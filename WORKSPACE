@@ -6,7 +6,7 @@ jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-distributedlog_version = "0.6.0-SNAPSHOT"
+distributedlog_version = "0.5.0"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -17,11 +17,6 @@ hk2_api = "2.5.0-b32"
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
-)
-
-maven_server(
-  name = "apache_snapshot",
-  url = "https://repository.apache.org/snapshots/",
 )
 
 maven_jar(
@@ -643,8 +638,7 @@ maven_jar(
 # bookkeeper & distributedlog dependencies
 maven_jar(
   name = "org_apache_distributedlog_core",
-  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:" + distributedlog_version,
-  server = "apache_snapshot",
+  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:" + distributedlog_version
 )
 # end bookkeeper & distributedlog dependencies
 
