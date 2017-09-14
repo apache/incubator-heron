@@ -320,7 +320,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(mtmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
@@ -343,7 +343,7 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker = new DummySpoutInstance(ss, options, topology_name, topology_id, instance_id,
@@ -365,7 +365,7 @@ void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker =
