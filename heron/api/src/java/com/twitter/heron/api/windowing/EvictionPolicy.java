@@ -14,13 +14,16 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
+
 /**
  * Eviction policy tracks events and decides whether
  * an event should be evicted from the window or not.
  *
  * @param <T> the type of event that is tracked.
+ * @param <S> the type of state that is used
  */
-public interface EvictionPolicy<T> {
+public interface EvictionPolicy<T extends Serializable, S> {
   /**
    * The action to be taken when {@link EvictionPolicy#evict(Event)} is invoked.
    */
@@ -78,4 +81,19 @@ public interface EvictionPolicy<T> {
    * Resets the eviction policy.
    */
   void reset();
+
+  /**
+   * Return runtime state to be checkpointed by the framework for restoring the eviction policy
+   * in case of failures.
+   *
+   * @return the state
+   */
+  S getState();
+
+  /**
+   * Restore the eviction policy from the state that was earlier checkpointed by the framework.
+   *
+   * @param state the state
+   */
+  void restoreState(S state);
 }

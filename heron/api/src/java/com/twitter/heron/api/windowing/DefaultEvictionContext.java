@@ -15,6 +15,7 @@ package com.twitter.heron.api.windowing;
 
 public class DefaultEvictionContext implements EvictionContext {
 
+  private static final long serialVersionUID = 7857989489355521603L;
   /**
    * Current timestamp
    */

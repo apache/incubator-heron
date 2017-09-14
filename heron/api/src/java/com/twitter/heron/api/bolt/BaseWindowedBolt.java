@@ -16,7 +16,6 @@ package com.twitter.heron.api.bolt;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
@@ -25,7 +24,6 @@ import com.twitter.heron.api.windowing.TupleFieldTimestampExtractor;
 import com.twitter.heron.api.windowing.WindowingConfigs;
 
 public abstract class BaseWindowedBolt implements IWindowedBolt {
-  private static final Logger LOG = Logger.getLogger(BaseWindowedBolt.class.getName());
   private static final long serialVersionUID = 5688213068448231559L;
 
   protected final transient WindowingConfigs windowConfiguration;

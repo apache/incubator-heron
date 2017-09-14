@@ -126,6 +126,11 @@
       "topologyName" : "IntegrationTest_SlidingWatermarkEventTimeWindow1",
       "classPath"    : "windowing.watermark.SlidingWatermarkEventTimeWindowTest1",
       "expectedResultRelativePath" : "windowing/watermark/SlidingWatermarkEventTimeWindowTest1Results.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_StatefulWindowingTest",
+      "classPath"    : "windowing.stateful.StatefulWindowingTest",
+      "expectedResultRelativePath" : "windowing/stateful/StatefulWindowingTestResults.json"
     }
   ],
   "pythonTopologies": [

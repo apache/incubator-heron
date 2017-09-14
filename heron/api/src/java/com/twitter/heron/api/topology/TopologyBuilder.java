@@ -14,6 +14,7 @@
 
 package com.twitter.heron.api.topology;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,9 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BasicBoltExecutor;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IStatefulWindowedBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.StatefulWindowedBoltExecutor;
 import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
@@ -182,6 +185,19 @@ public class TopologyBuilder {
   public BoltDeclarer setBolt(String id, IWindowedBolt bolt, Number parallelismHint) throws
       IllegalArgumentException {
     return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public BoltDeclarer setBolt(String id, IStatefulWindowedBolt bolt) throws
+      IllegalArgumentException {
+    return setBolt(id, new StatefulWindowedBoltExecutor(bolt));
+  }
+
+  @SuppressWarnings("rawtypes")
+  public <K extends Serializable, V extends Serializable> BoltDeclarer setBolt(
+      String id, IStatefulWindowedBolt<K, V> bolt, Number parallelismHint) throws
+      IllegalArgumentException {
+    return setBolt(id, new StatefulWindowedBoltExecutor<K, V>(bolt), parallelismHint);
   }
 
   /**

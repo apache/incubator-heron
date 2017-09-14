@@ -13,7 +13,10 @@
 //  limitations under the License.
 package com.twitter.heron.api.windowing;
 
-public class EventImpl<T> implements Event<T> {
+import java.io.Serializable;
+
+public class EventImpl<T extends Serializable> implements Event<T> {
+  private static final long serialVersionUID = -6459336682025060065L;
   private final T event;
   private long ts;
 

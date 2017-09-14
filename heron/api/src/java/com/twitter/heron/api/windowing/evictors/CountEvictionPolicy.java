@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.api.windowing.evictors;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.twitter.heron.api.windowing.Event;
@@ -25,7 +26,7 @@ import com.twitter.heron.api.windowing.EvictionPolicy;
  *
  * @param <T> the type of event tracked by this policy.
  */
-public class CountEvictionPolicy<T> implements EvictionPolicy<T> {
+public class CountEvictionPolicy<T extends Serializable> implements EvictionPolicy<T, Long> {
   protected final int threshold;
   protected final AtomicLong currentCount;
   private EvictionContext context;
@@ -80,5 +81,15 @@ public class CountEvictionPolicy<T> implements EvictionPolicy<T> {
   @Override
   public void reset() {
     // NOOP
+  }
+
+  @Override
+  public Long getState() {
+    return currentCount.get();
+  }
+
+  @Override
+  public void restoreState(Long state) {
+    currentCount.set(state);
   }
 }
