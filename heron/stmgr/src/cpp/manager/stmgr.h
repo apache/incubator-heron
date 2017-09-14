@@ -44,6 +44,7 @@ namespace heron {
 namespace stmgr {
 
 class StMgrServer;
+class InstanceServer;
 class StMgrClientMgr;
 class TMasterClient;
 class StreamConsumers;
@@ -55,7 +56,8 @@ class CkptMgrClient;
 
 class StMgr {
  public:
-  StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
+  StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port,
+        sp_int32 _local_data_port,
         const sp_string& _topology_name, const sp_string& _topology_id,
         proto::api::Topology* _topology, const sp_string& _stmgr_id,
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
@@ -94,7 +96,7 @@ class StMgr {
   void SendStopBackPressureToOtherStMgrs();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
-  const NetworkOptions&  GetServerNetworkOptions() const;
+  const NetworkOptions&  GetStmgrServerNetworkOptions() const;
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
   void HandleAllStMgrClientsRegistered();
   void HandleDeadInstance(sp_int32 _task_id);
@@ -184,11 +186,13 @@ class StMgr {
   sp_string topology_id_;
   sp_string stmgr_id_;
   sp_string stmgr_host_;
-  sp_int32 stmgr_port_;
+  sp_int32 data_port_;
+  sp_int32 local_data_port_;
   std::vector<sp_string> instances_;
   // Getting data from other streammgrs
-  // Also used to get/send data to local instances
-  StMgrServer* server_;
+  StMgrServer* stmgr_server_;
+  // Used to get/send data to local instances
+  InstanceServer* instance_server_;
   // Pushing data to other streammanagers
   StMgrClientMgr* clientmgr_;
   TMasterClient* tmaster_client_;

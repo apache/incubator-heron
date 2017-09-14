@@ -34,7 +34,7 @@ namespace stmgr {
 
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, const sp_string& _stmgr_host,
-                             sp_int32 _stmgr_port, sp_int32 _shell_port,
+                             sp_int32 _data_port, sp_int32 _local_data_port, sp_int32 _shell_port,
                              VCallback<proto::system::PhysicalPlan*> _pplan_watch,
                              VCallback<sp_string> _stateful_checkpoint_watch,
                              VCallback<sp_string, sp_int64> _restore_topology_watch,
@@ -42,7 +42,8 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_host_(_stmgr_host),
-      stmgr_port_(_stmgr_port),
+      data_port_(_data_port),
+      local_data_port_(_local_data_port),
       shell_port_(_shell_port),
       register_request_set_(false),
       to_die_(false),
@@ -226,7 +227,8 @@ void TMasterClient::SetStmgrRegisterRequest(
     proto::system::StMgr* stmgr = register_request_.mutable_stmgr();
     stmgr->set_id(stmgr_id_);
     stmgr->set_host_name(stmgr_host_);
-    stmgr->set_data_port(stmgr_port_);
+    stmgr->set_data_port(data_port_);
+    stmgr->set_local_data_port(local_data_port_);
     stmgr->set_local_endpoint("/unused");
     stmgr->set_cwd(cwd);
     stmgr->set_pid((sp_int32)ProcessUtils::getPid());

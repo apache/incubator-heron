@@ -26,6 +26,7 @@
 #include <utility>
 #include "manager/stmgr-clientmgr.h"
 #include "manager/stmgr-server.h"
+#include "manager/instance-server.h"
 #include "manager/stream-consumers.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -58,7 +59,8 @@ const sp_string RESTORE_DROPPED_INSTANCE_TUPLES = "__instance_dropped_tuples";
 const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
 const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
-StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
+StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port,
+             sp_int32 _local_data_port,
              const sp_string& _topology_name, const sp_string& _topology_id,
              proto::api::Topology* _hydrated_topology, const sp_string& _stmgr_id,
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
@@ -71,9 +73,11 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _myport,
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
       stmgr_host_(_myhost),
-      stmgr_port_(_myport),
+      data_port_(_data_port),
+      local_data_port_(_local_data_port),
       instances_(_instances),
-      server_(NULL),
+      stmgr_server_(NULL),
+      instance_server_(NULL),
       clientmgr_(NULL),
       tmaster_client_(NULL),
       eventLoop_(eventLoop),
@@ -138,15 +142,17 @@ void StMgr::Init() {
 
   // Create and start StmgrServer. The actual stmgr server port is assgined.
   StartStmgrServer();
+  // Create and start InstanceServer
+  StartInstanceServer();
   // FetchTMasterLocation() triggers the StMgr::CreateTMasterClient() where the TMasterClient
-  // constructor needs actual Stmgr port, thus put FetchTMasterLocation() after StartStmgrServer()
+  // constructor needs actual Stmgr port, thus put FetchTMasterLocation() after StartInstanceServer()
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
   if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Now start the stateful restorer
     stateful_restorer_ = new StatefulRestorer(ckptmgr_client_, clientmgr_,
-                               tuple_cache_, server_, metrics_manager_client_,
+                               tuple_cache_, instance_server_, metrics_manager_client_,
                                std::bind(&StMgr::HandleStatefulRestoreDone, this,
                                          std::placeholders::_1, std::placeholders::_2,
                                          std::placeholders::_3));
@@ -187,7 +193,8 @@ StMgr::~StMgr() {
   delete tuple_cache_;
   delete state_mgr_;
   delete pplan_;
-  delete server_;
+  delete stmgr_server_;
+  delete instance_server_;
   delete clientmgr_;
   delete tmaster_client_;
   CleanupStreamConsumers();
@@ -200,10 +207,13 @@ StMgr::~StMgr() {
   delete neighbour_calculator_;
 }
 
-bool StMgr::DidAnnounceBackPressure() { return server_->DidAnnounceBackPressure(); }
+bool StMgr::DidAnnounceBackPressure() {
+  return stmgr_server_->DidAnnounceBackPressure()
+         || instance_server_->DidAnnounceBackPressure();
+}
 
-const NetworkOptions&  StMgr::GetServerNetworkOptions() const {
-  return server_->get_serveroptions();
+const NetworkOptions&  StMgr::GetStmgrServerNetworkOptions() const {
+  return stmgr_server_->get_serveroptions();
 }
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {
@@ -253,11 +263,11 @@ void StMgr::FetchMetricsCacheLocation() {
 }
 
 void StMgr::StartStmgrServer() {
-  CHECK(!server_);
-  LOG(INFO) << "Creating StmgrServer" << std::endl;
+  CHECK(!stmgr_server_);
+  LOG(INFO) << "Creating StmgrServer";
   NetworkOptions sops;
   sops.set_host(IpUtils::getHostName());
-  sops.set_port(stmgr_port_);
+  sops.set_port(data_port_);
   sops.set_socket_family(PF_INET);
   sops.set_max_packet_size(
       config::HeronInternalsConfigReader::Instance()
@@ -265,15 +275,36 @@ void StMgr::StartStmgrServer() {
       1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
-  server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, instances_,
-                            this, metrics_manager_client_, neighbour_calculator_);
+  stmgr_server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
+                                  instances_, this, metrics_manager_client_, neighbour_calculator_);
 
   // start the server
-  CHECK_EQ(server_->Start(), 0);
-  stmgr_port_ = server_->get_serveroptions().get_port();
+  CHECK_EQ(stmgr_server_->Start(), 0);
+  data_port_ = server_->get_serveroptions().get_port();
+}
 
-  // metrics_manager_client_ picks the actual stmgr_port_ and starts
-  metrics_manager_client_->Start(stmgr_host_, stmgr_port_, "__stmgr__", stmgr_id_);
+void StMgr::StartInstanceServer() {
+  CHECK(!instance_server_);
+  LOG(INFO) << "Creating InstanceServer";
+  NetworkOptions sops;
+  sops.set_host(IpUtils::getHostName());
+  sops.set_port(local_data_port_);
+  sops.set_socket_family(PF_INET);
+  sops.set_max_packet_size(
+      config::HeronInternalsConfigReader::Instance()
+          ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
+      1_MB);
+  sops.set_high_watermark(high_watermark_);
+  sops.set_low_watermark(low_watermark_);
+  instance_server_ = new InstanceServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
+                                  instances_, this, metrics_manager_client_, neighbour_calculator_);
+
+  // start the server
+  CHECK_EQ(instance_server_->Start(), 0);
+  local_data_port_ = server_->get_serveroptions().get_port();
+
+  // metrics_manager_client_ picks the actual local_data_port_ and starts
+  metrics_manager_client_->Start(stmgr_host_, local_data_port_, "__stmgr__", stmgr_id_);
 }
 
 void StMgr::CreateCheckpointMgrClient() {
@@ -325,7 +356,8 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
   };
 
   tmaster_client_ = new TMasterClient(eventLoop_, master_options, stmgr_id_, stmgr_host_,
-                                      stmgr_port_, shell_port_, std::move(pplan_watch),
+                                      data_port_, local_data_port_, shell_port_,
+                                      std::move(pplan_watch),
                                       std::move(stateful_checkpoint_watch),
                                       std::move(restore_topology_watch),
                                       std::move(start_stateful_watch));
@@ -356,7 +388,7 @@ void StMgr::HandleNewTmaster(proto::tmaster::TMasterLocation* newTmasterLocation
 
   // In the case where we are doing a tmaster refresh we may have already
   // connected to all of the instances
-  if (server_ && server_->HaveAllInstancesConnectedToUs()) {
+  if (instance_server_ && instance_server_->HaveAllInstancesConnectedToUs()) {
     StartTMasterClient();
   }
 }
@@ -469,7 +501,7 @@ void StMgr::StartTMasterClient() {
     // Nothing else to do here
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
-    server_->GetInstanceInfo(all_instance_info);
+    instance_server_->GetInstanceInfo(all_instance_info);
     tmaster_client_->SetStmgrRegisterRequest(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
@@ -537,7 +569,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   if (!stateful_restorer_) {
     clientmgr_->StartConnections(pplan_);
   }
-  server_->BroadcastNewPhysicalPlan(*pplan_);
+  instance_server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 
 void StMgr::CleanupStreamConsumers() {
@@ -637,7 +669,7 @@ void StMgr::HandleStreamManagerData(const sp_string&,
 
   // We have a shortcut for non-acking case
   if (!is_acking_enabled) {
-    server_->SendToInstance2(_message);
+    instance_server_->SendToInstance2(_message);
   } else {
     proto::system::HeronTupleSet2* tuple_set = nullptr;
     tuple_set = __global_protobuf_pool_acquire__(tuple_set);
@@ -649,7 +681,7 @@ void StMgr::HandleStreamManagerData(const sp_string&,
 
 void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   if (_message->has_data()) {
-    server_->SendToInstance2(_task_id, _message);
+    instance_server_->SendToInstance2(_task_id, _message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
@@ -711,7 +743,7 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 
   // Check if we need to send this out
   if (current_control_tuple_set->has_control()) {
-    server_->SendToInstance2(_task_id, current_control_tuple_set);
+    instance_server_->SendToInstance2(_task_id, current_control_tuple_set);
   } else {
     __global_protobuf_pool_release__(current_control_tuple_set);
   }
@@ -839,12 +871,20 @@ void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
 void StMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Ask the StMgrServer to stop consuming. The client does
   // not consume anything
-  server_->StartBackPressureClientCb(_other_stmgr_id);
+  stmgr_server_->StartBackPressureClientCb(_other_stmgr_id);
+}
+
+void StMgr::StartBackPressureOnSpouts() {
+  instance_server_->StartBackPressureOnSpouts();
 }
 
 void StMgr::StopBackPressureOnServer(const sp_string& _other_stmgr_id) {
   // Call the StMgrServers removeBackPressure method
-  server_->StopBackPressureClientCb(_other_stmgr_id);
+  stmgr_server_->StopBackPressureClientCb(_other_stmgr_id);
+}
+
+void StMgr::AttemptStopBackPressureFromSpouts() {
+  instance_server_->AttemptStopBackPressureFromSpouts();
 }
 
 void StMgr::SendStartBackPressureToOtherStMgrs() {
@@ -926,7 +966,7 @@ void StMgr::HandleCkptMgrRegistration() {
 void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
   // Initiate the process of stateful checkpointing by sending a request
   // to checkpoint to all local spouts
-  server_->InitiateStatefulCheckpoint(_checkpoint_id);
+  instance_server_->InitiateStatefulCheckpoint(_checkpoint_id);
 }
 
 // We just recieved a InstanceStateCheckpoint message from one of our instances
@@ -998,9 +1038,9 @@ void StMgr::DrainDownstreamCheckpoint(sp_int32 _task_id,
 
 void StMgr::HandleDownStreamStatefulCheckpoint(
             const proto::ckptmgr::DownstreamStatefulCheckpoint& _message) {
-  server_->HandleCheckpointMarker(_message.origin_task_id(),
-                                  _message.destination_task_id(),
-                                  _message.checkpoint_id());
+  instance_server_->HandleCheckpointMarker(_message.origin_task_id(),
+                                           _message.destination_task_id(),
+                                           _message.checkpoint_id());
 }
 
 // Called by TmasterClient when it receives directive from tmaster
@@ -1026,7 +1066,7 @@ void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
     LOG(FATAL) << "StartProcessing received from Tmaster for "
                << _checkpoint_id << " when we are still in Restore";
   }
-  server_->SendStartInstanceStatefulProcessing(_checkpoint_id);
+  instance_server_->SendStartInstanceStatefulProcessing(_checkpoint_id);
 }
 
 void StMgr::HandleRestoreInstanceStateResponse(sp_int32 _task_id,
