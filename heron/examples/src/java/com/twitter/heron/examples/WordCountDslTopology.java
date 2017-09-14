@@ -18,7 +18,7 @@ import java.util.Arrays;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.dsl.Builder;
-import com.twitter.heron.dsl.Context;
+import com.twitter.heron.dsl.Runner;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.WindowConfig;
 
@@ -58,7 +58,7 @@ public final class WordCountDslTopology {
         .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
-    Context context = Context.CreateContext();
-    context.run(args[0], conf, builder);
+    Runner runner = Runner.CreateRunner();
+    runner.run(args[0], conf, builder);
   }
 }

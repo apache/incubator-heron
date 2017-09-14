@@ -20,14 +20,14 @@ import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.Builder;
-import com.twitter.heron.dsl.Context;
+import com.twitter.heron.dsl.Runner;
 
 /**
- * ContextImpl implements the Context interface. Currently its a
+ * RunnerImpl implements the Runner interface. Currently its a
  * straightforward implementation that builds the Topology using
  * TopologyBuilder and submits it using HeronTopology.submitTopology
  */
-public final class ContextImpl implements Context {
+public final class RunnerImpl implements Runner {
   @Override
   public void run(String name, Config config, Builder builder) {
     BuilderImpl bldr = (BuilderImpl) builder;
@@ -39,5 +39,5 @@ public final class ContextImpl implements Context {
     }
   }
 
-  public ContextImpl() { }
+  public RunnerImpl() { }
 }

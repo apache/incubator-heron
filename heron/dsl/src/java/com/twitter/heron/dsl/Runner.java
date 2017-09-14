@@ -15,15 +15,15 @@
 package com.twitter.heron.dsl;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.dsl.impl.ContextImpl;
+import com.twitter.heron.dsl.impl.RunnerImpl;
 
 /**
- * Context is used to run a topology that is built by the builder.
+ * Runner is used to run a topology that is built by the builder.
  * It exports a sole function called run that takes care of constructing the topology
  */
-public interface Context {
-  static Context CreateContext() {
-    return new ContextImpl();
+public interface Runner {
+  static Runner CreateRunner() {
+    return new RunnerImpl();
   }
 
   /**
