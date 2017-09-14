@@ -23,7 +23,7 @@ import heron.tools.cli.src.python.submit as submit
 import heron.tools.common.src.python.utils.config as config
 
 
-example_ids = dict(
+heron_java_examples = dict(
     AckingTopology="acking",
     ComponentJVMOptionsTopology="component-jvm-options",
     CustomGroupingTopology="custom-grouping",
@@ -36,35 +36,42 @@ example_ids = dict(
     WordCountTopology="wordcount")
 
 
+base_examples_package = "com.twitter.heron.examples."
+
 heron_examples = None
 
 def examples():
   '''
   :return:
   '''
+  global heron_examples
   if heron_examples is None:
-    heron_examples_jar = config.get_heron_examples_jar()
-    archive = zipfile.ZipFile(heron_examples_jar, 'r')
+    found_examples = installed_examples()
 
-    def to_name(c):
-      return c.split("/")[-1].replace(".class", "")
+    examples_list = []
+    for name, eid in heron_java_examples.items():
+      clazz = base_examples_package + name
+      if clazz in found_examples:
+        examples_list.append(dict(
+            name=name,
+            id=eid,
+            clazz=clazz))
 
-    def to_clazz(c):
-      return c.replace("/", ".").replace(".class", "")
+    heron_examples = sorted(examples_list, key=lambda ex: ex["name"])
 
-    example_re = '^com/twitter/heron/examples/[a-zA-Z0-9.-]+.class'
-    pattern = re.compile(example_re)
-    found_examples = ((to_name(c), to_clazz(c)) for c in archive.namelist() if pattern.match(c))
+  return heron_examples
 
-    def to_dict(ex):
-      return dict(name=ex[0], clazz=ex[1], id=example_ids[ex[0]])
-    known_examples = (to_dict(ex) for ex in found_examples if ex[0] in example_ids)
 
-    # sort examples by name
-    heron_exmaples = sorted(known_examples, key=lambda ex: ex["name"])
+def installed_examples():
+  heron_examples_jar = config.get_heron_examples_jar()
+  archive = zipfile.ZipFile(heron_examples_jar, 'r')
 
-  return heron_exmaples
+  def to_clazz(c):
+    return c.replace("/", ".").replace(".class", "")
 
+  example_re = '^com/twitter/heron/examples/[a-zA-Z0-9.-]+.class'
+  pattern = re.compile(example_re)
+  return set((to_clazz(c) for c in archive.namelist() if pattern.match(c)))
 
 def classname(example_id):
   for example in examples():

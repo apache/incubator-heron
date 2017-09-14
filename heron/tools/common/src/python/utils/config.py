@@ -97,7 +97,6 @@ def get_subparser(parser, command):
   for subparsers_action in subparsers_actions:
     # get all subparsers
     for choice, subparser in subparsers_action.choices.items():
-      print choice, subparser
       if choice == command:
         return subparser
   return None
