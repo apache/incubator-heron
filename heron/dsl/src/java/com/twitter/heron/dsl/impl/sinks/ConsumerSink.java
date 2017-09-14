@@ -24,8 +24,8 @@ import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.impl.operators.DslOperator;
 
 /**
- * LogSink is a very simple Bolt that implements the log functionality.
- * It basically logs every tuple.
+ * ConsumerSink is a very simple Sink that basically invokes a user supplied
+ * consume function for every tuple.
  */
 public class ConsumerSink<R> extends DslOperator {
   private static final Logger LOG = Logger.getLogger(ConsumerSink.class.getName());
