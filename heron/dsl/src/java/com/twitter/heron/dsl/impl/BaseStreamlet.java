@@ -29,6 +29,7 @@ import com.twitter.heron.dsl.SerializableFunction;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
+import com.twitter.heron.dsl.TransformFunction;
 import com.twitter.heron.dsl.Window;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.ConsumerStreamlet;
@@ -41,6 +42,7 @@ import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.SupplierStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
 
 /**
@@ -275,6 +277,21 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
     return;
+  }
+
+  /**
+   * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
+   * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
+   * This allows the transform Function to do any kind of initialization/loading, etc.
+   * @param transformFunction The transformation function to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the transformFunction
+   */
+  @Override
+  public <T> Streamlet<T> transform(TransformFunction<? super R, ? extends T> transformFunction) {
+    TransformStreamlet<R, T> transformStreamlet = new TransformStreamlet<>(this, transformFunction);
+    addChild(transformStreamlet);
+    return transformStreamlet;
   }
 
   /**
