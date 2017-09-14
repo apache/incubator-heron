@@ -54,7 +54,7 @@ public final class WordCountDslTopology {
     builder.newSource(() -> "Mary had a little lamb")
         .flatMap((word) -> Arrays.asList(word.split("\\s+")))
         .mapToKV((word) -> new KeyValue<>(word, 1))
-        .reduceByKeyAndWindow(WindowConfig.TumblingWindow(10), (x, y) -> x + y)
+        .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y)
         .log();
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
