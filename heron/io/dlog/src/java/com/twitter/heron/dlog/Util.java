@@ -33,7 +33,7 @@ import com.twitter.heron.common.basics.Pair;
 /**
  * A utility program to copy data between filesystem files and dlog streams.
  */
-public class Util {
+public final class Util {
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
@@ -47,7 +47,8 @@ public class Util {
     String srcPath = args[0];
     String destPath = args[1];
 
-    Namespace srcNs = null, destNs = null;
+    Namespace srcNs = null;
+    Namespace destNs = null;
     InputStream is = null;
     OutputStream os = null;
 
@@ -112,8 +113,8 @@ public class Util {
           uri.getAuthority(),
           parentName,
           uri.getQuery(),
-          uri.getFragment())
-        , logName);
+          uri.getFragment()
+        ), logName);
   }
 
   private static Namespace openNamespace(URI uri) throws IOException {
