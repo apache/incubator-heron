@@ -70,7 +70,7 @@ public class ReduceByWindowOperator<I> extends DslWindowOperator {
     } else {
       endWindow = inputWindow.getEndTimestamp();
     }
-    Window window = new Window(startWindow, endWindow);
+    Window window = new Window(startWindow, endWindow, inputWindow.get().size());
     collector.emit(new Values(new KeyValue<>(window, reducedValue)));
   }
 }

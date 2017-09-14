@@ -26,10 +26,12 @@ public final class Window implements Serializable {
   private static final long serialVersionUID = 5103471810104775854L;
   private long startTimeMs;
   private long endTimeMs;
+  private long count;
 
-  public Window(long startTimeMs, long endTimeMs) {
+  public Window(long startTimeMs, long endTimeMs, long count) {
     this.startTimeMs = startTimeMs;
     this.endTimeMs = endTimeMs;
+    this.count = count;
   }
 
   public long getStartTime() {
@@ -37,6 +39,9 @@ public final class Window implements Serializable {
   }
   public long getEndTime() {
     return endTimeMs;
+  }
+  public long getCount() {
+    return count;
   }
 
   @Override

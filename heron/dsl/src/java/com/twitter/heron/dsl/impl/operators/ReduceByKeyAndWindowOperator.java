@@ -68,7 +68,7 @@ public class ReduceByKeyAndWindowOperator<K, V> extends DslWindowOperator {
     } else {
       endWindow = inputWindow.getEndTimestamp();
     }
-    Window window = new Window(startWindow, endWindow);
+    Window window = new Window(startWindow, endWindow, inputWindow.get().size());
     for (K key : reduceMap.keySet()) {
       KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
       collector.emit(new Values(new KeyValue<>(keyedWindow, reduceMap.get(key))));
