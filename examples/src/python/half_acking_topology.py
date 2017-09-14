@@ -18,8 +18,8 @@ import heronpy.api.api_constants as constants
 from heronpy.api.topology import TopologyBuilder
 from heronpy.api.stream import Grouping
 
-from heron.examples.src.python.spout import WordSpout
-from heron.examples.src.python.bolt import HalfAckBolt
+from examples.src.python.spout import WordSpout
+from examples.src.python.bolt import HalfAckBolt
 
 # Topology is defined using a topology builder
 # Refer to multi_stream_topology for defining a topology by subclassing Topology
