@@ -217,6 +217,7 @@ void TMasterClient::SendRegisterRequest() {
 
 void TMasterClient::SetStmgrRegisterRequest(
                                     const std::vector<proto::system::Instance*>& _instances) {
+    register_request_.Clear();
     register_request_set_ = true;
 
     sp_string cwd;
