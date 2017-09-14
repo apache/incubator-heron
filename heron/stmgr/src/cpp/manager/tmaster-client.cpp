@@ -108,8 +108,9 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
                << get_clientoptions().get_port() << std::endl;
     LOG(INFO) << "Will retry again..." << std::endl;
     // Shouldn't be in a state where a previous timer is not cleared yet.
-    CHECK_EQ(reconnect_timer_id, 0);
-    reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+    if (reconnect_timer_id == 0) {
+      reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+    }
   }
 }
 
@@ -217,6 +218,7 @@ void TMasterClient::SendRegisterRequest() {
 
 void TMasterClient::SetStmgrRegisterRequest(
                                     const std::vector<proto::system::Instance*>& _instances) {
+    register_request_.Clear();
     register_request_set_ = true;
 
     sp_string cwd;
