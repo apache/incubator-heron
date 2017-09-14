@@ -46,23 +46,10 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends BaseKVStreamlet<KeyedWi
     setNumPartitions(parent.getNumPartitions());
   }
 
-  private void calculateName(Set<String> stageNames) {
-    int index = 1;
-    String name;
-    while (true) {
-      name = new StringBuilder("reduceByKeyAndWindow").append(index).toString();
-      if (!stageNames.contains(name)) {
-        break;
-      }
-      index++;
-    }
-    setName(name);
-  }
-
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      calculateName(stageNames);
+      setName(defaultNameCalculator("reduceByKeyAndWindow", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");

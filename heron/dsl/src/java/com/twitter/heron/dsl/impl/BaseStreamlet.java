@@ -323,4 +323,17 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   public  <T> void addChild(BaseStreamlet<T> child) {
     children.add(child);
   }
+
+  protected String defaultNameCalculator(String prefix, Set<String> stageNames) {
+    int index = 1;
+    String calculatedName;
+    while (true) {
+      calculatedName = new StringBuilder(prefix).append(index).toString();
+      if (!stageNames.contains(calculatedName)) {
+        break;
+      }
+      index++;
+    }
+    return calculatedName;
+  }
 }

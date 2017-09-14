@@ -77,26 +77,13 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<K, VR> {
     setNumPartitions(left.getNumPartitions());
   }
 
-  private void calculateName(Set<String> stageNames) {
-    int index = 1;
-    String name;
-    while (true) {
-      name = new StringBuilder("join").append(index).toString();
-      if (!stageNames.contains(name)) {
-        break;
-      }
-      index++;
-    }
-    setName(name);
-  }
-
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }
     if (getName() == null) {
-      calculateName(stageNames);
+      setName(defaultNameCalculator("join", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");

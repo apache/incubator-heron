@@ -47,6 +47,6 @@ public final class Window implements Serializable {
   @Override
   public String toString() {
     return "{WindowStart: " + String.valueOf(startTimeMs) + " WindowEnd: "
-           + String.valueOf(endTimeMs) + " }";
+           + String.valueOf(endTimeMs) + " Count: " + String.valueOf(count) + " }";
   }
 }
