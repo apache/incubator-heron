@@ -160,5 +160,5 @@ public interface Streamlet<R> {
    * @param consumer The user supplied consumer function that is invoked for each element
    * of this streamlet.
    */
-  void to(SerializableConsumer<R> consumer);
+  void toSink(SerializableConsumer<R> consumer);
 }
