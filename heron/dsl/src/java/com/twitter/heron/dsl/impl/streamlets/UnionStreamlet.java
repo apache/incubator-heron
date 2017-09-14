@@ -50,6 +50,8 @@ public class UnionStreamlet<I> extends BaseStreamlet<I> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (!left.isBuilt() || !right.isBuilt()) {
+      // We can only continue to build us if both of our parents are built.
+      // The system will call us again later
       return false;
     }
     if (getName() == null) {

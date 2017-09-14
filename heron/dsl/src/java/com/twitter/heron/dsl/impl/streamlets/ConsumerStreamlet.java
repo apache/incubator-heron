@@ -22,9 +22,9 @@ import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.sinks.ConsumerSink;
 
 /**
- * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
- * streamlet after logging each element. Since elements of the parents are just logged
- * nothing is emitted, thus this streamlet is empty.
+ * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
+ * streamlet after consuming every element. Since elements of the parents are just consumed
+ * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
 public class ConsumerStreamlet<R> extends BaseStreamlet<R> {
   private BaseStreamlet<R> parent;
