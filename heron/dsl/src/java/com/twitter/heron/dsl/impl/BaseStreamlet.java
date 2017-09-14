@@ -81,8 +81,8 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   */
   @Override
   public Streamlet<R> setName(String sName) {
-    if (sName == null) {
-      throw new IllegalArgumentException("Streamlet name cannot be null");
+    if (sName == null || sName.isEmpty()) {
+      throw new IllegalArgumentException("Streamlet name cannot be null/empty");
     }
     this.name = sName;
     return this;
