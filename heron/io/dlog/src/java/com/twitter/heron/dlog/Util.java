@@ -35,6 +35,9 @@ import com.twitter.heron.common.basics.Pair;
  */
 public final class Util {
 
+  private Util() {
+  }
+
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.println("Usage : Util <src> <target>");
