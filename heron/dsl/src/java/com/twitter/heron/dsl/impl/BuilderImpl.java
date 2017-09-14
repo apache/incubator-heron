@@ -38,11 +38,18 @@ public final class BuilderImpl implements Builder {
   }
 
   @Override
-  public <R> Streamlet<R> newStreamlet(SerializableSupplier<R> supplier) {
+  public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
     BaseStreamlet<R> retval = BaseStreamlet.createSupplierStreamlet(supplier);
     retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
+  }
+
+  @Override
+  public <R> Streamlet<R> newSource(Streamlet<R> source) {
+    BaseStreamlet<R> src = (BaseStreamlet<R>) source;
+    sources.add(src);
+    return source;
   }
 
   /**

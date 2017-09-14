@@ -51,7 +51,7 @@ public final class WordCountDslTopology {
       parallelism = Integer.parseInt(args[1]);
     }
     Builder builder = Builder.CreateBuilder();
-    builder.newStreamlet(() -> "Mary had a little lamb")
+    builder.newSource(() -> "Mary had a little lamb")
         .flatMap((word) -> Arrays.asList(word.split("\\s+")))
         .mapToKV((word) -> new KeyValue<>(word, 1))
         .reduceByKeyAndWindow(WindowConfig.TumblingWindow(10), (x, y) -> x + y)
