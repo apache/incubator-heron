@@ -59,14 +59,9 @@ const sp_string METRIC_FAIL_TUPLES_TO_INSTANCES_LOST = "__fail_tuples_to_workers
 // Num bytes lost since instances is not connected
 const sp_string METRIC_BYTES_TO_INSTANCES_LOST = "__bytes_to_workers_lost";
 
-Sanjeev Figure this metrics stuff out
 // Time spent in back pressure aggregated - back pressure initiated by us +
 // others
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_AGGR = "__server/__time_spent_back_pressure_aggr";
-// Time spent in back pressure because of local instances connection;
-// we initiated this backpressure
-const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
-    "__server/__time_spent_back_pressure_initiated";
 // Time spent in back pressure because of a component id. The comp id will be
 // appended
 // to the string below
@@ -100,12 +95,9 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
 
   instance_server_metrics_ = new heron::common::MultiCountMetric();
   back_pressure_metric_aggr_ = new heron::common::TimeSpentMetric();
-  back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
   metrics_manager_client_->register_metric("__instance_server", instance_server_metrics_);
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR,
                                            back_pressure_metric_aggr_);
-  metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
-                                           back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
 
   // Update queue related metrics every 10 seconds
@@ -155,10 +147,8 @@ InstanceServer::~InstanceServer() {
 
   metrics_manager_client_->unregister_metric("__instance_server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
-  metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
   delete instance_server_metrics_;
   delete back_pressure_metric_aggr_;
-  delete back_pressure_metric_initiated_;
 
   // cleanup the instance info
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
@@ -197,8 +187,6 @@ void InstanceServer::UpdateQueueMetrics(EventLoop::Status) {
     const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
     sp_int32 bytes = itr->first->getOutstandingBytes();
     connection_buffer_metric_map_[instance_id]->scope("bytes")->record(bytes);
-    sp_int32 pkts = itr->first->getOutstandingPackets();
-    connection_buffer_metric_map_[instance_id]->scope("packets")->record(pkts);
   }
 }
 
@@ -212,30 +200,20 @@ void InstanceServer::HandleNewConnection(Connection* _conn) {
 void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
   LOG(INFO) << "Instance Server got connection close of " << _conn << " from "
             << _conn->getIPAddress() << ":" << _conn->getPort();
-  // Did the stream manager ever announce back pressure to us
+  // Did the instance ever announce back pressure to us
   if (remote_ends_who_caused_back_pressure_.find(GetInstanceName(_conn)) !=
       remote_ends_who_caused_back_pressure_.end()) {
     _conn->unsetCausedBackPressure();
-    // Did the instance ever cause back pressure
     remote_ends_who_caused_back_pressure_.erase(GetInstanceName(_conn));
-    // This is a instance connection
     heron::common::TimeSpentMetric* instance_metric = instance_metric_map_[GetInstanceName(_conn)];
     instance_metric->Stop();
-    if (remote_ends_who_caused_back_pressure_.empty()) {
-      stmgr_->OptionallySendStopBackPressureToOtherStMgrs();
+    if (!stmgr_->DidAnnounceBackPressure()) {
+      stmgr_->SendStopBackPressureToOtherStMgrs();
     }
   }
   // Note: Connections to other stream managers get handled in StmgrClient
   // Now attempt to stop the back pressure
   AttemptStopBackPressureFromSpouts();
-
-  // Now cleanup the data structures
-  auto siter = rstmgrs_.find(_conn);
-  if (siter != rstmgrs_.end()) {
-    LOG(INFO) << "Stmgr " << siter->second << " closed connection";
-    stmgrs_.erase(siter->second);
-    rstmgrs_.erase(_conn);
-  }
 
   auto iiter = active_instances_.find(_conn);
   if (iiter != active_instances_.end()) {
@@ -269,48 +247,6 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
     }
 
     stmgr_->HandleDeadInstance(task_id);
-  }
-}
-
-void InstanceServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                          proto::stmgr::StrMgrHelloRequest* _request) {
-  LOG(INFO) << "Got a hello message from stmgr " << _request->stmgr() << " on connection " << _conn;
-  proto::stmgr::StrMgrHelloResponse response;
-  // Some basic checks
-  if (_request->topology_name() != topology_name_) {
-    LOG(ERROR) << "The hello message was from a different topology " << _request->topology_name()
-               << std::endl;
-    response.mutable_status()->set_status(proto::system::NOTOK);
-  } else if (_request->topology_id() != topology_id_) {
-    LOG(ERROR) << "The hello message was from a different topology id " << _request->topology_id()
-               << std::endl;
-    response.mutable_status()->set_status(proto::system::NOTOK);
-  } else if (stmgrs_.find(_request->stmgr()) != stmgrs_.end()) {
-    LOG(WARNING) << "We already had an active connection from the stmgr " << _request->stmgr()
-                 << ". Closing existing connection...";
-    // This will free up the slot in the various maps in this class
-    // and the next time around we'll be able to add this stmgr.
-    // We shouldn't add the new stmgr connection right now because
-    // the close could be asynchronous (fired through a 0 timer)
-    stmgrs_[_request->stmgr()]->closeConnection();
-    response.mutable_status()->set_status(proto::system::NOTOK);
-  } else {
-    stmgrs_[_request->stmgr()] = _conn;
-    rstmgrs_[_conn] = _request->stmgr();
-    response.mutable_status()->set_status(proto::system::OK);
-  }
-  SendResponse(_id, _conn, response);
-  delete _request;
-}
-
-void InstanceServer::HandleTupleStreamMessage(Connection* _conn,
-                                           proto::stmgr::TupleStreamMessage* _message) {
-  auto iter = rstmgrs_.find(_conn);
-  if (iter == rstmgrs_.end()) {
-    LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
-    __global_protobuf_pool_release__(_message);
-  } else {
-    stmgr_->HandleStreamManagerData(iter->second, _message);
   }
 }
 
@@ -400,12 +336,12 @@ void InstanceServer::HandleTupleSetMessage(Connection* _conn,
     return;
   }
   if (_message->has_data()) {
-    stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
+    instance_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->data().tuples_size());
   } else if (_message->has_control()) {
-    stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_FROM_INSTANCES)
+    instance_server_metrics_->scope(METRIC_ACK_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->control().acks_size());
-    stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_FROM_INSTANCES)
+    instance_server_metrics_->scope(METRIC_FAIL_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
@@ -439,16 +375,16 @@ void InstanceServer::DrainTupleSet(sp_int32 _task_id,
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
     if (_message->has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
+      instance_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message->control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
+      instance_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message->control().fails_size());
     }
   } else {
     if (_message->has_control()) {
-      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
+      instance_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message->control().acks_size());
-      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
+      instance_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
           ->incr_by(_message->control().fails_size());
     }
     SendMessage(iter->second->conn_, *_message);
@@ -507,9 +443,8 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   sp_string instance_name = GetInstanceName(_connection);
   CHECK_NE(instance_name, "");
 
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    SendStartBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Start();
+  if (!stmgr_->DidAnnounceBackPressure()) {
+    stmgr_->SendStartBackPressureToOtherStMgrs();
   }
 
   // Indicate which instance component had back pressure
@@ -536,97 +471,11 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   heron::common::TimeSpentMetric* instance_metric = instance_metric_map_[instance_name];
   instance_metric->Stop();
 
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    SendStopBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Stop();
+  if (!stmgr_->DidAnnounceBackPressure()) {
+    stmgr_->SendStopBackPressureToOtherStMgrs();
   }
   LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
-}
-
-void InstanceServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    SendStartBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Start();
-  }
-  remote_ends_who_caused_back_pressure_.insert(_other_stmgr_id);
-  LOG(INFO) << "We observe back pressure on sending data to remote stream manager "
-            << _other_stmgr_id;
-  StartBackPressureOnSpouts();
-}
-
-void InstanceServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
-  CHECK(remote_ends_who_caused_back_pressure_.find(_other_stmgr_id) !=
-        remote_ends_who_caused_back_pressure_.end());
-  remote_ends_who_caused_back_pressure_.erase(_other_stmgr_id);
-
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    SendStopBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Stop();
-  }
-  LOG(INFO) << "We don't observe back pressure now on sending data to remote "
-               "stream manager "
-            << _other_stmgr_id;
-  AttemptStopBackPressureFromSpouts();
-}
-
-void InstanceServer::HandleStartBackPressureMessage(Connection* _conn,
-                                                 proto::stmgr::StartBackPressureMessage* _message) {
-  // Close spouts
-  LOG(INFO) << "Received start back pressure from str mgr " << _message->stmgr();
-  if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
-    LOG(ERROR) << "Received start back pressure message from unknown stream manager "
-               << _message->topology_name() << " " << _message->topology_id() << " "
-               << _message->stmgr() << " " << _message->message_id();
-
-    __global_protobuf_pool_release__(_message);
-    return;
-  }
-  auto iter = rstmgrs_.find(_conn);
-  CHECK(iter != rstmgrs_.end());
-  sp_string stmgr_id = iter->second;
-  stmgrs_who_announced_back_pressure_.insert(stmgr_id);
-
-  StartBackPressureOnSpouts();
-
-  __global_protobuf_pool_release__(_message);
-}
-
-void InstanceServer::HandleStopBackPressureMessage(Connection* _conn,
-                                                proto::stmgr::StopBackPressureMessage* _message) {
-  LOG(INFO) << "Received stop back pressure from str mgr " << _message->stmgr();
-  if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
-    LOG(ERROR) << "Received stop back pressure message from unknown stream manager "
-               << _message->topology_name() << " " << _message->topology_id() << " "
-               << _message->stmgr();
-
-    __global_protobuf_pool_release__(_message);
-    return;
-  }
-  auto iter = rstmgrs_.find(_conn);
-  CHECK(iter != rstmgrs_.end());
-  sp_string stmgr_id = iter->second;
-  // Did we receive a start back pressure message from this stmgr to
-  // begin with? We could have been dead at the time of the announcement
-  if (stmgrs_who_announced_back_pressure_.find(stmgr_id) !=
-      stmgrs_who_announced_back_pressure_.end()) {
-    stmgrs_who_announced_back_pressure_.erase(stmgr_id);
-    AttemptStopBackPressureFromSpouts();
-  }
-
-  __global_protobuf_pool_release__(_message);
-}
-
-void InstanceServer::SendStartBackPressureToOtherStMgrs() {
-  LOG(INFO) << "Sending start back pressure notification to all other "
-            << "stream managers";
-  stmgr_->SendStartBackPressureToOtherStMgrs();
-}
-
-void InstanceServer::SendStopBackPressureToOtherStMgrs() {
-  LOG(INFO) << "Sending stop back pressure notification to all other "
-            << "stream managers";
-  stmgr_->SendStopBackPressureToOtherStMgrs();
 }
 
 void InstanceServer::StartBackPressureOnSpouts() {
@@ -645,8 +494,8 @@ void InstanceServer::StartBackPressureOnSpouts() {
 }
 
 void InstanceServer::AttemptStopBackPressureFromSpouts() {
-  if (spouts_under_back_pressure_ && remote_ends_who_caused_back_pressure_.empty() &&
-      stmgrs_who_announced_back_pressure_.empty()) {
+  if (spouts_under_back_pressure_ && !stmgr_->DidAnnounceBackPressure() &&
+      !stmgr_->DidOthersAnnounceBackPressure()) {
     LOG(INFO) << "Starting reading from spouts to relieve back pressure";
     spouts_under_back_pressure_ = false;
 
@@ -719,12 +568,6 @@ void InstanceServer::HandleRestoreInstanceStateResponse(Connection* _conn,
   // send the checkpoint message to all downstream task ids
   stmgr_->HandleRestoreInstanceStateResponse(task_id, _message->status(),
                                              _message->checkpoint_id());
-  __global_protobuf_pool_release__(_message);
-}
-
-void InstanceServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
-                               proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
-  stmgr_->HandleDownStreamStatefulCheckpoint(*_message);
   __global_protobuf_pool_release__(_message);
 }
 

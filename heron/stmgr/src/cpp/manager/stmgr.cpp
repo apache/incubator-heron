@@ -56,6 +56,10 @@ const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
 const sp_string RESTORE_DROPPED_STMGR_BYTES = "__stmgr_dropped_bytes";
 const sp_string RESTORE_DROPPED_INSTANCE_TUPLES = "__instance_dropped_tuples";
+// Time spent in back pressure because of local instances connection;
+// we initiated this backpressure
+const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
+    "__server/__time_spent_back_pressure_initiated";
 const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
 const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
@@ -111,6 +115,9 @@ void StMgr::Init() {
   dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__dropped_during_restore",
                                            dropped_during_restore_metrics_);
+  back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
+  metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
+                                           back_pressure_metric_initiated_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
   state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
@@ -187,9 +194,11 @@ StMgr::~StMgr() {
   metrics_manager_client_->unregister_metric("__process");
   metrics_manager_client_->unregister_metric("__restore_initiated");
   metrics_manager_client_->unregister_metric("__dropped_during_restore");
+  metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
   delete stmgr_process_metrics_;
   delete restore_initiated_metrics_;
   delete dropped_during_restore_metrics_;
+  delete back_pressure_metric_initiated_;
   delete tuple_cache_;
   delete state_mgr_;
   delete pplan_;
@@ -210,6 +219,10 @@ StMgr::~StMgr() {
 bool StMgr::DidAnnounceBackPressure() {
   return stmgr_server_->DidAnnounceBackPressure()
          || instance_server_->DidAnnounceBackPressure();
+}
+
+bool StMgr::DidOthersAnnounceBackPressure() {
+  return stmgr_server_->DidOthersAnnounceBackPressure();
 }
 
 const NetworkOptions&  StMgr::GetStmgrServerNetworkOptions() const {
@@ -276,11 +289,11 @@ void StMgr::StartStmgrServer() {
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   stmgr_server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
-                                  instances_, this, metrics_manager_client_, neighbour_calculator_);
+                                  this, metrics_manager_client_);
 
   // start the server
   CHECK_EQ(stmgr_server_->Start(), 0);
-  data_port_ = server_->get_serveroptions().get_port();
+  data_port_ = stmgr_server_->get_serveroptions().get_port();
 }
 
 void StMgr::StartInstanceServer() {
@@ -301,7 +314,7 @@ void StMgr::StartInstanceServer() {
 
   // start the server
   CHECK_EQ(instance_server_->Start(), 0);
-  local_data_port_ = server_->get_serveroptions().get_port();
+  local_data_port_ = instance_server_->get_serveroptions().get_port();
 
   // metrics_manager_client_ picks the actual local_data_port_ and starts
   metrics_manager_client_->Start(stmgr_host_, local_data_port_, "__stmgr__", stmgr_id_);
@@ -889,9 +902,13 @@ void StMgr::AttemptStopBackPressureFromSpouts() {
 
 void StMgr::SendStartBackPressureToOtherStMgrs() {
   clientmgr_->SendStartBackPressureToOtherStMgrs();
+  back_pressure_metric_initiated_->Start();
 }
 
-void StMgr::SendStopBackPressureToOtherStMgrs() { clientmgr_->SendStopBackPressureToOtherStMgrs(); }
+void StMgr::SendStopBackPressureToOtherStMgrs() {
+  clientmgr_->SendStopBackPressureToOtherStMgrs();
+  back_pressure_metric_initiated_->Stop();
+}
 
 // Do any actions if a stmgr client connection dies
 void StMgr::HandleDeadStMgrConnection(const sp_string& _stmgr_id) {

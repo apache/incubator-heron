@@ -85,6 +85,11 @@ class InstanceServer : public Server {
   // Clears all buffered state in stateful-gateway
   virtual void ClearCache();
 
+  // Can we free the back pressure on the spouts?
+  void AttemptStopBackPressureFromSpouts();
+  // Start back pressure on the spouts
+  void StartBackPressureOnSpouts();
+
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
@@ -114,11 +119,6 @@ class InstanceServer : public Server {
   virtual void StartBackPressureConnectionCb(Connection* _connection);
   // Relieve back pressure
   virtual void StopBackPressureConnectionCb(Connection* _connection);
-
-  // Can we free the back pressure on the spouts?
-  void AttemptStopBackPressureFromSpouts();
-  // Start back pressure on the spouts
-  void StartBackPressureOnSpouts();
 
   // Compute the LocalSpouts from Physical Plan
   void ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan);
@@ -167,7 +167,6 @@ class InstanceServer : public Server {
   heron::common::MetricsMgrSt* metrics_manager_client_;
   heron::common::MultiCountMetric* instance_server_metrics_;
   heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
-  heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
   bool spouts_under_back_pressure_;
 

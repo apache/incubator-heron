@@ -37,6 +37,7 @@ class MetricsMgrSt;
 class MultiAssignableMetric;
 class CountMetric;
 class MultiCountMetric;
+class TimeSpentMetric;
 }
 }
 
@@ -94,8 +95,11 @@ class StMgr {
   // messages
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
+  void StartBackPressureOnSpouts();
+  void AttemptStopBackPressureFromSpouts();
   void StartTMasterClient();
   bool DidAnnounceBackPressure();
+  bool DidOthersAnnounceBackPressure();
   const NetworkOptions&  GetStmgrServerNetworkOptions() const;
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
   void HandleAllStMgrClientsRegistered();
@@ -154,6 +158,7 @@ class StMgr {
 
   void CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation);
   void StartStmgrServer();
+  void StartInstanceServer();
   void CreateTupleCache();
   // This is called when we receive a valid new Tmaster Location.
   // Performs all the actions necessary to deal with new tmaster.
@@ -227,6 +232,9 @@ class StMgr {
   // Stateful Restore metric
   heron::common::CountMetric* restore_initiated_metrics_;
   heron::common::MultiCountMetric* dropped_during_restore_metrics_;
+
+  // Backpressure relarted metrics
+  heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;

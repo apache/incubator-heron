@@ -54,9 +54,10 @@ class StMgrServer : public Server {
   void StopBackPressureClientCb(const sp_string& _other_stmgr_id);
 
   bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
+  bool DidOthersAnnounceBackPressure() {
+    return !stmgrs_who_announced_back_pressure_.empty();
+  }
 
-  void SendStartBackPressureToOtherStMgrs();
-  void SendStopBackPressureToOtherStMgrs();
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);

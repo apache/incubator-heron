@@ -40,11 +40,6 @@ const sp_string METRIC_ACK_TUPLES_FROM_STMGRS = "__ack_tuples_from_stmgrs";
 const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__fail_tuples_from_stmgrs";
 // Bytes received from other stream managers
 const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
-// Time spent in back pressure aggregated - back pressure initiated by us +
-// others
-SANJEEV Figure this metric out
-const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
-    "__server/__time_spent_back_pressure_initiated";
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
@@ -64,19 +59,14 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
 
   stmgr_server_metrics_ = new heron::common::MultiCountMetric();
-  back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
   metrics_manager_client_->register_metric("__server", stmgr_server_metrics_);
-  metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
-                                           back_pressure_metric_initiated_);
 }
 
 StMgrServer::~StMgrServer() {
   Stop();
 
   metrics_manager_client_->unregister_metric("__server");
-  metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
   delete stmgr_server_metrics_;
-  delete back_pressure_metric_initiated_;
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {
@@ -156,9 +146,8 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
 }
 
 void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    SendStartBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Start();
+  if (!stmgr_->DidAnnounceBackPressure()) {
+    stmgr_->SendStartBackPressureToOtherStMgrs();
   }
   remote_ends_who_caused_back_pressure_.insert(_other_stmgr_id);
   LOG(INFO) << "We observe back pressure on sending data to remote stream manager "
@@ -171,12 +160,13 @@ void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
         remote_ends_who_caused_back_pressure_.end());
   remote_ends_who_caused_back_pressure_.erase(_other_stmgr_id);
 
-  SendStopBackPressureToOtherStMgrs();
+  if (!stmgr_->DidAnnounceBackPressure()) {
+    stmgr_->SendStopBackPressureToOtherStMgrs();
+  }
   LOG(INFO) << "We don't observe back pressure now on sending data to remote "
                "stream manager "
             << _other_stmgr_id;
-  if (remote_ends_who_caused_back_pressure_.empty() &&
-      stmgrs_who_announced_back_pressure_.empty()) {
+  if (!stmgr_->DidAnnounceBackPressure() && !stmgr_->DidOthersAnnounceBackPressure()) {
     stmgr_->AttemptStopBackPressureFromSpouts();
   }
 }
@@ -223,27 +213,11 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
       stmgrs_who_announced_back_pressure_.end()) {
     stmgrs_who_announced_back_pressure_.erase(stmgr_id);
   }
-  if (remote_ends_who_caused_back_pressure_.empty() &&
-      stmgrs_who_announced_back_pressure_.empty()) {
+  if (!stmgr_->DidAnnounceBackPressure() && !stmgr_->DidOthersAnnounceBackPressure()) {
     stmgr_->AttemptStopBackPressureFromSpouts();
   }
 
   __global_protobuf_pool_release__(_message);
-}
-
-void StMgrServer::SendStartBackPressureToOtherStMgrs() {
-  LOG(INFO) << "Sending start back pressure notification to all other "
-            << "stream managers";
-  stmgr_->SendStartBackPressureToOtherStMgrs();
-}
-
-void StMgrServer::SendStopBackPressureToOtherStMgrs() {
-  if (remote_ends_who_caused_back_pressure_.empty()) {
-    LOG(INFO) << "Sending stop back pressure notification to all other "
-              << "stream managers";
-    stmgr_->SendStopBackPressureToOtherStMgrs();
-    back_pressure_metric_initiated_->Stop();
-  }
 }
 
 }  // namespace stmgr
