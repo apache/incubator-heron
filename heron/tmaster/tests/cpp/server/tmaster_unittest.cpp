@@ -47,6 +47,8 @@ const sp_string MESSAGE_TIMEOUT = "30";  // seconds
 const sp_string LOCALHOST = "127.0.0.1";
 sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
+sp_string override_config_filename =
+    "../../../../../../../../heron/config/heron_internals.yaml";
 sp_string metrics_sinks_config_filename = "../../../../../../../../heron/config/metrics_sinks.yaml";
 
 // Generate a dummy topology
@@ -335,7 +337,7 @@ struct CommonResources {
     // Create the sington for heron_internals_config_reader
     // if it does not exist
     if (!heron::config::HeronInternalsConfigReader::Exists()) {
-      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename, "");
     }
   }
 };
@@ -629,7 +631,7 @@ int main(int argc, char** argv) {
 
   // Create the sington for heron_internals_config_reader, if it does not exist
   if (!heron::config::HeronInternalsConfigReader::Exists()) {
-    heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+    heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename, "");
   }
   return RUN_ALL_TESTS();
 }
