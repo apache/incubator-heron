@@ -1,4 +1,4 @@
-load("/tools/rules/pex_rules", "pex_test")
+load("/tools/rules/pex/pex_rules", "pex_test")
 
 pex_test(
     name = "configloader_unittest",

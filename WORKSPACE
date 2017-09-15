@@ -12,7 +12,6 @@ jetty_version = "9.4.6.v20170531"
 jersey_verion = "2.25.1"
 hk2_api = "2.5.0-b32"
 
-
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
@@ -629,3 +628,58 @@ maven_jar(
   artifact = "org.apache.commons:commons-compress:1.14",
 )
 # end heron api server
+
+# for pex repos
+PEX_SRC = "https://pypi.python.org/packages/3e/e8/d306b2d82487113ad188788a61895e7d474fa25823c23e19bb65f904cf30/pex-1.2.9.tar.gz"
+PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
+PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
+REQUESTS_SRC = "https://pypi.python.org/packages/2e/ad/e627446492cc374c284e82381215dcd9a0a87c4f6e90e9789afefe6da0ad/requests-2.11.1.tar.gz"
+SETUPTOOLS_SRC = "https://pypi.python.org/packages/68/13/1bfbfbd86560e61fa9803d241084fff41a775bf56ee8b3ad72fc9e550dad/setuptools-31.0.0.tar.gz"
+VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
+VIRTUALENV_PREFIX = "virtualenv-15.1.0"
+WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
+
+http_file(
+    name = 'pytest_whl',
+    url = PYTEST_WHEEL,
+)
+
+http_file(
+    name = 'py_whl',
+    url = PY_WHEEL,
+)
+
+http_file(
+    name = "wheel_src",
+    url = WHEEL_SRC,
+)
+
+http_file(
+    name = "pex_src",
+    url = PEX_SRC,
+)
+
+http_file(
+    name = "requests_src",
+    url = REQUESTS_SRC,
+)
+
+http_file(
+    name = "setuptools_src",
+    url = SETUPTOOLS_SRC,
+)
+
+new_http_archive(
+    name = "virtualenv",
+    url = VIRTUALENV_SRC,
+    strip_prefix = VIRTUALENV_PREFIX,
+    build_file_content = "\n".join([
+        "py_binary(",
+        "    name = 'virtualenv',",
+        "    srcs = ['virtualenv.py'],",
+        "    data = glob(['**/*']),",
+        "    visibility = ['//visibility:public'],",
+        ")",
+    ])
+)
+# end pex repos
