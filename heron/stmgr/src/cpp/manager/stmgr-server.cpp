@@ -220,5 +220,11 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
   __global_protobuf_pool_release__(_message);
 }
 
+void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
+                               proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  stmgr_->HandleDownStreamStatefulCheckpoint(*_message);
+  __global_protobuf_pool_release__(_message);
+}
+
 }  // namespace stmgr
 }  // namespace heron

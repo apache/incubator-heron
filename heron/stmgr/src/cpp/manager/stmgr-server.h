@@ -30,7 +30,6 @@ namespace heron {
 namespace common {
 class MetricsMgrSt;
 class MultiCountMetric;
-class TimeSpentMetric;
 class AssignableMetric;
 class MultiMeanMetric;
 }
@@ -100,7 +99,6 @@ class StMgrServer : public Server {
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
   heron::common::MultiCountMetric* stmgr_server_metrics_;
-  heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 };
 
 }  // namespace stmgr
