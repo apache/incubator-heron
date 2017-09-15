@@ -47,8 +47,6 @@ const sp_string MESSAGE_TIMEOUT = "30";  // seconds
 const sp_string LOCALHOST = "127.0.0.1";
 sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
-sp_string override_config_filename =
-    "../../../../../../../../heron/config/heron_internals.yaml";
 sp_string metrics_sinks_config_filename = "../../../../../../../../heron/config/metrics_sinks.yaml";
 
 // Generate a dummy topology
