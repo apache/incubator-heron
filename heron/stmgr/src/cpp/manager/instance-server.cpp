@@ -111,7 +111,8 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
                                             metrics_manager_client_,
     std::bind(&InstanceServer::DrainTupleSet, this, std::placeholders::_1, std::placeholders::_2),
     std::bind(&InstanceServer::DrainTupleStream, this, std::placeholders::_1),
-    std::bind(&InstanceServer::DrainCheckpoint, this, std::placeholders::_1, std::placeholders::_2));
+    std::bind(&InstanceServer::DrainCheckpoint, this, std::placeholders::_1,
+              std::placeholders::_2));
 }
 
 InstanceServer::~InstanceServer() {

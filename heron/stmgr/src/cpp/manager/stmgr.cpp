@@ -152,7 +152,8 @@ void StMgr::Init() {
   // Create and start InstanceServer
   StartInstanceServer();
   // FetchTMasterLocation() triggers the StMgr::CreateTMasterClient() where the TMasterClient
-  // constructor needs actual Stmgr port, thus put FetchTMasterLocation() after StartInstanceServer()
+  // constructor needs actual stmgr ports, thus put FetchTMasterLocation()
+  // has to be after after StartStmgrServer and StartInstanceServer()
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
@@ -227,6 +228,10 @@ bool StMgr::DidOthersAnnounceBackPressure() {
 
 const NetworkOptions&  StMgr::GetStmgrServerNetworkOptions() const {
   return stmgr_server_->get_serveroptions();
+}
+
+const NetworkOptions&  StMgr::GetInstanceServerNetworkOptions() const {
+  return instance_server_->get_serveroptions();
 }
 
 void StMgr::CheckTMasterLocation(EventLoop::Status) {

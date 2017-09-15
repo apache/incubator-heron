@@ -45,11 +45,11 @@ class CheckpointGateway;
 
 class InstanceServer : public Server {
  public:
-  InstanceServer(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& _topology_name,
-              const sp_string& _topology_id, const sp_string& _stmgr_id,
-              const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-              heron::common::MetricsMgrSt* _metrics_manager_client,
-              NeighbourCalculator* _neighbour_calculator);
+  InstanceServer(EventLoop* eventLoop, const NetworkOptions& options,
+                 const sp_string& _topology_name, const sp_string& _topology_id,
+                 const sp_string& _stmgr_id, const std::vector<sp_string>& _expected_instances,
+                 StMgr* _stmgr, heron::common::MetricsMgrSt* _metrics_manager_client,
+                 NeighbourCalculator* _neighbour_calculator);
   virtual ~InstanceServer();
 
   // We own the message

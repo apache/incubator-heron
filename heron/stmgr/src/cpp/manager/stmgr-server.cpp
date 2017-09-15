@@ -72,8 +72,8 @@ StMgrServer::~StMgrServer() {
 void StMgrServer::HandleNewConnection(Connection* _conn) {
   // There is nothing to be done here. Instead we wait
   // for the register/hello
-  LOG(INFO) << "StMgrServer Got new connection " << _conn << " from " << _conn->getIPAddress() << ":"
-            << _conn->getPort();
+  LOG(INFO) << "StMgrServer Got new connection " << _conn << " from "
+            << _conn->getIPAddress() << ":" << _conn->getPort();
 }
 
 void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {

@@ -101,6 +101,7 @@ class StMgr {
   bool DidAnnounceBackPressure();
   bool DidOthersAnnounceBackPressure();
   const NetworkOptions&  GetStmgrServerNetworkOptions() const;
+  const NetworkOptions&  GetInstanceServerNetworkOptions() const;
   void HandleDeadStMgrConnection(const sp_string& _stmgr);
   void HandleAllStMgrClientsRegistered();
   void HandleDeadInstance(sp_int32 _task_id);
