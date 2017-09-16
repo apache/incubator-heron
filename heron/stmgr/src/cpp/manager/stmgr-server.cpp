@@ -27,7 +27,6 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
-#include "metrics/metrics.h"
 
 namespace heron {
 namespace stmgr {
@@ -43,30 +42,22 @@ const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
-                         const sp_string& _stmgr_id, StMgr* _stmgr,
-                         heron::common::MetricsMgrSt* _metrics_manager_client)
+                         const sp_string& _stmgr_id, StMgr* _stmgr)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
-      stmgr_(_stmgr),
-      metrics_manager_client_(_metrics_manager_client) {
+      stmgr_(_stmgr) {
   // stmgr related handlers
   InstallRequestHandler(&StMgrServer::HandleStMgrHelloRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
   InstallMessageHandler(&StMgrServer::HandleStartBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleStopBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
-
-  stmgr_server_metrics_ = new heron::common::MultiCountMetric();
-  metrics_manager_client_->register_metric("__server", stmgr_server_metrics_);
 }
 
 StMgrServer::~StMgrServer() {
   Stop();
-
-  metrics_manager_client_->unregister_metric("__server");
-  delete stmgr_server_metrics_;
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {

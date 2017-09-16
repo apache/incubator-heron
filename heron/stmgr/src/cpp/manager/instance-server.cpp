@@ -95,7 +95,7 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
 
   instance_server_metrics_ = new heron::common::MultiCountMetric();
   back_pressure_metric_aggr_ = new heron::common::TimeSpentMetric();
-  metrics_manager_client_->register_metric("__instance_server", instance_server_metrics_);
+  metrics_manager_client_->register_metric("__server", instance_server_metrics_);
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR,
                                            back_pressure_metric_aggr_);
   spouts_under_back_pressure_ = false;
@@ -146,7 +146,7 @@ InstanceServer::~InstanceServer() {
     }
   }
 
-  metrics_manager_client_->unregister_metric("__instance_server");
+  metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
   delete instance_server_metrics_;
   delete back_pressure_metric_aggr_;

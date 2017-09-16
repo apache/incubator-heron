@@ -293,8 +293,7 @@ void StMgr::StartStmgrServer() {
       1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
-  stmgr_server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
-                                  this, metrics_manager_client_);
+  stmgr_server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, this);
 
   // start the server
   CHECK_EQ(stmgr_server_->Start(), 0);
