@@ -209,6 +209,7 @@ def _pex_binary_impl(ctx):
       "--disable-cache",
       manifest_file.path,
   ]
+  #EXTRA_PEX_ARGS#
 
   # form the inputs to pex builder
   _inputs = (
