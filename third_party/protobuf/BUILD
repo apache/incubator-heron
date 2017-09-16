@@ -2,12 +2,12 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "protobuf"
-package_version = "2.5.0"
+pkg_name = "protobuf"
+pkg_version = "2.5.0"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
-package_patch = package_name + "-" + package_version + ".patch"
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
+package_patch = pkg_name + "-" + pkg_version + ".patch"
 
 bin_files = [
     "bin/protoc",

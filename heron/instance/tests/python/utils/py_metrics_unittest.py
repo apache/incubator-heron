@@ -19,7 +19,7 @@ import unittest
 import threading
 
 from heron.instance.src.python.utils.metrics.py_metrics import PyMetrics
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 import heron.instance.tests.python.utils.mock_generator as mock_generator
 
 Mem = namedtuple('Mem', ['rss', 'vms'])
@@ -29,7 +29,7 @@ Thread = namedtuple('Thread', ['id', 'user_time', 'system_time'])
 class PyMetricsTest(unittest.TestCase):
   def setUp(self):
     metrics_collector = mock_generator.MockMetricsCollector()
-    with patch("heron.common.src.python.config.system_config.get_sys_config",
+    with patch("heron.instance.src.python.utils.system_config.get_sys_config",
                side_effect=lambda: {constants.HERON_METRICS_EXPORT_INTERVAL_SEC: 10}):
           self.py_metrics = PyMetrics(metrics_collector)
     self.py_metrics.process = Mock()

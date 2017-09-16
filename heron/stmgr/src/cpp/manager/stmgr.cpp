@@ -112,7 +112,7 @@ void StMgr::Init() {
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
 
   reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
-  if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
+  if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Start checkpoint manager client
     CreateCheckpointMgrClient();
   } else {
@@ -143,7 +143,7 @@ void StMgr::Init() {
   FetchTMasterLocation();
   FetchMetricsCacheLocation();
 
-  if (reliability_mode_ == config::TopologyConfigVars::EXACTLY_ONCE) {
+  if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Now start the stateful restorer
     stateful_restorer_ = new StatefulRestorer(ckptmgr_client_, clientmgr_,
                                tuple_cache_, server_, metrics_manager_client_,
@@ -470,7 +470,7 @@ void StMgr::StartTMasterClient() {
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     server_->GetInstanceInfo(all_instance_info);
-    tmaster_client_->SetInstanceInfo(all_instance_info);
+    tmaster_client_->SetStmgrRegisterRequest(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();
@@ -531,7 +531,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   delete pplan_;
   pplan_ = _pplan;
   neighbour_calculator_->Reconstruct(*pplan_);
-  // For exactly once topologies, we only start connecting after we have recovered
+  // For effectively once topologies, we only start connecting after we have recovered
   // from a globally consistent checkpoint. The act of starting connections is initiated
   // by the restorer
   if (!stateful_restorer_) {

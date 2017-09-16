@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "gperftools"
-package_version = "2.4"
+pkg_name = "gperftools"
+pkg_version = "2.4"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 
 COMMON_EXECUTE = [
     "export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind",

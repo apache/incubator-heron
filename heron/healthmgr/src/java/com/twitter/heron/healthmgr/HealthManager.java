@@ -100,6 +100,7 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
 public class HealthManager {
   public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
   public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
+  private static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
 
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
@@ -203,10 +204,7 @@ public class HealthManager {
     String metricsUrl = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_URL.key());
     metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
 
-    Class<? extends MetricsProvider> metricsProviderClass =
-        Class.forName(metricSourceClassName).asSubclass(MetricsProvider.class);
-    AbstractModule module =
-        buildMetricsProviderModule(config, metricsUrl, metricsProviderClass);
+    AbstractModule module = buildMetricsProviderModule(metricsUrl, metricSourceClassName);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -261,7 +259,9 @@ public class HealthManager {
   }
 
   public void initialize() throws ReflectiveOperationException, FileNotFoundException {
-    this.stateMgrAdaptor = createStateMgrAdaptor();
+    injector = Guice.createInjector(baseModule);
+
+    stateMgrAdaptor = createStateMgrAdaptor();
 
     this.runtime = Config.newBuilder()
         .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
@@ -272,7 +272,6 @@ public class HealthManager {
 
     this.policyConfigReader = createPolicyConfigReader();
 
-    injector = Guice.createInjector(baseModule);
     AbstractModule commonModule = buildCommonConfigModule();
     injector = injector.createChildInjector(commonModule);
 
@@ -308,15 +307,31 @@ public class HealthManager {
   }
 
   @VisibleForTesting
-  static AbstractModule buildMetricsProviderModule(
-      final Config config, final String metricsSourceUrl,
-      final Class<? extends MetricsProvider> metricsProviderClass) {
+  static AbstractModule buildMetricsProviderModule(final String sourceUrl, final String type) {
     return new AbstractModule() {
       @Override
       protected void configure() {
         bind(String.class)
             .annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
-            .toInstance(metricsSourceUrl);
+            .toInstance(sourceUrl);
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
+            .toInstance(type);
+      }
+    };
+  }
+
+  private AbstractModule buildCommonConfigModule() throws ReflectiveOperationException {
+    String metricSourceClassName
+        = injector.getInstance(
+        com.google.inject.Key.get(String.class, Names.named(CONF_METRICS_SOURCE_TYPE)));
+
+    Class<? extends MetricsProvider> metricsProviderClass =
+        Class.forName(metricSourceClassName).asSubclass(MetricsProvider.class);
+
+    return new AbstractModule() {
+      @Override
+      protected void configure() {
         bind(String.class)
             .annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
@@ -326,20 +341,12 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
-        bind(MetricsProvider.class).to(metricsProviderClass).in(Singleton.class);
-      }
-    };
-  }
-
-  private AbstractModule buildCommonConfigModule() {
-    return new AbstractModule() {
-      @Override
-      protected void configure() {
         bind(Config.class).toInstance(config);
         bind(EventManager.class).in(Singleton.class);
         bind(ISchedulerClient.class).toInstance(schedulerClient);
         bind(SchedulerStateManagerAdaptor.class).toInstance(stateMgrAdaptor);
         bind(PackingPlanProvider.class).in(Singleton.class);
+        bind(MetricsProvider.class).to(metricsProviderClass).in(Singleton.class);
       }
     };
   }

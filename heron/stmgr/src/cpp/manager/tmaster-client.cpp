@@ -44,6 +44,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       stmgr_host_(_stmgr_host),
       stmgr_port_(_stmgr_port),
       shell_port_(_shell_port),
+      register_request_set_(false),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
       stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
@@ -107,8 +108,9 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
                << get_clientoptions().get_port() << std::endl;
     LOG(INFO) << "Will retry again..." << std::endl;
     // Shouldn't be in a state where a previous timer is not cleared yet.
-    CHECK_EQ(reconnect_timer_id, 0);
-    reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+    if (reconnect_timer_id == 0) {
+      reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
+    }
   }
 }
 
@@ -207,31 +209,39 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  auto request = new proto::tmaster::StMgrRegisterRequest();
-
-  sp_string cwd;
-  FileUtils::getCwd(cwd);
-  proto::system::StMgr* stmgr = request->mutable_stmgr();
-  stmgr->set_id(stmgr_id_);
-  stmgr->set_host_name(stmgr_host_);
-  stmgr->set_data_port(stmgr_port_);
-  stmgr->set_local_endpoint("/unused");
-  stmgr->set_cwd(cwd);
-  stmgr->set_pid((sp_int32)ProcessUtils::getPid());
-  stmgr->set_shell_port(shell_port_);
-  for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
-    request->add_instances()->CopyFrom(*(*iter));
-  }
-  SendRequest(request, NULL);
+  CHECK(register_request_set_);
+  proto::tmaster::StMgrRegisterRequest* request =
+    new proto::tmaster::StMgrRegisterRequest(register_request_);
+  SendRequest(request, nullptr);
   return;
+}
+
+void TMasterClient::SetStmgrRegisterRequest(
+                                    const std::vector<proto::system::Instance*>& _instances) {
+    register_request_.Clear();
+    register_request_set_ = true;
+
+    sp_string cwd;
+    FileUtils::getCwd(cwd);
+    proto::system::StMgr* stmgr = register_request_.mutable_stmgr();
+    stmgr->set_id(stmgr_id_);
+    stmgr->set_host_name(stmgr_host_);
+    stmgr->set_data_port(stmgr_port_);
+    stmgr->set_local_endpoint("/unused");
+    stmgr->set_cwd(cwd);
+    stmgr->set_pid((sp_int32)ProcessUtils::getPid());
+    stmgr->set_shell_port(shell_port_);
+    for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {
+      register_request_.add_instances()->CopyFrom(*(*iter));
+    }
 }
 
 void TMasterClient::SendHeartbeatRequest() {
   auto request = new proto::tmaster::StMgrHeartbeatRequest();
-  request->set_heartbeat_time(time(NULL));
+  request->set_heartbeat_time(time(nullptr));
   // TODO(vikasr) Send actual stats
   request->mutable_stats();
-  SendRequest(request, NULL);
+  SendRequest(request, nullptr);
   return;
 }
 

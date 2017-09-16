@@ -230,7 +230,7 @@ filegroup(
 
 filegroup(
     name = "hexamples",
-    srcs = ["//heron/examples/src/java:heron-examples"],
+    srcs = ["//examples/src/java:heron-examples"],
 )
 
 filegroup(
@@ -240,7 +240,7 @@ filegroup(
 
 filegroup(
     name = "hpyinstance",
-    srcs = ["//heron/instance/src/python/instance:heron-python-instance"],
+    srcs = ["//heron/instance/src/python:heron-python-instance"],
 )
 
 filegroup(
@@ -380,7 +380,7 @@ filegroup(
 
 filegroup(
     name = "hstorm",
-    srcs = ["//heron/storm/src/java:heron-storm"],
+    srcs = ["//storm-compatibility/src/java:heron-storm"],
 )
 
 filegroup(

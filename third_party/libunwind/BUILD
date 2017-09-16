@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "libunwind"
-package_version = "1.1"
+pkg_name = "libunwind"
+pkg_version = "1.1"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 lzma_patch = "libunwind-1.1-lzma-link.patch"
 config_patch = "libunwind-1.1-config.patch"
 cache_patch = "libunwind-1.1-cache.patch"

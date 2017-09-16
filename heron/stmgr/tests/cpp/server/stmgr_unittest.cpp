@@ -320,7 +320,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(mtmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
@@ -343,7 +343,7 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker = new DummySpoutInstance(ss, options, topology_name, topology_id, instance_id,
@@ -365,7 +365,7 @@ void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker =
@@ -388,11 +388,11 @@ struct CommonResources {
   sp_string zkhostportlist_;
   sp_string topology_name_;
   sp_string topology_id_;
-  sp_int32 num_stmgrs_;
-  sp_int32 num_spouts_;
-  sp_int32 num_spout_instances_;
-  sp_int32 num_bolts_;
-  sp_int32 num_bolt_instances_;
+  size_t num_stmgrs_;
+  size_t num_spouts_;
+  size_t num_spout_instances_;
+  size_t num_bolts_;
+  size_t num_bolt_instances_;
 
   // store the stmgr server port returned by bind/listen 0
   std::vector<sp_int32> stmgr_ports_;

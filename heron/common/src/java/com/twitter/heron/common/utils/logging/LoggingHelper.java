@@ -103,7 +103,7 @@ public final class LoggingHelper {
     }
   }
 
-  protected static void setLoggingFormat(String format) {
+  public static void setLoggingFormat(String format) {
     System.setProperty(FORMAT_PROP_KEY, format);
   }
 

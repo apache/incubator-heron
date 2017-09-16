@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -97,9 +98,8 @@ abstract class AbstractWebSink implements IMetricsSink {
     int port = TypeUtils.getInteger(conf.getOrDefault(KEY_PORT, 0));
     if (port == 0) {
       if (!Strings.isNullOrEmpty(portFile)) {
-        try {
-          port = TypeUtils.getInteger(Files.lines(Paths.get(portFile)).findFirst()
-              .get().trim());
+        try (Stream<String> lines = Files.lines(Paths.get(portFile))) {
+          port = TypeUtils.getInteger(lines.findFirst().get().trim());
         } catch (IOException | SecurityException | IllegalArgumentException e) {
           throw new IllegalArgumentException("Could not parse " + KEY_PORT_FILE + " " + portFile
               + " Make sure the file is readable,"

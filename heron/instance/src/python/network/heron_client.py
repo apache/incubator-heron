@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 import time
 from heron.common.src.python.utils.log import Log
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 from heron.instance.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
 
 # pylint: disable=too-many-instance-attributes
@@ -30,7 +30,7 @@ class HeronClient(asyncore.dispatcher):
   def __init__(self, looper, hostname, port, socket_map, socket_options):
     """Initializes HeronClient
 
-    :type looper: ``GatewayLooper`` (heron.common.src.python.basics)
+    :type looper: ``GatewayLooper`` (heron.instance.src.python.network)
     :param looper: looper object
     :type hostname: str
     :param hostname: endpoint hostname

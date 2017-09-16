@@ -85,7 +85,7 @@ filegroup(
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
-    files = generated_release_files,
+    srcs = generated_release_files,
     deps = [
         ":heron-core-bin",
         ":heron-core-lib-scheduler",
@@ -104,67 +104,67 @@ pkg_tar(
 pkg_tar(
     name = "heron-core-bin",
     package_dir = "heron-core/bin",
-    files = heron_core_bin_files(),
+    srcs = heron_core_bin_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-scheduler",
     package_dir = "heron-core/lib/scheduler",
-    files = heron_core_lib_scheduler_files(),
+    srcs = heron_core_lib_scheduler_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-packing",
     package_dir = "heron-core/lib/packing",
-    files = heron_core_lib_packing_files(),
+    srcs = heron_core_lib_packing_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-healthmgr",
     package_dir = "heron-core/lib/healthmgr",
-    files = heron_core_lib_healthmgr_files(),
+    srcs = heron_core_lib_healthmgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-metricsmgr",
     package_dir = "heron-core/lib/metricsmgr",
-    files = heron_core_lib_metricsmgr_files(),
+    srcs = heron_core_lib_metricsmgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-metricscachemgr",
     package_dir = "heron-core/lib/metricscachemgr",
-    files = heron_core_lib_metricscachemgr_files(),
+    srcs = heron_core_lib_metricscachemgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-statemgr",
     package_dir = "heron-core/lib/statemgr",
-    files = heron_core_lib_statemgr_files(),
+    srcs = heron_core_lib_statemgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-instance",
     package_dir = "heron-core/lib/instance",
-    files = heron_core_lib_instance_files(),
+    srcs = heron_core_lib_instance_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-ckptmgr",
     package_dir = "heron-core/lib/ckptmgr",
-    files = heron_core_lib_ckptmgr_files(),
+    srcs = heron_core_lib_ckptmgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-statefulstorage",
     package_dir = "heron-core/lib/statefulstorage",
-    files = heron_core_lib_statefulstorage_files(),
+    srcs = heron_core_lib_statefulstorage_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-downloader",
     package_dir = "heron-core/lib/downloaders",
-    files = heron_core_lib_downloader_files(),
+    srcs = heron_core_lib_downloader_files(),
 )
 
 ################################################################################
@@ -173,26 +173,26 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools-bin",
     package_dir = "bin",
-    files = heron_tools_bin_files(),
+    srcs = heron_tools_bin_files(),
 )
 
 pkg_tar(
     name = "heron-tools-lib",
     package_dir = "lib",
-    files = heron_tools_lib_files(),
+    srcs = heron_tools_lib_files(),
 )
 
 pkg_tar(
     name = "heron-tools-conf",
     package_dir = "conf",
-    files = heron_tools_conf_files()
+    srcs = heron_tools_conf_files()
 )
 
 pkg_tar(
     name = "heron-tools-cluster-conf",
     strip_prefix = "/heron/config/src/yaml/conf",
     package_dir = "conf",
-    files = [
+    srcs = [
       "//heron/config/src/yaml:conf-yaml"
     ],
 )
@@ -200,7 +200,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
-    files = generated_release_files,
+    srcs = generated_release_files,
     deps = [
         ":heron-tools-bin",
         ":heron-tools-lib",
@@ -215,56 +215,56 @@ pkg_tar(
 pkg_tar(
     name = "heron-client-bin",
     package_dir = "bin",
-    files = heron_client_bin_files(),
+    srcs = heron_client_bin_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-scheduler",
     package_dir = "lib/scheduler",
-    files = heron_client_lib_scheduler_files(),
+    srcs = heron_client_lib_scheduler_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-packing",
     package_dir = "lib/packing",
-    files = heron_client_lib_packing_files(),
+    srcs = heron_client_lib_packing_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-statemgr",
     package_dir = "lib/statemgr",
-    files = heron_client_lib_statemgr_files(),
+    srcs = heron_client_lib_statemgr_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-uploader",
     package_dir = "lib/uploader",
-    files = heron_client_lib_uploader_files(),
+    srcs = heron_client_lib_uploader_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-healthmgr",
     package_dir = "lib/healthmgr",
-    files = heron_client_lib_healthmgr_files(),
+    srcs = heron_client_lib_healthmgr_files(),
 )
 
 pkg_tar(
     name = "heron-client-lib-third_party",
     package_dir = "lib/third_party",
-    files = heron_client_lib_third_party_files(),
+    srcs = heron_client_lib_third_party_files(),
 )
 
 pkg_tar(
     name = "heron-client-examples",
     package_dir = "examples",
-    files = heron_examples_files(),
+    srcs = heron_examples_files(),
 )
 
 pkg_tar(
     name = "heron-client-conf",
     strip_prefix = "/heron/config/src/yaml/conf",
     package_dir = "conf",
-    files = [
+    srcs = [
         "//heron/config/src/yaml:conf-yaml",
     ]
 )
@@ -272,13 +272,13 @@ pkg_tar(
 pkg_tar(
     name = "heron-client-dist",
     package_dir = "dist",
-    files = [":heron-core"],
+    srcs = [":heron-core"],
 )
 
 pkg_tar(
     name = "heron-client",
     extension = "tar.gz",
-    files = generated_release_files,
+    srcs = generated_release_files,
     deps = [
         ":heron-client-bin",
         ":heron-client-conf",
@@ -299,7 +299,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-tests-bin",
     package_dir = "bin",
-    files = [
+    srcs = [
         "//integration_test/src/python/http_server:http-server",
         "//integration_test/src/python/test_runner:test-runner",
     ]
@@ -308,23 +308,25 @@ pkg_tar(
 pkg_tar(
     name = "heron-tests-data-java",
     package_dir = "data/java",
-    files = [
+    srcs = [
         "//integration_test/src/java:test-data-files",
     ],
+    strip_prefix = '/integration_test/src/java/com/twitter/heron/integration_test/topology/'
 )
 
 pkg_tar(
     name = "heron-tests-data-python",
     package_dir = "data/python",
-    files = [
+    srcs = [
         "//integration_test/src/python/integration_test/topology:test-data-files",
     ],
+    strip_prefix = '/integration_test/src/python/integration_test/topology/'
 )
 
 pkg_tar(
     name = "heron-tests-lib",
     package_dir = "lib",
-    files = [
+    srcs = [
        "//integration_test/src/java:integration-tests",
        "//integration_test/src/python/integration_test/topology:heron_integ_topology",
     ],
@@ -333,7 +335,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-tests",
     extension = "tar.gz",
-    files = generated_release_files,
+    srcs = generated_release_files,
     deps = [
         ":heron-tests-bin",
         ":heron-tests-data-java",
@@ -348,7 +350,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-api",
     extension = "tar.gz",
-    files = generated_release_files + heron_api_files(),
+    srcs = generated_release_files + heron_api_files(),
 )
 
 ################################################################################
@@ -407,10 +409,11 @@ genrule(
         'mkdir -p $$HERONPY_DIR/heronpy/dsl',
         'mkdir -p $$HERONPY_DIR/heronpy/connectors',
         'mkdir -p $$HERONPY_DIR/heronpy/proto',
-        'mv $$HERONPYAPI_UNZIP/heronpy/api $$HERONPY_DIR/api',
-        'mv $$HERONPYDSL_UNZIP/heronpy/dsl $$HERONPY_DIR/dsl',
-        'mv $$HERONPYCONNECTORS_UNZIP/heronpy/connectors $$HERONPY_DIR/connectors',
-        'mv $$HERONPYPROTO_UNZIP/heronpy/proto $$HERONPY_DIR/proto',
+        'mv $$HERONPYAPI_UNZIP/heronpy/api $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYDSL_UNZIP/heronpy/dsl $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYCONNECTORS_UNZIP/heronpy/connectors $$HERONPY_DIR/heronpy/',
+        'mv $$HERONPYPROTO_UNZIP/heronpy/proto $$HERONPY_DIR/heronpy/',
+        'echo "__import__(\'pkg_resources\').declare_namespace(__name__)" > $$HERONPY_DIR/heronpy/__init__.py',
         'rm -rf $$HERONPYAPI_UNZIP/heron/api',
         'rm -rf $$HERONPYDSL_UNZIP/heron/dsl',
         'rm -rf $$HERONPYCONNECTORS_UNZIP/heron/connectors',

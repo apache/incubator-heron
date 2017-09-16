@@ -22,6 +22,8 @@ import java.util.Map;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
 import com.twitter.heron.api.topology.BoltDeclarer;
@@ -68,7 +70,17 @@ public class TestTopologyBuilder extends TopologyBuilder {
 
   @Override
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
-    return super.setBolt(id, new IntegrationTestBolt(bolt), parallelismHint);
+    return setBolt(id, bolt, parallelismHint, true);
+  }
+
+  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint, boolean ackAuto) {
+    return super.setBolt(id, new IntegrationTestBolt(bolt, ackAuto), parallelismHint);
+  }
+
+  public BoltDeclarer setBolt(String id, IWindowedBolt bolt,
+                              Number parallelismHint, boolean ackAuto) throws
+      IllegalArgumentException {
+    return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint, ackAuto);
   }
 
   @Override

@@ -15,8 +15,8 @@
 
 from collections import namedtuple
 from heron.common.src.python.utils.log import Log
-import heron.common.src.python.system_constants as const
-from heron.common.src.python.config import system_config
+import heron.instance.src.python.utils.system_constants as const
+from heron.instance.src.python.utils import system_config
 
 SocketOptions = namedtuple('Options', 'nw_write_batch_size_bytes, nw_write_batch_time_ms, '
                                       'nw_read_batch_size_bytes, nw_read_batch_time_ms, '

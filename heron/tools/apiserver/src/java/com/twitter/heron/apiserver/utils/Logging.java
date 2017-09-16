@@ -13,7 +13,15 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver.utils;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.twitter.heron.common.utils.logging.LoggingHelper;
+
 public final class Logging {
+
+  private static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] [%4$s] %3$s: %5$s %6$s %n";
 
   private static volatile boolean isVerbose;
 
@@ -23,6 +31,19 @@ public final class Logging {
 
   public static boolean isVerbose() {
     return isVerbose;
+  }
+
+  public static void configure(boolean verbose) {
+    LoggingHelper.setLoggingFormat(DEFAULT_FORMAT);
+
+    final Level level = verbose ? Level.ALL : Level.INFO;
+    // configure the root heron logger and it's handlers
+    Logger logger = Logger.getLogger("com.twitter");
+    for (Handler handler : logger.getHandlers()) {
+      handler.setLevel(level);
+    }
+
+    logger.setLevel(level);
   }
 
   private Logging() {

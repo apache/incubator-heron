@@ -94,4 +94,4 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples).
+See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples).
