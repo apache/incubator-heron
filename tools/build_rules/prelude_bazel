@@ -5,3 +5,8 @@ load(
     "pex_test",
     "pex_pytest",
 )
+
+load(
+    "@//tools/rules:java_tests.bzl",
+    "java_tests",
+)
