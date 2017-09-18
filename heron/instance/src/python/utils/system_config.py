@@ -15,9 +15,10 @@
 # pylint: disable=global-statement
 sys_config = {}
 
-def set_sys_config(config):
+def set_sys_config(config, override_config):
   global sys_config
   sys_config = config
+  sys_config.update(override_config)
 
 def get_sys_config():
   return sys_config
