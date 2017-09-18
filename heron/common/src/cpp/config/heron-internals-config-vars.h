@@ -140,6 +140,9 @@ class HeronInternalsConfigVars {
   // The max number of messages in the memory pool for each message type
   static const sp_string HERON_STREAMMGR_MEMPOOL_MAX_MESSAGE_NUMBER;
 
+  // The max byte size of HeronTupleSet message in stream manager
+  static const sp_string HERON_STREAMMGR_HERONTUPLESET_MESSAGE_MAX_BYTES;
+
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
 

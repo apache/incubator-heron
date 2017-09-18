@@ -120,7 +120,9 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   spouts_under_back_pressure_ = false;
-
+  max_herontupleset_size_in_bytes =
+    config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrHeronTupleSetMessageMaxBytes();
+  space_check_counter = 0;
   // Update queue related metrics every 10 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateQueueMetrics(status);
@@ -429,7 +431,20 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn,
         ->incr_by(_message->control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  __global_protobuf_pool_release__(_message);
+  space_check_counter = (space_check_counter + 1) % 1024;
+  if (space_check_counter == 0) {
+    auto message_size = _message->SpaceUsed();
+    if (message_size >= max_herontupleset_size_in_bytes) {
+      LOG(WARNING) << "HeronTupleSet message has size " << message_size <<
+        " bytes, exceeding limit " << max_herontupleset_size_in_bytes << " bytes." <<
+        " Release to memory allocator rather than memory pool.";
+      delete _message;
+    } else {
+      __global_protobuf_pool_release__(_message);
+    }
+  } else {
+    __global_protobuf_pool_release__(_message);
+  }
 }
 
 void StMgrServer::SendToInstance2(proto::stmgr::TupleStreamMessage* _message) {
