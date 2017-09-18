@@ -6,6 +6,7 @@ jackson_version = "2.6.6"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
+protobuf_version = "3.4.0"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -330,7 +331,7 @@ maven_jar(
 
 maven_jar(
   name = "com_google_protobuf_protobuf_java",
-  artifact = "com.google.protobuf:protobuf-java:3.4.0",
+  artifact = "com.google.protobuf:protobuf-java:" + protobuf_version,
 )
 
 maven_jar(
