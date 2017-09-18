@@ -1,4 +1,4 @@
-load("/tools/rules/pex_rules", "pex_test")
+package(default_visibility = ["//visibility:public"])
 
 pex_test(
     name = "configloader_unittest",
