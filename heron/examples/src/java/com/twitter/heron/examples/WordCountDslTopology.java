@@ -26,13 +26,11 @@ import com.twitter.heron.dsl.WindowConfig;
  * This is a topology that does simple word counts.
  * <p>
  * In this topology,
- * 1. the spout task generate a set of random words during initial "open" method.
- * (~128k words, 20 chars per word)
- * 2. During every "nextTuple" call, each spout simply picks a word at random and emits it
- * 3. Spouts use a fields grouping for their output, and each spout could send tuples to
- * every other bolt in the topology
- * 4. Bolts maintain an in-memory map, which is keyed by the word emitted by the spouts,
- * and updates the count when it receives a tuple.
+ * 1. The sentence "Mary had a little lamb" is generated over and over again.
+ * 2. The flatMap stage splits the sentence into words
+ * 3. The map stage 'counts' each word one at a time.
+ * 4. The reduceByKeyAndWindow stage assembles a tumbling count window and
+ *    computes the counts of all words grouped by word.
  */
 public final class WordCountDslTopology {
   private WordCountDslTopology() {
