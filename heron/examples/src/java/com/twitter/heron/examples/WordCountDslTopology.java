@@ -50,7 +50,7 @@ public final class WordCountDslTopology {
     }
     Builder builder = Builder.CreateBuilder();
     builder.newSource(() -> "Mary had a little lamb")
-        .flatMap((word) -> Arrays.asList(word.split("\\s+")))
+        .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")))
         .mapToKV((word) -> new KeyValue<>(word, 1))
         .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y)
         .log();
