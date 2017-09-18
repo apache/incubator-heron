@@ -1,4 +1,4 @@
-load("/tools/rules/pex/pex_rules", "pex_test", "pex_library")
+package(default_visibility = ["//visibility:public"])
 
 pex_library(
   name = 'mock_proto',

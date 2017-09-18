@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex/pex_rules", "pex_library", "pex_test")
-
 pex_library(
     name = "instance-tests-py",
     srcs = ["mock_protobuf.py"],
