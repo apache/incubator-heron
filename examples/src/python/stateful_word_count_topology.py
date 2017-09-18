@@ -17,8 +17,8 @@ import sys
 import heronpy.api.api_constants as constants
 from heronpy.api.topology import TopologyBuilder
 from heronpy.api.stream import Grouping
-from heron.examples.src.python.spout import StatefulWordSpout
-from heron.examples.src.python.bolt import StatefulCountBolt
+from examples.src.python.spout import StatefulWordSpout
+from examples.src.python.bolt import StatefulCountBolt
 
 # Topology is defined using a topology builder
 # Refer to multi_stream_topology for defining a topology by subclassing Topology

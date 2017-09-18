@@ -17,8 +17,8 @@ import heronpy.api.api_constants as constants
 from heronpy.api.topology import Topology
 from heronpy.api.stream import Grouping
 
-from heron.examples.src.python.spout import MultiStreamSpout
-from heron.examples.src.python.bolt import CountBolt, StreamAggregateBolt
+from examples.src.python.spout import MultiStreamSpout
+from examples.src.python.bolt import CountBolt, StreamAggregateBolt
 
 class MultiStream(Topology):
   spout = MultiStreamSpout.spec(par=2)

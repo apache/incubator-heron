@@ -69,6 +69,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       throw new RuntimeException(getInvalidTopologyNameMessage(Runtime.topologyName(runtime)));
     }
 
+    // validate that the image pull policy has been set correctly
+    if (!imagePullPolicyIsValid(KubernetesContext.getKubernetesImagePullPolicy(config))) {
+      throw new RuntimeException(
+          getInvalidImagePullPolicyMessage(KubernetesContext.getKubernetesImagePullPolicy(config))
+      );
+    }
+
     this.configuration = config;
     this.runtimeConfiguration = runtime;
     this.controller = getController();
@@ -283,6 +290,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
           existingContainer.get(KubernetesConstants.DOCKER_IMAGE).asText());
 
+      // Set the image pull policy for this container
+      setImagePullPolicyIfPresent(containerInfo);
+
       // Port info -- all the same
       containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
 
@@ -358,6 +368,9 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
         KubernetesContext.getExecutorDockerImage(configuration));
 
+    // Set the image pull policy for this container
+    setImagePullPolicyIfPresent(containerInfo);
+
     // Port information for this container
     containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
 
@@ -387,7 +400,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return containerSpec;
   }
 
-
   /**
    * Get the ports the container will need to expose so other containers can access its services
    *
@@ -406,6 +418,14 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     return ports;
   }
+
+  private void setImagePullPolicyIfPresent(ObjectNode containerInfo) {
+    if (KubernetesContext.hasImagePullPolicy(configuration)) {
+      containerInfo.put(KubernetesConstants.IMAGE_PULL_POLICY,
+          KubernetesContext.getKubernetesImagePullPolicy(configuration));
+    }
+  }
+
 
   /**
    * Get the command that will be used to retrieve the topology JAR
@@ -506,10 +526,23 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return matcher.matches();
   }
 
+  static boolean imagePullPolicyIsValid(String imagePullPolicy) {
+    if (imagePullPolicy == null || imagePullPolicy.isEmpty()) {
+      return true;
+    }
+    return KubernetesConstants.VALID_IMAGE_PULL_POLICIES.contains(imagePullPolicy);
+  }
+
   private static String getInvalidTopologyNameMessage(String topologyName) {
     return String.format("Invalid topology name: \"%s\": "
         + "topology names in kubernetes must consist of lower case alphanumeric "
         + "characters, '-' or '.', and must start and end with an alphanumeric "
         + "character.", topologyName);
+  }
+
+  private static String getInvalidImagePullPolicyMessage(String policy) {
+    return String.format("Invalid image pull policy: \"%s\": image pull polices must be one of "
+        + " %s Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
+        policy, KubernetesConstants.VALID_IMAGE_PULL_POLICIES.toString());
   }
 }
