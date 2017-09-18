@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 pkg_name = "protobuf"
-pkg_version = "3.1.0"
+pkg_version = "3.4.0"
 
 pkg_file = pkg_name + "-" + pkg_version + ".tar.gz"
 pkg_dir = pkg_name + "-" + pkg_version
@@ -22,6 +22,7 @@ genrule(
 
         "include/google/protobuf/arena.h",
         "include/google/protobuf/arenastring.h",
+        "include/google/protobuf/arena_impl.h",
         "include/google/protobuf/has_bits.h",
         "include/google/protobuf/stubs/atomic_sequence_num.h",
         "include/google/protobuf/stubs/fastmem.h",
@@ -32,9 +33,14 @@ genrule(
         "include/google/protobuf/stubs/mutex.h",
         "include/google/protobuf/stubs/callback.h",
         "include/google/protobuf/stubs/shared_ptr.h",
+        "include/google/protobuf/stubs/hash.h",
         "include/google/protobuf/stubs/casts.h",
 
         "include/google/protobuf/extension_set.h",
+        "include/google/protobuf/map.h",
+        "include/google/protobuf/map_type_handler.h",
+        "include/google/protobuf/map_entry_lite.h",
+        "include/google/protobuf/metadata_lite.h",
         "include/google/protobuf/message_lite.h",
         "include/google/protobuf/unknown_field_set.h",
         "include/google/protobuf/descriptor.h",
@@ -55,6 +61,7 @@ genrule(
         "include/google/protobuf/message.h",
         "include/google/protobuf/text_format.h",
         "include/google/protobuf/metadata.h",
+        "include/google/protobuf/generated_message_table_driven.h",
 
         "include/google/protobuf/compiler/code_generator.h",
         "include/google/protobuf/compiler/command_line_interface.h",
@@ -80,7 +87,6 @@ genrule(
         "include/google/protobuf/stubs/atomicops_internals_mips_gcc.h",
         "include/google/protobuf/stubs/once.h",
         "include/google/protobuf/stubs/atomicops_internals_arm_gcc.h",
-        "include/google/protobuf/stubs/atomicops_internals_pnacl.h",
         "include/google/protobuf/stubs/platform_macros.h",
         "include/google/protobuf/stubs/atomicops_internals_arm_qnx.h",
         "include/google/protobuf/stubs/atomicops_internals_x86_gcc.h",
@@ -88,7 +94,6 @@ genrule(
         "include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h",
         "include/google/protobuf/stubs/atomicops_internals_x86_msvc.h",
         "include/google/protobuf/stubs/type_traits.h",
-        "include/google/protobuf/stubs/atomicops_internals_macosx.h",
         "include/google/protobuf/stubs/common.h",
 
         "lib/libprotobuf-lite.a",
@@ -133,7 +138,6 @@ cc_library(
         "include/google/protobuf/generated_enum_reflection.h",
 
         "include/google/protobuf/stubs/atomicops.h",
-        "include/google/protobuf/stubs/atomicops_internals_macosx.h",
         "include/google/protobuf/stubs/atomicops_internals_x86_gcc.h",
         "include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h",
         "include/google/protobuf/stubs/platform_macros.h",
@@ -146,10 +150,12 @@ cc_library(
     hdrs = [
         "include/google/protobuf/arena.h",
         "include/google/protobuf/arenastring.h",
+        "include/google/protobuf/arena_impl.h",
         "include/google/protobuf/has_bits.h",
         "include/google/protobuf/stubs/atomic_sequence_num.h",
         "include/google/protobuf/stubs/common.h",
         "include/google/protobuf/stubs/fastmem.h",
+        "include/google/protobuf/stubs/hash.h",
         "include/google/protobuf/stubs/once.h",
         "include/google/protobuf/stubs/port.h",
         "include/google/protobuf/stubs/macros.h",
@@ -165,9 +171,14 @@ cc_library(
         "include/google/protobuf/generated_enum_util.h",
         "include/google/protobuf/generated_message_util.h",
         "include/google/protobuf/generated_message_reflection.h",
+        "include/google/protobuf/generated_message_table_driven.h",
+        "include/google/protobuf/map.h",
+        "include/google/protobuf/map_entry_lite.h",
+        "include/google/protobuf/map_type_handler.h",
         "include/google/protobuf/message.h",
         "include/google/protobuf/message_lite.h",
         "include/google/protobuf/metadata.h",
+        "include/google/protobuf/metadata_lite.h",
         "include/google/protobuf/reflection_ops.h",
         "include/google/protobuf/repeated_field.h",
         "include/google/protobuf/unknown_field_set.h",
