@@ -24,6 +24,7 @@ import com.twitter.heron.api.tuple.Fields;
  */
 public abstract class DslWindowOperator extends BaseWindowedBolt {
   private static final long serialVersionUID = -4836560876041237959L;
+  private static final String OUTPUTFIELDNAME = "output";
 
   /**
    * The operators implementing dsl functionality have some properties.
@@ -33,6 +34,6 @@ public abstract class DslWindowOperator extends BaseWindowedBolt {
    */
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("output"));
+    outputFieldsDeclarer.declare(new Fields(OUTPUTFIELDNAME));
   }
 }

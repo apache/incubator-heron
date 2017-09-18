@@ -30,6 +30,7 @@ public abstract class DslSource extends BaseRichSpout
     implements IStatefulComponent<Serializable, Serializable> {
 
   private static final long serialVersionUID = 8583965332619565343L;
+  private static final String OUTPUTFIELDNAME = "output";
 
   @Override
   public void initState(State<Serializable, Serializable> state) { }
@@ -45,6 +46,6 @@ public abstract class DslSource extends BaseRichSpout
    */
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("output"));
+    outputFieldsDeclarer.declare(new Fields(OUTPUTFIELDNAME));
   }
 }

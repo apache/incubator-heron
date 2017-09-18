@@ -29,6 +29,7 @@ import com.twitter.heron.dsl.impl.operators.DslOperator;
 public class LogSink<R> extends DslOperator {
   private static final long serialVersionUID = -6392422646613189818L;
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
+  private OutputCollector collector;
 
   public LogSink() {
   }
@@ -36,6 +37,7 @@ public class LogSink<R> extends DslOperator {
   @SuppressWarnings("rawtypes")
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    this.collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
@@ -43,5 +45,6 @@ public class LogSink<R> extends DslOperator {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
     LOG.info(String.valueOf(obj));
+    collector.ack(tuple);
   }
 }

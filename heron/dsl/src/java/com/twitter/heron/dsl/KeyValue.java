@@ -27,7 +27,7 @@ public final class KeyValue<K, V> implements Serializable {
   private K key;
   private V value;
 
-  static <R, T> KeyValue<R, T> create(R k, T v) {
+  public static <R, T> KeyValue<R, T> create(R k, T v) {
     return new KeyValue<R, T>(k, v);
   }
 

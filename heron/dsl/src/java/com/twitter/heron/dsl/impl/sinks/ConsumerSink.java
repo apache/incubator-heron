@@ -31,6 +31,7 @@ public class ConsumerSink<R> extends DslOperator {
   private static final Logger LOG = Logger.getLogger(ConsumerSink.class.getName());
   private static final long serialVersionUID = 8716140142187667638L;
   private SerializableConsumer<R> consumer;
+  private OutputCollector collector;
 
   public ConsumerSink(SerializableConsumer<R> consumer) {
     this.consumer = consumer;
@@ -39,6 +40,7 @@ public class ConsumerSink<R> extends DslOperator {
   @SuppressWarnings("rawtypes")
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    this.collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
@@ -46,5 +48,6 @@ public class ConsumerSink<R> extends DslOperator {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
     consumer.accept(obj);
+    collector.ack(tuple);
   }
 }

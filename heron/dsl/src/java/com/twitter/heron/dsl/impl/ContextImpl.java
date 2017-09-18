@@ -39,27 +39,27 @@ public class ContextImpl implements Context {
   }
 
   @Override
-  public int taskId() {
+  public int getTaskId() {
     return topologyContext.getThisTaskId();
   }
 
   @Override
-  public Map<String, Object> config() {
+  public Map<String, Object> getConfig() {
     return topologyConfig;
   }
 
   @Override
-  public String streamName() {
+  public String getStreamName() {
     return topologyContext.getThisStreams().iterator().next();
   }
 
   @Override
-  public int streamPartition() {
+  public int getStreamPartition() {
     return topologyContext.getThisTaskIndex();
   }
 
   @Override
-  public State<Serializable, Serializable> state() {
+  public State<Serializable, Serializable> getState() {
     return state;
   }
 }

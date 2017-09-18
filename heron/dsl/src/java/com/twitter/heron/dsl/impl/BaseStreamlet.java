@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.KVStreamlet;
@@ -65,6 +66,7 @@ import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
  * Streamlet before doing the transformation.
  */
 public abstract class BaseStreamlet<R> implements Streamlet<R> {
+  private static final Logger LOG = Logger.getLogger(BaseStreamlet.class.getName());
   protected String name;
   protected int nPartitions;
   private List<BaseStreamlet<?>> children;
@@ -334,6 +336,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
       }
       index++;
     }
+    LOG.info("Calculated stage Name as " + calculatedName);
     return calculatedName;
   }
 }

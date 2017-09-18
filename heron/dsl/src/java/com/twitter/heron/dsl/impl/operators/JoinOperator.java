@@ -90,6 +90,10 @@ public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
         }
       }
     }
+    evaluateJoinMap(joinMap);
+  }
+
+  private void evaluateJoinMap(Map<K, KeyValue<V1, V2>> joinMap) {
     for (K key : joinMap.keySet()) {
       KeyValue<V1, V2> val = joinMap.get(key);
       switch (joinType) {

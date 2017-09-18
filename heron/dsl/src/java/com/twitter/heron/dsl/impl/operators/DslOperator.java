@@ -29,6 +29,7 @@ import com.twitter.heron.api.tuple.Fields;
 public abstract class DslOperator extends BaseRichBolt
     implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 8524238140745238942L;
+  private static final String OUTPUTFIELDNAME = "output";
 
   @Override
   public void initState(State<Serializable, Serializable> state) { }
@@ -44,6 +45,6 @@ public abstract class DslOperator extends BaseRichBolt
    */
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("output"));
+    outputFieldsDeclarer.declare(new Fields(OUTPUTFIELDNAME));
   }
 }

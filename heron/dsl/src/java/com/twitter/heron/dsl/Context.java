@@ -29,29 +29,29 @@ public interface Context {
    * Fetches the task id of the current instance of the operator
    * @return the task id.
    */
-  int taskId();
+  int getTaskId();
 
   /**
    * Fetches the config of the computation
    * @return config
    */
-  Map<String, Object> config();
+  Map<String, Object> getConfig();
 
   /**
    * The stream name that we are operating on
    * @return the stream name that we are operating on
    */
-  String streamName();
+  String getStreamName();
 
   /**
    * The partition number that we are operating on
    * @return the partition number
    */
-  int streamPartition();
+  int getStreamPartition();
 
   /**
    * The state where components can store any of their local state
    * @return The state interface where users can store their local state
    */
-  State<Serializable, Serializable> state();
+  State<Serializable, Serializable> getState();
 }

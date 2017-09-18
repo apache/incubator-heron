@@ -43,11 +43,16 @@ public final class WindowConfigImpl implements WindowConfig {
   }
 
   public void attachWindowConfig(BaseWindowedBolt bolt) {
-    if (windowType == WindowType.COUNT) {
-      bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
-          BaseWindowedBolt.Count.of(slideInterval));
-    } else {
-      bolt.withWindow(windowDuration, slidingIntervalDuration);
+    switch(windowType) {
+      case COUNT:
+        bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
+                        BaseWindowedBolt.Count.of(slideInterval));
+        break;
+      case TIME:
+        bolt.withWindow(windowDuration, slidingIntervalDuration);
+        break;
+      default:
+        throw new RuntimeException("Unknown windowType " + String.valueOf(windowType));
     }
   }
 }
