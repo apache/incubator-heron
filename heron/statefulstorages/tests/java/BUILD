@@ -1,4 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 test_deps_files = \

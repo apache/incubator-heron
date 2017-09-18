@@ -53,6 +53,9 @@ from integration_test.src.python.integration_test.topology.one_spout_two_bolts\
 from integration_test.src.python.integration_test.topology.shuffle_grouping.shuffle_grouping \
   import shuffle_grouping_builder
 
+from integration_test.src.python.integration_test.topology.dsl.word_count_dsl \
+  import word_count_dsl_builder
+
 TOPOLOGY_BUILDERS = {
     'Heron_IntegrationTest_BasicOneTask': basic_one_task_builder,
     'Heron_IntegrationTest_AllGrouping': all_grouping_builder,
@@ -66,6 +69,7 @@ TOPOLOGY_BUILDERS = {
     'Heron_IntegrationTest_FieldsGrouping': fields_grouping_builder,
     'Heron_IntegrationTest_BoltDoubleEmitTuples': bolt_double_emit_tuples_builder,
     'Heron_IntegrationTest_GlobalGrouping': global_grouping_builder,
+    "Heron_IntegrationTest_WordCountDSL": word_count_dsl_builder
 }
 
 # pylint: disable=missing-docstring

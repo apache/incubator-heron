@@ -193,6 +193,11 @@
       "topologyName" : "Heron_IntegrationTest_GlobalGrouping",
       "classPath"    : "-",
       "expectedResultRelativePath" : "global_grouping/global_grouping_result.json"
+    },
+    {
+      "topologyName" : "Heron_IntegrationTest_WordCountDSL",
+      "classPath"    : "-",
+      "expectedResultRelativePath" : "dsl/word_count_dsl_results.json"
     }
   ]
 }

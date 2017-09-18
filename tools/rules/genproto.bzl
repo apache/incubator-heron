@@ -1,4 +1,4 @@
-load("pex_rules", "pex_library")
+load("/tools/rules/pex/pex_rules", "pex_library")
 
 def proto_package_impl(ctx):
   return struct(proto_src = ctx.file.src)

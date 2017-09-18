@@ -208,10 +208,8 @@ void StMgrServer::UpdateQueueMetrics(EventLoop::Status) {
   for (auto itr = active_instances_.begin(); itr != active_instances_.end(); ++itr) {
     sp_int32 task_id = itr->second;
     const sp_string& instance_id = instance_info_[task_id]->instance_->instance_id();
-    sp_int32 bytes = itr->first->getOutstandingBytes();
-    connection_buffer_metric_map_[instance_id]->scope("bytes")->record(bytes);
-    sp_int32 pkts = itr->first->getOutstandingPackets();
-    connection_buffer_metric_map_[instance_id]->scope("packets")->record(pkts);
+    sp_int32 byts = itr->first->getOutstandingBytes();
+    connection_buffer_metric_map_[instance_id]->scope("bytes")->record(byts);
   }
 }
 
