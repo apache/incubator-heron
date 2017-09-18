@@ -67,18 +67,24 @@ class Package(Link):
   def version(self):
     return parse_version(self.raw_version)
 
-  def satisfies(self, requirement):
+  def satisfies(self, requirement, allow_prereleases=None):
     """Determine whether this package matches the requirement.
 
     :param requirement: The requirement to compare this Package against
     :type requirement: string or :class:`pkg_resources.Requirement`
+    :param Optional[bool] allow_prereleases: Whether to allow prereleases to satisfy
+      the `requirement`.
     :returns: True if the package matches the requirement, otherwise False
     """
     requirement = maybe_requirement(requirement)
     link_name = safe_name(self.name).lower()
     if link_name != requirement.key:
       return False
-    return self.raw_version in requirement
+
+    # NB: If we upgrade to setuptools>=34 the SpecifierSet used here (requirement.specifier) will
+    # come from a non-vendored `packaging` package and pex's bootstrap code in `PEXBuilder` will
+    # need an update.
+    return requirement.specifier.contains(self.raw_version, prereleases=allow_prereleases)
 
   def compatible(self, identity, platform=Platform.current()):
     """Is this link compatible with the given :class:`PythonIdentity` identity and platform?
@@ -223,6 +229,16 @@ class WheelPackage(Package):
       if tag in self._supported_tags:
         return True
     return False
+
+  def __eq__(self, other):
+    return (self._name == other._name and
+            self._raw_version == other._raw_version and
+            self._py_tag == other._py_tag and
+            self._abi_tag == other._abi_tag and
+            self._arch_tag == other._arch_tag)
+
+  def __hash__(self):
+    return hash((self._name, self._raw_version, self._py_tag, self._abi_tag, self._arch_tag))
 
 
 Package.register(SourcePackage)

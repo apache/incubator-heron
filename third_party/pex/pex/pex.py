@@ -4,7 +4,6 @@
 from __future__ import absolute_import, print_function
 
 import os
-import subprocess
 import sys
 from contextlib import contextmanager
 from distutils import sysconfig
@@ -16,11 +15,13 @@ from pkg_resources import EntryPoint, WorkingSet, find_distributions
 from .common import die
 from .compatibility import exec_function
 from .environment import PEXEnvironment
+from .executor import Executor
 from .finders import get_entry_point_from_console_script, get_script_from_distributions
 from .interpreter import PythonInterpreter
 from .orderedset import OrderedSet
 from .pex_info import PexInfo
 from .tracer import TRACER
+from .util import iter_pth_paths
 from .variables import ENV
 
 
@@ -29,6 +30,9 @@ class DevNull(object):
     pass
 
   def write(self, *args, **kw):
+    pass
+
+  def flush(self):
     pass
 
 
@@ -85,18 +89,38 @@ class PEX(object):  # noqa: T000
   @classmethod
   def _extras_paths(cls):
     standard_lib = sysconfig.get_python_lib(standard_lib=True)
+
     try:
       makefile = sysconfig.parse_makefile(sysconfig.get_makefile_filename())
     except (AttributeError, IOError):
       # This is not available by default in PyPy's distutils.sysconfig or it simply is
       # no longer available on the system (IOError ENOENT)
       makefile = {}
+
     extras_paths = filter(None, makefile.get('EXTRASPATH', '').split(':'))
     for path in extras_paths:
       yield os.path.join(standard_lib, path)
 
-  @classmethod
-  def _get_site_packages(cls):
+    # Handle .pth injected paths as extras.
+    sitedirs = cls._get_site_packages()
+    for pth_path in cls._scan_pth_files(sitedirs):
+      TRACER.log('Found .pth file: %s' % pth_path, V=3)
+      for extras_path in iter_pth_paths(pth_path):
+        yield extras_path
+
+  @staticmethod
+  def _scan_pth_files(dir_paths):
+    """Given an iterable of directory paths, yield paths to all .pth files within."""
+    for dir_path in dir_paths:
+      if not os.path.exists(dir_path):
+        continue
+
+      pth_filenames = (f for f in os.listdir(dir_path) if f.endswith('.pth'))
+      for pth_filename in pth_filenames:
+        yield os.path.join(dir_path, pth_filename)
+
+  @staticmethod
+  def _get_site_packages():
     try:
       from site import getsitepackages
       return set(getsitepackages())
@@ -141,6 +165,11 @@ class PEX(object):  # noqa: T000
         new_modules[module_name] = module
         continue
 
+      # Unexpected objects, e.g. namespace packages, should just be dropped:
+      if not isinstance(module.__path__, list):
+        TRACER.log('Dropping %s' % (module_name,), V=3)
+        continue
+
       # Pop off site-impacting __path__ elements in-place.
       for k in reversed(range(len(module.__path__))):
         if cls._tainted_path(module.__path__[k], site_libs):
@@ -155,6 +184,7 @@ class PEX(object):  # noqa: T000
 
   @classmethod
   def minimum_sys_path(cls, site_libs, inherit_path):
+    scrub_paths = OrderedSet()
     site_distributions = OrderedSet()
     user_site_distributions = OrderedSet()
 
@@ -171,13 +201,10 @@ class PEX(object):  # noqa: T000
 
     user_site_distributions.update(all_distribution_paths(USER_SITE))
 
-    for path in user_site_distributions:
-      TRACER.log('Scrubbing from user site: %s' % path)
-
-    if inherit_path:
-      scrub_paths = user_site_distributions
-    else:
+    if not inherit_path:
       scrub_paths = site_distributions | user_site_distributions
+      for path in user_site_distributions:
+        TRACER.log('Scrubbing from user site: %s' % path)
       for path in site_distributions:
         TRACER.log('Scrubbing from site-packages: %s' % path)
 
@@ -235,9 +262,8 @@ class PEX(object):  # noqa: T000
   # potentially in a wonky state since the patches here (minimum_sys_modules
   # for example) actually mutate global state.  This should not be
   # considered a reversible operation despite being a contextmanager.
-  @classmethod
   @contextmanager
-  def patch_sys(cls, inherit_path):
+  def patch_sys(self, inherit_path):
     """Patch sys with all site scrubbed."""
     def patch_dict(old_value, new_value):
       old_value.clear()
@@ -250,7 +276,9 @@ class PEX(object):  # noqa: T000
 
     old_sys_path, old_sys_path_importer_cache, old_sys_modules = (
         sys.path[:], sys.path_importer_cache.copy(), sys.modules.copy())
-    new_sys_path, new_sys_path_importer_cache, new_sys_modules = cls.minimum_sys(inherit_path)
+    new_sys_path, new_sys_path_importer_cache, new_sys_modules = self.minimum_sys(inherit_path)
+
+    new_sys_path.extend(filter(None, self._vars.PEX_PATH.split(os.pathsep)))
 
     patch_all(new_sys_path, new_sys_path_importer_cache, new_sys_modules)
     yield
@@ -308,6 +336,10 @@ class PEX(object):  # noqa: T000
         profiler.dump_stats(pex_profile_filename)
       else:
         profiler.print_stats(sort=pex_profile_sort)
+
+  def path(self):
+    """Return the path this PEX was built at."""
+    return self._pex
 
   def execute(self):
     """Execute the PEX.
@@ -391,7 +423,7 @@ class PEX(object):  # noqa: T000
 
     entry_point = get_entry_point_from_console_script(script_name, dists)
     if entry_point:
-      return self.execute_entry(entry_point)
+      sys.exit(self.execute_entry(entry_point))
 
     dist, script_path, script_content = get_script_from_distributions(script_name, dists)
     if not dist:
@@ -426,7 +458,7 @@ class PEX(object):  # noqa: T000
   @classmethod
   def execute_entry(cls, entry_point):
     runner = cls.execute_pkg_resources if ':' in entry_point else cls.execute_module
-    runner(entry_point)
+    return runner(entry_point)
 
   @staticmethod
   def execute_module(module_name):
@@ -444,7 +476,7 @@ class PEX(object):  # noqa: T000
     else:
       # setuptools < 11.3
       runner = entry.load(require=False)
-    runner()
+    return runner()
 
   def cmdline(self, args=()):
     """The commandline to run this environment.
@@ -457,7 +489,7 @@ class PEX(object):  # noqa: T000
     cmds.extend(args)
     return cmds
 
-  def run(self, args=(), with_chroot=False, blocking=True, setsid=False, **kw):
+  def run(self, args=(), with_chroot=False, blocking=True, setsid=False, **kwargs):
     """Run the PythonEnvironment in an interpreter in a subprocess.
 
     :keyword args: Additional arguments to be passed to the application being invoked by the
@@ -473,9 +505,11 @@ class PEX(object):  # noqa: T000
 
     cmdline = self.cmdline(args)
     TRACER.log('PEX.run invoking %s' % ' '.join(cmdline))
-    process = subprocess.Popen(
-        cmdline,
-        cwd=self._pex if with_chroot else os.getcwd(),
-        preexec_fn=os.setsid if setsid else None,
-        **kw)
+    process = Executor.open_process(cmdline,
+                                    cwd=self._pex if with_chroot else os.getcwd(),
+                                    preexec_fn=os.setsid if setsid else None,
+                                    stdin=kwargs.pop('stdin', None),
+                                    stdout=kwargs.pop('stdout', None),
+                                    stderr=kwargs.pop('stderr', None),
+                                    **kwargs)
     return process.wait() if blocking else process

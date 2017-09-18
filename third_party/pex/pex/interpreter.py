@@ -7,7 +7,6 @@ from __future__ import absolute_import
 
 import os
 import re
-import subprocess
 import sys
 from collections import defaultdict
 
@@ -15,6 +14,7 @@ from pkg_resources import Distribution, Requirement, find_distributions
 
 from .base import maybe_requirement
 from .compatibility import string
+from .executor import Executor
 from .tracer import TRACER
 
 try:
@@ -155,7 +155,7 @@ class PythonIdentity(object):
   @property
   def python(self):
     # return the python version in the format of the 'python' key for distributions
-    # specifically, '2.6', '2.7', '3.2', etc.
+    # specifically, '2.7', '3.2', etc.
     return '%d.%d' % (self.version[0:2])
 
   def __str__(self):
@@ -235,20 +235,12 @@ class PythonInterpreter(object):
   def _from_binary_external(cls, binary, path_extras):
     environ = cls.sanitized_environment()
     environ['PYTHONPATH'] = ':'.join(path_extras)
-    po = subprocess.Popen(
-        [binary],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        env=environ)
-    so, _ = po.communicate(ID_PY)
-    output = so.decode('utf8').splitlines()
+    stdout, _ = Executor.execute([binary], env=environ, stdin_payload=ID_PY)
+    output = stdout.splitlines()
     if len(output) == 0:
       raise cls.IdentificationError('Could not establish identity of %s' % binary)
     identity, extras = output[0], output[1:]
-    return cls(
-        binary,
-        PythonIdentity.from_id_string(identity),
-        extras=cls._parse_extras(extras))
+    return cls(binary, PythonIdentity.from_id_string(identity), extras=cls._parse_extras(extras))
 
   @classmethod
   def expand_path(cls, path):
@@ -336,7 +328,7 @@ class PythonInterpreter(object):
   @classmethod
   def sanitized_environment(cls):
     # N.B. This is merely a hack because sysconfig.py on the default OS X
-    # installation of 2.6/2.7 breaks.
+    # installation of 2.7 breaks.
     env_copy = os.environ.copy()
     env_copy.pop('MACOSX_DEPLOYMENT_TARGET', None)
     return env_copy

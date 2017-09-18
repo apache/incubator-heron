@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import itertools
 import os
 import shutil
 import time
@@ -34,27 +35,31 @@ class Unsatisfiable(Exception):
 class StaticIterator(IteratorInterface):
   """An iterator that iterates over a static list of packages."""
 
-  def __init__(self, packages):
+  def __init__(self, packages, allow_prereleases=None):
     self._packages = packages
+    self._allow_prereleases = allow_prereleases
 
   def iter(self, req):
     for package in self._packages:
-      if package.satisfies(req):
+      if package.satisfies(req, allow_prereleases=self._allow_prereleases):
         yield package
 
 
-class _ResolvedPackages(namedtuple('_ResolvedPackages', 'resolvable packages parent')):
+class _ResolvedPackages(namedtuple('_ResolvedPackages',
+                                   'resolvable packages parent constraint_only')):
+
   @classmethod
   def empty(cls):
-    return cls(None, OrderedSet(), None)
+    return cls(None, OrderedSet(), None, False)
 
   def merge(self, other):
     if other.resolvable is None:
-      return _ResolvedPackages(self.resolvable, self.packages, self.parent)
+      return _ResolvedPackages(self.resolvable, self.packages, self.parent, self.constraint_only)
     return _ResolvedPackages(
         self.resolvable,
         self.packages & other.packages,
-        self.parent)
+        self.parent,
+        self.constraint_only and other.constraint_only)
 
 
 class _ResolvableSet(object):
@@ -103,12 +108,13 @@ class _ResolvableSet(object):
 
   def merge(self, resolvable, packages, parent=None):
     """Add a resolvable and its resolved packages."""
-    self.__tuples.append(_ResolvedPackages(resolvable, OrderedSet(packages), parent))
+    self.__tuples.append(_ResolvedPackages(resolvable, OrderedSet(packages),
+                                           parent, resolvable.is_constraint))
     self._check()
 
   def get(self, name):
     """Get the set of compatible packages given a resolvable name."""
-    resolvable, packages, parent = self._collapse().get(
+    resolvable, packages, parent, constraint_only = self._collapse().get(
         self.normalize(name), _ResolvedPackages.empty())
     return packages
 
@@ -129,7 +135,8 @@ class _ResolvableSet(object):
     """
     def map_packages(resolved_packages):
       packages = OrderedSet(built_packages.get(p, p) for p in resolved_packages.packages)
-      return _ResolvedPackages(resolved_packages.resolvable, packages, resolved_packages.parent)
+      return _ResolvedPackages(resolved_packages.resolvable, packages,
+                               resolved_packages.parent, resolved_packages.constraint_only)
 
     return _ResolvableSet([map_packages(rp) for rp in self.__tuples])
 
@@ -144,13 +151,15 @@ class Resolver(object):
     return [package for package in packages
         if package.compatible(interpreter.identity, platform)]
 
-  def __init__(self, interpreter=None, platform=None):
+  def __init__(self, allow_prereleases=None, interpreter=None, platform=None):
     self._interpreter = interpreter or PythonInterpreter.get()
     self._platform = platform or Platform.current()
+    self._allow_prereleases = allow_prereleases
 
   def package_iterator(self, resolvable, existing=None):
     if existing:
-      existing = resolvable.compatible(StaticIterator(existing))
+      existing = resolvable.compatible(
+        StaticIterator(existing, allow_prereleases=self._allow_prereleases))
     else:
       existing = resolvable.packages()
     return self.filter_packages_by_interpreter(existing, self._interpreter, self._platform)
@@ -188,14 +197,14 @@ class Resolver(object):
         processed_resolvables.add(resolvable)
 
       built_packages = {}
-      for resolvable, packages, parent in resolvable_set.packages():
+      for resolvable, packages, parent, constraint_only in resolvable_set.packages():
+        if constraint_only:
+          continue
         assert len(packages) > 0, 'ResolvableSet.packages(%s) should not be empty' % resolvable
         package = next(iter(packages))
         if resolvable.name in processed_packages:
-          # TODO implement backtracking?
-          if package != processed_packages[resolvable.name]:
-            raise self.Error('Ambiguous resolvable: %s' % resolvable)
-          continue
+          if package == processed_packages[resolvable.name]:
+            continue
         if package not in distributions:
           dist = self.build(package, resolvable.options)
           built_package = Package.from_href(dist.location)
@@ -211,7 +220,22 @@ class Resolver(object):
             distribution.requires(extras=resolvable_set.extras(resolvable.name)))
       resolvable_set = resolvable_set.replace_built(built_packages)
 
-    return list(distributions.values())
+    # We may have built multiple distributions depending upon if we found transitive dependencies
+    # for the same package. But ultimately, resolvable_set.packages() contains the correct version
+    # for all packages. So loop through it and only return the package version in
+    # resolvable_set.packages() that is found in distributions.
+    dists = []
+    # No point in proceeding if distributions is empty
+    if not distributions:
+      return dists
+
+    for resolvable, packages, parent, constraint_only in resolvable_set.packages():
+      if constraint_only:
+        continue
+      assert len(packages) > 0, 'ResolvableSet.packages(%s) should not be empty' % resolvable
+      package = next(iter(packages))
+      dists.append(distributions[package])
+    return dists
 
 
 class CachingResolver(Resolver):
@@ -231,20 +255,21 @@ class CachingResolver(Resolver):
 
   # Short-circuiting package iterator.
   def package_iterator(self, resolvable, existing=None):
-    iterator = Iterator(fetchers=[Fetcher([self.__cache])])
+    iterator = Iterator(fetchers=[Fetcher([self.__cache])],
+                        allow_prereleases=self._allow_prereleases)
     packages = self.filter_packages_by_interpreter(
-        resolvable.compatible(iterator), self._interpreter, self._platform)
+      resolvable.compatible(iterator),
+      self._interpreter,
+      self._platform
+    )
 
-    if packages:
-      if resolvable.exact:
-        return packages
+    if packages and self.__cache_ttl:
+      packages = self.filter_packages_by_ttl(packages, self.__cache_ttl)
 
-      if self.__cache_ttl:
-        packages = self.filter_packages_by_ttl(packages, self.__cache_ttl)
-        if packages:
-          return packages
-
-    return super(CachingResolver, self).package_iterator(resolvable, existing=existing)
+    return itertools.chain(
+      packages,
+      super(CachingResolver, self).package_iterator(resolvable, existing=existing)
+    )
 
   # Caching sandwich.
   def build(self, package, options):
@@ -266,16 +291,15 @@ class CachingResolver(Resolver):
     return DistributionHelper.distribution_from_path(target)
 
 
-def resolve(
-    requirements,
-    fetchers=None,
-    interpreter=None,
-    platform=None,
-    context=None,
-    precedence=None,
-    cache=None,
-    cache_ttl=None):
-
+def resolve(requirements,
+            fetchers=None,
+            interpreter=None,
+            platform=None,
+            context=None,
+            precedence=None,
+            cache=None,
+            cache_ttl=None,
+            allow_prereleases=None):
   """Produce all distributions needed to (recursively) meet `requirements`
 
   :param requirements: An iterator of Requirement-like things, either
@@ -289,7 +313,6 @@ def resolve(
     `Platform.current()`.
   :keyword context: (optional) A :class:`Context` object to use for network access.  If
     unspecified, the resolver will attempt to use the best available network context.
-  :type threads: int
   :keyword precedence: (optional) An ordered list of allowable :class:`Package` classes
     to be used for producing distributions.  For example, if precedence is supplied as
     ``(WheelPackage, SourcePackage)``, wheels will be preferred over building from source, and
@@ -304,6 +327,8 @@ def resolve(
     is older than cache_ttl seconds, it will be ignored.  If ``cache_ttl`` is not specified,
     resolving inexact requirements will always result in making network calls through the
     ``context``.
+  :keyword allow_prereleases: (optional) Include pre-release and development versions.  If
+    unspecified only stable versions will be resolved, unless explicitly included.
   :returns: List of :class:`pkg_resources.Distribution` instances meeting ``requirements``.
   :raises Unsatisfiable: If ``requirements`` is not transitively satisfiable.
   :raises Untranslateable: If no compatible distributions could be acquired for
@@ -332,15 +357,85 @@ def resolve(
     classes.
   """
 
-  builder = ResolverOptionsBuilder(
-      fetchers=fetchers,
-      precedence=precedence,
-      context=context,
-  )
+  builder = ResolverOptionsBuilder(fetchers=fetchers,
+                                   allow_prereleases=allow_prereleases,
+                                   precedence=precedence,
+                                   context=context)
 
   if cache:
-    resolver = CachingResolver(cache, cache_ttl, interpreter=interpreter, platform=platform)
+    resolver = CachingResolver(cache,
+                               cache_ttl,
+                               allow_prereleases=allow_prereleases,
+                               interpreter=interpreter,
+                               platform=platform)
   else:
-    resolver = Resolver(interpreter=interpreter, platform=platform)
+    resolver = Resolver(allow_prereleases=allow_prereleases,
+                        interpreter=interpreter,
+                        platform=platform)
 
   return resolver.resolve(resolvables_from_iterable(requirements, builder))
+
+
+def resolve_multi(requirements,
+                  fetchers=None,
+                  interpreters=None,
+                  platforms=None,
+                  context=None,
+                  precedence=None,
+                  cache=None,
+                  cache_ttl=None,
+                  allow_prereleases=None):
+  """A generator function that produces all distributions needed to meet `requirements`
+  for multiple interpreters and/or platforms.
+
+  :param requirements: An iterator of Requirement-like things, either
+    :class:`pkg_resources.Requirement` objects or requirement strings.
+  :keyword fetchers: (optional) A list of :class:`Fetcher` objects for locating packages.  If
+    unspecified, the default is to look for packages on PyPI.
+  :keyword interpreters: (optional) An iterable of :class:`PythonInterpreter` objects to use
+    for building distributions and for testing distribution compatibility.
+  :keyword platforms: (optional) An iterable of PEP425-compatible platform strings to use for
+    filtering compatible distributions.  If unspecified, the current platform is used, as
+    determined by `Platform.current()`.
+  :keyword context: (optional) A :class:`Context` object to use for network access.  If
+    unspecified, the resolver will attempt to use the best available network context.
+  :keyword precedence: (optional) An ordered list of allowable :class:`Package` classes
+    to be used for producing distributions.  For example, if precedence is supplied as
+    ``(WheelPackage, SourcePackage)``, wheels will be preferred over building from source, and
+    eggs will not be used at all.  If ``(WheelPackage, EggPackage)`` is suppplied, both wheels and
+    eggs will be used, but the resolver will not resort to building anything from source.
+  :keyword cache: (optional) A directory to use to cache distributions locally.
+  :keyword cache_ttl: (optional integer in seconds) If specified, consider non-exact matches when
+    resolving requirements.  For example, if ``setuptools==2.2`` is specified and setuptools 2.2 is
+    available in the cache, it will always be used.  However, if a non-exact requirement such as
+    ``setuptools>=2,<3`` is specified and there exists a setuptools distribution newer than
+    cache_ttl seconds that satisfies the requirement, then it will be used.  If the distribution
+    is older than cache_ttl seconds, it will be ignored.  If ``cache_ttl`` is not specified,
+    resolving inexact requirements will always result in making network calls through the
+    ``context``.
+  :keyword allow_prereleases: (optional) Include pre-release and development versions.  If
+    unspecified only stable versions will be resolved, unless explicitly included.
+  :yields: All :class:`pkg_resources.Distribution` instances meeting ``requirements``.
+  :raises Unsatisfiable: If ``requirements`` is not transitively satisfiable.
+  :raises Untranslateable: If no compatible distributions could be acquired for
+    a particular requirement.
+  """
+
+  interpreters = interpreters or [PythonInterpreter.get()]
+  platforms = platforms or [Platform.current()]
+
+  seen = set()
+  for interpreter in interpreters:
+    for platform in platforms:
+      for resolvable in resolve(requirements,
+                                fetchers,
+                                interpreter,
+                                platform,
+                                context,
+                                precedence,
+                                cache,
+                                cache_ttl,
+                                allow_prereleases):
+        if resolvable not in seen:
+          seen.add(resolvable)
+          yield resolvable

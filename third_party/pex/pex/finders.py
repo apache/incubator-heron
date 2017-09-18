@@ -22,9 +22,9 @@ import zipimport
 import pkg_resources
 
 if sys.version_info >= (3, 3) and sys.implementation.name == "cpython":
-  import importlib._bootstrap as importlib_bootstrap
+  import importlib.machinery as importlib_machinery
 else:
-  importlib_bootstrap = None
+  importlib_machinery = None
 
 
 class ChainedFinder(object):
@@ -214,8 +214,8 @@ def register_finders():
   # append the wheel finder
   _add_finder(pkgutil.ImpImporter, find_wheels_on_path)
 
-  if importlib_bootstrap is not None:
-    _add_finder(importlib_bootstrap.FileFinder, find_wheels_on_path)
+  if importlib_machinery is not None:
+    _add_finder(importlib_machinery.FileFinder, find_wheels_on_path)
 
   __PREVIOUS_FINDER = previous_finder
 
@@ -230,34 +230,37 @@ def unregister_finders():
   pkg_resources.register_finder(zipimport.zipimporter, __PREVIOUS_FINDER)
   _remove_finder(pkgutil.ImpImporter, find_wheels_on_path)
 
-  if importlib_bootstrap is not None:
-    _remove_finder(importlib_bootstrap.FileFinder, find_wheels_on_path)
+  if importlib_machinery is not None:
+    _remove_finder(importlib_machinery.FileFinder, find_wheels_on_path)
 
   __PREVIOUS_FINDER = None
 
 
 def get_script_from_egg(name, dist):
   """Returns location, content of script in distribution or (None, None) if not there."""
-  if name in dist.metadata_listdir('scripts'):
+  if dist.metadata_isdir('scripts') and name in dist.metadata_listdir('scripts'):
     return (
         os.path.join(dist.egg_info, 'scripts', name),
         dist.get_metadata('scripts/%s' % name).replace('\r\n', '\n').replace('\r', '\n'))
   return None, None
 
 
-def safer_name(name):
-  return name.replace('-', '_')
-
-
 def get_script_from_whl(name, dist):
-  # This is true as of at least wheel==0.24.  Might need to take into account the
-  # metadata version bundled with the wheel.
-  wheel_scripts_dir = '%s-%s.data/scripts' % (safer_name(dist.key), dist.version)
-  if dist.resource_isdir(wheel_scripts_dir) and name in dist.resource_listdir(wheel_scripts_dir):
-    script_path = os.path.join(wheel_scripts_dir, name)
-    return (
-        os.path.join(dist.egg_info, script_path),
-        dist.get_resource_string('', script_path).replace(b'\r\n', b'\n').replace(b'\r', b'\n'))
+  # This can get called in different contexts; in some, it looks for files in the
+  # wheel archives being used to produce a pex; in others, it looks for files in the
+  # install wheel directory included in the pex. So we need to look at both locations.
+  datadir_name = "%s-%s.data" % (dist.project_name, dist.version)
+  wheel_scripts_dirs = ['bin', 'scripts',
+                         os.path.join(datadir_name, "bin"),
+                         os.path.join(datadir_name, "scripts")]
+  for wheel_scripts_dir in wheel_scripts_dirs:
+    if (dist.resource_isdir(wheel_scripts_dir) and
+        name in dist.resource_listdir(wheel_scripts_dir)):
+      # We always install wheel scripts into bin
+      script_path = os.path.join(wheel_scripts_dir, name)
+      return (
+          os.path.join(dist.egg_info, script_path),
+          dist.get_resource_string('', script_path).replace(b'\r\n', b'\n').replace(b'\r', b'\n'))
   return None, None
 
 

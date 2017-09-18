@@ -4,16 +4,15 @@
 import contextlib
 import os
 import random
-import subprocess
 import sys
 import tempfile
-import zipfile
 from collections import namedtuple
 from textwrap import dedent
 
 from .bin.pex import log, main
-from .common import safe_mkdir, safe_rmtree
+from .common import open_zip, safe_mkdir, safe_rmtree
 from .compatibility import nested
+from .executor import Executor
 from .installer import EggInstaller, Packager
 from .pex_builder import PEXBuilder
 from .util import DistributionHelper, named_temporary_file
@@ -46,6 +45,13 @@ def random_bytes(length):
       map(chr, (random.randint(ord('a'), ord('z')) for _ in range(length)))).encode('utf-8')
 
 
+def get_dep_dist_names_from_pex(pex_path, match_prefix=''):
+  """Given an on-disk pex, extract all of the unique first-level paths under `.deps`."""
+  with open_zip(pex_path) as pex_zip:
+    dep_gen = (f.split(os.sep)[1] for f in pex_zip.namelist() if f.startswith('.deps/'))
+    return set(item for item in dep_gen if item.startswith(match_prefix))
+
+
 @contextlib.contextmanager
 def temporary_content(content_map, interp=None, seed=31337):
   """Write content to disk where content is map from string => (int, string).
@@ -73,7 +79,7 @@ def yield_files(directory):
 
 
 def write_zipfile(directory, dest, reverse=False):
-  with contextlib.closing(zipfile.ZipFile(dest, 'w')) as zf:
+  with open_zip(dest, 'w') as zf:
     for filename, rel_filename in sorted(yield_files(directory), reverse=reverse):
       zf.write(filename, arcname=rel_filename)
   return dest
@@ -85,7 +91,7 @@ PROJECT_CONTENT = {
 
       setup(
           name=%(project_name)r,
-          version='0.0.0',
+          version=%(version)r,
           zip_safe=%(zip_safe)r,
           packages=['my_package'],
           scripts=[
@@ -106,36 +112,46 @@ PROJECT_CONTENT = {
 
 
 @contextlib.contextmanager
-def make_installer(name='my_project', installer_impl=EggInstaller, zip_safe=True,
+def make_installer(name='my_project', version='0.0.0', installer_impl=EggInstaller, zip_safe=True,
                    install_reqs=None):
-  interp = {'project_name': name, 'zip_safe': zip_safe, 'install_requires': install_reqs or []}
+  interp = {'project_name': name,
+            'version': version,
+            'zip_safe': zip_safe,
+            'install_requires': install_reqs or []}
   with temporary_content(PROJECT_CONTENT, interp=interp) as td:
     yield installer_impl(td)
 
 
 @contextlib.contextmanager
-def make_source_dir(name='my_project', install_reqs=None):
-  interp = {'project_name': name, 'zip_safe': True, 'install_requires': install_reqs or []}
+def make_source_dir(name='my_project', version='0.0.0', install_reqs=None):
+  interp = {'project_name': name,
+            'version': version,
+            'zip_safe': True,
+            'install_requires': install_reqs or []}
   with temporary_content(PROJECT_CONTENT, interp=interp) as td:
     yield td
 
 
-def make_sdist(name='my_project', zip_safe=True, install_reqs=None):
-  with make_installer(name=name, installer_impl=Packager, zip_safe=zip_safe,
+def make_sdist(name='my_project', version='0.0.0', zip_safe=True, install_reqs=None):
+  with make_installer(name=name, version=version, installer_impl=Packager, zip_safe=zip_safe,
                       install_reqs=install_reqs) as packager:
     return packager.sdist()
 
 
 @contextlib.contextmanager
-def make_bdist(name='my_project', installer_impl=EggInstaller, zipped=False, zip_safe=True):
-  with make_installer(name=name, installer_impl=installer_impl, zip_safe=zip_safe) as installer:
+def make_bdist(name='my_project', version='0.0.0', installer_impl=EggInstaller, zipped=False,
+               zip_safe=True):
+  with make_installer(name=name,
+                      version=version,
+                      installer_impl=installer_impl,
+                      zip_safe=zip_safe) as installer:
     dist_location = installer.bdist()
     if zipped:
       yield DistributionHelper.distribution_from_path(dist_location)
     else:
       with temporary_dir() as td:
         extract_path = os.path.join(td, os.path.basename(dist_location))
-        with contextlib.closing(zipfile.ZipFile(dist_location)) as zf:
+        with open_zip(dist_location) as zf:
           zf.extractall(extract_path)
         yield DistributionHelper.distribution_from_path(extract_path)
 
@@ -150,16 +166,20 @@ except ImportError:
 """
 
 
-def write_simple_pex(td, exe_contents, dists=None, coverage=False):
+def write_simple_pex(td, exe_contents, dists=None, sources=None, coverage=False):
   """Write a pex file that contains an executable entry point
 
   :param td: temporary directory path
   :param exe_contents: entry point python file
   :type exe_contents: string
   :param dists: distributions to include, typically sdists or bdists
+  :param sources: sources to include, as a list of pairs (env_filename, contents)
   :param coverage: include coverage header
   """
   dists = dists or []
+  sources = sources or []
+
+  safe_mkdir(td)
 
   with open(os.path.join(td, 'exe.py'), 'w') as fp:
     fp.write(exe_contents)
@@ -168,6 +188,13 @@ def write_simple_pex(td, exe_contents, dists=None, coverage=False):
 
   for dist in dists:
     pb.add_egg(dist.location)
+
+  for env_filename, contents in sources:
+    src_path = os.path.join(td, env_filename)
+    safe_mkdir(os.path.dirname(src_path))
+    with open(src_path, 'w') as fp:
+      fp.write(contents)
+    pb.add_source(src_path, env_filename)
 
   pb.set_executable(os.path.join(td, 'exe.py'))
   pb.freeze()
@@ -212,14 +239,10 @@ def run_pex_command(args, env=None):
 
 
 # TODO(wickman) Why not PEX.run?
-def run_simple_pex(pex, args=(), env=None):
-  po = subprocess.Popen(
-      [sys.executable, pex] + list(args),
-      stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT,
-      env=env)
-  po.wait()
-  return po.stdout.read().replace(b'\r', b''), po.returncode
+def run_simple_pex(pex, args=(), env=None, stdin=None):
+  process = Executor.open_process([sys.executable, pex] + list(args), env=env, combined=True)
+  stdout, _ = process.communicate(input=stdin)
+  return stdout.replace(b'\r', b''), process.returncode
 
 
 def run_simple_pex_test(body, args=(), env=None, dists=None, coverage=False):

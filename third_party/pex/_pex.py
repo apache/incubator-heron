@@ -1,5 +1,3 @@
-#!/usr/bin/env python2.7
-
 from __future__ import print_function
 import os
 import sys
@@ -90,7 +88,7 @@ def main():
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
     parser.add_option('--disable-cache', action='store_true', dest='disable_cache', default=False)
     parser.add_option('--not-zip-safe', action='store_false', dest='zip_safe', default=True)
-    parser.add_option('--python', default="/usr/bin/python2.7")
+    parser.add_option('--python', default="/usr/bin/python")
     parser.add_option('--find-links', dest='find_links', default='')
     options, args = parser.parse_args()
 
@@ -143,8 +141,8 @@ def main():
             PythonInterpreter.from_binary(options.python).identity,
             extras={
                 # TODO: Fix this to resolve automatically
-                ('setuptools', '18.0.1'): 'third_party/pex/setuptools-18.0.1-py2.py3-none-any.whl',
-                ('wheel', '0.23.0'): 'third_party/pex/wheel-0.23.0-py2.7.egg'
+                ('setuptools', '33.1.0'): 'third_party/pex/setuptools-33.1.0-py2.py3-none-any.whl',
+                ('wheel', '0.28.0'): 'third_party/pex/wheel-0.28.0-py2.py3-none-any.whl'
             })
 
         # resolve setuptools
@@ -156,10 +154,9 @@ def main():
 
         # Add prebuilt libraries listed in the manifest.
         reqs = manifest.get('requirements', {}).keys()
-        #if len(reqs) > 0:
+        # if len(reqs) > 0:
         #  print("pex requirements: %s" % reqs)
-        pex_builder = build_pex(reqs, poptions,
-                                resolver_options_builder, interpreter=interpreter)
+        pex_builder = build_pex(reqs, poptions, resolver_options_builder, interpreter)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
         # and we'll rely on python's zip-import mechanism to load modules from
@@ -170,9 +167,9 @@ def main():
         # Set the starting point for this PEX.
         pex_builder.info.entry_point = options.entry_point
 
-        pex_builder.add_source(
-            dereference_symlinks(pkg_resources_py),
-            os.path.join(pex_builder.BOOTSTRAP_DIR, 'pkg_resources.py'))
+        # pex_builder.add_source(
+        #     dereference_symlinks(pkg_resources_py),
+        #    os.path.join(pex_builder.BOOTSTRAP_DIR, 'pkg_resources.py'))
 
         # Add the sources listed in the manifest.
         for dst, src in manifest['modules'].items():
