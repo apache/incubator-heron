@@ -25,6 +25,9 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_SCHEDULER_NAMESPACE =
       "heron.kubernetes.scheduler.namespace";
 
+  public static final String HERON_KUBERNETES_SCHEDULER_IMAGE_PULL_POLICY =
+      "heron.kubernetes.scheduler.imagePullPolicy";
+
   private KubernetesContext() {
   }
 
@@ -38,5 +41,14 @@ public final class KubernetesContext extends Context {
 
   public static String getKubernetesNamespace(Config config) {
     return config.getStringValue(HERON_KUBERNETES_SCHEDULER_NAMESPACE);
+  }
+
+  public static String getKubernetesImagePullPolicy(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_SCHEDULER_IMAGE_PULL_POLICY);
+  }
+
+  public static boolean hasImagePullPolicy(Config config) {
+    final String imagePullPolicy = getKubernetesImagePullPolicy(config);
+    return imagePullPolicy != null && !imagePullPolicy.isEmpty();
   }
 }
