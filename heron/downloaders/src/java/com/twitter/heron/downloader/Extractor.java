@@ -26,7 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
-class Extractor {
+final class Extractor {
 
   static void extract(InputStream in, Path destination) throws IOException {
     try (
