@@ -27,6 +27,10 @@ import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.distributedlog.exceptions.EndOfStreamException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.dlog.DLInputStream;
 
@@ -41,6 +45,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Extractor.class)
 public class DLDownloaderTest {
 
   @Test
@@ -82,9 +88,10 @@ public class DLDownloaderTest {
     when(nsBuilder.uri(any(URI.class))).thenReturn(nsBuilder);
     when(nsBuilder.build()).thenReturn(ns);
 
-    Extractor extractor = mock(Extractor.class);
+    PowerMockito.mockStatic(Extractor.class);
+    PowerMockito.doNothing().when(Extractor.class, "extract", any(InputStream.class), any(Path.class));
 
-    DLDownloader downloader = new DLDownloader(() -> nsBuilder, extractor);
+    DLDownloader downloader = new DLDownloader(() -> nsBuilder);
     downloader.download(uri, path);
 
     URI parentUri = URI.create("distributedlog://127.0.0.1/test/distributedlog");
@@ -92,7 +99,8 @@ public class DLDownloaderTest {
     verify(nsBuilder, times(1)).conf(eq(CONF));
     verify(nsBuilder, times(1)).uri(parentUri);
 
-    verify(extractor, times(1)).extract(any(InputStream.class), eq(path));
+    PowerMockito.verifyStatic(times(1));
+    Extractor.extract(any(InputStream.class), eq(path));
 
     verify(ns, times(1)).openLog(eq(logName));
     verify(ns, times(1)).close();

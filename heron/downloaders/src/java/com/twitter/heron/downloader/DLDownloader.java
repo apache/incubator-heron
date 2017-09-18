@@ -38,16 +38,13 @@ public class DLDownloader implements Downloader {
   }
 
   private final NamespaceBuilder builder;
-  private final Extractor extractor;
 
   public DLDownloader() {
-    this(() -> NamespaceBuilder.newBuilder(), Extractor.of());
+    this(() -> NamespaceBuilder.newBuilder());
   }
 
-  public DLDownloader(Supplier<NamespaceBuilder> builderSupplier,
-                      Extractor extractor) {
+  public DLDownloader(Supplier<NamespaceBuilder> builderSupplier) {
     this.builder = builderSupplier.get();
-    this.extractor = extractor;
   }
 
   @Override
@@ -70,7 +67,7 @@ public class DLDownloader implements Downloader {
     try {
       // open input stream
       InputStream in = openInputStream(ns, logName);
-      extractor.extract(in, destination);
+      Extractor.extract(in, destination);
     } finally {
       ns.close();
     }

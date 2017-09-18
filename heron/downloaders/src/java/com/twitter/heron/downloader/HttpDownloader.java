@@ -22,6 +22,6 @@ public class HttpDownloader implements Downloader {
   @Override
   public void download(URI uri, Path destination) throws Exception {
     final URL url = uri.toURL();
-    Extractor.of().extract(url.openStream(), destination);
+    Extractor.extract(url.openStream(), destination);
   }
 }
