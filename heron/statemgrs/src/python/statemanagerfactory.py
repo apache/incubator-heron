@@ -69,7 +69,6 @@ def get_all_zk_state_managers(conf):
     state_manager = ZkStateManager(name, hostportlist, rootpath, tunnelhost)
     try:
       state_manager.start()
-      raise Exception("Neng's test exception")
     except Exception as ex:
       LOG.error("Exception while connecting to state_manager.")
       LOG.debug(traceback.format_exc())
