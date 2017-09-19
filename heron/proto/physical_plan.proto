@@ -11,7 +11,12 @@ import "topology.proto";
 message StMgr {
   required string id = 1;
   required string host_name = 2;
+  // This is the data port for communication
+  // accross the containers(i.e. peer stmgrs)
   required int32  data_port = 3;
+  // This is the port for communication
+  // within the container(i.e. local instances)
+  optional int32  local_data_port = 8;
   required string local_endpoint = 4;
   optional string cwd = 5; // current working directory
   optional int32 pid = 6; // PID of process
