@@ -14,6 +14,10 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Random;
 
 /**
@@ -59,4 +63,21 @@ public final class UploaderUtils {
     return String.format("%s-%s-%s-%d-%d%s",
         topologyName, role, tag, version, new Random().nextLong(), extension);
   }
+
+  public static void copyToOutputStream(String inFile,
+                                        OutputStream out) throws IOException {
+    try (InputStream in = new FileInputStream(inFile)) {
+      int read = 0;
+      byte[] bytes = new byte[128 * 1024];
+      while ((read = in.read(bytes)) >= 0) {
+        if (0 == read) {
+          continue;
+        }
+        out.write(bytes, 0, read);
+      }
+      out.flush();
+      out.close();
+    }
+  }
+
 }

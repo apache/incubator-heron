@@ -1,4 +1,4 @@
-HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+HERONPY_VERSION := $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
 
 setup:
 	scripts/setup.sh
@@ -31,13 +31,13 @@ python-docs:
 site:
 	@make clean
 	@make build-static-assets
-	@make pages
 	@make javadocs
 	@make python-docs
+	@make pages
 
 travis-site:
 	@make clean
 	@make build-static-assets
-	@make pages
 	@scripts/javadocs.sh --travis
 	@make python-docs
+	@make pages

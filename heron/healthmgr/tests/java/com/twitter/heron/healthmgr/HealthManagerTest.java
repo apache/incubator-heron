@@ -59,12 +59,12 @@ public class HealthManagerTest {
 
     SchedulerLocation schedulerLocation = SchedulerLocation.newBuilder()
         .setTopologyName(topologyName)
-        .setHttpEndpoint("http://localhost")
+        .setHttpEndpoint("http://127.0.0.1")
         .build();
     when(adaptor.getSchedulerLocation(anyString())).thenReturn(schedulerLocation);
 
     AbstractModule baseModule = HealthManager
-        .buildMetricsProviderModule(config, "localhost", TrackerMetricsProvider.class);
+        .buildMetricsProviderModule("127.0.0.1", TrackerMetricsProvider.class.getName());
 
     HealthManager healthManager = new HealthManager(config, baseModule);
 

@@ -18,6 +18,7 @@ package com.twitter.heron.healthmgr.sensors;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -32,6 +33,8 @@ import com.twitter.heron.healthmgr.common.TopologyProvider;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureSensor extends BaseSensor {
+  private static final Logger LOG = Logger.getLogger(BackPressureSensor.class.getName());
+
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
@@ -71,14 +74,26 @@ public class BackPressureSensor extends BaseSensor {
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
 
+        if (stmgrResult.get(COMPONENT_STMGR) == null) {
+          continue;
+        }
+
         HashMap<String, InstanceMetrics> streamManagerResult =
             stmgrResult.get(COMPONENT_STMGR).getMetrics();
+
+        if (streamManagerResult.isEmpty()) {
+          continue;
+        }
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        double averageBp = stmgrInstanceResult.getMetricValueSum(metric) / duration.getSeconds();
+        Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
+        if (valueSum == null) {
+          continue;
+        }
+        double averageBp = valueSum / duration.getSeconds();
 
         // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
         // a bug in Heron (Issue: 1753), this value could be higher in some cases. The following

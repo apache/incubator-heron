@@ -9,7 +9,7 @@ pip install heronpy==${HERONPY_VERSION}
 
 mkdir -p static/api && rm -rf static/api/python
 
-pdoc $INPUT \
+pdoc heronpy \
   --html \
   --html-dir $TMP_DIR
 

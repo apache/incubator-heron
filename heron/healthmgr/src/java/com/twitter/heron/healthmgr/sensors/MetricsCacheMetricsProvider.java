@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
@@ -37,23 +38,29 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricInterval;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
-import static com.twitter.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
+import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
-  private static final String PATH_STATS = "/stats";
+  private static final String PATH_STATS = "stats";
   private static final Logger LOG = Logger.getLogger(MetricsCacheMetricsProvider.class.getName());
-  private HttpURLConnection con;
+
+  private final SchedulerStateManagerAdaptor stateManagerAdaptor;
+  private final String topologyName;
 
   private Clock clock = new Clock();
+  private String metricsCacheLocation;
 
   @Inject
-  public MetricsCacheMetricsProvider(@Named(CONF_METRICS_SOURCE_URL) String metricsCacheURL) {
-    LOG.info("Metrics will be provided by MetricsCache at :" + metricsCacheURL);
+  public MetricsCacheMetricsProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
+                                     @Named(CONF_TOPOLOGY_NAME) String topologyName) {
+    this.stateManagerAdaptor = stateManagerAdaptor;
+    this.topologyName = topologyName;
 
-    String url = metricsCacheURL + PATH_STATS;
-    con = NetworkUtils.getHttpConnection(url);
+    LOG.info("Metrics will be provided by MetricsCache at " + getCacheLocation());
   }
 
   @Override
@@ -65,6 +72,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     for (String component : components) {
       TopologyMaster.MetricResponse response =
           getMetricsFromMetricsCache(metric, component, startTime, duration);
+
       Map<String, InstanceMetrics> metrics = parse(response, component, metric);
       ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
       result.put(component, componentMetric);
@@ -97,18 +105,18 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     }
 
     // convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
-    for (TaskMetric tm :response.getMetricList()) {
+    for (TaskMetric tm : response.getMetricList()) {
       String instanceId = tm.getInstanceId();
       InstanceMetrics instanceMetrics = new InstanceMetrics(instanceId);
 
-      for (IndividualMetric im: tm.getMetricList()) {
+      for (IndividualMetric im : tm.getMetricList()) {
         String metricName = im.getName();
         Map<Instant, Double> values = new HashMap<>();
 
-        for (IntervalValue iv: im.getIntervalValuesList()) {
+        for (IntervalValue iv : im.getIntervalValuesList()) {
           MetricInterval mi = iv.getInterval();
           String value = iv.getValue();
-          values.put(Instant.ofEpochSecond(mi.getStart()),  Double.parseDouble(value));
+          values.put(Instant.ofEpochSecond(mi.getStart()), Double.parseDouble(value));
         }
 
         if (!values.isEmpty()) {
@@ -129,30 +137,60 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
         .setComponentName(component)
         .setExplicitInterval(
             MetricInterval.newBuilder()
-            .setStart(start.getEpochSecond())
-            .setEnd(start.plus(duration).getEpochSecond())
-            .build())
+                .setStart(start.getEpochSecond())
+                .setEnd(start.plus(duration).getEpochSecond())
+                .build())
         .addMetric(metric)
         .build();
-    LOG.log(Level.FINE, "MetricsCache Query request: %s", request);
+    LOG.log(Level.FINE, "MetricsCache Query request: {0}", request);
 
-    NetworkUtils.sendHttpPostRequest(con, "X", request.toByteArray());
-    byte[] responseData = NetworkUtils.readHttpResponse(con);
-
+    HttpURLConnection connection = NetworkUtils.getHttpConnection(getCacheLocation());
     try {
-      TopologyMaster.MetricResponse response =
-          TopologyMaster.MetricResponse.parseFrom(responseData);
-      LOG.log(Level.FINE, "MetricsCache Query response: %s", response);
-      return response;
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      LOG.severe("protobuf cannot parse the reply from MetricsCache " + e);
-      return null;
+      boolean result = NetworkUtils.sendHttpPostRequest(connection, "X", request.toByteArray());
+      if (!result) {
+        LOG.warning("Failed to get response from metrics cache. Resetting connection...");
+        resetCacheLocation();
+        return null;
+      }
+
+      byte[] responseData = NetworkUtils.readHttpResponse(connection);
+
+      try {
+        TopologyMaster.MetricResponse response =
+            TopologyMaster.MetricResponse.parseFrom(responseData);
+        LOG.log(Level.FINE, "MetricsCache Query response: {0}", response);
+        return response;
+      } catch (InvalidProtocolBufferException e) {
+        LOG.log(Level.SEVERE, "protobuf cannot parse the reply from MetricsCache ", e);
+        return null;
+      }
+    } finally {
+      if (connection != null) {
+        connection.disconnect();
+      }
     }
   }
 
   @VisibleForTesting
   void setClock(Clock clock) {
     this.clock = clock;
+  }
+
+  /* returns last known location of metrics cache
+   */
+  private synchronized String getCacheLocation() {
+    if (metricsCacheLocation != null) {
+      return metricsCacheLocation;
+    }
+
+    MetricsCacheLocation cacheLocation = stateManagerAdaptor.getMetricsCacheLocation(topologyName);
+    metricsCacheLocation = String.format("http://%s:%s/%s", cacheLocation.getHost(),
+        cacheLocation.getStatsPort(), PATH_STATS);
+    return metricsCacheLocation;
+  }
+
+  private synchronized void resetCacheLocation() {
+    metricsCacheLocation = null;
   }
 
   static class Clock {

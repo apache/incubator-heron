@@ -21,7 +21,10 @@ cc_test(
         "//heron/tmaster/src/cpp:tmaster-cxx",
         "//third_party/gtest:gtest-cxx",
     ],
-    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
+    data = [
+        "//heron/config/src/yaml:test-config-internals-yaml",
+        "//heron/config/src/yaml:test-config-metrics-sinks-yaml",
+    ],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
@@ -69,7 +72,7 @@ cc_test(
         "dummy_tuple_cache.h",
         "dummy_ckptmgr_client.h",
         "dummy_stmgr_clientmgr.h",
-        "dummy_stmgr_server.h",
+        "dummy_instance_server.h",
     ],
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",

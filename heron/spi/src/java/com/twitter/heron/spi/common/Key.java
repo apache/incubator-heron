@@ -38,6 +38,7 @@ public enum Key {
   //keys for heron configuration files
   CLUSTER_YAML             ("heron.config.file.cluster.yaml",   "${HERON_CONF}/cluster.yaml"),
   CLIENT_YAML              ("heron.config.file.client.yaml",    "${HERON_CONF}/client.yaml"),
+  HEALTHMGR_YAML           ("heron.config.file.healthmgr.yaml", "${HERON_CONF}/healthmgr.yaml"),
   METRICS_YAML             ("heron.config.file.metrics.yaml",   "${HERON_CONF}/metrics_sinks.yaml"),
   PACKING_YAML             ("heron.config.file.packing.yaml",   "${HERON_CONF}/packing.yaml"),
   SCHEDULER_YAML           ("heron.config.file.scheduler.yaml", "${HERON_CONF}/scheduler.yaml"),
@@ -64,12 +65,13 @@ public enum Key {
   BUILD_USER               ("heron.build.user",      Type.STRING),
 
   //keys for config provided user classes
-  UPLOADER_CLASS           ("heron.class.uploader",            Type.STRING),
-  LAUNCHER_CLASS           ("heron.class.launcher",            Type.STRING),
-  SCHEDULER_CLASS          ("heron.class.scheduler",           Type.STRING),
-  PACKING_CLASS            ("heron.class.packing.algorithm",   Type.STRING),
-  REPACKING_CLASS          ("heron.class.repacking.algorithm", Type.STRING),
-  STATE_MANAGER_CLASS      ("heron.class.state.manager",       Type.STRING),
+  UPLOADER_CLASS           ("heron.class.uploader",                        Type.STRING),
+  LAUNCHER_CLASS           ("heron.class.launcher",                        Type.STRING),
+  SCHEDULER_CLASS          ("heron.class.scheduler",                       Type.STRING),
+  PACKING_CLASS            ("heron.class.packing.algorithm",               Type.STRING),
+  REPACKING_CLASS          ("heron.class.repacking.algorithm",             Type.STRING),
+  STATE_MANAGER_CLASS      ("heron.class.state.manager",                   Type.STRING),
+  AURORA_CONTROLLER_CLASS  ("heron.class.scheduler.aurora.controller.cli", Boolean.TRUE),
 
   //keys for scheduler config
   SCHEDULER_IS_SERVICE     ("heron.scheduler.is.service", Boolean.TRUE),
@@ -114,8 +116,12 @@ public enum Key {
   STATEFUL_STORAGE_CONF                    ("heron.statefulstorage.config", Type.MAP),
   STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
 
+  // keys for health manager
+  HEALTHMGR_MODE             ("heron.topology.healthmgr.mode", Type.STRING),
+
   //keys for config provided paths
   INSTANCE_CLASSPATH         ("heron.classpath.instance",             "${HERON_LIB}/instance/*"),
+  HEALTHMGR_CLASSPATH        ("heron.classpath.healthmgr",            "${HERON_LIB}/healthmgr/*"),
   METRICSMGR_CLASSPATH       ("heron.classpath.metrics.manager",      "${HERON_LIB}/metricsmgr/*"),
   METRICSCACHEMGR_CLASSPATH  ("heron.classpath.metricscache.manager", "${HERON_LIB}/metricscachemgr/*"),
   PACKING_CLASSPATH          ("heron.classpath.packing",              "${HERON_LIB}/packing/*"),
@@ -157,7 +163,9 @@ public enum Key {
   STMGR_BINARY          ("heron.binaries.stmgr",           "${HERON_BIN}/heron-stmgr"),
   TMASTER_BINARY        ("heron.binaries.tmaster",         "${HERON_BIN}/heron-tmaster"),
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
-  PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance");
+  PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
+  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader");
+
 
   private final String value;
   private final Object defaultValue;

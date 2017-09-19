@@ -2,11 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "zookeeper"
-package_version = "3.4.5-macfix"
+pkg_name = "zookeeper"
+pkg_version = "3.4.10"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 
 genrule(
     name = "zookeeper-srcs",

@@ -16,15 +16,18 @@
 import time
 import Queue
 
-from heron.api.src.python import api_constants
-from heron.api.src.python import StatefulComponent
-from heron.api.src.python import Stream
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
+from heronpy.api.stream import Stream
+
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
-from heron.common.src.python.utils.metrics import BoltMetrics
+
 from heron.proto import topology_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.common.src.python.system_constants as system_constants
+from heron.instance.src.python.utils.metrics import BoltMetrics
+from heron.instance.src.python.utils.tuple import TupleHelper, HeronTuple
+
+import heron.instance.src.python.utils.system_constants as system_constants
 
 from .base_instance import BaseInstance
 
@@ -58,7 +61,7 @@ class BoltInstance(BaseInstance):
     if not self._initialized_metrics_and_tasks:
       self.bolt_metrics.register_metrics(context)
     if self.is_stateful and isinstance(self.bolt_impl, StatefulComponent):
-      self.bolt_impl.initState(stateful_state)
+      self.bolt_impl.init_state(stateful_state)
     self.bolt_impl.initialize(config=context.get_cluster_config(), context=context)
     # prepare tick tuple
     if not self._initialized_metrics_and_tasks:

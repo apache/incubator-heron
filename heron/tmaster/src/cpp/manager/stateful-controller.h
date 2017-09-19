@@ -36,7 +36,7 @@ namespace tmaster {
 class StatefulRestorer;
 class StatefulCheckpointer;
 
-// For Heron topologies running in exactly once semantics, the tmaster
+// For Heron topologies running in effectively once semantics, the tmaster
 // utilizes the stateful controller to handle all the work related with
 // checkpointing and restoring from checkpoints. The statful controller
 // offers methods to start checkpoint/restore. It also manages the state
@@ -80,7 +80,7 @@ class StatefulController {
 
  private:
   // Get the youngest ckpt id that is older than the given ckpt_id
-  const std::string& GetNextInLineCheckpointId(const std::string& _ckpt_id);
+  const std::string GetNextInLineCheckpointId(const std::string& _ckpt_id);
   // Creates a new ckpt record adding the latest one
   proto::ckptmgr::StatefulConsistentCheckpoints*
     AddNewConsistentCheckpoint(const std::string& _new_checkpoint,

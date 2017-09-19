@@ -83,9 +83,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
       config::HeronInternalsConfigReader::Instance()->GetHeronMetricsExportIntervalSec();
 
   mMetricsMgrClient = new heron::common::MetricsMgrSt(
-      myhost_name_, master_port_, mMetricsMgrPort, "__tmaster__",
-      "0",  // MM expects task_id, so just giving 0 for tmaster.
-      metricsExportIntervalSec, eventLoop_);
+      mMetricsMgrPort, metricsExportIntervalSec, eventLoop_);
+  mMetricsMgrClient->Start(myhost_name_, master_port_, "__tmaster__",
+                           "0");  // MM expects task_id, so just giving 0 for tmaster.
 
   tmasterProcessMetrics = new heron::common::MultiAssignableMetric();
   mMetricsMgrClient->register_metric(METRIC_PREFIX, tmasterProcessMetrics);
@@ -170,7 +170,7 @@ void TMaster::OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
       // In case a assignment already exists, we will throw this
       // list out and re-init with whats in assignment.
       absent_stmgrs_.clear();
-      for (sp_uint32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
+      for (sp_int32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
         LOG(INFO) << "Adding container id " << packing_plan_->container_plans(i).id()
                   << " to absent_stmgrs_";
         // the packing plan represents container ids by the numerical id of the container. The
@@ -318,10 +318,10 @@ void TMaster::GetTopologyDone(proto::system::StatusCode _code) {
   LOG(INFO) << "Topology read and validated\n";
 
   if (heron::config::TopologyConfigHelper::GetReliabilityMode(*topology_)
-      == config::TopologyConfigVars::EXACTLY_ONCE) {
+      == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Establish connection to ckptmgr
     NetworkOptions ckpt_options;
-    ckpt_options.set_host("localhost");
+    ckpt_options.set_host("127.0.0.1");
     ckpt_options.set_port(ckptmgr_port_);
     ckpt_options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
                                            ->GetHeronTmasterNetworkMasterOptionsMaximumPacketMb() *
@@ -917,9 +917,13 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan)
   }
   for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
     if (stmgr_to_instance_map.find(iter->first) == stmgr_to_instance_map.end()) {
+      LOG(ERROR) << "Instances info from " << iter->first
+                 << " is missing. Bailing out..." << std::endl;
       return false;
     }
     if (!iter->second->VerifyInstances(stmgr_to_instance_map[iter->first])) {
+      LOG(ERROR) << "Instances verification failed for " << iter->first
+                 << ". Bailing out..." << std::endl;
       return false;
     }
   }

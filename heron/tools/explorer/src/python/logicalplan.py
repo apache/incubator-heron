@@ -55,9 +55,9 @@ def parse_topo_loc(cl_args):
 def to_table(components, topo_info):
   """ normalize raw logical plan info to table """
   inputs, outputs = defaultdict(list), defaultdict(list)
-  for ctype, component in components.iteritems():
+  for ctype, component in components.items():
     if ctype == 'bolts':
-      for component_name, component_info in component.iteritems():
+      for component_name, component_info in component.items():
         for input_stream in component_info['inputs']:
           input_name = input_stream['component_name']
           inputs[component_name].append(input_name)
@@ -65,8 +65,8 @@ def to_table(components, topo_info):
   info = []
   spouts_instance = topo_info['physical_plan']['spouts']
   bolts_instance = topo_info['physical_plan']['bolts']
-  for ctype, component in components.iteritems():
-    for component_name, component_info in component.iteritems():
+  for ctype, component in components.items():
+    for component_name, component_info in component.items():
       row = [ctype[:-1], component_name]
       if ctype == 'spouts':
         row.append(len(spouts_instance[component_name]))

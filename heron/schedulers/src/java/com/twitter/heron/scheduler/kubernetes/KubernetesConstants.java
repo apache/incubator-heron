@@ -14,6 +14,11 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
 public final class KubernetesConstants {
   private KubernetesConstants() {
 
@@ -30,6 +35,7 @@ public final class KubernetesConstants {
   public static final String PORT_NAME = "name";
   public static final String CONTAINERS = "containers";
   public static final String DOCKER_IMAGE = "image";
+  public static final String IMAGE_PULL_POLICY = "imagePullPolicy";
   public static final String DOCKER_CONTAINER_PORT = "containerPort";
   public static final String API_VERSION = "apiVersion";
   public static final String API_VERSION_1 = "v1";
@@ -70,4 +76,16 @@ public final class KubernetesConstants {
   public static final String JOB_LINK =
       "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";
 
+
+  public static final Pattern VALID_POD_NAME_REGEX =
+      Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*",
+          Pattern.CASE_INSENSITIVE);
+
+  public static final List<String> VALID_IMAGE_PULL_POLICIES = Collections.unmodifiableList(
+      Arrays.asList(
+          "IfNotPresent",
+          "Always",
+          "Never"
+      )
+  );
 }

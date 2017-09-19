@@ -1,38 +1,48 @@
+build --genrule_strategy=standalone
+build --ignore_unsupported_sandboxing
+build --java_toolchain=//tools/java:heron_java_toolchain
+build --python2_path /usr/bin/python2.7
+build --spawn_strategy=standalone
+build --workspace_status_command scripts/release/status.sh
+
 # For centos
 # To use it: bazel build --config=centos
-build:centos --java_toolchain=//tools/java:heron_java_toolchain
-build:centos --ignore_unsupported_sandboxing
-build:centos --genrule_strategy=standalone
-build:centos --spawn_strategy=standalone
-build:centos --python2_path /usr/bin/python2.7
-build:centos --linkopt -lm
-build:centos --linkopt -lpthread
-build:centos --linkopt -lrt
 build:centos --experimental_action_listener=tools/cpp:compile_cpp
 build:centos --experimental_action_listener=tools/java:compile_java
 build:centos --experimental_action_listener=tools/python:compile_python
+build:centos --genrule_strategy=standalone
+build:centos --ignore_unsupported_sandboxing
+build:centos --java_toolchain=//tools/java:heron_java_toolchain
+build:centos --linkopt -lm
+build:centos --linkopt -lpthread
+build:centos --linkopt -lrt
+build:centos --python2_path /usr/bin/python2.7
+build:centos --spawn_strategy=standalone
 build:centos --workspace_status_command scripts/release/status.sh
 
 # For Mac
 # To use it: bazel build --config=darwin
-build:darwin --python2_path /usr/bin/python2.7
-build:darwin --java_toolchain=//tools/java:heron_java_toolchain
 build:darwin --experimental_action_listener=tools/cpp:compile_cpp
 build:darwin --experimental_action_listener=tools/java:compile_java
 build:darwin --experimental_action_listener=tools/python:compile_python
+build:darwin --genrule_strategy=standalone
+build:darwin --ignore_unsupported_sandboxing
+build:darwin --java_toolchain=//tools/java:heron_java_toolchain
+build:darwin --python2_path /usr/bin/python2.7
+build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
-build:ubuntu --java_toolchain=//tools/java:heron_java_toolchain
-build:ubuntu --ignore_unsupported_sandboxing
-build:ubuntu --genrule_strategy=standalone
-build:ubuntu --spawn_strategy=standalone
-build:ubuntu --python2_path /usr/bin/python2.7
-build:ubuntu --linkopt -lm
-build:ubuntu --linkopt -lpthread
-build:ubuntu --linkopt -lrt
 build:ubuntu --experimental_action_listener=tools/java:compile_java
 build:ubuntu --experimental_action_listener=tools/cpp:compile_cpp
 build:ubuntu --experimental_action_listener=tools/python:compile_python
+build:ubuntu --genrule_strategy=standalone
+build:ubuntu --ignore_unsupported_sandboxing
+build:ubuntu --java_toolchain=//tools/java:heron_java_toolchain
+build:ubuntu --linkopt -lm
+build:ubuntu --linkopt -lpthread
+build:ubuntu --linkopt -lrt
+build:ubuntu --python2_path /usr/bin/python2.7
+build:ubuntu --spawn_strategy=standalone
 build:ubuntu --workspace_status_command scripts/release/status.sh

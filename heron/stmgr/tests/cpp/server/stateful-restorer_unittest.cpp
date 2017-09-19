@@ -42,7 +42,7 @@
 #include "server/dummy_ckptmgr_client.h"
 #include "server/dummy_tuple_cache.h"
 #include "server/dummy_stmgr_clientmgr.h"
-#include "server/dummy_stmgr_server.h"
+#include "server/dummy_instance_server.h"
 
 const sp_string SPOUT_NAME = "spout";
 const sp_string BOLT_NAME = "bolt";
@@ -211,14 +211,14 @@ DummyCkptMgrClient* CreateDummyCkptMgr(heron::proto::system::PhysicalPlan* _ppla
   return new DummyCkptMgrClient(_eventLoop, options, GenerateStMgrId(1), _pplan);
 }
 
-DummyStMgrServer* CreateDummyStMgrServer(EventLoop* _eventLoop,
+DummyInstanceServer* CreateDummyInstanceServer(EventLoop* _eventLoop,
                                          const std::string& _stmgr,
                                          heron::proto::system::PhysicalPlan* _pplan,
                                          heron::common::MetricsMgrSt* _metrics) {
   NetworkOptions options;
   std::vector<std::string> dummy_instances;
-  return new DummyStMgrServer(_eventLoop, options, _stmgr, _pplan, dummy_instances,
-                              _metrics);
+  return new DummyInstanceServer(_eventLoop, options, _stmgr, _pplan, dummy_instances,
+                                 _metrics);
 }
 
 void RestoreDone(bool* _restore_done) {
@@ -232,17 +232,16 @@ TEST(StatefulRestorer, normalcase) {
   EventLoop* dummyLoop = new EventLoopImpl();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                               "_stmgr", "_stmgr", 100,
-                                                               dummyLoop);
+  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
-  auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
-                                                   pplan, dummy_metrics_client);
+  auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
+                                                      pplan, dummy_metrics_client);
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
   auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
-                                                     tuple_cache, dummy_stmgr_server,
+                                                     tuple_cache, dummy_instance_server,
                                                      dummy_metrics_client,
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
@@ -269,12 +268,12 @@ TEST(StatefulRestorer, normalcase) {
   // Responses from ckptmgr
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_tasks);
   for (auto task : local_tasks) {
-    EXPECT_FALSE(dummy_stmgr_server->DidSendRestoreRequest(task));
+    EXPECT_FALSE(dummy_instance_server->DidSendRestoreRequest(task));
     heron::proto::ckptmgr::InstanceStateCheckpoint c;
     c.set_checkpoint_id(ckpt_id);
     restorer->HandleCheckpointState(heron::proto::system::OK, task, ckpt_id, c);
     // Make sure that restore is sent to the instances
-    EXPECT_TRUE(dummy_stmgr_server->DidSendRestoreRequest(task));
+    EXPECT_TRUE(dummy_instance_server->DidSendRestoreRequest(task));
   }
   EXPECT_TRUE(restorer->InProgress());
 
@@ -306,17 +305,16 @@ TEST(StatefulRestorer, deadinstances) {
   EventLoop* dummyLoop = new EventLoopImpl();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                               "_stmgr", "_stmgr", 100,
-                                                               dummyLoop);
+  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
-  auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
-                                                   pplan, dummy_metrics_client);
+  auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
+                                                         pplan, dummy_metrics_client);
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
   auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
-                                                     tuple_cache, dummy_stmgr_server,
+                                                     tuple_cache, dummy_instance_server,
                                                      dummy_metrics_client,
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
@@ -355,12 +353,12 @@ TEST(StatefulRestorer, deadinstances) {
 
   // Notify that one instance is dead
   restorer->HandleDeadInstanceConnection(troublesome_task);
-  dummy_stmgr_server->ClearSendRestoreRequest(troublesome_task);
+  dummy_instance_server->ClearSendRestoreRequest(troublesome_task);
   ckptmgr_client->ClearGetCalled(ckpt_id, troublesome_task);
 
   EXPECT_TRUE(restorer->InProgress());
   EXPECT_FALSE(ckptmgr_client->GetCalled(ckpt_id, troublesome_task));
-  EXPECT_FALSE(dummy_stmgr_server->DidSendRestoreRequest(troublesome_task));
+  EXPECT_FALSE(dummy_instance_server->DidSendRestoreRequest(troublesome_task));
 
   // Now it is back on again
   restorer->HandleAllInstancesConnected();
@@ -374,7 +372,7 @@ TEST(StatefulRestorer, deadinstances) {
   restorer->HandleCheckpointState(heron::proto::system::OK, troublesome_task, ckpt_id, c);
   EXPECT_TRUE(restorer->InProgress());
   // make sure that we sent restore state
-  EXPECT_TRUE(dummy_stmgr_server->DidSendRestoreRequest(troublesome_task));
+  EXPECT_TRUE(dummy_instance_server->DidSendRestoreRequest(troublesome_task));
   restorer->HandleInstanceRestoredState(troublesome_task, heron::proto::system::OK, ckpt_id);
 
   // Now everything is done
@@ -397,19 +395,18 @@ TEST(StatefulRestorer, deadckptmgr) {
   EventLoop* dummyLoop = new EventLoopImpl();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
   auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt("localhost", 11000, 11001,
-                                                               "_stmgr", "_stmgr", 100,
-                                                               dummyLoop);
+  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
   auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   dummy_stmgr_clientmgr->SetAllStMgrClientsRegistered(true);
-  auto dummy_stmgr_server = CreateDummyStMgrServer(dummyLoop, GenerateStMgrId(1),
-                                                   pplan, dummy_metrics_client);
-  dummy_stmgr_server->SetAllInstancesConnectedToUs(true);
+  auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
+                                                         pplan, dummy_metrics_client);
+  dummy_instance_server->SetAllInstancesConnectedToUs(true);
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
   auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
-                                                     tuple_cache, dummy_stmgr_server,
+                                                     tuple_cache, dummy_instance_server,
                                                      dummy_metrics_client,
                                                      std::bind(&RestoreDone, &restore_done));
   // At the start the restore is not in progress
@@ -441,7 +438,7 @@ TEST(StatefulRestorer, deadckptmgr) {
   }
   EXPECT_TRUE(restorer->InProgress());
 
-  dummy_stmgr_server->ClearSendRestoreRequest(troublesome_task);
+  dummy_instance_server->ClearSendRestoreRequest(troublesome_task);
   ckptmgr_client->ClearGetCalled(ckpt_id, troublesome_task);
   EXPECT_FALSE(ckptmgr_client->GetCalled(ckpt_id, troublesome_task));
 

@@ -15,12 +15,15 @@
 import sys
 import traceback
 
-from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.network import HeronClient, StatusCode
+
+from heron.instance.src.python.network.heron_client import HeronClient
+from heron.instance.src.python.network import StatusCode
+from heron.instance.src.python.utils import system_config
+
 from heron.proto import common_pb2, stmgr_pb2, tuple_pb2, ckptmgr_pb2
 
-import heron.common.src.python.system_constants as constants
+import heron.instance.src.python.utils.system_constants as constants
 
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes

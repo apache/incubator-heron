@@ -59,11 +59,11 @@ public class WebSinkTest {
     }
 
     public Map<String, Object> getMetrics() {
-      return super.metricsCache.asMap();
+      return getMetricsCache().asMap();
     }
 
     void syncCache() {
-      super.metricsCache.cleanUp();
+      getMetricsCache().cleanUp();
     }
   }
 

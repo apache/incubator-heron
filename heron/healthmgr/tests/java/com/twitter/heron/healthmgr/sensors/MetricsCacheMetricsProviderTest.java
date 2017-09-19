@@ -29,13 +29,17 @@ import com.twitter.heron.proto.tmaster.TopologyMaster.MetricInterval;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMetric.IntervalValue;
 import com.twitter.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
+import com.twitter.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class MetricsCacheMetricsProviderTest {
   @Test
@@ -210,8 +214,19 @@ public class MetricsCacheMetricsProviderTest {
   }
 
   private MetricsCacheMetricsProvider createMetricsProviderSpy() {
+    MetricsCacheLocation location = MetricsCacheLocation.newBuilder()
+        .setTopologyName("testTopo")
+        .setTopologyId("topoId")
+        .setHost("localhost")
+        .setControllerPort(0)
+        .setMasterPort(0)
+        .build();
+
+    SchedulerStateManagerAdaptor stateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
+    when(stateMgr.getMetricsCacheLocation("testTopo")).thenReturn(location);
+
     MetricsCacheMetricsProvider metricsProvider
-        = new MetricsCacheMetricsProvider("localhost");
+        = new MetricsCacheMetricsProvider(stateMgr, "testTopo");
 
     MetricsCacheMetricsProvider spyMetricsProvider = spy(metricsProvider);
     spyMetricsProvider.setClock(new TestClock(70000));

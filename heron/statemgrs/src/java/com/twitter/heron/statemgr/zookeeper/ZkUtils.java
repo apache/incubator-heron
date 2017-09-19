@@ -25,7 +25,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 public final class ZkUtils {
-  public static final String LOCAL_HOST = "localhost";
+  public static final String LOCAL_HOST = "127.0.0.1";
 
   private static final Logger LOG = Logger.getLogger(ZkUtils.class.getName());
 

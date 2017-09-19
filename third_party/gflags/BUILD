@@ -2,18 +2,17 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-package_name = "gflags"
-package_version = "2.0"
+pkg_name = "gflags"
+pkg_version = "2.2.1"
 
-package_file = package_name + "-" + package_version + ".tar.gz"
-package_dir = package_name + "-" + package_version
+package_file = pkg_name + "-" + pkg_version + ".tar.gz"
+package_dir = pkg_name + "-" + pkg_version
 
 include_files = [
     "include/gflags/gflags.h",
     "include/gflags/gflags_completions.h",
     "include/gflags/gflags_declare.h",
-    "include/google/gflags.h",
-    "include/google/gflags_completions.h",
+    "include/gflags/gflags_gflags.h",
 ]
 
 lib_files = [
@@ -33,11 +32,12 @@ genrule(
         'cd $$TMP_DIR',
         'tar xfz ' + package_file,
         'cd ' + package_dir,
-        './configure --prefix=$$INSTALL_DIR --enable-shared=no',
+        'cmake -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .',
         'make install',
         'rm -rf $$TMP_DIR',
     ]),
 )
+
 
 cc_library(
     name = "gflags-cxx",

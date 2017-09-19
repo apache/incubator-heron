@@ -37,6 +37,7 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
@@ -186,7 +187,7 @@ public class Slave implements Runnable, AutoCloseable {
     //     - If the topology is not stateful
     if (helper != null && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
       Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
+      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
           .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
 
       if (!isTopologyStateful || isStatefulProcessingStarted) {
@@ -282,6 +283,7 @@ public class Slave implements Runnable, AutoCloseable {
     CheckpointManager.RestoreInstanceStateResponse response =
         CheckpointManager.RestoreInstanceStateResponse.newBuilder()
             .setCheckpointId(request.getState().getCheckpointId())
+            .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
   }

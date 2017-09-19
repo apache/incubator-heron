@@ -71,7 +71,7 @@ void OrderClient::HandleOrderMessage(OrderMessage* _message) {
 }
 
 void OrderClient::SendMessages() {
-  while (getOutstandingPackets() < 10000) {
+  while (getOutstandingBytes() < 1000000) {
     CreateAndSendMessage();
     if (++nsent_ >= ntotal_) {
       return;
