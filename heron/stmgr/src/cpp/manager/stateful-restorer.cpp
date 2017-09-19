@@ -22,7 +22,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "manager/stmgr-server.h"
+#include "manager/instance-server.h"
 #include "manager/ckptmgr-client.h"
 #include "manager/stmgr-clientmgr.h"
 #include "util/tuple-cache.h"
@@ -50,7 +50,7 @@ const sp_string METRIC_INSTANCE_RESTORE_RESPONSES_IGNORED = "__instance_restore_
 
 StatefulRestorer::StatefulRestorer(CkptMgrClient* _ckptmgr,
                              StMgrClientMgr* _clientmgr, TupleCache* _tuple_cache,
-                             StMgrServer* _server,
+                             InstanceServer* _server,
                              common::MetricsMgrSt* _metrics_manager_client,
                              std::function<void(proto::system::StatusCode,
                                                 std::string, sp_int64)> _restore_done_watcher) {

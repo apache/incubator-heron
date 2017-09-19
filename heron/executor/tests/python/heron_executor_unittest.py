@@ -135,7 +135,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
            "com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d " \
-           "master_port metricsmgr_port %s" \
+           "tmaster_controller_port metricsmgr_port %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH)
 
@@ -158,7 +158,7 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'stmgr-1',
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
                   'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 %s master_port '
-                  'metricsmgr_port shell-port %s ckptmgr-port ckptmgr-1'
+                  'tmaster_controller_port metricsmgr_port shell-port %s ckptmgr-port ckptmgr-1'
                   % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
@@ -177,7 +177,7 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'stmgr-7',
                 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
                 'container_7_word_11,container_7_exclaim1_210 %s master_port '
-                'metricsmgr_port shell-port %s ckptmgr-port ckptmgr-7'
+                'tmaster_controller_port metricsmgr_port shell-port %s ckptmgr-port ckptmgr-7'
                 % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),

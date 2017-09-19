@@ -34,7 +34,7 @@ namespace stmgr {
 
 TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, const sp_string& _stmgr_host,
-                             sp_int32 _stmgr_port, sp_int32 _shell_port,
+                             sp_int32 _data_port, sp_int32 _local_data_port, sp_int32 _shell_port,
                              VCallback<proto::system::PhysicalPlan*> _pplan_watch,
                              VCallback<sp_string> _stateful_checkpoint_watch,
                              VCallback<sp_string, sp_int64> _restore_topology_watch,
@@ -42,7 +42,8 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_host_(_stmgr_host),
-      stmgr_port_(_stmgr_port),
+      data_port_(_data_port),
+      local_data_port_(_local_data_port),
       shell_port_(_shell_port),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
@@ -232,6 +233,7 @@ void TMasterClient::SendRegisterRequest() {
   SendRequest(request, nullptr);
   return;
 }
+
 
 void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
     for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {

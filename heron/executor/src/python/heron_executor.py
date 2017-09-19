@@ -548,7 +548,7 @@ class HeronExecutor(object):
                            str(global_task_id),
                            str(component_index),
                            self.stmgr_ids[self.shard],
-                           self.master_port,
+                           self.tmaster_controller_port,
                            self.metricsmgr_port,
                            self.heron_internals_config_file])
       retval[instance_id] = instance_cmd
@@ -584,7 +584,7 @@ class HeronExecutor(object):
                       str(global_task_id),
                       str(component_index),
                       self.stmgr_ids[self.shard],
-                      self.master_port,
+                      self.tmaster_controller_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
                       self.topology_bin_file]
@@ -621,6 +621,7 @@ class HeronExecutor(object):
         ','.join(map(lambda x: x[0], instance_info)),
         self.master_host,
         self.master_port,
+        self.tmaster_controller_port,
         self.metricsmgr_port,
         self.shell_port,
         self.heron_internals_config_file,
