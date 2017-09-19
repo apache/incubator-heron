@@ -33,9 +33,13 @@ def get_all_state_managers(conf):
   Instantiates them, start and then return them.
   """
   state_managers = []
-  state_managers.extend(get_all_zk_state_managers(conf))
-  state_managers.extend(get_all_file_state_managers(conf))
-  return state_managers
+  try:
+    state_managers.extend(get_all_zk_state_managers(conf))
+    state_managers.extend(get_all_file_state_managers(conf))
+    return state_managers
+  except Exception as ex:
+    LOG.error("Exception while getting state_managers.")
+    raise ex
 
 def get_all_zk_state_managers(conf):
   """
@@ -65,9 +69,10 @@ def get_all_zk_state_managers(conf):
     state_manager = ZkStateManager(name, hostportlist, rootpath, tunnelhost)
     try:
       state_manager.start()
-    except Exception:
+    except Exception as ex:
       LOG.error("Exception while connecting to state_manager.")
       LOG.debug(traceback.format_exc())
+      raise ex
     state_managers.append(state_manager)
 
   return state_managers
@@ -85,9 +90,10 @@ def get_all_file_state_managers(conf):
     state_manager = FileStateManager(name, rootpath)
     try:
       state_manager.start()
-    except Exception:
+    except Exception as ex:
       LOG.error("Exception while connecting to state_manager.")
       traceback.print_exc()
+      raise ex
     state_managers.append(state_manager)
 
   return state_managers
