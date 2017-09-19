@@ -519,7 +519,7 @@ void StMgr::StartTMasterClient() {
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     instance_server_->GetInstanceInfo(all_instance_info);
-    tmaster_client_->SetStmgrRegisterRequest(all_instance_info);
+    tmaster_client_->SetInstanceInfo(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();

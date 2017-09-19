@@ -17,6 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 
+#include <set>
 #include <string>
 #include <vector>
 #include "network/network_error.h"
@@ -41,8 +42,8 @@ class TMasterClient : public Client {
   // Told by the upper layer to disconnect and self destruct
   void Die();
 
-  // Sets register request when stmgr collects all needed information
-  void SetStmgrRegisterRequest(const std::vector<proto::system::Instance*>& _instances);
+  // Sets the instances that belong to us
+  void SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances);
 
   // returns the tmaster address "host:port" form.
   sp_string getTmasterHostPort();
@@ -81,14 +82,16 @@ class TMasterClient : public Client {
   void SendRegisterRequest();
   void SendHeartbeatRequest();
 
+  void CleanInstances();
+
   sp_string stmgr_id_;
   sp_string stmgr_host_;
   sp_int32 data_port_;
   sp_int32 local_data_port_;
   sp_int32 shell_port_;
 
-  bool register_request_set_;
-  proto::tmaster::StMgrRegisterRequest register_request_;
+  // Set of instances to be reported to tmaster
+  std::set<proto::system::Instance*> instances_;
 
   bool to_die_;
   // We invoke this callback upon a new physical plan from tmaster
