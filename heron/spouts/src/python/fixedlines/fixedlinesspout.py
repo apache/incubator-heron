@@ -27,8 +27,8 @@ class FixedLinesSpout(Spout):
     self.logger.info("Initializing FixedLinesSpout with the following")
     self.logger.info("Component-specific config: \n%s" % str(config))
     self.words = ["Mary had a little lamb",
-                  "Humpy Dumpy sat on a wall",
-                  "Here we round the Moulberry bush"]
+                  "Humpty Dumpty sat on a wall",
+                  "Here we go round the mulberry bush"]
     self.index = 0
     self.emit_count = 0
     self.ack_count = 0
