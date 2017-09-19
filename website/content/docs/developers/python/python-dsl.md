@@ -17,15 +17,20 @@ To begin, here's an example of a word count processor implemented using the DSL:
 topology_name = "my-word-count-topology"
 
 counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
-         .flatMap(lambda line: line.split(), parallelism=2) \
+         .flat_map(lambda line: line.split(), parallelism=2) \
          .map(lambda word: (word, 1), parallelism=2)
 
 counts.run(topology_name)
 ```
 
-Here, the [`FixedLinesStreamlet`]({{% githubMaster %}}/heronpy/connectors/mock/fixedlinesstreamlet.py) initiates the processing graph by supplying an indefinite series of sentences chosen from a static list (sentences like "Humpy Dumpty sat on a wall"). From there, 
+Here, the [`FixedLinesStreamlet`]({{% githubMaster %}}/heronpy/connectors/mock/fixedlinesstreamlet.py) initiates the processing graph by supplying an indefinite series of sentences chosen from a static list (sentences like "Humpy Dumpty sat on a wall"). From there:
 
-In this example, `counts` is *technically* a topology but it isn't specified [like a normal topology](../topologies). Instead of [bolts](../bolts), a series of functions is used to process incoming data. In the Python DSL, these processing functions essentially do one thing: they take a streamlet and transform it into a new streamlet. You can apply as many streamlet-transforming functions as you like, and end the chain whenever you've achieved your desired result set.
+* the `flat_map` operation splits the line into separate words and returns a list of words
+* the `map` operation transforms each word into a tuple in which the first element is the word and the second element is the integer 1
+
+## The DSL vs. the topology API
+
+In this example, `counts` is *technically* a topology but it isn't specified [like a normal topology](../topologies). Instead of spouts, a streamlet Instead of [bolts](../bolts), a series of functions is used to process incoming data. In the Python DSL, these processing functions essentially do one thing: they take a streamlet and transform it into a new streamlet. You can apply as many streamlet-transforming functions as you like, and end the chain whenever you've achieved your desired result set.
 
 A few other things to notice:
 
@@ -34,23 +39,26 @@ A few other things to notice:
 
 ## Processing functions
 
+The Python DSL for Heron exposes a variety of functions that you can use to transform streamlets (or rather, transform streamlets into other streamlets):
+
 Function name | Description
 :-------------|:------------
-`map` | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
-`flatMap` | Like `map` but with the important difference that each element of the streamlet is flattened
-`join` | Enables you to join two separate streamlets into a single streamlet
-`filter` | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
-`sample` | Returns a new streamlet containing only a fraction of elements. That fraction is defined by the supplied function.
-`repartition` | Returns a new streamlet with a new parallelism level
-`reduceByWindow` |
-
-## Stage names
-
-
+[`map`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.map) | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
+[`flat_map`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.flat_map) | Like `map` but with the important difference that each element of the streamlet is flattened
+[`join`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.join) | Enables you to join two separate streamlets into a single streamlet
+[`filter`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.filter) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
+[`sample`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.sample) | Returns a new streamlet containing only a fraction of elements. That fraction is defined by the supplied function.
+[`repartition`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.repartition) | Returns a new streamlet with a new parallelism level
+[`reduce_by_key_and_window`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.reduce_by_key_and_window) | Returns a new streamlet in which each key-value pair of this streamlet is collected over a specified time window and reduced using a specified reduce function. More information on time windowing can be found [below](#windowing).
+[`reduce_by_window`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.Streamlet.reduce_by_window) | A shortcut for `reduce_by_key_and_window` with a parallelism of 1 over the specified time window and reduced using a specified reduce function. More information on time windowing can be found [below](#windowing).
 
 ## Creating streamlets
 
+Currently, creating input streamlets using the Python DSL for Heron involves wrapping a [`Spout`](/api/python/api/spout/spout.m.html) object. You can see an example below:
+
 ```python
+import random
+
 from heron.dsl.src.python import OperationType, Streamlet
 from heron.api.src.python import Spout
 
@@ -59,21 +67,47 @@ class RandomFruitSpout(Spout):
         self.words = ["apple", "orange", "banana", "lime", "tangelo"]
 
     def next_tuple(self):
-        self.emit([])
+        self.emit(random.choice(self.words))
 
 class RandomFruitStreamlet(Streamlet):
     def __init__(self, stage_name=None, parallelism=None):
-        super(RandomFruitStreamlet, self).__init__(parents=[],
-                                                   operation=OperationType.Input,
-                                                   stage_name=stage_name,
-                                                   parallelism=parallelism)
+        super(RandomFruitStreamlet, self).__init__(
+            parents=[],
+            operation=OperationType.Input,
+            stage_name=stage_name,
+            parallelism=parallelism)
     
     @staticmethod
-    def random_fruit_streamlet(stage_name=None):
-        return RandomFruitStreamlet(stage_name)
+    def random_fruit_streamlet(stage_name=None, parallelism=None):
+        return RandomFruitStreamlet(stage_name, parallelism)
     
     def _build_this(self, builder):
-        builder.add_spout(self._stage_name, FooSpout, par=self._parallelism)
+        builder.add_spout(
+            self._stage_name,
+            RandomFruitSpout,
+            par=self._parallelism)
+```
+
+In this example, the `RandomFruitSpout` implements the [`Spout`](/api/python/api/spout/spout.m.html) interface and emits names of fruit from a pre-selected list (apple, orange, etc.). The `RandomFruitStreamlet` implements the [`Streamlet`](/api/python/dsl/streamlet.m.html) interface. The `__init__` function defines how new `RandomFruitStreamlet`s are instantiated, while the `_build_this` function
+
+Here's a simple processing graph created using this input streamlet:
+
+```python
+from heronpy.dsl.streamlet import TimeWindow
+
+def process_fruit(fruit):
+    print("The fruit {} was selected".format(fruit))
+
+fruits_graph = RandomFruitStreamlet.random_fruit_streamlet(stage_name='input', parallelism=3)
+               .map(lambda fruit: process_fruit(fruit))
+               .reduce_by_window(TimeWindow())
 ```
 
 ## Windowing
+
+Windowing is the process of gathering tuples over a specified duration of time, applying
+
+[`TimeWindow`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.TimeWindow)
+
+## Examples
+

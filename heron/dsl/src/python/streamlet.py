@@ -23,10 +23,12 @@ TimeWindow = namedtuple('TimeWindow', 'duration sliding_interval')
 
 # pylint: disable=too-many-instance-attributes
 class Streamlet(object):
-  """A Streamlet is a (potentially unbounded) ordered collection of tuples
-     Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
-     csv files, HDFS files), or for that matter any other source. They are also created by
-     transforming existing Streamlets using operations such as map/flatMap, etc.
+  """
+  A Streamlet is a (potentially unbounded) ordered collection of tuples.
+  Streamlets originate from pub/sub systems (such as Pulsar or Kafka), from static
+  data (such as CSV files or HDFS files), or from any other source. They can also
+  be created by transforming existing Streamlets using operations such as map,
+  flatMap, etc.
   """
   def __init__(self, parents, operation=None, stage_name=None,
                parallelism=None, inputs=None):
@@ -46,42 +48,48 @@ class Streamlet(object):
     self._output = 'output'
 
   def map(self, map_function, stage_name=None, parallelism=None):
-    """Return a new Streamlet by applying map_function to each element of this Streamlet.
+    """
+    Return a new Streamlet by applying map_function to each element of this Streamlet.
     """
     from heron.dsl.src.python.mapbolt import MapStreamlet
     return MapStreamlet(map_function, parents=[self], stage_name=stage_name,
                         parallelism=parallelism)
 
   def flatMap(self, flatmap_function, stage_name=None, parallelism=None):
-    """Return a new Streamlet by applying map_function to each element of this Streamlet
-       and flattening the result
+    """
+    Return a new Streamlet by applying map_function to each element of this Streamlet
+    and flattening the result
     """
     from heron.dsl.src.python.flatmapbolt import FlatMapStreamlet
     return FlatMapStreamlet(flatmap_function, parents=[self], stage_name=stage_name,
                             parallelism=parallelism)
 
   def filter(self, filter_function, stage_name=None, parallelism=None):
-    """Return a new Streamlet containing only the elements that satisfy filter_function
+    """
+    Return a new Streamlet containing only the elements that satisfy filter_function
     """
     from heron.dsl.src.python.filterbolt import FilterStreamlet
     return FilterStreamlet(filter_function, parents=[self], stage_name=stage_name,
                            parallelism=parallelism)
 
   def sample(self, sample_fraction, stage_name=None, parallelism=None):
-    """Return a new Streamlet containing only sample_fraction fraction of elements
+    """
+    Return a new Streamlet containing only sample_fraction fraction of elements
     """
     from heron.dsl.src.python.samplebolt import SampleStreamlet
     return SampleStreamlet(sample_fraction, parents=[self], stage_name=stage_name,
                            parallelism=parallelism)
 
   def repartition(self, parallelism, stage_name=None):
-    """Return a new Streamlet with new parallelism level
+    """
+    Return a new Streamlet with new parallelism level
     """
     from heron.dsl.src.python.repartitionbolt import RepartitionStreamlet
     return RepartitionStreamlet(parallelism, parents=[self], stage_name=stage_name)
 
   def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
-    """Return a new Streamlet by joining join_streamlet with this streamlet
+    """
+    Return a new Streamlet by joining join_streamlet with this streamlet
     """
     from heron.dsl.src.python.joinbolt import JoinStreamlet
     return JoinStreamlet(time_window, parents=[self, join_streamlet],
@@ -89,8 +97,9 @@ class Streamlet(object):
                          stage_name=stage_name, parallelism=parallelism)
 
   def reduceByWindow(self, time_window, reduce_function, stage_name=None):
-    """A short cut for reduceByKeyAndWindow with parallelism of 1
-       over the time_window and then reduced using the reduce_function
+    """
+    A shortcut for reduceByKeyAndWindow with parallelism of 1
+    over the time_window and then reduced using the reduce_function
     """
     from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
@@ -98,8 +107,9 @@ class Streamlet(object):
                                          stage_name=stage_name, parallelism=1)
 
   def reduceByKeyAndWindow(self, time_window, reduce_function, stage_name=None, parallelism=None):
-    """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
-       over the time_window and then reduced using the reduce_function
+    """
+    Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
+    over the time_window and then reduced using the reduce_function
     """
     from heron.dsl.src.python.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
@@ -107,9 +117,10 @@ class Streamlet(object):
                                          stage_name=stage_name, parallelism=parallelism)
 
   def run(self, name, config=None):
-    """Runs the Streamlet. This is run as a Heron python topology under the name
-       'name'. The config attached is passed on to this Heron topology
-       Once submitted, run returns immediately
+    """
+    Runs the Streamlet. This is run as a Heron python topology under the name
+    'name'. The config attached is passed on to this Heron topology
+    Once submitted, run returns immediately
     """
     if name is None or not isinstance(name, str):
       raise RuntimeError("Job Name has to be a string")
@@ -143,7 +154,8 @@ class Streamlet(object):
 
   @abstractmethod
   def _build_this(self, builder):
-    """This is the method that's implemented by the operators.
+    """
+    This is the method that's implemented by the operators.
     :type builder: TopologyBuilder
     :param builder: The operator adds in the current streamlet as a spout/bolt
     """
@@ -152,7 +164,8 @@ class Streamlet(object):
   # pylint: disable=protected-access
   @abstractmethod
   def _calculate_parallelism(self):
-    """This is the method that's implemented by the operators with a default impl
+    """
+    This is the method that's implemented by the operators with a default impl
     :return: The parallelism required for this operator
     """
     parallelism = 1
@@ -163,14 +176,16 @@ class Streamlet(object):
 
   @abstractmethod
   def _calculate_inputs(self):
-    """This is the method that's implemented by the operators to get the inputs for this streamlet
+    """
+    This is the method that's implemented by the operators to get the inputs for this streamlet
     :return: The inputs as a dict
     """
     raise RuntimeError("Streamlet's calculate inputs not implemented")
 
   @abstractmethod
   def _calculate_stage_name(self, existing_stage_names):
-    """This is the method that's implemented by the operators to get the name of the Streamlet
+    """
+    This is the method that's implemented by the operators to get the name of the Streamlet
     :return: The name of the operator
     """
     raise RuntimeError("Streamlet's calculate stage name not implemented")
