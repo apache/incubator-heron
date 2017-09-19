@@ -38,6 +38,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
+import com.twitter.heron.metricsmgr.MetricsUtil;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
@@ -189,7 +190,7 @@ public class MetricsCacheSink implements IMetricsSink {
     // The format of source is "host:port/componentName/instanceId"
     // So source.split("/") would be an array with 3 elements:
     // ["host:port", componentName, instanceId]
-    String[] sources = record.getSource().split("/");
+    String[] sources = MetricsUtil.splitRecordSource(record);
     String hostPort = sources[0];
     String componentName = sources[1];
     String instanceId = sources[2];
