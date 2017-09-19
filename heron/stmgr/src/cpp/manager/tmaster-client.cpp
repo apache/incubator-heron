@@ -71,10 +71,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
 }
 
 TMasterClient::~TMasterClient() {
-  for (auto it = instances_.begin(); it != instances_.end(); ++it) {
-    delete *it;
-  }
-  instances_.clear();
+  CleanInstances();
 }
 
 void TMasterClient::Die() {
@@ -213,6 +210,13 @@ void TMasterClient::OnHeartbeatTimer() {
   SendHeartbeatRequest();
 }
 
+void TMasterClient::CleanInstances() {
+  for (auto it = instances_.begin(); it != instances_.end(); ++it) {
+    delete *it;
+  }
+  instances_.clear();
+}
+
 void TMasterClient::SendRegisterRequest() {
   auto request = new proto::tmaster::StMgrRegisterRequest();
 
@@ -221,7 +225,8 @@ void TMasterClient::SendRegisterRequest() {
   proto::system::StMgr* stmgr = request->mutable_stmgr();
   stmgr->set_id(stmgr_id_);
   stmgr->set_host_name(stmgr_host_);
-  stmgr->set_data_port(stmgr_port_);
+  stmgr->set_data_port(data_port_);
+  stmgr->set_local_data_port(local_data_port_);
   stmgr->set_local_endpoint("/unused");
   stmgr->set_cwd(cwd);
   stmgr->set_pid((sp_int32)ProcessUtils::getPid());
@@ -235,20 +240,14 @@ void TMasterClient::SendRegisterRequest() {
 }
 
 void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
+    if (!instances_.empty()) {
+      CleanInstances();
+    }
+
     for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {
       auto instance = new proto::system::Instance();
-      instance->set_instance_id((*iter)->instance_id());
-      instance->set_stmgr_id((*iter)->stmgr_id());
-
-      proto::system::InstanceInfo* this_info = instance->mutable_info();
-      const proto::system::InstanceInfo& other_info = (*iter)->info();
-      this_info->set_task_id(other_info.task_id());
-      this_info->set_component_index(other_info.component_index());
-      this_info->set_component_name(other_info.component_name());
-      for (auto param_iter = other_info.params().begin();
-                param_iter != other_info.params().end(); ++param_iter) {
-        this_info->add_params(*param_iter);
-      }
+      instance->CopyFrom(*(*iter));
+      instances_.insert(instance);
     }
 }
 

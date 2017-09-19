@@ -82,6 +82,8 @@ class TMasterClient : public Client {
   void SendRegisterRequest();
   void SendHeartbeatRequest();
 
+  void CleanInstances();
+
   sp_string stmgr_id_;
   sp_string stmgr_host_;
   sp_int32 data_port_;
