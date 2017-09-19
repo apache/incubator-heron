@@ -31,15 +31,6 @@ def read_server_mode_cluster_definition(cluster, cl_args):
   client_confs = dict()
   client_confs[cluster] = cliconfig.cluster_config(cluster)
 
-  # check if the config file exists, if it does, read it
-  #if os.path.isfile(config_file):
-  #  with open(config_file, 'r') as conf_file:
-  #    client_confs = yaml.load(conf_file)
-
-  #if not client_confs:
-  #  client_confs = dict()
-  #  client_confs[cluster] = dict()
-
   # now check if the service-url from command line is set, if so override it
   if cl_args.get('service_url', None):
     client_confs[cluster]['service_url'] = cl_args['service_url']
