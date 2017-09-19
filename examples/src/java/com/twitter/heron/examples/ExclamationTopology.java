@@ -45,7 +45,7 @@ public final class ExclamationTopology {
     int parallelism = 2;
 
     int spouts = parallelism;
-    builder.setSpout("word", new TestWordSpout(Duration.ofMillis(50)), spouts);
+    builder.setSpout("word", new TestWordSpout(Duration.ofMillis(0)), spouts);
     int bolts = 2 * parallelism;
     builder.setBolt("exclaim1", new ExclamationBolt(), bolts)
         .shuffleGrouping("word");

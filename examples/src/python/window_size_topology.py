@@ -19,7 +19,7 @@ from heronpy.api.topology import TopologyBuilder
 from heronpy.api.stream import Grouping
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
 from heron.examples.src.python.spout import WordSpout
-from heron.examples.src.python.bolt import WindowSizeBolt
+from examples.src.python.bolt import WindowSizeBolt
 
 # Topology is defined using a topology builder
 # Refer to multi_stream_topology for defining a topology by subclassing Topology

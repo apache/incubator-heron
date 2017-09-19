@@ -1,3 +1,4 @@
+syntax = "proto2";
 package heron.proto.scheduler;
 
 option java_package = "com.twitter.heron.proto.scheduler";

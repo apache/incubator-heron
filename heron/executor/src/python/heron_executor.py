@@ -553,7 +553,7 @@ class HeronExecutor(object):
                            str(global_task_id),
                            str(component_index),
                            self.stmgr_ids[self.shard],
-                           self.master_port,
+                           self.tmaster_controller_port,
                            self.metricsmgr_port,
                            self.heron_internals_config_file,
                            self.override_config_file])
@@ -590,7 +590,7 @@ class HeronExecutor(object):
                       str(global_task_id),
                       str(component_index),
                       self.stmgr_ids[self.shard],
-                      self.master_port,
+                      self.tmaster_controller_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
                       self.override_config_file,
@@ -628,6 +628,7 @@ class HeronExecutor(object):
         ','.join(map(lambda x: x[0], instance_info)),
         self.master_host,
         self.master_port,
+        self.tmaster_controller_port,
         self.metricsmgr_port,
         self.shell_port,
         self.heron_internals_config_file,
@@ -907,7 +908,11 @@ class HeronExecutor(object):
     """
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
-    self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+    try:
+      self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+    except Exception as ex:
+      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      sys.exit(1)
 
     # pylint: disable=unused-argument
     def on_packing_plan_watch(state_manager, new_packing_plan):

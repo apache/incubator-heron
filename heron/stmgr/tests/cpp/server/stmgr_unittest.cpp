@@ -267,7 +267,8 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
 }
 
 void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stmgr_thread,
-                const sp_string& stmgr_host, sp_int32& stmgr_port, const sp_string& topology_name,
+                const sp_string& stmgr_host, sp_int32& stmgr_port, sp_int32& local_data_port,
+                const sp_string& topology_name,
                 const sp_string& topology_id, const heron::proto::api::Topology* topology,
                 const std::vector<sp_string>& workers, const sp_string& stmgr_id,
                 const sp_string& zkhostportlist, const sp_string& dpath, sp_int32 metricsmgr_port,
@@ -278,13 +279,16 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
   stmgr_topology->CopyFrom(*topology);
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
-  mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, topology_name, topology_id,
+  mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, local_data_port, topology_name,
+                                topology_id,
                                 stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
                                 metricsmgr_port, shell_port, ckptmgr_port, ckptmgr_id,
                                 _high_watermark, _low_watermark);
   EXPECT_EQ(0, stmgr_port);
+  EXPECT_EQ(0, local_data_port);
   mgr->Init();
-  stmgr_port = mgr->GetServerNetworkOptions().get_port();
+  stmgr_port = mgr->GetStmgrServerNetworkOptions().get_port();
+  local_data_port = mgr->GetInstanceServerNetworkOptions().get_port();
   EXPECT_GT(stmgr_port, 0);
   stmgr_thread = new std::thread(StartServer, ss);
 }
@@ -320,7 +324,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(mtmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   mgr = new DummyMtrMgr(ss, options, stmgr_id, tmasterLatch, connectionCloseLatch);
@@ -343,7 +347,7 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker = new DummySpoutInstance(ss, options, topology_name, topology_id, instance_id,
@@ -365,7 +369,7 @@ void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
   NetworkOptions options;
   options.set_host(LOCALHOST);
   options.set_port(stmgr_port);
-  options.set_max_packet_size(1_MB);
+  options.set_max_packet_size(10_MB);
   options.set_socket_family(PF_INET);
 
   worker =
@@ -396,6 +400,7 @@ struct CommonResources {
 
   // store the stmgr server port returned by bind/listen 0
   std::vector<sp_int32> stmgr_ports_;
+  std::vector<sp_int32> local_data_ports_;
 
   heron::proto::api::Grouping grouping_;
 
@@ -459,6 +464,7 @@ struct CommonResources {
     num_stmgrs_ = numStmgrs;
     while (numStmgrs > 0) {
       stmgr_ports_.push_back(0);
+      local_data_ports_.push_back(0);
       numStmgrs--;
     }
   }
@@ -541,7 +547,7 @@ void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_in
   streamid += std::to_string(spout);
   sp_string instanceid = CreateInstanceId(spout, spout_instance, true);
   StartDummySpoutInstance(worker_ss, worker, worker_thread,
-                          common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
+                          common.local_data_ports_[common.instanceid_stmgr_[instanceid]],
                           common.topology_name_, common.topology_id_, instanceid,
                           common.instanceid_instance_[instanceid]->info().component_name(),
                           common.instanceid_instance_[instanceid]->info().task_id(),
@@ -592,7 +598,7 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
         }
       }
       StartDummyBoltInstance(worker_ss, worker, worker_thread,
-                             common.stmgr_ports_[common.instanceid_stmgr_[instanceid]],
+                             common.local_data_ports_[common.instanceid_stmgr_[instanceid]],
                              common.topology_name_, common.topology_id_, instanceid,
                              common.instanceid_instance_[instanceid]->info().component_name(),
                              common.instanceid_instance_[instanceid]->info().task_id(),
@@ -614,6 +620,7 @@ void StartStMgrs(CommonResources& common) {
     std::thread* stmgr_thread = NULL;
 
     StartStMgr(stmgr_ss, mgr, stmgr_thread, common.tmaster_host_, common.stmgr_ports_[i],
+               common.local_data_ports_[i],
                common.topology_name_, common.topology_id_, common.topology_,
                common.stmgr_instance_id_list_[i], common.stmgrs_id_list_[i], common.zkhostportlist_,
                common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
@@ -754,6 +761,9 @@ TEST(StMgr, test_pplan_decode) {
     EXPECT_NE(common.stmgr_ports_.end(),
               std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
                         pplan0->stmgrs(i).data_port()));
+    EXPECT_NE(common.local_data_ports_.end(),
+              std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
+                        pplan0->stmgrs(i).local_data_port()));
   }
   EXPECT_EQ(pplan0->instances_size(), common.num_stmgrs_ * num_workers_per_stmgr_);
   std::map<sp_string, heron::config::PhysicalPlanHelper::TaskData> tasks;
@@ -973,7 +983,8 @@ TEST(StMgr, test_back_pressure_instance) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1083,7 +1094,8 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1222,7 +1234,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   std::thread* regular_stmgr_thread1 = NULL;
 
   StartStMgr(regular_stmgr_ss1, regular_stmgr1, regular_stmgr_thread1, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1233,7 +1246,8 @@ TEST(StMgr, test_back_pressure_stmgr) {
   std::thread* regular_stmgr_thread2 = NULL;
 
   StartStMgr(regular_stmgr_ss2, regular_stmgr2, regular_stmgr_thread2, common.tmaster_host_,
-             common.stmgr_ports_[1], common.topology_name_, common.topology_id_,
+             common.stmgr_ports_[1], common.local_data_ports_[1],
+             common.topology_name_, common.topology_id_,
              common.topology_, common.stmgr_instance_id_list_[1], common.stmgrs_id_list_[1],
              common.zkhostportlist_, common.dpath_, common.metricsmgr_port_,
              common.shell_port_, common.ckptmgr_port_,
@@ -1337,7 +1351,8 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1462,7 +1477,8 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1609,7 +1625,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
@@ -1680,6 +1697,8 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
 
   // Ensure that Stmgr connected to the new tmaster and has received new physical plan
   CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(1).data_port(), common.stmgr_ports_[1]);
+  CHECK_EQ(regular_stmgr->GetPhysicalPlan()->stmgrs(1).local_data_port(),
+           common.local_data_ports_[1]);
 
   // Stop the schedulers
   for (size_t i = 0; i < common.ss_list_.size(); ++i) {
@@ -1755,7 +1774,8 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
-             common.stmgr_ports_[0], common.topology_name_, common.topology_id_, common.topology_,
+             common.stmgr_ports_[0], common.local_data_ports_[0],
+             common.topology_name_, common.topology_id_, common.topology_,
              common.stmgr_instance_id_list_[0], common.stmgrs_id_list_[0], common.zkhostportlist_,
              common.dpath_, common.metricsmgr_port_, common.shell_port_, common.ckptmgr_port_,
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
