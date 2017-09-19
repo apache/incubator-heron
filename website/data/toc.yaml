@@ -43,8 +43,6 @@ sections:
         url: /docs/concepts/architecture
       - name: Heron Delivery Semantics
         url: /docs/concepts/delivery-semantics
-      - name: Stateful processing
-        url: /docs/concepts/stateful-processing
   - name: Deployment
     sublinks:
       - name: Overview
