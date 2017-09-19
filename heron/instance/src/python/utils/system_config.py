@@ -13,12 +13,25 @@
 # limitations under the License.
 ''' sys_config '''
 # pylint: disable=global-statement
+
+from heron.common.src.python.utils import log
+
+Log = log.Log
 sys_config = {}
 
-def set_sys_config(config, override_config):
+def merge(default, override):
+  if isinstance(default, dict) and isinstance(override, dict):
+    for k, v in override.items():
+      Log.info("Add overriding configuration '%s'", k)
+      if k not in default:
+        default[k] = v
+      else:
+        default[k] = merge(default[k], v)
+  return default
+
+def set_sys_config(default, override_config):
   global sys_config
-  sys_config = config
-  sys_config.update(override_config)
+  sys_config = merge(default, override_config)
 
 def get_sys_config():
   return sys_config

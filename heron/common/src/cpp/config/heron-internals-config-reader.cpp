@@ -80,6 +80,7 @@ void HeronInternalsConfigReader::LoadOverrideConfig() {
       const std::string& key = n.first.Scalar();
       auto override_val = YAML::Node(override_config[key]);
       if (override_val) {
+        LOG(INFO) << "Add overriding configuration '" << key << "'";
         config_[n.first] = override_val;
       }
     }
