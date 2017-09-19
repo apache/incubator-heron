@@ -89,7 +89,8 @@ public class DLDownloaderTest {
     when(nsBuilder.build()).thenReturn(ns);
 
     PowerMockito.mockStatic(Extractor.class);
-    PowerMockito.doNothing().when(Extractor.class, "extract", any(InputStream.class), any(Path.class));
+    PowerMockito.doNothing()
+        .when(Extractor.class, "extract", any(InputStream.class), any(Path.class));
 
     DLDownloader downloader = new DLDownloader(() -> nsBuilder);
     downloader.download(uri, path);
