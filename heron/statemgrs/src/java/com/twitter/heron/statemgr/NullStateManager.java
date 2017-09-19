@@ -14,6 +14,8 @@
 
 package com.twitter.heron.statemgr;
 
+import java.util.logging.Logger;
+
 import javax.naming.OperationNotSupportedException;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -32,11 +34,16 @@ import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public class NullStateManager implements IStateManager {
-  public SettableFuture<Boolean> nullFuture = SettableFuture.create();
+
+  private static final Logger LOG = Logger.getLogger(NullStateManager.class.getName());
+
+  public final SettableFuture<Boolean> nullFuture = SettableFuture.create();
 
   @Override
   public void initialize(Config config) {
-    nullFuture.set(null);
+    if (!nullFuture.set(null)) {
+      LOG.warning("Unexpected - NullStateManager is initialized twice!");
+    }
   }
 
   @Override

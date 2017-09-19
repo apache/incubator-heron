@@ -26,3 +26,17 @@ java_tests(
   runtime_deps = [ ":tests" ],
   size = "small",
 )
+
+java_test(
+    name = "RegistryTest",
+    srcs = glob(["**/downloader/RegistryTest.java"]),
+    deps = downloader_test_deps_files,
+    size = "small",
+)
+
+java_test(
+    name = "DLDownloaderTest",
+    srcs = glob(["**/downloader/DLDownloaderTest.java"]),
+    deps = downloader_test_deps_files,
+    size = "small",
+)

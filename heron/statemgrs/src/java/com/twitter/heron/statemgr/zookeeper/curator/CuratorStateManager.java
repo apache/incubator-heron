@@ -216,12 +216,12 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     try {
       LOG.info("Checking existence of path: " + path);
-      result.set(client.checkExists().forPath(path) != null);
+      safeSetFuture(result, client.checkExists().forPath(path) != null);
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not check Exist", e));
+      safeSetException(result, new RuntimeException("Could not check Exist", e));
     }
 
     return result;
@@ -246,12 +246,12 @@ public class CuratorStateManager extends FileSystemStateManager {
           withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
           .forPath(path, data);
       LOG.info("Created node for path: " + path);
-      result.set(true);
+      safeSetFuture(result, true);
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not createNode:", e));
+      safeSetException(result, new RuntimeException("Could not createNode:", e));
     }
     return result;
   }
@@ -267,19 +267,19 @@ public class CuratorStateManager extends FileSystemStateManager {
       }
       deleteBuilder.withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
-      result.set(true);
+      safeSetFuture(result, true);
 
     } catch (KeeperException e) {
       if (KeeperException.Code.NONODE.equals(e.code())) {
-        result.set(true);
+        safeSetFuture(result, true);
       } else {
-        result.setException(new RuntimeException("Could not deleteNode", e));
+        safeSetException(result, new RuntimeException("Could not deleteNode", e));
       }
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not deleteNode", e));
+      safeSetException(result, new RuntimeException("Could not deleteNode", e));
     }
 
     return result;
@@ -301,9 +301,9 @@ public class CuratorStateManager extends FileSystemStateManager {
         byte[] data;
         if (event != null & (data = event.getData()) != null) {
           builder.mergeFrom(data);
-          future.set((M) builder.build());
+          safeSetFuture(future, (M) builder.build());
         } else {
-          future.setException(new RuntimeException("Failed to fetch data from path: "
+          safeSetException(future, new RuntimeException("Failed to fetch data from path: "
               + event.getPath()));
         }
       }
@@ -315,7 +315,7 @@ public class CuratorStateManager extends FileSystemStateManager {
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      future.setException(new RuntimeException("Could not getNodeData", e));
+      safeSetException(future, new RuntimeException("Could not getNodeData", e));
     }
 
     return future;
@@ -392,7 +392,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
+    safeSetFuture(result, true);
     return result;
   }
 
@@ -400,7 +400,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
+    safeSetFuture(result, true);
     return result;
   }
 
@@ -409,7 +409,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     // if scheduler is service, the znode is ephemeral and it's deleted automatically
     if (isSchedulerService) {
       final SettableFuture<Boolean> result = SettableFuture.create();
-      result.set(true);
+      safeSetFuture(result, true);
       return result;
     } else {
       return deleteNode(getStatePath(StateLocation.SCHEDULER_LOCATION, topologyName), false);

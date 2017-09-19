@@ -39,6 +39,18 @@ import com.twitter.heron.spi.statemgr.WatchCallback;
 public abstract class FileSystemStateManager implements IStateManager {
   private static final Logger LOG = Logger.getLogger(FileSystemStateManager.class.getName());
 
+  protected static <V> void safeSetFuture(SettableFuture<V> future, V result) {
+    if (!future.set(result)) {
+      LOG.warning("Unexpected - a local settable future is set twice!");
+    }
+  }
+
+  protected static <V> void safeSetException(SettableFuture<V> future, Throwable cause) {
+    if (!future.setException(cause)) {
+      LOG.warning("Unexpected - a local settable future is set twice!");
+    }
+  }
+
   // Store the root address of the hierarchical file system
   protected String rootAddress;
 
@@ -230,7 +242,7 @@ public abstract class FileSystemStateManager implements IStateManager {
       }
     }
     final SettableFuture<Boolean> future = SettableFuture.create();
-    future.set(result);
+    safeSetFuture(future, result);
     return future;
   }
 
