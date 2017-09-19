@@ -27,11 +27,11 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 15) {
+  if (argc != 16) {
     std::cout << "Usage: " << argv[0] << " "
               << "<topname> <topid> <topdefnfile> "
               << "<zknode> <zkroot> <stmgrid> "
-              << "<instanceids> <myhost> <myport> <metricsmgrport> "
+              << "<instanceids> <myhost> <data_port> <local_data_port> <metricsmgrport> "
               << "<shellport> <heron_internals_config_filename> "
               << "<ckptmgr_port> <ckptmgr_id>"
               << std::endl;
@@ -51,12 +51,13 @@ int main(int argc, char* argv[]) {
   std::string instanceids = argv[7];
   std::vector<std::string> instances = StrUtils::split(instanceids, ",");
   std::string myhost = argv[8];
-  sp_int32 myport = atoi(argv[9]);
-  sp_int32 metricsmgr_port = atoi(argv[10]);
-  sp_int32 shell_port = atoi(argv[11]);
-  sp_string heron_internals_config_filename = argv[12];
-  sp_int32 ckptmgr_port = atoi(argv[13]);
-  sp_string ckptmgr_id = argv[14];
+  sp_int32 data_port = atoi(argv[9]);
+  sp_int32 local_data_port = atoi(argv[10]);
+  sp_int32 metricsmgr_port = atoi(argv[11]);
+  sp_int32 shell_port = atoi(argv[12]);
+  sp_string heron_internals_config_filename = argv[13];
+  sp_int32 ckptmgr_port = atoi(argv[14]);
+  sp_string ckptmgr_id = argv[15];
 
   EventLoopImpl ss;
 
@@ -80,7 +81,8 @@ int main(int argc, char* argv[]) {
   sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
                               ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
                                 1_MB;
-  heron::stmgr::StMgr mgr(&ss, myhost, myport, topology_name, topology_id, topology, myid,
+  heron::stmgr::StMgr mgr(&ss, myhost, data_port, local_data_port, topology_name, topology_id,
+                          topology, myid,
                           instances, zkhostportlist, topdir, metricsmgr_port, shell_port,
                           ckptmgr_port, ckptmgr_id, high_watermark, low_watermark);
   mgr.Init();

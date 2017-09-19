@@ -1,7 +1,4 @@
-
-load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 
 metricscachemgr_deps_files = [
     "//heron/spi/src/java:common-spi-java",
