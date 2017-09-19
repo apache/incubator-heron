@@ -19,6 +19,13 @@ localfs_deps_files = \
         "//heron/uploaders/src/java:localfs-uploader-java",
         "//heron/common/src/java:basics-java",
     ]
+    
+dlog_deps_files = \
+    common_deps_files + \
+    spi_deps_files + [
+        "@org_apache_distributedlog_core//jar",
+        "//heron/uploaders/src/java:dlog-uploader-java",
+    ]
 
 hdfs_deps_files = \
     common_deps_files + \
@@ -47,6 +54,13 @@ java_tests(
   runtime_deps = [ ":localfs-tests" ],
   data = glob(["**/localfs/testdata/*.tar"]),
   size = "small",
+)
+
+java_test(
+    name = "DlogUploaderTest",
+    srcs = glob(["**/dlog/DlogUploaderTest.java"]),
+    deps = dlog_deps_files,
+    size = "small",
 )
 
 java_test(

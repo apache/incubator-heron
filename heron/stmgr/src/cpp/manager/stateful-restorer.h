@@ -44,7 +44,7 @@ class TimeSpentMetric;
 namespace heron {
 namespace stmgr {
 
-class StMgrServer;
+class InstanceServer;
 class TupleCache;
 class StMgrClientMgr;
 class CkptMgrClient;
@@ -74,7 +74,7 @@ class StatefulRestorer {
  public:
   explicit StatefulRestorer(CkptMgrClient* _ckptmgr,
                             StMgrClientMgr* _clientmgr, TupleCache* _tuple_cache,
-                            StMgrServer* _server,
+                            InstanceServer* _server,
                             common::MetricsMgrSt* _metrics_manager_client,
                             std::function<void(proto::system::StatusCode,
                                                std::string, sp_int64)> _restore_done_watcher);
@@ -142,7 +142,7 @@ class StatefulRestorer {
   CkptMgrClient* ckptmgr_;
   StMgrClientMgr* clientmgr_;
   TupleCache* tuple_cache_;
-  StMgrServer* server_;
+  InstanceServer* server_;
   common::MetricsMgrSt* metrics_manager_client_;
 
   // Are we in the middle of a restore

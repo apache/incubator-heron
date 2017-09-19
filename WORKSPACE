@@ -7,6 +7,7 @@ powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 protobuf_version = "3.4.0"
+distributedlog_version = "0.5.0"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -71,6 +72,11 @@ maven_jar(
 maven_jar(
   name = "commons_io_commons_io",
   artifact = "commons-io:commons-io:2.4",
+)
+
+maven_jar(
+  name = "commons_configuration_commons_configuration",
+  artifact = "commons-configuration:commons-configuration:1.6",
 )
 
 maven_jar(
@@ -628,6 +634,14 @@ maven_jar(
   name = "org_apache_commons_compress",
   artifact = "org.apache.commons:commons-compress:1.14",
 )
+
+# bookkeeper & distributedlog dependencies
+maven_jar(
+  name = "org_apache_distributedlog_core",
+  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:" + distributedlog_version
+)
+# end bookkeeper & distributedlog dependencies
+
 # end heron api server
 
 # for pex repos
