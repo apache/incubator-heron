@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __DUMMY_STMGR_SERVER_H
-#define __DUMMY_STMGR_SERVER_H
+#ifndef __DUMMY_INSTANCE_SERVER_H
+#define __DUMMY_INSTANCE_SERVER_H
 
 #include <set>
 #include <string>
@@ -23,16 +23,16 @@
 
 #include "proto/messages.h"
 #include "util/neighbour-calculator.h"
-#include "manager/stmgr-server.h"
+#include "manager/instance-server.h"
 
-class DummyStMgrServer : public heron::stmgr::StMgrServer {
+class DummyInstanceServer : public heron::stmgr::InstanceServer {
  public:
-  DummyStMgrServer(EventLoop* _eventLoop, const NetworkOptions& _options,
+  DummyInstanceServer(EventLoop* _eventLoop, const NetworkOptions& _options,
                    const std::string& _stmgr,
                    heron::proto::system::PhysicalPlan* _pplan,
                    const std::vector<sp_string>& _expected_instances,
                    heron::common::MetricsMgrSt* _metrics)
-  : heron::stmgr::StMgrServer(_eventLoop, _options, _pplan->topology().name(),
+  : heron::stmgr::InstanceServer(_eventLoop, _options, _pplan->topology().name(),
                               _pplan->topology().id(), _stmgr,
                               _expected_instances, NULL, _metrics,
                               new heron::stmgr::NeighbourCalculator()),
@@ -40,7 +40,7 @@ class DummyStMgrServer : public heron::stmgr::StMgrServer {
     my_stmgr_id_(_stmgr) {
   }
 
-  virtual ~DummyStMgrServer() { }
+  virtual ~DummyInstanceServer() { }
 
   virtual void ClearCache() { clear_called_ = true; }
   bool ClearCalled() const { return clear_called_; }
