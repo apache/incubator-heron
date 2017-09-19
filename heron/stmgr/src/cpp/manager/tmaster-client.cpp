@@ -44,7 +44,6 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       stmgr_host_(_stmgr_host),
       stmgr_port_(_stmgr_port),
       shell_port_(_shell_port),
-      register_request_set_(false),
       to_die_(false),
       pplan_watch_(std::move(_pplan_watch)),
       stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
@@ -70,7 +69,12 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   InstallMessageHandler(&TMasterClient::HandleStartStmgrStatefulProcessing);
 }
 
-TMasterClient::~TMasterClient() {}
+TMasterClient::~TMasterClient() {
+  for (auto it = instances_.begin(); it != instances_.end(); ++it) {
+    delete *it;
+  }
+  instances_.clear();
+}
 
 void TMasterClient::Die() {
   LOG(INFO) << "Tmaster client is being destroyed " << std::endl;
@@ -209,30 +213,41 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  CHECK(register_request_set_);
-  proto::tmaster::StMgrRegisterRequest* request =
-    new proto::tmaster::StMgrRegisterRequest(register_request_);
+  auto request = new proto::tmaster::StMgrRegisterRequest();
+
+  sp_string cwd;
+  FileUtils::getCwd(cwd);
+  proto::system::StMgr* stmgr = request->mutable_stmgr();
+  stmgr->set_id(stmgr_id_);
+  stmgr->set_host_name(stmgr_host_);
+  stmgr->set_data_port(stmgr_port_);
+  stmgr->set_local_endpoint("/unused");
+  stmgr->set_cwd(cwd);
+  stmgr->set_pid((sp_int32)ProcessUtils::getPid());
+  stmgr->set_shell_port(shell_port_);
+  for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
+    request->add_instances()->CopyFrom(*(*iter));
+  }
+
   SendRequest(request, nullptr);
   return;
 }
 
-void TMasterClient::SetStmgrRegisterRequest(
-                                    const std::vector<proto::system::Instance*>& _instances) {
-    register_request_.Clear();
-    register_request_set_ = true;
-
-    sp_string cwd;
-    FileUtils::getCwd(cwd);
-    proto::system::StMgr* stmgr = register_request_.mutable_stmgr();
-    stmgr->set_id(stmgr_id_);
-    stmgr->set_host_name(stmgr_host_);
-    stmgr->set_data_port(stmgr_port_);
-    stmgr->set_local_endpoint("/unused");
-    stmgr->set_cwd(cwd);
-    stmgr->set_pid((sp_int32)ProcessUtils::getPid());
-    stmgr->set_shell_port(shell_port_);
+void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
     for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {
-      register_request_.add_instances()->CopyFrom(*(*iter));
+      auto instance = new proto::system::Instance();
+      instance->set_instance_id((*iter)->instance_id());
+      instance->set_stmgr_id((*iter)->stmgr_id());
+
+      proto::system::InstanceInfo* this_info = instance->mutable_info();
+      const proto::system::InstanceInfo& other_info = (*iter)->info();
+      this_info->set_task_id(other_info.task_id());
+      this_info->set_component_index(other_info.component_index());
+      this_info->set_component_name(other_info.component_name());
+      for (auto param_iter = other_info.params().begin();
+                param_iter != other_info.params().end(); ++param_iter) {
+        this_info->add_params(*param_iter);
+      }
     }
 }
 
