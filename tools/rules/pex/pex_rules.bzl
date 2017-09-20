@@ -416,7 +416,7 @@ _pytest_pex_test = rule(
         "launcher_template": attr.label(
             allow_files = True,
             single_file = True,
-            default = Label("//pex:testlauncher.sh.template"),
+            default = Label("//tools/rules/pex:testlauncher.sh.template"),
         ),
     }),
 )
