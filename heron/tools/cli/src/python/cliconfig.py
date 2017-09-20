@@ -1,28 +1,28 @@
 ''' cliconfig.py '''
 import os
-import ConfigParser as configparser
+import yaml
 
 from heron.common.src.python.utils.log import Log
 
-CONFIG_SECTION = 'core'
+CLI_CONFIG = 'cli.yaml'
 PROP_SERVICE_URL = 'service_url'
 
 valid_properties = {PROP_SERVICE_URL}
 
 
-def get_config_directory():
+def get_config_directory(cluster):
   home = os.path.expanduser('~')
-  return os.path.join(home, '.config', 'heron')
+  return os.path.join(home, '.config', 'heron', cluster)
 
 
 def get_cluster_config_file(cluster):
-  return os.path.join(get_config_directory(), cluster)
+  return os.path.join(get_config_directory(cluster), CLI_CONFIG)
 
 
 def cluster_config(cluster):
   config = _cluster_config(cluster)
   if _config_has_property(config, PROP_SERVICE_URL):
-    return {PROP_SERVICE_URL: config.get(CONFIG_SECTION, PROP_SERVICE_URL)}
+    return {PROP_SERVICE_URL: config[PROP_SERVICE_URL]}
   return dict()
 
 
@@ -34,8 +34,8 @@ def set_property(cluster, prop, value):
   Log.debug("setting %s to %s for cluster %s", prop, value, cluster)
   if is_valid_property(prop):
     config = _cluster_config(cluster)
-    config.set(CONFIG_SECTION, prop, value)
-    _save_or_remove(config, get_cluster_config_file(cluster))
+    config[prop] = value
+    _save_or_remove(config, cluster)
     return True
 
   return False
@@ -45,22 +45,26 @@ def unset_property(cluster, prop):
   if is_valid_property(prop):
     config = _cluster_config(cluster)
     if _config_has_property(config, prop):
-      config.remove_option(CONFIG_SECTION, prop)
-      _save_or_remove(config, get_cluster_config_file(cluster))
+      config.pop(prop, None)
+      _save_or_remove(config, cluster)
       return True
 
   return False
 
 
 def _config_has_property(config, prop):
-  return config.has_section(CONFIG_SECTION) and config.has_option('core', prop)
+  return prop in config
 
 
-def _save_or_remove(config, cluster_config_file):
-  if config.sections():
+def _save_or_remove(config, cluster):
+  cluster_config_file = get_cluster_config_file(cluster)
+  if config:
     Log.debug("saving config file: %s", cluster_config_file)
+    config_directory = get_config_directory(cluster)
+    if not os.path.isdir(config_directory):
+      os.makedirs(config_directory)
     with open(cluster_config_file, 'wb') as cf:
-      config.write(cf)
+      yaml.dump(config, cf, default_flow_style=False)
   else:
     if os.path.isfile(cluster_config_file):
       try:
@@ -70,9 +74,10 @@ def _save_or_remove(config, cluster_config_file):
 
 
 def _cluster_config(cluster):
-  config = configparser.ConfigParser()
+  config = dict()
   cluster_config_file = get_cluster_config_file(cluster)
   if os.path.isfile(cluster_config_file):
-    config.read(cluster_config_file)
+    with open(cluster_config_file, 'r') as cf:
+      config = yaml.load(cf)
 
   return config
