@@ -425,10 +425,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       ports.add(port);
     }
 
-    // create port for prometheus to scrape metrics
-    ObjectNode prometheusPort = mapper.createObjectNode();
-
-
     return ports;
   }
 
