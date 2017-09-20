@@ -265,7 +265,7 @@ class HeronExecutorTest(unittest.TestCase):
     current_commands = self.executor_1.get_commands_to_run()
 
     self.assertEquals(dict(
-        map((lambda (process_info): (process_info.name, process_info.command.split(' '))),
+        map((lambda process_info: (process_info.name, process_info.command.split(' '))),
             self.expected_processes_container_1)), current_commands)
 
     # update instance distribution
