@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''result.py'''
+from __future__ import print_function
 import abc
 import sys
-from __future__ import print_function
 from enum import Enum
 
 from heron.common.src.python.utils import proc
