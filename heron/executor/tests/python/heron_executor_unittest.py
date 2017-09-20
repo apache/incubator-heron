@@ -248,7 +248,7 @@ class HeronExecutorTest(unittest.TestCase):
                           executor.processes))
     found_monitored = list(map(lambda pinfo:
                           (pinfo[0], pinfo[1].name, pinfo[1].command_str),
-                          monitored_processes.items())
+                          monitored_processes.items()))
     found_processes.sort(key=lambda tuple: tuple[0])
     found_monitored.sort(key=lambda tuple: tuple[0])
     print("do_test_commands - found_processes: %s found_monitored: %s" \
