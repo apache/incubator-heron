@@ -246,7 +246,16 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     metadataNode.set(KubernetesConstants.METADATA_LABELS, labels);
 
+    ObjectNode annotations = mapper.createObjectNode();
+    applyPrometheusAnnotations(annotations);
+    metadataNode.set(KubernetesConstants.METADATA_ANNOTATIONS, annotations);
+
     return metadataNode;
+  }
+
+  private void applyPrometheusAnnotations(ObjectNode node) {
+    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_SCRAPE, "true");
+    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_PORT, KubernetesConstants.PROMETHEUS_PORT);
   }
 
   /**
@@ -415,6 +424,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.PORT_NAMES[i]);
       ports.add(port);
     }
+
+    // create port for prometheus to scrape metrics
+    ObjectNode prometheusPort = mapper.createObjectNode();
+
 
     return ports;
   }
