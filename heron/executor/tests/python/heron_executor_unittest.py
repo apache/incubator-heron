@@ -31,12 +31,10 @@ def get_test_heron_internal_yaml():
   """
   heron_dir = '/'.join(__file__.split('/')[:-5])
   yaml_path = os.path.join(heron_dir, 'heron/config/src/yaml/conf/test/test_heron_internals.yaml')
-  override_path = os.path.join(
-    heron_dir, 'heron/config/src/yaml/conf/test/test_override.yaml')
 
-  return yaml_path, override_path
+  return yaml_path
 
-INTERNAL_CONF_PATH, OVERRIDE_PATH = get_test_heron_internal_yaml()
+INTERNAL_CONF_PATH = get_test_heron_internal_yaml()
 HOSTNAME = socket.gethostname()
 
 class MockPOpen(object):
@@ -98,8 +96,8 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
            "-Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true " \
            "-cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager metricsmgr-%d " \
-           "metricsmgr_port topname topid %s %s " \
-           "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
+           "metricsmgr_port topname topid %s " \
+           "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH)
 
   def get_expected_metricscachemgr_command():
       return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
@@ -111,10 +109,8 @@ class HeronExecutorTest(unittest.TestCase):
              "-cp metricscachemgr_classpath com.twitter.heron.metricscachemgr.MetricsCacheManager " \
              "--metricscache_id metricscache-0 --master_port metricscachemgr_masterport " \
              "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
-             "--system_config_file %s --override_config_file %s " \
-             "--sink_config_file metrics_sinks_config_file " \
-             "--cluster cluster --role role --environment environ --verbose" %\
-             (INTERNAL_CONF_PATH, OVERRIDE_PATH)
+             "--system_config_file %s --sink_config_file metrics_sinks_config_file " \
+             "--cluster cluster --role role --environment environ --verbose" % (INTERNAL_CONF_PATH)
 
   def get_expected_healthmgr_command():
       return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
@@ -139,9 +135,9 @@ class HeronExecutorTest(unittest.TestCase):
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
            "com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d " \
-           "tmaster_controller_port master_port metricsmgr_port %s %s" \
+           "tmaster_controller_port metricsmgr_port %s" \
            % (instance_name, instance_name, component_name, instance_id,
-              container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
+              container_id, INTERNAL_CONF_PATH)
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
@@ -149,8 +145,8 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_binary %s master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot '
-                  '%s %s metrics_sinks_config_file metricsmgr_port '
-                  'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  '%s metrics_sinks_config_file metricsmgr_port '
+                  'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH )),
       ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
@@ -162,8 +158,8 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'stmgr-1',
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
                   'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-1'
-                  % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  'tmaster_controller_port metricsmgr_port shell-port %s ckptmgr-port ckptmgr-1'
+                  % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
                   get_expected_instance_command('exclaim1', 1, 1)),
@@ -179,10 +175,10 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
                   get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
-                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
-                  'container_7_word_11,container_7_exclaim1_210 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-7'
-                  % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
+                'container_7_word_11,container_7_exclaim1_210 %s master_port '
+                'tmaster_controller_port metricsmgr_port shell-port %s ckptmgr-port ckptmgr-7'
+                % (HOSTNAME, INTERNAL_CONF_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),
   ]
@@ -213,14 +209,14 @@ class HeronExecutorTest(unittest.TestCase):
     zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port
-    %s %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
+    %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
     metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
     is_stateful_enabled ckptmgr_classpath ckptmgr-port stateful_config_file
     healthmgr_mode healthmgr_classpath
-    """ % (shard_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)).replace("\n", '').split()
+    """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
