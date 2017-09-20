@@ -93,21 +93,27 @@ In this example, the `RandomFruitSpout` implements the [`Spout`](/api/python/api
 Here's a simple processing graph created using this input streamlet:
 
 ```python
-from heronpy.dsl.streamlet import TimeWindow
-
 def process_fruit(fruit):
     print("The fruit {} was selected".format(fruit))
 
 fruits_graph = RandomFruitStreamlet.random_fruit_streamlet(stage_name='input', parallelism=3)
                .map(lambda fruit: process_fruit(fruit))
-               .reduce_by_window(TimeWindow())
 ```
 
 ## Windowing
 
-Windowing is the process of gathering tuples over a specified duration of time, applying
+Windowing is the process of gathering tuples over a specified duration of time, creating a new streamlet by applying some kind of reduce logic to the gathered tuples, and returning the resulting streamlet at the end of the period. An example would be returning a count of words in a word count topology every minute.
 
-[`TimeWindow`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.TimeWindow)
+In general, windowing operations in the Python DSL require specifying a [`TimeWindow`](/api/python/dsl/streamlet.m.html#heronpy.dsl.streamlet.TimeWindow) object that specifies the window itself.
+
+```python
+from heronpy.dsl.streamlet import TimeWindow
+
+counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
+         .flat_map(lambda line: line.split(), parallelism=2) \
+         .map(lambda word: (word, 1), parallelism=2)
+         .reduce_by_window()
+```
 
 ## Examples
 

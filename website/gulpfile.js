@@ -41,17 +41,6 @@ gulp.task('js:watch', function() {
   gulp.watch(SRC.js, gulp.series('js'));
 });
 
-// CSS assets
-gulp.task('css', function(done) {
-  gulp.src(SRC.css)
-    .pipe(gulp.dest(DIST.css));
-  done();
-});
-
-gulp.task('css:watch', function() {
-  return gulp.watch(SRC.css, gulp.watch('css'));
-});
-
 // Sass assets
 gulp.task('sass', function(done) {
   gulp.src(SRC.sass)
@@ -66,26 +55,8 @@ gulp.task('sass:watch', function() {
   gulp.watch(SRC.sass, gulp.series('sass'));
 });
 
-// Fonts
-gulp.task('fonts', function(done) {
-  gulp.src(SRC.fonts)
-    .pipe(gulp.dest(DIST.fonts));
-  done();
-});
-
-// Images
-gulp.task('images', function(done) {
-  gulp.src(SRC.images)
-    .pipe(gulp.dest(DIST.images));
-  done();
-});
-
-gulp.task('images:watch', function() {
-  gulp.watch(SRC.images, gulp.series('images'));
-});
-
 // One-time build; doesn't watch for changes
-gulp.task('build', gulp.series('js', 'sass', 'css', 'fonts', 'images'));
+gulp.task('build', gulp.series('js', 'sass'));
 
 // Delete static folder
 gulp.task('clean', function(done) {
@@ -94,7 +65,7 @@ gulp.task('clean', function(done) {
 });
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('build', gulp.parallel('js:watch', 'sass:watch', 'css:watch', 'images:watch')));
+gulp.task('dev', gulp.series('build', gulp.parallel('js:watch', 'sass:watch')));
 
 // Help => list tasks
 gulp.task('help', function(done) {
