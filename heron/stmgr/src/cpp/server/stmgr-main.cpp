@@ -51,21 +51,14 @@ int main(int argc, char* argv[]) {
   std::string instanceids = argv[7];
   std::vector<std::string> instances = StrUtils::split(instanceids, ",");
   std::string myhost = argv[8];
-<<<<<<< HEAD
-  sp_int32 myport = atoi(argv[9]);
-  sp_int32 metricsmgr_port = atoi(argv[10]);
-  sp_int32 shell_port = atoi(argv[11]);
-  sp_string heron_internals_config_filename = argv[12];
-  sp_string override_config_filename = argv[13];
-=======
   sp_int32 data_port = atoi(argv[9]);
   sp_int32 local_data_port = atoi(argv[10]);
   sp_int32 metricsmgr_port = atoi(argv[11]);
   sp_int32 shell_port = atoi(argv[12]);
   sp_string heron_internals_config_filename = argv[13];
->>>>>>> master
-  sp_int32 ckptmgr_port = atoi(argv[14]);
-  sp_string ckptmgr_id = argv[15];
+  sp_string override_config_filename = argv[14];
+  sp_int32 ckptmgr_port = atoi(argv[15]);
+  sp_string ckptmgr_id = argv[16];
 
   EventLoopImpl ss;
 
