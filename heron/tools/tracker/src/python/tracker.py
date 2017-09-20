@@ -13,6 +13,8 @@
 # limitations under the License.
 ''' tracker.py '''
 import json
+import sys
+import traceback
 
 from functools import partial
 
@@ -54,6 +56,13 @@ class Tracker(object):
     Sync the topologies with the statemgrs.
     """
     self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
+    try:
+      for state_manager in self.state_managers:
+        state_manager.start()
+    except Exception as ex:
+      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      traceback.print_exc()
+      sys.exit(1)
 
     # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
