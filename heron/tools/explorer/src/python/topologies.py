@@ -50,6 +50,7 @@ def to_table(result):
   return table, header, rest_count
 
 
+# pylint: disable=superfluous-parens
 def show_cluster(cl_args, cluster):
   ''' print topologies information to stdout '''
   try:
@@ -69,6 +70,7 @@ def show_cluster(cl_args, cluster):
   return True
 
 
+# pylint: disable=superfluous-parens
 def show_cluster_role(cl_args, cluster, role):
   ''' print topologies information to stdout '''
   try:
@@ -88,6 +90,7 @@ def show_cluster_role(cl_args, cluster, role):
   return True
 
 
+# pylint: disable=superfluous-parens
 def show_cluster_role_env(cl_args, cluster, role, env):
   ''' print topologies information to stdout '''
   try:

@@ -57,7 +57,7 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='version')
   return parser
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, cl_args, unknown_args):
   '''
   :param command:

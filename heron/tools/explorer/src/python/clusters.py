@@ -29,7 +29,7 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='clusters')
   return subparsers
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, cl_args, unknown_args):
   """ run command """
   try:

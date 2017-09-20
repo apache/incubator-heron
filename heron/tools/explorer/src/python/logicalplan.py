@@ -97,7 +97,7 @@ def filter_spouts(table, header):
   return spouts_info, header
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(cl_args, compo_type):
   """ run command """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']

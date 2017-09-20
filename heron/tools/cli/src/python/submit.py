@@ -142,6 +142,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   return res
 
 ################################################################################
+# pylint: disable=superfluous-parens
 def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_name):
   '''
   Launch a topology given topology jar, its definition file and configurations

@@ -46,7 +46,7 @@ HELP_EPILOG = '''Getting more help:
 For detailed documentation, go to http://heronstreaming.io'''
 
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,superfluous-parens
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
     parser.print_help()
@@ -192,6 +192,7 @@ def server_deployment_mode(command, parser, cluster, cl_args):
   return cl_args
 
 ################################################################################
+# pylint: disable=superfluous-parens
 def direct_deployment_mode(command, parser, cluster, cl_args):
   '''
   check the direct deployment mode for the given cluster

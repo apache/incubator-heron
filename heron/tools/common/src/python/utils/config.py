@@ -252,7 +252,7 @@ def heron_rc_file():
   return os.path.join(os.path.expanduser('~'), '.heronrc')
 
 ################################################################################
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,superfluous-parens
 def parse_cluster_role_env(cluster_role_env, config_path):
   """Parse cluster/[role]/[environ], supply default, if not provided, not required"""
   parts = cluster_role_env.split('/')[:3]

@@ -123,6 +123,7 @@ def run(command, *args):
   return 1
 
 
+# pylint: disable=superfluous-parens
 def extract_common_args(command, parser, cl_args):
   """ extract common args """
   try:

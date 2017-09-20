@@ -40,7 +40,7 @@ def create_parser(subparsers):
   return parser
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, args, unknown_args):
   '''
   :param command:
