@@ -9,7 +9,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )

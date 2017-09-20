@@ -33,7 +33,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
@@ -49,7 +49,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
@@ -63,7 +63,7 @@ pex_library(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
 )
 
@@ -78,7 +78,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
@@ -94,7 +94,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
         "mock==1.0.1",
     ],
     size = "small",
@@ -109,7 +109,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
@@ -123,7 +123,7 @@ pex_test(
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
