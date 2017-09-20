@@ -27,12 +27,12 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 16) {
+  if (argc != 17) {
     std::cout << "Usage: " << argv[0] << " "
               << "<topname> <topid> <topdefnfile> "
               << "<zknode> <zkroot> <stmgrid> "
               << "<instanceids> <myhost> <data_port> <local_data_port> <metricsmgrport> "
-              << "<shellport> <heron_internals_config_filename> "
+              << "<shellport> <heron_internals_config_filename> <override_config_filename "
               << "<ckptmgr_port> <ckptmgr_id>"
               << std::endl;
     std::cout << "If zknode is empty please say LOCALMODE\n";
@@ -56,14 +56,16 @@ int main(int argc, char* argv[]) {
   sp_int32 metricsmgr_port = atoi(argv[11]);
   sp_int32 shell_port = atoi(argv[12]);
   sp_string heron_internals_config_filename = argv[13];
-  sp_int32 ckptmgr_port = atoi(argv[14]);
-  sp_string ckptmgr_id = argv[15];
+  sp_string override_config_filename = argv[14];
+  sp_int32 ckptmgr_port = atoi(argv[15]);
+  sp_string ckptmgr_id = argv[16];
 
   EventLoopImpl ss;
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss, heron_internals_config_filename);
+  heron::config::HeronInternalsConfigReader::Create(&ss,
+    heron_internals_config_filename, override_config_filename);
 
   heron::common::Initialize(argv[0], myid.c_str());
 
