@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_binary")
+load("/tools/rules/pex/pex_rules", "pex_binary")
 
 release_version = "unversioned"
 
@@ -230,7 +230,7 @@ filegroup(
 
 filegroup(
     name = "hexamples",
-    srcs = ["//heron/examples/src/java:heron-examples"],
+    srcs = ["//examples/src/java:heron-examples"],
 )
 
 filegroup(
@@ -380,7 +380,7 @@ filegroup(
 
 filegroup(
     name = "hstorm",
-    srcs = ["//heron/storm/src/java:heron-storm"],
+    srcs = ["//storm-compatibility/src/java:heron-storm"],
 )
 
 filegroup(

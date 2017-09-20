@@ -72,7 +72,7 @@ cc_test(
         "dummy_tuple_cache.h",
         "dummy_ckptmgr_client.h",
         "dummy_stmgr_clientmgr.h",
-        "dummy_stmgr_server.h",
+        "dummy_instance_server.h",
     ],
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",

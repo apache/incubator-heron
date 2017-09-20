@@ -1,5 +1,4 @@
-load("/tools/rules/pex_rules", "pex_test")
-load("/tools/rules/pex_rules", "pex_library")
+package(default_visibility = ["//visibility:public"])
 
 pex_library(
   name = 'mock_proto',
@@ -14,6 +13,7 @@ pex_test(
     name = "topology_unittest",
     srcs = ["topology_unittest.py"],
     deps = [
+        ":mock_proto",
         "//heron/tools/tracker/src/python:tracker-py",
     ],
     reqs = [

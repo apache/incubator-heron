@@ -281,7 +281,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/heron/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.

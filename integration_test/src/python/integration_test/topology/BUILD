@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_library", "pex_binary")
+load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
 
 filegroup(
     name = "test-data-files",
@@ -15,6 +15,8 @@ pex_library(
     ),
     deps = [
         "//heronpy/api:heron-python-py",
+        "//heronpy/dsl:heron-pythondsl-py",
+        "//heronpy/connectors:heron-pythonconnectors-py",
         "//integration_test/src/python/integration_test/common:heron-integration-common-py",
         "//integration_test/src/python/integration_test/core:heron-integration-core-py",
     ],

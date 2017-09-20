@@ -245,4 +245,18 @@ public class KubernetesSchedulerTest {
       Assert.assertFalse(KubernetesScheduler.topologyNameIsValid(topologyName));
     }
   }
+
+  @Test
+  public void testValidImagePullPolicies() {
+    // test valid names
+    Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(null));
+    Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(""));
+    KubernetesConstants.VALID_IMAGE_PULL_POLICIES.forEach((String policy) ->
+        Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(policy))
+    );
+
+    // test invalid names
+    Assert.assertFalse(KubernetesScheduler.imagePullPolicyIsValid("never"));
+    Assert.assertFalse(KubernetesScheduler.imagePullPolicyIsValid("unknownPolicy"));
+  }
 }

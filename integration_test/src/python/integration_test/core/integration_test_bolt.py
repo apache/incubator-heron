@@ -98,6 +98,7 @@ class IntegrationTestBolt(Bolt):
 
   def emit(self, tup, stream=Stream.DEFAULT_STREAM_ID, anchors=None,
            direct_task=None, need_task_ids=False):
+    Log.info("emitting tuple: %s", tup)
     if tup is None:
       super(IntegrationTestBolt, self).emit(list(self.current_tuple_processing),
                                             stream=stream, anchors=anchors,
@@ -118,3 +119,6 @@ class IntegrationTestBolt(Bolt):
     if self.tuples_processed < self.tuple_received:
       super(IntegrationTestBolt, self).fail(tup)
       self.tuples_processed += 1
+
+  def process_tick(self, tup):
+    self.user_bolt.process_tick(tup)

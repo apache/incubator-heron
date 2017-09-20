@@ -38,7 +38,7 @@ BIN_JARS=`find $HERON_ROOT_DIR/bazel-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-genfiles/external/. -name "*\.jar" | tr '\n' ':'`
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
-CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
+CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/storm-compatibility/src/java/_javac/storm-compatibility-java/libstorm-compatibility-java_classes/."
 
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
@@ -46,7 +46,7 @@ $JAVADOC $FLAGS \
   -windowtitle "Heron Java API" \
   -doctitle "The Heron Java API" \
   -overview $OVERVIEW_HTML_FILE \
-  -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+  -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES || true
 
 # Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:

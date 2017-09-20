@@ -47,13 +47,9 @@ run_build() {
   CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
 
-  SCRIPT_FILE="$DOCKER_DIR/start-services.sh"
-  SCRIPT_OUT_FILE="$SCRATCH_DIR/artifacts/start-services.sh"
-
   cp $TOOLS_FILE $TOOLS_OUT_FILE
   cp $CLIENT_FILE $CLIENT_OUT_FILE
   cp $CORE_FILE $CORE_OUT_FILE
-  cp $SCRIPT_FILE $SCRIPT_OUT_FILE
 
   export HERON_VERSION
 

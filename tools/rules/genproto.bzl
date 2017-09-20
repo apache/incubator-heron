@@ -1,4 +1,4 @@
-load("pex_rules", "pex_library")
+load("/tools/rules/pex/pex_rules", "pex_library")
 
 def proto_package_impl(ctx):
   return struct(proto_src = ctx.file.src)
@@ -80,7 +80,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         srcs = [name+"_java_src"],
         deps = java_deps,
         visibility = visibility,
-        javacopts = [ "-Xlint:-static" ],
+        javacopts = [ "-Xlint:-cast", "-Xlint:-static", "-Xlint:-deprecation"],
     )
 
   if not includes:

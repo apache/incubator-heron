@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_library", "pex_binary")
+load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
     name = "tracker-py",
@@ -16,7 +16,7 @@ pex_library(
         "//heron/proto:proto-py",
     ],
     reqs = [
-        "protobuf==2.5.0",
+        "protobuf==3.4.0",
         "tornado==4.0.2",
     ],
 )
