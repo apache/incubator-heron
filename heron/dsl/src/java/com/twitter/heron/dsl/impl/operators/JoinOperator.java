@@ -23,7 +23,9 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.KeyedWindow;
 import com.twitter.heron.dsl.SerializableBiFunction;
+import com.twitter.heron.dsl.Window;
 
 /**
  * JoinOperator is the bolt that implements the join/leftJoin/innerJoin functionality.
@@ -90,25 +92,25 @@ public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
         }
       }
     }
-    evaluateJoinMap(joinMap);
+    evaluateJoinMap(joinMap, inputWindow);
   }
 
-  private void evaluateJoinMap(Map<K, KeyValue<V1, V2>> joinMap) {
+  private void evaluateJoinMap(Map<K, KeyValue<V1, V2>> joinMap, TupleWindow tupleWindow) {
     for (K key : joinMap.keySet()) {
       KeyValue<V1, V2> val = joinMap.get(key);
       switch (joinType) {
         case INNER:
           if (val.getKey() != null && val.getValue() != null) {
-            joinAndEmit(key, val);
+            joinAndEmit(key, tupleWindow, val);
           }
           break;
         case LEFT:
           if (val.getKey() != null) {
-            joinAndEmit(key, val);
+            joinAndEmit(key, tupleWindow, val);
           }
           break;
         case OUTER:
-          joinAndEmit(key, val);
+          joinAndEmit(key, tupleWindow, val);
           break;
         default:
           throw new RuntimeException("Unknown join type " + joinType.name());
@@ -132,8 +134,22 @@ public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
     }
   }
 
-  private void joinAndEmit(K key, KeyValue<V1, V2> val) {
-    KeyValue<K, VR> t = new KeyValue<K, VR>(key, joinFn.apply(val.getKey(), val.getValue()));
-    collector.emit(new Values(t));
+  private void joinAndEmit(K key, TupleWindow tupleWindow, KeyValue<V1, V2> val) {
+    long startWindow;
+    long endWindow;
+    if (tupleWindow.getStartTimestamp() == null) {
+      startWindow = 0;
+    } else {
+      startWindow = tupleWindow.getStartTimestamp();
+    }
+    if (tupleWindow.getEndTimestamp() == null) {
+      endWindow = 0;
+    } else {
+      endWindow = tupleWindow.getEndTimestamp();
+    }
+    Window window = new Window(startWindow, endWindow, tupleWindow.get().size());
+    KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
+    collector.emit(new Values(new KeyValue<>(keyedWindow,
+        joinFn.apply(val.getKey(), val.getValue()))));
   }
 }

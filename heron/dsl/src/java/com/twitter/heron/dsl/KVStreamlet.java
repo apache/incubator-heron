@@ -31,7 +31,7 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
   */
-  <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
+  <V2, VR> KVStreamlet<KeyedWindow<K>, VR> join(KVStreamlet<K, V2> other,
                           WindowConfig windowCfg,
                           SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
@@ -45,7 +45,7 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
    */
-  <V2, VR> KVStreamlet<K, VR> leftJoin(KVStreamlet<K, V2> other,
+  <V2, VR> KVStreamlet<KeyedWindow<K>, VR> leftJoin(KVStreamlet<K, V2> other,
                           WindowConfig windowCfg,
                           SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 
@@ -59,7 +59,7 @@ public interface KVStreamlet<K, V> extends Streamlet<KeyValue<K, V>> {
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
    */
-  <V2, VR> KVStreamlet<K, VR> outerJoin(KVStreamlet<K, V2> other,
+  <V2, VR> KVStreamlet<KeyedWindow<K>, VR> outerJoin(KVStreamlet<K, V2> other,
                           WindowConfig windowCfg,
                           SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
 

@@ -21,6 +21,7 @@ java_library(
 java_tests(
   test_classes = [
     "com.twitter.heron.dsl.impl.BaseStreamletTest",
+    "com.twitter.heron.dsl.impl.BaseKVStreamletTest",
   ],
   runtime_deps = [ ":dsl-tests" ],
   size = "small",

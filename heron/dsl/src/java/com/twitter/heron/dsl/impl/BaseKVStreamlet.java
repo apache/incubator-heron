@@ -39,7 +39,7 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param joinFunction The join function that needs to be applied
   */
   @Override
-  public <V2, VR> KVStreamlet<K, VR> join(KVStreamlet<K, V2> other,
+  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> join(KVStreamlet<K, V2> other,
                        WindowConfig windowCfg,
                        SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
@@ -61,7 +61,7 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public <V2, VR> KVStreamlet<K, VR> leftJoin(KVStreamlet<K, V2> other,
+  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> leftJoin(KVStreamlet<K, V2> other,
                       WindowConfig windowCfg,
                       SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
@@ -83,7 +83,7 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public <V2, VR> KVStreamlet<K, VR> outerJoin(KVStreamlet<K, V2> other,
+  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> outerJoin(KVStreamlet<K, V2> other,
                          WindowConfig windowCfg,
                          SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
