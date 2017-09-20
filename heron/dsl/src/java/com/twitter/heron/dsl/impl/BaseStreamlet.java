@@ -114,12 +114,22 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   }
 
   /**
-   * Gerts the number of partitions of this Streamlet.
+   * Gets the number of partitions of this Streamlet.
    * @return the number of partitions of this Streamlet
    */
   @Override
   public int getNumPartitions() {
     return nPartitions;
+  }
+
+  /**
+   * Gets all the children of this streamlet.
+   * Children of a streamlet are streamlets that are resulting from transformations of elements of
+   * this and potentially other streamlets.
+   * @return The kid streamlets
+   */
+  public List<BaseStreamlet<?>> getChildren() {
+    return children;
   }
 
   /**
@@ -195,7 +205,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   }
 
   /**
-   * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
+   * Same as filter(Identity).setNumPartitions(nPartitions)
   */
   @Override
   public Streamlet<R> repartition(int numPartitions) {

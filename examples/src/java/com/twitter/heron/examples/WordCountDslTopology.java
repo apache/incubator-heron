@@ -18,8 +18,8 @@ import java.util.Arrays;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.dsl.Builder;
-import com.twitter.heron.dsl.Runner;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.Runner;
 import com.twitter.heron.dsl.WindowConfig;
 
 /**
