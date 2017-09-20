@@ -210,6 +210,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
 
     auroraProperties.put(AuroraField.SYSTEM_YAML, Context.systemConfigFile(config));
+    auroraProperties.put(AuroraField.OVERRIDE_YAML, Context.overrideFile(config));
     auroraProperties.put(AuroraField.COMPONENT_RAMMAP, Runtime.componentRamMap(runtime));
     auroraProperties.put(AuroraField.COMPONENT_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
