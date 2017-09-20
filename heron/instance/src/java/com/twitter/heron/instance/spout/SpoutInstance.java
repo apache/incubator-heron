@@ -157,7 +157,8 @@ public class SpoutInstance implements IInstance {
   }
 
   @SuppressWarnings("unchecked")
-  public void start() {
+  @Override
+  public void init(State<Serializable, Serializable> state) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
@@ -167,6 +168,7 @@ public class SpoutInstance implements IInstance {
 
     // Initialize the instanceState if the spout is stateful
     if (spout instanceof IStatefulComponent) {
+      this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
     }
 
@@ -178,21 +180,18 @@ public class SpoutInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+  }
 
-    // Tasks happen in every time looper is waken up
+  @Override
+  public void start() {
+    // Add spout ta
     addSpoutsTasks();
 
     topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
-  public void start(State<Serializable, Serializable> state) {
-    this.instanceState = state;
-    start();
-  }
-
-  @Override
-  public void stop() {
+  public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
 
@@ -200,9 +199,14 @@ public class SpoutInstance implements IInstance {
     spout.close();
 
     // Clean the resources we own
-    looper.exitLoop();
     streamInQueue.clear();
     collector.clear();
+  }
+
+  @Override
+  public void shutdown() {
+    clean();
+    looper.exitLoop();
   }
 
   @Override

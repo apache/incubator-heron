@@ -15,13 +15,11 @@
 package com.twitter.heron.instance;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.state.HashMapState;
@@ -46,6 +44,8 @@ import com.twitter.heron.proto.system.Metrics;
  * will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
  * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
  */
+// TODO (nlu): the slave should handle newPhysicalPlan properly, init() instnace,
+// start() instance, clean() instance properly
 
 public class Slave implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Slave.class.getName());
@@ -62,7 +62,7 @@ public class Slave implements Runnable, AutoCloseable {
   private PhysicalPlanHelper helper;
   private SystemConfig systemConfig;
 
-  private boolean isInstanceStarted = false;
+  private boolean isInstanceStarted;
 
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
@@ -77,6 +77,8 @@ public class Slave implements Runnable, AutoCloseable {
     this.streamOutCommunicator = streamOutCommunicator;
     this.inControlQueue = inControlQueue;
     this.metricsOutCommunicator = metricsOutCommunicator;
+
+    isInstanceStarted = false;
 
     // The instance state will be provided by stream manager with RestoreInstanceStateRequests
     instanceState = null;
@@ -165,8 +167,8 @@ public class Slave implements Runnable, AutoCloseable {
           systemConfig.getInstanceTuningCurrentSampleWeight());
     }
 
-    if (!helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-      LOG.info("The instance is deployed in deactivated state");
+    if (!helper.isTopologyRunning()) {
+      LOG.info("Instance is deployed in deactivated state");
     }
 
     startInstanceIfNeeded();
@@ -185,25 +187,42 @@ public class Slave implements Runnable, AutoCloseable {
     //  2. The TopologyState == RUNNING
     //  3. - If the topology is stateful and we got the stateful processing start signal
     //     - If the topology is not stateful
-    if (helper != null && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-      Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
-          .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+    if (helper == null) {
+      LOG.info("No physical plan received. Instance is not started");
+      return;
+    }
 
-      if (!isTopologyStateful || isStatefulProcessingStarted) {
-        instance.start(instanceState);
+    if (!helper.isTopologyRunning()) {
+      LOG.info("Topology is not in RUNNING state. Instance is not started");
+      return;
+    }
+
+    if (helper.isTopologyStateful()) {
+      // For stateful topology, the `init(state)` will be
+      // invoked when a RestoreInstanceStateRequest is received
+      if (isStatefulProcessingStarted) {
         isInstanceStarted = true;
-        LOG.info("Started instance.");
+        instance.start();
+        LOG.info("Instance is started for stateful topology");
+      } else {
+        LOG.info("Start StatefulProcessing signal not received. Instance is not started");
       }
+    } else {
+      // For non-stateful topology, the `null` is provided
+      // as state and will be ignored
+      instance.init(null);
+      instance.start();
+      isInstanceStarted = true;
+      LOG.info("Instance is started for non-stateful topology");
     }
   }
 
   public void close() {
     LOG.info("Closing the Slave Thread");
     this.metricsCollector.forceGatherAllMetrics();
-    LOG.info("Cleaning up the instance");
+    LOG.info("Shutting down the instance");
     if (instance != null) {
-      instance.stop();
+      instance.shutdown();
     }
 
     // Clean the resources we own
@@ -218,37 +237,47 @@ public class Slave implements Runnable, AutoCloseable {
     LOG.info("Starting stateful processing: " + startStatefulRequest.getCheckpointId());
     isStatefulProcessingStarted = true;
 
-    // At this point, the pre-condition is we have already create the actual instance
-    // Check if we can start the topology
+    // At this point, the pre-condition is we have already created the actual instance
+    // and initialized it properly. Check if we can start the topology
     startInstanceIfNeeded();
+  }
+
+  private void cleanSlave() {
+    // Reset the in stream queue
+    streamInCommunicator.clear();
+
+    // Flash out existing metrics
+    metricsCollector.forceGatherAllMetrics();
+
+    // Clean tasks and timer in looper
+    slaveLooper.clearTasksOnWakeup();
+    slaveLooper.clearTimers();
+
+    // Create a new MetricsCollector with the clean slaveLooper
+    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+
+    if (instance != null) {
+      instance.clean();
+    }
+
+    if (instanceState != null) {
+      instanceState.clear();
+    }
+
+    isStatefulProcessingStarted = false;
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
+    LOG.info("Received restore instance state request. Start cleaning the Slave thread");
+    cleanSlave();
+
+    // re-registering the handling the control msg
+    handleControlMessage();
+
     LOG.info("Restoring state to checkpoint id: " + request.getState().getCheckpointId());
-    isStatefulProcessingStarted = false;
-    // Reset the in stream queue
-    streamInCommunicator.clear();
-
-    metricsCollector.forceGatherAllMetrics();
-
-    slaveLooper.clearTasksOnWakeup();
-    slaveLooper.clearTimers();
-
-    slaveLooper.addTasksOnWakeup(this);
-    // Create a new MetricsCollector with new clean slave looper
-    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
-
-    // Stop current working instance if there is one
-    if (instance != null) {
-      instance.stop();
-    }
-
     // Restore the state
-    if (instanceState != null) {
-      instanceState.clear();
-    }
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
@@ -273,6 +302,8 @@ public class Slave implements Runnable, AutoCloseable {
     // - We would create new instance when new "PhysicalPlan" comes
     // - Instance will start either within "StartStatefulProcessing" or new "PhysicalPlan"
     // 2. If during the normal running, we need to restart the instance
+    instance.init(instanceState);
+
     if (isInstanceStarted && helper != null) {
       LOG.info("Restarting instance");
       resetCurrentAssignment();

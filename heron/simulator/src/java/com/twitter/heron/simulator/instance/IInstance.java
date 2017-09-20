@@ -34,7 +34,7 @@ public interface IInstance {
    * TODO: - to avoid confusing, we in fact have never called this method yet
    * TODO: - need to consider whether or not call this method more carefully
    */
-  void stop();
+  void shutdown();
 
   /**
    * Read tuples from a queue and process the tuples

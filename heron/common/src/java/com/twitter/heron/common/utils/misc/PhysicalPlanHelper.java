@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.utils.Utils;
@@ -300,6 +301,16 @@ public class PhysicalPlanHelper {
 
   public boolean isCustomGroupingEmpty() {
     return customGrouper.isCustomGroupingEmpty();
+  }
+
+  public boolean isTopologyStateful() {
+    Map<String, Object> config = topologyContext.getTopologyConfig();
+    return String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE).equals(
+        config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+  }
+
+  public boolean isTopologyRunning() {
+    return getTopologyState().equals(TopologyAPI.TopologyState.RUNNING);
   }
 }
 
