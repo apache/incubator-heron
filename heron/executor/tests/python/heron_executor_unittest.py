@@ -243,20 +243,20 @@ class HeronExecutorTest(unittest.TestCase):
     monitored_processes = executor.processes_to_monitor
 
     # convert to (pid, name, command)
-    found_processes = map(lambda (process_info):
+    found_processes = list(map(lambda process_info:
                           (process_info.pid, process_info.name, process_info.command_str),
-                          executor.processes)
-    found_monitored = map(lambda (pid, process_info):
-                          (pid, process_info.name, process_info.command_str),
+                          executor.processes))
+    found_monitored = list(map(lambda pinfo:
+                          (pinfo[0], pinfo[1].name, pinfo[1].command_str),
                           monitored_processes.items())
     found_processes.sort(key=lambda tuple: tuple[0])
     found_monitored.sort(key=lambda tuple: tuple[0])
-    print "do_test_commands - found_processes: %s found_monitored: %s" \
-          % (found_processes, found_monitored)
+    print("do_test_commands - found_processes: %s found_monitored: %s" \
+          % (found_processes, found_monitored))
     self.assertEquals(found_processes, found_monitored)
 
-    print "do_test_commands - expected_processes: %s monitored_processes: %s" \
-          % (expected_processes, monitored_processes)
+    print("do_test_commands - expected_processes: %s monitored_processes: %s" \
+          % (expected_processes, monitored_processes))
     self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):
