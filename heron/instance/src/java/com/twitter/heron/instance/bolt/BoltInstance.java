@@ -226,7 +226,7 @@ public class BoltInstance implements IInstance {
   public void readTuplesAndExecute(Communicator<Message> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     Duration instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
-`
+
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
