@@ -16,7 +16,6 @@ package com.twitter.heron.dsl.impl.operators;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.state.State;
