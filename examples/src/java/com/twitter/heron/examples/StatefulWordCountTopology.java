@@ -129,7 +129,13 @@ public final class StatefulWordCountTopology {
 
     @Override
     public void nextTuple() {
+      try {
+        Thread.sleep(3000);
+      } catch (Exception ex) {
+        //
+      }
       int nextInt = rnd.nextInt(ARRAY_LENGTH);
+      System.out.println("word is: " + words[nextInt]);
       collector.emit(new Values(words[nextInt]));
     }
   }
@@ -162,7 +168,13 @@ public final class StatefulWordCountTopology {
 
     @Override
     public void execute(Tuple tuple) {
+      try {
+        Thread.sleep(3000);
+      } catch (Exception ex) {
+        // do nothing
+      }
       String key = tuple.getString(0);
+      System.out.println(key);
       if (myState.get(key) == null) {
         myState.put(key, 1);
       } else {
@@ -195,6 +207,7 @@ public final class StatefulWordCountTopology {
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
     conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+    conf.setTopologyStatefulCheckpointIntervalSecs(20);
 
     // configure component resources
     com.twitter.heron.api.Config.setComponentRam(conf, "word",

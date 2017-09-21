@@ -226,7 +226,7 @@ public class BoltInstance implements IInstance {
   public void readTuplesAndExecute(Communicator<Message> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     Duration instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
-
+`
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
@@ -235,7 +235,7 @@ public class BoltInstance implements IInstance {
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpointId =
             ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Persisting state for checkpoint: " + checkpintId);
+        LOG.info("Persisting state for checkpoint: " + checkpointId);
         persistState(checkpointId);
       }
 
