@@ -16,6 +16,7 @@ package com.twitter.heron.dsl.impl.operators;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.state.State;
@@ -67,8 +68,7 @@ public class TransformOperator<R, T> extends DslOperator {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    T result = transformFunction.transform(obj);
-    collector.emit(new Values(result));
+    transformFunction.transform(obj, x -> collector.emit(new Values(x)));
     collector.ack(tuple);
   }
 }

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -224,8 +225,8 @@ public class BaseStreamletTest {
           }
 
           @Override
-          public Double transform(Double aDouble) {
-            return aDouble;
+          public void transform(Double aDouble, Consumer<Double> consumer) {
+            consumer.accept(aDouble);
           }
 
           @Override
