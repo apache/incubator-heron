@@ -4,11 +4,13 @@ package(default_visibility = ["//visibility:public"])
 
 dsl_shaded_deps_files = [
       "//heron/api/src/java:heron-api",
+      "//heron/common/src/java:basics-java",
     ]
 
 dsl_unshaded_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/api/src/java:classification",
+    "//heron/common/src/java:basics-java",
 ]
 
 java_library(
