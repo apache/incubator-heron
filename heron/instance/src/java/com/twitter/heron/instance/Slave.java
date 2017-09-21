@@ -44,9 +44,6 @@ import com.twitter.heron.proto.system.Metrics;
  * will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
  * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
  */
-// TODO (nlu): the slave should handle newPhysicalPlan properly, init() instnace,
-// start() instance, clean() instance properly
-
 public class Slave implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Slave.class.getName());
 
@@ -198,19 +195,19 @@ public class Slave implements Runnable, AutoCloseable {
     }
 
     if (helper.isTopologyStateful()) {
-      // For stateful topology, the `init(state)` will be
-      // invoked when a RestoreInstanceStateRequest is received
+      // For stateful topology, `init(state)` will be invoked
+      // when a RestoreInstanceStateRequest is received
       if (isStatefulProcessingStarted) {
         instance.init(instanceState);
         instance.start();
         isInstanceStarted = true;
         LOG.info("Instance is started for stateful topology");
       } else {
-        LOG.info("Start StatefulProcessing signal not received. Instance is not started");
+        LOG.info("Start signal not received. Instance is not started");
       }
     } else {
-      // For non-stateful topology, the `null` is provided
-      // as state and will be ignored
+      // For non-stateful topology, any provided state will be ignored
+      // by the instance
       instance.init(null);
       instance.start();
       isInstanceStarted = true;
@@ -267,10 +264,10 @@ public class Slave implements Runnable, AutoCloseable {
     // Create a new MetricsCollector with the clean slaveLooper and register its task
     metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
 
-    // re-registering the handling of control msg. instance task
+    // registering the handling of control msg
     handleControlMessage();
 
-    // instance task will be registered when istance.start() is called
+    // instance task will be registered when instance.start() is called
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
@@ -298,7 +295,7 @@ public class Slave implements Runnable, AutoCloseable {
       LOG.info("The restore request does not have an actual state");
     }
 
-    // If there's no checkpoint to restore, heron provides as empty state
+    // If there's no checkpoint to restore, heron provides an empty state
     if (instanceState == null) {
       instanceState = new HashMapState<>();
     }
