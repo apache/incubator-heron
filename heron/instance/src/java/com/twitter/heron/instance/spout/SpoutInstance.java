@@ -147,7 +147,6 @@ public class SpoutInstance implements IInstance {
     }
 
     if (spout instanceof IStatefulComponent) {
-      LOG.info("Starting checkpoint");
       ((IStatefulComponent) spout).preSave(checkpointId);
     } else {
       LOG.info("Trying to checkponit a non stateful component. Send empty state");
@@ -243,9 +242,10 @@ public class SpoutInstance implements IInstance {
           spoutMetrics.updateOutQueueFullCount();
         }
 
-        if (ackEnabled) {
-          readTuplesAndExecute(streamInQueue);
+        // Check if we have any message to process anyway
+        readTuplesAndExecute(streamInQueue);
 
+        if (ackEnabled) {
           // Update the pending-to-be-acked tuples counts
           spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
         } else {
@@ -402,9 +402,7 @@ public class SpoutInstance implements IInstance {
         String checkpintId = ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
         LOG.info("Persisting state for checkpoint: " + checkpintId);
         persistState(checkpintId);
-      }
-
-      if (msg instanceof HeronTuples.HeronTupleSet) {
+      } else if (msg instanceof HeronTuples.HeronTupleSet) {
         HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
         // For spout, it should read only control tuples(ack&fail)
         if (tuples.hasData()) {
@@ -424,6 +422,9 @@ public class SpoutInstance implements IInstance {
         if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
           break;
         }
+      } else {
+        // Spout instance should not receive any other messages except the above ones
+        throw new RuntimeException("Invalid data sent to spout instance");
       }
     }
   }

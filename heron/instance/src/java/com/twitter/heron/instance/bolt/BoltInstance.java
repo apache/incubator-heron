@@ -135,10 +135,9 @@ public class BoltInstance implements IInstance {
 
     // Checkpoint
     if (bolt instanceof IStatefulComponent) {
-      LOG.info("Starting checkpoint");
       ((IStatefulComponent) bolt).preSave(checkpointId);
     } else {
-      LOG.info("Trying to checkponit a non stateful component. Send empty state");
+      LOG.info("Trying to checkpoint a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
@@ -236,7 +235,7 @@ public class BoltInstance implements IInstance {
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpointId =
             ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Start checkpoint for: " + checkpointId);
+        LOG.info("Persisting state for checkpoint: " + checkpintId);
         persistState(checkpointId);
       }
 

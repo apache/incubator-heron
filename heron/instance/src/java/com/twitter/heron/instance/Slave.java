@@ -201,8 +201,9 @@ public class Slave implements Runnable, AutoCloseable {
       // For stateful topology, the `init(state)` will be
       // invoked when a RestoreInstanceStateRequest is received
       if (isStatefulProcessingStarted) {
-        isInstanceStarted = true;
+        instance.init(instanceState);
         instance.start();
+        isInstanceStarted = true;
         LOG.info("Instance is started for stateful topology");
       } else {
         LOG.info("Start StatefulProcessing signal not received. Instance is not started");
@@ -234,7 +235,8 @@ public class Slave implements Runnable, AutoCloseable {
   private void handleStartInstanceStatefulProcessing(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.StartInstanceStatefulProcessing startStatefulRequest =
         instanceControlMsg.getStartInstanceStatefulProcessing();
-    LOG.info("Starting stateful processing: " + startStatefulRequest.getCheckpointId());
+    LOG.info("Starting stateful processing with checkpoint id: "
+        + startStatefulRequest.getCheckpointId());
     isStatefulProcessingStarted = true;
 
     // At this point, the pre-condition is we have already created the actual instance
@@ -242,42 +244,49 @@ public class Slave implements Runnable, AutoCloseable {
     startInstanceIfNeeded();
   }
 
-  private void cleanSlave() {
-    // Reset the in stream queue
+  private void cleanAndStopSlave() {
+    // Clear all queues
     streamInCommunicator.clear();
+    streamOutCommunicator.clear();
 
     // Flash out existing metrics
     metricsCollector.forceGatherAllMetrics();
 
-    // Clean tasks and timer in looper
+    // Stop slave looper consuming data/control_msg
     slaveLooper.clearTasksOnWakeup();
     slaveLooper.clearTimers();
-
-    // Create a new MetricsCollector with the clean slaveLooper
-    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
 
     if (instance != null) {
       instance.clean();
     }
 
-    if (instanceState != null) {
-      instanceState.clear();
-    }
-
     isStatefulProcessingStarted = false;
+  }
+
+  private void registerTasksWithSlave() {
+    // Create a new MetricsCollector with the clean slaveLooper and register its task
+    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+
+    // re-registering the handling of control msg. instance task
+    handleControlMessage();
+
+    // instance task will be registered when istance.start() is called
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
-    LOG.info("Received restore instance state request. Start cleaning the Slave thread");
-    cleanSlave();
+    // Clean buffers and unregister tasks in slave looper
+    if (isInstanceStarted) {
+      cleanAndStopSlave();
+    }
 
-    // re-registering the handling the control msg
-    handleControlMessage();
-
-    LOG.info("Restoring state to checkpoint id: " + request.getState().getCheckpointId());
     // Restore the state
+    LOG.info("Restoring state to checkpoint id: " + request.getState().getCheckpointId());
+    if (instanceState != null) {
+      instanceState.clear();
+      instanceState = null;
+    }
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
@@ -289,8 +298,7 @@ public class Slave implements Runnable, AutoCloseable {
       LOG.info("The restore request does not have an actual state");
     }
 
-    // First time a stateful topology is launched, there's no checkpoint
-    // to restore, heron needs to provide a proper initial empty state
+    // If there's no checkpoint to restore, heron provides as empty state
     if (instanceState == null) {
       instanceState = new HashMapState<>();
     }
@@ -302,15 +310,14 @@ public class Slave implements Runnable, AutoCloseable {
     // - We would create new instance when new "PhysicalPlan" comes
     // - Instance will start either within "StartStatefulProcessing" or new "PhysicalPlan"
     // 2. If during the normal running, we need to restart the instance
-    instance.init(instanceState);
-
     if (isInstanceStarted && helper != null) {
       LOG.info("Restarting instance");
       resetCurrentAssignment();
     }
 
+    registerTasksWithSlave();
+
     // Send back the response
-    LOG.info("Acknowledge back the restore instance state response");
     CheckpointManager.RestoreInstanceStateResponse response =
         CheckpointManager.RestoreInstanceStateResponse.newBuilder()
             .setCheckpointId(request.getState().getCheckpointId())
