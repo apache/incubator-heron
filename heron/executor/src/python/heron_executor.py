@@ -901,8 +901,11 @@ class HeronExecutor(object):
     statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
     try:
       self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+      for state_manager in self.state_managers:
+        state_manager.start()
     except Exception as ex:
       Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      traceback.print_exc()
       sys.exit(1)
 
     # pylint: disable=unused-argument

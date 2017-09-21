@@ -22,7 +22,7 @@ pex_library(
     ]
 )
 
-pex_test(
+pex_pytest(
     name = "st_stmgrcli_unittest",
     srcs = ["st_stmgr_client_unittest.py"],
     deps = [
@@ -31,14 +31,14 @@ pex_test(
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "metricsmgr_client_unittest",
     srcs = ["metricsmgr_client_unittest.py"],
     deps = [
@@ -47,8 +47,8 @@ pex_test(
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
     size = "small",
@@ -61,13 +61,13 @@ pex_library(
         ":instance-network-mock-client",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
 )
 
-pex_test(
+pex_pytest(
     name = "protocol_unittest",
     srcs = ["protocol_unittest.py"],
     deps = [
@@ -76,14 +76,14 @@ pex_test(
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "heron_client_unittest",
     srcs = ["heron_client_unittest.py"],
     deps = [
@@ -92,37 +92,37 @@ pex_test(
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
         "mock==1.0.1",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "gateway_looper_unittest",
     srcs = ["gateway_looper_unittest.py"],
     deps = [
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "event_looper_unittest",
     srcs = ["event_looper_unittest.py"],
     deps = [
         "//heron/instance/src/python:instance-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
+        "py==1.4.34",
+        "pytest==3.2.2",
         "unittest2==1.1.0",
     ],
     size = "small",

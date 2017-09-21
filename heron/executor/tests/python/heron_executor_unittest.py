@@ -15,6 +15,7 @@
 import os
 import socket
 import unittest2 as unittest
+import json
 
 from heron.executor.src.python.heron_executor import ProcessInfo
 from heron.executor.src.python.heron_executor import HeronExecutor
@@ -264,9 +265,14 @@ class HeronExecutorTest(unittest.TestCase):
     self.executor_1.update_packing_plan(self.packing_plan_expected)
     current_commands = self.executor_1.get_commands_to_run()
 
-    self.assertEquals(dict(
+    temp_dict = dict(
         map((lambda process_info: (process_info.name, process_info.command.split(' '))),
-            self.expected_processes_container_1)), current_commands)
+            self.expected_processes_container_1))
+
+    current_json = json.dumps(current_commands, sort_keys=True)
+    temp_json = json.dumps(temp_dict, sort_keys=True)
+
+    self.assertEquals(current_json, temp_json)
 
     # update instance distribution
     new_packing_plan = self.build_packing_plan(
@@ -295,3 +301,4 @@ class HeronExecutorTest(unittest.TestCase):
     self.assertEquals(expected_process.name, found_processes[pid].name)
     self.assertEquals(expected_process.command, found_processes[pid].command_str)
     self.assertEquals(1, found_processes[pid].attempts)
+
