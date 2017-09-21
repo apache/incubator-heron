@@ -79,15 +79,6 @@ public final class Config implements Serializable {
     heronConfig.put(key, value);
   }
 
-  /**
-   * Fetches the user defined key value mapping
-   * @param key The user defined key
-   * @return Any object the user stored or null if nothing was stored for this key
-   */
-  public Object getUserConfig(String key) {
-    return heronConfig.get(key);
-  }
-
   private com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
       DeliverySemantics semantics) {
     switch (semantics) {
