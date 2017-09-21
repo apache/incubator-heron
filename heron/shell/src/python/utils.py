@@ -30,9 +30,9 @@ def format_mode(sres):
   """
   mode = sres.st_mode
 
-  root = (mode & 0700) >> 6
-  group = (mode & 0070) >> 3
-  user = (mode & 07)
+  root = (mode & 0o700) >> 6
+  group = (mode & 0o070) >> 3
+  user = (mode & 0o7)
 
   def stat_type(md):
     ''' stat type'''
