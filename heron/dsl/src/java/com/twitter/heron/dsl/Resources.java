@@ -17,9 +17,8 @@ package com.twitter.heron.dsl;
 import java.io.Serializable;
 
 /**
- * Context is the information available at runtime for operators like transform.
- * It contains basic things like config, runtime information like task,
- * the stream that it is operating on, ProcessState, etc.
+ * Resources needed by the topology are encapsulated in this class.
+ * Currently we deal with cpu and ram. Others can be added later.
  */
 public final class Resources implements Serializable {
   private static final long serialVersionUID = 630451253428388496L;
@@ -34,9 +33,9 @@ public final class Resources implements Serializable {
     return ram;
   }
 
-  public Resources(float cpu, long ram) {
-    this.cpu = cpu;
-    this.ram = ram;
+  public Resources() {
+    this.cpu = 1.0f;
+    this.ram = 104857600;
   }
 
   public Resources withCpu(float ncpu) {

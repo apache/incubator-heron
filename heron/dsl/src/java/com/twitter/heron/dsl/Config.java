@@ -19,9 +19,10 @@ import java.io.Serializable;
 import com.twitter.heron.common.basics.ByteAmount;
 
 /**
- * Context is the information available at runtime for operators like transform.
- * It contains basic things like config, runtime information like task,
- * the stream that it is operating on, ProcessState, etc.
+ * Config is the way users configure the execution of the topology.
+ * Things like tuple delivery semantics, resources used, as well as
+ * user defined key/value pairs are passed on to the runner via
+ * this class.
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
@@ -70,7 +71,7 @@ public final class Config implements Serializable {
   }
 
   /**
-   * Sets some user defined object key value mapping
+   * Sets some user defined key value mapping
    * @param key The user defined key
    * @param value The user defined object
    */
@@ -78,6 +79,11 @@ public final class Config implements Serializable {
     heronConfig.put(key, value);
   }
 
+  /**
+   * Fetches the user defined key value mapping
+   * @param key The user defined key
+   * @return Any object the user stored or null if nothing was stored for this key
+   */
   public Object getUserConfig(String key) {
     return heronConfig.get(key);
   }
