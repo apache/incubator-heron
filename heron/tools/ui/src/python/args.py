@@ -17,7 +17,7 @@ import argparse
 import heron.tools.ui.src.python.consts as consts
 
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,superfluous-parens
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
     parser.print_help()
