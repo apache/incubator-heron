@@ -59,8 +59,8 @@ Currently, creating input streamlets using the Python DSL for Heron involves wra
 ```python
 import random
 
-from heron.dsl.src.python import OperationType, Streamlet
-from heron.api.src.python import Spout
+from heronpy.dsl.src.python import OperationType, Streamlet
+from heronpy.api.src.python import Spout
 
 class RandomFruitSpout(Spout):
     def initialize(self, config, context):
@@ -115,5 +115,17 @@ counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
          .reduce_by_window()
 ```
 
-## Examples
+## Setup
 
+To create Heron topologies using the Python DSL, you first need to install the `heronpy` library using [pip](https://pip.pypa.io/en/stable/), [EasyInstall](https://wiki.python.org/moin/EasyInstall), or an analogous tool:
+
+```shell
+$ pip install heronpy
+$ easy_install heronpy
+```
+
+Then you can include `heronpy` in your project files. Here's an example:
+
+```python
+from heronpy.dsl.streamlet import Streamlet 
+```

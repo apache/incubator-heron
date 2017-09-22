@@ -27,7 +27,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
   private com.twitter.heron.api.Config heronConfig;
-  enum DeliverySemantics {
+  public enum DeliverySemantics {
     ATMOST_ONCE,
     ATLEAST_ONCE,
     EFFECTIVELY_ONCE

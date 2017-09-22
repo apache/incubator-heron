@@ -2,7 +2,8 @@
 title: Python Topologies
 ---
 
-> As of Heron versoin 0.15.0, there is an alternative [Python DSL](../python-dsl) for writing stream processing logic in a more functional style.
+> ## New Python DSL for Heron topologies
+> As of Heron version 0.15.0, there is an alternative [Python DSL](../python-dsl) for writing stream processing logic in a more functional, rather than procedural, style. While topologies written in the older framework, based on explicitly creating spouts and bolts, will still run on Heron, we recommend using the Python DSL for all future work.
 
 Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy). The current version of `heronpy` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
 
