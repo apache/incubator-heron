@@ -14,17 +14,18 @@
 
 package com.twitter.heron.dsl;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.dsl.impl.RunnerImpl;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.exception.AlreadyAliveException;
+import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.dsl.impl.BuilderImpl;
 
 /**
  * Runner is used to run a topology that is built by the builder.
  * It exports a sole function called run that takes care of constructing the topology
  */
-public interface Runner {
-  static Runner CreateRunner() {
-    return new RunnerImpl();
-  }
+public final class Runner {
+  public Runner() { }
 
   /**
    * Runs the computation
@@ -32,5 +33,14 @@ public interface Runner {
    * @param config Any config thats passed to the topology
    * @param builder The builder used to keep track of the sources.
    */
-  void run(String name, Config config, Builder builder);
+  public void run(String name, Config config, Builder builder) {
+    BuilderImpl bldr = (BuilderImpl) builder;
+    TopologyBuilder topologyBuilder = bldr.build();
+    try {
+      HeronSubmitter.submitTopology(name, config.getHeronConfig(),
+                                    topologyBuilder.createTopology());
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
+      e.printStackTrace();
+    }
+  }
 }

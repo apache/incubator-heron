@@ -67,8 +67,7 @@ public class TransformOperator<R, T> extends DslOperator {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    T result = transformFunction.transform(obj);
-    collector.emit(new Values(result));
+    transformFunction.transform(obj, x -> collector.emit(new Values(x)));
     collector.ack(tuple);
   }
 }

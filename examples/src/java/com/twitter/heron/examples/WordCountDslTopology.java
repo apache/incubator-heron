@@ -16,8 +16,8 @@ package com.twitter.heron.examples;
 
 import java.util.Arrays;
 
-import com.twitter.heron.api.Config;
 import com.twitter.heron.dsl.Builder;
+import com.twitter.heron.dsl.Config;
 import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.Runner;
 import com.twitter.heron.dsl.WindowConfig;
@@ -55,8 +55,8 @@ public final class WordCountDslTopology {
         .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y)
         .log();
     Config conf = new Config();
-    conf.setNumStmgrs(parallelism);
-    Runner runner = Runner.CreateRunner();
+    conf.setNumContainers(parallelism);
+    Runner runner = new Runner();
     runner.run(args[0], conf, builder);
   }
 }
