@@ -140,7 +140,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
            "com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d " \
-           "tmaster_controller_port master_port metricsmgr_port %s %s" \
+           "tmaster_controller_port metricsmgr_port %s %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
@@ -203,8 +203,8 @@ class HeronExecutorTest(unittest.TestCase):
   # <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
   # <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>
   # <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>
-  # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>
-  # <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>
+  # <override_config_file> <component_rammap> <component_jvm_opts_in_base64> <pkg_type>
+  # <topology_bin_file> <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>
   # <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>
   # <scheduler_classpath> <scheduler_port> <python_instance_binary>
   @staticmethod
@@ -273,10 +273,12 @@ class HeronExecutorTest(unittest.TestCase):
         map((lambda process_info: (process_info.name, process_info.command.split(' '))),
             self.expected_processes_container_1))
 
-    current_json = json.dumps(current_commands, sort_keys=True)
-    temp_json = json.dumps(temp_dict, sort_keys=True)
+    current_json = json.dumps(current_commands, sort_keys=True).split(' ')
+    temp_json = json.dumps(temp_dict, sort_keys=True).split(' ')
 
-    self.assertEquals(current_json, temp_json)
+    # better test error report
+    for (s1, s2) in zip(current_json, temp_json):
+      self.assertEquals(s1, s2)
 
     # update instance distribution
     new_packing_plan = self.build_packing_plan(
