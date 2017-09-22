@@ -246,7 +246,16 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     metadataNode.set(KubernetesConstants.METADATA_LABELS, labels);
 
+    ObjectNode annotations = mapper.createObjectNode();
+    applyPrometheusAnnotations(annotations);
+    metadataNode.set(KubernetesConstants.METADATA_ANNOTATIONS, annotations);
+
     return metadataNode;
+  }
+
+  private void applyPrometheusAnnotations(ObjectNode node) {
+    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_SCRAPE, "true");
+    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_PORT, KubernetesConstants.PROMETHEUS_PORT);
   }
 
   /**
