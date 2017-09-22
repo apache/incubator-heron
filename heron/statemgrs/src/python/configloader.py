@@ -68,7 +68,7 @@ def __replace(config, wildcards, config_file):
   for config_key in config:
     config_value = config[config_key]
     original_value = config_value
-    if isinstance(config_value, basestring):
+    if isinstance(config_value, (str, unicode)):
       for token in wildcards:
         if wildcards[token]:
           config_value = config_value.replace(token, wildcards[token])
@@ -80,10 +80,10 @@ def __replace(config, wildcards, config_file):
   return config
 
 if __name__ == "__main__":
-  # pylint: disable=pointless-string-statement
+  # pylint: disable=pointless-string-statement,superfluous-parens
   """ helper main method used to verify config files, intended for manual verification only """
   if len(sys.argv) > 1:
     locations = load_state_manager_locations('local', sys.argv[1])
   else:
     locations = load_state_manager_locations('local')
-  print "locations: %s" % locations
+  print("locations: %s" % locations)

@@ -121,7 +121,7 @@ class BaseInstance(object):
     except Exception as e:
       spbl = "spout" if is_spout else "bolt"
       self.logger.error(traceback.format_exc())
-      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, e.message))
+      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, str(e)))
     return spbl_class
 
   def handle_initiate_stateful_checkpoint(self, ckptmsg, component):

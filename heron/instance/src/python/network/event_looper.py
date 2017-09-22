@@ -64,7 +64,7 @@ class EventLooper(object):
       self._execute_wakeup_tasks()
       self._trigger_timers()
     except Exception as e:
-      Log.error("Error occured during _run_once(): " + e.message)
+      Log.error("Error occured during _run_once(): " + str(e))
       Log.error(traceback.format_exc())
       self.should_exit = True
 
@@ -126,7 +126,7 @@ class EventLooper(object):
     :returns (float) next_timeout, or 10.0 if there are no timer events
     """
     if len(self.timer_tasks) == 0:
-      return sys.maxint
+      return sys.maxsize
     else:
       next_timeout_interval = self.timer_tasks[0][0] - time.time()
       return next_timeout_interval

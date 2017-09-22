@@ -189,7 +189,7 @@ class TopologyContextImpl(TopologyContext):
         raise RuntimeError("Auto-registered task hook not instance of ITaskHook")
       except Exception as e:
         raise RuntimeError("Error with loading task hook class: %s, with error message: %s"
-                           % (class_name, e.message))
+                           % (class_name, str(e)))
 
   def invoke_hook_prepare(self):
     """invoke task hooks for after the spout/bolt's initialize() method"""
