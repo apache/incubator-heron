@@ -88,7 +88,7 @@ class SingleThreadStmgrClient(HeronClient):
       else:
         raise RuntimeError("Unknown kind of message received from Stream Manager")
     except Exception as e:
-      Log.error("Error happened while handling a message from stmgr: " + e.message)
+      Log.error("Error happened while handling a message from stmgr: " + str(e))
       Log.error(traceback.format_exc())
       sys.exit(1)
 

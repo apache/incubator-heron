@@ -229,7 +229,7 @@ class HeronClient(asyncore.dispatcher):
 
   def handle_timeout(self, reqid):
     """Handles timeout"""
-    if self.context_map.has_key(reqid):
+    if reqid in self.context_map:
       context = self.context_map.pop(reqid)
       self.response_message_map.pop(reqid)
       self.on_response(StatusCode.TIMEOUT_ERROR, context, None)
@@ -255,7 +255,7 @@ class HeronClient(asyncore.dispatcher):
     # only called when packet.is_complete is True
     # otherwise, it's just an message -- call on_incoming_message()
     typename, reqid, serialized_msg = HeronProtocol.decode_packet(packet)
-    if self.context_map.has_key(reqid):
+    if reqid in self.context_map:
       # this incoming packet has the response of a request
       context = self.context_map.pop(reqid)
       response_msg = self.response_message_map.pop(reqid)
@@ -263,7 +263,7 @@ class HeronClient(asyncore.dispatcher):
       try:
         response_msg.ParseFromString(serialized_msg)
       except Exception as e:
-        Log.error("Invalid Packet Error: %s" % e.message)
+        Log.error("Invalid Packet Error: %s" % str(e))
         self._handle_close()
         self.on_error()
         return
@@ -287,7 +287,7 @@ class HeronClient(asyncore.dispatcher):
         else:
           raise RuntimeError("Message not initialized")
       except Exception as e:
-        Log.error("Error when handling message packet: %s" % e.message)
+        Log.error("Error when handling message packet: %s" % str(e))
         Log.error(traceback.format_exc())
         raise RuntimeError("Problem reading message")
     else:

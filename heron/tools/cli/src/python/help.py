@@ -40,7 +40,7 @@ def create_parser(subparsers):
   return parser
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, args, unknown_args):
   '''
   :param command:
@@ -60,7 +60,7 @@ def run(command, parser, args, unknown_args):
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
-    print subparser.format_help()
+    print(subparser.format_help())
     return SimpleResult(Status.Ok)
   else:
     Log.error("Unknown subcommand \'%s\'", command_help)
