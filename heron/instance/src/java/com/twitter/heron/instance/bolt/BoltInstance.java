@@ -129,6 +129,8 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
@@ -136,8 +138,6 @@ public class BoltInstance implements IInstance {
     // Checkpoint
     if (bolt instanceof IStatefulComponent) {
       ((IStatefulComponent) bolt).preSave(checkpointId);
-    } else {
-      LOG.info("Trying to checkpoint a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
@@ -235,7 +235,6 @@ public class BoltInstance implements IInstance {
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpointId =
             ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Persisting state for checkpoint: " + checkpointId);
         persistState(checkpointId);
       }
 

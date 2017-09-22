@@ -142,14 +142,14 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
     if (spout instanceof IStatefulComponent) {
       ((IStatefulComponent) spout).preSave(checkpointId);
-    } else {
-      LOG.info("Trying to checkponit a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
@@ -400,7 +400,6 @@ public class SpoutInstance implements IInstance {
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpintId = ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Persisting state for checkpoint: " + checkpintId);
         persistState(checkpintId);
       } else if (msg instanceof HeronTuples.HeronTupleSet) {
         HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;

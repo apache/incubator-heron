@@ -305,8 +305,11 @@ public class PhysicalPlanHelper {
 
   public boolean isTopologyStateful() {
     Map<String, Object> config = topologyContext.getTopologyConfig();
-    return String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE).equals(
-        config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+    Config.TopologyReliabilityMode mode =
+        Config.TopologyReliabilityMode.valueOf(
+            String.valueOf(config.get(Config.TOPOLOGY_RELIABILITY_MODE)));
+
+    return Config.TopologyReliabilityMode.EFFECTIVELY_ONCE.equals(mode);
   }
 
   public boolean isTopologyRunning() {
