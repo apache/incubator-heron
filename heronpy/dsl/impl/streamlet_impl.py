@@ -28,63 +28,63 @@ class Streamlet(object):
      csv files, HDFS files), or for that matter any other source. They are also created by
      transforming existing Streamlets using operations such as map/flat_map, etc.
   """
+  def __init__(self):
+    """
+    """
+    self._name = None
+    self._num_partitions = 1
+
   @property
   def name(self):
     """The name of the Streamlet"""
-    pass
+    return self._name
 
   @name.setter
   def name(self, nm):
-    pass
+    self._name = nm
 
   @property
   def num_partitions(self):
     """The number of partitions"""
-    pass
+    return self._num_partitions
 
   @num_partitions.setter
   def num_partitions(self, n):
-    pass
+    self._num_partitions = n
 
   def map(self, map_function):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
     """
-    pass
+    from heronpy.dsl.mapoperator import MapStreamlet
+    return MapStreamlet(map_function, self)
 
-  def flat_map(self, flatmap_function):
+  def flat_map(self, flatmap_function, stage_name=None, parallelism=None):
     """Return a new Streamlet by applying map_function to each element of this Streamlet
        and flattening the result
     """
-    pass
+    from heronpy.dsl.flatmapbolt import FlatMapStreamlet
+    return FlatMapStreamlet(flatmap_function, parents=[self], stage_name=stage_name,
+                            parallelism=parallelism)
 
-  def filter(self, filter_function):
+  def filter(self, filter_function, stage_name=None, parallelism=None):
     """Return a new Streamlet containing only the elements that satisfy filter_function
     """
-    pass
+    from heronpy.dsl.filterbolt import FilterStreamlet
+    return FilterStreamlet(filter_function, parents=[self], stage_name=stage_name,
+                           parallelism=parallelism)
 
-  def repartition(self, num_partitions):
-    """Return a new Streamlet containing all elements of the this streamlet but having
-    num_partitions partitions
+  def sample(self, sample_fraction, stage_name=None, parallelism=None):
+    """Return a new Streamlet containing only sample_fraction fraction of elements
     """
-    pass
+    from heronpy.dsl.samplebolt import SampleStreamlet
+    return SampleStreamlet(sample_fraction, parents=[self], stage_name=stage_name,
+                           parallelism=parallelism)
 
-  def repartition(self, num_partitions, repartition_function):
-    """Same as above except to use repartition_function to choose
-    where elements need to be sent
+  def repartition(self, parallelism, stage_name=None):
+    """Return a new Streamlet with new parallelism level
     """
-    pass
-
-  def clone(self, num_clones):
-    """Return num_clones number of streamlets each containing all elements
-    of the current streamlet
-    """
-    pass
-
-  def reduce_by_window(self, num_clones):
-    """Return num_clones number of streamlets each containing all elements
-    of the current streamlet
-    """
-    pass
+    from heronpy.dsl.repartitionbolt import RepartitionStreamlet
+    return RepartitionStreamlet(parallelism, parents=[self], stage_name=stage_name)
 
   def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
     """Return a new Streamlet by joining join_streamlet with this streamlet
