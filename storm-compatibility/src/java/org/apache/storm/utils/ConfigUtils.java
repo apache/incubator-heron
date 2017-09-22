@@ -61,6 +61,9 @@ public final class ConfigUtils {
         com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
                  com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
       }
+    } else {
+      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =
