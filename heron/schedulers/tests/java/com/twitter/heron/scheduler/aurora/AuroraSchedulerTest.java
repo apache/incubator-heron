@@ -338,9 +338,6 @@ public class AuroraSchedulerTest {
         case SYSTEM_YAML:
           expected = expectedConf + "/heron_internals.yaml";
           break;
-        case OVERRIDE_YAML:
-          expected = expectedConf + "/override.yaml";
-          break;
         case TOPOLOGY_BINARY_FILE:
         case TOPOLOGY_CLASSPATH:
           expected = "binaryFile.jar";

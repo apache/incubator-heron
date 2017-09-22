@@ -215,7 +215,6 @@ public final class SchedulerUtils {
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
     commands.add(Context.systemConfigFile(config));
-    commands.add(Context.overrideFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
