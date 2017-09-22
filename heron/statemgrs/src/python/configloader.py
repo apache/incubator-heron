@@ -68,7 +68,7 @@ def __replace(config, wildcards, config_file):
   for config_key in config:
     config_value = config[config_key]
     original_value = config_value
-    if isinstance(config_value, basestring):
+    if isinstance(config_value, (str, unicode)):
       for token in wildcards:
         if wildcards[token]:
           config_value = config_value.replace(token, wildcards[token])

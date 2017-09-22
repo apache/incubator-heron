@@ -337,8 +337,8 @@ class ZkStateManager(StateManager):
       raise_(StateException("NoNodeError while creating pplan",
                             StateException.EX_TYPE_NO_NODE_ERROR), sys.exc_info()[2])
     except NodeExistsError:
-      raise(StateException("NodeExistsError while creating pplan",
-                           StateException.EX_TYPE_NODE_EXISTS_ERROR), sys.exc_info()[2])
+      raise_(StateException("NodeExistsError while creating pplan",
+                            StateException.EX_TYPE_NODE_EXISTS_ERROR), sys.exc_info()[2])
     except ZookeeperError:
       raise_(StateException("Zookeeper while creating pplan",
                             StateException.EX_TYPE_ZOOKEEPER_ERROR), sys.exc_info()[2])
