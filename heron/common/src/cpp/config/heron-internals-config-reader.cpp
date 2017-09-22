@@ -23,6 +23,8 @@
 #include "network/network.h"
 #include "threads/threads.h"
 
+#include "yaml-cpp/yaml.h"
+
 namespace heron {
 namespace config {
 
@@ -30,9 +32,12 @@ namespace config {
 HeronInternalsConfigReader* HeronInternalsConfigReader::heron_internals_config_reader_ = 0;
 
 HeronInternalsConfigReader::HeronInternalsConfigReader(EventLoop* eventLoop,
-                                                       const sp_string& _defaults_file)
+                                                       const sp_string& _defaults_file,
+                                                       const sp_string& _override_file)
     : YamlFileReader(eventLoop, _defaults_file) {
+  override_file_ = _override_file;
   LoadConfig();
+  LoadOverrideConfig();
 }
 
 HeronInternalsConfigReader::~HeronInternalsConfigReader() { delete heron_internals_config_reader_; }
@@ -49,18 +54,38 @@ bool HeronInternalsConfigReader::Exists() {
   return (heron_internals_config_reader_ != NULL);  // Return true/false
 }
 
-void HeronInternalsConfigReader::Create(EventLoop* eventLoop, const sp_string& _defaults_file) {
+void HeronInternalsConfigReader::Create(EventLoop* eventLoop,
+                                        const sp_string& _defaults_file,
+                                        const sp_string& _override_file) {
   if (heron_internals_config_reader_) {
     LOG(FATAL) << "Singleton HeronInternalsConfigReader has already been created";
   } else {
-    heron_internals_config_reader_ = new HeronInternalsConfigReader(eventLoop, _defaults_file);
+    heron_internals_config_reader_ =
+      new HeronInternalsConfigReader(eventLoop, _defaults_file, _override_file);
   }
 }
 
-void HeronInternalsConfigReader::Create(const sp_string& _defaults_file) {
-  Create(NULL, _defaults_file);
+void HeronInternalsConfigReader::Create(const sp_string& _defaults_file,
+                                        const sp_string& _override_file) {
+  Create(NULL, _defaults_file, _override_file);
 }
 
+void HeronInternalsConfigReader::LoadOverrideConfig() {
+  if (override_file_.empty()) {
+    return;
+  }
+  YAML::Node override_config = YAML::LoadFile(override_file_);
+  for (auto n : config_) {
+    if (n.first.IsScalar()) {
+      const std::string& key = n.first.Scalar();
+      auto override_val = YAML::Node(override_config[key]);
+      if (override_val) {
+        LOG(INFO) << "Add overriding configuration '" << key << "'";
+        config_[n.first] = override_val;
+      }
+    }
+  }
+}
 void HeronInternalsConfigReader::OnConfigFileLoad() {
   // Nothing really
 }

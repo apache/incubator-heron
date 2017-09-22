@@ -198,11 +198,11 @@ public class MetricsManager {
   }
 
   public static void main(String[] args) throws IOException {
-    if (args.length != 6) {
+    if (args.length != 7) {
       throw new RuntimeException(
           "Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager "
               + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
-              + "<metrics_sinks_config_filename>");
+              + "<override_config_filename> <metrics_sinks_config_filename>");
     }
 
     String metricsmgrId = args[0];
@@ -210,10 +210,12 @@ public class MetricsManager {
     String topologyName = args[2];
     String topologyId = args[3];
     String systemConfigFilename = args[4];
-    String metricsSinksConfigFilename = args[5];
+    String overrideConfigFilename = args[5];
+    String metricsSinksConfigFilename = args[6];
 
     SystemConfig systemConfig = SystemConfig.newBuilder(true)
         .putAll(systemConfigFilename, true)
+        .putAll(overrideConfigFilename, true)
         .build();
 
     // Add the SystemConfig into SingletonRegistry
