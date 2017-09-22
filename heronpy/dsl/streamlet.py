@@ -64,13 +64,18 @@ class Streamlet(object):
 
   def repartition(self, num_partitions):
     """Return a new Streamlet containing all elements of the this streamlet but having
-    num_partitions partitions
+    num_partitions partitions. Note that this is different from num_partitions(n) in
+    that new streamlet will be created by the repartition call.
     """
     pass
 
   def repartition(self, num_partitions, repartition_function):
     """Same as above except to use repartition_function to choose
-    where elements need to be sent
+    where elements need to be sent. The repartiton_function is a function
+    that for any particular element belonging to the current stream, decides
+    which partitions(from 0 to num_partitions -1), it should route the element to.
+    It could also return a list of partitions if it wants to send it to multiple
+    partitions.
     """
     pass
 
@@ -80,27 +85,44 @@ class Streamlet(object):
     """
     pass
 
-  def reduce_by_window(self, num_clones):
-    """Return num_clones number of streamlets each containing all elements
-    of the current streamlet
+  def reduce_by_window(self, window_config, reduce_function):
+    """Return a new Streamlet in which each element of this Streamlet are collected
+      over a window defined by window_config and then reduced using the reduce_function
+      reduce_function takes two element at one time and reduces them to one element that
+      is used in the subsequent operations.
     """
     pass
 
-  def join(self, join_streamlet, time_window, stage_name=None, parallelism=None):
+  def union(self, other_streamlet):
+    """Returns a new Streamlet that consists of elements of both this and other_streamlet
+    """
+    pass
+
+  def transform(self, transform_function):
+    """Returns a  new Streamlet by applying the transform_function on each element of this
+    streamlet. The transform_function is of the type TransformFunction.
+    Before starting to cycle over the Streamlet, the open function of the transform_function is
+    called. This allows the transform_function to do any kind of initialization/loading, etc.
+    """
+    pass
+
+  def log(self):
+    """Logs all elements of this streamlet. This returns nothing
+    """
+    pass
+
+  def to_sink(self, consumer_function):
+    """Calls consumer_function for each element of this streamlet. This function returns nothing
+    """
+    pass
+
+
+  def join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
     from heronpy.dsl.joinbolt import JoinStreamlet
     return JoinStreamlet(time_window, parents=[self, join_streamlet],
                          stage_name=stage_name, parallelism=parallelism)
-
-  def reduce_by_window(self, time_window, reduce_function, stage_name=None):
-    """A short cut for reduce_by_key_and_window with parallelism of 1
-       over the time_window and then reduced using the reduce_function
-    """
-    from heronpy.dsl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
-    return ReduceByKeyAndWindowStreamlet(time_window, reduce_function,
-                                         parents=[self],
-                                         stage_name=stage_name, parallelism=1)
 
   def reduce_by_key_and_window(self, time_window, reduce_function,
                                stage_name=None, parallelism=None):
