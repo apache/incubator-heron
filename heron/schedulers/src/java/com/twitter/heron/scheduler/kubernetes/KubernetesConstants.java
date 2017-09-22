@@ -43,6 +43,7 @@ public final class KubernetesConstants {
   public static final String API_METADATA = "metadata";
   public static final String API_KIND = "kind";
   public static final String METADATA_LABELS = "labels";
+  public static final String METADATA_ANNOTATIONS = "annotations";
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
   public static final String REQUESTS = "requests";
@@ -53,6 +54,11 @@ public final class KubernetesConstants {
   public static final String FIELD_REF = "fieldRef";
   public static final String VALUE_FROM = "valueFrom";
   public static final String POD_IP = "status.podIP";
+
+  // prometheus annotation keys
+  public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
+  public static final String ANNOTATION_PROMETHEUS_PORT = "prometheus.io/port";
+  public static final String PROMETHEUS_PORT = "8080";
 
   public static final String[] PORT_NAMES = new String[]{
       "master", "tmaster-ctlr", "tmaster-stats", "shell", "metricsmgr", "scheduler",

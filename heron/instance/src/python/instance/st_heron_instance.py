@@ -168,7 +168,7 @@ class SingleThreadHeronInstance(object):
       try:
         self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
       except Exception as e:
-        raise RuntimeError("Could not serialize state during restore " + e.message)
+        raise RuntimeError("Could not serialize state during restore " + str(e))
     else:
       Log.info("The restore request does not have an actual state")
     if self.stateful_state is None:
@@ -280,7 +280,7 @@ class SingleThreadHeronInstance(object):
       try:
         self.start_instance_if_possible()
       except Exception as e:
-        Log.error("Error with starting bolt/spout instance: " + e.message)
+        Log.error("Error with starting bolt/spout instance: " + str(e))
         Log.error(traceback.format_exc())
     else:
       Log.info("The instance is deployed in deactivated state")
@@ -303,7 +303,7 @@ class SingleThreadHeronInstance(object):
       Log.info("Started instance successfully.")
     except Exception as e:
       Log.error(traceback.format_exc())
-      Log.error("Error when starting bolt/spout, bailing out...: %s", e.message)
+      Log.error("Error when starting bolt/spout, bailing out...: %s", str(e))
       self.looper.exit_loop()
 
 def print_usage(argv0):

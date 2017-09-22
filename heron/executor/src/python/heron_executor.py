@@ -770,7 +770,7 @@ class HeronExecutor(object):
                      (process_info.name, process_info.pid, ' '.join(command)))
             try:
               process_info.process.terminate()  # sends SIGTERM to process
-            except OSError, e:
+            except OSError as e:
               if e.errno == 3: # No such process
                 Log.warn("Expected process %s with pid %d was not running, ignoring." %
                          (process_info.name, process_info.pid))

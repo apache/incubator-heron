@@ -132,7 +132,7 @@ class MockDispatcher(object):
     if self.fatal_error_test:
       raise RuntimeError("Fatal Error Test")
     elif self.eagain_test:
-      raise socket.error, (socket.errno.EAGAIN, "EAGAIN Test")
+      raise socket.error(socket.errno.EAGAIN, "EAGAIN Test")
 
     ret = self.to_be_received[:numbytes]
     self.to_be_received = self.to_be_received[numbytes:]

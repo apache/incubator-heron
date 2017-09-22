@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''result.py'''
+from __future__ import print_function
 import abc
 import sys
 from enum import Enum
@@ -70,7 +71,7 @@ class Result(object):
     if msg:
       if msg[-1] == '\n':
         msg = msg[:-1]
-      print >> f, msg
+      print(msg, file=f)
 
   def _log_context(self):
     # render context only after process exits

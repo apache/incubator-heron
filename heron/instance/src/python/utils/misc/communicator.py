@@ -34,12 +34,12 @@ class HeronCommunicator(object):
     self._producer_callback = producer_cb
     self._consumer_callback = consumer_cb
     self._buffer = Queue.Queue()
-    self.capacity = sys.maxint
+    self.capacity = sys.maxsize
 
   def register_capacity(self, capacity):
     """Registers the capacity of this communicator
 
-    By default, the capacity of HeronCommunicator is set to be ``sys.maxint``
+    By default, the capacity of HeronCommunicator is set to be ``sys.maxsize``
     """
     self.capacity = capacity
 

@@ -15,6 +15,7 @@
 package com.twitter.heron.dsl;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 /**
  * All user supplied transformation functions have to be serializable.
@@ -25,6 +26,6 @@ import java.io.Serializable;
  */
 public interface TransformFunction<I, O> extends Serializable {
   void setup(Context context);
-  O transform(I i);
+  void transform(I i, Consumer<O> consumer);
   void cleanup();
 }
