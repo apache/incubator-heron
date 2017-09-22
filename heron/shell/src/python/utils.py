@@ -109,8 +109,8 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   Read a chunk of a file from an offset upto the length.
   """
   try:
-    length = long(length)
-    offset = long(offset)
+    length = int(length)
+    offset = int(offset)
   except ValueError:
     return {}
 
