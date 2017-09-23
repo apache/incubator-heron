@@ -8,6 +8,7 @@ RUN apt-get -y install curl ; apt-get clean all
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
 RUN apt-get -y install openjdk-8-jdk; apt-get clean all
+RUN apt-get -y install supervisor; apt-get clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f
@@ -17,12 +18,14 @@ ADD artifacts /heron
 WORKDIR /heron
 
 # run heron installers
+RUN /heron/heron-client-install.sh
 RUN /heron/heron-tools-install.sh
 
 RUN mkdir -p /opt/heron && \
     tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /opt/heron
 
 RUN rm -f /heron/heron-tools-install.sh
+RUN rm -f /heron/heron-client-install.sh
 RUN rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /opt/heron/heron-core/
@@ -53,11 +56,13 @@ RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
     /opt/zookeeper/$ZK_DIST.jar.md5 \
     /opt/zookeeper/$ZK_DIST.jar.sha1
 
-
 ADD conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
+ADD conf/sandbox.conf /etc/supervisor/conf.d/
 
 RUN mkdir -p /opt/zookeeper/scripts
 ADD scripts /opt/zookeeper/scripts
 RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
     && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
     && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
+
+CMD ["supervisord", "-n"]

@@ -37,6 +37,7 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
@@ -282,6 +283,7 @@ public class Slave implements Runnable, AutoCloseable {
     CheckpointManager.RestoreInstanceStateResponse response =
         CheckpointManager.RestoreInstanceStateResponse.newBuilder()
             .setCheckpointId(request.getState().getCheckpointId())
+            .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
   }

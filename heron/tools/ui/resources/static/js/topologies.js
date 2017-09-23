@@ -528,8 +528,6 @@ var AllMetrics = React.createClass({
       metrics: this.state.metrics,
       pplan: this.state.pplan,
       instance: this.props.instance,
-      hoverOverInstance: this.props.hoverOverInstance,
-      hoverOutInstance: this.props.hoverOutInstance
     };
     return (
       <div>
@@ -952,8 +950,6 @@ var InstanceCounters = React.createClass({
     });
 
     var instanceId = this.props.info.instance;
-    var hoverOverInstance = this.props.info.hoverOverInstance;
-    var hoverOutInstance = this.props.info.hoverOutInstance;
     var compName = this.props.info.comp_name;
     var reverse = this.state.reverse;
     var sortKey = this.state.sortBy;
@@ -1013,10 +1009,7 @@ var InstanceCounters = React.createClass({
           <tbody className="list">
             {rows.slice(0, maxRows).map(function (row) {
               var highlighted = row[0] === instanceId;
-              function hoverOver() {
-                hoverOverInstance({id: row[0], name: compName });
-              }
-              return <InstanceRow key={row[0]} row={row} headings={headingSortClass} highlighted={highlighted} hoverOver={hoverOver} hoverOut={hoverOutInstance}/>;
+              return <InstanceRow key={row[0]} row={row} headings={headingSortClass} highlighted={highlighted}/>;
             })}
           </tbody>
         </table>

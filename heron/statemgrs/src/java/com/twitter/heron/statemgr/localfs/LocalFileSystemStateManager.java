@@ -107,7 +107,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   protected ListenableFuture<Boolean> setData(String path, byte[] data, boolean overwrite) {
     final SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.writeToFile(path, data, overwrite);
-    future.set(ret);
+    safeSetFuture(future, ret);
 
     return future;
   }
@@ -123,7 +123,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   protected ListenableFuture<Boolean> nodeExists(String path) {
     SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.isFileExists(path);
-    future.set(ret);
+    safeSetFuture(future, ret);
 
     return future;
   }
@@ -141,7 +141,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
         ret = FileUtils.deleteFile(path);
       }
     }
-    future.set(ret);
+    safeSetFuture(future, ret);
 
     return future;
   }
@@ -157,15 +157,15 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
       data = FileUtils.readFromFile(path);
     }
     if (data.length == 0) {
-      future.set(null);
+      safeSetFuture(future, null);
       return future;
     }
 
     try {
       builder.mergeFrom(data);
-      future.set((M) builder.build());
+      safeSetFuture(future, (M) builder.build());
     } catch (InvalidProtocolBufferException e) {
-      future.setException(new RuntimeException("Could not parse " + Message.Builder.class, e));
+      safeSetException(future, new RuntimeException("Could not parse " + Message.Builder.class, e));
     }
 
     return future;

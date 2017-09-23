@@ -96,7 +96,7 @@ public class IntegrationTestSpout implements IRichSpout {
     // Here the spoutOutputCollector should be a default one
     // to emit tuples without adding MessageId
     this.spoutOutputCollector = outputCollector;
-    delegateSpout.open(map, topologyContext,
+    delegateSpout.open(map, new TestTopologyContext(topologyContext),
         new SpoutOutputCollector(new IntegrationTestSpoutCollector(outputCollector)));
   }
 
@@ -153,6 +153,7 @@ public class IntegrationTestSpout implements IRichSpout {
   public void fail(Object messageId) {
     LOG.info("Received a fail with MessageId: " + messageId);
 
+    tuplesToAck--;
     if (!isTestMessageId(messageId)) {
       delegateSpout.fail(messageId);
     } else {
@@ -166,7 +167,8 @@ public class IntegrationTestSpout implements IRichSpout {
   }
 
   private static boolean isTestMessageId(Object messageId) {
-    return ((String) messageId).startsWith(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID);
+    return  (messageId instanceof String) && ((String) messageId)
+        .startsWith(Constants.INTEGRATION_TEST_MOCK_MESSAGE_ID);
   }
 
   protected boolean doneEmitting() {

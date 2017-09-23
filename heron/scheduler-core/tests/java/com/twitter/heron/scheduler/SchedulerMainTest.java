@@ -131,7 +131,7 @@ public class SchedulerMainTest {
     PackingPlans.PackingPlan packingPlan =
         PackingTestUtils.testProtoPackingPlan("testTopology", new RoundRobinPacking());
     final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
-    future.set(packingPlan);
+    assertTrue(future.set(packingPlan));
     return future;
   }
 

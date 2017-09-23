@@ -1,14 +1,16 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_library", "pex_binary")
+load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
     name = 'instance-py',
     srcs = glob(['**/*.py']),
     deps = [
         '//heronpy/proto:proto-py',
-        "//heronpy/api:heron-python-py",
-        '//heron/common/src/python:common-py'
+        '//heronpy/api:heron-python-py',
+        '//heronpy/dsl:heron-pythondsl-py',
+        '//heronpy/connectors:heron-pythonconnectors-py',
+        '//heron/common/src/python:common-py',
     ],
 )
 

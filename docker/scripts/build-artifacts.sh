@@ -148,6 +148,8 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> [source-tarball] <output-directory> "
     echo "  "
+    echo "Script to build heron artifacts for different platforms"
+    echo "  "
     echo "Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7"
     echo "  "
     echo "Example:"
