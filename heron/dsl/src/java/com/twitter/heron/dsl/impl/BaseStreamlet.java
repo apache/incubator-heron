@@ -76,6 +76,18 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
     return built;
   }
 
+  boolean allBuilt() {
+    if (!built) {
+      return false;
+    }
+    for (BaseStreamlet<?> child : children) {
+      if (!child.allBuilt()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Sets the name of the Streamlet.
    * @param sName The name given by the user for this streamlet
