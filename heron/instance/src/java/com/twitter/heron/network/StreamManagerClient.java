@@ -283,7 +283,8 @@ public class StreamManagerClient extends HeronClient {
 
   private void handleRestoreInstanceStateRequest(
       CheckpointManager.RestoreInstanceStateRequest request) {
-    LOG.info("Received a RestoreInstanceState request: " + request);
+    LOG.info("Received a RestoreInstanceState request with checkpoint id: "
+          + request.getState().getCheckpointId());
 
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
         .setRestoreInstanceStateRequest(request)

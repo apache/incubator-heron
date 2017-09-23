@@ -154,7 +154,7 @@ public class InstanceExecutor implements Runnable {
     }
 
     if (toStop) {
-      instance.stop();
+      instance.shutdown();
       LOG.info("Stopped instance: " + physicalPlanHelper.getMyInstanceId());
 
       // Reset the flag value
