@@ -23,7 +23,7 @@ def create_parser(subparsers):
   '''
   parser = subparsers.add_parser(
       'config',
-      help='Configuration for a cluster',
+      help='Config properties for a cluster',
       usage="%(prog)s [cluster]",
       add_help=True)
 
@@ -39,7 +39,7 @@ def create_parser(subparsers):
   # add config list parser
   list_parser = ex_subparsers.add_parser(
       'list',
-      help='Lists all configuration propteries',
+      help='List config properties for a cluster',
       usage="%(prog)s",
       add_help=True)
   list_parser.set_defaults(configcommand='list')
@@ -47,31 +47,31 @@ def create_parser(subparsers):
   # add config set parser
   set_parser = ex_subparsers.add_parser(
       'set',
-      help='set a cluster property',
+      help='Set a cluster config property',
       usage="%(prog)s [property] [value]",
       add_help=True)
 
   set_parser.add_argument(
       'property',
-      help='property to set'
+      help='Config property to set'
   )
 
   set_parser.add_argument(
       'value',
-      help='value of property'
+      help='Value of config property'
   )
   set_parser.set_defaults(configcommand='set')
 
   # add config unset parser
   unset_parser = ex_subparsers.add_parser(
       'unset',
-      help='unset a cluster property',
+      help='Unset a cluster config property',
       usage="%(prog)s [property]",
       add_help=True)
 
   unset_parser.add_argument(
       'property',
-      help='property to unset'
+      help='Config property to unset'
   )
   unset_parser.set_defaults(configcommand='unset')
 
