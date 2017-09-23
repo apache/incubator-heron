@@ -195,6 +195,7 @@ public final class StatefulWordCountTopology {
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
     conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+    conf.setTopologyStatefulCheckpointIntervalSecs(20);
 
     // configure component resources
     com.twitter.heron.api.Config.setComponentRam(conf, "word",
