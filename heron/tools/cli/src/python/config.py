@@ -23,7 +23,7 @@ def create_parser(subparsers):
   '''
   parser = subparsers.add_parser(
       'config',
-      help='Print version of heron-cli',
+      help='Configuration for a cluster',
       usage="%(prog)s [cluster]",
       add_help=True)
 
@@ -39,7 +39,7 @@ def create_parser(subparsers):
   # add config list parser
   list_parser = ex_subparsers.add_parser(
       'list',
-      help='view cluster properties',
+      help='Lists all configuration propteries',
       usage="%(prog)s",
       add_help=True)
   list_parser.set_defaults(configcommand='list')
