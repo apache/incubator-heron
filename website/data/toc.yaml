@@ -9,6 +9,8 @@ sections:
         url: /docs/getting-started-troubleshooting
   - name: Topology Writers
     sublinks:
+      - name: The Heron DSL for Java
+        url: /docs/developers/java/dsl
       - name: Java Topologies
         url: /docs/developers/java/topologies
       - name: Python Topologies
