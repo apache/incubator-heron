@@ -16,8 +16,7 @@ cleanup() {
   fi
 }
 
-trap cleanup EXIT
-
+# trap cleanup EXIT
 
 setup_scratch_dir() {
   if [ ! -f "$1" ]; then
@@ -34,7 +33,7 @@ build_exec_image() {
   DOCKER_TAG_PREFIX=$3
   OUTPUT_DIRECTORY=$(realpath $4)
 
-  if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then 
+  if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
     TARGET_PLATFORM="ubuntu14.04"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
@@ -53,18 +52,22 @@ build_exec_image() {
   # need to copy artifacts locally
   TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install.sh"
   TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
-  
+
   CORE_FILE="$OUTPUT_DIRECTORY/heron-core.tar.gz"
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
- 
+
+  CLIENT_FILE="$OUTPUT_DIRECTORY/heron-client-install.sh"
+  CLIENT_OUT_FILE="$SCRATCH_DIR/artifacts/heron-client-install.sh"
+
   cp $TOOLS_FILE $TOOLS_OUT_FILE
   cp $CORE_FILE $CORE_OUT_FILE
- 
+  cp $CLIENT_FILE $CLIENT_OUT_FILE
+
   export HERON_VERSION
 
   # build the image
   echo "Building docker image with tag:$DOCKER_TAG"
-  if [ "$HERON_VERSION" == "nightly" ]; then 
+  if [ "$HERON_VERSION" == "nightly" ]; then
     docker build -t "$DOCKER_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
   else
     docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
@@ -81,7 +84,7 @@ publish_exec_image() {
   DOCKER_TAG_PREFIX=$3
   INPUT_DIRECTORY=$(realpath $4)
 
-  if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then 
+  if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
     TARGET_PLATFORM="ubuntu14.04"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
@@ -94,7 +97,7 @@ publish_exec_image() {
   fi
 
   # publish the image to docker hub
-  if [ "$HERON_VERSION" == "nightly" ]; then 
+  if [ "$HERON_VERSION" == "nightly" ]; then
     docker load -i $DOCKER_IMAGE_FILE
     docker push "$DOCKER_TAG"
   else

@@ -14,7 +14,7 @@ heron_git_release() {
   local git_release=$(git rev-parse --abbrev-ref HEAD)
   if [[ $? != 0 ]];
   then
-    exit 1 
+    exit 1
   fi
   if [ "${git_release}" = "HEAD" ];
   then
@@ -24,7 +24,7 @@ heron_git_release() {
       exit 1
     fi
   fi
-  echo $git_release 
+  echo $git_release
 }
 
 heron_git_rev() {
