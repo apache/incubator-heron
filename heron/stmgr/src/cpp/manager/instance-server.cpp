@@ -226,10 +226,8 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
     // Remove the connection from active instances
     active_instances_.erase(_conn);
 
-    // Remove from instance info
+    // Set the connection to null. Do not delete the structure
     instance_info_[task_id]->set_connection(NULL);
-    delete instance_info_[task_id];
-    instance_info_.erase(task_id);
 
     // Clean the instance_metric_map
     auto immiter = instance_metric_map_.find(instance_id);

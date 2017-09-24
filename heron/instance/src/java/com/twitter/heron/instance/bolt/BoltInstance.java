@@ -129,23 +129,23 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
     // Checkpoint
     if (bolt instanceof IStatefulComponent) {
-      LOG.info("Starting checkpoint");
       ((IStatefulComponent) bolt).preSave(checkpointId);
-    } else {
-      LOG.info("Trying to checkponit a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
   }
 
   @SuppressWarnings("unchecked")
-  public void start() {
+  @Override
+  public void init(State<Serializable, Serializable> state) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
@@ -155,6 +155,7 @@ public class BoltInstance implements IInstance {
 
     // Initialize the instanceState if the bolt is stateful
     if (bolt instanceof IStatefulComponent) {
+      this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) bolt).initState(instanceState);
     }
 
@@ -167,18 +168,15 @@ public class BoltInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+  }
 
+  @Override
+  public void start() {
     addBoltTasks();
   }
 
   @Override
-  public void start(State<Serializable, Serializable> state) {
-    this.instanceState = state;
-    start();
-  }
-
-  @Override
-  public void stop() {
+  public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
 
@@ -186,9 +184,14 @@ public class BoltInstance implements IInstance {
     bolt.cleanup();
 
     // Clean the resources we own
-    looper.exitLoop();
     streamInQueue.clear();
     collector.clear();
+  }
+
+  @Override
+  public void shutdown() {
+    clean();
+    looper.exitLoop();
   }
 
   private void addBoltTasks() {
@@ -232,7 +235,6 @@ public class BoltInstance implements IInstance {
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpointId =
             ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Start checkpoint for: " + checkpointId);
         persistState(checkpointId);
       }
 

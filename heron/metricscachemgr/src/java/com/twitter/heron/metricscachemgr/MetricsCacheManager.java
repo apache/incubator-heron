@@ -178,6 +178,13 @@ public class MetricsCacheManager {
         .argName("system config file")
         .build();
 
+    Option overrideConfig = Option.builder("o")
+        .desc("Override configuration file path")
+        .longOpt("override_config_file")
+        .hasArgs()
+        .argName("override config file")
+        .build();
+
     Option sinkConfig = Option.builder("i")
         .desc("Sink configuration file path")
         .longOpt("sink_config_file")
@@ -220,6 +227,7 @@ public class MetricsCacheManager {
     options.addOption(masterPort);
     options.addOption(statsPort);
     options.addOption(systemConfig);
+    options.addOption(overrideConfig);
     options.addOption(sinkConfig);
     options.addOption(topologyName);
     options.addOption(topologyId);
@@ -279,6 +287,7 @@ public class MetricsCacheManager {
     int masterPort = Integer.valueOf(cmd.getOptionValue("master_port"));
     int statsPort = Integer.valueOf(cmd.getOptionValue("stats_port"));
     String systemConfigFilename = cmd.getOptionValue("system_config_file");
+    String overrideConfigFilename = cmd.getOptionValue("override_config_file");
     String metricsSinksConfigFilename = cmd.getOptionValue("sink_config_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String topologyId = cmd.getOptionValue("topology_id");
@@ -287,6 +296,7 @@ public class MetricsCacheManager {
     // read heron internal config file
     SystemConfig systemConfig = SystemConfig.newBuilder(true)
         .putAll(systemConfigFilename, true)
+        .putAll(overrideConfigFilename, true)
         .build();
 
     // Log to file and sink(exception)
