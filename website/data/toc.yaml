@@ -13,6 +13,8 @@ sections:
         url: /docs/developers/java/topologies
       - name: Python Topologies
         url: /docs/developers/python/topologies
+      - name: Python DSL
+        url: /docs/developers/python/python-dsl
       - name: Heron Data Model
         url: /docs/developers/data-model
       - name: Tuple Serialization

@@ -1,4 +1,4 @@
-HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+HERONPY_VERSION := $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
 
 setup:
 	scripts/setup.sh
@@ -26,7 +26,7 @@ javadocs:
 	@scripts/javadocs.sh
 
 python-docs:
-	@scripts/python-doc-gen.sh $(HERONPY_VERSION)
+	@scripts/python-doc-gen.sh ${HERONPY_VERSION}
 
 site:
 	@make clean
