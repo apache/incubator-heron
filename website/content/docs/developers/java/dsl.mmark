@@ -3,6 +3,9 @@ title: The Heron DSL for Java
 description: Create Heron topologies in Java using a functional programming style
 ---
 
+{{content/snippets/heron-dsl.md}}
+
+
 ## Getting started
 
 In order to use the Heron DSL for Java, you'll need to install the `heron-dsl` library.
