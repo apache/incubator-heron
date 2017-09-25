@@ -56,7 +56,7 @@ public class CountEvictionPolicy<T> implements EvictionPolicy<T> {
 
   @Override
   public void track(Event<T> event) {
-    if (!event.isWatermark()) {
+    if (!event.isWatermark() && !event.isTimer()) {
       currentCount.incrementAndGet();
     }
   }
