@@ -81,12 +81,6 @@ gulp.task('sass:watch', function() {
 // One-time build; doesn't watch for changes
 gulp.task('build', gulp.series('js', 'sass'));
 
-// Delete static folder
-gulp.task('clean', function(done) {
-  del(DIST.all);
-  done();
-});
-
 // Run in development (i.e. watch) mode
 gulp.task('dev', gulp.series('js', gulp.parallel('js:watch', 'sass:watch')));
 

@@ -13,7 +13,6 @@ develop-static-assets:
 	@npm run develop
 
 build-static-assets:
-	@npm run clean
 	@npm run build
 
 pages:
