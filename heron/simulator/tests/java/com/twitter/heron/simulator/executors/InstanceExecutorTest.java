@@ -26,7 +26,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.PhysicalPlans;
-import com.twitter.heron.simulator.instance.IInstance;
 import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
 import com.twitter.heron.simulator.utils.PhysicalPlanUtilTest;
 

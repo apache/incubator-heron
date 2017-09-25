@@ -108,6 +108,11 @@ public class Simulator {
       throw new RuntimeException("Topology object is Malformed");
     }
 
+    // TODO (nlu): add simulator support stateful processing
+    if (isTopologyStateful(heronConfig)) {
+      throw new RuntimeException("Stateful topology is not supported");
+    }
+
     PhysicalPlans.PhysicalPlan pPlan = PhysicalPlanUtil.getPhysicalPlan(topologyToRun);
 
     LOG.info("Physical Plan: \n" + pPlan);
@@ -237,5 +242,13 @@ public class Simulator {
       // not owned by HeronInstance). To be safe, not sending these interrupts.
       Runtime.getRuntime().halt(1);
     }
+  }
+
+  private boolean isTopologyStateful(Config heronConfig) {
+    Config.TopologyReliabilityMode mode =
+        Config.TopologyReliabilityMode.valueOf(
+            String.valueOf(heronConfig.get(Config.TOPOLOGY_RELIABILITY_MODE)));
+
+    return Config.TopologyReliabilityMode.EFFECTIVELY_ONCE.equals(mode);
   }
 }
