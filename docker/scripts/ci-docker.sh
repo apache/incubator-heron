@@ -16,7 +16,7 @@ cleanup() {
   fi
 }
 
-# trap cleanup EXIT
+trap cleanup EXIT
 
 setup_scratch_dir() {
   if [ ! -f "$1" ]; then
