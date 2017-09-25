@@ -4,7 +4,7 @@ setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/*
+	rm -rf public/* static/{api,css,js}
 
 serve:
 	@hugo serve --buildDrafts
