@@ -24,10 +24,10 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.instance.IInstance;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.instance.BoltInstance;
-import com.twitter.heron.simulator.instance.IInstance;
 import com.twitter.heron.simulator.instance.SpoutInstance;
 
 /**
@@ -204,6 +204,7 @@ public class InstanceExecutor implements Runnable {
   }
 
   private void startInstance() {
+    instance.init(null);
     instance.start();
     isInstanceStarted = true;
     LOG.info("Started instance.");

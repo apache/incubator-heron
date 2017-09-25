@@ -27,6 +27,7 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.instance.IInstance;
 
 public class SpoutInstance
     extends com.twitter.heron.instance.spout.SpoutInstance implements IInstance {
