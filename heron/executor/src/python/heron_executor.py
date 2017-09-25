@@ -689,8 +689,7 @@ class HeronExecutor(object):
                    '-c' + self.ckptmgr_ids[self.shard],
                    '-p' + self.ckptmgr_port,
                    '-f' + self.stateful_config_file,
-                   '-g' + self.heron_internals_config_file,
-                   '-o' + self.override_config_file]
+                   '-g' + self.heron_internals_config_file]
     retval = {}
     retval[self.ckptmgr_ids[self.shard]] = ckptmgr_cmd
 
