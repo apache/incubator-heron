@@ -7,7 +7,7 @@ clean:
 	rm -rf public/* static/*
 
 serve:
-	@hugo serve
+	@hugo serve --buildDrafts
 
 develop-static-assets:
 	@npm run develop
