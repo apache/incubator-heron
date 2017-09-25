@@ -96,6 +96,12 @@ public class Simulator {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, sysConfig);
   }
 
+  /**
+   * Submit and run topology in simulator
+   * @param name topology name
+   * @param heronConfig topology config
+   * @param heronTopology topology built from topology builder
+   */
   public void submitTopology(String name, Config heronConfig, HeronTopology heronTopology) {
     TopologyAPI.Topology topologyToRun =
         heronTopology.
