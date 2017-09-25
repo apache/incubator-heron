@@ -2,5 +2,5 @@
 package-lock.json
 node_modules/
 public/
-static/css/style-*.css
+static/{css,js,api}
 data/assets
