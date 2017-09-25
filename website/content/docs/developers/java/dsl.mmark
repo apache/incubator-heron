@@ -5,7 +5,6 @@ description: Create Heron topologies in Java using a functional programming styl
 
 {{content/snippets/heron-dsl.md}}
 
-
 ## Getting started
 
 In order to use the Heron DSL for Java, you'll need to install the `heron-dsl` library.
@@ -80,3 +79,81 @@ heron-java-dsl-example-0.1.0-jar-with-dependencies.jar
 heron-java-dsl-example-0.1.0.jar
 ``` 
 
+## Full example
+
+
+
+## Creating processing logic
+
+All Java DSL processing graphs begin with a `Builder` object:
+
+```java
+import com.twitter.heron.dsl.Builder;
+
+Builder builder = Builder.CreateBuilder();
+```
+
+## Streamlets
+
+In the Heron DSL for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data (of whichever type) you'd like
+
+## Operations
+
+Operation | Description | Example
+:---------|:------------|:-------
+`map` | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
+`flatMap` | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
+`join` | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
+`union` | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one
+`filter` | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
+`repartition` | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
+`mapToKV` | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
+`log` | | Output the final results of a processing graph to stdout
+
+### Map operations
+
+Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet. Here's an example:
+
+```java
+Builder.newSource(() -> 1)
+    .map(i -> i + 1);
+```
+
+In this example,
+
+### FlatMap operations
+
+FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into another type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
+
+```java
+Builder.newSource(() -> "I have nothing to declare but my genius")
+    .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")));
+```
+
+The effect of this operation is to transform each `Streamlet<String>` into a `Streamlet<List<String>>`.
+
+> One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
+
+### Join operations
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+Streamlet<KeyValue<String, String>> streamlet1 =
+        builder.newSource(() -> new KeyValue<>("heron-api", "topology"));
+
+Builder.newSource(() -> new KeyValue<>("heron-api", "dsl"))
+    .join(streamlet1);
+```
+
+### Left join operations
+
+### Outer join operations
+
+### Filter operations
+
+
+
+## Parallelism
+
+In the original, Storm-inspired topology API for Heron, you could control parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron DSL is different in that 
