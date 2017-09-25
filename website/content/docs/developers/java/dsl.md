@@ -21,34 +21,59 @@ In order to use the `heron-dsl` library, add this to the `dependencies` block of
 
 #### Compiling a JAR with dependencies
 
-In order to run a Java DSL topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin, add this to your `plugins` block:
+In order to run a Java DSL topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
 
 ```xml
 <plugin>
     <artifactId>maven-assembly-plugin</artifactId>
-    <version>3.1.0</version>
     <configuration>
         <descriptorRefs>
-        <descriptorRef>jar-with-dependencies</descriptorRef>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
         </descriptorRefs>
+        <archive>
+            <manifest>
+                <mainClass></mainClass>
+            </manifest>
+        </archive>
     </configuration>
+    <executions>
+        <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
 </plugin>
 ```
+
+Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
 
 ```bash
 $ mvn assembly:assembly
 ```
 
-### Gradle installation
+By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example topology submission command using a compiled JAR:
 
-```groovy
-dependencies {
-    compile group: 'com.twitter.heron', name: 'heron-dsl', version: '{{< heronVersion >}}'
-}
-
-// Alternatively
-dependencies {
-    compile 'com.twitter.heron:heron-dsl:{{< heronVersion >}}'
-}
+```bash
+$ mvn assembly:assembly
+$ heron submit local \
+  target/my-project-1.2.3-jar-with-dependencies.jar \
+  com.example.Main \
+  MyTopology arg1 arg2
 ```
+
+#### Java DSL starter project
+
+If you'd like to up and running quickly with the Java DSL, you can clone [this repository](https://github.com/streamlio/heron-java-dsl-example), which includes an example topology built using the DSL as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
+
+```bash
+$ git clone https://github.com/streamlio/heron-java-dsl-example
+$ cd heron-java-dsl-example
+$ mvn assembly:assembly
+$ ls target/*.jar
+heron-java-dsl-example-0.1.0-jar-with-dependencies.jar
+heron-java-dsl-example-0.1.0.jar
+``` 
 
