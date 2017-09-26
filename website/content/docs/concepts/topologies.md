@@ -20,6 +20,11 @@ illustration of a simple topology:
 
 ![Heron topology](/img/topology.png)
 
+There are currently two APIs available that you can use to build Heron topologies:
+
+1. The higher-level [Heron DSL](#the-heron-dsl) (recommended), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (like map, flagMap, and filter)
+1. The lower-level topology API, based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API
+
 Spouts are responsible for emitting [tuples](../../developers/data-model)
 into the topology, while bolts are responsible for processing those tuples. In
 the diagram above, spout **S1** feeds tuples to bolts **B1** and **B2** for
@@ -59,6 +64,20 @@ needed to explicitly define the behavior of every spout and bolt in the topology
 Although this provided a powerful low-level API for creating topologies, the chief
 drawbacks was that topologies
 
+### Why a DSL?
+
+The older, spouts-and-bolts based model of creating topologies provided a powerful API for specifying processing logic, but it presented a number of challenges for developers as well:
+
+* **Verbosity** --- In both the Java and Python topology APIs, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts. This often led to the problem of...
+* **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
+* **Tuple-based data model** --- In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
+
+In contrast with the topology API, the Heron DSL offers:
+
+* **Boilerplate-free code** --- Instead of needing to implement spout and bolt classes, the Heron DSL enables you to write functions, such as map, flatMap, join, and filter functions, instead.
+* **Easy debugging** ---
+* **Completely flexible data model** ---
+
 The Heron DSL provides a higher-level API that is
 
 From the standpoint of both operators and developers [managing topologies'
@@ -67,7 +86,7 @@ development workflow standpoint, however, the difference is profound. The Heron
 DSL allows for topology code that is:
 
 * Less verbose and far less dependent on boilerplate
-* 
+
 
 ### Streamlets
 
@@ -87,7 +106,8 @@ map | Returns a new streamlet by applying the supplied mapping function to each 
 flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened
 join | Joins two separate streamlets into a single streamlet
 filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
-sample | Returns a new streamlet containing only a fraction of elements. That fraction is defined by the supplied function.
+
+### DSL example
 
 You can see an example streamlet-based processing graph in the diagram below:
 
@@ -106,16 +126,17 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class ExampleDSLTopology {
     public ExampleDSLTopology() {}
 
-    public static void main(String[] args) {
-        Streamlet<Integer> randoms = BaseStreamlet.createSupplierStreamlet(() -> ThreadLocalRandom.current().nextInt(1, 11));
-        Streamlet<Integer> zeroes = BaseStreamlet.createSupplierStreamlet(() -> 0);
+    private int randomInt(int lower, int upper) {
+        return ThreadLocalRandom.current().nextInt(lower, upper + 1);
+    }
 
+    public static void main(String[] args) {
         Builder builder = Builder.CreateBuilder();
 
-        builder.newSource(zeroes)
+        builder.newSource(() -> 0)
                 .setName("zeroes");
 
-        builder.newSource(randoms)
+        builder.newSource(() -> randomInt(1, 10))
                 .setName("random-ints")
                 .map(i -> i + 1)
                 .setName("add-one")
@@ -133,9 +154,9 @@ public final class ExampleDSLTopology {
 }
 ```
 
-This Java code will produce this [physical plan]():
+That Java code will produce this [physical plan](#physical-plan):
 
-![Heron DSL physical plan](/img/dsl-physical-plan.png)
+![Heron DSL physical plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
 
 ### Key-value streamlets
 
@@ -148,17 +169,47 @@ performs the heavy lifting of converting the streamlet-based processing logic th
 create into spouts and bolts and, from there, into containers that are then deployed using
 whichever scheduler your Heron cluster is using.
 
-### Why a DSL?
-
-The older, spouts-and-bolts based model of creating topologies provides 
-
 ### Available DSLs
 
 The Heron DSL is currently available in the following languages:
 
-* [Python](../../developers/python/python-dsl)
+* [Java](../../developers/java/dsl)
 
 ## Partitioning
+
+In the topology API, processing parallelism can be managed via adjusting the number of spouts and bolts performing different operations, enabling you to, for example, increase the relative parallelism of a bolt by using three of that bolt instead of two.
+
+The Heron DSL provides a different mechanism for controlling parallelism: **partitioning**. To understand partitioning, keep in mind that rather than physical spouts and bolts, the core processing construct in the Heron DSL is the processing step. With the Heron DSL, you can assign a number of partitions to each processing step in your graph (the default is one partition).
+
+The example topology [above](#streamlets), for example, has five steps: the random integer source, the "add one" map operation, the union operation, the filtering operation, and finally the logging operation. You could apply varying numbers of partitions each step in that topology like this:
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> 0)
+        .setName("zeroes");
+
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .setName("random-ints")
+        .setNumPartitions(3)
+        .map(i -> i + 1)
+        .setName("add-one")
+        .setNumPartitions(3)
+        .union(zeroes)
+        .setName("unify-streams")
+        .setNumPartitions(2)
+        .filter(i -> i != 2)
+        .setName("remove-all-twos")
+        .setNumPartitions(2)
+        .log();
+```
+
+With the older topology API, you had two "levers" for managing topology performance: 
+
+1. Adjusting the number of spouts and bolts performing operations
+1. Adjusting the resources (CPU and RAM) used by the topology
+
+The Heron DSL still enables you to adjust the CPU and RAM used by the topology but replaces #1 with per-processing-step partitioning.
 
 ## Windowing
 
