@@ -143,6 +143,12 @@ public final class WordCountTopology {
 
     @Override
     public void execute(Tuple tuple) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       String key = tuple.getString(0);
       if (countMap.get(key) == null) {
         countMap.put(key, 1);
