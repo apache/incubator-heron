@@ -142,11 +142,12 @@ public interface Streamlet<R> {
    * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
-   * @param transformFunction The transformation function to be applied
+   * @param serializableTransformer The transformation function to be applied
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the transformFunction
    */
-  <T> Streamlet<T> transform(TransformFunction<? super R, ? extends T> transformFunction);
+  <T> Streamlet<T> transform(
+      SerializableTransformer<? super R, ? extends T> serializableTransformer);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
