@@ -23,7 +23,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.dsl.Context;
-import com.twitter.heron.dsl.TransformFunction;
+import com.twitter.heron.dsl.SerializableTransformer;
 import com.twitter.heron.dsl.impl.ContextImpl;
 
 /**
@@ -34,14 +34,15 @@ import com.twitter.heron.dsl.impl.ContextImpl;
  */
 public class TransformOperator<R, T> extends DslOperator {
   private static final long serialVersionUID = 429297144878185182L;
-  private TransformFunction<? super R, ? extends T> transformFunction;
+  private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
   private OutputCollector collector;
   private Context context;
   private State<Serializable, Serializable> state;
 
-  public TransformOperator(TransformFunction<? super R, ? extends T> transformFunction) {
-    this.transformFunction = transformFunction;
+  public TransformOperator(
+      SerializableTransformer<? super R, ? extends T> serializableTransformer) {
+    this.serializableTransformer = serializableTransformer;
   }
 
   @Override
@@ -51,7 +52,7 @@ public class TransformOperator<R, T> extends DslOperator {
 
   @Override
   public void cleanup() {
-    transformFunction.cleanup();
+    serializableTransformer.cleanup();
   }
 
   @SuppressWarnings("rawtypes")
@@ -60,14 +61,14 @@ public class TransformOperator<R, T> extends DslOperator {
                       OutputCollector outputCollector) {
     collector = outputCollector;
     context = new ContextImpl(topologyContext, map, state);
-    transformFunction.setup(context);
+    serializableTransformer.setup(context);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    transformFunction.transform(obj, x -> collector.emit(new Values(x)));
+    serializableTransformer.transform(obj, x -> collector.emit(new Values(x)));
     collector.ack(tuple);
   }
 }

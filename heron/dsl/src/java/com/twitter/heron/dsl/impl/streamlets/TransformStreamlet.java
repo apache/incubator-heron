@@ -17,7 +17,7 @@ package com.twitter.heron.dsl.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.TransformFunction;
+import com.twitter.heron.dsl.SerializableTransformer;
 import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.operators.TransformOperator;
 
@@ -29,12 +29,12 @@ import com.twitter.heron.dsl.impl.operators.TransformOperator;
  */
 public class TransformStreamlet<R, T> extends BaseStreamlet<T> {
   private BaseStreamlet<R> parent;
-  private TransformFunction<? super R, ? extends T> transformFunction;
+  private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
   public TransformStreamlet(BaseStreamlet<R> parent,
-                            TransformFunction<? super R, ? extends T> transformFunction) {
+                       SerializableTransformer<? super R, ? extends T> serializableTransformer) {
     this.parent = parent;
-    this.transformFunction = transformFunction;
+    this.serializableTransformer = serializableTransformer;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -47,7 +47,7 @@ public class TransformStreamlet<R, T> extends BaseStreamlet<T> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new TransformOperator<R, T>(transformFunction),
+    bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }
