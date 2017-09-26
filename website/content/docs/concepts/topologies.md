@@ -54,7 +54,20 @@ lifecycle of a topology, which typically goes through the following stages:
 ## The Heron DSL
 
 When Heron was first created, the model for creating topologies was deeply
-indebted to the Apache Storm model. Under
+indebted to the Apache Storm model. Under that model, developers creating topologies
+needed to explicitly define the behavior of every spout and bolt in the topology.
+Although this provided a powerful low-level API for creating topologies, the chief
+drawbacks was that topologies
+
+The Heron DSL provides a higher-level API that is
+
+From the standpoint of both operators and developers [managing topologies'
+lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
+development workflow standpoint, however, the difference is profound. The Heron
+DSL allows for topology code that is:
+
+* Less verbose and far less dependent on boilerplate
+* 
 
 ### Streamlets
 
@@ -184,6 +197,9 @@ The defaults:
 
 Resource | Default
 :--------|:-------
+Number of containers | 1
+CPU | 1.0
+RAM | 512 MB
 
 ## Spouts
 
