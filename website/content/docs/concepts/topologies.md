@@ -2,6 +2,15 @@
 title: Heron Topologies
 ---
 
+> ## New DSL for Heron
+> As of Heron version 0.15.2, there is a new **Heron DSL** that can be used
+> to write topologies in a more functional manner, without needing to
+> specify spout and bolt logic directly. There is currently a [DSL for
+> Python](../../developers/python/python-dsl) and a DSL for Java will be
+> added soon.
+> 
+> More information on the DSL can be found [below](#the-heron-dsl).
+
 A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) used to process
 streams of data. Heron topologies consist of three basic components:
@@ -41,6 +50,140 @@ lifecycle of a topology, which typically goes through the following stages:
    remove it from the cluster.  It is no longer known to the Heron cluster and
    can no longer be activated. Once killed, the only way to run that topology is
    to re-submit it.
+
+## The Heron DSL
+
+When Heron was first created, the model for creating topologies was deeply
+indebted to the Apache Storm model. Under
+
+### Streamlets
+
+The core construct underlying the Heron DSL is that of the **streamlet**. A streamlet is
+a potentially unbounded, ordered collection of tuples. Streamlets can originate from a
+wide variety of sources, such as pub-sub messaging systems like [Apache
+Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
+(incubating), random generators, or static files like CVS or Parquet files.
+
+In the Heron DSL, processing tuples means *transforming streamlets into other
+streamlets*. This can be done using a wide variety of available operations, including
+many you may be familiar with from functional programming:
+
+Operation | Description
+:---------|:-----------
+map | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
+flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened
+join | Joins two separate streamlets into a single streamlet
+filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
+sample | Returns a new streamlet containing only a fraction of elements. That fraction is defined by the supplied function.
+
+You can see an example streamlet-based processing graph in the diagram below:
+
+![Streamlet-based processing graph for Heron](https://www.lucidchart.com/publicSegments/view/dc74f0b2-0d3d-46da-b80d-0bc70ad4f64c/image.png)
+
+Here's the corresponding Java code for the processing logic shown in the diagram:
+
+```java
+package heron.dsl.example;
+
+import com.twitter.heron.dsl.*;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+public final class ExampleDSLTopology {
+    public ExampleDSLTopology() {}
+
+    public static void main(String[] args) {
+        Streamlet<Integer> randoms = BaseStreamlet.createSupplierStreamlet(() -> ThreadLocalRandom.current().nextInt(1, 11));
+        Streamlet<Integer> zeroes = BaseStreamlet.createSupplierStreamlet(() -> 0);
+
+        Builder builder = Builder.CreateBuilder();
+
+        builder.newSource(zeroes)
+                .setName("zeroes");
+
+        builder.newSource(randoms)
+                .setName("random-ints")
+                .map(i -> i + 1)
+                .setName("add-one")
+                .union(zeroes)
+                .setName("unify-streams")
+                .filter(i -> i != 2)
+                .setName("remove-all-twos")
+                .log();
+
+        Config conf = new Config();
+        conf.setNumContainers(2);
+
+        new Runner().run("ExampleDSLTopology", conf, builder);
+    }
+}
+```
+
+This Java code will produce this [physical plan]():
+
+![Heron DSL physical plan](/img/dsl-physical-plan.png)
+
+### Key-value streamlets
+
+In order to perform some operations, such as streamlet joins and streamlet reduce operations,
+
+### Heron DSL topologies
+
+With the Heron DSL *you still create topologies*, but only implicitly. Heron automatically
+performs the heavy lifting of converting the streamlet-based processing logic that you
+create into spouts and bolts and, from there, into containers that are then deployed using
+whichever scheduler your Heron cluster is using.
+
+### Why a DSL?
+
+The older, spouts-and-bolts based model of creating topologies provides 
+
+### Available DSLs
+
+The Heron DSL is currently available in the following languages:
+
+* [Python](../../developers/python/python-dsl)
+
+## Partitioning
+
+## Windowing
+
+Window configurations have two core components:
+
+1. The length of the window
+
+> In the Heron DSL, all window lengths and sliding intervals are specified **in seconds**.
+
+### Sliding windows
+
+In a sliding time window, tuples
+
+![Sliding time window](https://www.lucidchart.com/publicSegments/view/57d2fcbb-591b-4403-9258-e5b8e1e25de2/image.png)
+
+### Tumbling windows
+
+> One of the crucial differences between sliding and tumbling windows is that sliding
+> windows can overlap.
+
+![Tumbling time window](https://www.lucidchart.com/publicSegments/view/881f99ee-8f93-448f-a178-b9f72dce6491/image.png)
+
+### Count windows
+
+There are thus four total window types:
+
+## Resource allocation with the Heron DSL
+
+Three configs:
+
+1. Number of containers
+1. CPU
+1. RAM
+
+The defaults:
+
+Resource | Default
+:--------|:-------
 
 ## Spouts
 
