@@ -22,8 +22,8 @@ illustration of a simple topology:
 
 There are currently two APIs available that you can use to build Heron topologies:
 
-1. The higher-level [Heron DSL](#the-heron-dsl) (recommended), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (like map, flagMap, and filter)
-1. The lower-level topology API, based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API
+1. The higher-level [Heron DSL](#the-heron-dsl) (recommended), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flagMap, and filter)
+1. The lower-level topology API, based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
 
 Spouts are responsible for emitting [tuples](../../developers/data-model)
 into the topology, while bolts are responsible for processing those tuples. In
@@ -74,7 +74,7 @@ The older, spouts-and-bolts based model of creating topologies provided a powerf
 
 In contrast with the topology API, the Heron DSL offers:
 
-* **Boilerplate-free code** --- Instead of needing to implement spout and bolt classes, the Heron DSL enables you to write functions, such as map, flatMap, join, and filter functions, instead.
+* **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron DSL enables you to write functions, such as map, flatMap, join, and filter functions, instead.
 * **Easy debugging** ---
 * **Completely flexible data model** ---
 
