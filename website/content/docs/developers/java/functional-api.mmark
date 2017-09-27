@@ -149,14 +149,14 @@ resources.withRam(104857600);
 topologyConfig.setContainerResources(resources);
 ```
 
-> The default CPU is `1.0f` while the default RAM is `104857600` (1 megabyte).
+> The default CPU is `1.0f` while the default RAM is `104857600` (100 megabytes). The minimum allowable amounts are `201326592` for RAM (192 megabytes)
 
 There's also a `ByteAmount` helper class that you can use:
 
 ```java
 import com.twitter.heron.common.basics.ByteAmount;
 
-resources.withRam(ByteAmount.fromMegabytes(2048).asMegabytes());
+resources.withRam(ByteAmount.fromMegabytes(192).asMegabytes());
 ```
 
 <!--
@@ -201,10 +201,10 @@ Map operations create a new streamlet by applying the supplied mapping function 
 
 ```java
 Builder.newSource(() -> 1)
-    .map(i -> i + 1);
+    .map(i -> i + 12);
 ```
 
-In this example,
+In this example, a supplier streamlet emits an indefinite series of 1s. The `map` operation then adds 12 to each incoming element, producing a streamlet of 13s.
 
 ### FlatMap operations
 
@@ -215,7 +215,7 @@ Builder.newSource(() -> "I have nothing to declare but my genius")
     .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")));
 ```
 
-The effect of this operation is to transform each `Streamlet<String>` into a `Streamlet<List<String>>`.
+The effect of this operation is to transform the `Streamlet<String>` into a `Streamlet<List<String>>`.
 
 > One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
 
@@ -235,9 +235,11 @@ Builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
 
 In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
 
+> The effect of a join operation is to create a new streamlet for each key.
+
 ### Filter operations
 
-Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function.
+Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example processing graph 
 
 ## Parallelism
 
