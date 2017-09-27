@@ -1,13 +1,13 @@
 ---
-title: The Heron DSL for Java
+title: The Heron Functional API for Java
 description: Create Heron topologies in Java using a functional programming style
 ---
 
-{{content/snippets/heron-dsl.md}}
+{{content/snippets/heron-functional-api.md}}
 
 ## Getting started
 
-In order to use the Heron DSL for Java, you'll need to install the `heron-dsl` library.
+In order to use the Heron Functional API for Java, you'll need to install the `heron-dsl` library.
 
 ### Maven setup
 
@@ -23,7 +23,7 @@ In order to use the `heron-dsl` library, add this to the `dependencies` block of
 
 #### Compiling a JAR with dependencies
 
-In order to run a Java DSL topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
+In order to run a Java Functional API topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
 
 ```xml
 <plugin>
@@ -66,18 +66,38 @@ $ heron submit local \
   MyTopology arg1 arg2
 ```
 
-#### Java DSL starter project
+### Java Functional API starter project
 
 If you'd like to up and running quickly with the Java DSL, you can clone [this repository](https://github.com/streamlio/heron-java-dsl-example), which includes an example topology built using the DSL as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
 
 ```bash
-$ git clone https://github.com/streamlio/heron-java-dsl-example
-$ cd heron-java-dsl-example
+$ git clone https://github.com/streamlio/heron-java-functional-api-example
+$ cd heron-java-functional-api-example
 $ mvn assembly:assembly
 $ ls target/*.jar
-heron-java-dsl-example-0.1.0-jar-with-dependencies.jar
-heron-java-dsl-example-0.1.0.jar
-``` 
+heron-java-functional-api-example-latest-jar-with-dependencies.jar
+heron-java-functional-api-example-latest.jar
+```
+
+If you're running a [local Heron cluster](../../../getting-started), you can submit the built example topology like this:
+
+```bash
+$ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
+  io.streaml.heron.functionalapi.WordCountFunctionalTopology \
+  WordCountFunctionalTopology
+```
+
+#### Selecting delivery semantics
+
+Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics)
+
+## Functional API topology configuration
+
+### Delivery semantics
+
+### Containers and resources
+
+<!--
 
 ## Full example
 
@@ -93,6 +113,8 @@ import com.twitter.heron.dsl.Builder;
 Builder builder = Builder.CreateBuilder();
 ```
 
+-->
+
 ## Streamlets
 
 In the Heron DSL for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data (of whichever type) you'd like
@@ -101,14 +123,15 @@ In the Heron DSL for Java, processing graphs consist of [streamlets](../../../co
 
 Operation | Description | Example
 :---------|:------------|:-------
-`map` | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
-`flatMap` | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
-`join` | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
-`union` | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one
-`filter` | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
+[`map`](#map-operations) | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
+[`flatMap`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
+[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
+[`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
 `repartition` | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
 `mapToKV` | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
 `log` | | Output the final results of a processing graph to stdout
+
+<!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
 
 ### Map operations
 
@@ -136,23 +159,23 @@ The effect of this operation is to transform each `Streamlet<String>` into a `St
 
 ### Join operations
 
+Join operations unify two streamlets *on a key* (join operations require `KVStreamlet`s). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
+
 ```java
 Builder builder = Builder.CreateBuilder();
 
 Streamlet<KeyValue<String, String>> streamlet1 =
-        builder.newSource(() -> new KeyValue<>("heron-api", "topology"));
+        builder.newSource(() -> new KeyValue<>("heron-api", "topology-api"));
 
-Builder.newSource(() -> new KeyValue<>("heron-api", "dsl"))
+Builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
     .join(streamlet1);
 ```
 
-### Left join operations
-
-### Outer join operations
+In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
 
 ### Filter operations
 
-
+Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function.
 
 ## Parallelism
 
