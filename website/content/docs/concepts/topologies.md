@@ -3,36 +3,39 @@ title: Heron Topologies
 ---
 
 > ## New DSL for Heron
-> As of Heron version 0.15.2, there is a new **Heron DSL** that can be used
-> to write topologies in a more functional manner, without needing to
-> specify spout and bolt logic directly. There is currently a [DSL for
-> Python](../../developers/python/python-dsl) and a DSL for Java will be
-> added soon.
+> As of Heron version 0.15.2, there is a new **Heron DSL** that you can use
+> to write topologies in a more declarative, functional manner, without
+> needing to specify spout and bolt logic directly. There is currently a [DSL for
+> Java](../../developers/java/dsl). A DSL for Python will be added soon.
 > 
 > More information on the DSL can be found [below](#the-heron-dsl).
 
 A Heron **topology** is a [directed acyclic
-graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) used to process
-streams of data. Heron topologies consist of three basic components:
-[spouts](#spouts) and [bolts](#bolts), which are connected via
-**streams** of [tuples](../../developers/data-model). Below is a visual
-illustration of a simple topology:
+graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) used to process
+streams of data. Topologies can be stateless or 
+[stateful](../delivery-semantics#stateful-topologies) depending on your use case.
+
+Heron topologies consist of two basic components:
+
+* [Spouts](#spouts) inject data into Heron topologies, potentially from external sources like pub-sub messaging systems (Apache Kafka, Apache Pulsar, etc.)
+* [Bolts](#bolts) apply user-defined processing logic to data supplied by spouts
+
+Spouts and bolts are connected to one another via **streams** of data. Below is a
+visual illustration of a simple Heron topology:
 
 ![Heron topology](/img/topology.png)
 
+In the diagram above, spout **S1** feeds data to bolts **B1** and **B2** for
+processing; in turn, bolt **B1** feeds processed data to bolts **B3** and
+**B4**, while bolt **B2** feeds processed data to bolt **B4**. This is just a
+simple example; you can create arbitrarily complex topologies in Heron.
+
+## Creating topologies
+
 There are currently two APIs available that you can use to build Heron topologies:
 
-1. The higher-level [Heron DSL](#the-heron-dsl) (recommended), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flagMap, and filter)
-1. The lower-level topology API, based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
-
-Spouts are responsible for emitting [tuples](../../developers/data-model)
-into the topology, while bolts are responsible for processing those tuples. In
-the diagram above, spout **S1** feeds tuples to bolts **B1** and **B2** for
-processing; in turn, bolt **B1** feeds processed tuples to bolts **B3** and
-**B4**, while bolt **B2** feeds processed tuples to bolt **B4**.
-
-This is just a simple example; you can use bolts and spouts to form arbitrarily
-complex topologies.
+1. The higher-level [Heron DSL](#the-heron-dsl) (recommended for new topologies), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)
+1. The lower-level [topology API](#the-topology-api) (*not* recommended for new topologies), based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
 
 ## Topology Lifecycle
 
@@ -40,21 +43,48 @@ Once you've set up a [Heron cluster](../../operators/deployment), you
 can use Heron's [CLI tool](../../operators/heron-cli) to manage the entire
 lifecycle of a topology, which typically goes through the following stages:
 
-1. [submit](../../operators/heron-cli#submitting-a-topology) the topology
+1. [Submit](../../operators/heron-cli#submitting-a-topology) the topology
    to the cluster. The topology is not yet processing streams but is ready to be
    activated.
-2. [activate](../../operators/heron-cli#activating-a-topology) the
+2. [Activate](../../operators/heron-cli#activating-a-topology) the
    topology. The topology will begin processing streams in accordance with
    the topology architecture that you've created.
-3. [restart](../../operators/heron-cli#restarting-a-topology) an
-   active topology if, for example, you need update the topology configuration.
-4. [deactivate](../../operators/heron-cli#deactivating-a-topology) the
+3. [Restart](../../operators/heron-cli#restarting-a-topology) an
+   active topology if, for example, you need to update the topology configuration.
+4. [Deactivate](../../operators/heron-cli#deactivating-a-topology) the
    topology. Once deactivated, the topology will stop processing but
    remain running in the cluster.
-5. [kill](../../operators/heron-cli#killing-a-topology) a topology to completely
+5. [Kill](../../operators/heron-cli#killing-a-topology) a topology to completely
    remove it from the cluster.  It is no longer known to the Heron cluster and
    can no longer be activated. Once killed, the only way to run that topology is
    to re-submit it.
+
+## Logical Plan
+
+A topology's **logical plan** is analagous to a database [query
+plan](https://en.wikipedia.org/wiki/Query_plan) in that it maps out the basic
+operations associated with a topology.
+
+![Topology logical Plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
+
+Whether you use the [Heron DSL](#the-heron-dsl) or the [topology
+API](#the-topology-api), Heron automatically  transforms the processing logic that
+you create into a physical network of [spouts](#spouts) and [bolts](#bolts) that
+run inside of containers.
+
+## Physical Plan
+
+A topology's **physical plan** is related to its logical plan but with the
+crucial difference that a physical plan maps the "physical" execution logic of a
+topology. Here's a
+rough visual representation of a physical plan:
+
+![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
+
+Whether you use the [Heron DSL](#the-heron-dsl) or the [topology
+API](#the-topology-api), Heron automatically  transforms the processing logic that
+you create into a physical network of [spouts](#spouts) and [bolts](#bolts) that
+run inside of containers.
 
 ## The Heron DSL
 
@@ -66,7 +96,8 @@ drawbacks was that topologies
 
 ### Why a DSL?
 
-The older, spouts-and-bolts based model of creating topologies provided a powerful API for specifying processing logic, but it presented a number of challenges for developers as well:
+The older, spouts-and-bolts based model of creating topologies provided a powerful API
+for specifying processing logic, but it presented a number of challenges for developers as well:
 
 * **Verbosity** --- In both the Java and Python topology APIs, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts. This often led to the problem of...
 * **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
@@ -75,18 +106,12 @@ The older, spouts-and-bolts based model of creating topologies provided a powerf
 In contrast with the topology API, the Heron DSL offers:
 
 * **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron DSL enables you to write functions, such as map, flatMap, join, and filter functions, instead.
-* **Easy debugging** ---
-* **Completely flexible data model** ---
-
-The Heron DSL provides a higher-level API that is
+* **Easy debugging** --- With the Heron DSL, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
+* **Completely flexible data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron DSL enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.
 
 From the standpoint of both operators and developers [managing topologies'
 lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
-development workflow standpoint, however, the difference is profound. The Heron
-DSL allows for topology code that is:
-
-* Less verbose and far less dependent on boilerplate
-
+development workflow standpoint, however, the difference is profound.
 
 ### Streamlets
 
@@ -274,22 +299,9 @@ topology, and much more.
 Information on building bolts can be found in [Building
 Bolts](../../developers/java/bolts).
 
-## Data Model
+## The topology API
+
+### Data Model
 
 Heron has a fundamentally tuple-driven data model. You can find more information
 in [Heron's Data Model](../../developers/data-model).
-
-## Logical Plan
-
-A topology's **logical plan** is analagous to a database [query
-plan](https://en.wikipedia.org/wiki/Query_plan). The image at the top of this
-page is an example logical plan for a topology.
-
-## Physical Plan
-
-A topology's **physical plan** is related to its logical plan but with the
-crucial difference that a physical plan maps the actual execution logic of a
-topology, including the machines running each spout or bolt and more. Here's a
-rough visual representation of a physical plan:
-
-![Topology Physical Plan](/img/physicalplan.png)
