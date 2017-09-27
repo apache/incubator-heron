@@ -26,8 +26,8 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.Context;
 import com.twitter.heron.dsl.KVStreamlet;
 import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableTransformer;
 import com.twitter.heron.dsl.Streamlet;
-import com.twitter.heron.dsl.TransformFunction;
 import com.twitter.heron.dsl.Window;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
@@ -218,7 +218,7 @@ public class BaseStreamletTest {
   public void testTransformStreamlet() throws Exception {
     Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet =
-        baseStreamlet.transform(new TransformFunction<Double, Double>() {
+        baseStreamlet.transform(new SerializableTransformer<Double, Double>() {
           @Override
           public void setup(Context context) {
 

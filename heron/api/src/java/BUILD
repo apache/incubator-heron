@@ -22,7 +22,7 @@ api_deps_files =  \
 
 java_library(
     name = "api-java",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
+    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/dsl/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files,
 )

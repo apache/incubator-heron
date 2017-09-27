@@ -37,6 +37,7 @@ command_to_start_executor = \
   '{{thermos.ports[port2]}}' \
   '{{thermos.ports[port3]}}' \
   '{{SYSTEM_YAML}}' \
+  '{{OVERRIDE_YAML}} ' \
   '{{COMPONENT_RAMMAP}}' \
   '{{COMPONENT_JVM_OPTS_IN_BASE64}}' \
   '{{TOPOLOGY_PACKAGE_TYPE}}' \

@@ -4,16 +4,15 @@ setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/*
+	rm -rf public/* static/api static/style.css static/style*.css static/js
 
 serve:
-	@hugo serve
+	@hugo serve --buildDrafts
 
 develop-static-assets:
 	@npm run develop
 
 build-static-assets:
-	@npm run clean
 	@npm run build
 
 pages:
