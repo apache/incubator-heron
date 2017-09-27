@@ -1,0 +1,3 @@
+IgnoreDirectoryMissingTrailingSlash: true
+IgnoreAltMissing: true
+DirectoryPath: public/docs

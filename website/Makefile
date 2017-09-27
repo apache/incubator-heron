@@ -41,11 +41,6 @@ site:
 	@make python-docs
 	@make linkchecker
 
-travis-ruby-setup:
-	NOKOGIRI_USE_SYSTEM_LIBRARIES=true bundle install \
-		--path vendor/bundle \
-		--jobs=3
-
 travis-python-setup:
 	sudo -H pip install pygments==2.1.3 pdoc==0.3.2 pyopenssl
 
@@ -54,7 +49,7 @@ travis-install-hugo:
 	sudo dpkg -i hugo_${HUGO_VERSION}_Linux-64bit.deb
 	hugo version
 
-travis-website-setup: travis-ruby-setup travis-python-setup travis-install-hugo
+travis-website-setup: travis-python-setup travis-install-hugo
 
 travis-website-check:
 	@make clean

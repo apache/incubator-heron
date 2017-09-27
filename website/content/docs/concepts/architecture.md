@@ -3,7 +3,7 @@ title: Heron Architecture
 ---
 
 Heron is a general purpose streaming engine designed for performance, low latency, isolation and
-reliability. It also provides API compatibility with [Apache Storm](http://storm.apache.org).
+reliability. It also provides API compatibility with [Apache Storm](https://storm.apache.org).
 
 The sections below clarify the distinction between [Heron and
 Storm]({{< ref "#relationship-with-apache-storm" >}}), describe the [design
@@ -28,7 +28,7 @@ Heron was initially developed at Twitter with two main goals in mind:
 1. Providing performance, reliability and ease of troubleshooting by leveraging a process-based
 computing model and full topology isolation.
 2. Retaining full compatibility with Storm's data model and [topology
-API](http://storm.apache.org/about/simple-api.html).
+API](https://storm.apache.org/about/simple-api.html).
 
 For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
 Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
@@ -55,7 +55,7 @@ the sections below:
 The Topology Master \(TM) manages a topology throughout its entire lifecycle,
 from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
-The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
+The TM creates an ephemeral [ZooKeeper](https://zookeeper.apache.org) node to
 ensure that there's only one TM for the topology and that the TM is easily
 discoverable by any process in the topology. The TM also constructs the [physical
 plan](../topologies#physical-plan) for a topology which it relays to different
@@ -163,7 +163,7 @@ Topologies](../../operators/heron-cli).
 The **Heron Tracker** (or just Tracker) is a centralized gateway for
 cluster-wide information about topologies, including which topologies are
 running, being launched, being killed, etc. It relies on the same
-[ZooKeeper](http://zookeeper.apache.org) nodes as the topologies in the cluster
+[ZooKeeper](https://zookeeper.apache.org) nodes as the topologies in the cluster
 and exposes that information through a JSON REST API. The Tracker can be
 run within your Heron cluster (on the same set of machines managed by your
 Heron [scheduler](../../operators/deployment)) or outside of it.

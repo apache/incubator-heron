@@ -1,11 +1,19 @@
 #!/bin/bash
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-GENERATED_HTML_DIR=./public/docs
 
-source $HERON_ROOT_DIR/website/scripts/common.sh
+source $HERON_ROOT_DIR/scripts/detect_os_type.sh
 
-bundle _${BUNDLER_VERSION}_ exec htmlproofer $GENERATED_HTML_DIR \
-    --alt-ignore '/.*/' \
-    --allow-hash-href \
-    --url-ignore "/http://localhost*/,/http://192.168.33.7:*/,/https://github.com/streamlio*/" || true
+PLATFORM=`platform`
+
+if [ $PLATFORM = "darwin" ]; then
+    HTMLTEST_PLATFORM=osx
+elif [ $PLATFORM = "ubuntu" ] || [ $PLATFORM = "centos" ]; then
+    HTMLTEST_PLATFORM=linux
+fi
+
+echo $HTMLTEST_PLATFORM
+
+EXECUTABLE=htmltest-$HTMLTEST_PLATFORM
+
+tmp/$EXECUTABLE
