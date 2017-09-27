@@ -2,13 +2,15 @@
 title: Heron Topologies
 ---
 
-> ## New DSL for Heron
-> As of Heron version 0.15.2, there is a new **Heron DSL** that you can use
+> ## New Functional API for Heron
+> As of version 0.15.2, Heron offers a new **Functional API** that you can use
 > to write topologies in a more declarative, functional manner, without
-> needing to specify spout and bolt logic directly. There is currently a [DSL for
-> Java](../../developers/java/dsl). A DSL for Python will be added soon.
+> needing to specify spout and bolt logic directly. The Functional API is
+> currently available for [Java](../../developers/java/functional-api). The
+> Functional API for Python will be available soon.
 > 
-> More information on the DSL can be found [below](#the-heron-dsl).
+> More information on the Functional API can be found
+> [below](#the-heron-functional-api).
 
 A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) used to process
@@ -34,7 +36,7 @@ simple example; you can create arbitrarily complex topologies in Heron.
 
 There are currently two APIs available that you can use to build Heron topologies:
 
-1. The higher-level [Heron DSL](#the-heron-dsl) (recommended for new topologies), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)
+1. The higher-level [Heron Functional API](#the-heron-functional-api) (recommended for new topologies), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)
 1. The lower-level [topology API](#the-topology-api) (*not* recommended for new topologies), based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
 
 ## Topology Lifecycle
@@ -57,36 +59,36 @@ lifecycle of a topology, which typically goes through the following stages:
 5. [Kill](../../operators/heron-cli#killing-a-topology) a topology to completely
    remove it from the cluster.  It is no longer known to the Heron cluster and
    can no longer be activated. Once killed, the only way to run that topology is
-   to re-submit it.
+   to re-submit and re-activate it.
 
 ## Logical Plan
 
 A topology's **logical plan** is analagous to a database [query
 plan](https://en.wikipedia.org/wiki/Query_plan) in that it maps out the basic
-operations associated with a topology.
+operations associated with a topology. Here's an example logical plan for the
+example Functional API topology [below](#functional-api-example):
 
 ![Topology logical Plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
 
-Whether you use the [Heron DSL](#the-heron-dsl) or the [topology
-API](#the-topology-api), Heron automatically  transforms the processing logic that
-you create into a physical network of [spouts](#spouts) and [bolts](#bolts) that
-run inside of containers.
+Whether you use the [Heron Functional API](#the-heron-functional-api) or the [topology
+API](#the-topology-api), Heron automatically transforms the processing logic that
+you create into both a logical plan and a [physical plan](#physical-plan).
 
 ## Physical Plan
 
 A topology's **physical plan** is related to its logical plan but with the
-crucial difference that a physical plan maps the "physical" execution logic of a
-topology. Here's a
-rough visual representation of a physical plan:
+crucial difference that a physical plan determines the "physical" execution
+logic of a topology, i.e. how topology processes are divided between
+[Docker](https://www.docker.com) containers. Here's a basic visual representation of a
+physical plan:
 
 ![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
 
-Whether you use the [Heron DSL](#the-heron-dsl) or the [topology
-API](#the-topology-api), Heron automatically  transforms the processing logic that
-you create into a physical network of [spouts](#spouts) and [bolts](#bolts) that
-run inside of containers.
+In this example, a Heron topology consists of one [spout](#spouts) and five
+different [bolts](#bolts) (each of which has multiple instances) that have automatically 
+been distributed between five different Docker containers.
 
-## The Heron DSL
+## The Heron Functional API
 
 When Heron was first created, the model for creating topologies was deeply
 indebted to the Apache Storm model. Under that model, developers creating topologies
@@ -98,27 +100,48 @@ presented a variety of drawbacks for developers:
 * **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
 * **Tuple-based data model** --- In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
 
-In contrast with the topology API, the Heron DSL offers:
+In contrast with the topology API, the Heron Functional API offers:
 
-* **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron DSL enables you to write functions, such as map, flatMap, join, and filter functions, instead.
-* **Easy debugging** --- With the Heron DSL, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
-* **Completely flexible data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron DSL enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.
+* **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron Functional API enables you to write functions, such as map, flatMap, join, and filter functions, instead.
+* **Easy debugging** --- With the Heron Functional API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
+* **Completely flexible data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Functional API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.
+
+### Heron Functional API topologies
+
+With the Heron Functional API *you still create topologies*, but only implicitly. Heron
+automatically performs the heavy lifting of converting the streamlet-based processing logic
+that you create into spouts and bolts and, from there, into containers that are then deployed using
+whichever [scheduler](../../operators/deployment) your Heron cluster is using.
 
 From the standpoint of both operators and developers [managing topologies'
 lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
 development workflow standpoint, however, the difference is profound.
 
+<!--
+
+TODO: add this when the Java DSL doc is published
+
+### Available languages
+
+The Heron Functional API is currently available in the following languages:
+
+* [Java](../../developers/java/functional-api)
+
+-->
+
 ### Streamlets
 
-The core construct underlying the Heron DSL is that of the **streamlet**. A streamlet is
+The core construct underlying the Heron Functional API is that of the **streamlet**. A streamlet is
 a potentially unbounded, ordered collection of tuples. Streamlets can originate from a
 wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
 (incubating), random generators, or static files like CVS or Parquet files.
 
-In the Heron DSL, processing tuples means *transforming streamlets into other
+#### Streamlet operations
+
+In the Heron Functional API, processing data means *transforming streamlets into other
 streamlets*. This can be done using a wide variety of available operations, including
-many you may be familiar with from functional programming:
+many that you may be familiar with from functional programming:
 
 Operation | Description
 :---------|:-----------
@@ -127,7 +150,7 @@ flatMap | Like a map operation but with the important difference that each eleme
 join | Joins two separate streamlets into a single streamlet
 filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 
-### DSL example
+### Functional API example
 
 You can see an example streamlet-based processing graph in the diagram below:
 
@@ -143,8 +166,8 @@ import com.twitter.heron.dsl.impl.BaseStreamlet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class ExampleDSLTopology {
-    public ExampleDSLTopology() {}
+public final class ExampleFunctionalAPITopology {
+    public ExampleFunctionalAPITopology() {}
 
     private int randomInt(int lower, int upper) {
         return ThreadLocalRandom.current().nextInt(lower, upper + 1);
@@ -169,39 +192,34 @@ public final class ExampleDSLTopology {
         Config conf = new Config();
         conf.setNumContainers(2);
 
-        new Runner().run("ExampleDSLTopology", conf, builder);
+        new Runner().run("ExampleFunctionalAPITopology", conf, builder);
     }
 }
 ```
 
-That Java code will produce this [physical plan](#physical-plan):
+That Java code will produce this [logical plan](#logical-plan):
 
-![Heron DSL physical plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
+![Heron Functional API logical plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
 
 ### Key-value streamlets
 
 In order to perform some operations, such as streamlet joins and streamlet reduce operations, you'll need to create **key-value** streamlets.
 
-### Heron DSL topologies
-
-With the Heron DSL *you still create topologies*, but only implicitly. Heron automatically
-performs the heavy lifting of converting the streamlet-based processing logic that you
-create into spouts and bolts and, from there, into containers that are then deployed using
-whichever scheduler your Heron cluster is using.
-
-### Available DSLs
-
-The Heron DSL is currently available in the following languages:
-
-* [Java](../../developers/java/dsl)
-
 ## Partitioning
 
 In the topology API, processing parallelism can be managed via adjusting the number of spouts and bolts performing different operations, enabling you to, for example, increase the relative parallelism of a bolt by using three of that bolt instead of two.
 
-The Heron DSL provides a different mechanism for controlling parallelism: **partitioning**. To understand partitioning, keep in mind that rather than physical spouts and bolts, the core processing construct in the Heron DSL is the processing step. With the Heron DSL, you can assign a number of partitions to each processing step in your graph (the default is one partition).
+The Heron Functional API provides a different mechanism for controlling parallelism: **partitioning**. To understand partitioning, keep in mind that rather than physical spouts and bolts, the core processing construct in the Heron Functional API is the processing step. With the Heron Functional API, you can explicitly assign a number of partitions to each processing step in your graph (the default is one partition).
 
-The example topology [above](#streamlets), for example, has five steps: the random integer source, the "add one" map operation, the union operation, the filtering operation, and finally the logging operation. You could apply varying numbers of partitions each step in that topology like this:
+The example topology [above](#streamlets), for example, has five steps:
+
+* the random integer source
+* the "add one" map operation
+* the union operation
+* the filtering operation
+* the logging operation.
+
+You could apply varying numbers of partitions to each step in that topology like this:
 
 ```java
 Builder builder = Builder.CreateBuilder();
@@ -229,7 +247,9 @@ With the older topology API, you had two "levers" for managing topology performa
 1. Adjusting the number of spouts and bolts performing operations
 1. Adjusting the resources (CPU and RAM) used by the topology
 
-The Heron DSL still enables you to adjust the CPU and RAM used by the topology but replaces #1 with per-processing-step partitioning.
+The Heron Functional API still enables you to adjust the CPU and RAM used by the topology but replaces #1 with per-processing-step partitioning.
+
+<!-->
 
 ## Windowing
 
@@ -254,23 +274,27 @@ In a sliding time window, tuples
 
 ### Count windows
 
-There are thus four total window types:
+There are thus four total window typ
 
-## Resource allocation with the Heron DSL
+-->
 
-Three configs:
+## Resource allocation with the Heron Functional API
 
-1. Number of containers
-1. CPU
-1. RAM
+When creating topologies using the Functional API, there are three types of resources that you can specify:
 
-The defaults:
+1. The number of containers into which the topology's [physical plan](#physical-plan) will be split
+1. The total number of CPUs allocated to be used by the topology
+1. The total amount of RAM allocated to be used by the topology
+
+For each topology, there are defaults for each resource type:
 
 Resource | Default
 :--------|:-------
 Number of containers | 1
 CPU | 1.0
 RAM | 512 MB
+
+<!-- TODO: For instructions on allocating resources to topologies, see ... -->
 
 ## Spouts
 
@@ -294,9 +318,9 @@ topology, and much more.
 Information on building bolts can be found in [Building
 Bolts](../../developers/java/bolts).
 
-## The topology API
+## Data Model
 
-### Data Model
+Heron's original topology API required using a fundamentally tuple-driven data model.
+You can find more information in [Heron's Data Model](../../developers/data-model).
 
-Heron has a fundamentally tuple-driven data model. You can find more information
-in [Heron's Data Model](../../developers/data-model).
+In the new Functional API, 
