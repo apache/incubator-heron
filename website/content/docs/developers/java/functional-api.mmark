@@ -83,19 +83,80 @@ If you're running a [local Heron cluster](../../../getting-started), you can sub
 
 ```bash
 $ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.functionalapi.WordCountFunctionalTopology \
-  WordCountFunctionalTopology
+  io.streaml.heron.functionalapi.IntegerProcessingTopology \
+  IntegerProcessingTopology
 ```
 
 #### Selecting delivery semantics
 
-Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics)
+Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology]()#java-functional-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
+
+```bash
+$ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
+  io.streaml.heron.functionalapi.IntegerProcessingTopology \
+  IntegerProcessingTopology \
+  effectively-once
+```
+
+The other options are `at-most-once` and `at-least-once`. If you don't explicitly select the delivery semantics, at-least-once semantics will be applied.
 
 ## Functional API topology configuration
 
+Every Functional API topology needs to be configured using a `Config` object. Here's an example baseline configuration:
+
+```java
+import com.twitter.heron.dsl.Config;
+import com.twitter.heron.dsl.Runner;
+
+Config topologyConfig = new Config();
+
+// Apply topology configuration using the topologyConfig object
+
+Runner topologyRunner = new Runner();
+topologyRunner.run("name-for-topology", conf, topologyBuilder);
+```
+
+You can set the following in the configuration: the topology's [delivery semantics](#delivery-semantics), the number of [containers](#containers-and-resources) to be used by the topology, and the total CPU and RAM resources for the topology.
+
 ### Delivery semantics
 
+You can apply [delivery semantics](../../../concepts/delivery-semantics) to a Functional API topology like this:
+
+```java
+topologyConfig.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
+```
+
+The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
+
 ### Containers and resources
+
+You can set the number of Docker containers to be used by a Functional API topology (as an integer) like so:
+
+```java
+topologyConfig.setNumContainers(2);
+```
+
+You can set the CPU per container (as a float) and RAM per container (as a long expressing the number of bytes) like this:
+
+```java
+import com.twitter.heron.dsl.Resources;
+
+Resources resources = new Resources();
+resources.withCpu(2.0f);
+resources.withRam(104857600);
+
+topologyConfig.setContainerResources(resources);
+```
+
+> The default CPU is `1.0f` while the default RAM is `104857600` (1 MB).
+
+There's also a `ByteAmount` helper class that you can use:
+
+```java
+import com.twitter.heron.common.basics.ByteAmount;
+
+resources.withRam(ByteAmount.fromMegabytes(2048).asMegabytes());
+```
 
 <!--
 
@@ -179,4 +240,4 @@ Filter operations retain elements in a streamlet, while potentially excluding so
 
 ## Parallelism
 
-In the original, Storm-inspired topology API for Heron, you could control parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron DSL is different in that 
+In the original, Storm-inspired topology API for Heron, you could control parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron Functional API is different in that 
