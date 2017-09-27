@@ -101,7 +101,7 @@ java_library(
 
 # This version is needed for dependents that don't want
 # kryo to be included in the generated binary
-# (e.g. //heron/storm/src/java:heron-storm)
+# (e.g. //storm-compatibility/src/java:heron-storm)
 java_library(
     name = "kryo-neverlink",
     srcs = [ "Empty.java" ],
@@ -221,12 +221,105 @@ java_library(
 )
 
 java_library(
-    name = "yahoo-pulsar-client",
+    name = "apache-pulsar-client",
     srcs = [ "Empty.java" ],
     exports = [ 
-        "@yahoo_pulsar_client//jar" 
+        "@apache_pulsar_client//jar" 
     ],
     deps = [ 
-        "@yahoo_pulsar_client//jar",
+        "@apache_pulsar_client//jar",
+    ],
+)
+
+java_library(
+  name = "commons-compress",
+  srcs = [ "Empty.java" ],
+  exports = [
+      "@org_apache_commons_compress//jar",
+  ],
+  deps = [
+      "@org_apache_commons_compress//jar",
+  ]
+)
+
+java_library(
+    name = "jetty-jersey-java",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@org_eclipse_jetty_server//jar",
+        "@org_eclipse_jetty_http//jar",
+        "@org_eclipse_jetty_util//jar",
+        "@org_eclipse_jetty_io//jar",
+        "@org_eclipse_jetty_security//jar",
+        "@org_eclipse_jetty_continuation//jar",
+        "@org_eclipse_jetty_servlet//jar",
+        "@org_eclipse_jetty_servlets//jar",
+        "@javax_servlet_api//jar",
+        "@jersey_container_servlet_core//jar",
+        "@jersey_container_servlet//jar",
+        "@jersey_server//jar",
+        "@jersey_client//jar",
+        "@jersey_common//jar",
+        "@jersey_guava//jar",
+        "@jersey_media_multipart//jar",
+        "@jersey_media_jaxb//jar",
+        "@javax_inject//jar",
+        "@javax_annotation//jar",
+        "@javax_validation//jar",
+        "@javax_ws_rs_api//jar",
+        "@hk2_api//jar",
+        "@hk2_utils//jar",
+        "@hk2_locator//jar",
+        "@hk2_aopalliance_repackaged//jar",
+        "@hk2_osgi_resource_locator//jar",
+        "@org_javassit//jar",
+        "@mimepull//jar",
+    ],
+    deps = [ 
+        "@org_eclipse_jetty_server//jar",
+        "@org_eclipse_jetty_http//jar",
+        "@org_eclipse_jetty_util//jar",
+        "@org_eclipse_jetty_io//jar",
+        "@org_eclipse_jetty_security//jar",
+        "@org_eclipse_jetty_continuation//jar",
+        "@org_eclipse_jetty_servlet//jar",
+        "@org_eclipse_jetty_servlets//jar",
+        "@javax_servlet_api//jar",
+        "@jersey_container_servlet_core//jar",
+        "@jersey_container_servlet//jar",
+        "@jersey_server//jar",
+        "@jersey_client//jar",
+        "@jersey_common//jar",
+        "@jersey_guava//jar",
+        "@jersey_media_multipart//jar",
+        "@jersey_media_jaxb//jar",
+        "@javax_inject//jar",
+        "@javax_annotation//jar",
+        "@javax_validation//jar",
+        "@javax_ws_rs_api//jar",
+        "@hk2_api//jar",
+        "@hk2_utils//jar",
+        "@hk2_locator//jar",
+        "@hk2_aopalliance_repackaged//jar",
+        "@hk2_osgi_resource_locator//jar",
+        "@org_javassit//jar",
+        "@mimepull//jar",
+    ],   
+)
+
+java_library(
+    name = "dlog-java",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@org_apache_distributedlog_core//jar",
+    ],
+    deps = [ 
+        "@org_apache_distributedlog_core//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
+        "@commons_collections_commons_collections//jar",
+        "@commons_configuration_commons_configuration//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_logging_commons_logging//jar",
     ],
 )

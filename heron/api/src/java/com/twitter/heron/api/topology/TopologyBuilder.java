@@ -21,8 +21,11 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BasicBoltExecutor;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
+import com.twitter.heron.api.windowing.TupleWindow;
 
 /**
  * TopologyBuilder exposes the Java API for specifying a topology for Heron
@@ -147,6 +150,38 @@ public class TopologyBuilder {
    */
   public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelismHint) {
     return setBolt(id, new BasicBoltExecutor(bolt), parallelismHint);
+  }
+
+  /**
+   * Define a new bolt in this topology. This defines a windowed bolt, intended
+   * for windowing operations. The {@link IWindowedBolt#execute(TupleWindow)} method
+   * is triggered for each window interval with the list of current events in the window.
+   *
+   * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
+   * @param bolt the windowed bolt
+   * @return use the returned object to declare the inputs to this component
+   * @throws IllegalArgumentException if {@code parallelism_hint} is not positive
+   */
+  public BoltDeclarer setBolt(String id, IWindowedBolt bolt) throws IllegalArgumentException {
+    return setBolt(id, bolt, null);
+  }
+
+  /**
+   * Define a new bolt in this topology. This defines a windowed bolt, intended
+   * for windowing operations. The {@link IWindowedBolt#execute(TupleWindow)} method
+   * is triggered for each window interval with the list of current events in the window.
+   *
+   * @param id the id of this component. This id is referenced by other components that want to
+   * consume this bolt's outputs.
+   * @param bolt the windowed bolt
+   * @param parallelismHint the number of tasks that should be assigned to execute this bolt.
+   * Each task will run on a thread in a process somwehere around the cluster.
+   * @return use the returned object to declare the inputs to this component
+   * @throws IllegalArgumentException if {@code parallelismHint} is not positive
+   */
+  public BoltDeclarer setBolt(String id, IWindowedBolt bolt, Number parallelismHint) throws
+      IllegalArgumentException {
+    return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint);
   }
 
   /**

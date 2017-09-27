@@ -38,6 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.SubmitterMain;
@@ -48,7 +49,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -338,6 +338,9 @@ public class AuroraSchedulerTest {
         case SYSTEM_YAML:
           expected = expectedConf + "/heron_internals.yaml";
           break;
+        case OVERRIDE_YAML:
+          expected = expectedConf + "/override.yaml";
+          break;
         case TOPOLOGY_BINARY_FILE:
         case TOPOLOGY_CLASSPATH:
           expected = "binaryFile.jar";
@@ -371,6 +374,12 @@ public class AuroraSchedulerTest {
           break;
         case STATEFUL_CONFIG_YAML:
           expected = expectedConf + "/stateful.yaml";
+          break;
+        case HEALTHMGR_MODE:
+          expected = "disabled";
+          break;
+        case HEALTHMGR_CLASSPATH:
+          expected = expectedLib + "/healthmgr/*";
           break;
         default:
           fail(String.format(

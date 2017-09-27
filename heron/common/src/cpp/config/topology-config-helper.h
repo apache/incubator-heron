@@ -82,7 +82,8 @@ class TopologyConfigHelper {
   static bool StatefulTopologyStartClean(const proto::api::Topology& _topology);
 
   // Gets the checkpoint interval for stateful topologies
-  static sp_int64 GetStatefulCheckpointIntervalSecs(const proto::api::Topology& _topology);
+  static sp_int64 GetStatefulCheckpointIntervalSecsWithDefault(
+                  const proto::api::Topology& _topology, sp_int64 _default);
 
   // Gets the list of all spout component names
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,

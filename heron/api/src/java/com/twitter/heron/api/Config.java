@@ -129,7 +129,7 @@ public class Config extends HashMap<String, Object> {
     ATLEAST_ONCE,
     /**
      * Heron guarantees that each emitted tuple is seen by the downstream components
-     * exactly once. This is achieved via distributed snapshotting approach is described at
+     * effectively once. This is achieved via distributed snapshotting approach is described at
      * https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit
      * In this mode Heron will try to take the snapshots of
      * all of the components of the topology every
@@ -137,14 +137,14 @@ public class Config extends HashMap<String, Object> {
      * any component or detection of any network failure, Heron will initiate a recovery
      * mechanism to revert the topology to the last globally consistent checkpoint
      */
-    EXACTLY_ONCE;
+    EFFECTIVELY_ONCE;
   }
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode
    * mode. The format of this flag is the string encoded values of the
    * underlying TopologyReliabilityMode value.
    */
-  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.relability.mode";
+  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
 
   /**
    * Number of cpu cores per container to be reserved for this topology
@@ -309,7 +309,7 @@ public class Config extends HashMap<String, Object> {
 
   /**
    * Is topology running with acking enabled?
-   * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead
+   * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead.
    */
   @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {

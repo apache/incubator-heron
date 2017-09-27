@@ -1,5 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
-
 java_library(
     name = "metricsmgr-tests",
     srcs = glob(["**/*.java"]),
@@ -7,6 +5,7 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:network-java",
+        "//heron/common/src/java:config-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/metricsmgr/src/java:metricsmgr-java",
         "//heron/spi/src/java:metricsmgr-spi-java",
@@ -22,6 +21,7 @@ java_library(
 
 java_tests(
     test_classes = [
+        "com.twitter.heron.metricsmgr.MetricsUtilTests",
         "com.twitter.heron.metricsmgr.HandleTMasterLocationTest",
         "com.twitter.heron.metricsmgr.MetricsManagerServerTest",
         "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
@@ -29,9 +29,11 @@ java_tests(
         "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
         "com.twitter.heron.metricsmgr.sink.FileSinkTest",
         "com.twitter.heron.metricsmgr.sink.WebSinkTest",
+        "com.twitter.heron.metricsmgr.sink.PrometheusSinkTests",
     ],
     runtime_deps = [
         ":metricsmgr-tests",
     ],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )

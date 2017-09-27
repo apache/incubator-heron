@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' deactivate.py '''
+from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.cli_helper as cli_helper
-
 
 def create_parser(subparsers):
   '''
@@ -32,4 +32,5 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  Log.debug("Deactivate Args: %s", cl_args)
   return cli_helper.run(command, cl_args, "deactivate topology")

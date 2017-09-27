@@ -35,8 +35,10 @@ import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.metricsmgr.MetricsManagerServer;
+import com.twitter.heron.metricsmgr.MetricsUtil;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
@@ -185,10 +187,10 @@ public class MetricsCacheSink implements IMetricsSink {
     LOG.info("metricscache sink processRecord");
     // Format it into TopologyMaster.PublishMetrics
 
-    // The format of source is "host:port/componentName/instanceId"
-    // So source.split("/") would be an array with 3 elements:
+    // The format of record is "host:port/componentName/instanceId"
+    // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
     // ["host:port", componentName, instanceId]
-    String[] sources = record.getSource().split("/");
+    String[] sources = MetricsUtil.splitRecordSource(record);
     String hostPort = sources[0];
     String componentName = sources[1];
     String instanceId = sources[2];
@@ -336,6 +338,8 @@ public class MetricsCacheSink implements IMetricsSink {
         throw new RuntimeException("Could not create the NIOLooper", e);
       }
 
+      SystemConfig systemConfig =
+          (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
               TypeUtils.getByteAmount(
@@ -349,7 +353,8 @@ public class MetricsCacheSink implements IMetricsSink {
               TypeUtils.getByteAmount(
                   metricsCacheClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
               TypeUtils.getByteAmount(
-                  metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+                  metricsCacheClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)),
+              systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

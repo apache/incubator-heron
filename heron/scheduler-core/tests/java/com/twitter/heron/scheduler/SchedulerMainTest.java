@@ -29,6 +29,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.utils.topology.TopologyTests;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
@@ -42,8 +44,6 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.TopologyTests;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -131,7 +131,7 @@ public class SchedulerMainTest {
     PackingPlans.PackingPlan packingPlan =
         PackingTestUtils.testProtoPackingPlan("testTopology", new RoundRobinPacking());
     final SettableFuture<PackingPlans.PackingPlan> future = SettableFuture.create();
-    future.set(packingPlan);
+    assertTrue(future.set(packingPlan));
     return future;
   }
 

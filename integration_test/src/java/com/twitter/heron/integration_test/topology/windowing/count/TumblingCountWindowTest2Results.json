@@ -1,0 +1,7 @@
+[
+  "{\"1\":[{\"tuplesInWindow\":[\"1\",\"2\"]},{\"newTuples\":[\"1\",\"2\"]},{\"expiredTuples\":[]}]}",
+  "{\"2\":[{\"tuplesInWindow\":[\"3\",\"4\"]},{\"newTuples\":[\"3\",\"4\"]},{\"expiredTuples\":[\"1\",\"2\"]}]}",
+  "{\"3\":[{\"tuplesInWindow\":[\"5\",\"6\"]},{\"newTuples\":[\"5\",\"6\"]},{\"expiredTuples\":[\"3\",\"4\"]}]}",
+  "{\"4\":[{\"tuplesInWindow\":[\"7\",\"8\"]},{\"newTuples\":[\"7\",\"8\"]},{\"expiredTuples\":[\"5\",\"6\"]}]}",
+  "{\"5\":[{\"tuplesInWindow\":[\"9\",\"10\"]},{\"newTuples\":[\"9\",\"10\"]},{\"expiredTuples\":[\"7\",\"8\"]}]}"
+]

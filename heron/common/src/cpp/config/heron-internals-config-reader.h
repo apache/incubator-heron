@@ -42,10 +42,11 @@ class HeronInternalsConfigReader : public YamlFileReader {
   static bool Exists();
   // Create a singleton reader from a config file,
   // which will check and reload the config change
-  static void Create(EventLoop* eventLoop, const sp_string& _defaults_file);
+  static void Create(EventLoop* eventLoop,
+                     const sp_string& _defaults_file, const sp_string& _override_file);
   // Create a singleton reader from a config file,
   // which will not check or reload the config change
-  static void Create(const sp_string& _defaults_file);
+  static void Create(const sp_string& _defaults_file, const sp_string& _override_file);
 
   virtual void OnConfigFileLoad();
 
@@ -143,9 +144,6 @@ class HeronInternalsConfigReader : public YamlFileReader {
   /**
   * Stream manager Config Getters
   **/
-  // Maximum size in bytes of a packet to be send out from stream manager
-  sp_int32 GetHeronStreammgrPacketMaximumSizeBytes();
-
   // The frequency in ms to drain the tuple cache in stream manager
   sp_int32 GetHeronStreammgrCacheDrainFrequencyMs();
 
@@ -161,6 +159,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
 
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
+
+  // The max reconnect attempts to other stream managers for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectMaxAttempts();
 
   // The reconnect interval to other stream managers in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectIntervalSec();
@@ -191,9 +192,12 @@ class HeronInternalsConfigReader : public YamlFileReader {
   sp_int32 GetHeronStreammgrNetworkBackpressureLowwatermarkMb();
 
  protected:
-  HeronInternalsConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
+  HeronInternalsConfigReader(EventLoop* eventLoop,
+                             const sp_string& _defaults_file,
+                             const sp_string& _override_file);
   virtual ~HeronInternalsConfigReader();
-
+  sp_string override_file_;
+  void LoadOverrideConfig();
   static HeronInternalsConfigReader* heron_internals_config_reader_;
 };
 }  // namespace config

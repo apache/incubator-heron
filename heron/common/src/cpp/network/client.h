@@ -144,17 +144,9 @@ class Client : public BaseClient {
     delete m;
   }
 
-  sp_int64 getOutstandingPackets() const {
-    if (conn_) {
-      return (reinterpret_cast<Connection*>(conn_))->getOutstandingPackets();
-    } else {
-      return 0;
-    }
-  }
-
   sp_int64 getOutstandingBytes() const {
     if (conn_) {
-      return (reinterpret_cast<Connection*>(conn_))->getOutstandingBytes();
+      return conn_->getOutstandingBytes();
     } else {
       return 0;
     }

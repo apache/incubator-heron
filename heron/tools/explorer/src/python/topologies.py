@@ -37,8 +37,8 @@ def to_table(result):
   ''' normalize raw result to table '''
   max_count = 20
   table, count = [], 0
-  for role, envs_topos in result.iteritems():
-    for env, topos in envs_topos.iteritems():
+  for role, envs_topos in result.items():
+    for env, topos in envs_topos.items():
       for topo in topos:
         count += 1
         if count > max_count:
@@ -50,6 +50,7 @@ def to_table(result):
   return table, header, rest_count
 
 
+# pylint: disable=superfluous-parens
 def show_cluster(cl_args, cluster):
   ''' print topologies information to stdout '''
   try:
@@ -62,13 +63,14 @@ def show_cluster(cl_args, cluster):
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
-  print 'Topologies running in cluster \'%s\'' % cluster
+  print('Topologies running in cluster \'%s\'' % cluster)
   if rest_count:
-    print '  with %d more...' % rest_count
-  print tabulate(table, headers=header)
+    print('  with %d more...' % rest_count)
+  print(tabulate(table, headers=header))
   return True
 
 
+# pylint: disable=superfluous-parens
 def show_cluster_role(cl_args, cluster, role):
   ''' print topologies information to stdout '''
   try:
@@ -81,13 +83,14 @@ def show_cluster_role(cl_args, cluster, role):
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
-  print 'Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role)
+  print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
   if rest_count:
-    print '  with %d more...' % rest_count
-  print tabulate(table, headers=header)
+    print('  with %d more...' % rest_count)
+  print(tabulate(table, headers=header))
   return True
 
 
+# pylint: disable=superfluous-parens
 def show_cluster_role_env(cl_args, cluster, role, env):
   ''' print topologies information to stdout '''
   try:
@@ -100,11 +103,11 @@ def show_cluster_role_env(cl_args, cluster, role, env):
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
-  print 'Topologies running in cluster \'%s\', submitted by \'%s\', and\
- under environment \'%s\':' % (cluster, role, env)
+  print('Topologies running in cluster \'%s\', submitted by \'%s\', and\
+ under environment \'%s\':' % (cluster, role, env))
   if rest_count:
-    print '  with %d more...' % rest_count
-  print tabulate(table, headers=header)
+    print('  with %d more...' % rest_count)
+  print(tabulate(table, headers=header))
   return True
 
 # pylint: disable=unused-argument

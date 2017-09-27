@@ -32,13 +32,13 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.DryRunFormatType;
-import com.twitter.heron.common.basics.PackageType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
-import com.twitter.heron.scheduler.dryrun.SubmitRawDryRunRenderer;
-import com.twitter.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
+import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
@@ -52,36 +52,12 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
  */
 public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
-
-  /**
-   * Load the topology config
-   *
-   * @param topologyPackage, tar ball containing user submitted jar/tar, defn and config
-   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
-   * @param topology, proto in memory version of topology definition
-   * @return config, the topology config
-   */
-  protected static Config topologyConfigs(
-      String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
-      TopologyAPI.Topology topology) {
-    PackageType packageType = PackageType.getPackageType(topologyBinaryFile);
-
-    return Config.newBuilder()
-        .put(Key.TOPOLOGY_ID, topology.getId())
-        .put(Key.TOPOLOGY_NAME, topology.getName())
-        .put(Key.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
-        .put(Key.TOPOLOGY_BINARY_FILE, topologyBinaryFile)
-        .put(Key.TOPOLOGY_PACKAGE_TYPE, packageType)
-        .build();
-  }
 
   /**
    * Load the config parameters from the command line
@@ -95,6 +71,7 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
+                                             String submitUser,
                                              Boolean dryRun,
                                              DryRunFormatType dryRunFormat,
                                              Boolean verbose) {
@@ -102,6 +79,7 @@ public class SubmitterMain {
         .put(Key.CLUSTER, cluster)
         .put(Key.ROLE, role)
         .put(Key.ENVIRON, environ)
+        .put(Key.SUBMIT_USER, submitUser)
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
@@ -139,6 +117,14 @@ public class SubmitterMain {
         .longOpt("environment")
         .hasArgs()
         .argName("environment")
+        .required()
+        .build();
+
+    Option submitUser = Option.builder("s")
+        .desc("User submitting the topology")
+        .longOpt("submit_user")
+        .hasArgs()
+        .argName("submit userid")
         .required()
         .build();
 
@@ -217,6 +203,7 @@ public class SubmitterMain {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
+    options.addOption(submitUser);
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(configOverrides);
@@ -247,11 +234,13 @@ public class SubmitterMain {
     return cmd.hasOption("v");
   }
 
+  @SuppressWarnings("JavadocMethod")
   @VisibleForTesting
   public static Config loadConfig(CommandLine cmd, TopologyAPI.Topology topology) {
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
+    String submitUser = cmd.getOptionValue("submit_user");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String overrideConfigFile = cmd.getOptionValue("override_config_file");
@@ -280,8 +269,10 @@ public class SubmitterMain {
     // build the final config by expanding all the variables
     return Config.toLocalMode(Config.newBuilder()
         .putAll(ConfigLoader.loadConfig(heronHome, configPath, releaseFile, overrideConfigFile))
-        .putAll(commandLineConfigs(cluster, role, environ, dryRun, dryRunFormat, isVerbose(cmd)))
-        .putAll(topologyConfigs(topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
+        .putAll(commandLineConfigs(cluster, role, environ, submitUser, dryRun,
+            dryRunFormat, isVerbose(cmd)))
+        .putAll(SubmitterUtils.topologyConfigs(topologyPackage, topologyBinaryFile,
+            topologyDefnFile, topology))
         .build());
   }
 
@@ -338,7 +329,7 @@ public class SubmitterMain {
       LOG.log(Level.FINE, "Sending out dry-run response");
       // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
       PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
-      out.print(submitterMain.renderDryRunResponse(response));
+      out.print(DryRunRenders.render(response, Context.dryRunFormatType(config)));
       // Exit with status code 200 to indicate dry-run response is sent out
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
       System.exit(200);
@@ -556,16 +547,5 @@ public class SubmitterMain {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     launchRunner.call();
-  }
-
-  protected String renderDryRunResponse(SubmitDryRunResponse resp) {
-    DryRunFormatType formatType = Context.dryRunFormatType(config);
-    switch (formatType) {
-      case RAW : return new SubmitRawDryRunRenderer(resp).render();
-      case TABLE: return new SubmitTableDryRunRenderer(resp, false).render();
-      case COLORED_TABLE: return new SubmitTableDryRunRenderer(resp, true).render();
-      default: throw new IllegalArgumentException(
-          String.format("Unexpected rendering format: %s", formatType));
-    }
   }
 }

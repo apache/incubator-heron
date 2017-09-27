@@ -59,6 +59,10 @@ public class IncomingPacket {
   }
 
   public int readFromChannel(SocketChannel channel) {
+    return readFromChannel(channel, Integer.MAX_VALUE);
+  }
+
+  public int readFromChannel(SocketChannel channel, long limit) {
     if (!headerRead) {
       int retval = readFromChannel(channel, header);
       if (retval != 0) {
@@ -68,8 +72,12 @@ public class IncomingPacket {
       // We read the header fully
       headerRead = true;
       header.flip();
-      // TODO:- sanitize header.getInteger()
-      data = ByteBuffer.allocate(header.getInt());
+      int size = header.getInt();
+      if (size > limit) {
+        LOG.log(Level.SEVERE, "packet size " + size + " exceeds limit " + limit);
+        return -1;
+      }
+      data = ByteBuffer.allocate(size);
     }
     int retval = readFromChannel(channel, data);
     if (retval == 0) {

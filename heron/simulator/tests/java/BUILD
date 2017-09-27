@@ -1,4 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 java_library(
@@ -9,6 +8,7 @@ java_library(
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
+        "//heron/instance/src/java:instance-java",
         "//heron/simulator/src/java:simulator-java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",

@@ -214,12 +214,10 @@ public class TupleImpl implements Tuple {
     return getFields().select(selector, values);
   }
 
-  /*
-   * TODO:- Is this needed
-    public GlobalStreamId getSourceGlobalStreamid() {
-        return new GlobalStreamId(getSourceComponent(), streamId);
-    }
-  */
+  @Override
+  public TopologyAPI.StreamId getSourceGlobalStreamId() {
+    return stream;
+  }
 
   @Override
   public String getSourceComponent() {

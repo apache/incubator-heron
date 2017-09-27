@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.ByteAmount;
@@ -52,7 +52,8 @@ public class HeronServerTester {
       ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(100), Duration.ofMillis(100),
       ByteAmount.fromMegabytes(5),
-      ByteAmount.fromMegabytes(5));
+      ByteAmount.fromMegabytes(5),
+      ByteAmount.fromMegabytes(10));
   private static final Duration DEFAULT_LATCH_TIMEOUT = Duration.ofSeconds(2);
   private static final Duration SERVER_START_TIMEOUT = Duration.ofSeconds(2);
   public static final Duration RESPONSE_RECEIVED_TIMEOUT = Duration.ofSeconds(4);
@@ -283,14 +284,14 @@ public class HeronServerTester {
    */
   public static final class SuccessResponseHandler
       implements TestResponseHandler {
-    private final Class<? extends GeneratedMessage> expectedMessageClass;
+    private final Class<? extends GeneratedMessageV3> expectedMessageClass;
     private final TestResponseHandler delegate;
 
-    public SuccessResponseHandler(Class<? extends GeneratedMessage> expectedMessageClass) {
+    public SuccessResponseHandler(Class<? extends GeneratedMessageV3> expectedMessageClass) {
       this(expectedMessageClass, null);
     }
 
-    public SuccessResponseHandler(Class<? extends GeneratedMessage> expectedMessageClass,
+    public SuccessResponseHandler(Class<? extends GeneratedMessageV3> expectedMessageClass,
                                   TestResponseHandler delegate) {
       this.expectedMessageClass = expectedMessageClass;
       this.delegate = delegate;

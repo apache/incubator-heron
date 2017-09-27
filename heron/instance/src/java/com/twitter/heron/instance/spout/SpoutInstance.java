@@ -14,11 +14,14 @@
 
 package com.twitter.heron.instance.spout;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -26,6 +29,8 @@ import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.IUpdatable;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
@@ -39,6 +44,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class SpoutInstance implements IInstance {
@@ -48,10 +54,13 @@ public class SpoutInstance implements IInstance {
   protected final SpoutOutputCollectorImpl collector;
   protected final SpoutMetrics spoutMetrics;
   // The spout will read Control tuples from streamInQueue
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
+  private final Communicator<Message> streamInQueue;
 
   private final boolean ackEnabled;
   private final boolean enableMessageTimeouts;
+
+  private final boolean isTopologyStateful;
+  private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
 
@@ -68,8 +77,8 @@ public class SpoutInstance implements IInstance {
    * Construct a SpoutInstance basing on given arguments
    */
   public SpoutInstance(PhysicalPlanHelper helper,
-                       Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                       Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                       Communicator<Message> streamInQueue,
+                       Communicator<Message> streamOutQueue,
                        SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
@@ -81,6 +90,11 @@ public class SpoutInstance implements IInstance {
         SystemConfig.HERON_SYSTEM_CONFIG);
     this.enableMessageTimeouts =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
+
+    this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
+        .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+
+    LOG.info("Is this topology stateful: " + isTopologyStateful);
 
     if (helper.getMySpout() == null) {
       throw new RuntimeException("HeronSpoutInstance has no spout in physical plan");
@@ -127,13 +141,35 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void start() {
+  public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
+    if (!isTopologyStateful) {
+      throw new RuntimeException("Could not save a non-stateful topology's state");
+    }
+
+    if (spout instanceof IStatefulComponent) {
+      ((IStatefulComponent) spout).preSave(checkpointId);
+    }
+
+    collector.sendOutState(instanceState, checkpointId);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void init(State<Serializable, Serializable> state) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
     GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportInterval());
 
     spoutMetrics.registerMetrics(topologyContext);
+
+    // Initialize the instanceState if the spout is stateful
+    if (spout instanceof IStatefulComponent) {
+      this.instanceState = state;
+      ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
+    }
 
     spout.open(
         topologyContext.getTopologyConfig(), topologyContext, new SpoutOutputCollector(collector));
@@ -143,15 +179,18 @@ public class SpoutInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+  }
 
-    // Tasks happen in every time looper is waken up
+  @Override
+  public void start() {
+    // Add spout tasks for execution
     addSpoutsTasks();
 
     topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
-  public void stop() {
+  public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
 
@@ -159,9 +198,14 @@ public class SpoutInstance implements IInstance {
     spout.close();
 
     // Clean the resources we own
-    looper.exitLoop();
     streamInQueue.clear();
     collector.clear();
+  }
+
+  @Override
+  public void shutdown() {
+    clean();
+    looper.exitLoop();
   }
 
   @Override
@@ -198,9 +242,10 @@ public class SpoutInstance implements IInstance {
           spoutMetrics.updateOutQueueFullCount();
         }
 
-        if (ackEnabled) {
-          readTuplesAndExecute(streamInQueue);
+        // Check if we have any message to process anyway
+        readTuplesAndExecute(streamInQueue);
 
+        if (ackEnabled) {
           // Update the pending-to-be-acked tuples counts
           spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
         } else {
@@ -345,30 +390,40 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+  public void readTuplesAndExecute(Communicator<Message> inQueue) {
     // Read data from in Queues
     long startOfCycle = System.nanoTime();
     Duration spoutAckBatchTime = systemConfig.getInstanceAckBatchTime();
 
     while (!inQueue.isEmpty()) {
-      HeronTuples.HeronTupleSet tuples = inQueue.poll();
-      // For spout, it should read only control tuples(ack&fail)
-      if (tuples.hasData()) {
-        throw new RuntimeException("Spout cannot get incoming data tuples from other components");
-      }
+      Message msg = inQueue.poll();
 
-      if (tuples.hasControl()) {
-        for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
-          handleAckTuple(aT, true);
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        String checkpintId = ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
+        persistState(checkpintId);
+      } else if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
+        // For spout, it should read only control tuples(ack&fail)
+        if (tuples.hasData()) {
+          throw new RuntimeException("Spout cannot get incoming data tuples from other components");
         }
-        for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
-          handleAckTuple(aT, false);
-        }
-      }
 
-      // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
-        break;
+        if (tuples.hasControl()) {
+          for (HeronTuples.AckTuple aT : tuples.getControl().getAcksList()) {
+            handleAckTuple(aT, true);
+          }
+          for (HeronTuples.AckTuple aT : tuples.getControl().getFailsList()) {
+            handleAckTuple(aT, false);
+          }
+        }
+
+        // To avoid spending too much time
+        if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
+          break;
+        }
+      } else {
+        // Spout instance should not receive any other messages except the above ones
+        throw new RuntimeException("Invalid data sent to spout instance");
       }
     }
   }

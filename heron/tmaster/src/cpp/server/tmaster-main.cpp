@@ -26,12 +26,12 @@
 #include "config/heron-internals-config-reader.h"
 
 int main(int argc, char* argv[]) {
-  if (argc != 12) {
+  if (argc != 14) {
     std::cout << "Usage: " << argv[0] << " "
               << "<master-host> <master-port> <controller-port> <stats-port> "
               << "<topology_name> <topology_id> <zk_hostportlist> "
-              << "<topdir> <heron_internals_config_filename> "
-              << "<metrics_sinks_filename> <metrics-manager-port>" << std::endl;
+              << "<topdir> <heron_internals_config_filename> <override_config_filename>"
+              << "<metrics_sinks_filename> <metrics-manager-port> <ckptmgr-port>" << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
   }
@@ -48,14 +48,17 @@ int main(int argc, char* argv[]) {
   }
   sp_string topdir = argv[8];
   sp_string heron_internals_config_filename = argv[9];
-  sp_string metrics_sinks_yaml = argv[10];
-  sp_int32 metrics_manager_port = atoi(argv[11]);
+  sp_string override_config_filename = argv[10];
+  sp_string metrics_sinks_yaml = argv[11];
+  sp_int32 metrics_manager_port = atoi(argv[12]);
+  sp_int32 ckptmgr_port = atoi(argv[13]);
 
   EventLoopImpl ss;
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss, heron_internals_config_filename);
+  heron::config::HeronInternalsConfigReader::Create(&ss,
+    heron_internals_config_filename, override_config_filename);
 
   heron::common::Initialize(argv[0], topology_id.c_str());
 
@@ -65,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   heron::tmaster::TMaster tmaster(zkhostportlist, topology_name, topology_id, topdir,
                                   controller_port, master_port, stats_port, metrics_manager_port,
-                                  metrics_sinks_yaml, myhost, &ss);
+                                  ckptmgr_port, metrics_sinks_yaml, myhost, &ss);
   ss.loop();
   return 0;
 }

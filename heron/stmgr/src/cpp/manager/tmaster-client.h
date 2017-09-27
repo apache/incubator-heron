@@ -17,6 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 
+#include <set>
 #include <string>
 #include <vector>
 #include "network/network_error.h"
@@ -30,7 +31,8 @@ namespace stmgr {
 class TMasterClient : public Client {
  public:
   TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
-                const sp_string& _stmgr_host, sp_int32 _stmgr_port, sp_int32 _shell_port,
+                const sp_string& _stmgr_host, sp_int32 _data_port, sp_int32 _local_data_port,
+                sp_int32 _shell_port,
                 VCallback<proto::system::PhysicalPlan*> _pplan_watch,
                 VCallback<sp_string> _stateful_checkpoint_watch,
                 VCallback<sp_string, sp_int64> _restore_topology_watch,
@@ -41,9 +43,7 @@ class TMasterClient : public Client {
   void Die();
 
   // Sets the instances that belong to us
-  void SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances) {
-    instances_ = _instances;
-  }
+  void SetInstanceInfo(const std::vector<proto::system::Instance*>& _instances);
 
   // returns the tmaster address "host:port" form.
   sp_string getTmasterHostPort();
@@ -82,11 +82,17 @@ class TMasterClient : public Client {
   void SendRegisterRequest();
   void SendHeartbeatRequest();
 
+  void CleanInstances();
+
   sp_string stmgr_id_;
   sp_string stmgr_host_;
-  sp_int32 stmgr_port_;
+  sp_int32 data_port_;
+  sp_int32 local_data_port_;
   sp_int32 shell_port_;
-  std::vector<proto::system::Instance*> instances_;
+
+  // Set of instances to be reported to tmaster
+  std::set<proto::system::Instance*> instances_;
+
   bool to_die_;
   // We invoke this callback upon a new physical plan from tmaster
   VCallback<proto::system::PhysicalPlan*> pplan_watch_;

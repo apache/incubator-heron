@@ -50,12 +50,13 @@ def print_usage():
       " <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
-      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
-      " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
+      " <override_config_file> <component_rammap> <component_jvm_opts_in_base64> <pkg_type>"
+      " <topology_bin_file> <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
-      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file>")
+      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file> "
+      " <healthmgr_mode> <healthmgr_classpath>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -140,7 +141,7 @@ class ProcessInfo(object):
     self.attempts += 1
     return self
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,too-many-statements
 class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
@@ -174,6 +175,7 @@ class HeronExecutor(object):
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
+    self.override_config_file = parsed_args.override_config_file
     self.component_rammap =\
         map(lambda x: {x.split(':')[0]:
                            int(x.split(':')[1])}, parsed_args.component_rammap.split(','))
@@ -214,6 +216,9 @@ class HeronExecutor(object):
     self.ckptmgr_classpath = parsed_args.ckptmgr_classpath
     self.ckptmgr_port = parsed_args.ckptmgr_port
     self.stateful_config_file = parsed_args.stateful_config_file
+    self.healthmgr_mode = parsed_args.healthmgr_mode
+    self.healthmgr_classpath = '%s:%s' % (self.scheduler_classpath, parsed_args.healthmgr_classpath)
+
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -260,6 +265,7 @@ class HeronExecutor(object):
     parser.add_argument("tmaster_controller_port")
     parser.add_argument("tmaster_stats_port")
     parser.add_argument("heron_internals_config_file")
+    parser.add_argument("override_config_file")
     parser.add_argument("component_rammap")
     parser.add_argument("component_jvm_opts_in_base64")
     parser.add_argument("pkg_type")
@@ -283,6 +289,8 @@ class HeronExecutor(object):
     parser.add_argument("ckptmgr_classpath")
     parser.add_argument("ckptmgr_port")
     parser.add_argument("stateful_config_file")
+    parser.add_argument("healthmgr_mode")
+    parser.add_argument("healthmgr_classpath")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -368,6 +376,7 @@ class HeronExecutor(object):
                       self.topology_name,
                       self.topology_id,
                       self.heron_internals_config_file,
+                      self.override_config_file,
                       sink_config_file]
 
     return metricsmgr_cmd
@@ -406,12 +415,47 @@ class HeronExecutor(object):
                            "--topology_name", self.topology_name,
                            "--topology_id", self.topology_id,
                            "--system_config_file", self.heron_internals_config_file,
+                           "--override_config_file", self.override_config_file,
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
                            "--environment", self.environ, "--verbose"]
 
     return metricscachemgr_cmd
+
+  def _get_healthmgr_cmd(self):
+    ''' get the command to start the topology health manager processes '''
+    healthmgr_main_class = 'com.twitter.heron.healthmgr.HealthManager'
+
+    healthmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
+                     # We could not rely on the default -Xmx setting, which could be very big,
+                     # for instance, the default -Xmx in Twitter mesos machine is around 18GB
+                     '-Xmx1024M',
+                     '-XX:+PrintCommandLineFlags',
+                     '-verbosegc',
+                     '-XX:+PrintGCDetails',
+                     '-XX:+PrintGCTimeStamps',
+                     '-XX:+PrintGCDateStamps',
+                     '-XX:+PrintGCCause',
+                     '-XX:+UseGCLogFileRotation',
+                     '-XX:NumberOfGCLogFiles=5',
+                     '-XX:GCLogFileSize=100M',
+                     '-XX:+PrintPromotionFailure',
+                     '-XX:+PrintTenuringDistribution',
+                     '-XX:+PrintHeapAtGC',
+                     '-XX:+HeapDumpOnOutOfMemoryError',
+                     '-XX:+UseConcMarkSweepGC',
+                     '-XX:+PrintCommandLineFlags',
+                     '-Xloggc:log-files/gc.healthmgr.log',
+                     '-Djava.net.preferIPv4Stack=true',
+                     '-cp', self.healthmgr_classpath,
+                     healthmgr_main_class,
+                     "--cluster", self.cluster,
+                     "--role", self.role,
+                     "--environment", self.environ,
+                     "--topology_name", self.topology_name, "--verbose"]
+
+    return healthmgr_cmd
 
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
@@ -427,13 +471,16 @@ class HeronExecutor(object):
         self.zknode,
         self.zkroot,
         self.heron_internals_config_file,
+        self.override_config_file,
         self.metrics_sinks_config_file,
-        self.metricsmgr_port]
+        self.metricsmgr_port,
+        self.ckptmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
-    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
+    if self.healthmgr_mode.lower() != "disabled":
+      retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
         self.metricsmgr_ids[0],
@@ -506,9 +553,10 @@ class HeronExecutor(object):
                            str(global_task_id),
                            str(component_index),
                            self.stmgr_ids[self.shard],
-                           self.master_port,
+                           self.tmaster_controller_port,
                            self.metricsmgr_port,
-                           self.heron_internals_config_file])
+                           self.heron_internals_config_file,
+                           self.override_config_file])
       retval[instance_id] = instance_cmd
     return retval
 
@@ -542,9 +590,10 @@ class HeronExecutor(object):
                       str(global_task_id),
                       str(component_index),
                       self.stmgr_ids[self.shard],
-                      self.master_port,
+                      self.tmaster_controller_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
+                      self.override_config_file,
                       self.topology_bin_file]
 
       retval[instance_id] = instance_cmd
@@ -579,9 +628,11 @@ class HeronExecutor(object):
         ','.join(map(lambda x: x[0], instance_info)),
         self.master_host,
         self.master_port,
+        self.tmaster_controller_port,
         self.metricsmgr_port,
         self.shell_port,
         self.heron_internals_config_file,
+        self.override_config_file,
         self.ckptmgr_port,
         self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
@@ -676,7 +727,7 @@ class HeronExecutor(object):
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_bin_file)
     elif self.pkg_type == "pex":
-      os.system("unzip %s" % self.topology_bin_file)
+      os.system("unzip -qq -n %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
@@ -719,7 +770,7 @@ class HeronExecutor(object):
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
     with self.process_lock:
-      for command_name, command in commands.iteritems():
+      for command_name, command in commands.items():
         for process_info in self.processes_to_monitor.values():
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
@@ -727,7 +778,7 @@ class HeronExecutor(object):
                      (process_info.name, process_info.pid, ' '.join(command)))
             try:
               process_info.process.terminate()  # sends SIGTERM to process
-            except OSError, e:
+            except OSError as e:
               if e.errno == 3: # No such process
                 Log.warn("Expected process %s with pid %d was not running, ignoring." %
                          (process_info.name, process_info.pid))
@@ -807,7 +858,7 @@ class HeronExecutor(object):
 
     # if the current command has a matching command in the updated commands we keep it
     # otherwise we kill it
-    for current_name, current_command in current_commands.iteritems():
+    for current_name, current_command in current_commands.items():
       # We don't restart tmaster since it watches the packing plan and updates itself. The stream
       # manager is restarted just to reset state, but we could update it to do so without a restart
       if current_name in updated_commands.keys() and \
@@ -818,7 +869,7 @@ class HeronExecutor(object):
         commands_to_kill[current_name] = current_command
 
     # updated commands not in the keep list need to be started
-    for updated_name, updated_command in updated_commands.iteritems():
+    for updated_name, updated_command in updated_commands.items():
       if updated_name not in commands_to_keep.keys():
         commands_to_start[updated_name] = updated_command
 
@@ -856,7 +907,14 @@ class HeronExecutor(object):
     """
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
-    self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+    try:
+      self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+      for state_manager in self.state_managers:
+        state_manager.start()
+    except Exception as ex:
+      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      traceback.print_exc()
+      sys.exit(1)
 
     # pylint: disable=unused-argument
     def on_packing_plan_watch(state_manager, new_packing_plan):

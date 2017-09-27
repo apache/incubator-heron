@@ -14,11 +14,15 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
+
+import com.google.protobuf.Message;
+
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.proto.system.HeronTuples;
 
 /**
  * Implementing this interface allows an object to be target of HeronInstance
@@ -26,25 +30,41 @@ import com.twitter.heron.proto.system.HeronTuples;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public interface IInstance {
+
   /**
-   * Do the basic setup for HeronInstance
+   * Initialize the instance. If it's a stateful topology,
+   * the provided state will be used for initialization.
+   * For non-stateful topology, the state will be ignored.
+   * @param state used for stateful topology to initialize the instance state
+   */
+  void init(State<Serializable, Serializable> state);
+
+  /**
+   * Start the execution of the IInstance
    */
   void start();
 
   /**
-   * Do the basic clean for HeronInstance
-   * Notice: this method is not guaranteed to invoke
-   * TODO: - to avoid confusing, we in fact have never called this method yet
-   * TODO: - need to consider whether or not call this method more carefully
+   * Clean the instance. After it's called, the IInstance
+   * will be still alive but with an empty state. Before
+   * starting the IInstance again, an `init()` call is needed
+   * to initialize the instance properly.
    */
-  void stop();
+  void clean();
+
+  /**
+   * Destroy the whole IInstance.
+   * Notice: It should only be called when the whole program is
+   * exiting. And in fact, this method should never be called.
+   */
+  void shutdown();
 
   /**
    * Read tuples from a queue and process the tuples
    *
    * @param inQueue the queue to read tuples from
    */
-  void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
+  void readTuplesAndExecute(Communicator<Message> inQueue);
 
   /**
    * Activate the instance
@@ -61,4 +81,10 @@ public interface IInstance {
    * @param physicalPlanHelper
    */
   void update(PhysicalPlanHelper physicalPlanHelper);
+
+  /**
+   * Save the state and send it out for persistence
+   * @param checkpointId
+   */
+  void persistState(String checkpointId);
 }

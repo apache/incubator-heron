@@ -1,22 +1,19 @@
-GULP = node_modules/.bin/gulp
-HUGO_VERSION = 0.25.1
-BUNDLER_VERSION = 1.15.1
+HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
 
 setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/*
+	rm -rf public/* static/api static/style.css static/style*.css static/js
 
 serve:
-	@hugo serve
+	@hugo serve --buildDrafts
 
 develop-static-assets:
-	@${GULP} develop
+	@npm run develop
 
 build-static-assets:
-	@${GULP} clean
-	@${GULP} build
+	@npm run build
 
 pages:
 	@hugo
@@ -27,33 +24,19 @@ linkchecker:
 javadocs:
 	@scripts/javadocs.sh
 
-javadocs-travis:
-	@scripts/javadocs.sh --travis
-
 python-docs:
-	@scripts/python-doc-gen.sh
+	@scripts/python-doc-gen.sh $(HERONPY_VERSION)
 
 site:
 	@make clean
 	@make build-static-assets
-	@make pages
 	@make javadocs
 	@make python-docs
-	@make linkchecker
-
-travis-python-setup:
-	sudo -H pip install pygments==2.1.3 pdoc==0.3.2 pyopenssl
-
-travis-install-hugo:
-	wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.deb
-	sudo dpkg -i hugo_${HUGO_VERSION}_Linux-64bit.deb
-	hugo version
-
-travis-website-setup: travis-python-setup travis-install-hugo
-
-travis-website-check:
-	@make clean
 	@make pages
-	@make javadocs-travis
+
+travis-site:
+	@make clean
+	@make build-static-assets
+	@scripts/javadocs.sh --travis
 	@make python-docs
-	@make linkchecker
+	@make pages

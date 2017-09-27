@@ -1,4 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
@@ -42,7 +41,6 @@ java_tests(
     test_classes = [
         "com.twitter.heron.spi.utils.ShellUtilsTest",
         "com.twitter.heron.spi.utils.NetworkUtilsTest",
-        "com.twitter.heron.spi.utils.TopologyUtilsTest",
         "com.twitter.heron.spi.utils.UploaderUtilsTest",
     ],
     runtime_deps = [ ":utils-tests" ],

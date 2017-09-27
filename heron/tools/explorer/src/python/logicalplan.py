@@ -55,9 +55,9 @@ def parse_topo_loc(cl_args):
 def to_table(components, topo_info):
   """ normalize raw logical plan info to table """
   inputs, outputs = defaultdict(list), defaultdict(list)
-  for ctype, component in components.iteritems():
+  for ctype, component in components.items():
     if ctype == 'bolts':
-      for component_name, component_info in component.iteritems():
+      for component_name, component_info in component.items():
         for input_stream in component_info['inputs']:
           input_name = input_stream['component_name']
           inputs[component_name].append(input_name)
@@ -65,8 +65,8 @@ def to_table(components, topo_info):
   info = []
   spouts_instance = topo_info['physical_plan']['spouts']
   bolts_instance = topo_info['physical_plan']['bolts']
-  for ctype, component in components.iteritems():
-    for component_name, component_info in component.iteritems():
+  for ctype, component in components.items():
+    for component_name, component_info in component.items():
       row = [ctype[:-1], component_name]
       if ctype == 'spouts':
         row.append(len(spouts_instance[component_name]))
@@ -97,7 +97,7 @@ def filter_spouts(table, header):
   return spouts_info, header
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(cl_args, compo_type):
   """ run command """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
@@ -108,13 +108,13 @@ def run(cl_args, compo_type):
     topo_info = tracker_access.get_topology_info(cluster, env, topology, role)
     table, header = to_table(components, topo_info)
     if spouts_only == bolts_only:
-      print tabulate(table, headers=header)
+      print(tabulate(table, headers=header))
     elif spouts_only:
       table, header = filter_spouts(table, header)
-      print tabulate(table, headers=header)
+      print(tabulate(table, headers=header))
     else:
       table, header = filter_bolts(table, header)
-      print tabulate(table, headers=header)
+      print(tabulate(table, headers=header))
     return True
   except:
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])

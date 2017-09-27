@@ -5,32 +5,61 @@ aliases:
   - /docs/install.html
 ---
 
-> The current version of Heron is **{{% heronVersion %}}**.
+> The current version of Heron is **{{% heronVersion %}}**
 
-The easiest way to get started learning Heron is to install and run pre-compiled
-Heron binaries, which are currently available for:
+The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
-* Mac OS X
-* Ubuntu >= 14.04
-* CentOS
+* [MacOS](#macos-homebrew)
+* [Ubuntu >= 14.04](#using-installation-scripts)
+* [CentOS](#using-installation-scripts)
 
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
 (../developers/compiling).
 
-## Step 1 --- Download Heron binaries using installation scripts
+## Step 1 --- Download the Heron tools
 
-Go to the [releases page](https://github.com/twitter/heron/releases) for Heron
-and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, would be named
+Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
+
+> You can install using [installation scripts](#using-installation-scripts) on MacOS as well.
+
+## MacOS/Homebrew
+
+The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
+
+* The Heron [command-line tool](../operators/heron-cli) (or client), which is used to submit, activate, and kill topologies (and more):
+
+    ```shell
+    $ brew install heron-client
+    ```
+
+* The [Heron UI](../operators/heron-ui) dashboard:
+
+    ```shell
+    $ brew install heron-ui
+    ```
+
+* The [Heron Tracker](../operators/heron-tracker), which powers Heron UI:
+
+    ```shell
+    $ brew install heron-tracker
+    ```
+
+For this getting started tutorial we recommend installing all three tools.
+
+## Using installation scripts
+
+To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
+and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, are named
 `heron-client-install-{{% heronVersion %}}-darwin.sh` and
 `heron-tools-install-{{% heronVersion %}}-darwin.sh`.
 
 Download both the `client` and `tools` installation scripts for your platform either from the releases page or using [wget](https://www.gnu.org/software/wget/).
 
-Here's an example for MacOS (`darwin`):
+Here's an example for Ubuntu:
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-darwin.sh
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-darwin.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-ubuntu.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-ubuntu.sh
 ```
 
 Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
@@ -41,7 +70,7 @@ $ chmod +x heron-*.sh
 
 > Both installation scripts will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the client installation script with the `--user` flag set:
+Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set:
 
 ```bash
 $ ./heron-client-install-{{% heronVersion %}}--PLATFORM.sh --user
@@ -252,7 +281,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/heron/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.
