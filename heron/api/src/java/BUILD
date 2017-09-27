@@ -29,7 +29,7 @@ java_library(
 
 java_binary(
     name = "api-unshaded",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
+    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/dsl/**/*.java"]),
     deps = api_deps_files,
 )
 
