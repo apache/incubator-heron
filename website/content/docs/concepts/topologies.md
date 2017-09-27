@@ -242,14 +242,10 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .log();
 ```
 
-With the older topology API, you had two "levers" for managing topology performance: 
+The number of partitions to assign to each processing step when using the Functional API depends
+on a variety of factors.
 
-1. Adjusting the number of spouts and bolts performing operations
-1. Adjusting the resources (CPU and RAM) used by the topology
-
-The Heron Functional API still enables you to adjust the CPU and RAM used by the topology but replaces #1 with per-processing-step partitioning.
-
-<!-->
+<!--
 
 ## Windowing
 
