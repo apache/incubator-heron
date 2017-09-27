@@ -123,7 +123,8 @@ You can set the following in the configuration: the topology's [delivery semanti
 You can apply [delivery semantics](../../../concepts/delivery-semantics) to a Functional API topology like this:
 
 ```java
-topologyConfig.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
+topologyConfig
+        .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
 ```
 
 The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
@@ -136,7 +137,7 @@ You can set the number of Docker containers to be used by a Functional API topol
 topologyConfig.setNumContainers(2);
 ```
 
-You can set the CPU per container (as a float) and RAM per container (as a long expressing the number of bytes) like this:
+You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
 
 ```java
 import com.twitter.heron.dsl.Resources;
@@ -148,7 +149,7 @@ resources.withRam(104857600);
 topologyConfig.setContainerResources(resources);
 ```
 
-> The default CPU is `1.0f` while the default RAM is `104857600` (1 MB).
+> The default CPU is `1.0f` while the default RAM is `104857600` (1 megabyte).
 
 There's also a `ByteAmount` helper class that you can use:
 
