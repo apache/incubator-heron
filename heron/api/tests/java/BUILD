@@ -14,7 +14,7 @@ api_deps_files = \
 java_library(
   name = "api-tests",
   srcs = glob(["**/*.java"]),
-  deps = api_deps_files 
+  deps = api_deps_files
 )
 
 java_tests(
@@ -22,7 +22,9 @@ java_tests(
     "com.twitter.heron.api.windowing.WindowManagerTest",
     "com.twitter.heron.api.windowing.WaterMarkEventGeneratorTest",
     "com.twitter.heron.api.bolt.WindowedBoltExecutorTest",
-    "com.twitter.heron.api.bolt.BaseWindowedBoltTest"
+    "com.twitter.heron.api.bolt.BaseWindowedBoltTest",
+    "com.twitter.heron.dsl.impl.BaseStreamletTest",
+    "com.twitter.heron.dsl.impl.BaseKVStreamletTest",
   ],
   runtime_deps = [ ":api-tests" ],
   size = "small",
