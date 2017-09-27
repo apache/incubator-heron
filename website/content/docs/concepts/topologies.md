@@ -3,7 +3,7 @@ title: Heron Topologies
 ---
 
 > ## New Functional API for Heron
-> As of version 0.15.2, Heron offers a new **Functional API** that you can use
+> As of version 0.16.0, Heron offers a new **Functional API** that you can use
 > to write topologies in a more declarative, functional manner, without
 > needing to specify spout and bolt logic directly. The Functional API is
 > currently available for [Java](../../developers/java/functional-api). The
@@ -104,7 +104,7 @@ In contrast with the topology API, the Heron Functional API offers:
 
 * **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron Functional API enables you to write functions, such as map, flatMap, join, and filter functions, instead.
 * **Easy debugging** --- With the Heron Functional API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
-* **Completely flexible data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Functional API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.
+* **Completely flexible, type-safe data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Functional API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish. In the Functional API for [Java](../../developers/java/functional-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than runtime.
 
 ### Heron Functional API topologies
 
@@ -284,11 +284,11 @@ When creating topologies using the Functional API, there are three types of reso
 
 For each topology, there are defaults for each resource type:
 
-Resource | Default
-:--------|:-------
-Number of containers | 1
-CPU | 1.0
-RAM | 512 MB
+Resource | Default | Minimum
+:--------|:--------|:-------
+Number of containers | 1 | 1
+CPU | 1.0 | 1.0
+RAM | 512 MB | 192MB
 
 <!-- TODO: For instructions on allocating resources to topologies, see ... -->
 
