@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * definitions with a Serializable tag to ensure that any supplied
  * lambda functions automatically become serializable.
  */
-public interface TransformFunction<I, O> extends Serializable {
+public interface SerializableTransformer<I, O> extends Serializable {
   void setup(Context context);
   void transform(I i, Consumer<O> consumer);
   void cleanup();

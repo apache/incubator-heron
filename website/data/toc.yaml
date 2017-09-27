@@ -43,6 +43,8 @@ sections:
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
+      - name: Heron Delivery Semantics
+        url: /docs/concepts/delivery-semantics
   - name: Deployment
     sublinks:
       - name: Overview
