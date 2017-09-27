@@ -91,13 +91,8 @@ run inside of containers.
 When Heron was first created, the model for creating topologies was deeply
 indebted to the Apache Storm model. Under that model, developers creating topologies
 needed to explicitly define the behavior of every spout and bolt in the topology.
-Although this provided a powerful low-level API for creating topologies, the chief
-drawbacks was that topologies
-
-### Why a DSL?
-
-The older, spouts-and-bolts based model of creating topologies provided a powerful API
-for specifying processing logic, but it presented a number of challenges for developers as well:
+Although this provided a powerful low-level API for creating topologies, that approach
+presented a variety of drawbacks for developers:
 
 * **Verbosity** --- In both the Java and Python topology APIs, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts. This often led to the problem of...
 * **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
@@ -185,7 +180,7 @@ That Java code will produce this [physical plan](#physical-plan):
 
 ### Key-value streamlets
 
-In order to perform some operations, such as streamlet joins and streamlet reduce operations,
+In order to perform some operations, such as streamlet joins and streamlet reduce operations, you'll need to create **key-value** streamlets.
 
 ### Heron DSL topologies
 
