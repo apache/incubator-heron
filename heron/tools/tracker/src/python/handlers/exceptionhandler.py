@@ -108,7 +108,7 @@ class ExceptionHandler(BaseHandler):
     exception_response.ParseFromString(result.body)
 
     if exception_response.status.status == common_pb2.NOTOK:
-      if exception_response.status.HasField("message"):
+      if exception_response.status.message:
         raise tornado.gen.Return({
             "message": exception_response.status.message
         })

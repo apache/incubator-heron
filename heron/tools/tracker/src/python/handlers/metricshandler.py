@@ -144,7 +144,7 @@ class MetricsHandler(BaseHandler):
     metricResponse.ParseFromString(result.body)
 
     if metricResponse.status.status == common_pb2.NOTOK:
-      if metricResponse.status.HasField("message"):
+      if metricResponse.status.message:
         Log.warn("Received response from Tmaster: %s", metricResponse.status.message)
 
     # Form the response.

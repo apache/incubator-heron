@@ -411,7 +411,7 @@ class Tracker(object):
     for stmgr in stmgrs:
       host = stmgr.host_name
       cwd = stmgr.cwd
-      shell_port = stmgr.shell_port if stmgr.HasField("shell_port") else None
+      shell_port = stmgr.shell_port
       physicalPlan["stmgrs"][stmgr.id] = {
           "id": stmgr.id,
           "host": host,
