@@ -16,7 +16,7 @@ Effectively once | Heron ensures that the data it receives is processed effectiv
 
 You can see a visual representation of these different delivery semantics in the figure below:
 
-![Heron delivery semantics](/img/delivery-semantics.svg)
+![Heron delivery semantics](https://www.lucidchart.com/publicSegments/view/f35df5fd-bfc1-4270-aad6-40766abae024/image.png)
 
 In this diagram, you see three Heron topologies, each of which is processing a series of tuples (`(1,2,3)`, `(7,8,11)`, etc.).
 

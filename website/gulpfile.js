@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     // Pulls in any Gulp-related metadata
     pkg = require('./package.json'),
+    hash = require('gulp-hash'),
     // Use $ to invoke Gulp plugins
     $ = require('gulp-load-plugins')(),
     // All non-Gulp modules here
@@ -44,14 +45,14 @@ gulp.task('sass-dev', function(done) {
     .pipe($.sass({
       outputStyle: 'compressed'
     }).on('error', function(err) { $.sass.logError; }))
-    .pipe($.hash())
+    .pipe(hash())
     .pipe($.autoprefixer({
       browsers: ['last 2 versions'],
       cascade: false
     }))
     .pipe($.cleanCss())
     .pipe(gulp.dest(DIST.css))
-    .pipe($.hash.manifest('hash.json'))
+    .pipe(hash.manifest('hash.json'))
     .pipe(gulp.dest('data/assets/css'));
   done();
 });

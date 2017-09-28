@@ -37,8 +37,10 @@ fine-tune potential latency/throughput trade-offs.
 
 ### Semantic guarantees
 
-Heron provides support for both [at-most-once and
-at-least-once](https://kafka.apache.org/08/design.html#semantics) processing
+Heron provides support for
+[at-most-once](../delivery-semantics#available-semantics),
+[at-least-once](../delivery-semantics#available-semantics), and
+[effectively-once](../delivery-semantics#available-semantics) processing
 semantics.
 
 ### Efficiency

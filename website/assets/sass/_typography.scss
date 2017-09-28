@@ -63,6 +63,10 @@ article.hn-docs-content {
     border-left: .5rem solid $heron-blue-green;
     background-color: lighten($light-gray, 22%);
 
+    h2, h3, h4 {
+      margin: .25rem 0 1.25rem 0;
+    }
+
     h4 {
       font-size: $base-font-size * 1.5;
 
@@ -94,7 +98,7 @@ article.hn-docs-content {
     table-layout: initial;
 
     thead {
-      font-size: $base-font-size * 1.2;
+      font-size: $base-font-size * 1.1;
       border-bottom: 1px solid black;
     }
 
