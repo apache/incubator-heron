@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 package_name = "zookeeper"
-package_version = "3.4.10"
+package_version = "3.4.5-macfix"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
