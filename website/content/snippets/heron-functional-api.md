@@ -13,7 +13,7 @@ Here are some crucial differences between the two APIs:
 
 Domain | Original topology API | Heron Functional API
 :------|:----------------------|:--------------------
-Programming style | Procedural, processing component based | Declarative, functional
+Programming style | Procedural, processing component based | Functional
 Abstraction level | **Low level**. Developers must think in terms of "physical" spout and bolt implementation logic. | **High level**. Developers can write processing logic in an idiomatic fashion in the language of their choice, without needing to write and connect spouts and bolts.
 Processing model | [Spout](../spouts) and [bolt](../bolts) logic must be created explicitly, and connecting spouts and bolts is the responsibility of the developer | Spouts and bolts are created for you automatically on the basis of the processing graph that you build
 
