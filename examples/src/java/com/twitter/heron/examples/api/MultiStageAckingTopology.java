@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.examples;
+package com.twitter.heron.examples.api;
 
 import java.util.Map;
 import java.util.Random;
@@ -31,27 +31,28 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.utils.Utils;
-
+import com.twitter.heron.simulator.Simulator;
 
 /**
- * This is a basic example of a Heron topology with acking enable.
+ * This is three stage topology. Spout emits to bolt to bolt.
  */
-public final class AckingTopology {
+public final class MultiStageAckingTopology {
 
-  private AckingTopology() {
+  private MultiStageAckingTopology() {
   }
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
-      throw new RuntimeException("Specify topology name");
+      throw new RuntimeException("Please specify the name of the topology");
     }
     TopologyBuilder builder = new TopologyBuilder();
 
-    int spouts = 2;
-    int bolts = 2;
-    builder.setSpout("word", new AckingTestWordSpout(), spouts);
-    builder.setBolt("exclaim1", new ExclamationBolt(), bolts)
+    int parallelism = 2;
+    builder.setSpout("word", new AckingTestWordSpout(), parallelism);
+    builder.setBolt("exclaim1", new ExclamationBolt(true), parallelism)
         .shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(false), parallelism)
+        .shuffleGrouping("exclaim1");
 
     Config conf = new Config();
     conf.setDebug(true);
@@ -59,30 +60,40 @@ public final class AckingTopology {
     // Put an arbitrary large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
-    // To enable acking
+    // To enable acking, we need to setEnableAcking true
     conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
+
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word",
+        ExampleResources.getComponentRam());
     com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim2",
         ExampleResources.getComponentRam());
 
     // container resource configuration
     com.twitter.heron.api.Config.setContainerDiskRequested(conf,
-        ExampleResources.getContainerDisk(spouts + bolts, 2));
+        ExampleResources.getContainerDisk(3 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerRamRequested(conf,
-        ExampleResources.getContainerRam(spouts + bolts, 2));
+        ExampleResources.getContainerRam(3 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
-    // Set the number of workers or stream managers
-    conf.setNumStmgrs(2);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    if (args != null && args.length > 0) {
+      conf.setNumStmgrs(parallelism);
+      HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    } else {
+      Simulator simulator = new Simulator();
+      simulator.submitTopology("test", conf, builder.createTopology());
+      Utils.sleep(10000);
+      simulator.killTopology("test");
+      simulator.shutdown();
+    }
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {
-
-    private static final long serialVersionUID = -630307949908406294L;
+    private static final long serialVersionUID = -5972291205871728684L;
     private SpoutOutputCollector collector;
     private String[] words;
     private Random rand;
@@ -106,9 +117,7 @@ public final class AckingTopology {
     public void nextTuple() {
       // We explicitly slow down the spout to avoid the stream mgr to be the bottleneck
       Utils.sleep(1);
-
       final String word = words[rand.nextInt(words.length)];
-
       // To enable acking, we need to emit tuple with MessageId, which is an object
       collector.emit(new Values(word), "MESSAGE_ID");
     }
@@ -125,14 +134,22 @@ public final class AckingTopology {
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    private static final long serialVersionUID = -2267338658317778214L;
+    private static final long serialVersionUID = -3226618846531432832L;
     private OutputCollector collector;
     private long nItems;
     private long startTime;
+    private boolean emit;
+
+    public ExclamationBolt(boolean emit) {
+      this.emit = emit;
+    }
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
+    public void prepare(
+        Map conf,
+        TopologyContext context,
+        OutputCollector acollector) {
       collector = acollector;
       nItems = 0;
       startTime = System.currentTimeMillis();
@@ -143,24 +160,25 @@ public final class AckingTopology {
       // We need to ack a tuple when we consider it is done successfully
       // Or we could fail it by invoking collector.fail(tuple)
       // If we do not do the ack or fail explicitly
-      // After the MessageTimeout Seconds, which could be set in Config, the spout will
-      // fail this tuple
+      // After the MessageTimeout Seconds, which could be set in Config,
+      // the spout will fail this tuple
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
         System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
-        // Here we explicitly forget to do the ack or fail
-        // It would trigger fail on this tuple on spout end after MessageTimeout Seconds
-      } else if (nItems % 2 == 0) {
-        collector.fail(tuple);
-      } else {
-        collector.ack(tuple);
       }
+      if (emit) {
+        collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+      }
+      collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+      if (emit) {
+        declarer.declare(new Fields("word"));
+      }
     }
   }
 }
