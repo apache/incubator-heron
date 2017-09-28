@@ -7,7 +7,7 @@ clean:
 	rm -rf public/* static/api static/style.css static/style*.css static/js
 
 serve:
-	@hugo serve --buildDrafts
+	@hugo serve --buildDrafts & node_modules/.bin/gulp dev
 
 develop-static-assets:
 	@npm run develop
