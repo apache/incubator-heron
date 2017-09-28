@@ -7,16 +7,16 @@ description: Create Heron topologies in Java using a functional programming styl
 
 ## Getting started
 
-In order to use the Heron Functional API for Java, you'll need to install the `heron-dsl` library.
+In order to use the Heron Functional API for Java, you'll need to install the `heron-api` library.
 
 ### Maven setup
 
-In order to use the `heron-dsl` library, add this to the `dependencies` block of your `pom.xml` configuration file:
+In order to use the `heron-api` library, add this to the `dependencies` block of your `pom.xml` configuration file:
 
 ```xml
 <dependency>
     <groupId>com.twitter.heron</groupId>
-    <artifactId>heron-dsl</artifactId>
+    <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
 </dependency>
 ```
