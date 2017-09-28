@@ -69,6 +69,9 @@ public class BoltInstance implements IInstance {
 
   private final SystemConfig systemConfig;
 
+  /**
+   * Construct a BoltInstance basing on given arguments
+   */
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
@@ -94,10 +97,12 @@ public class BoltInstance implements IInstance {
     }
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
-    if (helper.getMyBolt().getComp().hasSerializedObject()) {
+    if (helper.getMyBolt().getComp().getSerializedObject() != null
+        && !helper.getMyBolt().getComp().getSerializedObject().isEmpty()) {
       bolt = (IBolt) Utils.deserialize(
           helper.getMyBolt().getComp().getSerializedObject().toByteArray());
-    } else if (helper.getMyBolt().getComp().hasClassName()) {
+    } else if (helper.getMyBolt().getComp().getClassName() != null
+               && !helper.getMyBolt().getComp().getClassName().isEmpty()) {
       try {
         String boltClassName = helper.getMyBolt().getComp().getClassName();
         bolt = (IBolt) Class.forName(boltClassName).newInstance();

@@ -194,7 +194,7 @@ public class MetricsCache {
         }
       }
     }
-    if (!request.hasInterval() && !request.hasExplicitInterval()) {
+    if (request.getInterval() == 0 && request.getExplicitInterval() == null) {
       return buildResponseNotOk("No purgeIntervalSec or explicit purgeIntervalSec set").build();
     }
 

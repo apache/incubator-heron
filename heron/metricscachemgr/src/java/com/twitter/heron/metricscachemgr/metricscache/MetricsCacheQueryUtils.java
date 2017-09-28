@@ -71,7 +71,7 @@ public final class MetricsCacheQueryUtils {
     // default: the whole time horizon
     long startTime = 0;
     long endTime = Long.MAX_VALUE;
-    if (request.hasInterval()) { // endTime = now
+    if (request.getInterval() > 0) { // endTime = now
       endTime = System.currentTimeMillis();
 
       long interval = request.getInterval(); // in seconds
@@ -87,7 +87,7 @@ public final class MetricsCacheQueryUtils {
 
     // default: aggregate all metrics
     MetricGranularity aggregationGranularity = AGGREGATE_ALL_METRICS;
-    if (request.hasMinutely() && request.getMinutely()) {
+    if (request.getMinutely()) {
       aggregationGranularity = AGGREGATE_BY_BUCKET;
     }
 

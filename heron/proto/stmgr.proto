@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 package heron.proto.stmgr;
 option java_package = "com.twitter.heron.proto.stmgr";
 option java_outer_classname = "StreamManager";
@@ -11,7 +11,7 @@ import "physical_plan.proto";
 //
 
 message NewPhysicalPlanMessage {
-  required heron.proto.system.PhysicalPlan new_pplan = 1;
+  heron.proto.system.PhysicalPlan new_pplan = 1;
 }
 
 //
@@ -19,52 +19,52 @@ message NewPhysicalPlanMessage {
 //
 message RegisterInstanceRequest {
   // Information about the instance registering with us
-  required heron.proto.system.Instance instance = 1;
-  required string topology_name = 2;
-  required string topology_id = 3;
+  heron.proto.system.Instance instance = 1;
+  string topology_name = 2;
+  string topology_id = 3;
 }
 
 message RegisterInstanceResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
   // If the assignment is known, send it
-  optional heron.proto.system.PhysicalPlan pplan = 2;
+  heron.proto.system.PhysicalPlan pplan = 2;
 }
 
 message NewInstanceAssignmentMessage {
-  required heron.proto.system.PhysicalPlan pplan = 1;
+  heron.proto.system.PhysicalPlan pplan = 1;
 }
 
 // messages exchanged between stream managers
 message StrMgrHelloRequest {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
 }
 
 message StrMgrHelloResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
 }
 
 message StartBackPressureMessage {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
-  required string message_id = 4;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
+  string message_id = 4;
 }
 
 message StopBackPressureMessage {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
-  required string message_id = 4;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
+  string message_id = 4;
 }
 
 // Tuples exchanged between stream managers
 message TupleStreamMessage {
   // The src_task of this message
-  required int32 src_task_id = 3;
+  int32 src_task_id = 3;
   // This is actually the destination task_id
-  required int32 task_id = 1;
+  int32 task_id = 1;
   // serialized data
-  required bytes set = 2;
+  bytes set = 2;
 }

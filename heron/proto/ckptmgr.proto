@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 package heron.proto.ckptmgr;
 option java_package = "com.twitter.heron.proto.ckptmgr";
 option java_outer_classname = "CheckpointManager";
@@ -68,8 +68,8 @@ import "physical_plan.proto";
 // Message representing information about a globally consistent
 // checkpoint
 message StatefulConsistentCheckpoint {
-  required string checkpoint_id = 1;
-  required string packing_plan_id = 2;
+  string checkpoint_id = 1;
+  string packing_plan_id = 2;
   // One can add more meta data about this ckpt later
 }
 
@@ -86,27 +86,27 @@ message StatefulConsistentCheckpoints {
 
 // Message sent to stmgrs by the tmaster to initiate checkpointing
 message StartStatefulCheckpoint {
-  required string checkpoint_id = 1;
+  string checkpoint_id = 1;
 }
 
 // Message sent by tmaster to stmgr asking them to reset their instances
 // to this checkpoint
 message RestoreTopologyStateRequest {
-  required string checkpoint_id = 1;
+  string checkpoint_id = 1;
   // Every Attempt made by Tmaster to restore to a globally consistent
   // checkpoint is tagged with a unique id. The stmgrs include this in their
   // RestoreTopologyStateResponse below. This way tmaster could
   // try restoring to the same checkpoint_id multiple times and still
   // keep track of for which attempt the restore was in the responses
-  required int64 restore_txid = 2; 
+  int64 restore_txid = 2; 
 }
 
 // Message that stmgr sends to tmaster after it restores
 // all of its local instances to a checkpoint_id
 message RestoreTopologyStateResponse {
-  required heron.proto.system.Status status = 1;
-  required string checkpoint_id = 2;
-  required int64 restore_txid = 3; 
+  heron.proto.system.Status status = 1;
+  string checkpoint_id = 2;
+  int64 restore_txid = 3; 
 }
 
 // Message sent by stmgr to tmaster asking it to reset the topology
@@ -115,21 +115,21 @@ message RestoreTopologyStateResponse {
 message ResetTopologyState {
   // Was there a dead/recovered stmgr connection that was the reason
   // for this request?
-  optional string dead_stmgr = 1;
+  string dead_stmgr = 1;
   // Was there a dead/recovered local instance connection that was the reason
   // for this request?
-  optional int32 dead_taskid = 2;
+  int32 dead_taskid = 2;
   // This one describes the reason for sending the message.
   // Used primarily for debugging
-  required string reason = 3;
+  string reason = 3;
 }
 
 // Message sent by stmgr to tmaster informing it about
 // the fact that we stored a checkpoint belonging
 // to the instance
 message InstanceStateStored {
-  required string checkpoint_id = 1;
-  required heron.proto.system.Instance instance = 2;
+  string checkpoint_id = 1;
+  heron.proto.system.Instance instance = 2;
 }
 
 // Message sent by tmaster to stmgr to start processing
@@ -137,7 +137,7 @@ message InstanceStateStored {
 // should be rolled back to a consistent state before they can
 // start processing.
 message StartStmgrStatefulProcessing {
-  required string checkpoint_id = 1;
+  string checkpoint_id = 1;
 }
 
 // tmaster -> ckptmgr messages
@@ -146,28 +146,28 @@ message StartStmgrStatefulProcessing {
 // when it wants to register itself
 // with checkpoint manager
 message RegisterTMasterRequest {
-  required string topology_name = 1;
-  required string topology_id = 2;
+  string topology_name = 1;
+  string topology_id = 2;
 }
 
 // This is the message that checkpoint manager
 // sends when it receives the register request
 // from tmaster
 message RegisterTMasterResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
 }
 
 // Message sent by tmaster to ckptmgr to cleanup
 // old checkpoint state.
 message CleanStatefulCheckpointRequest {
   // Any checkpoints older than this can be cleaned
-  optional string oldest_checkpoint_preserved = 1;
-  optional bool clean_all_checkpoints = 2;
+  string oldest_checkpoint_preserved = 1;
+  bool clean_all_checkpoints = 2;
 }
 
 // Message sent by ckptmgr to tmaster about the cleanup request
 message CleanStatefulCheckpointResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
   repeated string cleaned_checkpoint_ids = 2;
 }
 
@@ -177,48 +177,48 @@ message CleanStatefulCheckpointResponse {
 // when it wants to register itself with
 // the checkpoint manager
 message RegisterStMgrRequest {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr_id = 3;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr_id = 3;
 }
 
 // This is the message that checkpoint manager
 // sends when it receives the register request
 // from stmgr
 message RegisterStMgrResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
 }
 
 // This is the request that StMgr sends to Checkpoint Mgr
 // to store instance checkpoint data
 message SaveInstanceStateRequest {
   // Information about the instance whose state this is
-  required heron.proto.system.Instance instance = 1;
-  required InstanceStateCheckpoint checkpoint = 2;
+  heron.proto.system.Instance instance = 1;
+  InstanceStateCheckpoint checkpoint = 2;
 }
 
 // After successfully saving state, this is what
 // Checkpoint Mgr sends back as response
 message SaveInstanceStateResponse {
-  required heron.proto.system.Status status = 1;
-  required heron.proto.system.Instance instance = 2;
-  required string checkpoint_id = 3;
+  heron.proto.system.Status status = 1;
+  heron.proto.system.Instance instance = 2;
+  string checkpoint_id = 3;
 }
 
 // This is the request that StMgr sends to Checkpoint Mgr
 // to fetch the instance state data
 message GetInstanceStateRequest {
-  required heron.proto.system.Instance instance = 1;
-  required string checkpoint_id = 2;
+  heron.proto.system.Instance instance = 1;
+  string checkpoint_id = 2;
 }
 
 // This is the response that Checkpoint Mgr sends to StMgr
 // for its get instance state request
 message GetInstanceStateResponse {
-  required heron.proto.system.Status status = 1;
-  required heron.proto.system.Instance instance = 2;
-  required string checkpoint_id = 3;
-  optional InstanceStateCheckpoint checkpoint = 4;
+  heron.proto.system.Status status = 1;
+  heron.proto.system.Instance instance = 2;
+  string checkpoint_id = 3;
+  InstanceStateCheckpoint checkpoint = 4;
 }
 
 // stmgr -> Instance messages
@@ -226,40 +226,40 @@ message GetInstanceStateResponse {
 // This is the message that the stmgr sends to its
 // local tasks to begin initiating checkpoint
 message InitiateStatefulCheckpoint {
-  required string checkpoint_id = 1;
+  string checkpoint_id = 1;
 }
 
 // This proto encapsulates the info associated with
 // state of an instance
 message InstanceStateCheckpoint {
-  required string checkpoint_id = 1;
-  required bytes state = 2;
+  string checkpoint_id = 1;
+  bytes state = 2;
 }
 
 // This is the message that the instance sends
 // when it wants stmgr to store its state
 message StoreInstanceStateCheckpoint {
-  required InstanceStateCheckpoint state = 1;
+  InstanceStateCheckpoint state = 1;
 }
 
 // This is the message that stmgr sends to its instance
 // asking them to restore their state
 message RestoreInstanceStateRequest {
-  required InstanceStateCheckpoint state = 1;
+  InstanceStateCheckpoint state = 1;
 }
 
 // This is the message that instance sends to its stmgr
 // when done with restoring the state
 message RestoreInstanceStateResponse {
-  required heron.proto.system.Status status = 1;
-  required string checkpoint_id = 2;
+  heron.proto.system.Status status = 1;
+  string checkpoint_id = 2;
 }
 
 // Message sent by stmgr to Instance to start processing
 // This is related to StartStmgrStatefulProcessing message above
 // but between stmgr -> instance.
 message StartInstanceStatefulProcessing {
-  required string checkpoint_id = 1;
+  string checkpoint_id = 1;
 }
 
 // stmgr -> stmgr messages
@@ -268,7 +268,7 @@ message StartInstanceStatefulProcessing {
 // it sends this message to all of that instance's 
 // downstream components' stmgrs to propagate the checkpoint marker
 message DownstreamStatefulCheckpoint {
-  required int32 origin_task_id = 1; 
-  required int32 destination_task_id = 2; 
-  required string checkpoint_id = 3;
+  int32 origin_task_id = 1; 
+  int32 destination_task_id = 2; 
+  string checkpoint_id = 3;
 }

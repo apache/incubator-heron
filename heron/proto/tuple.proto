@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
@@ -7,17 +7,17 @@ option java_outer_classname = "HeronTuples";
 import "topology.proto";
 
 message RootId {
-  required int32 taskid = 1;
-  required sfixed64 key = 2;
+  int32 taskid = 1;
+  sfixed64 key = 2;
 }
 
 message AckTuple {
   repeated RootId roots = 1;
-  required sfixed64 ackedtuple = 2;
+  sfixed64 ackedtuple = 2;
 }
 
 message HeronDataTuple {
-  required sfixed64 key = 1;
+  sfixed64 key = 1;
   repeated RootId roots = 2;               // What are the roots
   repeated bytes values = 3;               // The actual payload
   // If present, this set of tuples must be sent
@@ -27,7 +27,7 @@ message HeronDataTuple {
 }
 
 message HeronDataTupleSet {
-  required heron.proto.api.StreamId stream = 1;
+  heron.proto.api.StreamId stream = 1;
   repeated HeronDataTuple tuples = 2;
 }
 
@@ -40,18 +40,18 @@ message HeronControlTupleSet {
 
 // Note:- Only one of data/control is set in any message
 message HeronTupleSet {
-  optional HeronDataTupleSet data = 1;
-  optional HeronControlTupleSet control = 2;
-  required int32 src_task_id = 3;
+  HeronDataTupleSet data = 1;
+  HeronControlTupleSet control = 2;
+  int32 src_task_id = 3;
 }
 
 message HeronDataTupleSet2 {
-  required heron.proto.api.StreamId stream = 1;
+  heron.proto.api.StreamId stream = 1;
   repeated bytes tuples = 2;
 }
 
 message HeronTupleSet2 {
-  optional HeronDataTupleSet2 data = 1;
-  optional HeronControlTupleSet control = 2;
-  required int32 src_task_id = 3;
+  HeronDataTupleSet2 data = 1;
+  HeronControlTupleSet control = 2;
+  int32 src_task_id = 3;
 }

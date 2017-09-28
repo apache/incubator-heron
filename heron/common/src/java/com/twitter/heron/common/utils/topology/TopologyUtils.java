@@ -151,7 +151,7 @@ public final class TopologyUtils {
    * Verify if the given topology has all the necessary information
    */
   public static boolean verifyTopology(TopologyAPI.Topology topology) {
-    if (!topology.hasName() || topology.getName().isEmpty()) {
+    if (topology.getName() == null || topology.getName().isEmpty()) {
       LOG.severe("Missing topology name");
       return false;
     }

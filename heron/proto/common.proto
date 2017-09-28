@@ -1,10 +1,11 @@
-syntax = "proto2";
+syntax = "proto3";
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
 option java_outer_classname = "Common";
 
 enum StatusCode {
+  UNUSED_STATUSCODE = 0;
   OK = 1;
   NOTOK = 2; //generic not ok message
 
@@ -30,6 +31,6 @@ enum StatusCode {
 }
 
 message Status {
-  required StatusCode status = 1;
-  optional string message = 2;
+  StatusCode status = 1;
+  string message = 2;
 }

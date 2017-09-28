@@ -105,7 +105,7 @@ public class CheckpointManagerServer extends HeronServer {
     LOG.info(String.format("Got a clean request from %s running at host:port %s",
              request.toString(), channel.socket().getRemoteSocketAddress()));
 
-    boolean deleteAll = request.hasCleanAllCheckpoints() && request.getCleanAllCheckpoints();
+    boolean deleteAll = request.getCleanAllCheckpoints();
     Common.StatusCode statusCode = Common.StatusCode.OK;
     String errorMessage = "";
 
@@ -250,7 +250,7 @@ public class CheckpointManagerServer extends HeronServer {
     String errorMessage = "";
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
-    if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
+    if (request.getCheckpointId() == null || request.getCheckpointId().isEmpty()) {
       LOG.info("The checkpoint id was empty, this sending empty state");
       CheckpointManager.InstanceStateCheckpoint dummyState =
           CheckpointManager.InstanceStateCheckpoint.newBuilder()
