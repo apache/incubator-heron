@@ -68,7 +68,7 @@ $ heron submit local \
 
 ### Java Functional API starter project
 
-If you'd like to up and running quickly with the Java DSL, you can clone [this repository](https://github.com/streamlio/heron-java-dsl-example), which includes an example topology built using the DSL as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
+If you'd like to up and running quickly with the Heron Functional API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-functional-api-example), which includes an example topology built using the DSL as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
 
 ```bash
 $ git clone https://github.com/streamlio/heron-java-functional-api-example
