@@ -89,7 +89,7 @@ $ heron submit local target/heron-java-functional-api-example-latest-jar-with-de
 
 #### Selecting delivery semantics
 
-Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology]()#java-functional-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
+Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology](#java-functional-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
 
 ```bash
 $ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
