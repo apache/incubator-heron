@@ -1,4 +1,4 @@
-Heron processing topologies can be written using a domain-specific language called the **Heron DSL**. The Heron Functional API is currently available for the following languages:
+Heron processing topologies can be written using an API called the **Heron Functional API**. The Heron Functional API is currently available for the following languages:
 
 * [Java](../../../developers/java/functional-api)
 <!-- * [Python](../../../developers/python/functional-api) -->
