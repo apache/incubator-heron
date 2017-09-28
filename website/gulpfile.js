@@ -82,7 +82,7 @@ gulp.task('sass:watch', function() {
 gulp.task('build', gulp.series('js', 'sass'));
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js', gulp.parallel('js:watch', 'sass:watch')));
+gulp.task('dev', gulp.series('js', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
 
 // Help => list tasks
 gulp.task('help', function(done) {

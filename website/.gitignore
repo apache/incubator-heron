@@ -3,7 +3,7 @@ package-lock.json
 node_modules/
 public/
 static/api
-static/style.css
-static/style*.css
+static/css/style.css
+static/css/style*.css
 static/js
 data/assets
