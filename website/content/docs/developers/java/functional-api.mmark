@@ -68,7 +68,7 @@ $ heron submit local \
 
 ### Java Functional API starter project
 
-If you'd like to up and running quickly with the Heron Functional API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-functional-api-example), which includes an example topology built using the DSL as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
+If you'd like to up and running quickly with the Heron Functional API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-functional-api-example), which includes an example topology built using the Functional API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
 
 ```bash
 $ git clone https://github.com/streamlio/heron-java-functional-api-example
@@ -161,7 +161,7 @@ resources.withRam(ByteAmount.fromMegabytes(192).asMegabytes());
 
 ## Streamlets
 
-In the Heron DSL for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
+In the Heron Functional API for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
 
 ## Operations
 
