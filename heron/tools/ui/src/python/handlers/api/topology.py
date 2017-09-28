@@ -43,7 +43,7 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
         self.write(dict())
         return
 
-      if not lplan.has_key('spouts') or not lplan.has_key('bolts'):
+      if not 'spouts' in lplan or not 'bolts' in lplan:
         self.write(dict())
         return
       comp_names = lplan['spouts'].keys()
@@ -97,7 +97,7 @@ class ListTopologiesJsonHandler(base.BaseHandler):
           if "jobname" not in topology_value or topology_value["jobname"] is None:
             continue
 
-          if topology_value.has_key("submission_time"):
+          if "submission_time" in topology_value:
             topology_value["submission_time"] = topology_value["submission_time"]
           else:
             topology_value["submission_time"] = '-'
@@ -126,7 +126,7 @@ class TopologyLogicalPlanJsonHandler(base.BaseHandler):
       self.write(dict())
       return
 
-    if not lplan.has_key('spouts') or not lplan.has_key('bolts'):
+    if not 'spouts' in lplan or not 'bolts' in lplan:
       self.write(dict())
       return
 

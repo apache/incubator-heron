@@ -19,9 +19,13 @@ import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.KeyedWindow;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
+import com.twitter.heron.dsl.SerializableGenerator;
+import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.dsl.impl.streamlets.GeneratorKVStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.SupplierKVStreamlet;
 
 /**
  * Some transformations like join and reduce assume a certain structure of the tuples
@@ -30,6 +34,25 @@ import com.twitter.heron.dsl.impl.streamlets.ReduceByKeyAndWindowStreamlet;
  */
 public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>>
     implements KVStreamlet<K, V> {
+
+  /**
+   * Create a Streamlet based on the supplier function
+   * @param supplier The Supplier function to generate the elements
+   */
+  static <K, V> BaseKVStreamlet<K, V> createSupplierKVStreamlet(
+      SerializableSupplier<KeyValue<K, V>> supplier) {
+    return new SupplierKVStreamlet<K, V>(supplier);
+  }
+
+  /**
+   * Create a Streamlet based on the generator function
+   * @param generator The Generator function to generate the elements
+   */
+  static <K, V> BaseKVStreamlet<K, V> createGeneratorKVStreamlet(
+      SerializableGenerator<KeyValue<K, V>> generator) {
+    return new GeneratorKVStreamlet<K, V>(generator);
+  }
+
   /**
    * Return a new KVStreamlet by inner joining ‘this’ streamlet with ‘other’ streamlet.
    * The join is done over elements accumulated over a time window defined by TimeWindow.

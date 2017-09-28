@@ -93,17 +93,17 @@ class TS(Operator):
     if len(children) != 3:
       raise Exception("TS format error, expects 3 arguments")
     self.component = children[0]
-    if not isinstance(self.component, (str, unicode)):
+    if not isinstance(self.component, str):
       raise Exception("TS expects component name as first argument")
     # A '*' represents all instances, which is represented by empty array.
     # Otherwise, it represents a single instance
     self.instances = []
     if children[1] != "*":
-      if not isinstance(children[1], (str, unicode)):
+      if not isinstance(children[1], str):
         raise Exception("Second argument of TS must be * or instance name")
       self.instances.append(children[1])
     self.metricName = children[2]
-    if not isinstance(self.metricName, (str, unicode)):
+    if not isinstance(self.metricName, str):
       raise Exception("TS expects metric name as third argument")
 
   @tornado.gen.coroutine
@@ -168,7 +168,7 @@ class Default(Operator):
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     allMetrics = yield self.timeseries.execute(tracker, tmaster, start, end)
-    if isinstance(allMetrics, (str, unicode)):
+    if isinstance(allMetrics, str):
       raise Exception(allMetrics)
     for metric in allMetrics:
       metric.setDefault(self.constant, start, end)
@@ -202,7 +202,7 @@ class Sum(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, (str, unicode)):
+      if isinstance(met, str):
         raise Exception(met)
       allMetrics.extend(met)
 
@@ -246,7 +246,7 @@ class Max(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, (str, unicode)):
+      if isinstance(met, str):
         raise Exception(met)
       allMetrics.extend(met)
 
@@ -296,7 +296,7 @@ class Percentile(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, (str, unicode)):
+      if isinstance(met, str):
         raise Exception(met)
       allMetrics.extend(met)
 

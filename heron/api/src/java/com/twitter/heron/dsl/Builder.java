@@ -33,10 +33,28 @@ public interface Builder {
   <R> Streamlet<R> newSource(SerializableSupplier<R> supplier);
 
   /**
-   * Registers an already created source streamlet into the builder
-   * @param source The streamlet that needs to be registered
+   * Same as above except returns KVStreamlet
+   * @param supplier
+   * @param <K>
+   * @param <V>
+   * @return
+   */
+  <K, V> KVStreamlet<K, V> newKVSource(SerializableSupplier<KeyValue<K, V>> supplier);
+
+  /**
+   * Creates a new Streamlet using the underlying generator
+   * @param generator The generator that generates the tuples of the streamlet
    * @param <R>
    * @return
    */
-  <R> Streamlet<R> newSource(Streamlet<R> source);
+  <R> Streamlet<R> newSource(SerializableGenerator<R> generator);
+
+  /**
+   * Same as above except returns a KVStreamlet
+   * @param generator The genertor that generates the tuples of the streamlet
+   * @param <K>
+   * @param <V>
+   * @return
+   */
+  <K, V> KVStreamlet<K, V> newKVSource(SerializableGenerator<KeyValue<K, V>> generator);
 }

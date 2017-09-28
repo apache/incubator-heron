@@ -22,6 +22,9 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.dsl.Builder;
+import com.twitter.heron.dsl.KVStreamlet;
+import com.twitter.heron.dsl.KeyValue;
+import com.twitter.heron.dsl.SerializableGenerator;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.Streamlet;
 
@@ -46,10 +49,27 @@ public final class BuilderImpl implements Builder {
   }
 
   @Override
-  public <R> Streamlet<R> newSource(Streamlet<R> source) {
-    BaseStreamlet<R> src = (BaseStreamlet<R>) source;
-    sources.add(src);
-    return source;
+  public <K, V> KVStreamlet<K, V> newKVSource(SerializableSupplier<KeyValue<K, V>> supplier) {
+    BaseKVStreamlet<K, V> retval = BaseKVStreamlet.createSupplierKVStreamlet(supplier);
+    retval.setNumPartitions(1);
+    sources.add(retval);
+    return retval;
+  }
+
+  @Override
+  public <R> Streamlet<R> newSource(SerializableGenerator<R> generator) {
+    BaseStreamlet<R> retval = BaseStreamlet.createGeneratorStreamlet(generator);
+    retval.setNumPartitions(1);
+    sources.add(retval);
+    return retval;
+  }
+
+  @Override
+  public <K, V> KVStreamlet<K, V> newKVSource(SerializableGenerator<KeyValue<K, V>> generator) {
+    BaseKVStreamlet<K, V> retval = BaseKVStreamlet.createGeneratorKVStreamlet(generator);
+    retval.setNumPartitions(1);
+    sources.add(retval);
+    return retval;
   }
 
   /**
