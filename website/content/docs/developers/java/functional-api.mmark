@@ -149,9 +149,9 @@ resources.withRam(104857600);
 topologyConfig.setContainerResources(resources);
 ```
 
-> The default CPU is `1.0f` while the default RAM is `104857600` (100 megabytes). The minimum allowable amounts are `201326592` for RAM (192 megabytes)
+> The default CPU is `1.0f` while the default RAM is `104857600` (100 megabytes).
 
-There's also a `ByteAmount` helper class that you can use:
+There's also a `ByteAmount` helper class that you can use to convert byte formats:
 
 ```java
 import com.twitter.heron.common.basics.ByteAmount;
@@ -159,27 +159,9 @@ import com.twitter.heron.common.basics.ByteAmount;
 resources.withRam(ByteAmount.fromMegabytes(192).asMegabytes());
 ```
 
-<!--
-
-## Full example
-
-
-
-## Creating processing logic
-
-All Java DSL processing graphs begin with a `Builder` object:
-
-```java
-import com.twitter.heron.dsl.Builder;
-
-Builder builder = Builder.CreateBuilder();
-```
-
--->
-
 ## Streamlets
 
-In the Heron DSL for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data (of whichever type) you'd like
+In the Heron DSL for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
 
 ## Operations
 
@@ -189,9 +171,9 @@ Operation | Description | Example
 [`flatMap`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
 [`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
 [`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
-`repartition` | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
-`mapToKV` | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
-`log` | | Output the final results of a processing graph to stdout
+[`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
+[`mapToKV`](#map-to-kv-operations) | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
+`log` | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
 
 <!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
 
@@ -200,7 +182,7 @@ Operation | Description | Example
 Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet. Here's an example:
 
 ```java
-Builder.newSource(() -> 1)
+builder.newSource(() -> 1)
     .map(i -> i + 12);
 ```
 
@@ -211,7 +193,7 @@ In this example, a supplier streamlet emits an indefinite series of 1s. The `map
 FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into another type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
 
 ```java
-Builder.newSource(() -> "I have nothing to declare but my genius")
+builder.newSource(() -> "I have nothing to declare but my genius")
     .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")));
 ```
 
@@ -221,26 +203,71 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 
 ### Join operations
 
-Join operations unify two streamlets *on a key* (join operations require `KVStreamlet`s). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
+Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
+import com.twitter.heron.dsl.WindowConfig;
+
 Builder builder = Builder.CreateBuilder();
 
-Streamlet<KeyValue<String, String>> streamlet1 =
-        builder.newSource(() -> new KeyValue<>("heron-api", "topology-api"));
+KVStreamlet<String, String> streamlet1 =
+        builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
 
-Builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
-    .join(streamlet1);
+builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
+    .join(streamlet1, WindowConfig.TumblingCountWindow(10), KeyValue::create);
 ```
 
 In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
 
-> The effect of a join operation is to create a new streamlet for each key.
+> The effect of a join operation is to create a new streamlet *for each key*.
 
 ### Filter operations
 
-Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example processing graph 
+Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example:
 
-## Parallelism
+```java
+Builder builder = Builder.CreateBuilder();
 
-In the original, Storm-inspired topology API for Heron, you could control parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron Functional API is different in that 
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+```
+
+### Repartition operations
+
+When you assign a number of [partitions](#partitioning-and-parallelism) to a processing step, each step that comes after it inherits that number of partitions. Thus, if you assign 5 partitions to a `map` operation, then any `mapToKV`, `flatMap`, `filter`, etc. operations that come after it will also be assigned 5 partitions. But you can also change the number of partitions for a processing step (as well as the number of partitions for downstream operations) using `repartition`. Here's an example:
+
+```java
+import java.util.concurrent.ThreadLocalRandom;
+
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .setNumPartitions(5)
+        .map(i -> i + 1)
+        .repartition(2)
+        .filter(i -> i > 7)
+        .filter(i -> i < 2)
+        .log();
+```
+
+In this example, the supplier streamlet emits random integers between one and ten. That operation is assigned 5 partitions. After the `map` operation, the `repartition` function is used to assign 2 partitions to all downstream operations.
+
+### Map-to-KV operations
+
+Map-to-KV operations enable you to transform a streamlet into a KV streamlet, for example a `Streamlet<String>` into a `Streamlet<KeyValue<String, Boolean>>`, using a mapping function. Here's an example:
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> randomIntGenerator(1, 100))
+        .mapToKV((num) -> new KeyValue<>(num, num > 50));
+```
+
+In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
+
+<!--
+
+## Partitioning and parallelism
+
+In the original, Storm-inspired topology API for Heron, you could manage parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron Functional API is different in that you assign **partitions** to specific operations.
+
+-->
