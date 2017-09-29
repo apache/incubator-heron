@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     // Pulls in any Gulp-related metadata
     pkg = require('./package.json'),
+    hash = require('gulp-hash'),
     // Use $ to invoke Gulp plugins
     $ = require('gulp-load-plugins')(),
     // All non-Gulp modules here
@@ -44,14 +45,14 @@ gulp.task('sass-dev', function(done) {
     .pipe($.sass({
       outputStyle: 'compressed'
     }).on('error', function(err) { $.sass.logError; }))
-    .pipe($.hash())
+    .pipe(hash())
     .pipe($.autoprefixer({
       browsers: ['last 2 versions'],
       cascade: false
     }))
     .pipe($.cleanCss())
     .pipe(gulp.dest(DIST.css))
-    .pipe($.hash.manifest('hash.json'))
+    .pipe(hash.manifest('hash.json'))
     .pipe(gulp.dest('data/assets/css'));
   done();
 });
@@ -82,7 +83,7 @@ gulp.task('sass:watch', function() {
 gulp.task('build', gulp.series('js', 'sass'));
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js', gulp.parallel('js:watch', 'sass:watch')));
+gulp.task('dev', gulp.series('js', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
 
 // Help => list tasks
 gulp.task('help', function(done) {

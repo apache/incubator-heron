@@ -121,10 +121,12 @@ public class WindowManager<T> implements TriggerHandler {
    */
   public void add(Event<T> windowEvent) {
     // watermark events are not added to the queue.
-    if (!windowEvent.isWatermark()) {
-      queue.add(windowEvent);
-    } else {
+    if (windowEvent.isWatermark()) {
       LOG.fine(String.format("Got watermark event with ts %d", windowEvent.getTimestamp()));
+    } else if (windowEvent.isTimer()) {
+      LOG.fine(String.format("Got timer event with ts %d", windowEvent.getTimestamp()));
+    } else {
+      queue.add(windowEvent);
     }
     track(windowEvent);
     compactWindow();

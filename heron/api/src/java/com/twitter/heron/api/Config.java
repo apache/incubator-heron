@@ -50,10 +50,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts";
   /**
-   * How often a tick tuple from the "__system" component and "__tick" stream should be sent
+   * How often (in milliseconds) a tick tuple from the "__system" component and "__tick" stream should be sent
    * to tasks. Meant to be used as a component-specific configuration.
    */
-  public static final String TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+  public static final String TOPOLOGY_TICK_TUPLE_FREQ_MS = "topology.tick.tuple.freq.ms";
   /**
    * True if Heron should timeout messages or not. Defaults to true. This is meant to be used
    * in unit tests to prevent tuples from being accidentally timed out during the test.
@@ -248,7 +248,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_WORKER_CHILDOPTS);
     apiVars.add(TOPOLOGY_COMPONENT_JVMOPTS);
     apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
-    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_MS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
     apiVars.add(TOPOLOGY_CONTAINER_CPU_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_DISK_REQUESTED);
@@ -333,7 +333,11 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+    setTickTupleFrequencyMs(conf, (long) (seconds * 1000));
+  }
+
+  public static void setTickTupleFrequencyMs(Map<String, Object> conf, long millis) {
+    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, millis);
   }
 
   public static void setTopologyReliabilityMode(Map<String, Object> conf,

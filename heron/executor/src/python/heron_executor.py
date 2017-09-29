@@ -18,6 +18,7 @@ monitoring the processes of the topology and it's support services."""
 import argparse
 import atexit
 import base64
+import functools
 import json
 import os
 import random
@@ -32,8 +33,6 @@ import yaml
 import socket
 import traceback
 
-from functools import partial
-
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
 # pylint: disable=unused-import
@@ -45,7 +44,7 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 Log = log.Log
 
 def print_usage():
-  print (
+  print(
       "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
       " <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
@@ -180,7 +179,7 @@ class HeronExecutor(object):
         map(lambda x: {x.split(':')[0]:
                            int(x.split(':')[1])}, parsed_args.component_rammap.split(','))
     self.component_rammap =\
-        reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
+        functools.reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
@@ -935,7 +934,7 @@ class HeronExecutor(object):
     for state_manager in self.state_managers:
       # The callback function with the bound
       # state_manager as first variable.
-      onPackingPlanWatch = partial(on_packing_plan_watch, state_manager)
+      onPackingPlanWatch = functools.partial(on_packing_plan_watch, state_manager)
       state_manager.get_packing_plan(self.topology_name, onPackingPlanWatch)
       Log.info("Registered state watch for packing plan changes with state manager %s." %
                str(state_manager))
