@@ -335,7 +335,7 @@ struct CommonResources {
     // Create the sington for heron_internals_config_reader
     // if it does not exist
     if (!heron::config::HeronInternalsConfigReader::Exists()) {
-      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename, "");
     }
   }
 };
@@ -629,7 +629,7 @@ int main(int argc, char** argv) {
 
   // Create the sington for heron_internals_config_reader, if it does not exist
   if (!heron::config::HeronInternalsConfigReader::Exists()) {
-    heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+    heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename, "");
   }
   return RUN_ALL_TESTS();
 }

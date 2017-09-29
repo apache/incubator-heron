@@ -18,6 +18,7 @@ monitoring the processes of the topology and it's support services."""
 import argparse
 import atexit
 import base64
+import functools
 import json
 import os
 import random
@@ -32,8 +33,6 @@ import yaml
 import socket
 import traceback
 
-from functools import partial
-
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
 # pylint: disable=unused-import
@@ -45,13 +44,13 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 Log = log.Log
 
 def print_usage():
-  print (
+  print(
       "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
       " <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
-      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
-      " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
+      " <override_config_file> <component_rammap> <component_jvm_opts_in_base64> <pkg_type>"
+      " <topology_bin_file> <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
@@ -141,7 +140,7 @@ class ProcessInfo(object):
     self.attempts += 1
     return self
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,too-many-statements
 class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
@@ -175,11 +174,12 @@ class HeronExecutor(object):
     self.tmaster_controller_port = parsed_args.tmaster_controller_port
     self.tmaster_stats_port = parsed_args.tmaster_stats_port
     self.heron_internals_config_file = parsed_args.heron_internals_config_file
+    self.override_config_file = parsed_args.override_config_file
     self.component_rammap =\
         map(lambda x: {x.split(':')[0]:
                            int(x.split(':')[1])}, parsed_args.component_rammap.split(','))
     self.component_rammap =\
-        reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
+        functools.reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
 
     # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
@@ -264,6 +264,7 @@ class HeronExecutor(object):
     parser.add_argument("tmaster_controller_port")
     parser.add_argument("tmaster_stats_port")
     parser.add_argument("heron_internals_config_file")
+    parser.add_argument("override_config_file")
     parser.add_argument("component_rammap")
     parser.add_argument("component_jvm_opts_in_base64")
     parser.add_argument("pkg_type")
@@ -374,6 +375,7 @@ class HeronExecutor(object):
                       self.topology_name,
                       self.topology_id,
                       self.heron_internals_config_file,
+                      self.override_config_file,
                       sink_config_file]
 
     return metricsmgr_cmd
@@ -412,6 +414,7 @@ class HeronExecutor(object):
                            "--topology_name", self.topology_name,
                            "--topology_id", self.topology_id,
                            "--system_config_file", self.heron_internals_config_file,
+                           "--override_config_file", self.override_config_file,
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
@@ -467,6 +470,7 @@ class HeronExecutor(object):
         self.zknode,
         self.zkroot,
         self.heron_internals_config_file,
+        self.override_config_file,
         self.metrics_sinks_config_file,
         self.metricsmgr_port,
         self.ckptmgr_port]
@@ -550,7 +554,8 @@ class HeronExecutor(object):
                            self.stmgr_ids[self.shard],
                            self.tmaster_controller_port,
                            self.metricsmgr_port,
-                           self.heron_internals_config_file])
+                           self.heron_internals_config_file,
+                           self.override_config_file])
       retval[instance_id] = instance_cmd
     return retval
 
@@ -587,6 +592,7 @@ class HeronExecutor(object):
                       self.tmaster_controller_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
+                      self.override_config_file,
                       self.topology_bin_file]
 
       retval[instance_id] = instance_cmd
@@ -625,6 +631,7 @@ class HeronExecutor(object):
         self.metricsmgr_port,
         self.shell_port,
         self.heron_internals_config_file,
+        self.override_config_file,
         self.ckptmgr_port,
         self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
@@ -927,7 +934,7 @@ class HeronExecutor(object):
     for state_manager in self.state_managers:
       # The callback function with the bound
       # state_manager as first variable.
-      onPackingPlanWatch = partial(on_packing_plan_watch, state_manager)
+      onPackingPlanWatch = functools.partial(on_packing_plan_watch, state_manager)
       state_manager.get_packing_plan(self.topology_name, onPackingPlanWatch)
       Log.info("Registered state watch for packing plan changes with state manager %s." %
                str(state_manager))

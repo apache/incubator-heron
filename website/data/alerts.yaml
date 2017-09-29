@@ -1,0 +1,4 @@
+functional-api-preview:
+  title: The Heron Functional API is in beta
+  content: The Heron Functional API is well tested and can be used to build and test topologies locally. The API is not yet fully stable, however, and breaking changes are likely in the coming weeks.
+  type: success
