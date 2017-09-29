@@ -101,7 +101,7 @@ public final class PackingTestUtils {
       ram = ram.plus(instance.getResource().getRam());
     }
     Resource resource = new Resource(cpu, ram, ram);
-    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource, resource);
+    return new PackingPlan.ContainerPlan(containerId, instancePlans, resource, null);
   }
 
   public static PackingPlan.InstancePlan testInstancePlan(

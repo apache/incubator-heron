@@ -43,7 +43,8 @@ public class PackingPlanProtoDeserializer {
         containerPlan.getId(),
         instances,
         convert(containerPlan.getRequiredResource()),
-        convert(containerPlan.getScheduledResource()));
+        convert(containerPlan.hasScheduledResource() ? containerPlan.getScheduledResource()
+                : null));
   }
 
   private PackingPlan.InstancePlan convert(PackingPlans.InstancePlan instancePlan) {
