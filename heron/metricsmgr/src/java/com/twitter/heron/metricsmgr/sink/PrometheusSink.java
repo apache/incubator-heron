@@ -16,7 +16,6 @@ package com.twitter.heron.metricsmgr.sink;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -49,8 +48,6 @@ public class PrometheusSink extends AbstractWebSink {
 
   // spout metric
   private static final String METRIC_NEXT_TUPLE_COUNT = "__next-tuple-count";
-
-  private Map<String, Set<String>> xx;
 
   // This is the cache that is used to serve the metrics
   private Cache<String, Map<String, Double>> metricsCache;
