@@ -5,7 +5,6 @@ title: Writing and Launching a Topology in Java
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations.
 
-
 ### Install Heron APIs for development
 
 Before getting started writing a topology, you need to install the Heron API
@@ -95,3 +94,19 @@ HeronTopology topology = builder.createTopology();
 ```
 
 See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples).
+
+## Applying delivery semantics to topologies
+
+```java
+import com.twitter.heron.api.Config;
+
+Config topologyConfig = new Config();
+
+config.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+```
+
+There are three delivery semantics available corresponding to the three delivery semantics that Heron provides:
+
+* `ATMOST_ONCE`
+* `ATLEAST_ONCE`
+* `EFFECTIVELY_ONCE`
