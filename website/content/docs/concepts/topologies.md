@@ -6,10 +6,10 @@ title: Heron Topologies
 > As of version 0.16.0, Heron offers a new **Functional API** that you can use
 > to write topologies in a more declarative, functional manner, without
 > needing to specify spout and bolt logic directly. The Functional API is
-> **currently in preview mode** and available for
+> **currently in beta** and available for
 > [Java](../../developers/java/functional-api). The Functional API for Python will
 > be available soon.
-> 
+>
 > More information on the Functional API can be found
 > [below](#the-heron-functional-api).
 
