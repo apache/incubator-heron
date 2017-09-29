@@ -11,39 +11,13 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.api.windowing;
+package com.twitter.heron.api;
 
-public class EventImpl<T> implements Event<T> {
-  private final T event;
-  private long ts;
+public final class Constants {
 
-  EventImpl(T event, long ts) {
-    this.event = event;
-    this.ts = ts;
+  private Constants() {
   }
 
-  @Override
-  public long getTimestamp() {
-    return ts;
-  }
-
-  @Override
-  public T get() {
-    return event;
-  }
-
-  @Override
-  public boolean isWatermark() {
-    return false;
-  }
-
-  @Override
-  public boolean isTimer() {
-    return false;
-  }
-
-  @Override
-  public String toString() {
-    return "EventImpl{" + "event=" + event + ", ts=" + ts + '}';
-  }
+  public static final String SYSTEM_COMPONENT_ID = "__system";
+  public static final String SYSTEM_TICK_STREAM_ID = "__tick";
 }
