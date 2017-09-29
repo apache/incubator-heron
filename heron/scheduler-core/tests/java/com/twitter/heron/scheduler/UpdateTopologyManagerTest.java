@@ -104,8 +104,16 @@ public class UpdateTopologyManagerTest {
                                                                PackingPlans.PackingPlan packingPlan,
                                                                Lock lock) {
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
-    when(stateManager.getPhysicalPlan(TOPOLOGY_NAME))
-        .thenReturn(PhysicalPlans.PhysicalPlan.getDefaultInstance());
+
+    TopologyAPI.Topology defaultTopology = TopologyAPI.Topology.newBuilder()
+              .setState(TopologyAPI.TopologyState.RUNNING)
+              .build();
+
+    PhysicalPlans.PhysicalPlan pplan = PhysicalPlans.PhysicalPlan.newBuilder()
+              .setTopology(defaultTopology)
+              .build();
+
+    when(stateManager.getPhysicalPlan(TOPOLOGY_NAME)).thenReturn(pplan);
     when(stateManager.getTopology(TOPOLOGY_NAME)).thenReturn(topology);
     when(stateManager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(packingPlan);
     when(stateManager.getLock(eq(TOPOLOGY_NAME), eq(IStateManager.LockName.UPDATE_TOPOLOGY)))
