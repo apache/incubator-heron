@@ -11,39 +11,19 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.api.windowing;
+package com.twitter.heron.api.utils;
 
-public class EventImpl<T> implements Event<T> {
-  private final T event;
-  private long ts;
+import com.twitter.heron.api.Constants;
+import com.twitter.heron.api.tuple.Tuple;
 
-  EventImpl(T event, long ts) {
-    this.event = event;
-    this.ts = ts;
+public final class TupleUtils {
+  private TupleUtils() {
+    // No instantiation
   }
 
-  @Override
-  public long getTimestamp() {
-    return ts;
-  }
-
-  @Override
-  public T get() {
-    return event;
-  }
-
-  @Override
-  public boolean isWatermark() {
-    return false;
-  }
-
-  @Override
-  public boolean isTimer() {
-    return false;
-  }
-
-  @Override
-  public String toString() {
-    return "EventImpl{" + "event=" + event + ", ts=" + ts + '}';
+  public static boolean isTick(Tuple tuple) {
+    return tuple != null
+        && Constants.SYSTEM_COMPONENT_ID.equals(tuple.getSourceComponent())
+        && Constants.SYSTEM_TICK_STREAM_ID.equals(tuple.getSourceStreamId());
   }
 }

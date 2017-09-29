@@ -13,37 +13,21 @@
 //  limitations under the License.
 package com.twitter.heron.api.windowing;
 
-public class EventImpl<T> implements Event<T> {
-  private final T event;
-  private long ts;
-
-  EventImpl(T event, long ts) {
-    this.event = event;
-    this.ts = ts;
-  }
-
-  @Override
-  public long getTimestamp() {
-    return ts;
-  }
-
-  @Override
-  public T get() {
-    return event;
-  }
-
-  @Override
-  public boolean isWatermark() {
-    return false;
+/**
+ * Timer event used to trigger actions in windowing that needs to occur on a set frequency
+ */
+public class TimerEvent<T> extends EventImpl<T> {
+  public TimerEvent(T event, long ts) {
+    super(event, ts);
   }
 
   @Override
   public boolean isTimer() {
-    return false;
+    return true;
   }
 
   @Override
   public String toString() {
-    return "EventImpl{" + "event=" + event + ", ts=" + ts + '}';
+    return "TimerEvent{} " + super.toString();
   }
 }
