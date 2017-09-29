@@ -133,7 +133,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   @VisibleForTesting
   TopologyMaster.MetricResponse getMetricsFromMetricsCache(
       String metric, String component, Instant start, Duration duration) {
-    LOG.log(Level.FINE, "MetricsCache Query request metric nme : {0}", metric);
+    LOG.log(Level.FINE, "MetricsCache Query request metric name : {0}", metric);
     TopologyMaster.MetricRequest request = TopologyMaster.MetricRequest.newBuilder()
         .setComponentName(component)
         .setExplicitInterval(
