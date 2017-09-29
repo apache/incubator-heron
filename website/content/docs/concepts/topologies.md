@@ -6,9 +6,10 @@ title: Heron Topologies
 > As of version 0.16.0, Heron offers a new **Functional API** that you can use
 > to write topologies in a more declarative, functional manner, without
 > needing to specify spout and bolt logic directly. The Functional API is
-> currently available for [Java](../../developers/java/functional-api). The
-> Functional API for Python will be available soon.
-> 
+> **currently in beta** and available for
+> [Java](../../developers/java/functional-api). The Functional API for Python will
+> be available soon.
+>
 > More information on the Functional API can be found
 > [below](#the-heron-functional-api).
 
@@ -89,6 +90,8 @@ different [bolts](#bolts) (each of which has multiple instances) that have autom
 been distributed between five different Docker containers.
 
 ## The Heron Functional API
+
+{{< alert "functional-api-preview" >}}
 
 When Heron was first created, the model for creating topologies was deeply
 indebted to the Apache Storm model. Under that model, developers creating topologies
