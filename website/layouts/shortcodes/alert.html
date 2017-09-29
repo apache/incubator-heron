@@ -1,0 +1,15 @@
+{{- $alert := index .Site.Data.alerts (.Get 0) }}
+<div class="alert alert-{{ default "info" (index $alert "type") }} alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+
+  {{- if (index $alert "title") }}<h4 class="alert-heading">{{ index $alert "title"}}</h4>{{- end }}
+  {{- if (index $alert "content") }}{{ (index $alert "content") | markdownify }}{{- end }}
+  {{- if (index $alert "footer") }}
+  <hr>
+  <p class="mb-0">
+    {{ index $alert "footer" }}
+  </p>
+  {{- end }}
+</div>
