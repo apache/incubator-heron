@@ -1,18 +1,18 @@
-// Copyright 2016 Twitter. All rights reserved.
+//  Copyright 2017 Twitter. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-package com.twitter.heron.examples;
+package com.twitter.heron.examples.api;
 
 import java.util.Map;
 
@@ -27,48 +27,51 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.examples.spout.TestWordSpout;
+import com.twitter.heron.examples.api.spout.TestWordSpout;
 import com.twitter.heron.simulator.Simulator;
 
 
 /**
  * This is a basic example of a Storm topology.
  */
-public final class ComponentJVMOptionsTopology {
+public final class MultiSpoutExclamationTopology {
 
-  private ComponentJVMOptionsTopology() {
+  private MultiSpoutExclamationTopology() {
   }
 
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("word", new TestWordSpout(), 2);
+    builder.setSpout("word0", new TestWordSpout(), 2);
+    builder.setSpout("word1", new TestWordSpout(), 2);
+    builder.setSpout("word2", new TestWordSpout(), 2);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2)
-        .shuffleGrouping("word");
+        .shuffleGrouping("word0")
+        .shuffleGrouping("word1")
+        .shuffleGrouping("word2");
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
-
-    // TOPOLOGY_WORKER_CHILDOPTS will be a global one
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
-    // For each component, both the global and if any the component one will be appended.
-    // And the component one will take precedence
-    com.twitter.heron.api.Config.setComponentJvmOptions(conf, "word", "-XX:NewSize=300m");
-    com.twitter.heron.api.Config.setComponentJvmOptions(conf, "exclaim1", "-XX:NewSize=800m");
-
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1", ByteAmount.fromMegabytes(512));
+    com.twitter.heron.api.Config.setComponentRam(conf, "word0",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word1",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "word2",
+        ExampleResources.getComponentRam());
+    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+        ExampleResources.getComponentRam());
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
     com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
 
     if (args != null && args.length > 0) {
-      conf.setNumStmgrs(2);
+      conf.setNumStmgrs(3);
       HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       Simulator simulator = new Simulator();
@@ -77,27 +80,26 @@ public final class ComponentJVMOptionsTopology {
       simulator.killTopology("test");
       simulator.shutdown();
     }
-
-
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    private static final long serialVersionUID = 2165326630789117557L;
+    private static final long serialVersionUID = 6945654705222426596L;
     private long nItems;
     private long startTime;
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void prepare(
-        Map conf,
-        TopologyContext context,
-        OutputCollector collector) {
+    public void prepare(Map conf,
+                        TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
 
     @Override
     public void execute(Tuple tuple) {
+      // System.out.println(tuple.getString(0));
+      // collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+      // collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
         System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
@@ -107,6 +109,7 @@ public final class ComponentJVMOptionsTopology {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+      // declarer.declare(new Fields("word"));
     }
   }
 }

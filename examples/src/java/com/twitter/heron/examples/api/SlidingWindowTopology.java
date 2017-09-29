@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.examples;
+package com.twitter.heron.examples.api;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +30,9 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.examples.bolt.PrinterBolt;
-import com.twitter.heron.examples.bolt.SlidingWindowSumBolt;
-import com.twitter.heron.examples.spout.RandomIntegerSpout;
+import com.twitter.heron.examples.api.bolt.PrinterBolt;
+import com.twitter.heron.examples.api.bolt.SlidingWindowSumBolt;
+import com.twitter.heron.examples.api.spout.RandomIntegerSpout;
 
 /**
  * A sample topology that demonstrates the usage of {@link com.twitter.heron.api.bolt.IWindowedBolt}

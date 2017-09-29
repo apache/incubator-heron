@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.examples;
+package com.twitter.heron.examples.dsl;
 
 import java.util.Arrays;
 
