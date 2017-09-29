@@ -159,7 +159,7 @@ public class PrometheusSink extends AbstractWebSink {
   }
 
   static String getComponentType(Map<String, Double> sourceMetrics) {
-    for(String metric : sourceMetrics.keySet()) {
+    for (String metric : sourceMetrics.keySet()) {
       if (metric.contains(METRIC_EXECUTE_TIME_NS)) {
         return "bolt";
       }
