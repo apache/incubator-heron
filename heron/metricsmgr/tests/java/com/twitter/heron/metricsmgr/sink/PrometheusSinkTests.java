@@ -168,6 +168,10 @@ public class PrometheusSinkTests {
     assertEquals("bolt", PrometheusSink.getComponentType(metrics));
 
     metrics = new HashMap<>();
+    metrics.put("__execute-time-ns/stream1", 1d);
+    assertEquals("bolt", PrometheusSink.getComponentType(metrics));
+
+    metrics = new HashMap<>();
     metrics.put("__next-tuple-count", 1d);
     assertEquals("spout", PrometheusSink.getComponentType(metrics));
 

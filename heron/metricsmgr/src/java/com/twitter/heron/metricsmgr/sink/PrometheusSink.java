@@ -44,7 +44,7 @@ public class PrometheusSink extends AbstractWebSink {
   private static final String DELIMITER = "\n";
 
   // bolt metric
-  private static final String METRIC_EXECUTE_TIME_NS = "__execute-time-ns/default";
+  private static final String METRIC_EXECUTE_TIME_NS = "__execute-time-ns";
 
   // spout metric
   private static final String METRIC_NEXT_TUPLE_COUNT = "__next-tuple-count";
@@ -159,9 +159,13 @@ public class PrometheusSink extends AbstractWebSink {
   }
 
   static String getComponentType(Map<String, Double> sourceMetrics) {
-    if (sourceMetrics.containsKey(METRIC_EXECUTE_TIME_NS)) {
-      return "bolt";
-    } else if (sourceMetrics.containsKey(METRIC_NEXT_TUPLE_COUNT)) {
+    for(String metric : sourceMetrics.keySet()) {
+      if (metric.contains(METRIC_EXECUTE_TIME_NS)) {
+        return "bolt";
+      }
+    }
+
+    if (sourceMetrics.containsKey(METRIC_NEXT_TUPLE_COUNT)) {
       return "spout";
     }
     return null;
