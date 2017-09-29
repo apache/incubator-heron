@@ -48,6 +48,14 @@ public final class Resources implements Serializable {
     return this;
   }
 
+  public Resources withRamInMB(long nram) {
+    return withRam(nram * 1024 * 1024);
+  }
+
+  public Resources withRamInGB(long nram) {
+    return withRamInMB(nram * 1024);
+  }
+
   @Override
   public String toString() {
     return "{ CPU: " + String.valueOf(cpu) + " RAM: " + String.valueOf(ram) + " }";
