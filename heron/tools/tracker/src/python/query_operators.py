@@ -26,7 +26,7 @@ def is_str_instance(obj):
   if isPY3:
     return isinstance(obj, str)
   else:
-    return isinstance(obj, (str, unicode))
+    return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
 
 #####################################################################
 # Data Structure for fetched Metrics
