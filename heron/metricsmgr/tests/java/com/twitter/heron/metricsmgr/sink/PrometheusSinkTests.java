@@ -32,6 +32,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class PrometheusSinkTests {
@@ -158,6 +159,24 @@ public class PrometheusSinkTests {
     expectedLines.forEach((String line) -> {
       assertTrue(generatedLines.contains(line));
     });
+  }
+
+  @Test
+  public void testComponentType() {
+    Map<String, Double> metrics = new HashMap<>();
+    metrics.put("__execute-time-ns/default", 1d);
+    assertEquals("bolt", PrometheusSink.getComponentType(metrics));
+
+    metrics = new HashMap<>();
+    metrics.put("__execute-time-ns/stream1", 1d);
+    assertEquals("bolt", PrometheusSink.getComponentType(metrics));
+
+    metrics = new HashMap<>();
+    metrics.put("__next-tuple-count", 1d);
+    assertEquals("spout", PrometheusSink.getComponentType(metrics));
+
+    metrics = new HashMap<>();
+    assertNull(PrometheusSink.getComponentType(metrics));
   }
 
   private String createMetric(String topology, String component, String instance,
