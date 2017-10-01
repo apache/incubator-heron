@@ -78,6 +78,7 @@ public class WaterMarkEventGeneratorTest {
     streams.add(streamId("s1"));
     streams.add(streamId("s2"));
     waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5, streams);
+    waterMarkEventGenerator.start();
 
     waterMarkEventGenerator.track(streamId("s1"), 100);
     waterMarkEventGenerator.track(streamId("s1"), 110);

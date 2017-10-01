@@ -205,7 +205,6 @@ public class WindowedBoltExecutor implements IRichBolt {
       Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
       waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager,
           maxLagMs, getComponentStreams(context));
-
     } else {
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM)) {
         throw new IllegalArgumentException(
