@@ -18,7 +18,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.dslboltbase import DslBoltBase
+from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
 class MapBolt(Bolt, StatefulComponent, DslBoltBase):
@@ -39,8 +39,6 @@ class MapBolt(Bolt, StatefulComponent, DslBoltBase):
     self.emitted = 0
     if MapBolt.FUNCTION in config:
       self.map_function = config[MapBolt.FUNCTION]
-      if not callable(self.map_function):
-        raise RuntimeError("Map function has to be callable")
     else:
       raise RuntimeError("MapBolt needs to be passed map function")
 
@@ -54,30 +52,26 @@ class MapBolt(Bolt, StatefulComponent, DslBoltBase):
 # pylint: disable=protected-access
 class MapStreamlet(Streamlet):
   """MapStreamlet"""
-  def __init__(self, map_function, parents, stage_name=None, parallelism=None):
-    super(MapStreamlet, self).__init__(parents=parents,
-                                       stage_name=stage_name, parallelism=parallelism)
+  def __init__(self, map_function, parent):
+    super(MapStreamlet, self).__init__()
+    if not callable(map_function):
+      raise RuntimeError("Map function has to be callable")
+    if not isinstance(parent, Streamlet):
+      raise RuntimeError("Parent of Map Streamlet has to be a Streamlet")
+    self._parent = parent;
     self._map_function = map_function
+    self.set_num_partitions(parent.get_num_partitions())
 
   def _calculate_inputs(self):
-    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
+    return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
             Grouping.SHUFFLE}
 
-  def _calculate_stage_name(self, existing_stage_names):
-    funcname = "map-" + self._map_function.__name__
-    if funcname not in existing_stage_names:
-      return funcname
-    else:
-      index = 1
-      newfuncname = funcname + str(index)
-      while newfuncname in existing_stage_names:
-        index = index + 1
-        newfuncname = funcname + str(index)
-      return newfuncname
-
-  def _build_this(self, builder):
-    if not callable(self._map_function):
-      raise RuntimeError("map function must be callable")
-    builder.add_bolt(self._stage_name, MapBolt, par=self._parallelism,
+  def _build_this(self, builder, stage_names):
+    if not self.get_name():
+      self.set_name(self._default_stage_name_calculator("map", stage_names))
+    if self.get_name() in stage_names:
+      raise RuntimeError("Duplicate Names")
+    stage_names.add(self.get_name())
+    builder.add_bolt(self.get_name(), MapBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={MapBolt.FUNCTION : self._map_function})

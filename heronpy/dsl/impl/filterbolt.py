@@ -18,7 +18,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.dslboltbase import DslBoltBase
+from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
 class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
@@ -39,8 +39,6 @@ class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
     self.emitted = 0
     if FilterBolt.FUNCTION in config:
       self.filter_function = config[FilterBolt.FUNCTION]
-      if not callable(self.filter_function):
-        raise RuntimeError("Filter function has to be callable")
     else:
       raise RuntimeError("FilterBolt needs to be passed filter function")
 
@@ -54,30 +52,26 @@ class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
 # pylint: disable=protected-access
 class FilterStreamlet(Streamlet):
   """FilterStreamlet"""
-  def __init__(self, filter_function, parents, stage_name=None, parallelism=None):
-    super(FilterStreamlet, self).__init__(parents=parents,
-                                          stage_name=stage_name, parallelism=parallelism)
+  def __init__(self, filter_function, parent):
+    super(FilterStreamlet, self).__init__()
+    if not callable(filter_function):
+      raise RuntimeError("Filter function has to be callable")
+    if not isinstance(parent, Streamlet):
+      raise RuntimeError("Parent of Filter Streamlet has to be a Streamlet")
+    self._parent = parent;
     self._filter_function = filter_function
+    self.set_num_partitions(parent.get_num_partitions())
 
   def _calculate_inputs(self):
-    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
+    return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
             Grouping.SHUFFLE}
 
-  def _calculate_stage_name(self, existing_stage_names):
-    funcname = "filter-" + self._filter_function.__name__
-    if funcname not in existing_stage_names:
-      return funcname
-    else:
-      index = 1
-      newfuncname = funcname + str(index)
-      while newfuncname in existing_stage_names:
-        index = index + 1
-        newfuncname = funcname + str(index)
-      return newfuncname
-
-  def _build_this(self, builder):
-    if not callable(self._filter_function):
-      raise RuntimeError("filter function must be callable")
-    builder.add_bolt(self._stage_name, FilterBolt, par=self._parallelism,
+  def _build_this(self, builder, stage_names):
+    if not self.get_name():
+      self.set_name(self._default_stage_name_calculator("filter", stage_names))
+    if self.get_name() in stage_names:
+      raise RuntimeError("Duplicate Names")
+    stage_names.add(self.get_name())
+    builder.add_bolt(self.get_name(), FilterBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={FilterBolt.FUNCTION : self._filter_function})

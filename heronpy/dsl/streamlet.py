@@ -82,10 +82,7 @@ class Streamlet(object):
     num_partitions partitions. Note that this is different from num_partitions(n) in
     that new streamlet will be created by the repartition call.
     """
-    from heronpy.dsl.impl.repartitionbolt import RepartitionStreamlet
-    repartition_streamlet = RepartitionStreamlet(parallelism, self)
-    self._add_child(repartition_streamlet)
-    return repartition_streamlet
+    return self.map(lambda x: x).set_num_partitions(num_partitions)
 
   def repartition(self, num_partitions, repartition_function):
     """Same as above except to use repartition_function to choose

@@ -12,13 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
+from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.dslboltbase import DslBoltBase
+from heronpy.dsl.impl.dslboltbase import DslBoltBase
+
+# pylint: disable=unused-argument
+class RepartitionCustomGrouping(ICustomGrouping):
+  def __init__(self, repartition_function):
+    self._repartition_function = repartition_function
+
+  def prepare(self, context, component, stream, target_tasks):
+    logging.getLogger().info("In prepare of SampleCustomGrouping, "
+                             "with src component: %s, "
+                             "with stream id: %s, "
+                             "with target tasks: %s"
+                             , component, stream, str(target_tasks))
+    self.target_tasks = target_tasks
+
+  def choose_tasks(self, values):
+    # only emits to the first task id
+    targets = self._repartition_function(values, len(self.target_tasks))
+    retval = []
+    if isinstance(targets, collections.Iterable):
+      for target in targets:
+        retval.append(self.target_tasks[target % len(self.target_tasks)])
+    else:
+      retval.append(self.target_tasks[targets % len(self.target_tasks)])
+    return retval
 
 # pylint: disable=unused-argument
 class RepartitionBolt(Bolt, StatefulComponent, DslBoltBase):
@@ -46,27 +71,26 @@ class RepartitionBolt(Bolt, StatefulComponent, DslBoltBase):
 # pylint: disable=protected-access
 class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
-  def __init__(self, parallelism, parents, stage_name=None):
-    super(RepartitionStreamlet, self).__init__(parents=parents,
-                                               stage_name=stage_name, parallelism=parallelism)
+  def __init__(self, num_partitions, repartition_function, parent):
+    super(RepartitionStreamlet, self).__init__()
+    if not callable(repartition_function):
+      raise RuntimeError("Repartition function has to be callable")
+    if not isinstance(parent, Streamlet):
+      raise RuntimeError("Parent of FlatMap Streamlet has to be a Streamlet")
+    self._parent = parent
+    self._repartition_function = repartition_function
+    self.set_num_partitions(num_partitions)
 
   # pylint: disable=no-self-use
   def _calculate_inputs(self):
-    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-            Grouping.SHUFFLE}
-
-  def _calculate_stage_name(self, existing_stage_names):
-    stagename = "repartition"
-    if stagename not in existing_stage_names:
-      return stagename
-    else:
-      index = 1
-      newfuncname = stagename + str(index)
-      while newfuncname in existing_stage_names:
-        index = index + 1
-        newfuncname = stagename + str(index)
-      return newfuncname
+    return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
+            Grouping.custom(RepartitionCustomGrouping(self._repartition_function))}
 
   def _build_this(self, builder):
-    builder.add_bolt(self._stage_name, RepartitionBolt, par=self._parallelism,
+    if not self.get_name():
+      self.set_name(self._default_stage_name_calculator("repartition", stage_names))
+    if self.get_name() in stage_names:
+      raise RuntimeError("Duplicate Names")
+    stage_names.add(self.get_name())
+    builder.add_bolt(self.get_name(), RepartitionBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs())
