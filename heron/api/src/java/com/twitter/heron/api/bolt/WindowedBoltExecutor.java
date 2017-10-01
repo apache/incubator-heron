@@ -201,7 +201,9 @@ public class WindowedBoltExecutor implements IRichBolt {
       } else {
         watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
-      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager, watermarkInterval,
+      // Use tick tuple to perodically generate watermarks
+      Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
+      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager,
           maxLagMs, getComponentStreams(context));
     } else {
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM)) {
@@ -310,8 +312,10 @@ public class WindowedBoltExecutor implements IRichBolt {
   public void execute(Tuple input) {
     if (TupleUtils.isTick(input)) {
       long currTime = System.currentTimeMillis();
-      triggerPolicy.track(new TimerEvent<>(input, currTime));
-      evictionPolicy.track(new TimerEvent<>(input, currTime));
+      windowManager.add(new TimerEvent<>(input, currTime));
+      if (isTupleTs()) {
+        waterMarkEventGenerator.run();
+      }
     } else {
       if (isTupleTs()) {
         long ts = timestampExtractor.extractTimestamp(input);
