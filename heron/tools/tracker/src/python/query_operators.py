@@ -12,11 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' query_operators.py '''
+import sys
 import math
 import tornado.httpclient
 import tornado.gen
 
 from heron.tools.tracker.src.python.metricstimeline import getMetricsTimeline
+
+isPY3 = sys.version_info >= (3, 0, 0)
+
+# helper method to support python 2 and 3
+def is_str_instance(obj):
+  if isPY3:
+    return isinstance(obj, str)
+  else:
+    return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
 
 #####################################################################
 # Data Structure for fetched Metrics
@@ -93,17 +103,17 @@ class TS(Operator):
     if len(children) != 3:
       raise Exception("TS format error, expects 3 arguments")
     self.component = children[0]
-    if not isinstance(self.component, str):
+    if not is_str_instance(self.component):
       raise Exception("TS expects component name as first argument")
     # A '*' represents all instances, which is represented by empty array.
     # Otherwise, it represents a single instance
     self.instances = []
     if children[1] != "*":
-      if not isinstance(children[1], str):
+      if not is_str_instance(children[1]):
         raise Exception("Second argument of TS must be * or instance name")
       self.instances.append(children[1])
     self.metricName = children[2]
-    if not isinstance(self.metricName, str):
+    if not is_str_instance(self.metricName):
       raise Exception("TS expects metric name as third argument")
 
   @tornado.gen.coroutine
@@ -168,7 +178,7 @@ class Default(Operator):
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     allMetrics = yield self.timeseries.execute(tracker, tmaster, start, end)
-    if isinstance(allMetrics, str):
+    if is_str_instance(allMetrics):
       raise Exception(allMetrics)
     for metric in allMetrics:
       metric.setDefault(self.constant, start, end)
@@ -202,7 +212,7 @@ class Sum(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, str):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
@@ -246,7 +256,7 @@ class Max(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, str):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
@@ -296,7 +306,7 @@ class Percentile(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, str):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
