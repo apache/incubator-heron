@@ -29,8 +29,10 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.utils.TupleUtils;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
+import com.twitter.heron.api.windowing.TimerEvent;
 import com.twitter.heron.api.windowing.TimestampExtractor;
 import com.twitter.heron.api.windowing.TriggerPolicy;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
@@ -199,7 +201,9 @@ public class WindowedBoltExecutor implements IRichBolt {
       } else {
         watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
-      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager, watermarkInterval,
+      // Use tick tuple to perodically generate watermarks
+      Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
+      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager,
           maxLagMs, getComponentStreams(context));
     } else {
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM)) {
@@ -212,7 +216,7 @@ public class WindowedBoltExecutor implements IRichBolt {
         slidingIntervalDurationMs);
     evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
     triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
-        evictionPolicy);
+        evictionPolicy, topoConf);
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
     return manager;
@@ -245,7 +249,7 @@ public class WindowedBoltExecutor implements IRichBolt {
   @SuppressWarnings("HiddenField")
   private TriggerPolicy<Tuple> getTriggerPolicy(Count slidingIntervalCount, Long
       slidingIntervalDurationMs, WindowManager<Tuple> manager, EvictionPolicy<Tuple>
-      evictionPolicy) {
+      evictionPolicy, Map<String, Object> topoConf) {
     if (slidingIntervalCount != null) {
       if (isTupleTs()) {
         return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value, manager,
@@ -258,6 +262,8 @@ public class WindowedBoltExecutor implements IRichBolt {
         return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
             evictionPolicy, manager);
       } else {
+        // set tick tuple frequency in milliseconds for timer in TimeTriggerPolicy
+        Config.setTickTupleFrequencyMs(topoConf, slidingIntervalDurationMs);
         return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager, evictionPolicy);
       }
     }
@@ -304,22 +310,30 @@ public class WindowedBoltExecutor implements IRichBolt {
 
   @Override
   public void execute(Tuple input) {
-    if (isTupleTs()) {
-      long ts = timestampExtractor.extractTimestamp(input);
-      if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
-        windowManager.add(input, ts);
-      } else {
-        if (lateTupleStream != null) {
-          windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
-        } else {
-          LOG.info(String.format(
-              "Received a late tuple %s with ts %d. This will not be " + "processed"
-                  + ".", input, ts));
-        }
-        windowedOutputCollector.ack(input);
+    if (TupleUtils.isTick(input)) {
+      long currTime = System.currentTimeMillis();
+      windowManager.add(new TimerEvent<>(input, currTime));
+      if (isTupleTs()) {
+        waterMarkEventGenerator.run();
       }
     } else {
-      windowManager.add(input);
+      if (isTupleTs()) {
+        long ts = timestampExtractor.extractTimestamp(input);
+        if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
+          windowManager.add(input, ts);
+        } else {
+          if (lateTupleStream != null) {
+            windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
+          } else {
+            LOG.info(String.format(
+                "Received a late tuple %s with ts %d. This will not be " + "processed"
+                    + ".", input, ts));
+          }
+          windowedOutputCollector.ack(input);
+        }
+      } else {
+        windowManager.add(input);
+      }
     }
   }
 

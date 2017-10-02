@@ -45,7 +45,7 @@ public class CountTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public void track(Event<T> event) {
-    if (started && !event.isWatermark()) {
+    if (started && !event.isWatermark() && !event.isTimer()) {
       if (currentCount.incrementAndGet() >= count) {
         evictionPolicy.setContext(new DefaultEvictionContext(System.currentTimeMillis()));
         handler.onTrigger();

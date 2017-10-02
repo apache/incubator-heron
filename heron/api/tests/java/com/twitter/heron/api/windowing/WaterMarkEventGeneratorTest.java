@@ -48,7 +48,7 @@ public class WaterMarkEventGeneratorTest {
       }
     };
     // set watermark interval to a high value and trigger manually to fix timing issues
-    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 100000, 5, Collections
+    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5, Collections
         .singleton(streamId("s1")));
     waterMarkEventGenerator.start();
   }
@@ -77,7 +77,8 @@ public class WaterMarkEventGeneratorTest {
     Set<TopologyAPI.StreamId> streams = new HashSet<>();
     streams.add(streamId("s1"));
     streams.add(streamId("s2"));
-    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 100000, 5, streams);
+    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5, streams);
+    waterMarkEventGenerator.start();
 
     waterMarkEventGenerator.track(streamId("s1"), 100);
     waterMarkEventGenerator.track(streamId("s1"), 110);
