@@ -50,7 +50,8 @@ public class MetricsCache {
                       WakeableLooper looper) {
     // metadata
     metricNameType = new MetricsFilter();
-    Map<String, Object> sinksTMaster = sinksConfig.getConfigForSink(METRICS_SINKS_METRICSCACHE_SINK);
+    Map<String, Object> sinksTMaster =
+        sinksConfig.getConfigForSink(METRICS_SINKS_METRICSCACHE_SINK);
     @SuppressWarnings("unchecked")
     Map<String, String> metricsTypes =
         (Map<String, String>) sinksTMaster.get(METRICS_SINKS_METRICSCACHE_METRICS);

@@ -30,10 +30,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
 
 
 /**
