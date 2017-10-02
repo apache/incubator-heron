@@ -208,7 +208,7 @@ public class PhysicalPlanHelper {
 
   private void addConfigsToMap(TopologyAPI.Config config, Map<String, Object> map) {
     for (TopologyAPI.Config.KeyValue kv : config.getKvsList()) {
-      if (kv.getValue() != null) {
+      if (!kv.getValue().isEmpty()) {
         map.put(kv.getKey(), kv.getValue());
       } else {
         map.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
