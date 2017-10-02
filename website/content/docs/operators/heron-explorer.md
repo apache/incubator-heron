@@ -2,7 +2,10 @@
 title: Heron Explorer
 ---
 
-The **Heron Explorer** is a CLI tool that you can use to
+The **Heron Explorer** is a CLI tool that you can use to gain insight into a Heron installation, including information about:
+
+* which clusters are currently running in the installation
+* 
 
 > #### The Heron Explorer vs. Heron CLI
 > There are two important differences between the Heron Explorer and [Heron CLI](../heron-cli): unlike Heron CLI, the Heron Explorer (a) requires the [Heron Tracker](../heron-tracker) and (b) performs read-only, observation-oriented commands (rather than actions like submitting, activating, and killing topologies).
@@ -19,6 +22,6 @@ $ heron-tracker
 
 Command | Action | Arguments
 :-------|:-------|:---------
-`clusters` | List all currently available Heron clusters |
+`clusters` | List all currently available Heron clusters | None
 `components` | Display information about a topology's components | `[cluster]/[role]/[env] [topology-name] [options]`
 `metrics` | Display metrics for a topology | `[cluster]/[role]/[env] [topology-name] [options]`
