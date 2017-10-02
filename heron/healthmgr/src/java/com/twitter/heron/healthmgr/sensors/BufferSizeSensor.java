@@ -98,13 +98,10 @@ public class BufferSizeSensor extends BaseSensor {
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
         InstanceMetrics iMetrics = streamManagerResult.values().iterator().next();
-        System.out.println("check null " + iMetrics);
         Double stmgrInstanceResult = iMetrics.getMetricValueSum(metric);
         if (stmgrInstanceResult == null) {
           continue;
         }
-//        double stmgrInstanceResult =
-//            streamManagerResult.values().iterator().next().getMetricValueSum(metric);
 
         InstanceMetrics boltInstanceMetric =
             new InstanceMetrics(boltInstanceName, getMetricName(), stmgrInstanceResult);

@@ -75,7 +75,6 @@ public class PackingPlanProvider implements Provider<PackingPlan>, EventHandler<
         boltInstanceNames.add(name);
       }
     }
-    LOG.info(boltInstanceNames.toString());
     return boltInstanceNames.toArray(new String[boltInstanceNames.size()]);
   }
 
