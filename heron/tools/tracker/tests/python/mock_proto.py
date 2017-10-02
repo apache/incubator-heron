@@ -1,5 +1,5 @@
 ''' mock_proto.py '''
-from heron.api.src.python import api_constants
+from heronpy.api import api_constants
 import heron.proto.execution_state_pb2 as protoEState
 import heron.proto.physical_plan_pb2 as protoPPlan
 import heron.proto.tmaster_pb2 as protoTmaster

@@ -54,7 +54,7 @@ class PexLoaderTest(unittest.TestCase):
 
   def test_sample(self):
     path = self.get_path_of_sample(constants.SAMPLE_PEX)
-    print path
+    print(path)
     pex_loader.load_pex(path)
     cls = pex_loader.import_and_get_class(path, constants.SAMPLE_PEX_CLASSPATH)
     self.assertIsNotNone(cls)

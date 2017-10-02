@@ -790,6 +790,7 @@ class HeronQueryHandler(QueryHandler):
 
     raise tornado.gen.Return(result)
 
+  # pylint: disable=unused-argument
   @tornado.gen.coroutine
   def fetch_backpressure(self, cluster, metric, topology, component, instance, \
     timerange, is_max, environ=None):

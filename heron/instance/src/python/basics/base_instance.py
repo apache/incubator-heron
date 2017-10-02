@@ -17,18 +17,19 @@ import logging
 import traceback
 from abc import abstractmethod
 
-import heron.api.src.python.global_metrics as global_metrics
-import heron.api.src.python.api_constants as api_constants
-from heron.api.src.python.state.stateful_component import StatefulComponent
+import heronpy.api.global_metrics as global_metrics
+import heronpy.api.api_constants as api_constants
+from heronpy.api.state.stateful_component import StatefulComponent
 
-from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
-from heron.common.src.python.utils.misc import SerializerHelper
-from heron.common.src.python.utils.misc import OutgoingTupleHelper
+
 from heron.proto import tuple_pb2
 
-import heron.common.src.python.system_constants as system_constants
+from heron.instance.src.python.utils.misc import SerializerHelper
+from heron.instance.src.python.utils.misc import OutgoingTupleHelper
+from heron.instance.src.python.utils import system_config
 
+import heron.instance.src.python.utils.system_constants as system_constants
 import heron.common.src.python.pex_loader as pex_loader
 
 # pylint: disable=too-many-instance-attributes
@@ -58,7 +59,7 @@ class BaseInstance(object):
     context = pplan_helper.context
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
-    self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    self.is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE)
     self._stateful_state = None
     self.serializer = SerializerHelper.get_serializer(pplan_helper.context)
     self._initialized_global_metrics = False
@@ -120,7 +121,7 @@ class BaseInstance(object):
     except Exception as e:
       spbl = "spout" if is_spout else "bolt"
       self.logger.error(traceback.format_exc())
-      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, e.message))
+      raise RuntimeError("Error when loading a %s from pex: %s" % (spbl, str(e)))
     return spbl_class
 
   def handle_initiate_stateful_checkpoint(self, ckptmsg, component):

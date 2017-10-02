@@ -63,6 +63,10 @@ article.hn-docs-content {
     border-left: .5rem solid $heron-blue-green;
     background-color: lighten($light-gray, 22%);
 
+    h2, h3, h4 {
+      margin: .25rem 0 1.25rem 0;
+    }
+
     h4 {
       font-size: $base-font-size * 1.5;
 
@@ -80,16 +84,22 @@ article.hn-docs-content {
     }
   }
 
+  table, td, th {
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px 20px 10px 5px;
+    line-height: 1.4;
+  }
+
   table {
     margin: $base-margin 0;
+    table-layout: initial;
 
     thead {
       font-size: $base-font-size * 1.1;
       border-bottom: 1px solid black;
-
-      tr th {
-        padding-right: 5%;
-      }
     }
 
     tbody {
@@ -97,8 +107,6 @@ article.hn-docs-content {
         border-bottom: 1px solid $light-gray;
 
         td {
-          padding: 1.5% 7.5% 1.5% 0;
-
           code {
             font-size: $base-font-size;
           }

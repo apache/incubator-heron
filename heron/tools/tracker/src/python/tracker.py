@@ -13,6 +13,8 @@
 # limitations under the License.
 ''' tracker.py '''
 import json
+import sys
+import traceback
 
 from functools import partial
 
@@ -54,6 +56,13 @@ class Tracker(object):
     Sync the topologies with the statemgrs.
     """
     self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
+    try:
+      for state_manager in self.state_managers:
+        state_manager.start()
+    except Exception as ex:
+      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      traceback.print_exc()
+      sys.exit(1)
 
     # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
@@ -90,10 +99,10 @@ class Tracker(object):
     an optional role.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = filter(lambda t: t.name == topologyName
-                        and t.cluster == cluster
-                        and (not role or t.execution_state.role == role)
-                        and t.environ == environ, self.topologies)
+    topologies = list(filter(lambda t: t.name == topologyName
+                             and t.cluster == cluster
+                             and (not role or t.execution_state.role == role)
+                             and t.environ == environ, self.topologies))
     if not topologies or len(topologies) > 1:
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(

@@ -26,15 +26,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
-class Extractor {
+final class Extractor {
 
-  private static final Extractor INSTANCE = new Extractor();
-
-  static Extractor of() {
-    return INSTANCE;
-  }
-
-  public void extract(InputStream in, Path destination) throws IOException {
+  static void extract(InputStream in, Path destination) throws IOException {
     try (
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
         final GzipCompressorInputStream gzipInputStream =
@@ -57,8 +51,6 @@ class Extractor {
     }
   }
 
-  // because we remove `final` from this class for being able to do mock unit test,
-  // make it non private to pass `FinalClass` check.
-  Extractor() {
+  private Extractor() {
   }
 }

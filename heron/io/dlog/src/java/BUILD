@@ -7,6 +7,20 @@ dlog_deps = [
 
 java_library(
   name = 'dlog-lib',
-  srcs = glob(["**/dlog/*.java"]),
+  srcs = glob(["**/dlog/DL*.java"]),
   deps = dlog_deps,
+)
+
+java_binary(
+  name = "dlog-util-unshaded",
+  srcs = glob(["**/dlog/*.java"]),
+  main_class = "com.twitter.heron.dlog.Util",
+  deps = dlog_deps + ["//heron/common/src/java:basics-java"]
+)
+
+genrule(
+  name = "dlog-util",
+  srcs = [":dlog-util-unshaded_deploy.jar"],
+  outs = ["dlog-util.jar"],
+  cmd  = "cp $< $@",
 )

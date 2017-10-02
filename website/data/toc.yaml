@@ -9,6 +9,8 @@ sections:
         url: /docs/getting-started-troubleshooting
   - name: Topology Writers
     sublinks:
+      - name: The Heron Functional API for Java
+        url: /docs/developers/java/functional-api
       - name: Java Topologies
         url: /docs/developers/java/topologies
       - name: Python Topologies
@@ -41,6 +43,8 @@ sections:
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
+      - name: Heron Delivery Semantics
+        url: /docs/concepts/delivery-semantics
   - name: Deployment
     sublinks:
       - name: Overview

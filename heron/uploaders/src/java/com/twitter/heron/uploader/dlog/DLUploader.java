@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.distributedlog.AppendOnlyStreamWriter;
@@ -111,7 +112,7 @@ public class DLUploader implements IUploader {
     int numReplicas = DLContext.dlTopologiesNumReplicas(upConfig);
 
     DistributedLogConfiguration conf = new DistributedLogConfiguration()
-
+        .setWriteLockEnabled(false)
         .setOutputBufferSize(256 * 1024)                  // 256k
         .setPeriodicFlushFrequencyMilliSeconds(0)         // disable periodical flush
         .setImmediateFlushEnabled(false)                  // disable immediate flush
@@ -152,6 +153,10 @@ public class DLUploader implements IUploader {
     try {
       return doUploadPackage();
     } catch (IOException ioe) {
+      LOG.log(
+          Level.SEVERE,
+          "Encountered exceptions on uploading the package '" + packageName + "'",
+          ioe);
       throw new UploaderException("Encountered exceptions on uploading the package '"
           + packageName + "'", ioe);
     }

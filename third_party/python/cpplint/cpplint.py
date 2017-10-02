@@ -6245,8 +6245,18 @@ def ProcessFile(filename, vlevel, extra_check_functions=None):
   # When reading from stdin, the extension is unknown, so no cpplint tests
   # should rely on the extension.
   if filename != '-' and file_extension not in GetAllExtensions():
-    _cpplint_state.PrintError('Ignoring %s; not a valid file name '
-                     '(%s)\n' % (filename, ', '.join(GetAllExtensions())))
+    # bazel 0.5.1> uses four distinct generated files that gives a warning
+    # we suppress the warning for these files
+    bazel_gen_files = set([ 
+        "external/local_config_cc/libtool",
+        "external/local_config_cc/make_hashed_objlist.py", 
+        "external/local_config_cc/wrapped_ar",
+        "external/local_config_cc/wrapped_clang",
+        "external/local_config_cc/xcrunwrapper.sh",
+    ])
+    if not filename in bazel_gen_files:
+       _cpplint_state.PrintError('Ignoring %s; not a valid file name '
+                                 '(%s)\n' % (filename, ', '.join(GetAllExtensions())))
   else:
     ProcessFileData(filename, file_extension, lines, Error,
                     extra_check_functions)

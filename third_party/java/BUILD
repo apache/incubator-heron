@@ -101,7 +101,7 @@ java_library(
 
 # This version is needed for dependents that don't want
 # kryo to be included in the generated binary
-# (e.g. //heron/storm/src/java:heron-storm)
+# (e.g. //storm-compatibility/src/java:heron-storm)
 java_library(
     name = "kryo-neverlink",
     srcs = [ "Empty.java" ],
@@ -317,5 +317,9 @@ java_library(
         "@org_apache_distributedlog_core//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
+        "@commons_collections_commons_collections//jar",
+        "@commons_configuration_commons_configuration//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_logging_commons_logging//jar",
     ],
 )

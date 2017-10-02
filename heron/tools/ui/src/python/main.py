@@ -14,6 +14,7 @@
 
 # !/usr/bin/env python2.7
 ''' main.py '''
+from __future__ import print_function
 import logging
 import os
 import signal
@@ -179,7 +180,7 @@ def main():
   # stop Tornado IO loop
   def signal_handler(signum, frame):
     # start a new line after ^C character because this looks nice
-    print '\n',
+    print('\n', end='')
     Log.debug('SIGINT received. Stopping UI')
     tornado.ioloop.IOLoop.instance().stop()
 
