@@ -369,26 +369,13 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Setup the working directory:
-   * <br> 1. Download heron core and the topology packages into topology working directory,
-   * <br> 2. Extract heron core and the topology packages
-   * <br> 3. Remove the downloaded heron core and the topology packages
+   * Setup the working directory: Create the directory if it does not exist
+   * otherwise clean the directory.
    *
    * @param workingDirectory the working directory to setup
-   * @param coreReleasePackageURL the URL of core release package
-   * @param coreReleaseDestination the destination of the core release package fetched
-   * @param topologyPackageURL the URL of heron topology release package
-   * @param topologyPackageDestination the destination of heron topology release package fetched
-   * @param isVerbose display verbose output or not
    * @return true if successful
    */
-  public static boolean setupWorkingDirectory(
-      String workingDirectory,
-      String coreReleasePackageURL,
-      String coreReleaseDestination,
-      String topologyPackageURL,
-      String topologyPackageDestination,
-      boolean isVerbose) {
+  public static boolean setupWorkingDirectory(String workingDirectory) {
     // if the working directory does not exist, create it.
     if (!FileUtils.isDirectoryExists(workingDirectory)) {
       LOG.fine("The working directory does not exist; creating it.");
@@ -404,16 +391,13 @@ public final class SchedulerUtils {
       return false;
     }
 
-    // Curl and extract heron core release package and topology package
-    // And then delete the downloaded release package
-    boolean ret =
-        curlAndExtractPackage(
-            workingDirectory, coreReleasePackageURL, coreReleaseDestination, true, isVerbose)
-            &&
-            curlAndExtractPackage(
-                workingDirectory, topologyPackageURL, topologyPackageDestination, true, isVerbose);
+    return true;
+  }
 
-    return ret;
+  public static boolean extractPackage(String workingDirectory, String packageURI,
+        String packageDestination, boolean deletePackage, boolean verbose) {
+    return curlAndExtractPackage(workingDirectory, packageURI, packageDestination,
+        deletePackage, verbose);
   }
 
   /**

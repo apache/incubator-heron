@@ -92,12 +92,17 @@ public class SlurmLauncher implements ILauncher {
     String topologyPackageDestination = Paths.get(
         topologyWorkingDirectory, "topology.tar.gz").toString();
 
-    return SchedulerUtils.setupWorkingDirectory(
-        topologyWorkingDirectory,
-        coreReleasePackageURI,
-        coreReleaseFileDestination,
-        topologyPackageURI,
-        topologyPackageDestination,
-        Context.verbose(config));
+    if (!SchedulerUtils.setupWorkingDirectory(topologyWorkingDirectory)) {
+      return false;
+    }
+
+    final boolean isVerbose = Context.verbose(config);
+    if (!SchedulerUtils.extractPackage(topologyWorkingDirectory, coreReleasePackageURI,
+        coreReleaseFileDestination, true, isVerbose)) {
+      return false;
+    }
+
+    return SchedulerUtils.extractPackage(topologyWorkingDirectory, topologyPackageURI,
+        topologyPackageDestination, true, isVerbose);
   }
 }
