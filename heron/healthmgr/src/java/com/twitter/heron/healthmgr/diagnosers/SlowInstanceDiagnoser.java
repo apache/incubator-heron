@@ -45,7 +45,9 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
         || !processingRateSkewComponents.isEmpty()) {
       // Since there is no back pressure or disparate wait count or similar
       // execution count, no action is needed
-      LOG.info("no back pressure or disparate wait count or similar execution count");
+      LOG.info("no back pressure " + bpSymptoms.isEmpty());
+      LOG.info("no disparate wait count " + waitQDisparityComponents.isEmpty());
+      LOG.info("no similar execution count " + !processingRateSkewComponents.isEmpty());
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
