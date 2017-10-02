@@ -256,6 +256,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    */
   @SuppressWarnings("unchecked")
   public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
+    System.out.println("registering metrics: " + name);
     MetricDelegate d = new MetricDelegate(metric);
     delegate.registerMetric(name, d, timeBucketSizeInSecs);
     return metric;
