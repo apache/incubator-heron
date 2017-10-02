@@ -142,7 +142,7 @@ public class KubernetesController {
       try {
         deployContainer(appConf);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Problem deploying container with config: " + appConf, ioe);
+        LOG.log(Level.SEVERE, "Problem deploying container with config: " + appConf);
         return false;
       }
     }
