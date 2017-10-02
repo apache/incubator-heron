@@ -7,7 +7,8 @@ The **Heron Explorer** is a CLI tool that you can use to gain insight into a Her
 * which clusters are currently running in the installation
 * information about a given topology's components (spouts and bolts)
 * metrics for a topology
-* 
+* the containers in which a topology is running
+* the topologies running in a given cluster, role, or environment
 
 > #### The Heron Explorer vs. Heron CLI
 > There are two important differences between the Heron Explorer and [Heron CLI](../heron-cli). Unlike Heron CLI, the Heron Explorer (a) requires the [Heron Tracker](../heron-tracker) and (b) performs read-only, observation-oriented commands (rather than commands for actions like submitting, activating, and killing topologies).
@@ -31,7 +32,9 @@ Command | Action | Arguments
 [`clusters`](#clusters) | Lists all currently available Heron clusters | None
 [`components`](#components) | Displays information about a topology's spout and bolt components, including each component's inputs and outputs (if any) and parallelism | `[cluster]/[role]/[env] [topology-name] [options]`
 [`metrics`](#metrics) | Displays metrics for a topology | `[cluster]/[role]/[env] [topology-name] [options]`
-[`containers`](#containers) | Displays all of the containers in which a topology is running
+[`containers`](#containers) | Displays all of the containers in which a topology is running | `[cluster]/[role]/[env] [topology-name] [options]`
+[`topologies`](#topologies) | Displays all topologies currently running in the specified cluster, cluster/role, or cluster/role/env | `[cluster]/[role]/[env] [topology-name] [options]`
+
 
 In addition to these commands, you can get help output by running `heron-explorer help` and the current version of Heron Explorer by running `heron-explorer version`.
 
