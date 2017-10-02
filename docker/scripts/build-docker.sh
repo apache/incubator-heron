@@ -24,14 +24,14 @@ setup_scratch_dir() {
     mkdir $1/artifacts
   fi
 
-  cp -R $DOCKER_DIR/dist/* $1
+  cp -R $DOCKER_DIR/dist $1/
 }
 
 run_build() {
   TARGET_PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
-  DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
+  DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron/heron:$HERON_VERSION"
   DOCKER_LATEST_TAG="heron/heron:latest"
 

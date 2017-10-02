@@ -43,6 +43,12 @@ public class PrometheusSink extends AbstractWebSink {
 
   private static final String DELIMITER = "\n";
 
+  // bolt metric
+  private static final String METRIC_EXECUTE_TIME_NS = "__execute-time-ns";
+
+  // spout metric
+  private static final String METRIC_NEXT_TUPLE_COUNT = "__next-tuple-count";
+
   // This is the cache that is used to serve the metrics
   private Cache<String, Map<String, Double>> metricsCache;
 
@@ -68,6 +74,7 @@ public class PrometheusSink extends AbstractWebSink {
       String instance = sources[2];
 
       final boolean componentIsStreamManger = component.contains("stmgr");
+      final String componentType = getComponentType(sourceMetrics);
 
       sourceMetrics.forEach((String metric, Double value) -> {
 
@@ -105,6 +112,10 @@ public class PrometheusSink extends AbstractWebSink {
             .append("component=\"").append(component).append("\",")
             .append("instance_id=\"").append(instance).append("\"");
 
+        if (componentType != null) {
+          sb.append(",component_type=\"").append(componentType).append("\"");
+        }
+
         if (metricInstanceId != null) {
           sb.append(",metric_instance_id=\"").append(metricInstanceId).append("\"");
         }
@@ -131,6 +142,7 @@ public class PrometheusSink extends AbstractWebSink {
         final Cache<String, Double> newSourceCache = createCache();
         sourceCache = newSourceCache.asMap();
       }
+
       sourceCache.putAll(processMetrics(record.getMetrics()));
       metricsCache.put(source, sourceCache);
     } else {
@@ -144,6 +156,19 @@ public class PrometheusSink extends AbstractWebSink {
 
   long currentTimeMillis() {
     return System.currentTimeMillis();
+  }
+
+  static String getComponentType(Map<String, Double> sourceMetrics) {
+    for (String metric : sourceMetrics.keySet()) {
+      if (metric.contains(METRIC_EXECUTE_TIME_NS)) {
+        return "bolt";
+      }
+    }
+
+    if (sourceMetrics.containsKey(METRIC_NEXT_TUPLE_COUNT)) {
+      return "spout";
+    }
+    return null;
   }
 
   static Map<String, Double> processMetrics(Iterable<MetricsInfo> metrics) {
