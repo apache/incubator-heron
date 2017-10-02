@@ -38,8 +38,8 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
  * see heron/tmaster/src/cpp/manager/tmetrics-collector.h
  */
 public class MetricsCache {
-  public static final String METRICS_SINKS_TMASTER_SINK = "tmaster-sink";
-  public static final String METRICS_SINKS_TMASTER_METRICS = "tmaster-metrics-type";
+  public static final String METRICS_SINKS_METRICSCACHE_SINK = "metricscache-sink";
+  public static final String METRICS_SINKS_METRICSCACHE_METRICS = "metricscache-metrics-type";
 
   private static final Logger LOG = Logger.getLogger(CacheCore.class.getName());
 
@@ -50,10 +50,10 @@ public class MetricsCache {
                       WakeableLooper looper) {
     // metadata
     metricNameType = new MetricsFilter();
-    Map<String, Object> sinksTMaster = sinksConfig.getConfigForSink(METRICS_SINKS_TMASTER_SINK);
+    Map<String, Object> sinksTMaster = sinksConfig.getConfigForSink(METRICS_SINKS_METRICSCACHE_SINK);
     @SuppressWarnings("unchecked")
     Map<String, String> metricsTypes =
-        (Map<String, String>) sinksTMaster.get(METRICS_SINKS_TMASTER_METRICS);
+        (Map<String, String>) sinksTMaster.get(METRICS_SINKS_METRICSCACHE_METRICS);
     for (String metricName : metricsTypes.keySet()) {
       metricNameType.setMetricToType(metricName, translateFromString(metricsTypes.get(metricName)));
     }
