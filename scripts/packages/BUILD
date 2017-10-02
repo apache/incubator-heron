@@ -295,8 +295,8 @@ pkg_tar(
         ":heron-client-lib-scheduler",
         ":heron-client-lib-packing",
         ":heron-client-lib-statemgr",
+        ":heron-client-lib-metricscachemgr",
         ":heron-client-lib-uploader",
-        ":heron-client-lib-healthmgr",
     ],
 )
 

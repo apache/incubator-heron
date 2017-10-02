@@ -70,6 +70,8 @@ public class MetricsFilter {
         return prefixToType.get(prefix);
       }
     }
+    System.out.println("check unknown "+metricName);
+    System.out.println("check unknown "+prefixToType.keySet());
     return MetricAggregationType.UNKNOWN;
   }
 
