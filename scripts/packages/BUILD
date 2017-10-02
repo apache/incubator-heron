@@ -8,6 +8,7 @@ load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
 load("/tools/rules/heron_client", "heron_client_lib_third_party_files")
 load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
+load("/tools/rules/heron_client", "heron_client_lib_metricscachemgr_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
 load("/tools/rules/heron_client", "heron_client_lib_uploader_files")
@@ -222,6 +223,12 @@ pkg_tar(
     name = "heron-client-lib-scheduler",
     package_dir = "lib/scheduler",
     srcs = heron_client_lib_scheduler_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-metricscachemgr",
+    package_dir = "lib/metricscachemgr",
+    srcs = heron_client_lib_metricscachemgr_files(),
 )
 
 pkg_tar(
