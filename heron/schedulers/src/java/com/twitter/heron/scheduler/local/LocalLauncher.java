@@ -136,7 +136,6 @@ public class LocalLauncher implements ILauncher {
         return false;
       }
     } else {
-      // check for heron home
       Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME), "heron-core");
       Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
       try {
@@ -144,6 +143,7 @@ public class LocalLauncher implements ILauncher {
       } catch (IOException ioe) {
         LOG.log(Level.SEVERE, "Unable to create heron core link from "
             + heronCoreLink + " to " + heronCore, ioe);
+        return false;
       }
     }
 
