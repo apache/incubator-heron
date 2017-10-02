@@ -83,7 +83,7 @@ def to_table(metrics):
   return stats, header
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run_metrics(command, parser, cl_args, unknown_args):
   """ run metrics subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
@@ -114,13 +114,13 @@ def run_metrics(command, parser, cl_args, unknown_args):
     cresult.append((comp, stat, header))
   for i, (comp, stat, header) in enumerate(cresult):
     if i != 0:
-      print ''
-    print '\'%s\' metrics:' % comp
-    print tabulate(stat, headers=header)
+      print('')
+    print('\'%s\' metrics:' % comp)
+    print(tabulate(stat, headers=header))
   return True
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run_bolts(command, parser, cl_args, unknown_args):
   """ run bolts subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
@@ -149,12 +149,12 @@ def run_bolts(command, parser, cl_args, unknown_args):
       return False
   for i, (bolt, stat, header) in enumerate(bolts_result):
     if i != 0:
-      print ''
-    print '\'%s\' metrics:' % bolt
-    print tabulate(stat, headers=header)
+      print('')
+    print('\'%s\' metrics:' % bolt)
+    print(tabulate(stat, headers=header))
   return True
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,superfluous-parens
 def run_containers(command, parser, cl_args, unknown_args):
   """ run containers subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
@@ -194,5 +194,5 @@ def run_containers(command, parser, cl_args, unknown_args):
     table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
   headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
   sys.stdout.flush()
-  print tabulate(table, headers=headers)
+  print(tabulate(table, headers=headers))
   return True

@@ -5,7 +5,7 @@ aliases:
   - /docs/install.html
 ---
 
-> The current version of Heron is **{{% heronVersion %}}**.
+> The current version of Heron is **{{% heronVersion %}}**
 
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
@@ -283,7 +283,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/heron/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.

@@ -253,6 +253,16 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Get the metricscache location for the given topology
+   *
+   * @return MetricsCacheLocation
+   */
+  public TopologyMaster.MetricsCacheLocation getMetricsCacheLocation(String topologyName) {
+    return awaitResult(delegate.getMetricsCacheLocation(null, topologyName));
+  }
+
+
+  /**
    * Get the topology definition for the given topology
    *
    * @return Topology

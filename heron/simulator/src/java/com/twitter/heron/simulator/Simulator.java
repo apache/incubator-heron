@@ -96,6 +96,12 @@ public class Simulator {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, sysConfig);
   }
 
+  /**
+   * Submit and run topology in simulator
+   * @param name topology name
+   * @param heronConfig topology config
+   * @param heronTopology topology built from topology builder
+   */
   public void submitTopology(String name, Config heronConfig, HeronTopology heronTopology) {
     TopologyAPI.Topology topologyToRun =
         heronTopology.
@@ -106,6 +112,11 @@ public class Simulator {
 
     if (!TopologyUtils.verifyTopology(topologyToRun)) {
       throw new RuntimeException("Topology object is Malformed");
+    }
+
+    // TODO (nlu): add simulator support stateful processing
+    if (isTopologyStateful(heronConfig)) {
+      throw new RuntimeException("Stateful topology is not supported");
     }
 
     PhysicalPlans.PhysicalPlan pPlan = PhysicalPlanUtil.getPhysicalPlan(topologyToRun);
@@ -237,5 +248,13 @@ public class Simulator {
       // not owned by HeronInstance). To be safe, not sending these interrupts.
       Runtime.getRuntime().halt(1);
     }
+  }
+
+  private boolean isTopologyStateful(Config heronConfig) {
+    Config.TopologyReliabilityMode mode =
+        Config.TopologyReliabilityMode.valueOf(
+            String.valueOf(heronConfig.get(Config.TOPOLOGY_RELIABILITY_MODE)));
+
+    return Config.TopologyReliabilityMode.EFFECTIVELY_ONCE.equals(mode);
   }
 }

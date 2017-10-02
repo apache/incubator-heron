@@ -142,6 +142,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   return res
 
 ################################################################################
+# pylint: disable=superfluous-parens
 def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_name):
   '''
   Launch a topology given topology jar, its definition file and configurations
@@ -181,7 +182,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
     elif ok:
       # this case happens when we request a dry_run
-      print r.json().get("response")
+      print(r.json().get("response"))
   except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
     Log.error(err)
     return SimpleResult(Status.HeronError, err_ctxt, succ_ctxt)

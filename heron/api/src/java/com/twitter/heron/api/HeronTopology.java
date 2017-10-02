@@ -52,7 +52,7 @@ public class HeronTopology {
     }
     if (!userConfig.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
       userConfig.put(Config.TOPOLOGY_RELIABILITY_MODE,
-                     String.valueOf(Config.TopologyReliabilityMode.ATLEAST_ONCE));
+                     String.valueOf(Config.TopologyReliabilityMode.ATMOST_ONCE));
     }
     if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       userConfig.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");

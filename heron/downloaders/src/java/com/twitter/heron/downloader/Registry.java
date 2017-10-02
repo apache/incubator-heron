@@ -26,6 +26,7 @@ final class Registry {
   static {
     DOWNLOADERS.put("http", HttpDownloader.class);
     DOWNLOADERS.put("https", HttpDownloader.class);
+    DOWNLOADERS.put("distributedlog", DLDownloader.class);
   }
 
   private static final Registry INSTANCE = new Registry();
@@ -38,9 +39,15 @@ final class Registry {
   }
 
   Downloader getDownloader(URI uri) throws Exception {
-    final Class<? extends Downloader> downloaderClass =
-        DOWNLOADERS.get(uri.getScheme().toLowerCase());
+    final String scheme = uri.getScheme().toLowerCase();
+    if (!DOWNLOADERS.containsKey(scheme)) {
+      throw new RuntimeException(
+          String.format("Unable to create downloader unsupported uri %s", uri.toString()));
+    }
+
     try {
+      final Class<? extends Downloader> downloaderClass = DOWNLOADERS.get(scheme);
+
       return downloaderClass.getConstructor().newInstance();
     } catch (InstantiationException | IllegalAccessException
         | InvocationTargetException | NoSuchMethodException e) {

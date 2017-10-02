@@ -46,8 +46,8 @@ class DownloadHandler(tornado.web.RequestHandler):
       self.finish()
       return
 
-    length = long(4 * 1024 * 1024)
-    offset = long(0)
+    length = int(4 * 1024 * 1024)
+    offset = int(0)
     while True:
       data = utils.read_chunk(path, offset=offset, length=length, escape_data=False)
       if self.connection_closed or 'data' not in data or len(data['data']) < length:

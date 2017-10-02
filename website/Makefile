@@ -4,16 +4,15 @@ setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/*
+	rm -rf public/* static/api static/style.css static/style*.css static/js
 
 serve:
-	@hugo serve
+	@hugo serve --buildDrafts & node_modules/.bin/gulp dev
 
 develop-static-assets:
 	@npm run develop
 
 build-static-assets:
-	@npm run clean
 	@npm run build
 
 pages:
@@ -31,13 +30,13 @@ python-docs:
 site:
 	@make clean
 	@make build-static-assets
-	@make pages
 	@make javadocs
 	@make python-docs
+	@make pages
 
 travis-site:
 	@make clean
 	@make build-static-assets
-	@make pages
 	@scripts/javadocs.sh --travis
 	@make python-docs
+	@make pages

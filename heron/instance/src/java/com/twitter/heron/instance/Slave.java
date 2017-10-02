@@ -15,13 +15,11 @@
 package com.twitter.heron.instance;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.state.HashMapState;
@@ -37,6 +35,7 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
@@ -45,7 +44,6 @@ import com.twitter.heron.proto.system.Metrics;
  * will instantiate a new instance (spout or bolt) according to the PhysicalPlanHelper in SingletonRegistry.
  * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
  */
-
 public class Slave implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Slave.class.getName());
 
@@ -61,7 +59,7 @@ public class Slave implements Runnable, AutoCloseable {
   private PhysicalPlanHelper helper;
   private SystemConfig systemConfig;
 
-  private boolean isInstanceStarted = false;
+  private boolean isInstanceStarted;
 
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
@@ -76,6 +74,8 @@ public class Slave implements Runnable, AutoCloseable {
     this.streamOutCommunicator = streamOutCommunicator;
     this.inControlQueue = inControlQueue;
     this.metricsOutCommunicator = metricsOutCommunicator;
+
+    isInstanceStarted = false;
 
     // The instance state will be provided by stream manager with RestoreInstanceStateRequests
     instanceState = null;
@@ -164,8 +164,8 @@ public class Slave implements Runnable, AutoCloseable {
           systemConfig.getInstanceTuningCurrentSampleWeight());
     }
 
-    if (!helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-      LOG.info("The instance is deployed in deactivated state");
+    if (!helper.isTopologyRunning()) {
+      LOG.info("Instance is deployed in deactivated state");
     }
 
     startInstanceIfNeeded();
@@ -184,25 +184,43 @@ public class Slave implements Runnable, AutoCloseable {
     //  2. The TopologyState == RUNNING
     //  3. - If the topology is stateful and we got the stateful processing start signal
     //     - If the topology is not stateful
-    if (helper != null && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-      Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-      boolean isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EXACTLY_ONCE)
-          .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+    if (helper == null) {
+      LOG.info("No physical plan received. Instance is not started");
+      return;
+    }
 
-      if (!isTopologyStateful || isStatefulProcessingStarted) {
-        instance.start(instanceState);
+    if (!helper.isTopologyRunning()) {
+      LOG.info("Topology is not in RUNNING state. Instance is not started");
+      return;
+    }
+
+    if (helper.isTopologyStateful()) {
+      // For stateful topology, `init(state)` will be invoked
+      // when a RestoreInstanceStateRequest is received
+      if (isStatefulProcessingStarted) {
+        instance.init(instanceState);
+        instance.start();
         isInstanceStarted = true;
-        LOG.info("Started instance.");
+        LOG.info("Instance is started for stateful topology");
+      } else {
+        LOG.info("Start signal not received. Instance is not started");
       }
+    } else {
+      // For non-stateful topology, any provided state will be ignored
+      // by the instance
+      instance.init(null);
+      instance.start();
+      isInstanceStarted = true;
+      LOG.info("Instance is started for non-stateful topology");
     }
   }
 
   public void close() {
     LOG.info("Closing the Slave Thread");
     this.metricsCollector.forceGatherAllMetrics();
-    LOG.info("Cleaning up the instance");
+    LOG.info("Shutting down the instance");
     if (instance != null) {
-      instance.stop();
+      instance.shutdown();
     }
 
     // Clean the resources we own
@@ -214,39 +232,57 @@ public class Slave implements Runnable, AutoCloseable {
   private void handleStartInstanceStatefulProcessing(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.StartInstanceStatefulProcessing startStatefulRequest =
         instanceControlMsg.getStartInstanceStatefulProcessing();
-    LOG.info("Starting stateful processing: " + startStatefulRequest.getCheckpointId());
+    LOG.info("Starting stateful processing with checkpoint id: "
+        + startStatefulRequest.getCheckpointId());
     isStatefulProcessingStarted = true;
 
-    // At this point, the pre-condition is we have already create the actual instance
-    // Check if we can start the topology
+    // At this point, the pre-condition is we have already created the actual instance
+    // and initialized it properly. Check if we can start the topology
     startInstanceIfNeeded();
+  }
+
+  private void cleanAndStopSlave() {
+    // Clear all queues
+    streamInCommunicator.clear();
+    streamOutCommunicator.clear();
+
+    // Flash out existing metrics
+    metricsCollector.forceGatherAllMetrics();
+
+    // Stop slave looper consuming data/control_msg
+    slaveLooper.clearTasksOnWakeup();
+    slaveLooper.clearTimers();
+
+    if (instance != null) {
+      instance.clean();
+    }
+
+    isStatefulProcessingStarted = false;
+  }
+
+  private void registerTasksWithSlave() {
+    // Create a new MetricsCollector with the clean slaveLooper and register its task
+    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+
+    // registering the handling of control msg
+    handleControlMessage();
+
+    // instance task will be registered when instance.start() is called
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
-    LOG.info("Restoring state to checkpoint id: " + request.getState().getCheckpointId());
-    isStatefulProcessingStarted = false;
-    // Reset the in stream queue
-    streamInCommunicator.clear();
-
-    metricsCollector.forceGatherAllMetrics();
-
-    slaveLooper.clearTasksOnWakeup();
-    slaveLooper.clearTimers();
-
-    slaveLooper.addTasksOnWakeup(this);
-    // Create a new MetricsCollector with new clean slave looper
-    metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
-
-    // Stop current working instance if there is one
-    if (instance != null) {
-      instance.stop();
+    // Clean buffers and unregister tasks in slave looper
+    if (isInstanceStarted) {
+      cleanAndStopSlave();
     }
 
     // Restore the state
+    LOG.info("Restoring state to checkpoint id: " + request.getState().getCheckpointId());
     if (instanceState != null) {
       instanceState.clear();
+      instanceState = null;
     }
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
@@ -259,8 +295,7 @@ public class Slave implements Runnable, AutoCloseable {
       LOG.info("The restore request does not have an actual state");
     }
 
-    // First time a stateful topology is launched, there's no checkpoint
-    // to restore, heron needs to provide a proper initial empty state
+    // If there's no checkpoint to restore, heron provides an empty state
     if (instanceState == null) {
       instanceState = new HashMapState<>();
     }
@@ -277,11 +312,13 @@ public class Slave implements Runnable, AutoCloseable {
       resetCurrentAssignment();
     }
 
+    registerTasksWithSlave();
+
     // Send back the response
-    LOG.info("Acknowledge back the restore instance state response");
     CheckpointManager.RestoreInstanceStateResponse response =
         CheckpointManager.RestoreInstanceStateResponse.newBuilder()
             .setCheckpointId(request.getState().getCheckpointId())
+            .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
   }

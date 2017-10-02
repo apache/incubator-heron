@@ -1,3 +1,4 @@
+syntax = "proto2";
 message EchoServerRequest {
   required string echo_request = 1;
 }
