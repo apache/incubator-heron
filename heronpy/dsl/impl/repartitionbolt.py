@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
+import inspect
+
 from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
@@ -75,6 +77,8 @@ class RepartitionStreamlet(Streamlet):
     super(RepartitionStreamlet, self).__init__()
     if not callable(repartition_function):
       raise RuntimeError("Repartition function has to be callable")
+    if len(inspect.getargspec(repartition_function)) != 2:
+      raise RuntimeError("Repartition function should take 2 arguments")
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of FlatMap Streamlet has to be a Streamlet")
     self._parent = parent

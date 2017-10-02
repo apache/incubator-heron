@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for join bolt: ReduceByKeyAndWindowBolt"""
+"""module for bolt: ReduceByWindowBolt"""
 import collections
 
 from heronpy.api.bolt.window_bolt import SlidingWindowBolt
@@ -19,12 +19,12 @@ from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet, TimeWindow
+from heronpy.dsl.streamlet import Streamlet, WindowConfig
 from heronpy.dsl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
-  """ReduceByKeyAndWindowBolt"""
+class ReduceByWindowBolt(SlidingWindowBolt, DslBoltBase):
+  """ReduceByWindowBolt"""
   FUNCTION = 'function'
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
@@ -34,8 +34,6 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
     if ReduceByKeyAndWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
     self.reduce_function = config[ReduceByKeyAndWindowBolt.FUNCTION]
-    if not callable(self.reduce_function):
-      raise RuntimeError("Reduce Function has to be callable")
 
   @staticmethod
   def _add(key, value, mymap):
@@ -74,33 +72,34 @@ class ReduceGrouping(ICustomGrouping):
     return [self.target_tasks[target_index]]
 
 # pylint: disable=protected-access
-class ReduceByKeyAndWindowStreamlet(Streamlet):
-  """ReduceByKeyAndWindowStreamlet"""
+class ReduceByWindowStreamlet(Streamlet):
+  """ReduceByWindowStreamlet"""
   def __init__(self, window_config, reduce_function, parent):
-    super(ReduceByKeyAndWindowStreamlet, self).__init__()
+    super(ReduceByWindowStreamlet, self).__init__()
     if not isinstance(window_config, WindowConfig):
-      raise RuntimeError("window config has to be a WindowConfig")
+      raise RuntimeError("window config has to be of type WindowConfig")
     if not callable(reduce_function):
-      raise RuntimeError("ReduceByKeyAndWindow function has to be callable")
+      raise RuntimeError("ReduceByWindow function has to be callable")
     if not isinstance(parent, Streamlet):
-      raise RuntimeError("Parent of Filter Streamlet has to be a Streamlet")
+      raise RuntimeError("Parent of FlatMap Streamlet has to be a Streamlet")
+    self._parent = parent
     self._window_config = window_config
     self._reduce_function = reduce_function
-    self._parent = parent
+    self.set_num_partitions(parent.get_num_partitions())
 
   def _calculate_inputs(self):
     return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
-            Grouping.custom("heronpy.dsl.reducebykeyandwindowbolt.ReduceGrouping")}
+            Grouping.custom("heronpy.dsl.impl.reducebywindowbolt.ReduceGrouping")}
 
   def _build_this(self, builder):
     if not self.get_name():
-      self.set_name(self._default_stage_name_calculator("reducebykeyandwindow", stage_names))
+      self.set_name(self._default_stage_name_calculator("reducebywindow", stage_names))
     if self.get_name() in stage_names:
       raise RuntimeError("Duplicate Names")
     stage_names.add(self.get_name())
-    builder.add_bolt(self.get_name(), ReduceByKeyAndWindowBolt, par=self.get_num_partitions(),
+    builder.add_bolt(self.get_name(), ReduceByWindowBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                             ReduceByKeyAndWindowBolt.WINDOWDURATION : self._window_config.duration,
+                             ReduceByKeyAndWindowBolt.TIMECONFIG : self._window_config.duration,
                              ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
                              self._window_config.sliding_interval})

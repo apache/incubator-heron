@@ -22,9 +22,16 @@ from heronpy.api.stream import Grouping
 from heronpy.dsl.streamlet import Streamlet, TimeWindow
 from heronpy.dsl.dslboltbase import DslBoltBase
 
+
 # pylint: disable=unused-argument
 class JoinBolt(SlidingWindowBolt, DslBoltBase):
   """JoinBolt"""
+  
+  LEFT = 1
+  INNER = 2
+  OUTER = 3
+  JOINFUNCTION = '__join_function__'
+  JOINTYPE = '__join_type__'
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
   JOINEDCOMPONENT = '__joined_component__'
@@ -46,6 +53,12 @@ class JoinBolt(SlidingWindowBolt, DslBoltBase):
     if not JoinBolt.JOINEDCOMPONENT in config:
       raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINEDCOMPONENT)
     self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
+    if not JoinBolt.JOINFUNCTION in config:
+      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINFUNCTION)
+    self._join_function = config[JoinBolt.JOINFUNCTION]
+    if not JoinBolt.JOINTYPE in config:
+      raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINTYPE)
+    self._join_type = config[JoinBolt.JOINTYPE]
 
   def processWindow(self, window_config, tuples):
     # our temporary map
@@ -56,7 +69,18 @@ class JoinBolt(SlidingWindowBolt, DslBoltBase):
         raise RuntimeError("Join tuples must be iterable of length 2")
       self._add(userdata[0], userdata[1], tup.component, mymap)
     for (key, values) in mymap.items():
-      self.emit([(key, values)], stream='output')
+      if self._join_type == JoinBolt.INNER:
+        if values[0] and values[1]:
+          self.emit_join(key, values)
+      elif self._join_type == JoinBolt.LEFT:
+        if values[0]:
+          self.emit_join(key, values)
+      elif self._join_type == JoinBolt.OUTER:
+        self.emit_join(key, values)
+
+  def emit_join(self, key, values):
+    result = self._join_function(values[0], values[1])
+    self.emit([key, result], stream='output')
 
 # pylint: disable=unused-argument
 class JoinGrouping(ICustomGrouping):
@@ -76,37 +100,41 @@ class JoinGrouping(ICustomGrouping):
 # pylint: disable=protected-access
 class JoinStreamlet(Streamlet):
   """JoinStreamlet"""
-  def __init__(self, time_window, parents, stage_name=None, parallelism=None):
-    super(JoinStreamlet, self).__init__(parents=parents,
-                                        stage_name=stage_name, parallelism=parallelism)
-    self._time_window = time_window
+  def __init__(self, join_type, window_config, join_function, left, right):
+    super(JoinStreamlet, self).__init__()
+    if not join_type in [JoinBolt.INNER, JoinBolt.OUTER, JoinBolt.LEFT]:
+      raise RuntimeError("join type has to be of one of inner, outer, left")
+    if not isinstance(window_config, WindowConfig):
+      raise RuntimeError("window config has to be of type WindowConfig")
+    if not callable(join_function):
+      raise RuntimeError("Join function has to be callable")
+    if not isinstance(left, Streamlet):
+      raise RuntimeError("Parent of Join has to be a Streamlet")
+    if not isinstance(right, Streamlet):
+      raise RuntimeError("Parent of Join has to be a Streamlet")
+    self._join_type = join_type
+    self._window_config = window_config
+    self._join_function = join_function
+    self._left = left
+    self._right = right
+    self.set_num_partitions(left.get_num_partitions())
 
   def _calculate_inputs(self):
-    inputs = {}
-    for parent in self._parents:
-      inputs[GlobalStreamId(parent._stage_name, parent._output)] = \
-             Grouping.custom("heronpy.dsl.joinbolt.JoinGrouping")
-    return inputs
+    return {GlobalStreamId(self._left.get_name(), self._left._output) :
+            Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping"),
+            GlobalStreamId(self._right.get_name(), self._right._output) : 
+            Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping")}
 
-  def _calculate_stage_name(self, existing_stage_names):
-    stage_name = self._parents[0]._stage_name
-    for stage in self._parents[1:]:
-      stage_name = stage_name + '.join.' + stage._stage_name
-    if stage_name not in existing_stage_names:
-      return stage_name
-    else:
-      index = 1
-      tmp_name = stage_name + str(index)
-      while tmp_name in existing_stage_names:
-        index = index + 1
-        tmp_name = stage_name + str(index)
-      return tmp_name
-
-  def _build_this(self, builder):
-    if not isinstance(self._time_window, TimeWindow):
-      raise RuntimeError("Join's time_window should be TimeWindow")
-    builder.add_bolt(self._stage_name, JoinBolt, par=self._parallelism,
+  def _build_this(self, builder, stage_names):
+    if not self.get_name():
+      self.set_name(self._default_stage_name_calculator("join", stage_names))
+    if self.get_name() in stage_names:
+      raise RuntimeError("Duplicate Names")
+    stage_names.add(self.get_name())
+    builder.add_bolt(self.get_name(), JoinBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
-                     config={JoinBolt.WINDOWDURATION : self._time_window.duration,
-                             JoinBolt.SLIDEINTERVAL : self._time_window.sliding_interval,
-                             JoinBolt.JOINEDCOMPONENT : self._parent[1]._stage_name})
+                     config={JoinBolt.WINDOWDURATION : self._window_config.duration,
+                             JoinBolt.SLIDEINTERVAL : self._window_config.sliding_interval,
+                             JoinBolt.JOINEDCOMPONENT : self._right.get_name(),
+                             JoinBolt.JOINFUNCTION : self._join_function,
+                             JoinBolt.JOINTYPE : self._join_type})

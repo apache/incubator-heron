@@ -112,28 +112,28 @@ class Streamlet(object):
       reduce_function takes two element at one time and reduces them to one element that
       is used in the subsequent operations.
     """
-    from heronpy.dsl.impl.reducebywindowbolt import ReduceByWindowBolt
-    reduce_streamlet = ReduceByWindowBolt(window_config, reduce_function, self)
+    from heronpy.dsl.impl.reducebywindowbolt import ReduceByWindowStreamlet
+    reduce_streamlet = ReduceByWindowStreamlet(window_config, reduce_function, self)
     self._add_child(reduce_streamlet)
     return reduce_streamlet
 
   def union(self, other_streamlet):
     """Returns a new Streamlet that consists of elements of both this and other_streamlet
     """
-    from heronpy.dsl.impl.unionbolt import UnionBolt
-    union_streamlet = UnionBolt(self, other_streamlet)
+    from heronpy.dsl.impl.unionbolt import UnionStreamlet
+    union_streamlet = UnionStreamlet(self, self, other_streamlet)
     self._add_child(union_streamlet)
     other_streamlet._add_child(union_streamlet)
     return union_streamlet
 
-  def transform(self, transform_function):
-    """Returns a  new Streamlet by applying the transform_function on each element of this
-    streamlet. The transform_function is of the type TransformFunction.
-    Before starting to cycle over the Streamlet, the open function of the transform_function is
-    called. This allows the transform_function to do any kind of initialization/loading, etc.
+  def transform(self, transform_operator):
+    """Returns a  new Streamlet by applying the transform_operator on each element of this
+    streamlet. The transform_function is of the type TransformOperator.
+    Before starting to cycle over the Streamlet, the open function of the transform_operator is
+    called. This allows the transform_operator to do any kind of initialization/loading, etc.
     """
     from heronpy.dsl.impl.transformbolt import TransformStreamlet
-    transform_streamlet = TransformStreamlet(transform_function, self)
+    transform_streamlet = TransformStreamlet(transform_operator, self)
     self._add_child(transform_streamlet)
     return transform_streamlet
 
@@ -156,8 +156,8 @@ class Streamlet(object):
   def join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet
-    join_streamlet = JoinStreamlet(JoinStreamlet.INNER, window_config,
+    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    join_streamlet = JoinStreamlet(JoinBolt.INNER, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
     join_streamlet._add_child(join_streamlet)
@@ -166,8 +166,8 @@ class Streamlet(object):
   def outer_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by outer joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet
-    join_streamlet = JoinStreamlet(JoinStreamlet.OUTER, window_config,
+    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    join_streamlet = JoinStreamlet(JoinBolt.OUTER, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
     join_streamlet._add_child(join_streamlet)
@@ -176,8 +176,8 @@ class Streamlet(object):
   def left_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by left joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet
-    join_streamlet = JoinStreamlet(JoinStreamlet.LEFT, window_config,
+    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    join_streamlet = JoinStreamlet(JoinBolt.LEFT, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
     join_streamlet._add_child(join_streamlet)
