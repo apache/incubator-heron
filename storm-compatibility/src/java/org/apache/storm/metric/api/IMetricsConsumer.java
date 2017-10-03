@@ -89,7 +89,7 @@ public interface IMetricsConsumer {
   }
 
   @SuppressWarnings("rawtypes")
-  void prepare(Map stormConf, Object registrationArgument,
+  void prepare(Map<String, Object> stormConf, Object registrationArgument,
                TopologyContext context, IErrorReporter errorReporter);
 
   void handleDataPoints(TaskInfo taskInfo, Collection<DataPoint> dataPoints);
