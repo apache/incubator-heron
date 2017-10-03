@@ -13,6 +13,7 @@ taxonomies:
 # Pygments syntax highlighting
 pygmentsuseclasses: true
 pygmentscodefences: true
+pygmentsUseClassic: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
