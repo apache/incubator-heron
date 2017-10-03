@@ -27,44 +27,47 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   //The current lat and count buckets are protected by a different lock
   // from the other buckets.  This is to reduce the lock contention
   // When doing complex calculations.  Never grab the instance object lock
-  // while holding _currentLock to avoid deadlocks
-  private final Object _currentLock = new byte[0];
-  private long _currentLatBucket;
-  private long _currentCountBucket;
+  // while holding currentLock to avoid deadlocks
+  private final Object currentLock = new byte[0];
+  private long currentLatBucket;
+  private long currentCountBucket;
 
   // All internal state except for the current buckets are
   // protected using the Object Lock
-  private long _bucketStart;
+  private long bucketStart;
 
   //exact variable time, that is added to the current bucket
-  private long _exactExtraLat;
-  private long _exactExtraCount;
+  private long exactExtraLat;
+  private long exactExtraCount;
 
   //10 min values
-  private final int _tmSize;
-  private final long[] _tmLatBuckets;
-  private final long[] _tmCountBuckets;
-  private final long[] _tmTime;
+  private final int tmSize;
+  private final long[] tmLatBuckets;
+  private final long[] tmCountBuckets;
+  private final long[] tmTime;
 
   //3 hour values
-  private final int _thSize;
-  private final long[] _thLatBuckets;
-  private final long[] _thCountBuckets;
-  private final long[] _thTime;
+  private final int thSize;
+  private final long[] thLatBuckets;
+  private final long[] thCountBuckets;
+  private final long[] thTime;
 
   //1 day values
-  private final int _odSize;
-  private final long[] _odLatBuckets;
-  private final long[] _odCountBuckets;
-  private final long[] _odTime;
+  private final int odSize;
+  private final long[] odLatBuckets;
+  private final long[] odCountBuckets;
+  private final long[] odTime;
 
   //all time
-  private long _allTimeLat;
-  private long _allTimeCount;
+  private long allTimeLat;
+  private long allTimeCount;
 
-  private final TimerTask _task;
+  private final TimerTask task;
 
   /**
+   *
+   * Constructor
+   *
    * @param numBuckets the number of buckets to divide the time periods into.
    */
   public LatencyStatAndMetric(int numBuckets) {
@@ -78,37 +81,37 @@ public class LatencyStatAndMetric implements IMetric<Double> {
    * @param startTime if positive the simulated time to start the from.
    */
   LatencyStatAndMetric(int numBuckets, long startTime) {
-    numBuckets = Math.max(numBuckets, 2);
+    int numBucketsCorrected = Math.max(numBuckets, 2);
     //We want to capture the full time range, so the target size is as
     // if we had one bucket less, then we do
-    _tmSize = 10 * 60 * 1000 / (numBuckets - 1);
-    _thSize = 3 * 60 * 60 * 1000 / (numBuckets - 1);
-    _odSize = 24 * 60 * 60 * 1000 / (numBuckets - 1);
-    if (_tmSize < 1 || _thSize < 1 || _odSize < 1) {
+    tmSize = 10 * 60 * 1000 / (numBucketsCorrected - 1);
+    thSize = 3 * 60 * 60 * 1000 / (numBucketsCorrected - 1);
+    odSize = 24 * 60 * 60 * 1000 / (numBucketsCorrected - 1);
+    if (tmSize < 1 || thSize < 1 || odSize < 1) {
       throw new IllegalArgumentException("number of buckets is too large to be supported");
     }
-    _tmLatBuckets = new long[numBuckets];
-    _tmCountBuckets = new long[numBuckets];
-    _tmTime = new long[numBuckets];
-    _thLatBuckets = new long[numBuckets];
-    _thCountBuckets = new long[numBuckets];
-    _thTime = new long[numBuckets];
-    _odLatBuckets = new long[numBuckets];
-    _odCountBuckets = new long[numBuckets];
-    _odTime = new long[numBuckets];
-    _allTimeLat = 0;
-    _allTimeCount = 0;
-    _exactExtraLat = 0;
-    _exactExtraCount = 0;
+    tmLatBuckets = new long[numBucketsCorrected];
+    tmCountBuckets = new long[numBucketsCorrected];
+    tmTime = new long[numBucketsCorrected];
+    thLatBuckets = new long[numBucketsCorrected];
+    thCountBuckets = new long[numBucketsCorrected];
+    thTime = new long[numBucketsCorrected];
+    odLatBuckets = new long[numBucketsCorrected];
+    odCountBuckets = new long[numBucketsCorrected];
+    odTime = new long[numBucketsCorrected];
+    allTimeLat = 0;
+    allTimeCount = 0;
+    exactExtraLat = 0;
+    exactExtraCount = 0;
 
-    _bucketStart = startTime >= 0 ? startTime : System.currentTimeMillis();
-    _currentLatBucket = 0;
-    _currentCountBucket = 0;
+    bucketStart = startTime >= 0 ? startTime : System.currentTimeMillis();
+    currentLatBucket = 0;
+    currentCountBucket = 0;
     if (startTime < 0) {
-      _task = new Fresher();
-      MetricStatTimer._timer.scheduleAtFixedRate(_task, _tmSize, _tmSize);
+      task = new Fresher();
+      MetricStatTimer.timer.scheduleAtFixedRate(task, tmSize, tmSize);
     } else {
-      _task = null;
+      task = null;
     }
   }
 
@@ -118,9 +121,9 @@ public class LatencyStatAndMetric implements IMetric<Double> {
    * @param latency what we are recording
    */
   public void record(long latency) {
-    synchronized (_currentLock) {
-      _currentLatBucket += latency;
-      _currentCountBucket++;
+    synchronized (currentLock) {
+      currentLatBucket += latency;
+      currentCountBucket++;
     }
   }
 
@@ -132,20 +135,20 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   synchronized Double getValueAndReset(long now) {
     long lat;
     long count;
-    synchronized (_currentLock) {
-      lat = _currentLatBucket;
-      count = _currentCountBucket;
-      _currentLatBucket = 0;
-      _currentCountBucket = 0;
+    synchronized (currentLock) {
+      lat = currentLatBucket;
+      count = currentCountBucket;
+      currentLatBucket = 0;
+      currentCountBucket = 0;
     }
 
-    long timeSpent = now - _bucketStart;
-    long exactExtraCountSum = count + _exactExtraCount;
+    long timeSpent = now - bucketStart;
+    long exactExtraCountSum = count + exactExtraCount;
     double ret = Utils.zeroIfNaNOrInf(
-        ((double) (lat + _exactExtraLat)) / exactExtraCountSum);
-    _bucketStart = now;
-    _exactExtraLat = 0;
-    _exactExtraCount = 0;
+        ((double) (lat + exactExtraLat)) / exactExtraCountSum);
+    bucketStart = now;
+    exactExtraLat = 0;
+    exactExtraCount = 0;
     rotateBuckets(lat, count, timeSpent);
     return ret;
   }
@@ -153,26 +156,26 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   synchronized void rotateSched(long now) {
     long lat;
     long count;
-    synchronized (_currentLock) {
-      lat = _currentLatBucket;
-      count = _currentCountBucket;
-      _currentLatBucket = 0;
-      _currentCountBucket = 0;
+    synchronized (currentLock) {
+      lat = currentLatBucket;
+      count = currentCountBucket;
+      currentLatBucket = 0;
+      currentCountBucket = 0;
     }
 
-    long timeSpent = now - _bucketStart;
-    _exactExtraLat += lat;
-    _exactExtraCount += count;
-    _bucketStart = now;
+    long timeSpent = now - bucketStart;
+    exactExtraLat += lat;
+    exactExtraCount += count;
+    bucketStart = now;
     rotateBuckets(lat, count, timeSpent);
   }
 
   synchronized void rotateBuckets(long lat, long count, long timeSpent) {
-    rotate(lat, count, timeSpent, _tmSize, _tmTime, _tmLatBuckets, _tmCountBuckets);
-    rotate(lat, count, timeSpent, _thSize, _thTime, _thLatBuckets, _thCountBuckets);
-    rotate(lat, count, timeSpent, _odSize, _odTime, _odLatBuckets, _odCountBuckets);
-    _allTimeLat += lat;
-    _allTimeCount += count;
+    rotate(lat, count, timeSpent, tmSize, tmTime, tmLatBuckets, tmCountBuckets);
+    rotate(lat, count, timeSpent, thSize, thTime, thLatBuckets, thCountBuckets);
+    rotate(lat, count, timeSpent, odSize, odTime, odLatBuckets, odCountBuckets);
+    allTimeLat += lat;
+    allTimeCount += count;
   }
 
   private synchronized void rotate(long lat, long count, long timeSpent, long targetSize,
@@ -202,6 +205,9 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   }
 
   /**
+   *
+   * Get time latency average
+   *
    * @return a map of time window to average latency.
    * Keys are "600" for last 10 mins
    * "10800" for the last 3 hours
@@ -216,17 +222,20 @@ public class LatencyStatAndMetric implements IMetric<Double> {
     Map<String, Double> ret = new HashMap<>();
     long lat;
     long count;
-    synchronized (_currentLock) {
-      lat = _currentLatBucket;
-      count = _currentCountBucket;
+    synchronized (currentLock) {
+      lat = currentLatBucket;
+      count = currentCountBucket;
     }
-    long timeSpent = now - _bucketStart;
-    ret.put("600", readApproximateLatAvg(lat, count, timeSpent, _tmTime, _tmLatBuckets, _tmCountBuckets, 600 * 1000));
-    ret.put("10800", readApproximateLatAvg(lat, count, timeSpent, _thTime, _thLatBuckets, _thCountBuckets, 10800 * 1000));
-    ret.put("86400", readApproximateLatAvg(lat, count, timeSpent, _odTime, _odLatBuckets, _odCountBuckets, 86400 * 1000));
-    long allTimeCountSum = count + _allTimeCount;
+    long timeSpent = now - bucketStart;
+    ret.put("600", readApproximateLatAvg(lat, count, timeSpent, tmTime,
+        tmLatBuckets, tmCountBuckets, 600 * 1000));
+    ret.put("10800", readApproximateLatAvg(lat, count, timeSpent, thTime,
+        thLatBuckets, thCountBuckets, 10800 * 1000));
+    ret.put("86400", readApproximateLatAvg(lat, count, timeSpent, odTime,
+        odLatBuckets, odCountBuckets, 86400 * 1000));
+    long allTimeCountSum = count + allTimeCount;
     ret.put(":all-time", Utils.zeroIfNaNOrInf(
-        (double) lat + _allTimeLat) / allTimeCountSum);
+        (double) lat + allTimeLat) / allTimeCountSum);
     return ret;
   }
 
@@ -245,8 +254,8 @@ public class LatencyStatAndMetric implements IMetric<Double> {
   }
 
   public void close() {
-    if (_task != null) {
-      _task.cancel();
+    if (task != null) {
+      task.cancel();
     }
   }
 

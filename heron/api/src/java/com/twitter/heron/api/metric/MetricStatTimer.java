@@ -19,6 +19,11 @@ import java.util.Timer;
 /**
  * Just holds a singleton metric/stat timer for use by metric/stat calculations
  */
-class MetricStatTimer {
-  static Timer _timer = new Timer("metric/stat timer", true);
+final class MetricStatTimer {
+
+  private MetricStatTimer() {
+  }
+
+  @SuppressWarnings("VisibilityModifier")
+  static Timer timer = new Timer("metric/stat timer", true);
 }
