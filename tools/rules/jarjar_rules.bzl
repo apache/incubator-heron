@@ -24,7 +24,7 @@ def jarjar_binary_impl(ctx):
       outputs = [ class_jar ],
       arguments = ["process", shade_file.path, src_file.path, class_jar.path])
 
-  return struct(files = set([class_jar]))
+  return struct(files = depset([class_jar]))
 
 jarjar_attrs = {
     "src": attr.label(
