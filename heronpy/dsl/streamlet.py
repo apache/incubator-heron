@@ -228,3 +228,11 @@ class Streamlet(object):
         return calculated_name
       index = index + 1
     return "Should Never Got Here"
+
+  def _all_built(self):
+    if not _built:
+      return False
+    for child in self._children:
+      if not child.all_built():
+        return False
+    return True
