@@ -100,6 +100,7 @@ class ReduceByWindowStreamlet(Streamlet):
     builder.add_bolt(self.get_name(), ReduceByWindowBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                             ReduceByKeyAndWindowBolt.TIMECONFIG : self._window_config.duration,
+                             ReduceByKeyAndWindowBolt.TIMECONFIG :
+                             self._window_config._window_duration.seconds,
                              ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
-                             self._window_config.sliding_interval})
+                             self._window_config._slide_interval.seconds})

@@ -133,8 +133,8 @@ class JoinStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_bolt(self.get_name(), JoinBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
-                     config={JoinBolt.WINDOWDURATION : self._window_config.duration,
-                             JoinBolt.SLIDEINTERVAL : self._window_config.sliding_interval,
+                     config={JoinBolt.WINDOWDURATION : self._window_config._window_duration.seconds,
+                             JoinBolt.SLIDEINTERVAL : self._window_config._slide_interval.seconds,
                              JoinBolt.JOINEDCOMPONENT : self._right.get_name(),
                              JoinBolt.JOINFUNCTION : self._join_function,
                              JoinBolt.JOINTYPE : self._join_type})
