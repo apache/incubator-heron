@@ -55,7 +55,7 @@ egg_file_types = FileType([".egg", ".whl"])
 
 
 def _collect_transitive_sources(ctx):
-  source_files = set(order="compile")
+  source_files = depset(order="postorder")
   for dep in ctx.attr.deps:
     source_files += dep.py.transitive_sources
   source_files += pex_file_types.filter(ctx.files.srcs)
@@ -63,7 +63,7 @@ def _collect_transitive_sources(ctx):
 
 
 def _collect_transitive_eggs(ctx):
-  transitive_eggs = set(order="compile")
+  transitive_eggs = depset(order="postorder")
   for dep in ctx.attr.deps:
     if hasattr(dep.py, "transitive_eggs"):
       transitive_eggs += dep.py.transitive_eggs
@@ -72,7 +72,7 @@ def _collect_transitive_eggs(ctx):
 
 
 def _collect_transitive_reqs(ctx):
-  transitive_reqs = set(order="compile")
+  transitive_reqs = depset(order="postorder")
   for dep in ctx.attr.deps:
     if hasattr(dep.py, "transitive_reqs"):
       transitive_reqs += dep.py.transitive_reqs
@@ -92,15 +92,15 @@ def _collect_transitive(ctx):
 
 
 def _pex_library_impl(ctx):
-  transitive_files = set(ctx.files.srcs)
+  transitive_files = depset(ctx.files.srcs)
   for dep in ctx.attr.deps:
     transitive_files += dep.default_runfiles.files
   return struct(
-      files = set(),
+      files = depset(),
       py = _collect_transitive(ctx),
       runfiles = ctx.runfiles(
           collect_default = True,
-          transitive_files = set(transitive_files),
+          transitive_files = depset(transitive_files),
       )
   )
 
@@ -152,7 +152,7 @@ def _gen_manifest(py, runfiles, resources):
 
 
 def _pex_binary_impl(ctx):
-  transitive_files = set(ctx.files.srcs)
+  transitive_files = depset(ctx.files.srcs)
 
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
@@ -255,7 +255,7 @@ def _pex_binary_impl(ctx):
   )
 
   return struct(
-      files = set([executable]),  # Which files show up in cmdline output
+      files = depset([executable]),  # Which files show up in cmdline output
       runfiles = runfiles,
   )
 
@@ -283,7 +283,7 @@ def _pex_pytest_impl(ctx):
       executable = True,
   )
 
-  transitive_files = set(ctx.files.srcs + [test_runner])
+  transitive_files = depset(ctx.files.srcs + [test_runner])
   for dep in ctx.attr.deps:
     transitive_files += dep.default_runfiles
 
