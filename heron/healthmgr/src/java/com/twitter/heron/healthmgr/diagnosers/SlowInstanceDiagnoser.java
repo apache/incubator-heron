@@ -53,13 +53,14 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
+    com.twitter.heron.common.utils.metrics.ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
     // verify wait Q disparity and back pressure for the same component exists
     ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
     if (pendingBufferMetrics == null) {
       // no wait Q disparity for the component with back pressure. There is no slow instance
-      LOG.info("no wait Q disparity for the component with back pressure.");
+      LOG.info("no wait Q disparity for " + bpMetrics.getName() + " with back pressure. " +
+          " the backpressure metrics:\n" + bpMetrics.toString());
       return null;
     }
 
