@@ -3,4 +3,4 @@ link rel=stylesheet href=/css/font-awesome.min.css
 link rel=stylesheet href=/css/{{ index .Site.Data.assets.css.hash "style.css" }}
 {{- else }}
 link rel=stylesheet href=/css/style.css
-{{- end}} 
+{{- end }}

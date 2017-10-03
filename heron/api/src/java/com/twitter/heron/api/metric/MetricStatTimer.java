@@ -11,24 +11,19 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.examples.bolt;
 
-import com.twitter.heron.api.bolt.BaseBasicBolt;
-import com.twitter.heron.api.bolt.BasicOutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.tuple.Tuple;
+package com.twitter.heron.api.metric;
 
-public class PrinterBolt extends BaseBasicBolt {
+import java.util.Timer;
 
-  private static final long serialVersionUID = -4380380611593913345L;
+/**
+ * Just holds a singleton metric/stat timer for use by metric/stat calculations
+ */
+final class MetricStatTimer {
 
-  @Override
-  public void execute(Tuple tuple, BasicOutputCollector collector) {
-    System.out.println(tuple);
+  private MetricStatTimer() {
   }
 
-  @Override
-  public void declareOutputFields(OutputFieldsDeclarer ofd) {
-  }
-
+  @SuppressWarnings("VisibilityModifier")
+  static Timer timer = new Timer("metric/stat timer", true);
 }

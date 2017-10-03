@@ -22,6 +22,8 @@ java_tests(
     "com.twitter.heron.api.windowing.WindowManagerTest",
     "com.twitter.heron.api.windowing.WaterMarkEventGeneratorTest",
     "com.twitter.heron.api.bolt.WindowedBoltExecutorTest",
+    "com.twitter.heron.api.metric.CountStatAndMetricTest",
+    "com.twitter.heron.api.metric.LatencyStatAndMetricTest",
     "com.twitter.heron.api.bolt.BaseWindowedBoltTest",
     "com.twitter.heron.dsl.impl.BaseStreamletTest",
     "com.twitter.heron.dsl.impl.BaseKVStreamletTest",

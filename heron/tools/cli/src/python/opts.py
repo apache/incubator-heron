@@ -45,7 +45,7 @@ def get_config(k):
   :return:
   '''
   global config_opts
-  if config_opts.has_key(k):
+  if k in config_opts:
     return config_opts[k]
   return None
 
