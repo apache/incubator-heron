@@ -22,9 +22,9 @@ def _stream_process_fileno(fileno, handler):
   """
   while 1:
     line = fileno.readline()
+    handler(line)
     if not line:
       break
-    handler(line)
 
 def stream_process_stdout(process, handler):
   """ Stream the stdout for a process out to display
@@ -76,13 +76,21 @@ def async_stream_process_stderr(process, handler):
 
 class StringBuilder(object):
   def __init__(self):
-    self.str = ""
+    self.end = False
+    self.strs = []
 
   def add(self, line):
-    self.str += line
+    if not line:
+      self.end = True
+    else:
+      self.strs.append(line)
 
   def result(self):
-    return self.str
+    while True:
+      if self.end:
+        return ''.join(self.strs)
+      else:
+        continue
 
 def async_stdout_builder(proc):
   """ Save stdout into string builder
