@@ -23,7 +23,7 @@ class WindowConfig(object):
   def __init__(self, window_duration, slide_interval):
     self._window_duration = window_duration
     self._slide_interval = slide_interval
-    if self._window_duration.microseconds > 0 || self._slide_interval.microseconds > 0:
+    if self._window_duration.microseconds > 0 or self._slide_interval.microseconds > 0:
       raise RuntimeError("Python Windowing curently only supports second resolution")
 
   @staticmethod

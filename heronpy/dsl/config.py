@@ -35,13 +35,13 @@ class Config(object):
 
   def setDeliverySemantics(self, semanitcs):
     if semantics == ATMOST_ONCE:
-      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =
+      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.ATMOST_ONCE
     elif semantics == ATLEAST_ONCE:
-      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =
+      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.ATLEAST_ONCE
     elif semantics == EFFECTIVELY_ONCE:
-      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =
+      self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE
     else:
       raise RuntimeError("Unknown Topology delivery semantics %s" % str(semantics))
