@@ -71,16 +71,17 @@ class JoinBolt(SlidingWindowBolt, DslBoltBase):
     for (key, values) in mymap.items():
       if self._join_type == JoinBolt.INNER:
         if values[0] and values[1]:
-          self.emit_join(key, values)
+          self.emit_join(key, values, window_config)
       elif self._join_type == JoinBolt.LEFT:
         if values[0]:
-          self.emit_join(key, values)
+          self.emit_join(key, values, window_config)
       elif self._join_type == JoinBolt.OUTER:
-        self.emit_join(key, values)
+        self.emit_join(key, values, window_config)
 
-  def emit_join(self, key, values):
+  def emit_join(self, key, values, window_config):
     result = self._join_function(values[0], values[1])
-    self.emit([key, result], stream='output')
+    keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
+    self.emit([keyedwindow, result], stream='output')
 
 # pylint: disable=unused-argument
 class JoinGrouping(ICustomGrouping):

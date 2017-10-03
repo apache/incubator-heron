@@ -35,26 +35,12 @@ class ReduceByWindowBolt(SlidingWindowBolt, DslBoltBase):
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
     self.reduce_function = config[ReduceByKeyAndWindowBolt.FUNCTION]
 
-  @staticmethod
-  def _add(key, value, mymap):
-    if key in mymap:
-      mymap[key].append(value)
-    else:
-      mymap[key] = [value]
-
   def processWindow(self, window_config, tuples):
-    # our temporary map
-    mymap = {}
+    result = None
     for tup in tuples:
       userdata = tup.values[0]
-      if not isinstance(userdata, collections.Iterable) or len(userdata) != 2:
-        raise RuntimeError("ReduceByWindow tuples must be iterable of length 2")
-      self._add(userdata[0], userdata[1], mymap)
-    for (key, values) in mymap.items():
-      result = values[0]
-      for value in values[1:]:
-        result = self.reduce_function(result, value)
-      self.emit([(key, result)], stream='output')
+      result = self.reduce_function(result, userdata)
+    self.emit([(Window(window_config.start, window_config.end), result)], stream='output')
 
 # pylint: disable=unused-argument
 class ReduceGrouping(ICustomGrouping):
