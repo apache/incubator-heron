@@ -2,10 +2,11 @@
 title: Heron's Architecture
 ---
 
-Heron is a general-purpose stream processing engine designed for performance, low latency, isolation, and
-reliability.
+Heron is a general-purpose stream processing engine designed for speedy performance,
+low latency, isolation, reliability, and friendliness to developers and administrators
+alike.
 
-It also provides API compatibility with [Apache Storm](http://storm.apache.org).
+> We also recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
 The sections below clarify the distinction between [Heron and
 Storm](#relationship-with-apache-storm), describe the [design
@@ -13,6 +14,8 @@ goals](../design-goals) that drove the creation of Heron, and explain major
 [components](#topology-components) of its architecture.
 
 ## Codebase
+
+Heron is primarily written in Java, C++, and Python.
 
 A detailed guide to the Heron codebase can be found
 [here](../../contributors/codebase).
@@ -40,21 +43,29 @@ Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 For a description of the principles that Heron was designed to fulfill, see
 [Heron Design Goals](/docs/concepts/design-goals).
 
+## Basic system architecture
+
+In a Heron cluster
+
 ## Topology Components
+
+From an architectural standpoint, Heron was built as an interconnected set of modular
+components. 
+
 
 The following core components of Heron topologies are discussed in depth in
 the sections below:
 
-* [Topology Master]({{< ref "#topology-master" >}})
-* [Container]({{< ref "#container" >}})
-* [Stream Manager]({{< ref "#stream-manager" >}})
-* [Heron Instance]({{< ref "#heron-instance" >}})
-* [Metrics Manager]({{< ref "#metrics-manager" >}})
-* [Heron Tracker]({{< ref "#heron-tracker" >}})
+* [Topology Master](#topology-master)
+* [Containers](#containers)
+* [Stream Manager](#stream-manager)
+* [Heron Instance](#heron-instance)
+* [Metrics Manager](#metrics-manager)
+* [Heron Tracker](#heron-tracker)
 
 ### Topology Master
 
-The Topology Master \(TM) manages a topology throughout its entire lifecycle,
+The **Topology Master** \(TM) manages a topology throughout its entire lifecycle,
 from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
 The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
