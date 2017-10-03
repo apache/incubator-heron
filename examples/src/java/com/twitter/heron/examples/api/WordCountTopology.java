@@ -128,6 +128,7 @@ public final class WordCountTopology {
   
   public static class BackpressureSpout extends BaseRichSpout {
 
+    private static final long serialVersionUID = 2222L;
     Random rand = null;
     SpoutOutputCollector collector;
     
@@ -156,6 +157,8 @@ public final class WordCountTopology {
   }
   
   public static class BackpressureBolt extends BaseRichBolt {
+
+    private static final long serialVersionUID = 1111L;
 
     @Override
     public void prepare(Map<String, Object> heronConf, TopologyContext context,
