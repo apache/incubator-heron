@@ -53,7 +53,7 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-    com.twitter.heron.common.utils.metrics.ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
+    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
     // verify wait Q disparity and back pressure for the same component exists
     ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
