@@ -80,7 +80,7 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       }
     }
 
-    LOG.info("resultSymptom " + resultSymptom);
+    LOG.info("result symptom: " + resultSymptom);
     return resultSymptom != null
         ? new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), resultSymptom) : null;
   }
