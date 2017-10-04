@@ -14,6 +14,7 @@
 '''builder.py: module for creating streamlets'''
 
 from heronpy.api.topology import TopologyBuilder
+from heronpy.dsl.generator import Generator
 from heronpy.dsl.impl.supplierspout import SupplierStreamlet
 from heronpy.dsl.impl.generatorspout import GeneratorStreamlet
 

@@ -19,7 +19,8 @@ from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet, TimeWindow
+from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.dsl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument

@@ -22,7 +22,7 @@ class ArrayLooper(Generator):
   """
   def __init__(self, user_iterable):
     super(ArrayLooper, self).__init__()
-    if not isinstance(user_array, collections.Iterable):
+    if not isinstance(user_iterable, collections.Iterable):
       raise RuntimeError("ArrayLooper must be passed an iterable")
     self._user_iterable = user_iterable
 

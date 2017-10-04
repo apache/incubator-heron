@@ -28,12 +28,14 @@ class WindowConfig(object):
 
   @staticmethod
   def create_tumbling_window(window_duration):
-    if not isinstance(window_duration, datetime.timedelta):
-      raise RuntimeError("Window Duration has to be of type datetime.timedelta")
     return WindowConfig(window_duration, window_duration)
 
   @staticmethod
   def create_sliding_window(window_duration, slide_interval):
+    if isinstance(window_duration, int):
+      window_duration = datetime.timedelta(seconds=window_duration)
+    if isinstance(slide_interval, int):
+      slide_interval = datetime.timedelta(seconds=slide_interval)
     if not isinstance(window_duration, datetime.timedelta):
       raise RuntimeError("Window Duration has to be of type datetime.timedelta")
     if not isinstance(slide_interval, datetime.timedelta):

@@ -19,7 +19,7 @@ from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
-from heronpy.dsl.impl.generator import Generator
+from heronpy.dsl.generator import Generator
 
 # pylint: disable=unused-argument
 class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
