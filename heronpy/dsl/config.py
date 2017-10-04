@@ -25,11 +25,8 @@ class Config(object):
   ATLEAST_ONCE = 2
   EFFECTIVELY_ONCE = 3
 
-  def __init__(self):
-    self._api_config = {}
-
-  def __init__(self, config):
-    if not isinstance(config, dict):
+  def __init__(self, config=None):
+    if config is not None and not isinstance(config, dict):
       raise RuntimeError("Config has to be of type dict")
     self._api_config = config
 

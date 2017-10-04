@@ -16,6 +16,7 @@ import sys
 
 from heronpy.dsl.builder import Builder
 from heronpy.dsl.runner import Runner
+from heronpy.dsl.config import Config
 from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.connectors.mock.arraylooper import ArrayLooper
 
@@ -30,4 +31,5 @@ if __name__ == '__main__':
          .map(lambda word: (word, 1)) \
          .reduce_by_window(WindowConfig.create_sliding_window(10, 2), lambda x, y: x + y)
   runner = Runner()
-  runner.run(sys.argv[1], {}, builder)
+  config = Config()
+  runner.run(sys.argv[1], config, builder)

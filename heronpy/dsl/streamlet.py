@@ -15,8 +15,6 @@
 from collections import namedtuple
 from abc import abstractmethod
 
-from heronpy.api.topology import TopologyBuilder
-
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=too-many-instance-attributes
@@ -200,7 +198,7 @@ class Streamlet(object):
   def _build(self, bldr, stage_names):
     if self._built:
       raise RuntimeError("Logic error while building")
-    if self.build_this(bldr, stage_names):
+    if self._build_this(bldr, stage_names):
       self._built = True
       for children in self._children:
         children.build(bldr, stage_names)

@@ -13,7 +13,8 @@
 # limitations under the License.
 '''runner.py: module for creating Runner'''
 
-from heronpy.api.topology import TopologyBuilder
+from heronpy.dsl.builder import Builder
+from heronpy.dsl.config import Config
 from heronpy.dsl.impl.supplierspout import SupplierStreamlet
 from heronpy.dsl.impl.generatorspout import GeneratorStreamlet
 
