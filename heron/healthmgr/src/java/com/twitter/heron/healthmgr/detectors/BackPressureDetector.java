@@ -67,6 +67,7 @@ public class BackPressureDetector implements IDetector {
       }
     }
 
+    System.out.println("backpressure detector result " + result);
     return result;
   }
 }

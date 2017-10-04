@@ -71,6 +71,7 @@ public class BackPressureSensor extends BaseSensor {
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
         String metric = getMetricName() + boltInstanceName;
+        System.out.println("backpressure sensor metric query " + metric);
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
 
@@ -109,6 +110,7 @@ public class BackPressureSensor extends BaseSensor {
       result.put(boltComponent, componentMetrics);
     }
 
+    System.out.println("backpressure sensor " + result);
     return result;
   }
 }
