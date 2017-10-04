@@ -14,8 +14,9 @@
 '''Example WordCountTopology'''
 import sys
 
-from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.dsl.builder import Builder
+from heronpy.dsl.runner import Runner
+from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.connectors.mock.arraylooper import ArrayLooper
 
 if __name__ == '__main__':
@@ -23,8 +24,8 @@ if __name__ == '__main__':
     print "Topology's name is not specified"
     sys.exit(1)
 
-  builder = new Builder()
-  builder.new_source(ArrayLooper(["Mary Had a little lamb", "I Love You"]))
+  builder = Builder()
+  builder.new_source(ArrayLooper(["Mary Had a little lamb", "I Love You"])) \
          .flat_map(lambda line: line.split()) \
          .map(lambda word: (word, 1)) \
          .reduce_by_window(WindowConfig.create_sliding_window(10, 2), lambda x, y: x + y)

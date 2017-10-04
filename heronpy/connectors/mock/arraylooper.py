@@ -33,6 +33,6 @@ class ArrayLooper(Generator):
     retval = None
     try:
       return self._curiter.next()
-    catch StopIteration as e:
+    except StopIteration as e:
       self._curiter = iter(self._user_iterable)
       return self._curiter.next()
