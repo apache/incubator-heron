@@ -40,6 +40,17 @@ class Context(object):
     pass
 
   @abstractmethod
+  def get_num_partitions(self):
+    """Fetches the number of partitions of the stream we are operating on
+    """
+    pass
+
+  def get_partition_index(self):
+    """Fetches the partition of the stream that we are operating on
+    """
+    pass
+
+  @abstractmethod
   def get_state(self):
     """The state where components can store any of their local state
     """

@@ -44,8 +44,9 @@ class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
 
   def next_tuple(self):
     values = self._generator.get()
-    self.emit(values, stream='output')
-    self.emitted += 1
+    if values is not None:
+      self.emit(values, stream='output')
+      self.emitted += 1
 
 # pylint: disable=protected-access
 class GeneratorStreamlet(Streamlet):

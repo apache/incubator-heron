@@ -30,5 +30,13 @@ class ContextImpl(Context):
   def get_stream_name(self):
     return self._topology_context.get_this_sources().keys()[0].id
 
+  def get_num_partitions(self):
+    return len(self._topology_context.get_component_tasks(self._topology_context.get_component_id()))
+
+  def get_partition_index(self):
+    tasks = self._topology_context.get_component_tasks(self._topology_context.get_component_id())
+    tasks.sort()
+    return tasks.index(self.get_task_id())
+
   def get_state(self):
     return self._state
