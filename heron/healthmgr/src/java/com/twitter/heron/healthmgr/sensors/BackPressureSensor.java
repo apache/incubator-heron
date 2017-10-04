@@ -17,6 +17,7 @@ package com.twitter.heron.healthmgr.sensors;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -74,6 +75,7 @@ public class BackPressureSensor extends BaseSensor {
         System.out.println("backpressure sensor metric query " + metric);
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
+        System.out.println("backpressure sensor metric query result\n" + metric);
 
         if (stmgrResult.get(COMPONENT_STMGR) == null) {
           System.out.println("continue stmgr result null");
@@ -88,16 +90,20 @@ public class BackPressureSensor extends BaseSensor {
           continue;
         }
 
-        // since a bolt instance belongs to one stream manager, expect just one metrics
-        // manager instance in the result
-        InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
+        // since a bolt instance belongs to one stream manager, 
+        // for tracker rest api: expect just one metrics manager instance in the result;
+        // for tmaster/metricscache stat interface: expect a list
+//        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
+//          it.hasNext(); ) {
+          InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
-        System.out.println("continue stmgr result instance metrics " + stmgrInstanceResult);
-        Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
-        if (valueSum == null) {
-          System.out.println("continue valueSum null");
-          continue;
-        }
+          System.out.println("continue stmgr result instance metrics " + stmgrInstanceResult);
+          Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
+          if (valueSum == null) {
+            System.out.println("continue valueSum null");
+            continue;
+          }
+//        }
         double averageBp = valueSum / duration.getSeconds();
 
         // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
