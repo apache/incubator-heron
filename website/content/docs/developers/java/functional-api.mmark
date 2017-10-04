@@ -131,6 +131,8 @@ topologyConfig
 
 The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
 
+One of the key advantages of the Functional API is that applying delivery semantics doesn't require any extra modifications to the underlying processing graph.
+
 ### Containers and resources
 
 You can set the number of Docker containers to be used by a Functional API topology (as an integer) like so:
@@ -175,9 +177,8 @@ Operation | Description | Example
 [`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
 [`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
 [`mapToKV`](#map-to-kv-operations) | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
+[`union`](#union-operations) | Create a new streamlet by merging two non-KV streamlets | Merge two integer streamlets into a single integer streamlet
 `log` | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
-
-<!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
 
 ### Map operations
 
@@ -233,6 +234,52 @@ Builder builder = Builder.CreateBuilder();
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
 ```
 
+### Map-to-KV operations
+
+Map-to-KV operations enable you to transform a streamlet into a KV streamlet, for example a `Streamlet<String>` into a `Streamlet<KeyValue<String, Boolean>>`, using a mapping function. Here's an example:
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> randomIntGenerator(1, 100))
+        .mapToKV((num) -> new KeyValue<>(num, num > 50));
+```
+
+In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
+
+### Union operations
+
+Union operations combine non-KV streamlets, for example two `Streamlet<String>`s. Here's an example:
+
+```java
+Builder builder = Builder.createBuilder();
+
+Streamlet<String> peas = builder.newSource(() -> "peas");
+Streamlet<String> carrots = builder.newSource(() -> "carrots");
+
+peas
+        .union(carrots)
+        .map(word -> word.replace("s", ""));
+```
+
+Here, the union operations creates a `Streamlet<String>` with two possible values: `peas` and `carrots`. The map operation then removes the `s` from the end of each word, producing a new `Streamlet<String>` with two possible values: `pea` and `carrot`.
+
+## Partitioning and parallelism
+
+In the original, Storm-inspired topology API for Heron, you could manage parallelism within your topologies by controlling the number of spouts performing a data ingestion operation and/or the number of bolts performing a data processing operation. The Heron Functional API is different in that you assign **partitions** to operators. The number of partitions that you set is then translated into the corresponding number of instances for that operator in the topology's [physical plan](../../concepts/topologies#physical-plan).
+
+> The default number of partitions for operators is **one**.
+
+Here's an example graph that includes a `setNumPartitions` setter:
+
+```java
+builder.newSource(() -> randomIntGenerator(1, 100))
+        .setNumPartitions(5)
+        .map(i -> i + 1)
+        .filter(i -> i != 2)
+        .log();
+```
+
 ### Repartition operations
 
 When you assign a number of [partitions](#partitioning-and-parallelism) to a processing step, each step that comes after it inherits that number of partitions. Thus, if you assign 5 partitions to a `map` operation, then any `mapToKV`, `flatMap`, `filter`, etc. operations that come after it will also be assigned 5 partitions. But you can also change the number of partitions for a processing step (as well as the number of partitions for downstream operations) using `repartition`. Here's an example:
@@ -252,24 +299,3 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
 ```
 
 In this example, the supplier streamlet emits random integers between one and ten. That operation is assigned 5 partitions. After the `map` operation, the `repartition` function is used to assign 2 partitions to all downstream operations.
-
-### Map-to-KV operations
-
-Map-to-KV operations enable you to transform a streamlet into a KV streamlet, for example a `Streamlet<String>` into a `Streamlet<KeyValue<String, Boolean>>`, using a mapping function. Here's an example:
-
-```java
-Builder builder = Builder.CreateBuilder();
-
-builder.newSource(() -> randomIntGenerator(1, 100))
-        .mapToKV((num) -> new KeyValue<>(num, num > 50));
-```
-
-In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
-
-<!--
-
-## Partitioning and parallelism
-
-In the original, Storm-inspired topology API for Heron, you could manage parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron Functional API is different in that you assign **partitions** to specific operations.
-
--->
