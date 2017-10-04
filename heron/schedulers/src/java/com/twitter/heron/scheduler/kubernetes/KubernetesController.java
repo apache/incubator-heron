@@ -35,10 +35,11 @@ public class KubernetesController {
                                String topologyName, boolean isVerbose) {
 
     if (kubernetesNamespace == null) {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/default/pods", kubernetesURI);
+      this.baseUriPath = String.format("%s/api/v1/namespaces/default/replicationcontrollers",
+          kubernetesURI);
     } else {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/pods", kubernetesURI,
-          kubernetesNamespace);
+      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/replicationcontrollers",
+          kubernetesURI, kubernetesNamespace);
     }
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
@@ -67,17 +68,17 @@ public class KubernetesController {
   }
 
   /**
-   * Get information about a pod
+   * Get information about a Replication Controller
    */
-  protected JsonNode getBasePod(String podId) throws IOException {
+  protected JsonNode getBaseRC(String rcId) throws IOException {
 
-    String podURI = String.format(
+    String rcURI = String.format(
         "%s/%s",
         this.baseUriPath,
-        podId);
+        rcId);
 
     // send the delete request to the scheduler
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(rcURI);
     JsonNode result;
     try {
       result = jsonAPIClient.get(HttpURLConnection.HTTP_OK);
@@ -88,7 +89,7 @@ public class KubernetesController {
   }
 
   /**
-   * Deploy a single container (Pod)
+   * Deploy a single instance (Replication Controller)
    *
    * @param deployConf, the json body as a string
    */
@@ -104,17 +105,17 @@ public class KubernetesController {
   }
 
   /**
-   * Remove a single container (Pod)
+   * Remove a single container (Replication Controller)
    *
-   * @param podId, the pod id (TOPOLOGY_NAME-CONTAINER_INDEX)
+   * @param rcId, the replication controller id (TOPOLOGY_NAME-CONTAINER_INDEX)
    */
-  protected void removeContainer(String podId) throws IOException {
-    String podURI = String.format(
+  protected void removeContainer(String rcId) throws IOException {
+    String rcURI = String.format(
         "%s/%s",
         this.baseUriPath,
-        podId);
+        rcId);
 
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(podURI);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(rcURI);
     jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
   }
 
@@ -130,7 +131,7 @@ public class KubernetesController {
   }
 
   /**
-   * Submit a topology to kubernetes based on a set of pod configurations
+   * Submit a topology to kubernetes based on a set of replication controller configurations
    */
   protected boolean submitTopology(String[] appConfs) {
 

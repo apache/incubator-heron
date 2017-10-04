@@ -94,7 +94,7 @@ public class KubernetesControllerTest {
     // Test a bad GET
     PowerMockito.doThrow(new IOException()).when(httpJsonClient).get(Mockito.anyInt());
     exception.expect(IOException.class);
-    controller.getBasePod(Mockito.anyString());
+    controller.getBaseRC(Mockito.anyString());
 
   }
 

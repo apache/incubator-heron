@@ -2,7 +2,7 @@
 heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:  <zookeeper_host:zookeeper_port>
+heron.statemgr.connection.string:  10.23.251.30:2181
 
 # path of the root address to store the state in a local file system
 heron.statemgr.root.path: "/heron"
@@ -21,3 +21,19 @@ heron.statemgr.zookeeper.retry.count: 10
 
 # duration of time to wait until the next retry
 heron.statemgr.zookeeper.retry.interval.ms: 10000
+
+heron.statemgr.is.tunnel.needed: True
+
+heron.statemgr.tunnel.connection.timeout.ms:    1000
+
+# The count of retry to check whether has direct access on zk server
+heron.statemgr.tunnel.connection.retry.count:   2
+
+# The interval in ms between two retry checking whether has direct access on zk server
+heron.statemgr.tunnel.retry.interval.ms:        1000
+
+# The count of retry to verify whether seting up a tunnel process
+heron.statemgr.tunnel.verify.count:             10
+
+# SSH tunnel host
+heron.statemgr.tunnel.host:              john@35.202.157.213

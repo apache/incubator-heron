@@ -166,10 +166,51 @@ public class KubernetesScheduler implements IScheduler, IScalable {
         new String[Ints.checkedCast(Runtime.numContainers(runtimeConfiguration))];
     for (int i = 0; i < Runtime.numContainers(runtimeConfiguration); i++) {
 
-      deploymentConfs[i] = buildKubernetesPodSpec(mapper, i, containerResource);
+      deploymentConfs[i] = buildKubernetesReplicationControllerSpec(mapper, i, containerResource);
     }
 
     return deploymentConfs;
+  }
+
+  protected String buildKubernetesReplicationControllerSpec(ObjectMapper mapper,
+                                                            Integer containerIndex,
+                                                            Resource containerResource) {
+    ObjectNode instance = mapper.createObjectNode();
+
+    instance.put(KubernetesConstants.API_VERSION, KubernetesConstants.API_VERSION_1);
+    instance.put(KubernetesConstants.API_KIND, KubernetesConstants.API_RC);
+    instance.set(KubernetesConstants.API_METADATA, getMetadata(mapper, containerIndex));
+
+    instance.set(KubernetesConstants.API_SPEC, getReplicationControllerSpec(mapper,
+        containerIndex,
+        containerResource));
+
+    return instance.toString();
+
+
+  }
+
+  protected ObjectNode getReplicationControllerSpec(ObjectMapper mapper,
+                                                int containerIndex,
+                                                Resource containerResource) {
+    ObjectNode instance = mapper.createObjectNode();
+
+    instance.put("replicas", 1);
+
+    ObjectNode selectorInstance = mapper.createObjectNode();
+
+    selectorInstance.put(KubernetesConstants.TOPOLOGY_LABEL,
+        Runtime.topologyName(runtimeConfiguration));
+
+    instance.set("selector", selectorInstance);
+
+    ObjectNode templateInstance = mapper.createObjectNode();
+    templateInstance.set("metadata", getMetadata(mapper, containerIndex));
+    templateInstance.set("spec", getContainerSpec(mapper, containerIndex, containerResource));
+
+    instance.set("template", templateInstance);
+
+    return instance;
   }
 
   /**
@@ -480,7 +521,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     String basePodName = Runtime.topologyName(runtimeConfiguration) + "-0";
     JsonNode podConfig;
     try {
-      podConfig = controller.getBasePod(basePodName);
+      podConfig = controller.getBaseRC(basePodName);
     } catch (IOException ioe) {
       throw new TopologyRuntimeManagementException("Unable to retrieve base pod configuration from "
           + basePodName, ioe);

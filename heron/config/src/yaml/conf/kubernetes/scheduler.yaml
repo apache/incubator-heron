@@ -14,10 +14,27 @@ heron.directory.conf:                       "./heron-conf/"
 heron.directory.home:                       $HERON_HOME
 
 # The URI of kubernetes API
-heron.kubernetes.scheduler.uri:             <kubernetes_api_addr>
+heron.kubernetes.scheduler.uri:             http://localhost:8001
 
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
 
 # docker repo for executor
-heron.executor.docker.image:                'ndustrialio/heron-core:latest'
+heron.executor.docker.image:                'streamlio/heron:latest'
+
+heron.scheduler.is.tunnel.needed: True
+
+# The connection timeout in ms when trying to connect to zk server
+heron.scheduler.tunnel.connection.timeout.ms:    1000
+
+# The count of retry to check whether has direct access on zk server
+heron.scheduler.tunnel.connection.retry.count:   2
+
+# The interval in ms between two retry checking whether has direct access on zk server
+heron.scheduler.tunnel.retry.interval.ms:        1000
+
+# The count of retry to verify whether seting up a tunnel process
+heron.scheduler.tunnel.verify.count:             10
+
+# SSH tunnel host
+heron.scheduler.tunnel.host:              john@35.202.157.213

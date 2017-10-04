@@ -40,6 +40,7 @@ public final class KubernetesConstants {
   public static final String API_VERSION = "apiVersion";
   public static final String API_VERSION_1 = "v1";
   public static final String API_POD = "Pod";
+  public static final String API_RC = "ReplicationController";
   public static final String API_METADATA = "metadata";
   public static final String API_KIND = "kind";
   public static final String METADATA_LABELS = "labels";
