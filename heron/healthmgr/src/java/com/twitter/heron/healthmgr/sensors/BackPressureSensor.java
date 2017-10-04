@@ -76,6 +76,7 @@ public class BackPressureSensor extends BaseSensor {
             metric, duration, COMPONENT_STMGR);
 
         if (stmgrResult.get(COMPONENT_STMGR) == null) {
+          System.out.println("continue stmgr result null");
           continue;
         }
 
@@ -83,6 +84,7 @@ public class BackPressureSensor extends BaseSensor {
             stmgrResult.get(COMPONENT_STMGR).getMetrics();
 
         if (streamManagerResult.isEmpty()) {
+          System.out.println("continue stmgr result empty");
           continue;
         }
 
@@ -90,8 +92,10 @@ public class BackPressureSensor extends BaseSensor {
         // manager instance in the result
         InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
 
+        System.out.println("continue stmgr result instance metrics " + stmgrInstanceResult);
         Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
         if (valueSum == null) {
+          System.out.println("continue valueSum null");
           continue;
         }
         double averageBp = valueSum / duration.getSeconds();
