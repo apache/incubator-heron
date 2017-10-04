@@ -27,6 +27,8 @@ sections:
         url: /docs/developers/packing/ffdpacking
       - name: Simulator Mode
         url: /docs/developers/simulator-mode
+      - name: Self-regulating Topologies
+        url: /docs/developers/self-regulating-topologies
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
   - name: Client API docs
