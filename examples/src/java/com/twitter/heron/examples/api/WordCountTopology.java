@@ -243,9 +243,9 @@ public final class WordCountTopology {
 
     // configure container resources
     com.twitter.heron.api.Config.setContainerDiskRequested(conf,
-        ExampleResources.getContainerDisk(5 * parallelism, parallelism));
+        ByteAmount.fromGigabytes(20));
     com.twitter.heron.api.Config.setContainerRamRequested(conf,
-        ExampleResources.getContainerRam(5 * parallelism, parallelism));
+        ByteAmount.fromGigabytes(5));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
