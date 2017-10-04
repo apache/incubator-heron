@@ -1,0 +1,38 @@
+# Copyright 2016 - Twitter, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+'''arraylooper.py: module for defining a simple Generator'''
+
+import collections
+
+from heronpy.dsl.generator import Generator
+
+class ArrayLooper(Generator):
+  """A ArrayLooper loops the contents of the a user supplied array forever
+  """
+  def __init__(self, user_iterable):
+    super(ArrayLooper, self).__init__()
+    if not isinstance(user_array, collections.Iterable):
+      raise RuntimeError("ArrayLooper must be passed an iterable")
+    self._user_iterable = user_iterable
+
+  def setup(self, context):
+    self._curiter = iter(self._user_iterable)
+
+  def get(self):
+    retval = None
+    try:
+      return self._curiter.next()
+    catch StopIteration as e:
+      self._curiter = iter(self._user_iterable)
+      return self._curiter.next()
