@@ -21,7 +21,7 @@ from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.windowconfig import WindowConfig
-from heronpy.dsl.dslboltbase import DslBoltBase
+from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 
 # pylint: disable=unused-argument
