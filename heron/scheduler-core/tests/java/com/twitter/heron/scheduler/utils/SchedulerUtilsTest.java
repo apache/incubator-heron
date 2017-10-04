@@ -116,7 +116,7 @@ public class SchedulerUtilsTest {
   }
 
   /**
-   * Test method setupWorkingDirectory()
+   * Test method createOrCleanDirectory()
    */
   @Test
   public void testSetupWorkingDirectory() throws Exception {
@@ -128,17 +128,17 @@ public class SchedulerUtilsTest {
 
     // Failed to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(false);
-    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(WORKING_DIR));
+    Assert.assertFalse(SchedulerUtils.createOrCleanDirectory(WORKING_DIR));
     // OK to create dir
     PowerMockito.when(FileUtils.createDirectory(Mockito.anyString())).thenReturn(true);
 
     // Fail to cleanup
     PowerMockito.when(FileUtils.cleanDir(Mockito.anyString())).thenReturn(false);
-    Assert.assertFalse(SchedulerUtils.setupWorkingDirectory(WORKING_DIR));
+    Assert.assertFalse(SchedulerUtils.createOrCleanDirectory(WORKING_DIR));
 
     // Ok to cleanup
     PowerMockito.when(FileUtils.cleanDir(Mockito.anyString())).thenReturn(true);
-    Assert.assertTrue(SchedulerUtils.setupWorkingDirectory(WORKING_DIR));
+    Assert.assertTrue(SchedulerUtils.createOrCleanDirectory(WORKING_DIR));
   }
 
   @Test

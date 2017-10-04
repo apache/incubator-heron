@@ -369,25 +369,24 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Setup the working directory: Create the directory if it does not exist
-   * otherwise clean the directory.
+   * Create the directory if it does not exist otherwise clean the directory.
    *
-   * @param workingDirectory the working directory to setup
+   * @param directory the working directory to setup
    * @return true if successful
    */
-  public static boolean setupWorkingDirectory(String workingDirectory) {
-    // if the working directory does not exist, create it.
-    if (!FileUtils.isDirectoryExists(workingDirectory)) {
-      LOG.fine("The working directory does not exist; creating it.");
-      if (!FileUtils.createDirectory(workingDirectory)) {
-        LOG.severe("Failed to create directory: " + workingDirectory);
+  public static boolean createOrCleanDirectory(String directory) {
+    // if the directory does not exist, create it.
+    if (!FileUtils.isDirectoryExists(directory)) {
+      LOG.fine("The directory does not exist; creating it.");
+      if (!FileUtils.createDirectory(directory)) {
+        LOG.severe("Failed to create directory: " + directory);
         return false;
       }
     }
 
     // Cleanup the directory
-    if (!FileUtils.cleanDir(workingDirectory)) {
-      LOG.severe("Failed to clean directory: " + workingDirectory);
+    if (!FileUtils.cleanDir(directory)) {
+      LOG.severe("Failed to clean directory: " + directory);
       return false;
     }
 
