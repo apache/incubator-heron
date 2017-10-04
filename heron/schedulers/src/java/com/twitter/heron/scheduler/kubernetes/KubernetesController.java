@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -134,10 +135,14 @@ public class KubernetesController {
     for (String appConf : appConfs) {
       try {
         deployContainer(appConf);
+      } catch (ConnectException ce) {
+        final String message = "Error connecting to kubernetes api server";
+        LOG.log(Level.SEVERE,
+            "Problem deploying container: " + message, ce);
+        throw new TopologySubmissionException(message);
       } catch (IOException ioe) {
-        String message = (ioe instanceof java.net.ConnectException)
-            ? "Error connecting to kubernetes api server" : ioe.getMessage();
-        LOG.log(Level.SEVERE, "Problem deploying container: " + message, ioe);
+        final String message = ioe.getMessage();
+        LOG.log(Level.SEVERE, "Problem deploying container: " + ioe.getMessage(), ioe);
         LOG.log(Level.SEVERE, "Container config: " + appConf);
         throw new TopologySubmissionException(message);
       }
