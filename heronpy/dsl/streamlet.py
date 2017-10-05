@@ -143,12 +143,12 @@ class Streamlet(object):
     self._add_child(log_streamlet)
     return
 
-  def to_sink(self, consumer_function):
-    """Calls consumer_function for each element of this streamlet. This function returns nothing
+  def consume(self, consume_function):
+    """Calls consume_function for each element of this streamlet. This function returns nothing
     """
-    from heronpy.dsl.impl.sinkbolt import SinkStreamlet
-    sink_streamlet = SinkStreamlet(consumer_function, self)
-    self._add_child(sink_streamlet)
+    from heronpy.dsl.impl.consumebolt import ConsumeStreamlet
+    consume_streamlet = ConsumeStreamlet(consume_function, self)
+    self._add_child(consume_streamlet)
     return
 
   def join(self, join_streamlet, window_config, join_function):
