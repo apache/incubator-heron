@@ -293,19 +293,19 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
     active_instances_[_conn] = task_id;
     if (instance_info_.find(task_id) == instance_info_.end()) {
       instance_info_[task_id] = new InstanceData(_request->release_instance());
-      // Create a metric for this instance
-      if (instance_metric_map_.find(instance_id) == instance_metric_map_.end()) {
-        auto instance_metric = new heron::common::TimeSpentMetric();
-        metrics_manager_client_->register_metric(MakeBackPressureCompIdMetricName(instance_id),
-                                                 instance_metric);
-        instance_metric_map_[instance_id] = instance_metric;
-      }
-      if (connection_buffer_metric_map_.find(instance_id) == connection_buffer_metric_map_.end()) {
-        auto queue_metric = new heron::common::MultiMeanMetric();
-        metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
-                                                 queue_metric);
-        connection_buffer_metric_map_[instance_id] = queue_metric;
-      }
+    }
+    // Create a metric for this instance
+    if (instance_metric_map_.find(instance_id) == instance_metric_map_.end()) {
+      auto instance_metric = new heron::common::TimeSpentMetric();
+      metrics_manager_client_->register_metric(MakeBackPressureCompIdMetricName(instance_id),
+                                               instance_metric);
+      instance_metric_map_[instance_id] = instance_metric;
+    }
+    if (connection_buffer_metric_map_.find(instance_id) == connection_buffer_metric_map_.end()) {
+      auto queue_metric = new heron::common::MultiMeanMetric();
+      metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
+                                               queue_metric);
+      connection_buffer_metric_map_[instance_id] = queue_metric;
     }
     instance_info_[task_id]->set_connection(_conn);
 

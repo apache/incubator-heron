@@ -42,7 +42,7 @@ def genproto_java_impl(ctx):
       command = java_cmd,
       use_default_shell_env = True)
 
-  return struct(files = set([srcjar]))
+  return struct(files = depset([srcjar]))
 
 genproto_java = rule(
     genproto_java_impl,
