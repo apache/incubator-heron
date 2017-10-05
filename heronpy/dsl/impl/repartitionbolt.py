@@ -65,7 +65,7 @@ class RepartitionBolt(Bolt, StatefulComponent, DslBoltBase):
     self.emitted = 0
 
   def process(self, tup):
-    self.emit(tup.values, stream='output')
+    self.emit([tup.values[0]], stream='output')
     self.processed += 1
     self.emitted += 1
     self.ack(tup)

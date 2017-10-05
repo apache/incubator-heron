@@ -83,7 +83,7 @@ class JoinBolt(SlidingWindowBolt, DslBoltBase):
   def emit_join(self, key, values, window_config):
     result = self._join_function(values[0], values[1])
     keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
-    self.emit([keyedwindow, result], stream='output')
+    self.emit([(keyedwindow, result)], stream='output')
 
 # pylint: disable=unused-argument
 class JoinGrouping(ICustomGrouping):

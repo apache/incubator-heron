@@ -43,7 +43,7 @@ class SupplierSpout(Spout, StatefulComponent, DslSpoutBase):
 
   def next_tuple(self):
     values = self._supplier_function()
-    self.emit(values, stream='output')
+    self.emit([values], stream='output')
     self.emitted += 1
 
 # pylint: disable=protected-access

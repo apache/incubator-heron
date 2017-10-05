@@ -44,7 +44,7 @@ class FilterBolt(Bolt, StatefulComponent, DslBoltBase):
 
   def process(self, tup):
     if self.filter_function(tup.values[0]):
-      self.emit([tup.values], stream='output')
+      self.emit([tup.values[0]], stream='output')
       self.emitted += 1
     self.processed += 1
     self.ack(tup)
