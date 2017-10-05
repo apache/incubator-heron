@@ -64,3 +64,4 @@ class SupplierStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_spout(self.get_name(), SupplierSpout, par=self.get_num_partitions(),
                      config={SupplierSpout.FUNCTION : self._supplier_function})
+    return True

@@ -201,7 +201,7 @@ class Streamlet(object):
     if self._build_this(bldr, stage_names):
       self._built = True
       for children in self._children:
-        children.build(bldr, stage_names)
+        children._build(bldr, stage_names)
 
   @abstractmethod
   def _build_this(self, builder, stage_names):
@@ -231,6 +231,6 @@ class Streamlet(object):
     if not self._built:
       return False
     for child in self._children:
-      if not child.all_built():
+      if not child._all_built():
         return False
     return True

@@ -81,3 +81,4 @@ class FlatMapStreamlet(Streamlet):
     builder.add_bolt(self.get_name(), FlatMapBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={FlatMapBolt.FUNCTION : self._flatmap_function})
+    return True

@@ -73,3 +73,4 @@ class TransformStreamlet(Streamlet):
     builder.add_bolt(self.get_name(), TransformBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={TransformBolt.OPERATOR : self._transform_operator})
+    return True

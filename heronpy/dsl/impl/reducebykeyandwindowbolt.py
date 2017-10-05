@@ -20,6 +20,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.window import Window
 from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
@@ -94,7 +95,7 @@ class ReduceByKeyAndWindowStreamlet(Streamlet):
     return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
             Grouping.custom("heronpy.dsl.reducebykeyandwindowbolt.ReduceGrouping")}
 
-  def _build_this(self, builder):
+  def _build_this(self, builder, stage_names):
     if not self.get_name():
       self.set_name(self._default_stage_name_calculator("reducebykeyandwindow", stage_names))
     if self.get_name() in stage_names:
@@ -107,3 +108,4 @@ class ReduceByKeyAndWindowStreamlet(Streamlet):
                              self._window_config._window_duration.seconds,
                              ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
                              self._window_config._slide_interval.seconds})
+    return True

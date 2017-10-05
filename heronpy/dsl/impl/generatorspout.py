@@ -17,6 +17,7 @@ from heronpy.api.spout.spout import Spout
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
+from heronpy.dsl.context import Context
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
 from heronpy.dsl.generator import Generator
@@ -66,3 +67,4 @@ class GeneratorStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_spout(self.get_name(), GeneratorSpout, par=self.get_num_partitions(),
                      config={GeneratorSpout.GENERATOR : self._generator})
+    return True

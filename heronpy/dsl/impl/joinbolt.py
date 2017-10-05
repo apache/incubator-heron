@@ -20,6 +20,7 @@ from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.window import Window
 from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
@@ -128,6 +129,8 @@ class JoinStreamlet(Streamlet):
             Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping")}
 
   def _build_this(self, builder, stage_names):
+    if not self._left._built or not self._right._built:
+      return False
     if not self.get_name():
       self.set_name(self._default_stage_name_calculator("join", stage_names))
     if self.get_name() in stage_names:
@@ -140,3 +143,4 @@ class JoinStreamlet(Streamlet):
                              JoinBolt.JOINEDCOMPONENT : self._right.get_name(),
                              JoinBolt.JOINFUNCTION : self._join_function,
                              JoinBolt.JOINTYPE : self._join_type})
+    return True

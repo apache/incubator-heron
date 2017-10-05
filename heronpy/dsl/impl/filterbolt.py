@@ -75,3 +75,4 @@ class FilterStreamlet(Streamlet):
     builder.add_bolt(self.get_name(), FilterBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={FilterBolt.FUNCTION : self._filter_function})
+    return True

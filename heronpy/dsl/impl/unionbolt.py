@@ -62,6 +62,8 @@ class UnionStreamlet(Streamlet):
             Grouping.SHUFFLE}
 
   def _build_this(self, builder, stage_names):
+    if not self._left._built or not self._right._built:
+      return False
     if not self.get_name():
       self.set_name(self._default_stage_name_calculator("union", stage_names))
     if self.get_name() in stage_names:
@@ -69,3 +71,4 @@ class UnionStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_bolt(self.get_name(), UnionBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs())
+    return True

@@ -20,6 +20,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.window import Window
 from heronpy.dsl.windowconfig import WindowConfig
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
@@ -31,10 +32,10 @@ class ReduceByWindowBolt(SlidingWindowBolt, DslBoltBase):
   SLIDEINTERVAL = SlidingWindowBolt.WINDOW_SLIDEINTERVAL_SECS
 
   def initialize(self, config, context):
-    super(ReduceByKeyAndWindowBolt, self).initialize(config, context)
-    if ReduceByKeyAndWindowBolt.FUNCTION not in config:
+    super(ReduceByWindowBolt, self).initialize(config, context)
+    if ReduceByWindowBolt.FUNCTION not in config:
       raise RuntimeError("FUNCTION not specified in reducebywindow operator")
-    self.reduce_function = config[ReduceByKeyAndWindowBolt.FUNCTION]
+    self.reduce_function = config[ReduceByWindowBolt.FUNCTION]
 
   def processWindow(self, window_config, tuples):
     result = None
@@ -78,7 +79,7 @@ class ReduceByWindowStreamlet(Streamlet):
     return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
             Grouping.custom("heronpy.dsl.impl.reducebywindowbolt.ReduceGrouping")}
 
-  def _build_this(self, builder):
+  def _build_this(self, builder, stage_names):
     if not self.get_name():
       self.set_name(self._default_stage_name_calculator("reducebywindow", stage_names))
     if self.get_name() in stage_names:
@@ -86,8 +87,9 @@ class ReduceByWindowStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_bolt(self.get_name(), ReduceByWindowBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
-                     config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                             ReduceByKeyAndWindowBolt.TIMECONFIG :
+                     config={ReduceByWindowBolt.FUNCTION : self._reduce_function,
+                             ReduceByWindowBolt.WINDOWDURATION :
                              self._window_config._window_duration.seconds,
-                             ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
+                             ReduceByWindowBolt.SLIDEINTERVAL :
                              self._window_config._slide_interval.seconds})
+    return True

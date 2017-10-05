@@ -75,3 +75,4 @@ class MapStreamlet(Streamlet):
     builder.add_bolt(self.get_name(), MapBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={MapBolt.FUNCTION : self._map_function})
+    return True

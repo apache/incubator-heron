@@ -90,7 +90,7 @@ class RepartitionStreamlet(Streamlet):
     return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
             Grouping.custom(RepartitionCustomGrouping(self._repartition_function))}
 
-  def _build_this(self, builder):
+  def _build_this(self, builder, stage_names):
     if not self.get_name():
       self.set_name(self._default_stage_name_calculator("repartition", stage_names))
     if self.get_name() in stage_names:
@@ -98,3 +98,4 @@ class RepartitionStreamlet(Streamlet):
     stage_names.add(self.get_name())
     builder.add_bolt(self.get_name(), RepartitionBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs())
+    return True
