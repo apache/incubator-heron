@@ -19,6 +19,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.stream import Grouping
 
+from heronpy.dsl.keyedwindow import KeyedWindow
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.window import Window
 from heronpy.dsl.windowconfig import WindowConfig

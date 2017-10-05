@@ -19,6 +19,7 @@ from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
+from heronpy.dsl.keyedwindow import KeyedWindow
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.window import Window
 from heronpy.dsl.windowconfig import WindowConfig
@@ -93,7 +94,7 @@ class ReduceByKeyAndWindowStreamlet(Streamlet):
 
   def _calculate_inputs(self):
     return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
-            Grouping.custom("heronpy.dsl.reducebykeyandwindowbolt.ReduceGrouping")}
+            Grouping.custom("heronpy.dsl.impl.reducebykeyandwindowbolt.ReduceGrouping")}
 
   def _build_this(self, builder, stage_names):
     if not self.get_name():
