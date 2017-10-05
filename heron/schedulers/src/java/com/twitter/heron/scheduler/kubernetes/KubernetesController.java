@@ -15,7 +15,6 @@
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
