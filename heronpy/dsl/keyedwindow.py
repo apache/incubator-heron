@@ -24,3 +24,6 @@ class KeyedWindow(object):
       raise RuntimeError("Window of KeyedWindow has to be of type Window")
     self._key = key
     self._window = window
+
+  def __repr__(self):
+    return 'KeyedWindow {key: %s, window: %s}' % (self._key, self._window)

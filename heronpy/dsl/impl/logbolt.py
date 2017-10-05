@@ -11,56 +11,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for map bolt: TransformBolt"""
+"""module for log bolt: LogBolt"""
 from heronpy.api.bolt.bolt import Bolt
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.impl.contextimpl import ContextImpl
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
-class TransformBolt(Bolt, StatefulComponent, DslBoltBase):
-  """TransformBolt"""
-  OPERATOR = 'operator'
+class LogBolt(Bolt, StatefulComponent, DslBoltBase):
+  """LogBolt"""
   def init_state(self, stateful_state):
-    self._state = stateful_state
+    # logBolt does not have any state
+    pass
 
   def pre_save(self, checkpoint_id):
-    # Nothing really
+    # logBolt does not have any state
     pass
 
   def initialize(self, config, context):
-    self.logger.debug("TransformBolt's Component-specific config: \n%s" % str(config))
+    self.logger.debug("LogBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
-    self.emitted = 0
-    if TransformBolt.OPERATOR in config:
-      self._transform_operator = config[TransformBolt.OPERATOR]
-    else:
-      raise RuntimeError("TransformBolt needs to be passed transform_operator")
-    if hasattr(self, '_state'):
-      contextimpl = ContextImpl(context, self._state, self)
-    else:
-      contextimpl = ContextImpl(context, None, self)
-    self._transform_operator.setup(contextimpl)
 
   def process(self, tup):
-    self.transform_operator.transform(tup)
+    self.logger.info(str(tup.values[0]))
     self.processed += 1
     self.ack(tup)
 
 # pylint: disable=protected-access
-class TransformStreamlet(Streamlet):
-  """TransformStreamlet"""
-  def __init__(self, transform_operator, parent):
-    super(TransformStreamlet, self).__init__()
-    if not isinstance(transform_operator, TransformOperator):
-      raise RuntimeError("Transform Operator has to be a TransformOperator")
+class LogStreamlet(Streamlet):
+  """LogStreamlet"""
+  def __init__(self, parent):
+    super(LogStreamlet, self).__init__()
     if not isinstance(parent, Streamlet):
-      raise RuntimeError("parent of Transform Streamlet has to be a Streamlet")
-    self._transform_operator = transform_operator;
+      raise RuntimeError("Parent of Log Streamlet has to be a Streamlet")
     self._parent = parent;
     self.set_num_partitions(parent.get_num_partitions())
 
@@ -70,11 +56,10 @@ class TransformStreamlet(Streamlet):
 
   def _build_this(self, builder, stage_names):
     if not self.get_name():
-      self.set_name(self._default_stage_name_calculator("transform", stage_names))
+      self.set_name(self._default_stage_name_calculator("log", stage_names))
     if self.get_name() in stage_names:
       raise RuntimeError("Duplicate Names")
     stage_names.add(self.get_name())
-    builder.add_bolt(self.get_name(), TransformBolt, par=self.get_num_partitions(),
-                     inputs=self._calculate_inputs(),
-                     config={TransformBolt.OPERATOR : self._transform_operator})
+    builder.add_bolt(self.get_name(), LogBolt, par=self.get_num_partitions(),
+                     inputs=self._calculate_inputs())
     return True

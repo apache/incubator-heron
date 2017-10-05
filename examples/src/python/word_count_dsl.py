@@ -29,7 +29,8 @@ if __name__ == '__main__':
   builder.new_source(ArrayLooper(["Mary Had a little lamb", "I Love You"])) \
          .flat_map(lambda line: line.split()) \
          .map(lambda word: (word, 1)) \
-         .reduce_by_key_and_window(WindowConfig.create_sliding_window(10, 2), lambda x, y: x + y)
+         .reduce_by_key_and_window(WindowConfig.create_sliding_window(10, 2), lambda x, y: x + y) \
+         .log()
   runner = Runner()
   config = Config()
   runner.run(sys.argv[1], config, builder)
