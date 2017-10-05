@@ -17,7 +17,7 @@ from heronpy.api.spout.spout import Spout
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.context import Context
+from heronpy.dsl.impl.contextimpl import ContextImpl
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
 from heronpy.dsl.generator import Generator
@@ -40,7 +40,10 @@ class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
       self._generator = config[GeneratorSpout.GENERATOR]
     else:
       raise RuntimeError("GeneratorSpout needs to be passed generator function")
-    context = Context(context, self._state)
+    if hasattr(self, '_state'):
+      context = ContextImpl(context, self._state)
+    else:
+      context = ContextImpl(context, None)
     self._generator.setup(context)
 
   def next_tuple(self):
