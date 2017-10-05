@@ -55,3 +55,9 @@ class Context(object):
     """The state where components can store any of their local state
     """
     pass
+
+  @abstractmethod
+  def emit(self, values):
+    """Emits the values in the output stream
+    """
+    pass

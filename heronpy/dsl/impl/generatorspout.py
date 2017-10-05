@@ -33,7 +33,7 @@ class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
   def pre_save(self, checkpoint_id):
     pass
 
-  def initialize(self, config, context):
+  def initialize(self, config, topology_context):
     self.logger.debug("GeneratorSpout's Component-specific config: \n%s" % str(config))
     self.emitted = 0
     if GeneratorSpout.GENERATOR in config:
@@ -41,9 +41,9 @@ class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
     else:
       raise RuntimeError("GeneratorSpout needs to be passed generator function")
     if hasattr(self, '_state'):
-      context = ContextImpl(context, self._state)
+      context = ContextImpl(topology_context, self._state, self)
     else:
-      context = ContextImpl(context, None)
+      context = ContextImpl(topology_context, None, self)
     self._generator.setup(context)
 
   def next_tuple(self):

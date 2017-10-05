@@ -17,9 +17,10 @@ from heronpy.dsl.context import Context
 
 class ContextImpl(Context):
   """ContextImpl"""
-  def __init__(self, topology_context, state):
+  def __init__(self, topology_context, state, emitter):
     self._topology_context = topology_context
     self._state = state
+    self._emitter = emitter
 
   def get_task_id(self):
     return self._topology_context.get_task_id()
@@ -40,3 +41,6 @@ class ContextImpl(Context):
 
   def get_state(self):
     return self._state
+
+  def emit(self, values):
+    self._emitter.emit([values], stream='output')

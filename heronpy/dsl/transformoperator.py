@@ -37,11 +37,11 @@ class TransformOperator(object):
     pass
 
   @abstractmethod
-  def transform(self, tup, emitter):
+  def transform(self, tup):
     """Process a single tuple of input
 
     The Tuple object contains metadata on it about which component/stream/task it came from.
-    To emit a tuple, call ``emitter.emit(tuple)``.
+    To emit a tuple, call ``context.emit(tuple)``.
 
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
 

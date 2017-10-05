@@ -18,6 +18,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.impl.contextimpl import ContextImpl
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
@@ -25,25 +26,28 @@ class TransformBolt(Bolt, StatefulComponent, DslBoltBase):
   """TransformBolt"""
   OPERATOR = 'operator'
   def init_state(self, stateful_state):
-    # unionBolt does not have any state
-    pass
+    self._state = stateful_state
 
   def pre_save(self, checkpoint_id):
-    # unionBolt does not have any state
+    # Nothing really
     pass
 
-  def initialize(self, config, context):
+  def initialize(self, config, topology_context):
     self.logger.debug("TransformBolt's Component-specific config: \n%s" % str(config))
     self.processed = 0
     self.emitted = 0
     if TransformBolt.OPERATOR in config:
-      self.transform_operator = config[TransformBolt.OPERATOR]
+      self._transform_operator = config[TransformBolt.OPERATOR]
     else:
       raise RuntimeError("TransformBolt needs to be passed transform_operator")
-    self.transform_operator.setup(context)
+    if hasattr(self, '_state'):
+      context = ContextImpl(topology_context, self._state, self)
+    else:
+      context = ContextImpl(topology_context, None, self)
+    self._transform_operator.setup(context)
 
   def process(self, tup):
-    self.transform_operator.transform(tup, self)
+    self.transform_operator.transform(tup)
     self.processed += 1
     self.ack(tup)
 
