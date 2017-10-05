@@ -30,6 +30,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.scheduler.TopologySubmissionException;
 import com.twitter.heron.scheduler.utils.HttpJsonClient;
 
 @RunWith(PowerMockRunner.class)
@@ -124,23 +125,32 @@ public class KubernetesControllerTest {
 
 
   /***
-   * Test KubernetesController's submitTopology method
+   * Test KubernetesController's submitTopology method succeeded
    * @throws Exception
    */
   @Test
-  public void testSubmitTopology() throws Exception {
+  public void testSubmitTopologySuccess() throws Exception {
 
+    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
+    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+
+    // Test a good path
+    PowerMockito.doNothing().when(httpJsonClient).post(Mockito.anyString(), Mockito.anyInt());
+    Assert.assertTrue(controller.submitTopology(DEPLOY_CONFS));
+  }
+
+  /***
+   * Test KubernetesController's submitTopology method failed
+   * @throws Exception
+   */
+  @Test(expected = TopologySubmissionException.class)
+  public void testSubmitTopologyFailure() throws Exception {
     HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
     PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
 
     // Test a bad POST
     PowerMockito.doThrow(new IOException()).when(httpJsonClient).post(Mockito.anyString(),
         Mockito.anyInt());
-    Assert.assertFalse(controller.submitTopology(DEPLOY_CONFS));
-
-    // Test a good path
-    PowerMockito.doNothing().when(httpJsonClient).post(Mockito.anyString(), Mockito.anyInt());
-    Assert.assertTrue(controller.submitTopology(DEPLOY_CONFS));
-
+    controller.submitTopology(DEPLOY_CONFS);
   }
 }
