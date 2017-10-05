@@ -13,6 +13,8 @@
 # limitations under the License.
 '''builder.py: module for creating streamlets'''
 
+import sets
+
 from heronpy.api.topology import TopologyBuilder
 from heronpy.dsl.generator import Generator
 from heronpy.dsl.impl.supplierspout import SupplierStreamlet
@@ -43,7 +45,7 @@ class Builder(object):
   def build(self, name):
     """Builds the topology and returns the builder"""
     bldr = TopologyBuilder(name=name)
-    stage_names = {}
+    stage_names = sets.Set()
     for source in self._sources:
       source._build(bldr, stage_names)
     for source in self._sources:

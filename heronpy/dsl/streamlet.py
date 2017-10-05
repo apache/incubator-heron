@@ -222,13 +222,13 @@ class Streamlet(object):
     calculated_name = ""
     while True:
       calculated_name = prefix + "-" + str(index)
-      if calculated_name in existing_stage_names:
+      if calculated_name not in existing_stage_names:
         return calculated_name
       index = index + 1
     return "Should Never Got Here"
 
   def _all_built(self):
-    if not _built:
+    if not self._built:
       return False
     for child in self._children:
       if not child.all_built():
