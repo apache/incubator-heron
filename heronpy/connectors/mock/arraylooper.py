@@ -14,6 +14,7 @@
 '''arraylooper.py: module for defining a simple Generator'''
 
 import collections
+import itertools
 
 from heronpy.dsl.generator import Generator
 
@@ -27,12 +28,7 @@ class ArrayLooper(Generator):
     self._user_iterable = user_iterable
 
   def setup(self, context):
-    self._curiter = iter(self._user_iterable)
+    self._curiter = itertools.cycle(self._user_iterable)
 
   def get(self):
-    retval = None
-    try:
-      return self._curiter.next()
-    except StopIteration as e:
-      self._curiter = iter(self._user_iterable)
-      return self._curiter.next()
+    return self._curiter.next()
