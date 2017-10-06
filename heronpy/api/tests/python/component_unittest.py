@@ -23,9 +23,9 @@ class ComponentSpecTest(unittest.TestCase):
   def test_sanitize_args(self):
     # good args
     spec = HeronComponentSpec(
-      name="string", python_class_path="string.path",
-      is_spout=True,
-      par=1
+        name="string", python_class_path="string.path",
+        is_spout=True,
+        par=1
     )
     self.assertIsNotNone(spec)
     name_none_spec = HeronComponentSpec(name=None, python_class_path="string.path",
