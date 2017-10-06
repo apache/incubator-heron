@@ -41,6 +41,10 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
         getProcessingRateSkewComponents(symptoms);
     Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
 
+    LOG.fine("backpressure symptoms\n" + bpSymptoms);
+    LOG.fine("processing rate skew components\n" + processingRateSkewComponents);
+    LOG.fine("wait q disparity components\n" + waitQDisparityComponents);
+
     if (bpSymptoms.isEmpty() || waitQDisparityComponents.isEmpty()
         || !processingRateSkewComponents.isEmpty()) {
       // Since there is no back pressure or disparate wait count or similar
@@ -59,8 +63,7 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
     ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
     if (pendingBufferMetrics == null) {
       // no wait Q disparity for the component with back pressure. There is no slow instance
-      LOG.info("no wait Q disparity for " + bpMetrics.getName() + " with back pressure. " +
-          " the backpressure metrics:\n" + bpMetrics.toString());
+      LOG.info("no wait Q disparity for " + bpMetrics.getName() + " with back pressure.");
       return null;
     }
 
