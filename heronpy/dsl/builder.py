@@ -15,7 +15,6 @@
 
 import sets
 
-from heronpy.api.topology import TopologyBuilder
 from heronpy.dsl.generator import Generator
 from heronpy.dsl.impl.supplierspout import SupplierStreamlet
 from heronpy.dsl.impl.generatorspout import GeneratorStreamlet
@@ -42,13 +41,11 @@ class Builder(object):
     self._sources.append(source_streamlet)
     return source_streamlet
 
-  def build(self, name):
+  def build(self, bldr):
     """Builds the topology and returns the builder"""
-    bldr = TopologyBuilder(name=name)
     stage_names = sets.Set()
     for source in self._sources:
       source._build(bldr, stage_names)
     for source in self._sources:
       if not source._all_built():
         raise RuntimeError("Topology cannot be fully built! Are all sources added?")
-    return bldr

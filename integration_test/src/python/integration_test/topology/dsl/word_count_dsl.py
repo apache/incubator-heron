@@ -23,6 +23,7 @@ from heronpy.dsl.config import Config
 from heronpy.dsl.generator import Generator
 from heronpy.dsl.runner import Runner
 from heronpy.dsl.windowconfig import WindowConfig
+from integration_test.src.python.integration_test.core.test_runner import TestRunner
 
 def word_count_dsl_builder(topology_name, http_server_url):
   builder = Builder()
@@ -34,9 +35,9 @@ def word_count_dsl_builder(topology_name, http_server_url):
          .map(lambda word: (word, 1)) \
          .reduce_by_key_and_window(WindowConfig.create_sliding_window(5, 5), lambda x, y: x + y) \
          .log()
-  runner = Runner()
+  runner = TestRunner()
   config = Config()
-  runner.run(sys.argv[1], config, builder)
+  runner.run(topology_name, config, builder, http_server_url)
 
 class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever

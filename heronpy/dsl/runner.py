@@ -13,6 +13,7 @@
 # limitations under the License.
 '''runner.py: module for creating Runner'''
 
+from heronpy.api.topology import TopologyBuilder
 from heronpy.dsl.builder import Builder
 from heronpy.dsl.config import Config
 from heronpy.dsl.impl.supplierspout import SupplierStreamlet
@@ -35,6 +36,7 @@ class Runner(object):
       raise RuntimeError("config has to be a Config type")
     if not isinstance(builder, Builder):
       raise RuntimeError("builder has to be a Builder type")
-    bldr = builder.build(name)
+    bldr = TopologyBuilder(name=name)
+    builder.build(bldr)
     bldr.set_config(config._api_config)
     bldr.build_and_submit()
