@@ -7,6 +7,14 @@ config_setting(
 )
 
 config_setting(
+    name = "darwin_dev",
+    values = {
+        "cpu": "darwin",
+    },
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
     name = "ubuntu",
     values = {
         "cpu": "k8",
