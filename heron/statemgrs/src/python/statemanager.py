@@ -83,7 +83,7 @@ class StateManager:
     """
     for hostport in self.hostportlist:
       try:
-        socket.create_connection(hostport, TIMEOUT_SECONDS)
+        socket.create_connection(hostport, StateManager.TIMEOUT_SECONDS)
         return True
       except:
         LOG.info("StateManager %s Unable to connect to host: %s port %i"
