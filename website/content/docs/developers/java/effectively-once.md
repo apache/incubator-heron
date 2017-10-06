@@ -258,7 +258,7 @@ Once the Heron UI is running, navigate to http://localhost:8889 and click on the
 
 Click on **addition-bolt** on the right (under **1 Container and 1 Instances**) and then click on the blug **logs** button. You should see log output like this:
 
-```
+```bash
 [2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 0
 [2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 68
 [2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 93
