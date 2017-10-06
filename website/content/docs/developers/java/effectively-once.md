@@ -130,6 +130,7 @@ import java.util.Map;
 
 public class AdditionBolt extends BaseRichBolt implements IStatefulComponent<String, Integer> {
     private OutputCollector outputCollector;
+    private State<String, Integer> count;
 
     public AdditionBolt() {
     }
@@ -138,6 +139,11 @@ public class AdditionBolt extends BaseRichBolt implements IStatefulComponent<Str
     @Override
     public void preSave(String checkpointId) {
         System.out.println(String.format("Saving spout state at checkpoint %s", checkpointId));
+    }
+
+    @Override
+    public void initState(State<String, Integer> state) {
+        count = state;
     }
 
     // These three methods are required to extend the BaseRichSpout abstract class
@@ -169,15 +175,21 @@ public class AdditionBolt extends BaseRichBolt implements IStatefulComponent<Str
 
         // Update the count state
         count.put("count", newSum);
+
+        System.out.println(String.format("The current saved sum is: %d", newSum));
     }
 }
 ```
 
 A few things to notice in this bolt:
 
+* As in the `RandomIntSpout`, all state is handled by the `count` variable, which is of type `State<String, Integer>`. In that state object, the key is always `count`, while the value is the current sum.
+* As in the `RandomIntSpout`, the `preSave` method simply logs the current checkpoint ID.
+* The bolt has no output (it simply logs the current stored sum), so no output fields need to be declared.
+
 ### Putting the topology together
 
-Now that we have a stateful spout and bolt in place, we can build and configure the topology.
+Now that we have a stateful spout and bolt in place, we can build and configure the topology:
 
 ```java
 import com.twitter.heron.api.Config;
@@ -201,17 +213,26 @@ public class EffectivelyOnceTopology {
         topologyBuilder.setBolt("addition-bolt", new AdditionBolt())
                 .fieldsGrouping("random-int-spout", new Fields("random-int"));
 
-        HeronSubmitter.submitTopology(args[0], config, topologyBuilder.buildTopology());
+        HeronSubmitter.submitTopology(args[0], config, topologyBuilder.createTopology());
     }
 }
 ```
 
 ### Submitting the topology
 
+The code for this topology can be found in [this GitHub repository](https://github.com/streamlio/heron-java-effectively-once-example). You can clone the repo locally like this:
+
 ```bash
+$ git clone https://github.com/streamlio/heron-java-effectively-once-example
+```
+
+Once you have the repo locally, you can submit the topology to a [running Heron installation](../../../getting-started) like this (if you have [Maven](https://maven.apache.org/) installed):
+
+```bash
+$ cd heron-java-effectively-once-example
 $ mvn assembly:assembly
 $ heron submit local \
-  target/example-effectively-once-topology-0.1.0-jar-with-dependencies.jar \
-  com.example.topologies.EffectivelyOnceTopology \
+  target/effectivelyonce-latest-jar-with-dependencies.jar \
+  io.streaml.example.effectivelyonce.RunningSumTopology \
   RunningSumTopology
 ```
