@@ -26,14 +26,12 @@ The other possible values for the `TopologyReliabilityMode` enum are `ATMOST_ONC
 
 ## Stateful components
 
-Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface, which requires implementing five methods (all of which are `void` methods):
+Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface, which requires implementing two methods (all of which are `void` methods):
 
 Method | Input | Description
 :------|:------|:-----------
 `preSave` | Checkpoint ID (`String`)| The action taken immediately prior to the component's state being saved. 
 `initState` | Initial state ([`State<K, V>`](/api/java/com/twitter/heron/examples/api/StatefulWordCountTopology.ConsumerBolt.html#initState-com.twitter.heron.api.state.State-)) | Initializes the state of the function or operator to that of a previous checkpoint.
-`declareOutputFields` | [`OutputFieldsDeclarer`](/api/java/com/twitter/heron/api/topology/OutputFieldsDeclarer.html) | Declares the output fields for the spout or bolt (if any)
-`execute` | Data input ([`Tuple`](/api/java/com/twitter/heron/api/tuple/Tuple.html)) | The tuple processing logic performed by the component
 
 > Remember that stateful components automatically handle all state storage in the background using a State Manager (the currently available State Managers are [ZooKeeper](../../../operators/deployment/statemanagers/zookeeper) and the [local filesystem](../../../operators/deployment/statemanagers/localfs). You don't need to, for example, save state to an external database.
 
