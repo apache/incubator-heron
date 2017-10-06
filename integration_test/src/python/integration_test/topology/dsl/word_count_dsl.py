@@ -37,7 +37,7 @@ def word_count_dsl_builder(topology_name, http_server_url):
          .log()
   runner = TestRunner()
   config = Config()
-  runner.run(topology_name, config, builder, http_server_url)
+  return runner.run(topology_name, config, builder, http_server_url)
 
 class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever

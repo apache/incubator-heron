@@ -25,4 +25,4 @@ class TestRunner(Runner):
     bldr = TestTopologyBuilder(name, http_server_url)
     builder.build(bldr)
     bldr.set_config(config._api_config)
-    bldr.build_and_submit()
+    return bldr.create_topology()
