@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''streamlet.py: module for defining the basic concept of the heron python dsl'''
-from collections import namedtuple
 from abc import abstractmethod
 
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes, protected-access
 class Streamlet(object):
   """A Streamlet is a (potentially unbounded) ordered collection of tuples
      Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from static data(such as
@@ -75,26 +74,23 @@ class Streamlet(object):
     self._add_child(filter_streamlet)
     return filter_streamlet
 
-  def repartition(self, num_partitions):
+  def repartition(self, num_partitions, repartition_function=None):
     """Return a new Streamlet containing all elements of the this streamlet but having
     num_partitions partitions. Note that this is different from num_partitions(n) in
     that new streamlet will be created by the repartition call.
-    """
-    return self.map(lambda x: x).set_num_partitions(num_partitions)
-
-  def repartition(self, num_partitions, repartition_function):
-    """Same as above except to use repartition_function to choose
-    where elements need to be sent. The repartiton_function is a function
-    that for any particular element belonging to the current stream, decides
-    which partitions(from 0 to num_partitions -1), it should route the element to.
+    If repartiton_function is not None, it is used to decide which parititons
+    (from 0 to num_partitions -1), it should route each element to.
     It could also return a list of partitions if it wants to send it to multiple
     partitions.
     """
     from heronpy.dsl.impl.repartitionbolt import RepartitionStreamlet
+    if repartition_function is None:
+      repartition_function = lambda x: x
     repartition_streamlet = RepartitionStreamlet(num_partitions, repartition_function, self)
     self._add_child(repartition_streamlet)
     return repartition_streamlet
 
+  # pylint: disable=unused-variable
   def clone(self, num_clones):
     """Return num_clones number of streamlets each containing all elements
     of the current streamlet
@@ -115,6 +111,7 @@ class Streamlet(object):
     self._add_child(reduce_streamlet)
     return reduce_streamlet
 
+  #pylint: disable=protected-access
   def union(self, other_streamlet):
     """Returns a new Streamlet that consists of elements of both this and other_streamlet
     """
@@ -214,6 +211,7 @@ class Streamlet(object):
   def _add_child(self, child):
     self._children.append(child)
 
+  #pylint: disable=no-self-use
   def _default_stage_name_calculator(self, prefix, existing_stage_names):
     """This is the method that's implemented by the operators to get the name of the Streamlet
     :return: The name of the operator

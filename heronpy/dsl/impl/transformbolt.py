@@ -18,6 +18,7 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.transformoperator import TransformOperator
 from heronpy.dsl.impl.contextimpl import ContextImpl
 from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
@@ -25,6 +26,8 @@ from heronpy.dsl.impl.dslboltbase import DslBoltBase
 class TransformBolt(Bolt, StatefulComponent, DslBoltBase):
   """TransformBolt"""
   OPERATOR = 'operator'
+
+  # pylint: disable=attribute-defined-outside-init
   def init_state(self, stateful_state):
     self._state = stateful_state
 
@@ -60,8 +63,8 @@ class TransformStreamlet(Streamlet):
       raise RuntimeError("Transform Operator has to be a TransformOperator")
     if not isinstance(parent, Streamlet):
       raise RuntimeError("parent of Transform Streamlet has to be a Streamlet")
-    self._transform_operator = transform_operator;
-    self._parent = parent;
+    self._transform_operator = transform_operator
+    self._parent = parent
     self.set_num_partitions(parent.get_num_partitions())
 
   def _calculate_inputs(self):

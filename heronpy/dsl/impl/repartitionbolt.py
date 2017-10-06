@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """module for map bolt: RepartitionBolt"""
+import collections
 import inspect
 
 from heronpy.api.custom_grouping import ICustomGrouping
@@ -29,11 +30,11 @@ class RepartitionCustomGrouping(ICustomGrouping):
     self._repartition_function = repartition_function
 
   def prepare(self, context, component, stream, target_tasks):
-    logging.getLogger().info("In prepare of SampleCustomGrouping, "
-                             "with src component: %s, "
-                             "with stream id: %s, "
-                             "with target tasks: %s"
-                             , component, stream, str(target_tasks))
+    self.logger.info("In prepare of SampleCustomGrouping, "
+                     "with src component: %s, "
+                     "with stream id: %s, "
+                     "with target tasks: %s"
+                     , component, stream, str(target_tasks))
     self.target_tasks = target_tasks
 
   def choose_tasks(self, values):

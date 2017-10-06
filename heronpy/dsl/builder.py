@@ -28,8 +28,7 @@ class Builder(object):
     self._sources = []
 
   def new_source(self, source):
-    """
-    """
+    """Adds a new source to the computation dag"""
     source_streamlet = None
     if callable(source):
       source_streamlet = SupplierStreamlet(source)
@@ -41,6 +40,7 @@ class Builder(object):
     self._sources.append(source_streamlet)
     return source_streamlet
 
+  # pylint: disable=protected-access
   def build(self, bldr):
     """Builds the topology and returns the builder"""
     stage_names = sets.Set()

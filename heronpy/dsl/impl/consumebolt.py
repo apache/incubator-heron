@@ -52,7 +52,7 @@ class ConsumeStreamlet(Streamlet):
     super(ConsumeStreamlet, self).__init__()
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of Consume Streamlet has to be a Streamlet")
-    self._parent = parent;
+    self._parent = parent
     self.set_num_partitions(parent.get_num_partitions())
 
   def _calculate_inputs(self):

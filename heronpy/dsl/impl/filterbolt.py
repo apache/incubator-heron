@@ -58,7 +58,7 @@ class FilterStreamlet(Streamlet):
       raise RuntimeError("Filter function has to be callable")
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of Filter Streamlet has to be a Streamlet")
-    self._parent = parent;
+    self._parent = parent
     self._filter_function = filter_function
     self.set_num_partitions(parent.get_num_partitions())
 

@@ -29,6 +29,12 @@ class Resources(object):
     self._ram = int(ram)
     return self
 
+  def get_cpu(self):
+    return self._cpu
+
+  def get_ram(self):
+    return self._ram
+
   def set_ram_in_mb(self, ram):
     return self.set_ram(ram * 1024 * 1024)
 

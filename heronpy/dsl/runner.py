@@ -16,20 +16,18 @@
 from heronpy.api.topology import TopologyBuilder
 from heronpy.dsl.builder import Builder
 from heronpy.dsl.config import Config
-from heronpy.dsl.impl.supplierspout import SupplierStreamlet
-from heronpy.dsl.impl.generatorspout import GeneratorStreamlet
 
 class Runner(object):
   """Runner is used to run a topology that is built by the builder.
      It exports a sole function called run that takes care of constructing the topology
   """
   def __init__(self):
-    """
-    """
+    """Nothing really"""
+    pass
 
+  # pylint: disable=protected-access, no-self-use
   def run(self, name, config, builder):
-    """
-    """
+    """Builds the topology and submits it"""
     if not isinstance(name, str):
       raise RuntimeError("Name has to be a string type")
     if not isinstance(config, Config):

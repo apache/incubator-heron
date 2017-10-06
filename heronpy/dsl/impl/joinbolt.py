@@ -29,7 +29,7 @@ from heronpy.dsl.impl.dslboltbase import DslBoltBase
 # pylint: disable=unused-argument
 class JoinBolt(SlidingWindowBolt, DslBoltBase):
   """JoinBolt"""
-  
+
   LEFT = 1
   INNER = 2
   OUTER = 3
@@ -126,7 +126,7 @@ class JoinStreamlet(Streamlet):
   def _calculate_inputs(self):
     return {GlobalStreamId(self._left.get_name(), self._left._output) :
             Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping"),
-            GlobalStreamId(self._right.get_name(), self._right._output) : 
+            GlobalStreamId(self._right.get_name(), self._right._output) :
             Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping")}
 
   def _build_this(self, builder, stage_names):

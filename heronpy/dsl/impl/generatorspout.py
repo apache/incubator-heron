@@ -14,8 +14,6 @@
 """module for generator spout: GeneratorSpout"""
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.spout.spout import Spout
-from heronpy.api.component.component_spec import GlobalStreamId
-from heronpy.api.stream import Grouping
 
 from heronpy.dsl.impl.contextimpl import ContextImpl
 from heronpy.dsl.streamlet import Streamlet
@@ -27,6 +25,7 @@ class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
   """GeneratorSpout"""
   GENERATOR = 'generator'
 
+  #pylint: disable=attribute-defined-outside-init
   def init_state(self, stateful_state):
     self._state = stateful_state
 
@@ -69,5 +68,5 @@ class GeneratorStreamlet(Streamlet):
       raise RuntimeError("Duplicate Names")
     stage_names.add(self.get_name())
     builder.add_spout(self.get_name(), GeneratorSpout, par=self.get_num_partitions(),
-                     config={GeneratorSpout.GENERATOR : self._generator})
+                      config={GeneratorSpout.GENERATOR : self._generator})
     return True

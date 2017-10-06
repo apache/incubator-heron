@@ -14,8 +14,6 @@
 """module for supplier spout: SupplierSpout"""
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.spout.spout import Spout
-from heronpy.api.component.component_spec import GlobalStreamId
-from heronpy.api.stream import Grouping
 
 from heronpy.dsl.streamlet import Streamlet
 from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
@@ -63,5 +61,5 @@ class SupplierStreamlet(Streamlet):
       raise RuntimeError("Duplicate Names")
     stage_names.add(self.get_name())
     builder.add_spout(self.get_name(), SupplierSpout, par=self.get_num_partitions(),
-                     config={SupplierSpout.FUNCTION : self._supplier_function})
+                      config={SupplierSpout.FUNCTION : self._supplier_function})
     return True

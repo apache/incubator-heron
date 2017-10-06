@@ -17,25 +17,25 @@ from heronpy.dsl.context import Context
 
 class ContextImpl(Context):
   """ContextImpl"""
-  def __init__(self, topology_context, state, emitter):
-    self._topology_context = topology_context
+  def __init__(self, top_context, state, emitter):
+    self._top_context = top_context
     self._state = state
     self._emitter = emitter
 
   def get_task_id(self):
-    return self._topology_context.get_task_id()
+    return self._top_context.get_task_id()
 
   def get_config(self):
-    return self._topology_context.get_cluster_config()
+    return self._top_context.get_cluster_config()
 
   def get_stream_name(self):
-    return self._topology_context.get_this_sources().keys()[0].id
+    return self._top_context.get_this_sources().keys()[0].id
 
   def get_num_partitions(self):
-    return len(self._topology_context.get_component_tasks(self._topology_context.get_component_id()))
+    return len(self._top_context.get_component_tasks(self._top_context.get_component_id()))
 
   def get_partition_index(self):
-    tasks = self._topology_context.get_component_tasks(self._topology_context.get_component_id())
+    tasks = self._top_context.get_component_tasks(self._top_context.get_component_id())
     tasks.sort()
     return tasks.index(self.get_task_id())
 

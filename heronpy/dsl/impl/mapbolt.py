@@ -58,7 +58,7 @@ class MapStreamlet(Streamlet):
       raise RuntimeError("Map function has to be callable")
     if not isinstance(parent, Streamlet):
       raise RuntimeError("Parent of Map Streamlet has to be a Streamlet")
-    self._parent = parent;
+    self._parent = parent
     self._map_function = map_function
     self.set_num_partitions(parent.get_num_partitions())
 

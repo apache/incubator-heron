@@ -34,7 +34,6 @@ class TransformOperator(object):
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
     """
     raise NotImplementedError("TransformOperator not implementing setup() method.")
-    pass
 
   @abstractmethod
   def transform(self, tup):

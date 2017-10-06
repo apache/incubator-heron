@@ -24,6 +24,7 @@ class TextFileGenerator(Generator):
     super(TextFileGenerator, self).__init__()
     self._files = glob.glob(filepattern)
 
+  # pylint: disable=attribute-defined-outside-init
   def setup(self, context):
     """Implements TextFile Generator's setup method"""
     myindex = context.get_partition_index()

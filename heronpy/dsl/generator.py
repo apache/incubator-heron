@@ -32,7 +32,6 @@ class Generator(object):
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
     """
     raise NotImplementedError("Generator not implementing setup() method.")
-    pass
 
   @abstractmethod
   def get(self):

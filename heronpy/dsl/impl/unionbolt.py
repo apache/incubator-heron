@@ -51,8 +51,8 @@ class UnionStreamlet(Streamlet):
       raise RuntimeError("Left of Union Streamlet has to be a Streamlet")
     if not isinstance(right, Streamlet):
       raise RuntimeError("Right of Union Streamlet has to be a Streamlet")
-    self._left = left;
-    self._right = right;
+    self._left = left
+    self._right = right
     self.set_num_partitions(left.get_num_partitions())
 
   def _calculate_inputs(self):

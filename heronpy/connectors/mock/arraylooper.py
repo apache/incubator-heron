@@ -27,6 +27,7 @@ class ArrayLooper(Generator):
       raise RuntimeError("ArrayLooper must be passed an iterable")
     self._user_iterable = user_iterable
 
+  # pylint: disable=unused-argument, attribute-defined-outside-init
   def setup(self, context):
     self._curiter = itertools.cycle(self._user_iterable)
 
