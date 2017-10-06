@@ -35,9 +35,3 @@ def word_count_dsl_builder(topology_name, http_server_url):
   runner = Runner()
   config = Config()
   runner.run(sys.argv[1], config, builder)
-
-  counts = TestStreamlet(FixedLinesStreamlet.fixedLinesGenerator(parallelism=1) \
-    .flat_map(lambda line: line.split(), parallelism=1) \
-    .map(lambda word: (word, 1), parallelism=1) \
-    .reduce_by_window(TimeWindow(5, 5), lambda x, y: x + y))
-  return counts.run(topology_name, http_server_url=http_server_url)
