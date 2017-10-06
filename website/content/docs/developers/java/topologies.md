@@ -5,6 +5,10 @@ title: Writing and Launching a Topology in Java
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations.
 
+> If you're interested in creating stateful topologies with [effectively-once
+> semantics](../../../concepts/delivery-semantics) in Java, see [this new
+> guide](../effectively-once).
+
 ### Install Heron APIs for development
 
 Before getting started writing a topology, you need to install the Heron API
