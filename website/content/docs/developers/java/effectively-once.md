@@ -26,7 +26,7 @@ The other possible values for the `TopologyReliabilityMode` enum are `ATMOST_ONC
 
 ## Stateful components
 
-Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface, which requires implementing two methods (all of which are `void` methods):
+Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface, which requires implementing two methods (both of which are `void` methods):
 
 Method | Input | Description
 :------|:------|:-----------
