@@ -13,14 +13,16 @@
 # limitations under the License.
 '''Example WordCountTopology'''
 
+import collections
 import logging
+import itertools
 import time
 
 from heronpy.dsl.builder import Builder
-from heronpy.dsl.runner import Runner
 from heronpy.dsl.config import Config
+from heronpy.dsl.generator import Generator
+from heronpy.dsl.runner import Runner
 from heronpy.dsl.windowconfig import WindowConfig
-from heronpy.connectors.mock.arraylooper import ArrayLooper
 
 def word_count_dsl_builder(topology_name, http_server_url):
   builder = Builder()
@@ -35,3 +37,19 @@ def word_count_dsl_builder(topology_name, http_server_url):
   runner = Runner()
   config = Config()
   runner.run(sys.argv[1], config, builder)
+
+class ArrayLooper(Generator):
+  """A ArrayLooper loops the contents of the a user supplied array forever
+  """
+  def __init__(self, user_iterable):
+    super(ArrayLooper, self).__init__()
+    if not isinstance(user_iterable, collections.Iterable):
+      raise RuntimeError("ArrayLooper must be passed an iterable")
+    self._user_iterable = user_iterable
+
+  def setup(self, context):
+    self._curiter = itertools.cycle(self._user_iterable)
+
+  def get(self):
+    time.sleep(1)
+    return self._curiter.next()
