@@ -130,7 +130,8 @@ public final class PythonCheckstyle {
         Predicates.and(
           Predicates.or(
             Predicates.containsPattern(".*/src/.+\\.py[c]{0,1}$"),
-            Predicates.containsPattern("^heronpy/.+\\.py[c]{0,1}$")),
+            Predicates.containsPattern("^heronpy/.+\\.py[c]{0,1}$")
+          ),
             Predicates.not(Predicates.containsPattern("third_party/")),
             Predicates.not(Predicates.containsPattern("integration_test/"))
         )
