@@ -22,7 +22,7 @@ import com.twitter.heron.dsl.impl.BuilderImpl;
  * information to build the topology
  */
 public interface Builder {
-  static Builder CreateBuilder() {
+  static Builder createBuilder() {
     return new BuilderImpl();
   }
 

@@ -123,6 +123,9 @@ public class BoltInstance implements IInstance {
 
     // Re-prepare the CustomStreamGrouping since the downstream tasks can change
     physicalPlanHelper.prepareForCustomStreamGrouping();
+    // transfer potentially changed variables by topology code
+    physicalPlanHelper.getTopologyContext().getTopologyConfig()
+        .putAll(helper.getTopologyContext().getTopologyConfig());
     // Reset the helper
     helper = physicalPlanHelper;
   }
@@ -296,11 +299,11 @@ public class BoltInstance implements IInstance {
   }
 
   private void PrepareTickTupleTimer() {
-    Object tickTupleFreqSecs =
-        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    Object tickTupleFreqMs =
+        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS);
 
-    if (tickTupleFreqSecs != null) {
-      Duration freq = TypeUtils.getDuration(tickTupleFreqSecs, ChronoUnit.SECONDS);
+    if (tickTupleFreqMs != null) {
+      Duration freq = TypeUtils.getDuration(tickTupleFreqMs, ChronoUnit.MILLIS);
 
       Runnable r = new Runnable() {
         public void run() {

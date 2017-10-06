@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.examples;
+package com.twitter.heron.examples.dsl;
 
 import java.util.Arrays;
 
@@ -48,7 +48,7 @@ public final class WordCountDslTopology {
     if (args.length > 1) {
       parallelism = Integer.parseInt(args[1]);
     }
-    Builder builder = Builder.CreateBuilder();
+    Builder builder = Builder.createBuilder();
     builder.newSource(() -> "Mary had a little lamb")
         .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")))
         .mapToKV((word) -> new KeyValue<>(word, 1))
