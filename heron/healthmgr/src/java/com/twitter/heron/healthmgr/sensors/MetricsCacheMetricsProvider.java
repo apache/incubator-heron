@@ -73,7 +73,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       TopologyMaster.MetricResponse response =
           getMetricsFromMetricsCache(metric, component, startTime, duration);
 
-      Map<String, InstanceMetrics> metrics = parse(response, component, metric);
+      Map<String, InstanceMetrics> metrics = parse(response, component, metric, startTime);
       ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
       result.put(component, componentMetric);
     }
@@ -91,10 +91,12 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   @VisibleForTesting
   @SuppressWarnings("unchecked")
   Map<String, InstanceMetrics> parse(
-      TopologyMaster.MetricResponse response, String component, String metric) {
+      TopologyMaster.MetricResponse response, String component, String metric, Instant startTime) {
     Map<String, InstanceMetrics> metricsData = new HashMap<>();
 
     if (response == null || !response.getStatus().getStatus().equals(StatusCode.OK)) {
+      LOG.info(String.format(
+          "Query failure from MetricsCache for %s:%s ", component, metric));
       return metricsData;
     }
 
@@ -113,10 +115,15 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
         String metricName = im.getName();
         Map<Instant, Double> values = new HashMap<>();
 
+        // case 1
         for (IntervalValue iv : im.getIntervalValuesList()) {
           MetricInterval mi = iv.getInterval();
           String value = iv.getValue();
           values.put(Instant.ofEpochSecond(mi.getStart()), Double.parseDouble(value));
+        }
+        // case 2
+        if (im.hasValue()) {
+          values.put(startTime, Double.parseDouble(im.getValue()));
         }
 
         if (!values.isEmpty()) {
