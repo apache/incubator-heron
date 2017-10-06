@@ -41,12 +41,14 @@ Method | Input | Description
 
 Heron topologies with effectively-once semantics need to be stateful topologies (you can also create stateful topologies with at-least-once or at-most-once semantics). All state in stateful topologies is handled through a [`State`](/api/java/com/twitter/heron/api/state/State.html) class which has the same semantics as a standard Java [`Map`](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html), and so it includes methods like `get`, `set`, `put`, `putIfAbsent`, `keySet`, `compute`, `forEach`, `merge`, and so on.
 
+Each stateful spout or bolt must be associated with a single `State` object that handles the state, and that object must also be typed as `State<K, V>`, for example `State<String, Integer>`, `State<long, MyPojo>`, etc. An example usage of the state object can be found in the [example topology](#example-effectively-once-topology) below.
+
 ## Example effectively-once topology
 
 In the sections below, we'll build a stateful topology with effectively-once semantics from scratch. The topology will work like this:
 
 * A [`RandomIntSpout`](#example-stateful-spout) will continuously emit random integers between 1 and 100
-* An [`AdditionBolt`](#example-stateful-bolt) will receive those random numbers and add each number to a running sum. When the sum reaches 1,000,000, it will go back to zero.
+* An [`AdditionBolt`](#example-stateful-bolt) will receive those random numbers and add each number to a running sum. When the sum reaches 1,000,000, it will go back to zero. The bolt won't emit any data but will simply log the current sum.
 
 ### Example stateful spout
 
@@ -235,4 +237,32 @@ $ heron submit local \
   target/effectivelyonce-latest-jar-with-dependencies.jar \
   io.streaml.example.effectivelyonce.RunningSumTopology \
   RunningSumTopology
+```
+
+> By default, Heron uses the [local filesystem](../../../operators/deployment/statemanagers/localfs) as a State Manager. If you're running Heron locally using the instructions in the [Quick Start Guide](../../../getting-started) then you won't need to change any settings to run this example stateful topology with effectively-once semantics.
+
+From there, you can see the log output for the bolt by running the [Heron Tracker](../../../operators/heron-tracker) and [Heron UI](../../../operators/heron-ui):
+
+```bash
+$ heron-tracker
+
+# In a different terminal window
+$ heron-ui
+```
+
+> For installation instructions for the Heron Tracker and the Heron UI, see the [Quick Start Guide](../../../getting-started).
+
+Once the Heron UI is running, navigate to http://localhost:8889 and click on the `RunningSumTopology` link. You should see something like this in the window that opens up:
+
+![Logical topology drilldown](/img/logical-topology.png)
+
+Click on **addition-bolt** on the right (under **1 Container and 1 Instances**) and then click on the blug **logs** button. You should see log output like this:
+
+```
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 0
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 68
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 93
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 117
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 123
+[2017-10-06 13:39:07 -0700] [STDOUT] stdout: The current saved sum is: 185
 ```
