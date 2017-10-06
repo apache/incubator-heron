@@ -93,18 +93,22 @@ public class BackPressureSensor extends BaseSensor {
         // since a bolt instance belongs to one stream manager, 
         // for tracker rest api: expect just one metrics manager instance in the result;
         // for tmaster/metricscache stat interface: expect a list
-//        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-//          it.hasNext(); ) {
-          InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
+        Double valueSum = 0.0;
+        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
+          it.hasNext(); ) {
+          InstanceMetrics stmgrInstanceResult = it.next();
 
           System.out.println("continue stmgr result instance metrics " + stmgrInstanceResult);
-          Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
-          if (valueSum == null) {
-            System.out.println("continue valueSum null");
-            continue;
+          Double val = stmgrInstanceResult.getMetricValueSum(metric);
+          if (val == null) {
+            System.out.println("continue val null");
+          } else {
+            System.out.println("val " + val);
+            valueSum += val;
           }
-//        }
+        }
         double averageBp = valueSum / duration.getSeconds();
+        System.out.println("averageBp " + averageBp);
 
         // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
         // a bug in Heron (Issue: 1753), this value could be higher in some cases. The following
