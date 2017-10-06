@@ -1,7 +1,7 @@
 Heron processing topologies can be written using an API called the **Heron Functional API**. The Heron Functional API is currently available for the following languages:
 
 * [Java](../../../developers/java/functional-api)
-<!-- * [Python](../../../developers/python/functional-api) -->
+* [Python](../../../developers/python/functional-api)
 
 > Although the original [topology API](../../../concepts/topologies) can still be used with Heron (which means that all of your older topologies will still run) we strongly recommend creating all new topologies using the Heron Functional API, for reasons outlined in the section below.
 

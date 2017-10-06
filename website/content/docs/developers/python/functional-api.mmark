@@ -1,0 +1,16 @@
+---
+title: The Heron Functional API for Python
+description: Create Heron topologies in Python using a functional programming style
+---
+
+{{< alert "functional-api-preview" >}}
+
+{{content/snippets/heron-functional-api.md}}
+
+## Getting started
+
+If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Python topologies to a Heron cluster, they need to be packaged as a Python executable ([PEX](https://pex.readthedocs.io/en/stable/whatispex.html)) file. In order to produce PEX files, we recommend using a build tool like [Pants](http://www.pantsbuild.org/python_readme.html) or [Bazel](https://github.com/benley/bazel_rules_pex).
+
+> #### Example Functional API topologies buildable as PEXes
+> * See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
+> * See [this repo](https://github.com/streamlio/bazel-dev-environment) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
