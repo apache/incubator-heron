@@ -28,14 +28,16 @@ from integration_test.src.python.integration_test.core.test_runner import TestRu
 
 def word_count_dsl_builder(topology_name, http_server_url):
   builder = Builder()
-  sentences = ["Mary had a little lamb",
-               "Humpy Dumpy sat on a wall",
-               "Here we round the Moulberry bush"]
-  builder.new_source(ArrayLooper(sentences, sleep=1)) \
-         .flat_map(lambda line: line.split()) \
-         .map(lambda word: (word, 1)) \
-         .reduce_by_key_and_window(WindowConfig.create_sliding_window(5, 5), lambda x, y: x + y) \
-         .log()
+  sentences1 = ["Mary had a little lamb",
+                "Humpy Dumpy sat on a wall"]
+  sentences2 = ["Here we round the Moulberry bush"]
+  source1 = builder.new_source(ArrayLooper(sentences1, sleep=1))
+  source2 = builder.new_source(ArrayLooper(sentences2, sleep=1))
+  stream1 = source1.flat_map(lambda line: line.split()) \
+                   .map(lambda word: (word, 1))
+  stream2 = source2.flat_map(lambda line: line.split()) \
+                   .map(lambda word: (word, 1))
+  stream1.union(stream2)
   runner = TestRunner()
   config = Config()
   return runner.run(topology_name, config, builder, http_server_url)
