@@ -6,7 +6,6 @@ pex_library(
     name = "heron-integration-common-py",
     srcs = glob(["**/*.py"]),
     deps = [
-        "//heronpy/api:heron-python-py",
-        "//heronpy/dsl:heron-pythondsl-py"
+        "//heronpy/api:heron-python-py"
     ],
 )
