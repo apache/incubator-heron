@@ -32,6 +32,15 @@ build:darwin --python2_path /usr/bin/python2.7
 build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
 
+# For Mac
+# To use it: bazel build --config=darwin_dev
+build:darwin_dev --genrule_strategy=standalone
+build:darwin_dev --ignore_unsupported_sandboxing
+build:darwin_dev --java_toolchain=//tools/java:heron_java_toolchain
+build:darwin_dev --python2_path /usr/bin/python2.7
+build:darwin_dev --spawn_strategy=standalone
+build:darwin_dev --workspace_status_command scripts/release/status.sh
+
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
 build:ubuntu --experimental_action_listener=tools/java:compile_java
