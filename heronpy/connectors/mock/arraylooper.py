@@ -15,21 +15,25 @@
 
 import collections
 import itertools
+import time
 
 from heronpy.dsl.generator import Generator
 
 class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever
   """
-  def __init__(self, user_iterable):
+  def __init__(self, user_iterable, sleep=None):
     super(ArrayLooper, self).__init__()
     if not isinstance(user_iterable, collections.Iterable):
       raise RuntimeError("ArrayLooper must be passed an iterable")
     self._user_iterable = user_iterable
+    self._sleep = sleep
 
   # pylint: disable=unused-argument, attribute-defined-outside-init
   def setup(self, context):
     self._curiter = itertools.cycle(self._user_iterable)
 
   def get(self):
+    if self._sleep is not None:
+      time.sleep(self._sleep)
     return self._curiter.next()

@@ -23,15 +23,15 @@ from heronpy.dsl.config import Config
 from heronpy.dsl.generator import Generator
 from heronpy.dsl.runner import Runner
 from heronpy.dsl.windowconfig import WindowConfig
+from heronpy.connectors.mock.arraylooper import ArrayLooper
 from integration_test.src.python.integration_test.core.test_runner import TestRunner
-from integration_test.src.python.integration_test.common.generator import SleepArrayLooper
 
 def word_count_dsl_builder(topology_name, http_server_url):
   builder = Builder()
   sentences = ["Mary had a little lamb",
                "Humpy Dumpy sat on a wall",
                "Here we round the Moulberry bush"]
-  builder.new_source(SleepArrayLooper(sentences)) \
+  builder.new_source(ArrayLooper(sentences, sleep=1)) \
          .flat_map(lambda line: line.split()) \
          .map(lambda word: (word, 1)) \
          .reduce_by_key_and_window(WindowConfig.create_sliding_window(5, 5), lambda x, y: x + y) \
