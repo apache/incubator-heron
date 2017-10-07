@@ -115,7 +115,7 @@ public class BackPressureSensor extends BaseSensor {
         // check partially corrects the reported BP value
         averageBp = averageBp > 1000 ? 1000 : averageBp;
         InstanceMetrics boltInstanceMetric
-            = new InstanceMetrics(boltInstanceName, metric, averageBp);
+            = new InstanceMetrics(boltInstanceName, getMetricName(), averageBp);
 
         instanceMetrics.put(boltInstanceName, boltInstanceMetric);
       }
