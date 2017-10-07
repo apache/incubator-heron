@@ -16,7 +16,6 @@ package com.twitter.heron.api.bolt;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
