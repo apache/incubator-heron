@@ -24,13 +24,14 @@ from heronpy.dsl.generator import Generator
 from heronpy.dsl.runner import Runner
 from heronpy.dsl.windowconfig import WindowConfig
 from integration_test.src.python.integration_test.core.test_runner import TestRunner
+from integration_test.src.python.integration_test.common.generator import SleepArrayLooper
 
 def word_count_dsl_builder(topology_name, http_server_url):
   builder = Builder()
   sentences = ["Mary had a little lamb",
                "Humpy Dumpy sat on a wall",
                "Here we round the Moulberry bush"]
-  builder.new_source(ArrayLooper(sentences)) \
+  builder.new_source(SleepArrayLooper(sentences)) \
          .flat_map(lambda line: line.split()) \
          .map(lambda word: (word, 1)) \
          .reduce_by_key_and_window(WindowConfig.create_sliding_window(5, 5), lambda x, y: x + y) \
@@ -38,19 +39,3 @@ def word_count_dsl_builder(topology_name, http_server_url):
   runner = TestRunner()
   config = Config()
   return runner.run(topology_name, config, builder, http_server_url)
-
-class ArrayLooper(Generator):
-  """A ArrayLooper loops the contents of the a user supplied array forever
-  """
-  def __init__(self, user_iterable):
-    super(ArrayLooper, self).__init__()
-    if not isinstance(user_iterable, collections.Iterable):
-      raise RuntimeError("ArrayLooper must be passed an iterable")
-    self._user_iterable = user_iterable
-
-  def setup(self, context):
-    self._curiter = itertools.cycle(self._user_iterable)
-
-  def get(self):
-    time.sleep(1)
-    return self._curiter.next()
