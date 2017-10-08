@@ -81,7 +81,6 @@ public class WindowedBoltExecutor implements IRichBolt,
   private static final String WINDOWING_INTERNAL_STATE = "windowing.internal.state";
   // package level for unit tests
   protected transient WaterMarkEventGenerator<Tuple> waterMarkEventGenerator;
-  private  Map<String, Serializable> windowingInternalState;
 
   public WindowedBoltExecutor(IWindowedBolt bolt) {
     this.bolt = bolt;
@@ -156,6 +155,7 @@ public class WindowedBoltExecutor implements IRichBolt,
     }
   }
 
+  @SuppressWarnings("unchecked")
   private WindowManager<Tuple> initWindowManager(WindowLifecycleListener<Tuple>
                                                      lifecycleListener, Map<String, Object>
       topoConf, TopologyContext context, Collection<Event<Tuple>> queue) {
@@ -228,8 +228,10 @@ public class WindowedBoltExecutor implements IRichBolt,
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
     // restore state if there is existing state
-    if (this.windowingInternalState != null) {
-      manager.restoreState(this.windowingInternalState);
+    if (this.state != null
+        && this.state.get(WINDOWING_INTERNAL_STATE) != null
+        && !((HashMapState) this.state.get(WINDOWING_INTERNAL_STATE)).isEmpty()) {
+      restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
     }
     return manager;
   }
@@ -422,24 +424,26 @@ public class WindowedBoltExecutor implements IRichBolt,
   }
 
   @Override
-  @SuppressWarnings({"unchecked", "HiddenField"})
+  @SuppressWarnings("HiddenField")
   public void initState(State<Serializable, Serializable> state) {
-    this.state = state;
-    // if already contains state then that indicates that a rollback has happened
-    if (!this.state.containsKey(WINDOWING_INTERNAL_STATE)) {
-      this.state.put(WINDOWING_INTERNAL_STATE, new HashMapState<Serializable, Serializable>());
-    } else {
-      // need to restore state after a rollback
-      this.windowingInternalState = (Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE);
+    // if effectively once is enabled
+    if (state != null) {
+      this.state = state;
+      // if already contains state then that indicates that a rollback has happened
+      if (!this.state.containsKey(WINDOWING_INTERNAL_STATE)) {
+        this.state.put(WINDOWING_INTERNAL_STATE, new HashMapState<>());
+      }
     }
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void preSave(String checkpointId) {
-    // getting current state from window manager to be included in checkpoint
-    ((HashMapState<Serializable, Serializable>) this.state.get(WINDOWING_INTERNAL_STATE))
-        .putAll(this.getWindowManager().getState());
+    if (this.state != null) {
+      // getting current state from window manager to be included in checkpoint
+      ((HashMapState<Serializable, Serializable>) this.state.get(WINDOWING_INTERNAL_STATE))
+          .putAll(this.getWindowManager().getState());
+    }
   }
 
   /**
