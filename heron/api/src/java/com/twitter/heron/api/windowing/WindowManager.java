@@ -323,7 +323,6 @@ public class WindowManager<T extends Serializable> implements TriggerHandler {
   @SuppressWarnings("unchecked")
   public void restoreState(Map<String, Serializable> state) {
     LOG.info("Restoring window manager state");
-    LOG.info("State: " + state);
 
     //restore eviction policy state
     if (state.get(EVICTION_STATE_KEY) != null) {
