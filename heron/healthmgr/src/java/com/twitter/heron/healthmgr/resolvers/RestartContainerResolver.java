@@ -62,7 +62,9 @@ public class RestartContainerResolver implements IResolver {
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
         LOG.info("bpSymptom == null " + (bpSymptom == null));
-        LOG.info("bpSymptom.getComponents() " + (bpSymptom.getComponents()));
+        if (bpSymptom != null) {
+          LOG.info("bpSymptom.getComponents() " + (bpSymptom.getComponents()));
+        }
         continue;
       }
 
