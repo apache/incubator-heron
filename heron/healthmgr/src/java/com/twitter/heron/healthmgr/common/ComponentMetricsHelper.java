@@ -48,7 +48,7 @@ public class ComponentMetricsHelper {
   public void computeBpStats() {
     for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
       Double bpValue = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
-      if (bpValue!=null && bpValue > 0) {
+      if (bpValue != null && bpValue > 0) {
         boltsWithBackpressure.add(instanceMetrics);
         totalBackpressure += bpValue;
       }

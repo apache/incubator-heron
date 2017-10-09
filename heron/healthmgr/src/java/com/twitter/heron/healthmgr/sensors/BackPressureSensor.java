@@ -90,12 +90,12 @@ public class BackPressureSensor extends BaseSensor {
           continue;
         }
 
-        // since a bolt instance belongs to one stream manager, 
+        // since a bolt instance belongs to one stream manager,
         // for tracker rest api: expect just one metrics manager instance in the result;
         // for tmaster/metricscache stat interface: expect a list
         Double valueSum = 0.0;
         for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-          it.hasNext(); ) {
+            it.hasNext();) {
           InstanceMetrics stmgrInstanceResult = it.next();
 
           System.out.println("stmgr result instance metrics " + stmgrInstanceResult);

@@ -100,7 +100,7 @@ public class BufferSizeSensor extends BaseSensor {
         // manager instance in the result
         Double stmgrInstanceResult = 0.0;
         for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-            it.hasNext(); ) {
+            it.hasNext();) {
           InstanceMetrics iMetrics = it.next();
           Double val = iMetrics.getMetricValueSum(metric);
           if (val == null) {
