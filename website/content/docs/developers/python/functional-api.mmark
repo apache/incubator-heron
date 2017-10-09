@@ -3,7 +3,7 @@ title: The Heron Functional API for Python
 description: Create Heron topologies in Python using a functional programming style
 ---
 
-{{< alert "functional-api-preview" >}}
+{{< alert "functional-api-beta" >}}
 
 {{content/snippets/heron-functional-api.md}}
 
