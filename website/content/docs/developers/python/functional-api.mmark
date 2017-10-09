@@ -20,6 +20,44 @@ If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Pyth
 
 ## Functional API topology configuration
 
-Every Functional API topology needs to be configured using a [`Config`]() object
+Every Functional API topology needs to be configured using a [`Config`](TODO) object.
 
 ### Delivery semantics
+
+```python
+from heronpy.dsl.config import Config
+
+topology_config = Config()
+topology_config.set_delivery_semantics(Config.EFFECTIVELY_ONCE)
+```
+
+The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
+
+### Containers and resources
+
+You can set the number of containers to be used by a Functional API topology (as an integer) like so:
+
+```python
+topology_config.set_num_containers(2)
+```
+
+You can set the CPU (as a `float`) and RAM (as an `int` expressing the number of bytes) per container like this:
+
+```python
+from heronpy.dsl.resources import Resources
+
+topology_resources = Resources()
+topology_resources.set_cpu(2.0)
+topology_resources.set_ram(104857600)
+
+topology_config.set_container_resources(topology_resources)
+```
+
+> The default CPU is `1.0` while the default RAM is `104857600` (100 megabytes).
+
+There are also some helper methods that make it easier to specify RAM in megabytes and gigabytes (`set_ram_in_mb` and `set_ram_in_gb`, respectively). Here are two examples:
+
+```python
+topology_resources.set_ram_in_mb(500) # 500 megabytes
+topology_resources.set_ram_in_gb(5)   # 5 gigabytes
+```

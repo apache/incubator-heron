@@ -134,13 +134,13 @@ The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
 
 ### Containers and resources
 
-You can set the number of Docker containers to be used by a Functional API topology (as an integer) like so:
+You can set the number of containers to be used by a Functional API topology (as an integer) like so:
 
 ```java
 topologyConfig.setNumContainers(2);
 ```
 
-You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
+You can set the CPU (as a `float`) and RAM (as a `long` expressing the number of bytes) per container like this:
 
 ```java
 import com.twitter.heron.dsl.Resources;
