@@ -15,8 +15,6 @@ sections:
     sublinks:
       - name: The Heron Topology API for Java
         url: /docs/developers/java/topologies
-      - name: Effectively-once Java topologies
-        url: /docs/developers/java/effectively-once
       - name: Python Topologies
         url: /docs/developers/python/topologies
       - name: Heron Data Model
