@@ -121,6 +121,15 @@ public final class FileUtils {
   }
 
   public static boolean deleteDir(File dir, boolean deleteSelf) {
+    if (Files.isSymbolicLink(dir.toPath())) {
+      try {
+        Files.delete(dir.toPath());
+        return true;
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
     if (dir.isDirectory()) {
       String[] children = dir.list();
 

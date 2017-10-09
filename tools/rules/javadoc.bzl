@@ -15,8 +15,8 @@
 
 def _impl(ctx):
   zip_output = ctx.outputs.zip
-  transitive_jar_set = set()
-  source_jars = set()
+  transitive_jar_set = depset()
+  source_jars = depset()
   for l in ctx.attr.libs:
     source_jars += l.java.source_jars
     transitive_jar_set += l.java.transitive_deps

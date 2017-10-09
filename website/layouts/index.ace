@@ -51,10 +51,6 @@ html lang={{.Site.LanguageCode}}
                     .panel-heading Scalability and Reliability
                     .panel-body Heron is highly scalable both in the ability to execute large number of components for each topology and the ability to launch and track large numbers of topologies.
             hr
-            .landing-feature-1.text-left
-              h2 Heron is in Beta
-              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use. The Heron team monitors and responds actively to <a href="{{.Site.Params.github.issues}}">bug reports</a> from users.
-            hr
             .landing-feature-2.text-left
               h2 Get Started
               .row

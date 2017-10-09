@@ -53,7 +53,7 @@ public class HttpJsonClient {
     byte[] responseData;
     try {
       if (!NetworkUtils.sendHttpGetRequest(conn)) {
-        throw new IOException("Failed to send delete request to " + endpointURI);
+        throw new IOException("Failed to send get request to " + endpointURI);
       }
 
       // Check the response code
