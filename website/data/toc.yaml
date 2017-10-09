@@ -107,6 +107,8 @@ sections:
     sublinks:
       - name: Heron Client
         url: /docs/operators/heron-cli
+      - name: Heron Explorer
+        url: /docs/operators/heron-explorer
       - name: Heron Tracker REST API
         url: /docs/operators/heron-tracker-api
       - name: Heron Tracker Runbook
