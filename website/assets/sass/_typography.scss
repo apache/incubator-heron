@@ -8,6 +8,7 @@ article.hn-docs-content {
   code {
     color: $heron-blue-green;
     background-color: lighten($light-gray, 25%);
+    font-size: inherit;
   }
 
   h1 {
@@ -51,10 +52,6 @@ article.hn-docs-content {
       h1, h2, h3, h4 {
         margin-top: $base-margin * 1.5;
       }
-    }
-
-    code {
-      font-size: inherit;
     }
   }
 
@@ -145,12 +142,10 @@ article.hn-docs-content {
   }
 
   .highlight {
-    overflow: hidden;
     margin: $base-margin * .8 0;
+    max-width: 100%;
 
     pre {
-      max-width: 100%;
-      overflow: auto;
       color: $light-gray;
       padding: $base-padding * 1.25;
 
@@ -158,6 +153,7 @@ article.hn-docs-content {
         font-size: $base-font-size;
         color: $light-gray;
         background-color: #263238;
+        white-space: pre;
 
         .hll { background-color: #49483e }
         .c { color: #75715e; } /* Comment */
