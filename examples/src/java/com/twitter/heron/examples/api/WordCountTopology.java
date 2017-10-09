@@ -159,19 +159,23 @@ public final class WordCountTopology {
   public static class BackpressureBolt extends BaseRichBolt {
 
     private static final long serialVersionUID = 1111L;
+    private boolean slow = true;
 
     @Override
     public void prepare(Map<String, Object> heronConf, TopologyContext context,
         OutputCollector collector) {
-      System.out.println("backpressure bolt prepare");
+      slow = context.getThisTaskIndex() %2==0;
+      System.out.println("backpressure bolt prepare - slow " + slow);
     }
 
     @Override
     public void execute(Tuple input) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+      if (slow) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
     }
 
