@@ -14,3 +14,5 @@ If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Pyth
 > #### Example Functional API topologies buildable as PEXes
 > * See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
 > * See [this repo](https://github.com/streamlio/bazel-dev-environment) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
+>
+> Regardless of which build tool you use, make sure to update the version of the `heronpy` library to the most recent version ({{< heronVersion >}}). For Pants you can set the version in `3rdparty/python/requirements.txt` and for Bazel you can set the version in each topology's root `BUILD` file (in the `reqs` list of the `pex_binary` declaration).
