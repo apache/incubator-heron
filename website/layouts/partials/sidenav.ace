@@ -8,6 +8,9 @@ nav.hn-sidebar-nav
           a role=button data-toggle=collapse data-parent=#hn-accordion href=#collapse-{{$label}} aria-labelledby={{$label}}
             i.fa.fa-caret-right
             {{.name}}
+            {{- if .new }}
+            span.label.label-success NEW
+            {{- end }}
       .panel-collapse.collapse id=collapse-{{$label}} aria-labelledby={{$label}}
         .panel-body
           ul

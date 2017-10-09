@@ -8,6 +8,7 @@ sections:
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
   - name: The Heron Functional API
+    new: true
     sublinks:
     - name: The Heron Functional API for Java
       url: /docs/developers/java/functional-api

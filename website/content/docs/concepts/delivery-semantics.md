@@ -1,5 +1,6 @@
 ---
 title: Heron Delivery Semantics
+new: true
 ---
 
 Heron provides support for multiple delivery semantics, and you can select delivery semantics on a topology-by-topology basis. Thus, if you have topologies for which [at-most-once](#available-semantics) semantics are perfectly acceptable, for example, you can run them alongside topologies with more stringent semantics (such as effectively once).

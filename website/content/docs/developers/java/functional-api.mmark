@@ -1,6 +1,7 @@
 ---
 title: The Heron Functional API for Java
 description: Create Heron topologies in Java using a functional programming style
+new: true
 ---
 
 {{< alert "functional-api-beta" >}}

@@ -104,6 +104,10 @@ aside.hn-sidebar {
   .hn-sidebar-nav {
     a {
       text-decoration: none;
+
+      .label {
+        margin-left: .5rem;
+      }
     }
 
     .panel {
@@ -170,6 +174,12 @@ aside.hn-sidebar {
 section.hn-docs-main {
   margin-bottom: $docs-main-bottom-margin;
   header.hn-docs-header {
+    .hn-docs-title {
+      .label {
+        margin-left: 1rem;
+      }
+    }
+
     .hn-docs-description {
       font-weight: bolder;
     }
