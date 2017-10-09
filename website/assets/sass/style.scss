@@ -1,5 +1,4 @@
 @import "variables";
-@import "pygments";
 @import "bootstrap";
 @import "typography";
 
@@ -165,6 +164,7 @@ aside.hn-sidebar {
 
 // Main content on docs pages
 section.hn-docs-main {
+  max-width: 100%;
   margin-bottom: $docs-main-bottom-margin;
 
   header.hn-docs-header {

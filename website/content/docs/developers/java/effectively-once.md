@@ -119,7 +119,7 @@ A few things to note in this spout:
 
 ### Example stateful bolt
 
-The `AdditionBolt`
+The `AdditionBolt` takes incoming tuples from the `RandomIntSpout` and adds each integer to produce a running sum. If the sum ever exceeds 1 million, then it resets to zero.
 
 ```java
 import com.twitter.heron.api.bolt.BaseRichBolt;
@@ -171,7 +171,7 @@ public class AdditionBolt extends BaseRichBolt implements IStatefulComponent<Str
         int newSum = incomingValue + currentSum;
 
         // Reset the sum to zero if it exceeds 1,000,000
-        if (newSum > 10^6) {
+        if (newSum > 1000000) {
             newSum = 0;
         }
 

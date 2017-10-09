@@ -17,7 +17,7 @@ html lang={{.Site.LanguageCode}}
           .row
             aside.hn-sidebar.hidden-xs.hidden-sm.col-md-4.col-lg-2
               {{partial "sidenav.html" .}}
-            section.hn-docs-main.col-xs-12.col-sm-12.col-md-8.col-lg-8.col-md-offset-4.col-lg-offset-2
+            section.hn-docs-main.col-xs-12.col-sm-12.col-md-8.col-lg-10.col-md-offset-4.col-lg-offset-2
               {{partial "docs/main.html" .}}
     script src=https://code.jquery.com/jquery-2.2.1.min.js
     script src=/js/app.min.js
