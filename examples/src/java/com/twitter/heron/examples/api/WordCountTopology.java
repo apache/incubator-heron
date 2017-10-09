@@ -125,62 +125,6 @@ public final class WordCountTopology {
       collector.emit(new Values(words[nextInt]));
     }
   }
-  
-  public static class BackpressureSpout extends BaseRichSpout {
-
-    private static final long serialVersionUID = 2222L;
-    Random rand = null;
-    SpoutOutputCollector collector;
-    
-    @Override
-    public void open(Map<String, Object> conf, TopologyContext context,
-        SpoutOutputCollector collector) {
-      rand = new Random();
-      this.collector = collector;
-    }
-
-    @Override
-    public void nextTuple() {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      collector.emit(new Values(Integer.toHexString(rand.nextInt())));
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      declarer.declare(new Fields("backpressure_word"));
-    }
-    
-  }
-  
-  public static class BackpressureBolt extends BaseRichBolt {
-
-    private static final long serialVersionUID = 1111L;
-
-    @Override
-    public void prepare(Map<String, Object> heronConf, TopologyContext context,
-        OutputCollector collector) {
-      System.out.println("backpressure bolt prepare");
-    }
-
-    @Override
-    public void execute(Tuple input) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      System.out.println("declare output fields - no operation");
-    }
-    
-  }
 
   /**
    * A bolt that counts the words that it receives
@@ -221,19 +165,16 @@ public final class WordCountTopology {
       throw new RuntimeException("Specify topology name");
     }
 
-    int parallelism = 10;
+    int parallelism = 1;
     if (args.length > 1) {
       parallelism = Integer.parseInt(args[1]);
     }
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
-    builder.setSpout("backpressurespout", new BackpressureSpout(), 2);
     builder.setBolt("consumer", new ConsumerBolt(), parallelism)
-        .fieldsGrouping("word", new Fields("word")).shuffleGrouping("backpressurespout");
-    builder.setBolt("backpressurebolt", new BackpressureBolt(), 2)
-      .shuffleGrouping("backpressurespout").shuffleGrouping("word");
+        .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
-    conf.setNumStmgrs(5);
+    conf.setNumStmgrs(parallelism);
 
     // configure component resources
     com.twitter.heron.api.Config.setComponentRam(conf, "word",
@@ -243,9 +184,9 @@ public final class WordCountTopology {
 
     // configure container resources
     com.twitter.heron.api.Config.setContainerDiskRequested(conf,
-        ByteAmount.fromGigabytes(20));
+        ExampleResources.getContainerDisk(2 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerRamRequested(conf,
-        ByteAmount.fromGigabytes(5));
+        ExampleResources.getContainerRam(2 * parallelism, parallelism));
     com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());

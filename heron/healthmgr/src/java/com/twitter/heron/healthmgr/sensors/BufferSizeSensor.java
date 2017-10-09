@@ -18,7 +18,6 @@ package com.twitter.heron.healthmgr.sensors;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,17 +97,8 @@ public class BufferSizeSensor extends BaseSensor {
 
         // since a bolt instance belongs to one stream manager, expect just one metrics
         // manager instance in the result
-        Double stmgrInstanceResult = 0.0;
-        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-            it.hasNext();) {
-          InstanceMetrics iMetrics = it.next();
-          Double val = iMetrics.getMetricValueSum(metric);
-          if (val == null) {
-            continue;
-          } else {
-            stmgrInstanceResult += val;
-          }
-        }
+        double stmgrInstanceResult =
+            streamManagerResult.values().iterator().next().getMetricValueSum(metric);
 
         InstanceMetrics boltInstanceMetric =
             new InstanceMetrics(boltInstanceName, getMetricName(), stmgrInstanceResult);
