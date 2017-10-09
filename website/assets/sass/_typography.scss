@@ -4,6 +4,10 @@ $base-font-size: 18px;
 $base-line-height: 1.5;
 
 article.hn-docs-content {
+  .alert {
+    margin: 1.5rem 0;
+  }
+
   code {
     color: $heron-blue-green;
     background-color: lighten($light-gray, 25%);

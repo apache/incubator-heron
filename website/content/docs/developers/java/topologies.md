@@ -74,57 +74,49 @@ $ heron submit local \
 
 ### Writing your topology logic
 
-Heron [topologies](../../../concepts/topologies)
+Heron [topologies](../../../concepts/topologies) are processing graphs consisting
+of [spouts](../spouts) that ingest data and [bolts](../bolts) that process that data.
 
-[Spouts](../spouts) and [Bolts](../bolts) discuss how to implement a
-spouts and bolts, respectively.
+{{< alert "spouts-and-bolts" >}}
 
-After defining the spouts and bolts, a topology can be composed using
+Once you've defined the spouts and bolts, a topology can be composed using a
 [`TopologyBuilder`](/api/com/twitter/heron/api/topology/TopologyBuilder.html). The
-`TopologyBuilder` has two major methods to specify the components:
+`TopologyBuilder` has two major methods used to specify topology components:
 
-* `setBolt(String id, IRichBolt bolt, Number parallelismHint)`: `id` is the
-unique identifier that assigned to a bolt, `bolt` is the one previously
-composed, and `parallelismHint` is a number that specifying the number of
-instances of this bolt.
+Method | Description
+:------|:-----------
+`setBolt(String id, IRichBolt bolt, Number parallelismHint)` | `id` is the unique identifier that assigned to a bolt, `bolt` is the one previously composed, and `parallelismHint` is a number that specifies the number of instances of this bolt.
+`setSpout(String id, IRichSpout spout, Number parallelismHint)` | `id` is the unique identifier that assigned to a spout, `spout` is the one previously composed, and `parallelismHint` is a number that specifying the number of instances of this spout.
 
-* `setSpout(String id, IRichSpout spout, Number parallelismHint)`: `id` is the
-unique identifier that assigned to a spout, `spout` is the one previously
-composed, and `parallelismHint` is a number that specifying the number of
-instances of this spout.
-
-A simple example is as follows:
+Here's a simple example:
 
 ```java
 
 TopologyBuilder builder = new TopologyBuilder();
 builder.setSpout("word", new TestWordSpout(), 5);
 builder.setBolt("exclaim", new ExclamationBolt(), 4);
-
 ```
 
-In addition to the component specification, how to transmit Tuples between the
-components must also be specified. This is defined by different
-grouping strategies:
+In addition to the component specification, you also need to specify how tuples
+will be routed between your topology components. There are a few different grouping
+strategies available:
 
-* Fields Grouping: Tuples are transmitted to bolts based on a given field. Tuples
-with the same field will always go to the same bolt.
-* Global Grouping: All the Tuples are transmitted to a single instance of a bolt
-with the lowest task id.
-* Shuffle Grouping: Tuples are randomly transmitted to different instances of
-a bolt.
-* None Grouping: Currently, it equals to shuffle grouping.
-* All Grouping: All Tuples are transmitted to all instances of a bolt.
-* Custom Grouping: User-defined grouping strategy.
+Grouping strategy | Description
+:-----------------|:-----------
+Fields grouping | Tuples are transmitted to bolts based on a given field. Tuples with the same field will always go to the same bolt.
+Global grouping | All tuples are transmitted to a single instance of a bolt with the lowest task id.
+Shuffle Grouping | Tuples are randomly transmitted to different instances of a bolt.
+None grouping | Currently, this is the same as shuffle grouping.
+All grouping | All tuples are transmitted to all instances of a bolt.
+Custom grouping | User-defined grouping strategy.
 
 The following snippet is a simple example of specifying shuffle grouping
-between our `word` spout and `exclaim` bolt.
+between a `word` spout and an `exclaim` bolt.
 
 ```java
 
 builder.setBolt("exclaim", new ExclamationBolt(), 4)
   .shuffleGrouping("word");
-
 ```
 
 Once the components and the grouping are specified, the topology can be built.
@@ -133,4 +125,4 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples).
+See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for a complete example. More examples for the Heron Topology API can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples/api).
