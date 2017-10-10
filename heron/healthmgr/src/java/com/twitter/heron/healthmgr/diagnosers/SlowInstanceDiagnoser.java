@@ -45,6 +45,9 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
         || !processingRateSkewComponents.isEmpty()) {
       // Since there is no back pressure or disparate wait count or similar
       // execution count, no action is needed
+      LOG.info("no back pressure " + bpSymptoms.isEmpty());
+      LOG.info("no disparate wait count " + waitQDisparityComponents.isEmpty());
+      LOG.info("no similar execution count " + !processingRateSkewComponents.isEmpty());
       return null;
     } else if (bpSymptoms.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
@@ -56,6 +59,8 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
     ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
     if (pendingBufferMetrics == null) {
       // no wait Q disparity for the component with back pressure. There is no slow instance
+      LOG.info("no wait Q disparity for " + bpMetrics.getName() + " with back pressure. " +
+          " the backpressure metrics:\n" + bpMetrics.toString());
       return null;
     }
 
@@ -76,6 +81,7 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       }
     }
 
+    LOG.info("result symptom: " + resultSymptom);
     return resultSymptom != null
         ? new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), resultSymptom) : null;
   }

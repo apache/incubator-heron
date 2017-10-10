@@ -133,6 +133,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   @VisibleForTesting
   TopologyMaster.MetricResponse getMetricsFromMetricsCache(
       String metric, String component, Instant start, Duration duration) {
+    LOG.log(Level.FINE, "MetricsCache Query request metric name : {0}", metric);
     TopologyMaster.MetricRequest request = TopologyMaster.MetricRequest.newBuilder()
         .setComponentName(component)
         .setExplicitInterval(
@@ -142,7 +143,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
                 .build())
         .addMetric(metric)
         .build();
-    LOG.log(Level.FINE, "MetricsCache Query request: {0}", request);
+    LOG.log(Level.FINE, "MetricsCache Query request: \n{0}", request);
 
     HttpURLConnection connection = NetworkUtils.getHttpConnection(getCacheLocation());
     try {
@@ -158,7 +159,7 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
       try {
         TopologyMaster.MetricResponse response =
             TopologyMaster.MetricResponse.parseFrom(responseData);
-        LOG.log(Level.FINE, "MetricsCache Query response: {0}", response);
+        LOG.log(Level.FINE, "MetricsCache Query response: \n{0}", response);
         return response;
       } catch (InvalidProtocolBufferException e) {
         LOG.log(Level.SEVERE, "protobuf cannot parse the reply from MetricsCache ", e);
