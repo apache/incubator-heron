@@ -28,10 +28,10 @@ import com.twitter.heron.dsl.impl.operators.FlatMapOperator;
  */
 public class FlatMapStreamlet<R, T> extends BaseStreamlet<T> {
   private BaseStreamlet<R> parent;
-  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
+  private SerializableFunction<? super R, ? extends Iterable<T>> flatMapFn;
 
   public FlatMapStreamlet(BaseStreamlet<R> parent,
-                          SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
+                          SerializableFunction<? super R, ? extends Iterable<T>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());

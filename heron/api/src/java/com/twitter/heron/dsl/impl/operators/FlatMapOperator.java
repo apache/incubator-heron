@@ -30,11 +30,11 @@ import com.twitter.heron.dsl.SerializableFunction;
  */
 public class FlatMapOperator<R, T> extends DslOperator {
   private static final long serialVersionUID = -2418329215159618998L;
-  private SerializableFunction<? super R, Iterable<? extends T>> flatMapFn;
+  private SerializableFunction<? super R, ? extends Iterable<T>> flatMapFn;
 
   private OutputCollector collector;
 
-  public FlatMapOperator(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn) {
+  public FlatMapOperator(SerializableFunction<? super R, ? extends Iterable<T>> flatMapFn) {
     this.flatMapFn = flatMapFn;
   }
 

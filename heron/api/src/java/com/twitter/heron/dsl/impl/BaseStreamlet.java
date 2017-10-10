@@ -194,7 +194,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   */
   @Override
   public <T> Streamlet<T> flatMap(SerializableFunction<? super R,
-                                                       Iterable<? extends T>> flatMapFn) {
+                                                       ? extends Iterable<T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -208,7 +208,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   */
   @Override
   public <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      Iterable<? extends KeyValue<K, V>>> flatMapFn) {
+      ? extends Iterable<KeyValue<K, V>>> flatMapFn) {
     KVFlatMapStreamlet<R, K, V> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;

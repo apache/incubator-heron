@@ -85,7 +85,7 @@ public interface Streamlet<R> {
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
-  <T> Streamlet<T> flatMap(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn);
+  <T> Streamlet<T> flatMap(SerializableFunction<? super R, ? extends Iterable<T>> flatMapFn);
 
   /**
    * Return a new KVStreamlet by applying map_function to each element of this Streamlet
@@ -94,7 +94,7 @@ public interface Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      Iterable<? extends KeyValue<K, V>>> flatMapFn);
+      ? extends Iterable<KeyValue<K, V>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
