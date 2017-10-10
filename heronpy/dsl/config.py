@@ -33,7 +33,7 @@ class Config(object):
     if self._api_config is None:
       self._api_config = {}
 
-  def setDeliverySemantics(self, semantics):
+  def set_delivery_semantics(self, semantics):
     if semantics == Config.ATMOST_ONCE:
       self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.ATMOST_ONCE
