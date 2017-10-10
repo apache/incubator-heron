@@ -9,6 +9,10 @@ between components and proper configurations. The
 [`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.twitter.heron%22%20AND%20a%3A%22heron-api%22)
 enables you to create topology logic in Java.
 
+> If you're interested in creating stateful topologies with [effectively-once
+> semantics](../../../concepts/delivery-semantics) in Java, see [this new
+> guide](../effectively-once).
+
 ## Getting started
 
 In order to use the Heron API for Java, you'll need to install the `heron-api` library, which is available
@@ -125,4 +129,20 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for a complete example. More examples for the Heron Topology API can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples/api).
+See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples).
+
+## Applying delivery semantics to topologies
+
+```java
+import com.twitter.heron.api.Config;
+
+Config topologyConfig = new Config();
+
+config.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+```
+
+There are three delivery semantics available corresponding to the three delivery semantics that Heron provides:
+
+* `ATMOST_ONCE`
+* `ATLEAST_ONCE`
+* `EFFECTIVELY_ONCE`
