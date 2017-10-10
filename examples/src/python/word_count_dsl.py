@@ -14,16 +14,23 @@
 '''Example WordCountTopology'''
 import sys
 
-from heronpy.dsl.streamlet import TimeWindow
-from heronpy.connectors.mock.fixedlinesstreamlet import FixedLinesStreamlet
+from heronpy.dsl.builder import Builder
+from heronpy.dsl.runner import Runner
+from heronpy.dsl.config import Config
+from heronpy.dsl.windowconfig import WindowConfig
+from heronpy.connectors.mock.arraylooper import ArrayLooper
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
     print "Topology's name is not specified"
     sys.exit(1)
 
-  counts = FixedLinesStreamlet.fixedLinesGenerator(parallelism=2) \
-           .flat_map(lambda line: line.split(), parallelism=2) \
-           .map(lambda word: (word, 1), parallelism=2) \
-           .reduce_by_window(TimeWindow(10, 2), lambda x, y: x + y)
-  counts.run(sys.argv[1])
+  builder = Builder()
+  builder.new_source(ArrayLooper(["Mary Had a little lamb", "I Love You"])) \
+         .flat_map(lambda line: line.split()) \
+         .map(lambda word: (word, 1)) \
+         .reduce_by_key_and_window(WindowConfig.create_sliding_window(10, 2), lambda x, y: x + y) \
+         .log()
+  runner = Runner()
+  config = Config()
+  runner.run(sys.argv[1], config, builder)

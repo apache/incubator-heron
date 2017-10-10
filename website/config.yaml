@@ -11,9 +11,9 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
+pygmentsUseClassic: true
 pygmentsUseClasses: true
 pygmentsCodeFences: true
-pygmentsUseClassic: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:

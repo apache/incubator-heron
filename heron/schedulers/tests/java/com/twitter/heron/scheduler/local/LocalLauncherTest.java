@@ -62,11 +62,11 @@ public class LocalLauncherTest {
     localLauncher.initialize(config, runtime);
 
     // Failed to setup working directory
-    Mockito.doReturn(false).when(localLauncher).setupWorkingDirectory();
+    Mockito.doReturn(false).when(localLauncher).setupWorkingDirectoryAndExtractPackages();
     Assert.assertFalse(localLauncher.launch(packingPlan));
 
     // setup successfully
-    Mockito.doReturn(true).when(localLauncher).setupWorkingDirectory();
+    Mockito.doReturn(true).when(localLauncher).setupWorkingDirectoryAndExtractPackages();
     String[] expectedSchedulerCommand = {"expected", "scheduler", "command"};
     Mockito.doReturn(expectedSchedulerCommand).when(localLauncher).getSchedulerCommand();
 
