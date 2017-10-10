@@ -55,6 +55,8 @@ sections:
         url: /docs/operators/deployment
       - name: Configuration
         url: /docs/operators/deployment/configuration
+      - name: The Heron API server
+        url: /docs/operators/heron-api-server
   - name: State Managers
     sublinks:
       - name: Zookeeper
