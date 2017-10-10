@@ -307,7 +307,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * @param consumer The user supplied consumer function that is invoked for each element
    */
   @Override
-  public void toSink(SerializableConsumer<R> consumer) {
+  public void consume(SerializableConsumer<R> consumer) {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
     return;

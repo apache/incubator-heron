@@ -13,80 +13,31 @@
 # limitations under the License.
 '''Example WordCountTopology'''
 
-from heronpy.dsl.streamlet import TimeWindow, Streamlet
-from heronpy.api.spout.spout import Spout
-from heronpy.dsl.dslboltbase import DslBoltBase
-from integration_test.src.python.integration_test.core.test_streamlet import TestStreamlet
+import collections
 import logging
+import itertools
 import time
 
+from heronpy.dsl.builder import Builder
+from heronpy.dsl.config import Config
+from heronpy.dsl.generator import Generator
+from heronpy.dsl.runner import Runner
+from heronpy.dsl.windowconfig import WindowConfig
+from heronpy.connectors.mock.arraylooper import ArrayLooper
+from integration_test.src.python.integration_test.core.test_runner import TestRunner
+
 def word_count_dsl_builder(topology_name, http_server_url):
-  counts = TestStreamlet(FixedLinesStreamlet.fixedLinesGenerator(parallelism=1) \
-    .flat_map(lambda line: line.split(), parallelism=1) \
-    .map(lambda word: (word, 1), parallelism=1) \
-    .reduce_by_window(TimeWindow(5, 5), lambda x, y: x + y))
-  return counts.run(topology_name, http_server_url=http_server_url)
-
-class FixedLinesStreamlet(Streamlet):
-  """A FixedLinesStreamlet spews a set of words forever
-  """
-  # pylint: disable=no-self-use
-  def __init__(self, stage_name=None, parallelism=None):
-    super(FixedLinesStreamlet, self).__init__(parents=[],
-                                              stage_name=stage_name,
-                                              parallelism=parallelism)
-
-  @staticmethod
-  def fixedLinesGenerator(stage_name=None, parallelism=None):
-    return FixedLinesStreamlet(stage_name=stage_name, parallelism=parallelism)
-
-  def _calculate_stage_name(self, existing_stage_names):
-    stagename = "fixedlines"
-    if stagename not in existing_stage_names:
-      return stagename
-    else:
-      index = 1
-      newname = stagename + str(index)
-      while newname in existing_stage_names:
-        index = index + 1
-        newname = stagename + str(index)
-      return newname
-
-  def _build_this(self, bldr):
-    bldr.add_spout(self._stage_name, FixedLinesSpout, par=self._parallelism)
-
-class FixedLinesSpout(Spout, DslBoltBase):
-  """FixedLinesSpout: Generates a line from a set of static lines again and again
-  """
-  # pylint: disable=unused-argument
-  def initialize(self, config, context):
-    """Implements FixedLines Spout's initialize method"""
-    self.logger.info("Initializing FixedLinesSpout with the following")
-    self.logger.info("Component-specific config: \n%s" % str(config))
-    self.words = ["Mary had a little lamb",
-                  "Humpy Dumpy sat on a wall",
-                  "Here we round the Moulberry bush"]
-    self.index = 0
-    self.emit_count = 0
-    self.ack_count = 0
-    self.fail_count = 0
-
-  def _get_next_line(self):
-    retval = self.words[self.index]
-    self.index += 1
-    if self.index >= len(self.words):
-      self.index = 0
-    return retval
-
-  def next_tuple(self):
-    time.sleep(1)
-    self.emit([self._get_next_line()], stream='output')
-    self.emit_count += 1
-
-  def ack(self, tup_id):
-    self.ack_count += 1
-    self.logger.debug("Acked tuple %s" % str(tup_id))
-
-  def fail(self, tup_id):
-    self.fail_count += 1
-    self.logger.debug("Failed tuple %s" % str(tup_id))
+  builder = Builder()
+  sentences1 = ["Mary had a little lamb",
+                "Humpy Dumpy sat on a wall"]
+  sentences2 = ["Here we round the Moulberry bush"]
+  source1 = builder.new_source(ArrayLooper(sentences1, sleep=1))
+  source2 = builder.new_source(ArrayLooper(sentences2, sleep=1))
+  stream1 = source1.flat_map(lambda line: line.split()) \
+                   .map(lambda word: (word, 1))
+  stream2 = source2.flat_map(lambda line: line.split()) \
+                   .map(lambda word: (word, 1))
+  stream1.union(stream2)
+  runner = TestRunner()
+  config = Config()
+  return runner.run(topology_name, config, builder, http_server_url)
