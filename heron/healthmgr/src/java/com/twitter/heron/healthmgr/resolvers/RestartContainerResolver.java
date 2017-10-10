@@ -32,7 +32,7 @@ import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_SLOW_INSTANCE;
 
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
@@ -58,8 +58,8 @@ public class RestartContainerResolver implements IResolver {
 
     LOG.info("RestartContainerResolver resolve " + diagnosis);
     for (Diagnosis diagnoses : diagnosis) {
-      LOG.info("RestartContainerResolver Diagnosis " + DIAGNOSIS_SLOW_INSTANCE.text());
-      Symptom bpSymptom = diagnoses.getSymptoms().get(DIAGNOSIS_SLOW_INSTANCE.text());
+      LOG.info("RestartContainerResolver Diagnosis " + SYMPTOM_SLOW_INSTANCE.text());
+      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_SLOW_INSTANCE.text());
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
         LOG.info("bpSymptom == null " + (bpSymptom == null));
