@@ -72,13 +72,10 @@ public class BackPressureSensor extends BaseSensor {
       Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
       for (String boltInstanceName : boltInstanceNames) {
         String metric = getMetricName() + boltInstanceName;
-        System.out.println("backpressure sensor metric query " + metric);
         Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
             metric, duration, COMPONENT_STMGR);
-        System.out.println("backpressure sensor metric query result\n" + stmgrResult);
 
         if (stmgrResult.get(COMPONENT_STMGR) == null) {
-          System.out.println("continue stmgr result null");
           continue;
         }
 
@@ -86,7 +83,6 @@ public class BackPressureSensor extends BaseSensor {
             stmgrResult.get(COMPONENT_STMGR).getMetrics();
 
         if (streamManagerResult.isEmpty()) {
-          System.out.println("continue stmgr result empty");
           continue;
         }
 
@@ -98,17 +94,12 @@ public class BackPressureSensor extends BaseSensor {
             it.hasNext();) {
           InstanceMetrics stmgrInstanceResult = it.next();
 
-          System.out.println("stmgr result instance metrics " + stmgrInstanceResult);
           Double val = stmgrInstanceResult.getMetricValueSum(metric);
-          if (val == null) {
-            System.out.println("val null");
-          } else {
-            System.out.println("val " + val);
+          if (val != null) {
             valueSum += val;
           }
         }
         double averageBp = valueSum / duration.getSeconds();
-        System.out.println("averageBp " + averageBp);
 
         // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
         // a bug in Heron (Issue: 1753), this value could be higher in some cases. The following
@@ -124,7 +115,6 @@ public class BackPressureSensor extends BaseSensor {
       result.put(boltComponent, componentMetrics);
     }
 
-    System.out.println("backpressure sensor " + result);
     return result;
   }
 }
