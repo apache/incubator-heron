@@ -33,7 +33,7 @@ import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
 
 public class BackPressureDetector implements IDetector {
-  static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
+  public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
   private final BackPressureSensor bpSensor;
