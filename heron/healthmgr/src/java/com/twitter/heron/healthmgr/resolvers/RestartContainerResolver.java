@@ -56,16 +56,10 @@ public class RestartContainerResolver implements IResolver {
   public List<Action> resolve(List<Diagnosis> diagnosis) {
     List<Action> actions = new ArrayList<>();
 
-    LOG.info("RestartContainerResolver resolve " + diagnosis);
     for (Diagnosis diagnoses : diagnosis) {
-      LOG.info("RestartContainerResolver Diagnosis " + DIAGNOSIS_SLOW_INSTANCE.text());
       Symptom bpSymptom = diagnoses.getSymptoms().get(DIAGNOSIS_SLOW_INSTANCE.text());
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
-        LOG.info("bpSymptom == null " + (bpSymptom == null));
-        if (bpSymptom != null) {
-          LOG.info("bpSymptom.getComponents() " + (bpSymptom.getComponents()));
-        }
         continue;
       }
 

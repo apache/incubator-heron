@@ -30,7 +30,10 @@ import com.sun.net.httpserver.HttpServer;
 
 import com.twitter.heron.metricscachemgr.metricscache.MetricsCache;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager;
 
 
 /**
@@ -74,7 +77,7 @@ public class MetricsCacheManagerHttpServer {
    * How to run:
    * in the [source root directory], run bazel test,
    * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
-   * &lt;host:port&gt; &lt;component_name&gt; &lt;metrics_name&gt;
+   * &lt;topology_name&gt; &lt;component_name&gt; &lt;metrics_name&gt;
    * Example:
    * 1. run the example topology,
    * ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
@@ -82,7 +85,7 @@ public class MetricsCacheManagerHttpServer {
    * --deploy-deactivated --verbose
    * 2. in the [source root directory],
    * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \
-   * 127.0.0.1:23345 exclaim1 \
+   * ExclamationTopology exclaim1 \
    * __emit-count __execute-count __fail-count __ack-count __complete-latency __execute-latency \
    * __process-latency __jvm-uptime-secs __jvm-process-cpu-load __jvm-memory-used-mb \
    * __jvm-memory-mb-total __jvm-gc-collection-time-ms __server/__time_spent_back_pressure_initiated \
@@ -92,12 +95,28 @@ public class MetricsCacheManagerHttpServer {
       throws ExecutionException, InterruptedException, IOException {
     if (args.length < 3) {
       System.out.println(
-          "Usage: java MetricsQuery <host:port> <component_name> <metrics_name>");
+          "Usage: java MetricsQuery <topology_name> <component_name> <metrics_name>");
+    } else {
+      System.out.println("topology: " + args[0] + "; component: " + args[1]);
+    }
+
+    Config config = Config.newBuilder()
+        .put(Key.STATEMGR_ROOT_PATH,
+            System.getProperty("user.home") + "/.herondata/repository/state/local")
+        .build();
+    LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.initialize(config);
+
+    TopologyMaster.MetricsCacheLocation location =
+        stateManager.getMetricsCacheLocation(null, args[0]).get();
+    if (location == null || !location.isInitialized()) {
+      System.out.println("MetricsCacheMgr is not ready");
+      return;
     }
 
     // construct metric cache stat url
-    String url = "http://" + args[0] + MetricsCacheManagerHttpServer.PATH_STATS;
-    System.out.println("endpoint: " + url + "; component: " + args[1]);
+    String url = "http://" + location.getHost() + ":" + location.getStatsPort()
+        + MetricsCacheManagerHttpServer.PATH_STATS;
 
     // construct query payload
     byte[] requestData = TopologyMaster.MetricRequest.newBuilder()

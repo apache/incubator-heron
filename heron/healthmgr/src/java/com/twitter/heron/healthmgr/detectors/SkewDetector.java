@@ -59,9 +59,6 @@ public class SkewDetector extends BaseDetector {
         LOG.info(String.format("Detected skew for %s, min = %f, max = %f",
             compMetrics.getName(), stats.getMetricMin(), stats.getMetricMax()));
         result.add(new Symptom(symptomName.text(), compMetrics));
-      } else {
-        System.out.println(String.format("No skew for %s, min = %f, max = %f",
-            compMetrics.getName(), stats.getMetricMin(), stats.getMetricMax()));
       }
     }
 

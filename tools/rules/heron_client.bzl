@@ -48,11 +48,6 @@ def heron_client_lib_packing_files():
 
     ]
 
-def heron_client_lib_metricscachemgr_files():
-    return [
-        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
-    ]
-
 def heron_client_lib_statemgr_files():
     return [
         "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
