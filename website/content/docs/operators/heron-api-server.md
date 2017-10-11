@@ -63,3 +63,15 @@ Flag | Description
 `--config-path` | A non-default path to a base configuration
 `--port` | The port to bind to (the default is 9000)
 `--release-file` | The path for the `release.yaml` file specifying information about the Heron release
+
+## Configuration overrides
+
+When you specify a [base template](#base-templates) when running the Heron API server, the server will use whatever configuration is found in the template files. You can override configuration on a per-parameter basis, however, using the `-D` flag. Here's an example:
+
+```bash
+$ heron-apiserver \
+  --base-template aurora \
+  --cluster us-west-prod \
+  -D heron.statemgr.connection.string=zk-1:2181,zk-2:2181,zk-3:2181 \
+  -D heron.class.uploader=com.acme.uploaders.MyCustomUploader
+```
