@@ -248,34 +248,57 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
 The number of partitions to assign to each processing step when using the Functional API depends
 on a variety of factors.
 
-<!--
-
 ## Windowing
+
+**Windowed computations** gather results from a topology or topology component within a specified finite time frame. The
+alternative to windowed computations
+
+Here are some examples of window operations:
+
+* Counting how many customers have purchased a product during each hour in the last 24 hours
 
 Window configurations have two core components:
 
-1. The length of the window
+1. The length or duration of the window (length if the window is a [count window](#count-windows), duration if the window is a [])
+1. The sliding interval, which 
 
 > In the Heron DSL, all window lengths and sliding intervals are specified **in seconds**.
 
 ### Sliding windows
 
-In a sliding time window, tuples
+**Sliding windows** are windows that overlap, as in this figure:
 
 ![Sliding time window](https://www.lucidchart.com/publicSegments/view/57d2fcbb-591b-4403-9258-e5b8e1e25de2/image.png)
 
+With sliding time windows, data can be processed in more than one window. Tuples 3, 4, and 5 above are processed in
+both window 1 and window 2; tuples 6, 7, and 8 are processed in both window 2 and window 3.
+
+For sliding time windows, you need to specify both 
+
 ### Tumbling windows
 
-> One of the crucial differences between sliding and tumbling windows is that sliding
-> windows can overlap.
+**Tumbling windows** are windows that don't overlap, as in this figure:
 
 ![Tumbling time window](https://www.lucidchart.com/publicSegments/view/881f99ee-8f93-448f-a178-b9f72dce6491/image.png)
 
+> With tumbling windows, data are never processed in more than one window because the windows never overlap.
+
+### Duration windows
+
 ### Count windows
 
-There are thus four total window typ
+With **count windows**, instead 
 
--->
+> With 
+
+### All types
+
+There are thus four total window types of window configurations:
+
+1. Sliding duration windows
+1. Sliding count windows
+1. Tumbling duration windows
+1. Tumbling count windows
 
 ## Resource allocation with the Heron Functional API
 
@@ -293,7 +316,15 @@ Number of containers | 1 | 1
 CPU | 1.0 | 1.0
 RAM | 512 MB | 192MB
 
-<!-- TODO: For instructions on allocating resources to topologies, see ... -->
+### Allocating resources to topologies
+
+For instructions on allocating resources to topologies, see the language-specific documentation for:
+
+* [Java](../../developers/java/functional-api#containers-and-resources)
+
+## The Heron Topology API
+
+In addition to the newer [Functional API](#the-heron-functional-api), Heron also still supports
 
 ## Spouts
 
