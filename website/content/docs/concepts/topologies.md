@@ -353,9 +353,11 @@ For instructions on allocating resources to topologies, see the language-specifi
 
 * [Java](../../developers/java/functional-api#containers-and-resources)
 
+<!-->
 ## The Heron Topology API
 
 In addition to the newer [Functional API](#the-heron-functional-api), Heron also still supports
+-->
 
 ## Spouts
 
