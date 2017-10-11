@@ -29,8 +29,14 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * Implementation of AuroraController that is a wrapper of AuroraCLIController The difference is:
- * the `restart` method implementation is changed to heron-shell
+ * Implementation of AuroraController that is a wrapper of AuroraCLIController.
+ * The difference is `restart` command:
+ * 1. restart whole topology: delegate to AuroraCLIController
+ * 2. restart container 0: delegate to AuroraCLIController
+ * 3. restart container x(x>0): call heron-shell endpoint `/killexecutor`
+ * For backpressure, only containers with heron-stmgr may send out backpressure.
+ * This class is to handle `restart backpressure containers inside container`,
+ * while delegating to AuroraCLIController for all the other scenarios.
  */
 class AuroraHeronShellController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraHeronShellController.class.getName());
