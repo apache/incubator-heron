@@ -98,12 +98,10 @@ public class BackPressureSensor extends BaseSensor {
             it.hasNext();) {
           InstanceMetrics stmgrInstanceResult = it.next();
 
-          System.out.println("stmgr result instance metrics " + stmgrInstanceResult);
           Double val = stmgrInstanceResult.getMetricValueSum(metric);
           if (val == null) {
-            System.out.println("val null");
+            continue;
           } else {
-            System.out.println("val " + val);
             valueSum += val;
           }
         }
