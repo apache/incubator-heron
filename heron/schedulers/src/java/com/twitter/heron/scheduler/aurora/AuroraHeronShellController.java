@@ -76,13 +76,14 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
+    containerId --;
     StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(containerId);
     String host = contaienrInfo.getHostName();
     int port = contaienrInfo.getShellPort();
     String url = "http://" + host + ":" + port + "/killexecutor";
 
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
-    LOG.info("sending `kill container` to " + url + "; payload: " + payload);
+    LOG.info("sending `kill container " + containerId+ "` to " + url + "; payload: " + payload);
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
     try {
