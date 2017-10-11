@@ -235,6 +235,13 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
       "topology.update.reactivate.wait.secs";
 
+  /**
+   * Topology-specific environment variables for the worker child process.
+   * This is added to the existing environment (that of the supervisor).
+   * This variable contains Map<String, String>
+   */
+  public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -465,6 +472,9 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+  public static void setEnvironment(Map<String, Object> conf, Map<String, String> env) {
+    conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
   public void setDebug(boolean isOn) {
