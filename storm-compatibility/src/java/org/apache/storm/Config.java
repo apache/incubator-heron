@@ -360,7 +360,7 @@ public class Config extends HashMap<String, Object> {
    * Topology-specific environment variables for the worker child process.
    * This is added to the existing environment (that of the supervisor)
    */
-  public static final String TOPOLOGY_ENVIRONMENT="topology.environment";
+  public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
 
   /**
    * ----  DO NOT USE -----
