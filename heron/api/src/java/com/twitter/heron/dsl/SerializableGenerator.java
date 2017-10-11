@@ -24,6 +24,6 @@ import java.io.Serializable;
  */
 public interface SerializableGenerator<T> extends Serializable {
   void setup(Context context);
-  <T> T get();
+  T get();
   void cleanup();
 }
