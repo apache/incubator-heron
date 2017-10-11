@@ -13,7 +13,7 @@ sections:
       url: /docs/developers/java/functional-api
   - name: The Heron Topology API
     sublinks:
-      - name: Java Topologies
+      - name: The Heron Topology API for Java
         url: /docs/developers/java/topologies
       - name: Effectively-once Java topologies
         url: /docs/developers/java/effectively-once
