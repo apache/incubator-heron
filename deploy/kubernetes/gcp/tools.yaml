@@ -16,7 +16,7 @@ spec:
         - name: heron-tracker
           image: heron/heron:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8888
               name: api-port
           command: ["sh", "-c"]
           args:
@@ -29,14 +29,14 @@ spec:
         - name: heron-ui
           image: heron/heron:latest
           ports:
-            - containerPort: 8081
+            - containerPort: 8889
               name: app-port
           command: ["sh", "-c"]
           args:
             - >-
               heron-ui
-              --port=8081
-              --base_url=/api/v1/proxy/namespaces/default/services/heron-ui:8081
+              --port=8889
+              --base_url=/api/v1/proxy/namespaces/default/services/heron-ui:8889
 ---
 
 ##
@@ -51,5 +51,5 @@ spec:
     app: heron-tracker
   ports:
     - protocol: TCP
-      port: 8081
-      targetPort: 8081
+      port: 8889
+      targetPort: 8889
