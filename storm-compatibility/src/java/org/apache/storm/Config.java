@@ -357,6 +357,12 @@ public class Config extends HashMap<String, Object> {
       = "topology.bolts.watermark.event.interval.ms";
 
   /**
+   * Topology-specific environment variables for the worker child process.
+   * This is added to the existing environment (that of the supervisor)
+   */
+  public static final String TOPOLOGY_ENVIRONMENT="topology.environment";
+
+  /**
    * ----  DO NOT USE -----
    * This variable is used to rewrite the TOPOLOGY_AUTO_TASK_HOOKS variable.
    * As such this is a strictly internal config variable that is not exposed the user
@@ -460,6 +466,10 @@ public class Config extends HashMap<String, Object> {
     }
     conf.put(Config.TOPOLOGY_KRYO_DECORATORS, ret);
     return ret;
+  }
+
+  public static void setEnvironment(Map<String, Object> conf, Map env) {
+    conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
   public void setDebug(boolean isOn) {

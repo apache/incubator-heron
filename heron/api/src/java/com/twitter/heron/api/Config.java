@@ -473,7 +473,7 @@ public class Config extends HashMap<String, Object> {
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
   }
-  public static void setEnvironment(Map<String, Object> conf, Map<String, String> env) {
+  public static void setEnvironment(Map<String, Object> conf, Map env) {
     conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
