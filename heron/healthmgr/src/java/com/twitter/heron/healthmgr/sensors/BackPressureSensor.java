@@ -17,6 +17,7 @@ package com.twitter.heron.healthmgr.sensors;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -85,13 +86,20 @@ public class BackPressureSensor extends BaseSensor {
           continue;
         }
 
-        // since a bolt instance belongs to one stream manager, expect just one metrics
-        // manager instance in the result
-        InstanceMetrics stmgrInstanceResult = streamManagerResult.values().iterator().next();
+        // since a bolt instance belongs to one stream manager,
+        // for tracker rest api: expect just one metrics manager instance in the result;
+        // for tmaster/metricscache stat interface: expect a list
+        Double valueSum = 0.0;
+        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
+            it.hasNext();) {
+          InstanceMetrics stmgrInstanceResult = it.next();
 
-        Double valueSum = stmgrInstanceResult.getMetricValueSum(metric);
-        if (valueSum == null) {
-          continue;
+          Double val = stmgrInstanceResult.getMetricValueSum(metric);
+          if (val == null) {
+            continue;
+          } else {
+            valueSum += val;
+          }
         }
         double averageBp = valueSum / duration.getSeconds();
 
