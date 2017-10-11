@@ -49,9 +49,7 @@ spec:
                 topologyKey: "kubernetes.io/hostname"
       containers:
         - name: zookeeper
-          # TODO put image pull policy to never
           image: heron/heron:0.16.2
-          imagePullPolicy: Never
           command: ["sh", "-c"]
           args:
             - >
@@ -83,8 +81,6 @@ spec:
           volumeMounts:
             - name: datadir
               mountPath: /heron/data
-
-      ## should we have a limit disk resource
       volumes:
         - name: datadir
           emptyDir: {}
