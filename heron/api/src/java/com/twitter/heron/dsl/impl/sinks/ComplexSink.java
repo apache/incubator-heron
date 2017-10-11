@@ -12,34 +12,35 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.sources;
+package com.twitter.heron.dsl.impl.sinks;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.dsl.Context;
-import com.twitter.heron.dsl.SerializableGenerator;
+import com.twitter.heron.dsl.Sink;
 import com.twitter.heron.dsl.impl.ContextImpl;
+import com.twitter.heron.dsl.impl.operators.DslOperator;
 
 /**
- * SupplierSource is a way to wrap a supplier function inside a Heron Spout.
- * The SupplierSource just calls the get method of the supplied function
- * to generate the next tuple.
+ * ConsumerSink is a very simple Sink that basically invokes a user supplied
+ * consume function for every tuple.
  */
-public class GeneratorSource<R> extends DslSource {
-  private static final long serialVersionUID = -5086763670301450007L;
-  private SerializableGenerator<R> generator;
-
-  private SpoutOutputCollector collector;
+public class ComplexSink<R> extends DslOperator {
+  private static final Logger LOG = Logger.getLogger(ComplexSink.class.getName());
+  private static final long serialVersionUID = 8717991188885786658L;
+  private Sink<R> sink;
+  private OutputCollector collector;
   private Context context;
   private State<Serializable, Serializable> state;
 
-  public GeneratorSource(SerializableGenerator<R> generator) {
-    this.generator = generator;
+  public ComplexSink(Sink<R> sink) {
+    this.sink = sink;
   }
 
   @Override
@@ -49,18 +50,18 @@ public class GeneratorSource<R> extends DslSource {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void open(Map<String, Object> map, TopologyContext topologyContext,
-                   SpoutOutputCollector outputCollector) {
-    collector = outputCollector;
+  public void prepare(Map<String, Object> map, TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
+    this.collector = outputCollector;
     context = new ContextImpl(topologyContext, map, state);
-    generator.setup(context);
+    sink.setup(context);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void nextTuple() {
-    R val = generator.get();
-    if (val != null) {
-      collector.emit(new Values(val));
-    }
+  public void execute(Tuple tuple) {
+    R obj = (R) tuple.getValue(0);
+    sink.put(obj);
+    collector.ack(tuple);
   }
 }

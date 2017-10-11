@@ -17,20 +17,19 @@ package com.twitter.heron.dsl.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.SerializableGenerator;
-import com.twitter.heron.dsl.impl.BaseKVStreamlet;
-import com.twitter.heron.dsl.impl.sources.GeneratorSource;
+import com.twitter.heron.dsl.Source;
+import com.twitter.heron.dsl.impl.BaseStreamlet;
+import com.twitter.heron.dsl.impl.sources.ComplexSource;
 
 /**
  * SupplierStreamlet is a very quick and flexible way of creating a Streamlet
  * from a user supplied Supplier Function. The supplier function is the
  * source of all tuples for this Streamlet.
  */
-public class GeneratorKVStreamlet<K, V> extends BaseKVStreamlet<K, V> {
-  private SerializableGenerator<KeyValue<K, V>> generator;
+public class SourceStreamlet<R> extends BaseStreamlet<R> {
+  private Source<R> generator;
 
-  public GeneratorKVStreamlet(SerializableGenerator<KeyValue<K, V>> generator) {
+  public SourceStreamlet(Source<R> generator) {
     this.generator = generator;
     setNumPartitions(1);
   }
@@ -38,13 +37,13 @@ public class GeneratorKVStreamlet<K, V> extends BaseKVStreamlet<K, V> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("kvgenerator", stageNames));
+      setName(defaultNameCalculator("generator", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setSpout(getName(), new GeneratorSource<KeyValue<K, V>>(generator), getNumPartitions());
+    bldr.setSpout(getName(), new ComplexSource<R>(generator), getNumPartitions());
     return true;
   }
 }

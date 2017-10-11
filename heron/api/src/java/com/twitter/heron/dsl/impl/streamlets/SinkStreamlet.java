@@ -17,33 +17,36 @@ package com.twitter.heron.dsl.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.SerializableGenerator;
+import com.twitter.heron.dsl.Sink;
 import com.twitter.heron.dsl.impl.BaseStreamlet;
-import com.twitter.heron.dsl.impl.sources.GeneratorSource;
+import com.twitter.heron.dsl.impl.sinks.ComplexSink;
 
 /**
- * SupplierStreamlet is a very quick and flexible way of creating a Streamlet
- * from a user supplied Supplier Function. The supplier function is the
- * source of all tuples for this Streamlet.
+ * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
+ * streamlet after consuming every element. Since elements of the parents are just consumed
+ * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
-public class GeneratorStreamlet<R> extends BaseStreamlet<R> {
-  private SerializableGenerator<R> generator;
+public class SinkStreamlet<R> extends BaseStreamlet<R> {
+  private BaseStreamlet<R> parent;
+  private Sink<R> sink;
 
-  public GeneratorStreamlet(SerializableGenerator<R> generator) {
-    this.generator = generator;
-    setNumPartitions(1);
+  public SinkStreamlet(BaseStreamlet<R> parent, Sink<R> sink) {
+    this.parent = parent;
+    this.sink = sink;
+    setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("generator", stageNames));
+      setName(defaultNameCalculator("sink", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setSpout(getName(), new GeneratorSource<R>(generator), getNumPartitions());
+    bldr.setBolt(getName(), new ComplexSink<>(sink),
+        getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }
 }
