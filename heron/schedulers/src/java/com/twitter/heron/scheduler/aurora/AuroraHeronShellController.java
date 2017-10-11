@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
+import com.twitter.heron.proto.tmaster.TopologyMaster.TMasterLocation;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
@@ -76,14 +77,22 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    containerId --;
-    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(containerId);
-    String host = contaienrInfo.getHostName();
-    int port = contaienrInfo.getShellPort();
-    String url = "http://" + host + ":" + port + "/killexecutor";
+    String url = null;
+    if (containerId == 0) {
+      TMasterLocation contaienrInfo = stateMgrAdaptor.getTMasterLocation(topologyName);
+      String host = contaienrInfo.getHost();
+      int port = contaienrInfo.getStatsPort(); // TODO(huijun): this should be shell port
+      url = "http://" + host + ":" + port + "/killexecutor";
+    } else {
+      int index = containerId - 1; // stmgr container starts from 1
+      StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
+      String host = contaienrInfo.getHostName();
+      int port = contaienrInfo.getShellPort();
+      url = "http://" + host + ":" + port + "/killexecutor";
+    }
 
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
-    LOG.info("sending `kill container " + containerId+ "` to " + url + "; payload: " + payload);
+    LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
     try {
