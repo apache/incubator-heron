@@ -79,10 +79,7 @@ class AuroraHeronShellController implements AuroraController {
 
     String url = null;
     if (containerId == 0) {
-      TMasterLocation contaienrInfo = stateMgrAdaptor.getTMasterLocation(topologyName);
-      String host = contaienrInfo.getHost();
-      int port = contaienrInfo.getStatsPort(); // TODO(huijun): this should be shell port
-      url = "http://" + host + ":" + port + "/killexecutor";
+      throw new UnsupportedOperationException("Not implemented for container 0");
     } else {
       int index = containerId - 1; // stmgr container starts from 1
       StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
