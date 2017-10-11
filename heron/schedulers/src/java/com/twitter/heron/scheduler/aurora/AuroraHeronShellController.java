@@ -20,7 +20,9 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
+import com.twitter.heron.proto.tmaster.TopologyMaster.TMasterLocation;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -77,12 +79,15 @@ class AuroraHeronShellController implements AuroraController {
 
     String url = null;
     if (containerId == 0) {
-      throw new UnsupportedOperationException("Not implemented for container 0");
+      TMasterLocation containerInfo = stateMgrAdaptor.getTMasterLocation(topologyName);
+      String host = containerInfo.getHost();
+      int port = containerInfo.getStatsPort(); // TODO(huijun): this should be shell port
+      url = "http://" + host + ":" + port + "/killexecutor";
     } else {
       int index = containerId - 1; // stmgr container starts from 1
-      StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-      String host = contaienrInfo.getHostName();
-      int port = contaienrInfo.getShellPort();
+      StMgr containerInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
+      String host = containerInfo.getHostName();
+      int port = containerInfo.getShellPort();
       url = "http://" + host + ":" + port + "/killexecutor";
     }
 
