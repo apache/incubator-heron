@@ -66,8 +66,9 @@ class AuroraHeronShellController implements AuroraController {
   // Restart an aurora container
   @Override
   public boolean restart(Integer containerId) {
-    if (containerId == null) {
-      throw new UnsupportedOperationException("Not implemented");
+    // there is no backpressure for container 0, delegate to aurora client
+    if (containerId == null || containerId == 0) {
+      cliController.restart(containerId);
     }
 
     if (stateMgrAdaptor == null) {
@@ -75,16 +76,11 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    String url = null;
-    if (containerId == 0) {
-      throw new UnsupportedOperationException("Not implemented for container 0");
-    } else {
-      int index = containerId - 1; // stmgr container starts from 1
-      StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-      String host = contaienrInfo.getHostName();
-      int port = contaienrInfo.getShellPort();
-      url = "http://" + host + ":" + port + "/killexecutor";
-    }
+    int index = containerId - 1; // stmgr container starts from 1
+    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
+    String host = contaienrInfo.getHostName();
+    int port = contaienrInfo.getShellPort();
+    String url = "http://" + host + ":" + port + "/killexecutor";
 
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
