@@ -191,10 +191,10 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
+   */
   @Override
-  public <T> Streamlet<T> flatMap(SerializableFunction<? super R,
-                                                       ? extends Iterable<T>> flatMapFn) {
+  public <T> Streamlet<T> flatMap(
+      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
