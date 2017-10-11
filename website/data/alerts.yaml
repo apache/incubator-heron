@@ -7,3 +7,8 @@ storm-api:
   content: |
     Heron now offers two separate APIs for building topologies: the original, [Storm](https://storm.apache.org)-based Topology API, and the newer [Functional API](../../../concepts/topologies#the-heron-functional-api). Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Functional API for future work.
   type: warning
+spouts-and-bolts:
+  title: Don't want to manually create spouts and bolts? Try the Heron Functional API
+  type: success
+  content: |
+    If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Functional API](../functional-api) for Java, which enables you to create your topology logic using a highly streamlined logic reminiscent of functional programming.
