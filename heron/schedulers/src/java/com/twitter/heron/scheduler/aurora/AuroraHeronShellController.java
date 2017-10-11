@@ -41,14 +41,14 @@ class AuroraHeronShellController implements AuroraController {
   private final SchedulerStateManagerAdaptor stateMgrAdaptor;
 
   AuroraHeronShellController(String jobName, String cluster, String role, String env,
-      String auroraFilename, boolean isVerbose)
+      String auroraFilename, boolean isVerbose, Config localConfig)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    System.out.println("init aurora heron shell controller");
     this.topologyName = jobName;
     this.cliController =
         new AuroraCLIController(jobName, cluster, role, env, auroraFilename, isVerbose);
 
-    Config config =
-        Config.toClusterMode(Config.newBuilder().putAll(ConfigLoader.loadClusterConfig()).build());
+    Config config = Config.toClusterMode(localConfig);
     String stateMgrClass = Context.stateManagerClass(config);
     IStateManager stateMgr = ReflectionUtils.newInstance(stateMgrClass);
     stateMgr.initialize(config);
