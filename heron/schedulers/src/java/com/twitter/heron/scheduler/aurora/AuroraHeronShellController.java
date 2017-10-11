@@ -43,7 +43,6 @@ class AuroraHeronShellController implements AuroraController {
   AuroraHeronShellController(String jobName, String cluster, String role, String env,
       String auroraFilename, boolean isVerbose, Config localConfig)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-    System.out.println("init aurora heron shell controller");
     this.topologyName = jobName;
     this.cliController =
         new AuroraCLIController(jobName, cluster, role, env, auroraFilename, isVerbose);
@@ -82,7 +81,7 @@ class AuroraHeronShellController implements AuroraController {
     int port = contaienrInfo.getShellPort();
     String url = "http://" + host + ":" + port + "/killexecutor";
 
-    String payload = "secret=" + topologyName;
+    String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
