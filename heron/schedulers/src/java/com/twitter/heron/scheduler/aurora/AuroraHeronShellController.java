@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
-import com.twitter.heron.proto.tmaster.TopologyMaster.TMasterLocation;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
