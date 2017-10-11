@@ -248,21 +248,22 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
 The number of partitions to assign to each processing step when using the Functional API depends
 on a variety of factors.
 
-## Windowing
+## Window operations
 
-**Windowed computations** gather results from a topology or topology component within a specified finite time frame. The
-alternative to windowed computations
+<!--
+> For documentation on using time windows in Heron topologies, see:
+> 
+> * [Window operations in Java](../../developers/java/topologies)
+-->
+
+**Windowed computations** gather results from a topology or topology component within a specified finite time frame rather than, say, on a per-tuple basis.
 
 Here are some examples of window operations:
 
-* Counting how many customers have purchased a product during each hour in the last 24 hours
+* Counting how many customers have purchased a product during each one-hour period in the last 24 hours.
+* Determining which player in an online game has the highest score during a 15-minute period.
 
-Window configurations have two core components:
-
-1. The length or duration of the window (length if the window is a [count window](#count-windows), duration if the window is a [])
-1. The sliding interval, which 
-
-> In the Heron DSL, all window lengths and sliding intervals are specified **in seconds**.
+> In Heron, all window time durations, including sliding intervals, are specified **in seconds**.
 
 ### Sliding windows
 
@@ -270,10 +271,20 @@ Window configurations have two core components:
 
 ![Sliding time window](https://www.lucidchart.com/publicSegments/view/57d2fcbb-591b-4403-9258-e5b8e1e25de2/image.png)
 
-With sliding time windows, data can be processed in more than one window. Tuples 3, 4, and 5 above are processed in
-both window 1 and window 2; tuples 6, 7, and 8 are processed in both window 2 and window 3.
+For sliding windows, you need to specify two things:
 
-For sliding time windows, you need to specify both 
+1. The length or duration of the window (length if the window is a [count window](#count-windows), duration if the window is a [time window](#time-windows)).
+1. The sliding interval, which determines when the window slides, i.e. at what point during the current window the new window begins.
+
+In the figure above, the duration of the window is 10 seconds, while the sliding interval is 5 seconds. Each new window begins five seconds into the current window.
+
+> With sliding time windows, data can be processed in more than one window. Tuples 3, 4, and 5 above are processed in both window 1 and window 2 while tuples 6, 7, and 8 are processed in both window 2 and window 3.
+
+Setting the duration of a window to 16 seconds and the sliding interval to 12 seconds would produce this window arrangement:
+
+![Sliding time window with altered time interval](https://www.lucidchart.com/publicSegments/view/44bd4835-a692-44e6-a5d8-8e47151e3167/image.png)
+
+Here, the sliding interval determines that a new window is always created 12 seconds into the current window.
 
 ### Tumbling windows
 
@@ -281,24 +292,44 @@ For sliding time windows, you need to specify both
 
 ![Tumbling time window](https://www.lucidchart.com/publicSegments/view/881f99ee-8f93-448f-a178-b9f72dce6491/image.png)
 
-> With tumbling windows, data are never processed in more than one window because the windows never overlap.
+Tumbling windows don't overlap because a new window doesn't begin until the current window has elapsed. For tumbling windows, you only need to specify the length or duration of the window but *no sliding interval*.
 
-### Duration windows
+> With tumbling windows, data are *never* processed in more than one window because the windows never overlap.
 
 ### Count windows
 
-With **count windows**, instead 
+**Count windows** are specified on the basis of the number of operations rather than a time interval. A count window of 100 would mean that a window would elapse after 100 tuples have been processed, *with no relation to clock time*.
 
-> With 
+With count windows, this scenario (for a count window of 50) would be completely normal:
 
-### All types
+Window | Tuples processed | Clock time
+:------|:-----------------|:----------
+1 | 50 | 10 seconds
+2 | 50 | 12 seconds
+3 | 50 | 1 hour, 12 minutes
+4 | 50 | 5 seconds
 
-There are thus four total window types of window configurations:
+### Time windows
 
-1. Sliding duration windows
-1. Sliding count windows
-1. Tumbling duration windows
-1. Tumbling count windows
+**Time windows** differ from [count windows](#count-windows) because you need to specify a time duration (in seconds) rather than a number of tuples processed.
+
+With time windows, this scenario (for a time window of 30 seconds) would be completely normal:
+
+Window | Tuples processed | Clock time
+:------|:-----------------|:----------
+1 | 150 | 30 seconds
+2 | 50 | 30 seconds
+3 | 0 | 30 seconds
+4 | 375 | 30 seconds
+
+### All window types
+
+As explained above, windows differ along two axes: sliding (overlapping) vs. tumbling (non overlapping) and count vs. time. This produces four total types:
+
+1. [Sliding](#sliding-windows) [time](#time-windows) windows
+1. [Sliding](#sliding-windows) [count](#count-windows) windows
+1. [Tumbling](#tumbling-windows) [time](#time-windows) windows
+1. [Tumbling](#tumbling-windows) [count](#count-windows) windows
 
 ## Resource allocation with the Heron Functional API
 
