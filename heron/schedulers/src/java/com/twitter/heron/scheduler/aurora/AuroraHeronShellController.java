@@ -80,9 +80,9 @@ class AuroraHeronShellController implements AuroraController {
       throw new UnsupportedOperationException("Not implemented for container 0");
     } else {
       int index = containerId - 1; // stmgr container starts from 1
-      StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-      String host = contaienrInfo.getHostName();
-      int port = contaienrInfo.getShellPort();
+      StMgr containerInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
+      String host = containerInfo.getHostName();
+      int port = containerInfo.getShellPort();
       url = "http://" + host + ":" + port + "/killexecutor";
     }
 
