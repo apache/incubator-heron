@@ -30,7 +30,7 @@ import com.twitter.heron.streamlet.impl.ContextImpl;
  * The SupplierSource just calls the get method of the supplied function
  * to generate the next tuple.
  */
-public class GeneratorSource<R> extends DslSource {
+public class GeneratorSource<R> extends StreamletSource {
   private static final long serialVersionUID = -5086763670301450007L;
   private SerializableGenerator<R> generator;
 

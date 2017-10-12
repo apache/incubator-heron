@@ -32,8 +32,8 @@ import com.twitter.heron.streamlet.WindowConfig;
  * 4. The reduceByKeyAndWindow stage assembles a tumbling count window and
  *    computes the counts of all words grouped by word.
  */
-public final class WordCountStreamletopology {
-  private WordCountStreamletTopology() {
+public final class WordCountStreamletTopology {
+  public WordCountStreamletTopology() {
   }
 
   /**

@@ -64,7 +64,7 @@ pex_binary(
     srcs = ["pulsar_word_count_streamlet.py"],
     deps = [
       '//heronpy/api:heron-python-py',
-      '//heronpy/streamlet:heron-streamlet-api-py',
+      '//heronpy/streamlet:heron-python-streamlet-api-py',
       '//heronpy/connectors:heron-pythonconnectors-py',
     ]
 )

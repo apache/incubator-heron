@@ -26,7 +26,7 @@ import com.twitter.heron.streamlet.SerializableSupplier;
  * The SupplierSource just calls the get method of the supplied function
  * to generate the next tuple.
  */
-public class SupplierSource<R> extends DslSource {
+public class SupplierSource<R> extends StreamletSource {
   private static final long serialVersionUID = 6476611751545430216L;
   private SerializableSupplier<R> supplier;
 

@@ -1,7 +1,7 @@
 """
 The top-level library for Heron's Python Connectors, which define some basic
 Heron Spouts/Bolts/Streamlets to be used while constructing Heron Topologies either
-using the basic Low Level API and the higher level DSL API.
+using the basic Low Level API and the higher-level Streamlet API.
 """
 
 # Load all connector modules

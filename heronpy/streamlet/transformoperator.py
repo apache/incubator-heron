@@ -15,7 +15,7 @@
 from abc import abstractmethod
 
 class TransformOperator(object):
-  """API for defining a generic transformer for Heron in Python DSL
+  """API for defining a generic transformer for Heron in the Python Streamlet API
   """
 
   @abstractmethod

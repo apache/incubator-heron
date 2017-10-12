@@ -15,7 +15,7 @@
 from abc import abstractmethod
 
 class Generator(object):
-  """API for defining a generic source for Heron in Python DSL
+  """API for defining a generic source for Heron in the Python Streamlet API
   """
 
   @abstractmethod

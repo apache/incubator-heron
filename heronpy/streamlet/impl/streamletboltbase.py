@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""module for base dsl bolt: DslBoltBase"""
+"""module for base streamlet bolt: StreamletBoltBase"""
 from heronpy.api.stream import Stream
 
 class StreamletBoltBase(object):
-  """DslBoltBase"""
+  """StreamletBoltBase"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]

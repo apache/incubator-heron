@@ -21,7 +21,7 @@ from heronpy.streamlet.streamlet import Streamlet
 from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
-class FilterBolt(Bolt, StatefulComponent, StremletBoltBase):
+class FilterBolt(Bolt, StatefulComponent, StreamletBoltBase):
   """FilterBolt"""
   FUNCTION = 'function'
 
