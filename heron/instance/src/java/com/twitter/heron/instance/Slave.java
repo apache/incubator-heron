@@ -15,11 +15,13 @@
 package com.twitter.heron.instance;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.state.HashMapState;
@@ -178,6 +180,7 @@ public class Slave implements Runnable, AutoCloseable {
     slaveLooper.loop();
   }
 
+  @SuppressWarnings("unchecked")
   private void startInstanceIfNeeded() {
     // To start the instance when:
     //  1. We got the PhysicalPlan
@@ -192,6 +195,15 @@ public class Slave implements Runnable, AutoCloseable {
     if (!helper.isTopologyRunning()) {
       LOG.info("Topology is not in RUNNING state. Instance is not started");
       return;
+    }
+
+    // Setting topology environment properties
+    Map<String, Object> topoConf = helper.getTopologyContext().getTopologyConfig();
+    if (topoConf.containsKey(Config.TOPOLOGY_ENVIRONMENT)) {
+      Map<String, String> envProps =
+          (Map<String, String>) topoConf.get(Config.TOPOLOGY_ENVIRONMENT);
+      LOG.info("Setting topology environment: " + envProps);
+      System.getProperties().putAll(envProps);
     }
 
     if (helper.isTopologyStateful()) {
