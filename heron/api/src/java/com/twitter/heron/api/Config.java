@@ -236,8 +236,8 @@ public class Config extends HashMap<String, Object> {
       "topology.update.reactivate.wait.secs";
 
   /**
-   * Topology-specific environment variables for the worker child process.
-   * This is added to the existing environment (that of the supervisor).
+   * Topology-specific environment properties to be added to an Heron instance.
+   * This is added to the existing environment (that of the Heron instance).
    * This variable contains Map<String, String>
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
