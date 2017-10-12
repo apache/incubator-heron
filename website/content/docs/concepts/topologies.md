@@ -263,8 +263,6 @@ Here are some examples of window operations:
 * Counting how many customers have purchased a product during each one-hour period in the last 24 hours.
 * Determining which player in an online game has the highest score during a 15-minute period.
 
-> In Heron, all window time durations, including sliding intervals, are specified **in seconds**.
-
 ### Sliding windows
 
 **Sliding windows** are windows that overlap, as in this figure:
