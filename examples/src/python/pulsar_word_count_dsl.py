@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''Example WordCountTopology'''
+'''Example WordCountStreamletTopology'''
 import sys
 
-from heronpy.dsl.streamlet import TimeWindow
+from heronpy.streamlet import TimeWindow
 from heronpy.connectors.pulsar.pulsarstreamlet import PulsarStreamlet
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:
-    print "Usage pulsar_would_count_dsl.pex <topology_name> <pulsar_service_url> <pulsar_topic>"
+    print "Usage pulsar_would_count_streamlet.pex <topology_name> <pulsar_service_url> <pulsar_topic>"
     sys.exit(1)
 
   counts = PulsarStreamlet.pulsarStreamlet(sys.argv[2], sys.argv[3], parallelism=2) \

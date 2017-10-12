@@ -48,23 +48,23 @@ pex_binary(
     deps = [":example-py"],
 )
 
-# dsl examples
+# streamlet API examples
 pex_binary(
-    name = "word_count_dsl",
-    srcs = ["word_count_dsl.py"],
+    name = "word_count_streamlet",
+    srcs = ["word_count_streamlet.py"],
     deps = [
       '//heronpy/api:heron-python-py',
-      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/streamlet:heron-python-streamlet-api-py',
       '//heronpy/connectors:heron-pythonconnectors-py',
     ],
 )
 
 pex_binary(
-    name = "pulsar_word_count_dsl",
-    srcs = ["pulsar_word_count_dsl.py"],
+    name = "pulsar_word_count_streamlet",
+    srcs = ["pulsar_word_count_streamlet.py"],
     deps = [
       '//heronpy/api:heron-python-py',
-      '//heronpy/dsl:heron-pythondsl-py',
+      '//heronpy/streamlet:heron-streamlet-api-py',
       '//heronpy/connectors:heron-pythonconnectors-py',
     ]
 )
