@@ -29,8 +29,14 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * Implementation of AuroraController that is a wrapper of AuroraCLIController The difference is:
- * the `restart` method implementation is changed to heron-shell
+ * Implementation of AuroraController that is a wrapper of AuroraCLIController.
+ * The difference is `restart` command:
+ * 1. restart whole topology: delegate to AuroraCLIController
+ * 2. restart container 0: delegate to AuroraCLIController
+ * 3. restart container x(x>0): call heron-shell endpoint `/killexecutor`
+ * For backpressure, only containers with heron-stmgr may send out backpressure.
+ * This class is to handle `restart backpressure containers inside container`,
+ * while delegating to AuroraCLIController for all the other scenarios.
  */
 class AuroraHeronShellController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraHeronShellController.class.getName());
@@ -66,8 +72,9 @@ class AuroraHeronShellController implements AuroraController {
   // Restart an aurora container
   @Override
   public boolean restart(Integer containerId) {
-    if (containerId == null) {
-      throw new UnsupportedOperationException("Not implemented");
+    // there is no backpressure for container 0, delegate to aurora client
+    if (containerId == null || containerId == 0) {
+      cliController.restart(containerId);
     }
 
     if (stateMgrAdaptor == null) {
@@ -75,18 +82,11 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    String url = null;
-    if (containerId == 0) {
-      // TODO(huijun): needs shell port for container 0
-      throw new UnsupportedOperationException("Not implemented for container 0");
-    } else {
-      int index = containerId - 1; // stmgr container starts from 1
-      StMgr containerInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-      String host = containerInfo.getHostName();
-      int port = containerInfo.getShellPort();
-      url = "http://" + host + ":" + port + "/killexecutor";
-    }
-
+    int index = containerId - 1; // stmgr container starts from 1
+    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
+    String host = contaienrInfo.getHostName();
+    int port = contaienrInfo.getShellPort();
+    String url = "http://" + host + ":" + port + "/killexecutor";
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
