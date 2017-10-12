@@ -22,7 +22,7 @@ import com.twitter.heron.dsl.impl.BaseStreamlet;
 import com.twitter.heron.dsl.impl.sinks.ComplexSink;
 
 /**
- * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
+ * SinkStreamlet represents en empty Streamlet that is made up of elements from the parent
  * streamlet after consuming every element. Since elements of the parents are just consumed
  * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
