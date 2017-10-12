@@ -19,12 +19,12 @@ import com.twitter.heron.dsl.KeyValue;
 import com.twitter.heron.dsl.KeyedWindow;
 import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
-import com.twitter.heron.dsl.SerializableGenerator;
 import com.twitter.heron.dsl.SerializableSupplier;
+import com.twitter.heron.dsl.Source;
 import com.twitter.heron.dsl.WindowConfig;
-import com.twitter.heron.dsl.impl.streamlets.GeneratorKVStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.SourceKVStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.SupplierKVStreamlet;
 
 /**
@@ -49,8 +49,8 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param generator The Generator function to generate the elements
    */
   static <K, V> BaseKVStreamlet<K, V> createGeneratorKVStreamlet(
-      SerializableGenerator<KeyValue<K, V>> generator) {
-    return new GeneratorKVStreamlet<K, V>(generator);
+      Source<KeyValue<K, V>> generator) {
+    return new SourceKVStreamlet<K, V>(generator);
   }
 
   /**
