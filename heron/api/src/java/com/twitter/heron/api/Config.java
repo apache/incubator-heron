@@ -139,12 +139,21 @@ public class Config extends HashMap<String, Object> {
      */
     EFFECTIVELY_ONCE;
   }
+
+  public enum TopologyDeliverySemantics {
+    ATMOST_ONCE,
+    ATLEAST_ONCE,
+    EFFECTIVELY_ONCE;
+  }
+
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode
    * mode. The format of this flag is the string encoded values of the
    * underlying TopologyReliabilityMode value.
    */
   public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
+
+  public static final String TOPOLOGY_DELIVERY_SEMANTICS = "topology.delivery.semantics";
 
   /**
    * Number of cpu cores per container to be reserved for this topology
@@ -343,6 +352,11 @@ public class Config extends HashMap<String, Object> {
   public static void setTopologyReliabilityMode(Map<String, Object> conf,
                                                 Config.TopologyReliabilityMode mode) {
     conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
+  }
+
+  public static void setTopologyDeliverySemantics(Map<String, Object) conf,
+                                                  Config.TopologySemantics semantics) {
+    conf.put(Config.TOPOLOGY_DELIVERY_SEMANTICS, String.valueOf(semantics));
   }
 
   public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
