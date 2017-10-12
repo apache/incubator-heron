@@ -87,6 +87,10 @@ public final class ConfigUtils {
           Boolean.parseBoolean(heronConfig.get(org.apache.storm.Config.TOPOLOGY_DEBUG).toString());
       com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
     }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT)) {
+      com.twitter.heron.api.Config.setEnvironment(heronConfig,
+          (Map) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT));
+    }
 
     doTaskHooksTranslation(heronConfig);
 
