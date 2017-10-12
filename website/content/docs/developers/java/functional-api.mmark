@@ -206,21 +206,23 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 
 ### Join operations
 
-Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
+Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each key-value object (a Python two-tuple) in a streamlet has, by definition, a key. Here's an example:
 
 ```java
 import com.twitter.heron.dsl.WindowConfig;
 
 Builder builder = Builder.CreateBuilder();
 
-KVStreamlet<String, String> streamlet1 =
-        builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
+KVStreamlet<String, Integer> player1Scores =
+        builder.newKVSource(() -> new KeyValue<>("score", 10));
+KVStreamlet<String, Integer> player2Scores =
+        builder.newKVSource(() -> new KeyValue<>("score", 12));
 
-builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
-    .join(streamlet1, WindowConfig.TumblingCountWindow(10), KeyValue::create);
+player1Scores
+        .join()
 ```
 
-In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
+Here, two streamlets are created, each of which emits a `KeyValue<String, String>` object in which the key is `heron-api`. In `streamlet`, the value of the `KeyValue` object is `topology-api` while in `streamlet2` the value is `functional-api`. The streamlet resulting from the join operation would consist of a key-value streamlet consisting of `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
 
 > The effect of a join operation is to create a new streamlet *for each key*.
 

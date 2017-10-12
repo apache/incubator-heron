@@ -22,7 +22,9 @@ If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Pyth
 
 Every Functional API topology needs to be configured using a [`Config`](TODO) object.
 
-### Delivery semantics
+### Selecting delivery semantics
+
+You can select one of three [delivery semantics](../../../concepts/delivery-semantics)---at least once, at most once, or effectively once---to a topology like this:
 
 ```python
 from heronpy.dsl.config import Config
@@ -111,9 +113,17 @@ The effect of this operation is to transform a string streamlet into a list stre
 
 ### Join operations
 
-Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each key-value object (a Python two-tuple) in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
+Join operations unify two streamlets *on a key*. Each key-value object (a Python two-tuple) in a streamlet has, by definition, a key and a value.
 
 ```java
+from heronpy.streamlet.windowconfig import WindowConfig
+
+streamlet1 = builder.new_source(ArrayLooper[('heron-api', 'topology-api')])
+streamlet2 = builder.new_source(ArrayLooper[('heron-api', 'functional-api')])
+
+streamlet2
+    .join(streamlet1)
+
 import com.twitter.heron.dsl.WindowConfig;
 
 Builder builder = Builder.CreateBuilder();
