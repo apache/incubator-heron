@@ -17,13 +17,13 @@ from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.transformoperator import TransformOperator
-from heronpy.dsl.impl.contextimpl import ContextImpl
-from heronpy.dsl.impl.dslboltbase import DslBoltBase
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.transformoperator import TransformOperator
+from heronpy.streamlet.impl.contextimpl import ContextImpl
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
-class TransformBolt(Bolt, StatefulComponent, DslBoltBase):
+class TransformBolt(Bolt, StatefulComponent, StreamletBoltBase):
   """TransformBolt"""
   OPERATOR = 'operator'
 

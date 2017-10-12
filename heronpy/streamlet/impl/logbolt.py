@@ -17,11 +17,11 @@ from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.impl.dslboltbase import DslBoltBase
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
-class LogBolt(Bolt, StatefulComponent, DslBoltBase):
+class LogBolt(Bolt, StatefulComponent, StreamletBoltBase):
   """LogBolt"""
   def init_state(self, stateful_state):
     # logBolt does not have any state

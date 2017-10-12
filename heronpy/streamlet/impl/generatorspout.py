@@ -15,13 +15,13 @@
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.spout.spout import Spout
 
-from heronpy.dsl.impl.contextimpl import ContextImpl
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
-from heronpy.dsl.generator import Generator
+from heronpy.streamlet.impl.contextimpl import ContextImpl
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.impl.streamletspoutbase import StreamletSpoutBase
+from heronpy.streamlet.generator import Generator
 
 # pylint: disable=unused-argument
-class GeneratorSpout(Spout, StatefulComponent, DslSpoutBase):
+class GeneratorSpout(Spout, StatefulComponent, StreamletSpoutBase):
   """GeneratorSpout"""
   GENERATOR = 'generator'
 

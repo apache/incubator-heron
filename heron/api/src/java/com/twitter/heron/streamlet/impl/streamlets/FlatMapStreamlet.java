@@ -12,14 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.streamlets;
+package com.twitter.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.impl.BaseStreamlet;
-import com.twitter.heron.dsl.impl.operators.FlatMapOperator;
+import com.twitter.heron.streamlet.SerializableFunction;
+import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.operators.FlatMapOperator;
 
 /**
  * FlatMapStreamlet represents a Streamlet that is made up of applying the user

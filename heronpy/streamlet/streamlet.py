@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''streamlet.py: module for defining the basic concept of the heron python dsl'''
+'''streamlet.py: module for defining the basic concept of the heron python streamlet API'''
 from abc import abstractmethod
 
-from heronpy.dsl.impl.dslboltbase import DslBoltBase
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=too-many-instance-attributes, protected-access
 class Streamlet(object):
@@ -31,7 +31,7 @@ class Streamlet(object):
     self._num_partitions = 1
     self._children = []
     self._built = False
-    self._output = DslBoltBase.outputs[0].stream_id
+    self._output = StreamletBoltBase.outputs[0].stream_id
 
   def set_name(self, name):
     """Sets the name of the Streamlet"""
@@ -52,7 +52,7 @@ class Streamlet(object):
   def map(self, map_function):
     """Return a new Streamlet by applying map_function to each element of this Streamlet.
     """
-    from heronpy.dsl.impl.mapbolt import MapStreamlet
+    from heronpy.streamlet.impl.mapbolt import MapStreamlet
     map_streamlet = MapStreamlet(map_function, self)
     self._add_child(map_streamlet)
     return map_streamlet
@@ -61,7 +61,7 @@ class Streamlet(object):
     """Return a new Streamlet by applying map_function to each element of this Streamlet
        and flattening the result
     """
-    from heronpy.dsl.impl.flatmapbolt import FlatMapStreamlet
+    from heronpy.streamlet.impl.flatmapbolt import FlatMapStreamlet
     fm_streamlet = FlatMapStreamlet(flatmap_function, self)
     self._add_child(fm_streamlet)
     return fm_streamlet
@@ -69,7 +69,7 @@ class Streamlet(object):
   def filter(self, filter_function):
     """Return a new Streamlet containing only the elements that satisfy filter_function
     """
-    from heronpy.dsl.impl.filterbolt import FilterStreamlet
+    from heronpy.streamlet.impl.filterbolt import FilterStreamlet
     filter_streamlet = FilterStreamlet(filter_function, self)
     self._add_child(filter_streamlet)
     return filter_streamlet
@@ -83,7 +83,7 @@ class Streamlet(object):
     It could also return a list of partitions if it wants to send it to multiple
     partitions.
     """
-    from heronpy.dsl.impl.repartitionbolt import RepartitionStreamlet
+    from heronpy.streamlet.impl.repartitionbolt import RepartitionStreamlet
     if repartition_function is None:
       repartition_function = lambda x: x
     repartition_streamlet = RepartitionStreamlet(num_partitions, repartition_function, self)
@@ -106,7 +106,7 @@ class Streamlet(object):
       reduce_function takes two element at one time and reduces them to one element that
       is used in the subsequent operations.
     """
-    from heronpy.dsl.impl.reducebywindowbolt import ReduceByWindowStreamlet
+    from heronpy.streamlet.impl.reducebywindowbolt import ReduceByWindowStreamlet
     reduce_streamlet = ReduceByWindowStreamlet(window_config, reduce_function, self)
     self._add_child(reduce_streamlet)
     return reduce_streamlet
@@ -115,7 +115,7 @@ class Streamlet(object):
   def union(self, other_streamlet):
     """Returns a new Streamlet that consists of elements of both this and other_streamlet
     """
-    from heronpy.dsl.impl.unionbolt import UnionStreamlet
+    from heronpy.streamlet.impl.unionbolt import UnionStreamlet
     union_streamlet = UnionStreamlet(self, other_streamlet)
     self._add_child(union_streamlet)
     other_streamlet._add_child(union_streamlet)
@@ -127,7 +127,7 @@ class Streamlet(object):
     Before starting to cycle over the Streamlet, the open function of the transform_operator is
     called. This allows the transform_operator to do any kind of initialization/loading, etc.
     """
-    from heronpy.dsl.impl.transformbolt import TransformStreamlet
+    from heronpy.streamlet.impl.transformbolt import TransformStreamlet
     transform_streamlet = TransformStreamlet(transform_operator, self)
     self._add_child(transform_streamlet)
     return transform_streamlet
@@ -135,7 +135,7 @@ class Streamlet(object):
   def log(self):
     """Logs all elements of this streamlet. This returns nothing
     """
-    from heronpy.dsl.impl.logbolt import LogStreamlet
+    from heronpy.streamlet.impl.logbolt import LogStreamlet
     log_streamlet = LogStreamlet(self)
     self._add_child(log_streamlet)
     return
@@ -143,7 +143,7 @@ class Streamlet(object):
   def consume(self, consume_function):
     """Calls consume_function for each element of this streamlet. This function returns nothing
     """
-    from heronpy.dsl.impl.consumebolt import ConsumeStreamlet
+    from heronpy.streamlet.impl.consumebolt import ConsumeStreamlet
     consume_streamlet = ConsumeStreamlet(consume_function, self)
     self._add_child(consume_streamlet)
     return
@@ -151,7 +151,7 @@ class Streamlet(object):
   def join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet = JoinStreamlet(JoinBolt.INNER, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
@@ -161,7 +161,7 @@ class Streamlet(object):
   def outer_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by outer joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet = JoinStreamlet(JoinBolt.OUTER, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
@@ -171,7 +171,7 @@ class Streamlet(object):
   def left_join(self, join_streamlet, window_config, join_function):
     """Return a new Streamlet by left joining join_streamlet with this streamlet
     """
-    from heronpy.dsl.impl.joinbolt import JoinStreamlet, JoinBolt
+    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
     join_streamlet = JoinStreamlet(JoinBolt.LEFT, window_config,
                                    join_function, self, join_streamlet)
     self._add_child(join_streamlet)
@@ -182,7 +182,7 @@ class Streamlet(object):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
        over the time_window and then reduced using the reduce_function
     """
-    from heronpy.dsl.impl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
+    from heronpy.streamlet.impl.reducebykeyandwindowbolt import ReduceByKeyAndWindowStreamlet
     reduce_streamlet = ReduceByKeyAndWindowStreamlet(window_config, reduce_function, self)
     self._add_child(reduce_streamlet)
     return reduce_streamlet

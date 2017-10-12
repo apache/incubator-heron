@@ -20,7 +20,7 @@ import java.time.Duration;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 
 /**
- * WindowConfig allows dsl users to program window configuration for operations
+ * WindowConfig allows Streamlet API users to program window configuration for operations
  * that rely on windowing. Currently we only support time/count based
  * sliding/tumbling windows.
  */

@@ -14,7 +14,7 @@
 """module for base dsl bolt: DslBoltBase"""
 from heronpy.api.stream import Stream
 
-class DslBoltBase(object):
+class StreamletBoltBase(object):
   """DslBoltBase"""
   # output declarer
   outputs = [Stream(fields=['_output_'], name='output')]

@@ -13,7 +13,7 @@
 # limitations under the License.
 '''keyedwindow.py: module for defining KeyedWindow'''
 
-from heronpy.dsl.window import Window
+from heronpy.streamlet.window import Window
 
 class KeyedWindow(object):
   """Transformation depending on Windowing pass on the window/key information

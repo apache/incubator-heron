@@ -15,9 +15,9 @@
 
 import sets
 
-from heronpy.dsl.generator import Generator
-from heronpy.dsl.impl.supplierspout import SupplierStreamlet
-from heronpy.dsl.impl.generatorspout import GeneratorStreamlet
+from heronpy.streamlet.generator import Generator
+from heronpy.streamlet.impl.supplierspout import SupplierStreamlet
+from heronpy.streamlet.impl.generatorspout import GeneratorStreamlet
 
 class Builder(object):
   """A Builder object is used to build the functional api dag in Heron.

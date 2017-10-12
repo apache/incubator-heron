@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.operators;
+package com.twitter.heron.streamlet.impl.operators;
 
 import java.util.Map;
 
@@ -21,9 +21,9 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.SerializableBinaryOperator;
-import com.twitter.heron.dsl.Window;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.SerializableBinaryOperator;
+import com.twitter.heron.streamlet.Window;
 
 /**
  * ReduceByWindowOperator is the class that implements the reduceByWindow functionality.
@@ -31,7 +31,7 @@ import com.twitter.heron.dsl.Window;
  * For every window, the bolt applies reduceFn to all the tuples in that window, and emits
  * the resulting value as output
  */
-public class ReduceByWindowOperator<I> extends DslWindowOperator {
+public class ReduceByWindowOperator<I> extends StreamletWindowOperator {
   private static final long serialVersionUID = 6513775685209414130L;
   private SerializableBinaryOperator<I> reduceFn;
   private OutputCollector collector;

@@ -23,10 +23,10 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
 /**
- * DslSource is the base class for all dsl sources.
+ * StreamletSource is the base class for all streamlet sources.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class DslSource extends BaseRichSpout
+public abstract class StreamletSource extends BaseRichSpout
     implements IStatefulComponent<Serializable, Serializable> {
 
   private static final long serialVersionUID = 8583965332619565343L;
@@ -39,9 +39,9 @@ public abstract class DslSource extends BaseRichSpout
   public void preSave(String checkpointId) { }
 
   /**
-   * The sources implementing dsl functionality have some properties.
+   * The sources implementing streamlet functionality have some properties.
    * 1. They all output only one stream
-   * 2. All dsl operators should be able to consume their output
+   * 2. All streamlet operators should be able to consume their output
    * This imply that the output stream should be named same for all of them.
    */
   @Override

@@ -18,7 +18,7 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.dsl.impl.BuilderImpl;
+import com.twitter.heron.streamlet.impl.BuilderImpl;
 
 /**
  * Runner is used to run a topology that is built by the builder.

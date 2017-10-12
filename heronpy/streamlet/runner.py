@@ -14,8 +14,8 @@
 '''runner.py: module for creating Runner'''
 
 from heronpy.api.topology import TopologyBuilder
-from heronpy.dsl.builder import Builder
-from heronpy.dsl.config import Config
+from heronpy.streamlet.builder import Builder
+from heronpy.streamlet.config import Config
 
 class Runner(object):
   """Runner is used to run a topology that is built by the builder.

@@ -18,15 +18,15 @@ import logging
 import itertools
 import time
 
-from heronpy.dsl.builder import Builder
-from heronpy.dsl.config import Config
-from heronpy.dsl.generator import Generator
-from heronpy.dsl.runner import Runner
-from heronpy.dsl.windowconfig import WindowConfig
+from heronpy.streamlet.builder import Builder
+from heronpy.streamlet.config import Config
+from heronpy.streamlet.generator import Generator
+from heronpy.streamlet.runner import Runner
+from heronpy.streamlet.windowconfig import WindowConfig
 from heronpy.connectors.mock.arraylooper import ArrayLooper
 from integration_test.src.python.integration_test.core.test_runner import TestRunner
 
-def word_count_dsl_builder(topology_name, http_server_url):
+def word_count_streamlet_builder(topology_name, http_server_url):
   builder = Builder()
   sentences1 = ["Mary had a little lamb",
                 "Humpy Dumpy sat on a wall"]

@@ -19,15 +19,15 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.keyedwindow import KeyedWindow
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.window import Window
-from heronpy.dsl.windowconfig import WindowConfig
-from heronpy.dsl.impl.dslboltbase import DslBoltBase
+from heronpy.streamlet.keyedwindow import KeyedWindow
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.window import Window
+from heronpy.streamlet.windowconfig import WindowConfig
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 
 # pylint: disable=unused-argument
-class JoinBolt(SlidingWindowBolt, DslBoltBase):
+class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
   """JoinBolt"""
 
   LEFT = 1
@@ -125,9 +125,9 @@ class JoinStreamlet(Streamlet):
 
   def _calculate_inputs(self):
     return {GlobalStreamId(self._left.get_name(), self._left._output) :
-            Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping"),
+            Grouping.custom("heronpy.streamlet.impl.joinbolt.JoinGrouping"),
             GlobalStreamId(self._right.get_name(), self._right._output) :
-            Grouping.custom("heronpy.dsl.impl.joinbolt.JoinGrouping")}
+            Grouping.custom("heronpy.streamlet.impl.joinbolt.JoinGrouping")}
 
   def _build_this(self, builder, stage_names):
     if not self._left._built or not self._right._built:

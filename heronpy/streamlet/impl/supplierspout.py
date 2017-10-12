@@ -15,11 +15,11 @@
 from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.spout.spout import Spout
 
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.impl.dslspoutbase import DslSpoutBase
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.impl.streamletspoutbase import StreamletSpoutBase
 
 # pylint: disable=unused-argument
-class SupplierSpout(Spout, StatefulComponent, DslSpoutBase):
+class SupplierSpout(Spout, StatefulComponent, StreamletSpoutBase):
   """SupplierSpout"""
   FUNCTION = 'function'
 

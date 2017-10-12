@@ -14,7 +14,7 @@
 '''config.py: module for defining config'''
 
 import heronpy.api.api_constants as api_constants
-from heronpy.dsl.resources import Resources
+from heronpy.streamlet.resources import Resources
 
 class Config(object):
   """Config is the way users configure the execution of the topology.

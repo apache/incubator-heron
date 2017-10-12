@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.dsl.impl.operators;
+package com.twitter.heron.streamlet.impl.operators;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +22,10 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.KeyedWindow;
-import com.twitter.heron.dsl.SerializableBiFunction;
-import com.twitter.heron.dsl.Window;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.KeyedWindow;
+import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.Window;
 
 /**
  * JoinOperator is the bolt that implements the join/leftJoin/innerJoin functionality.
@@ -33,10 +33,10 @@ import com.twitter.heron.dsl.Window;
  * a config parameter. Also taken as parameters are which source is left and right.
  * This is needed for the semantics of outer/left/inner joins.
  */
-public class JoinOperator<K, V1, V2, VR> extends DslWindowOperator {
+public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   private static final long serialVersionUID = 4875450390444745407L;
-  public static final String LEFT_COMPONENT_NAME = "_dsl_joinbolt_left_component_name_";
-  public static final String RIGHT_COMPONENT_NAME = "_dsl_joinbolt_right_component_name_";
+  public static final String LEFT_COMPONENT_NAME = "_streamlet_joinbolt_left_component_name_";
+  public static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";
 
   public enum JoinType {
     INNER,

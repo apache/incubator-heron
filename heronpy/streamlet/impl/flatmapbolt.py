@@ -18,11 +18,11 @@ from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet
-from heronpy.dsl.impl.dslboltbase import DslBoltBase
+from heronpy.streamlet.streamlet import Streamlet
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
-class FlatMapBolt(Bolt, StatefulComponent, DslBoltBase):
+class FlatMapBolt(Bolt, StatefulComponent, StreamletBoltBase):
   """FlatMapBolt"""
   FUNCTION = 'function'
 

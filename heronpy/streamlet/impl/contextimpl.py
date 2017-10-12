@@ -13,7 +13,7 @@
 # limitations under the License.
 """module for contextimpl: ContextImpl"""
 
-from heronpy.dsl.context import Context
+from heronpy.streamlet.context import Context
 
 class ContextImpl(Context):
   """ContextImpl"""
