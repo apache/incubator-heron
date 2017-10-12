@@ -77,6 +77,7 @@ class AuroraHeronShellController implements AuroraController {
 
     String url = null;
     if (containerId == 0) {
+      // TODO(huijun): needs shell port for container 0
       throw new UnsupportedOperationException("Not implemented for container 0");
     } else {
       int index = containerId - 1; // stmgr container starts from 1
