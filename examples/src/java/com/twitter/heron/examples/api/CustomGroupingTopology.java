@@ -47,15 +47,13 @@ public final class CustomGroupingTopology {
     Config conf = new Config();
 
     // component resource configuration
-    com.twitter.heron.api.Config
-        .setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
-    com.twitter.heron.api
-        .Config.setComponentRam(conf, "mybolt", ByteAmount.fromMegabytes(512));
+    conf.setComponentRam("word", ByteAmount.fromMegabytes(512));
+    conf.setComponentRam("mybolt", ByteAmount.fromMegabytes(512));
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(2));
+    conf.setContainerRamRequested(ByteAmount.fromGigabytes(2));
+    conf.setContainerCpuRequested(2);
 
     conf.setNumStmgrs(2);
 
