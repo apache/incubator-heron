@@ -64,16 +64,15 @@ public final class AckingTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ExampleResources.getComponentRam());
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
-        ExampleResources.getComponentRam());
+    conf.setComponentRam("word", ExampleResources.getComponentRam());
+    conf.setComponentRam("exclaim1", ExampleResources.getComponentRam());
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+    conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(spouts + bolts, 2));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+    conf.setContainerRamRequested(
         ExampleResources.getContainerRam(spouts + bolts, 2));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
+    conf.setContainerCpuRequested(conf, 1);
 
     // Set the number of workers or stream managers
     conf.setNumStmgrs(2);

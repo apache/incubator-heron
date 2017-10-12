@@ -174,14 +174,14 @@ public final class SentenceWordCountTopology {
     Config conf = new Config();
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "spout", ByteAmount.fromMegabytes(512));
-    com.twitter.heron.api.Config.setComponentRam(conf, "split", ByteAmount.fromMegabytes(512));
-    com.twitter.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
+    conf.setComponentRam("spout", ByteAmount.fromMegabytes(512));
+    conf.setComponentRam("split", ByteAmount.fromMegabytes(512));
+    conf.setComponentRam("count", ByteAmount.fromMegabytes(512));
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(3));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(3));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(3));
+    conf.setContainerRamRequested(ByteAmount.fromGigabytes(3));
+    conf.setContainerCpuRequested(2);
 
     conf.setNumStmgrs(2);
 
