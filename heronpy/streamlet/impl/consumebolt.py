@@ -17,7 +17,7 @@ from heronpy.api.state.stateful_component import StatefulComponent
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.streamlet import Streamlet
+from heronpy.streamlet.streamlet import Streamlet
 from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
