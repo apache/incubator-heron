@@ -31,16 +31,14 @@ public interface GeneralTopologyContext {
   String getTopologyId();
 
   /**
-   * Gets the Thrift object representing the topology.
-   *
-   * @return the Thrift definition representing the topology
+   * Gets the Protobuf object representing the topology.
+   * Deprecated.  Only for storm compatiblity purposes
+   * @return the Protobuf definition representing the topology
+   * @deprecated for backwards compatibility purposes
    */
-    /*
-    TODO:- This should not be exposed. Take this out
-    public HeronTopology getRawTopology() {
-        return _topology;
-    }
-    */
+  @Deprecated
+  TopologyAPI.Topology getRawTopology();
+
 
   /**
    * Gets the component id for the specified task id. The component id maps
