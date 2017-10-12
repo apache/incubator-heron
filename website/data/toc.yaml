@@ -18,6 +18,8 @@ sections:
     sublinks:
       - name: Java Topologies
         url: /docs/developers/java/topologies
+      - name: Effectively-once Java topologies
+        url: /docs/developers/java/effectively-once
       - name: Python Topologies
         url: /docs/developers/python/topologies
       - name: Heron Data Model
@@ -108,6 +110,8 @@ sections:
     sublinks:
       - name: Heron Client
         url: /docs/operators/heron-cli
+      - name: Heron Explorer
+        url: /docs/operators/heron-explorer
       - name: Heron Tracker REST API
         url: /docs/operators/heron-tracker-api
       - name: Heron Tracker Runbook

@@ -19,8 +19,11 @@ from heronpy.api.custom_grouping import ICustomGrouping
 from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
-from heronpy.dsl.streamlet import Streamlet, TimeWindow
-from heronpy.dsl.dslboltbase import DslBoltBase
+from heronpy.dsl.keyedwindow import KeyedWindow
+from heronpy.dsl.streamlet import Streamlet
+from heronpy.dsl.window import Window
+from heronpy.dsl.windowconfig import WindowConfig
+from heronpy.dsl.impl.dslboltbase import DslBoltBase
 
 # pylint: disable=unused-argument
 class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
@@ -56,7 +59,8 @@ class ReduceByKeyAndWindowBolt(SlidingWindowBolt, DslBoltBase):
       result = values[0]
       for value in values[1:]:
         result = self.reduce_function(result, value)
-      self.emit([(key, result)], stream='output')
+      keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
+      self.emit([(keyedwindow, result)], stream='output')
 
 # pylint: disable=unused-argument
 class ReduceGrouping(ICustomGrouping):
@@ -76,37 +80,33 @@ class ReduceGrouping(ICustomGrouping):
 # pylint: disable=protected-access
 class ReduceByKeyAndWindowStreamlet(Streamlet):
   """ReduceByKeyAndWindowStreamlet"""
-  def __init__(self, time_window, reduce_function, parents, stage_name=None, parallelism=None):
-    super(ReduceByKeyAndWindowStreamlet, self).__init__(parents=parents,
-                                                        stage_name=stage_name,
-                                                        parallelism=parallelism)
-    self._time_window = time_window
+  def __init__(self, window_config, reduce_function, parent):
+    super(ReduceByKeyAndWindowStreamlet, self).__init__()
+    if not isinstance(window_config, WindowConfig):
+      raise RuntimeError("window config has to be a WindowConfig")
+    if not callable(reduce_function):
+      raise RuntimeError("ReduceByKeyAndWindow function has to be callable")
+    if not isinstance(parent, Streamlet):
+      raise RuntimeError("Parent of Filter Streamlet has to be a Streamlet")
+    self._window_config = window_config
     self._reduce_function = reduce_function
+    self._parent = parent
 
   def _calculate_inputs(self):
-    return {GlobalStreamId(self._parents[0]._stage_name, self._parents[0]._output) :
-            Grouping.custom("heronpy.dsl.reducebykeyandwindowbolt.ReduceGrouping")}
+    return {GlobalStreamId(self._parent.get_name(), self._parent._output) :
+            Grouping.custom("heronpy.dsl.impl.reducebykeyandwindowbolt.ReduceGrouping")}
 
-  def _calculate_stage_name(self, existing_stage_names):
-    funcname = "reducebykeyandwindow-" + self._reduce_function.__name__
-    if funcname not in existing_stage_names:
-      return funcname
-    else:
-      index = 1
-      newfuncname = funcname + str(index)
-      while newfuncname in existing_stage_names:
-        index = index + 1
-        newfuncname = funcname + str(index)
-      return newfuncname
-
-  def _build_this(self, builder):
-    if not callable(self._reduce_function):
-      raise RuntimeError("reduce function must be callable")
-    if not isinstance(self._time_window, TimeWindow):
-      raise RuntimeError("reduce's time_window should be TimeWindow")
-    builder.add_bolt(self._stage_name, ReduceByKeyAndWindowBolt, par=self._parallelism,
+  def _build_this(self, builder, stage_names):
+    if not self.get_name():
+      self.set_name(self._default_stage_name_calculator("reducebykeyandwindow", stage_names))
+    if self.get_name() in stage_names:
+      raise RuntimeError("Duplicate Names")
+    stage_names.add(self.get_name())
+    builder.add_bolt(self.get_name(), ReduceByKeyAndWindowBolt, par=self.get_num_partitions(),
                      inputs=self._calculate_inputs(),
                      config={ReduceByKeyAndWindowBolt.FUNCTION : self._reduce_function,
-                             ReduceByKeyAndWindowBolt.WINDOWDURATION : self._time_window.duration,
+                             ReduceByKeyAndWindowBolt.WINDOWDURATION :
+                             self._window_config._window_duration.seconds,
                              ReduceByKeyAndWindowBolt.SLIDEINTERVAL :
-                             self._time_window.sliding_interval})
+                             self._window_config._slide_interval.seconds})
+    return True
