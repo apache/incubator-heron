@@ -142,7 +142,7 @@ topologyConfig.setNumContainers(2);
 You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
 
 ```java
-import com.twitter.heron.dsl.Resources;
+import com.twitter.heron.streamlet.Resources;
 
 Resources resources = new Resources();
 resources.withCpu(2.0f);
@@ -208,7 +208,7 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
-import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.CreateBuilder();
 
