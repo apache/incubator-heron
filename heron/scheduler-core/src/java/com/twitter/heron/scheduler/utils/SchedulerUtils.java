@@ -29,6 +29,7 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.scheduler.ExecutorFlag;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -169,7 +170,7 @@ public final class SchedulerUtils {
       List<String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(createCommandArg("--shard", Integer.toString(containerIndex)));
+    commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));
@@ -201,43 +202,44 @@ public final class SchedulerUtils {
     String ckptmgrPort = freePorts.get(8);
 
     List<String> commands = new ArrayList<>();
-    commands.add(createCommandArg("--topology-name", topology.getName()));
-    commands.add(createCommandArg("--topology-id", topology.getId()));
-    commands.add(createCommandArg("--topology-defn-file",
+    commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
+    commands.add(createCommandArg(ExecutorFlag.TopologyId, topology.getId()));
+    commands.add(createCommandArg(ExecutorFlag.TopologyDefinitionFile,
         FileUtils.getBaseName(Context.topologyDefinitionFile(config))));
-    commands.add(createCommandArg("--state-manager-connection",
+    commands.add(createCommandArg(ExecutorFlag.StateManagerConnection,
         Context.stateManagerConnectionString(config)));
-    commands.add(createCommandArg("--state-manager-root",
+    commands.add(createCommandArg(ExecutorFlag.StateManagerRoot,
         Context.stateManagerRootPath(config)));
-    commands.add(createCommandArg("--tmaster-binary", Context.tmasterBinary(config)));
-    commands.add(createCommandArg("--stmgr-binary", Context.stmgrBinary(config)));
-    commands.add(createCommandArg("--metrics-manager-classpath",
+    commands.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,
         Context.metricsManagerClassPath(config)));
-    commands.add(createCommandArg("--instance-jvm-opts",
+    commands.add(createCommandArg(ExecutorFlag.InstanceJvmOpts,
         SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology))));
-    commands.add(createCommandArg("--classpath",
+    commands.add(createCommandArg(ExecutorFlag.Classpath,
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config))));
-    commands.add(createCommandArg("--master-port", masterPort));
-    commands.add(createCommandArg("--tmaster-controller-port", tmasterControllerPort));
-    commands.add(createCommandArg("--tmaster-stats-port", tmasterStatsPort));
-    commands.add(createCommandArg("--heron-internals-config-file",
+    commands.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
+    commands.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
+    commands.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
+    commands.add(createCommandArg(ExecutorFlag.HeronInternalsConfigFile,
         Context.systemConfigFile(config)));
-    commands.add(createCommandArg("--override-config-file", Context.overrideFile(config)));
-    commands.add(createCommandArg("--component-ram-map", Runtime.componentRamMap(runtime)));
-    commands.add(createCommandArg("--component-jvm-opts",
+    commands.add(createCommandArg(ExecutorFlag.OverrideConfigFile, Context.overrideFile(config)));
+    commands.add(createCommandArg(ExecutorFlag.ComponentRamMap, Runtime.componentRamMap(runtime)));
+    commands.add(createCommandArg(ExecutorFlag.ComponentJvmOpts,
         SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology))));
-    commands.add(createCommandArg("--pkg-type",
+    commands.add(createCommandArg(ExecutorFlag.PkgType,
         Context.topologyPackageType(config).name().toLowerCase()));
-    commands.add(createCommandArg("--topology-binary-file", Context.topologyBinaryFile(config)));
-    commands.add(createCommandArg("--heron-java-home", Context.clusterJavaHome(config)));
-    commands.add(createCommandArg("--shell-port", shellPort));
-    commands.add(createCommandArg("--heron-shell-binary", Context.shellBinary(config)));
-    commands.add(createCommandArg("--metrics-manager-port", metricsmgrPort));
-    commands.add(createCommandArg("--cluster", Context.cluster(config)));
-    commands.add(createCommandArg("--role", Context.role(config)));
-    commands.add(createCommandArg("--environment", Context.environ(config)));
-    commands.add(createCommandArg("--instance-classpath", Context.instanceClassPath(config)));
-    commands.add(createCommandArg("--metrics-sinks-config-file",
+    commands.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
+        Context.topologyBinaryFile(config)));
+    commands.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
+    commands.add(createCommandArg(ExecutorFlag.ShellPort, shellPort));
+    commands.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsManagerPort, metricsmgrPort));
+    commands.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
+    commands.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
+    commands.add(createCommandArg(ExecutorFlag.Environment, Context.environ(config)));
+    commands.add(createCommandArg(ExecutorFlag.InstanceClasspath, Context.instanceClassPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsSinksConfigFile,
         Context.metricsSinksFile(config)));
 
     String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
@@ -245,38 +247,45 @@ public final class SchedulerUtils {
         Context.packingClassPath(config),
         Context.stateManagerClassPath(config));
 
-    commands.add(createCommandArg("--scheduler-classpath", completeSchedulerProcessClassPath));
-    commands.add(createCommandArg("--scheduler-port", schedulerPort));
-    commands.add(createCommandArg("--python-instance-binary",
+    commands.add(createCommandArg(ExecutorFlag.SchedulerClasspath,
+        completeSchedulerProcessClassPath));
+    commands.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
+    commands.add(createCommandArg(ExecutorFlag.PythonInstanceBinary,
         Context.pythonInstanceBinary(config)));
-    commands.add(createCommandArg("--metricscache-manager-classpath",
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
         Context.metricsCacheManagerClassPath(config)));
-    commands.add(createCommandArg("--metricscache-manager-master-port", metricsCacheMasterPort));
-    commands.add(createCommandArg("--metricscache-manager-stats-port", metricsCacheStatsPort));
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort,
+        metricsCacheMasterPort));
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerStatsPort,
+        metricsCacheStatsPort));
 
     Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
-    commands.add(createCommandArg("--is-stateful", Boolean.toString(ckptMgrEnabled)));
+    commands.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),
         Context.statefulStorageCustomClassPath(config));
-    commands.add(createCommandArg("--checkpoint-manager-classpath",
+    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerClasspath,
         completeCkptmgrProcessClassPath));
-    commands.add(createCommandArg("--checkpoint-manager-port", ckptmgrPort));
-    commands.add(createCommandArg("--stateful-config-file",
+    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerPort, ckptmgrPort));
+    commands.add(createCommandArg(ExecutorFlag.StatefulConfigFile,
         Context.statefulConfigFile(config)));
 
     String healthMgrMode =
         Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
-    commands.add(createCommandArg("--health-manager-mode", healthMgrMode));
-    commands.add(createCommandArg("--health-manager-classpath",
+    commands.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
+    commands.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
         Context.healthMgrClassPath(config)));
 
     return commands.toArray(new String[commands.size()]);
   }
 
-  private static String createCommandArg(String flag, String value) {
-    return String.format("%s=%s", flag, value);
+  public static String createCommandArg(ExecutorFlag flag, String value) {
+    return String.format("%s=%s", flag.getFlag(), value);
+  }
+
+  public static String[] splitCommandArg(String command) {
+    return command.split("=");
   }
 
   /**
