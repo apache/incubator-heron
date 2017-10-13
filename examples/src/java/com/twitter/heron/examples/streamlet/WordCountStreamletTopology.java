@@ -33,7 +33,7 @@ import com.twitter.heron.streamlet.WindowConfig;
  *    computes the counts of all words grouped by word.
  */
 public final class WordCountStreamletTopology {
-  public WordCountStreamletTopology() {
+  private WordCountStreamletTopology() {
   }
 
   /**
