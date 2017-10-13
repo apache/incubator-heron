@@ -15,12 +15,9 @@
 package com.twitter.heron.api.bolt;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.twitter.heron.api.state.HashMapState;
 import com.twitter.heron.api.state.State;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
 
 @SuppressWarnings({"rawtypes", "unchecked", "HiddenField"})
 public class StatefulWindowedBoltExecutor<K extends Serializable, V extends Serializable>
@@ -34,12 +31,6 @@ public class StatefulWindowedBoltExecutor<K extends Serializable, V extends Seri
   public StatefulWindowedBoltExecutor(IStatefulWindowedBolt bolt) {
     super(bolt);
     this.statefulWindowedBolt = bolt;
-  }
-
-  @Override
-  public void prepare(Map<String, Object> topoConf,
-                      TopologyContext context, OutputCollector collector) {
-    super.prepare(topoConf, context, collector);
   }
 
   /**
@@ -62,10 +53,5 @@ public class StatefulWindowedBoltExecutor<K extends Serializable, V extends Seri
   public void preSave(String checkpointId) {
     this.statefulWindowedBolt.preSave(checkpointId);
     super.preSave(checkpointId);
-  }
-
-  @Override
-  public void execute(Tuple input) {
-    super.execute(input);
   }
 }

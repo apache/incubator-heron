@@ -73,7 +73,6 @@ public final class StatefulSlidingWindowTopology {
       for (Tuple tuple : inputWindow.get()) {
         sum += tuple.getLongByField("value");
       }
-      state.put("sum", sum);
       collector.emit(new Values(sum));
     }
 
@@ -84,7 +83,7 @@ public final class StatefulSlidingWindowTopology {
 
     @Override
     public void preSave(String checkpointId) {
-
+      state.put("sum", sum);
     }
   }
 
@@ -116,7 +115,6 @@ public final class StatefulSlidingWindowTopology {
       collector.emit(new Values(val,
           System.currentTimeMillis() - (24 * 60 * 60 * 1000), msgId), msgId);
       msgId++;
-      this.state.put("msgId", msgId);
     }
 
     @Override
@@ -139,7 +137,7 @@ public final class StatefulSlidingWindowTopology {
 
     @Override
     public void preSave(String checkpointId) {
-
+      this.state.put("msgId", msgId);
     }
   }
 
