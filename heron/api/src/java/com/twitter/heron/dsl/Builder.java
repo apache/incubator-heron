@@ -47,7 +47,7 @@ public interface Builder {
    * @param <R>
    * @return
    */
-  <R> Streamlet<R> newSource(SerializableGenerator<R> generator);
+  <R> Streamlet<R> newSource(Source<R> generator);
 
   /**
    * Same as above except returns a KVStreamlet
@@ -56,5 +56,5 @@ public interface Builder {
    * @param <V>
    * @return
    */
-  <K, V> KVStreamlet<K, V> newKVSource(SerializableGenerator<KeyValue<K, V>> generator);
+  <K, V> KVStreamlet<K, V> newKVSource(Source<KeyValue<K, V>> generator);
 }

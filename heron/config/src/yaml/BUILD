@@ -23,6 +23,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-sandbox-yaml",
+    srcs = glob(["conf/sandbox/*.yaml"]),
+)
+
+filegroup(
     name = "conf-aurora-yaml",
     srcs = glob(["conf/aurora/*"]),
 )

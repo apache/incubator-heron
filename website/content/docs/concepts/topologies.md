@@ -91,7 +91,7 @@ been distributed between five different Docker containers.
 
 ## The Heron Functional API
 
-{{< alert "functional-api-preview" >}}
+{{< alert "functional-api-beta" >}}
 
 When Heron was first created, the model for creating topologies was deeply
 indebted to the Apache Storm model. Under that model, developers creating topologies

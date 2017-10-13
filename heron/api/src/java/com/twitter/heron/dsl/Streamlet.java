@@ -84,8 +84,9 @@ public interface Streamlet<R> {
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
-  <T> Streamlet<T> flatMap(SerializableFunction<? super R, Iterable<? extends T>> flatMapFn);
+   */
+  <T> Streamlet<T> flatMap(
+      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn);
 
   /**
    * Return a new KVStreamlet by applying map_function to each element of this Streamlet
@@ -94,7 +95,7 @@ public interface Streamlet<R> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
   */
   <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      Iterable<? extends KeyValue<K, V>>> flatMapFn);
+      ? extends Iterable<KeyValue<K, V>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
@@ -161,5 +162,13 @@ public interface Streamlet<R> {
    * @param consumer The user supplied consumer function that is invoked for each element
    * of this streamlet.
    */
-  void toSink(SerializableConsumer<R> consumer);
+  void consume(SerializableConsumer<R> consumer);
+
+  /**
+   * Applies the sink's put function to every element of the stream
+   * This function does not return anything.
+   * @param sink The Sink whose put method consumes each element
+   * of this streamlet.
+   */
+  void toSink(Sink<R> sink);
 }
