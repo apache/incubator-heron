@@ -16,6 +16,8 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
+      - gcc-4.8-multilib
+      - g++-4.8-multilib
       - python2.7
       - wget
       - pkg-config
