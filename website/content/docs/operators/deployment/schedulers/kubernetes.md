@@ -78,6 +78,37 @@ $ heron config kubernetes set service_url \
   http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
 ```
 
+```bash
+$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+```
+
+```json
+{
+   "heron.build.git.revision" : "bf9fe93f76b895825d8852e010dffd5342e1f860",
+   "heron.build.git.status" : "Clean",
+   "heron.build.host" : "ci-server-01",
+   "heron.build.time" : "Sun Oct  1 20:42:18 UTC 2017",
+   "heron.build.timestamp" : "1506890538000",
+   "heron.build.user" : "release-agent1",
+   "heron.build.version" : "0.16.2"
+}
+```
+
+```bash
+$ heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  ~/.heron/examples/heron-api-examples.jar \
+  com.twitter.heron.examples.api.AckingTopology \
+  AckingTopology
+```
+
+## Heron UI
+
+The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies)
+
+You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+
+
 
 
 
