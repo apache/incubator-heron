@@ -24,7 +24,6 @@
 #include <utility>
 
 #include "proto/messages.h"
-#include "logger/logger.h"
 #include "metric/imetric.h"
 #include "metric/imetrics-registrar.h"
 #include "tuple/fields.h"
@@ -106,7 +105,7 @@ class TopologyContext {
   /**
    * Gets the logger with which you can do logging
    */
-  virtual std::unique_ptr<logger::Logger> getLogger() = 0;
+  virtual std::ostream& getLogger() = 0;
 };
 
 }  // namespace topology
