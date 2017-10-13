@@ -1,15 +1,91 @@
 ---
 title: Kubernetes
+new: true
 ---
 
-Heron supports deployment on [Kubernetes (k8s)](https://kubernetes.io/). Deployments on Kubernetes 
+Heron supports deployment on [Kubernetes](https://kubernetes.io/) (sometimes called **k8s**). Heron deployments on Kubernetes 
 are done via Docker and the k8s API.
+
+## Requirements
+
+In order to run Heron on Kubernetes, you will need:
+
+* A Kubernetes cluster with at least 3 nodes
+* The [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLI tool installed and set up to communicate with your cluster
+* The [`heron`](../../../../getting-started) CLI tool
 
 ## How Heron on Kubernetes Works
 
-When deploying to k8s, each Heron container is deployed as a Pod within a Docker container. If there
-are 20 containers that are going to be deployed with a topoology, then there will be 20 pods
-deployed onto your k8s cluster for that topology.
+When deploying to Kubernetes, each Heron container is deployed as a Kubernetes
+[pod](https://kubernetes.io/docs/concepts/workloads/pods/pod/) inside of a Docker container. If there
+are 20 containers that are going to be deployed with a topoology, for example, then there will be 20 pods
+deployed to your Kubernetes cluster for that topology.
+
+## Setting up Heron on Kubernetes
+
+You can set up Heron on Kubernetes by 
+
+### Installing components
+
+#### ZooKeeper
+
+Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. You 
+
+```bash
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/zookeeper.yaml
+```
+
+```bash
+$ kubectl get pods -w -l app=heron
+```
+
+#### BookKeeper
+
+```bash
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.yaml
+```
+
+> BookKeeper is currently the only [state manager](../../../../concepts/topologies) for Heron that's supported when running
+> Heron on Kubernetes.
+
+### Heron tools
+
+```bash
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/tools.yaml
+```
+
+### Heron API server
+
+```bash
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/apiserver.yaml
+```
+
+## Accessing the running Heron installation
+
+### The Heron CLI tool
+
+```bash
+$ kubectl proxy -p 8001
+```
+
+```bash
+$ heron submit kubernetes \
+  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+```
+
+```bash
+$ heron config kubernetes set service_url \
+  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+```
+
+
+
+
+
+
+
+<!--
+
 
 ### Current Limitations
 
@@ -185,5 +261,4 @@ machine in the cluster. Since every deployment is done via Docker, there's no ne
 individual agent configurations. When launching topologies using the `heron submit` command, you can
 look in your Kubernetes UI to see the launched topology pods.
 
-
-
+-->
