@@ -169,7 +169,7 @@ public final class SchedulerUtils {
       List<String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(String.format("--shard=%s", Integer.toString(containerIndex)));
+    commands.add(createCommandArg("--shard", Integer.toString(containerIndex)));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));
