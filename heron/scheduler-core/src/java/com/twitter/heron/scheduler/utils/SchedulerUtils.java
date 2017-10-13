@@ -238,7 +238,8 @@ public final class SchedulerUtils {
     commands.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
     commands.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
     commands.add(createCommandArg(ExecutorFlag.Environment, Context.environ(config)));
-    commands.add(createCommandArg(ExecutorFlag.InstanceClasspath, Context.instanceClassPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.InstanceClasspath,
+        Context.instanceClassPath(config)));
     commands.add(createCommandArg(ExecutorFlag.MetricsSinksConfigFile,
         Context.metricsSinksFile(config)));
 
