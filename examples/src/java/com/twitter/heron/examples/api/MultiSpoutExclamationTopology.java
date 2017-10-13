@@ -58,11 +58,11 @@ public final class MultiSpoutExclamationTopology {
     // component resource configuration
     conf.setComponentRam("word0",
         ExampleResources.getComponentRam());
-        conf.setComponentRam("word1",
+    conf.setComponentRam("word1",
         ExampleResources.getComponentRam());
-        conf.setComponentRam("word2",
+    conf.setComponentRam("word2",
         ExampleResources.getComponentRam());
-        conf.setComponentRam("exclaim1",
+    conf.setComponentRam("exclaim1",
         ExampleResources.getComponentRam());
 
     // container resource configuration
