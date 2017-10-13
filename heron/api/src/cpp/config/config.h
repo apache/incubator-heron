@@ -117,8 +117,8 @@ class Config {
      * any component or detection of any network failure, Heron will initiate a recovery
      * mechanism to revert the topology to the last globally consistent checkpoint
      */
-    EFFECTIVELY_ONCE;
-  }
+    EFFECTIVELY_ONCE
+  };
 
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode

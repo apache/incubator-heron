@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "config/config.h"
+#include "serializer/ipluggable-serializer.h"
 #include "serializer/cereal-serializer.h"
 #include "serializer/string-serializer.h"
 

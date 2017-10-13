@@ -23,26 +23,44 @@ namespace heron {
 namespace api {
 namespace config {
 
-#define stringify( name ) # name
+#define stringify(name) # name
 
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS = "topology.enable.message.timeouts";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_DEBUG = "topology.debug";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_STMGRS = "topology.stmgrs";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_MAX_RAM_HINT = "topology.container.max.ram.hint";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_CONTAINER_PADDING_PERCENTAGE =
                                                     "topology.container.padding.percentage";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_NAME = "topology.name";
 
 const std::set<std::string> Config::apiVars_ = {
@@ -65,7 +83,7 @@ const std::set<std::string> Config::apiVars_ = {
   Config::TOPOLOGY_NAME
 };
 
-Config::setTopologyReliabilityMode(Config::TopologyReliabilityMode mode) {
+void Config::setTopologyReliabilityMode(Config::TopologyReliabilityMode mode) {
   config_[Config::TOPOLOGY_RELIABILITY_MODE] = stringify(mode);
 }
 

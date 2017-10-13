@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "proto/messages.h"
+#include "logger/logger.h"
 #include "metric/imetric.h"
 #include "metric/imetrics-registrar.h"
 #include "tuple/fields.h"
@@ -101,6 +102,11 @@ class TopologyContext {
    * Gets the metrics registrar with whom you can register metrics
    */
   virtual std::shared_ptr<metric::IMetricsRegistrar> getMetricsRegistrar() = 0;
+
+  /**
+   * Gets the logger with which you can do logging
+   */
+  virtual std::unique_ptr<logger::Logger> getLogger() = 0;
 };
 
 }  // namespace topology

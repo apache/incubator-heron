@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-#include <string>
-
-#include "utils/utils.h"
+#ifndef HERON_API_LOGGER_LOGGER_H_
+#define HERON_API_LOGGER_LOGGER_H_
 
 namespace heron {
 namespace api {
-namespace utils {
+namespace logger {
 
-// NOLINTNEXTLINE
-const std::string Utils::DEFAULT_STREAM_ID = "default";
+class Logger {
+ public:
+  virtual ~Logger() { }
+  template<typename T>
+  virtual std::unique_ptr<Logger> operator<<(const T& stuff) = 0;
+};
 
-
-}  // namespace utils
+}  // namespace logger
 }  // namespace api
 }  // namespace heron
+
+#endif  // HERON_API_LOGGER_LOGGER_H_
