@@ -21,10 +21,12 @@ import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.SerializableGenerator;
 import com.twitter.heron.streamlet.SerializableSupplier;
+import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.GeneratorKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.SourceKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierKVStreamlet;
 
 /**
