@@ -198,17 +198,17 @@ public final class StatefulWordCountTopology {
     conf.setTopologyStatefulCheckpointIntervalSecs(20);
 
     // configure component resources
-    com.twitter.heron.api.Config.setComponentRam(conf, "word",
+    conf.setComponentRam("word",
         ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
-    com.twitter.heron.api.Config.setComponentRam(conf, "consumer",
+    conf.setComponentRam("consumer",
         ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
 
     // configure container resources
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+    conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(2 * parallelism, parallelism));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+    conf.setContainerRamRequested(
         ExampleResources.getContainerRam(2 * parallelism, parallelism));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+    conf.setContainerCpuRequested(2);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

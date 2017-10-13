@@ -17,13 +17,13 @@ package com.twitter.heron.dsl;
 import java.io.Serializable;
 
 /**
- * SerializableGenerator is how Streamlet's originate. The get method
- * invokation returns new element that form the tuples of the streamlet.
- * setup/cleanup is where the generator can do any one time setup work, like
+ * Sink is how Streamlet's end. The put method
+ * invokation consumes the tuple into say external database/cache, etc.
+ * setup/cleanup is where the sink can do any one time setup work, like
  * establishing/closing connection to sources, etc.
  */
-public interface SerializableGenerator<T> extends Serializable {
+public interface Sink<T> extends Serializable {
   void setup(Context context);
-  T get();
+  void put(T tuple);
   void cleanup();
 }
