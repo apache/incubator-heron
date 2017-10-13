@@ -56,14 +56,10 @@ public final class MultiSpoutExclamationTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    conf.setComponentRam("word0",
-        ExampleResources.getComponentRam());
-        conf.setComponentRam("word1",
-        ExampleResources.getComponentRam());
-        conf.setComponentRam("word2",
-        ExampleResources.getComponentRam());
-        conf.setComponentRam("exclaim1",
-        ExampleResources.getComponentRam());
+    conf.setComponentRam("word0", ExampleResources.getComponentRam());
+    conf.setComponentRam("word1", ExampleResources.getComponentRam());
+    conf.setComponentRam("word2", ExampleResources.getComponentRam());
+    conf.setComponentRam("exclaim1", ExampleResources.getComponentRam());
 
     // container resource configuration
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(3));
