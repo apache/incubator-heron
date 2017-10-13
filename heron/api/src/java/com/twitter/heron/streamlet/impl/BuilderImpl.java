@@ -57,7 +57,7 @@ public final class BuilderImpl implements Builder {
   }
 
   @Override
-  public <R> Streamlet<R> newSource(SerializableGenerator<R> generator) {
+  public <R> Streamlet<R> newSource(Source<R> generator) {
     BaseStreamlet<R> retval = BaseStreamlet.createGeneratorStreamlet(generator);
     retval.setNumPartitions(1);
     sources.add(retval);
@@ -65,7 +65,7 @@ public final class BuilderImpl implements Builder {
   }
 
   @Override
-  public <K, V> KVStreamlet<K, V> newKVSource(SerializableGenerator<KeyValue<K, V>> generator) {
+  public <K, V> KVStreamlet<K, V> newKVSource(Source<KeyValue<K, V>> generator) {
     BaseKVStreamlet<K, V> retval = BaseKVStreamlet.createGeneratorKVStreamlet(generator);
     retval.setNumPartitions(1);
     sources.add(retval);

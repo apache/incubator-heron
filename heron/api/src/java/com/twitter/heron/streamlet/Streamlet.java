@@ -163,4 +163,12 @@ public interface Streamlet<R> {
    * of this streamlet.
    */
   void consume(SerializableConsumer<R> consumer);
+
+  /**
+   * Applies the sink's put function to every element of the stream
+   * This function does not return anything.
+   * @param sink The Sink whose put method consumes each element
+   * of this streamlet.
+   */
+  void toSink(Sink<R> sink);
 }

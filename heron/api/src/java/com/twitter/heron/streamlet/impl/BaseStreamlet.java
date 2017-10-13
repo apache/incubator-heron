@@ -158,8 +158,8 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * Create a Streamlet based on the generator function
    * @param generator The Generator function to generate the elements
    */
-  static <T> BaseStreamlet<T> createGeneratorStreamlet(SerializableGenerator<T> generator) {
-    return new GeneratorStreamlet<T>(generator);
+  static <T> BaseStreamlet<T> createGeneratorStreamlet(Source<T> generator) {
+    return new SourceStreamlet<T>(generator);
   }
 
   /**
@@ -310,6 +310,17 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   public void consume(SerializableConsumer<R> consumer) {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
+    return;
+  }
+
+  /**
+   * Uses the sink to consume every element of this streamlet
+   * @param sink The Sink that consumes
+   */
+  @Override
+  public void toSink(Sink<R> sink) {
+    SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
+    addChild(sinkStreamlet);
     return;
   }
 

@@ -49,8 +49,8 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param generator The Generator function to generate the elements
    */
   static <K, V> BaseKVStreamlet<K, V> createGeneratorKVStreamlet(
-      SerializableGenerator<KeyValue<K, V>> generator) {
-    return new GeneratorKVStreamlet<K, V>(generator);
+      Source<KeyValue<K, V>> generator) {
+    return new SourceKVStreamlet<K, V>(generator);
   }
 
   /**
