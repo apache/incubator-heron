@@ -24,9 +24,8 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.KVStreamlet;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.Source;
-import com.twitter.heron.streamlet.SerializableGenerator;
 import com.twitter.heron.streamlet.SerializableSupplier;
+import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 
 /**
