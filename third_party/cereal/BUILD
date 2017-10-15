@@ -107,13 +107,10 @@ genrule(
         "rm -f include/cereal/types/boost_variant.hpp",
         "rm -f unittests/boost_variant.cpp",
         "rm -f unittests/boost_variant.hpp",
-        "$$WORKSPACE_ROOT/$(location //scripts/compile:env_exec) cmake -Wno-dev -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
-        "$$WORKSPACE_ROOT/$(location //scripts/compile:env_exec) make install",
+        "cmake -Wno-dev -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
+        "make install",
         "rm -rf $$TMP_DIR",
     ]),
-    tools = [
-        "//scripts/compile:env_exec",
-    ],
 )
 
 cc_library(
