@@ -18,6 +18,7 @@ addons:
       - g++-4.8
       - gcc-4.8-multilib
       - g++-4.8-multilib
+      - linux-libc-dev  
       - python2.7
       - wget
       - pkg-config
