@@ -107,7 +107,7 @@ genrule(
         "rm -f include/cereal/types/boost_variant.hpp",
         "rm -f unittests/boost_variant.cpp",
         "rm -f unittests/boost_variant.hpp",
-        "cmake -Wno-dev -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
+        "cmake -Wno-dev -DSKIP_PORTABILITY_TEST=1 -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),
