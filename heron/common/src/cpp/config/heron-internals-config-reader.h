@@ -191,6 +191,43 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // Low water mark on the num in MB that can be left outstanding on a connection
   sp_int32 GetHeronStreammgrNetworkBackpressureLowwatermarkMb();
 
+  /**
+  * Instance Config Getters
+  **/
+
+  // Interval in seconds to reconnect to the stream manager
+  int GetHeronInstanceReconnectStreammgrIntervalSec();
+
+  // Number of attempts to connect to stream manager before giving up
+  int GetHeronInstanceReconnectStreammgrTimes();
+
+  // The queue capacity (num of items) in bolt for buffer packets to read from stream manager
+  int GetHeronInstanceInternalBoltReadQueueCapacity();
+
+  // The queue capacity (num of items) in bolt for buffer packets to write to stream manager
+  int GetHeronInstanceInternalBoltWriteQueueCapacity();
+
+  // The queue capacity (num of items) in spout for buffer packets to read from stream manager
+  int GetHeronInstanceInternalSpoutReadQueueCapacity();
+
+  // The queue capacity (num of items) in spout for buffer packets to write to stream manager
+  int GetHeronInstanceInternalSpoutWriteQueueCapacity();
+
+  // The maximum time in ms for an spout instance to emit tuples per attempt
+  int GetHeronInstanceEmitBatchTimeMs();
+
+  // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
+  int GetHeronInstanceSetDataTupleCapacity();
+
+  // The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+  int GetHeronInstanceSetDataTupleSizeBytes();
+
+  // The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
+  int GetHeronInstanceSetControlTupleCapacity();
+
+  // For efficient acknowledgement
+  int GetHeronInstanceAcknowledgementNbuckets();
+
  protected:
   HeronInternalsConfigReader(EventLoop* eventLoop,
                              const sp_string& _defaults_file,
