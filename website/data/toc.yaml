@@ -73,6 +73,8 @@ sections:
         url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
+      - name: Kubernetes
+        url: /docs/operators/deployment/schedulers/kubernetes
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
       - name: Local Cluster
