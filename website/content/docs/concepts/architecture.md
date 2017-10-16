@@ -8,10 +8,12 @@ alike.
 
 > We recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
-The sections below clarify the distinction between [Heron and
-Storm](#relationship-with-apache-storm), describe the [design
-goals](../design-goals) that drove the creation of Heron, and explain major
-[components](#topology-components) of its architecture.
+The sections below:
+
+* clarify the distinction between [Heron and Apache Storm](#relationship-with-apache-storm)
+* describe Heron's basic [system architecture](#basic-system-architecture)
+* explain the role of major [components](#topology-components) of Heron's architecture
+* provide an overview of what happens when [submit a topology](#topology-submission-description)
 
 ## Codebase
 
@@ -231,7 +233,7 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 -->
 <img src="/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/>
 
-### Topology Submit Description
+### Topology Submission Description
 
 The following describes in more detail how a topology is submitted and
 launched using local scheduler.
