@@ -17,13 +17,6 @@ The sections below:
 * explain the role of major [components](#topology-components) of Heron's architecture
 * provide an overview of what happens when [submit a topology](#topology-submission-description)
 
-## Codebase
-
-Heron is primarily written in Java, C++, and Python.
-
-A detailed guide to the Heron codebase can be found
-[here](../../contributors/codebase).
-
 ## Topologies
 
 You can think of a Heron cluster as a mechanism for managing the lifecycle of
@@ -41,16 +34,17 @@ open sourced by Twitter in 2011. Heron, also developed at Twitter, was created
 to overcome many of the shortcomings that Storm exhibited when run in production
 at Twitter scale.
 
-Shortcoming | Heron solution
+Shortcoming | Solution
 :-----------|:--------------
-Isolation | Heron uses process-based isolation, which is more reliable and easier to debug than Storm's thread-based isolation model
-
+Resource isolation | Heron uses process-based isolation both between topologies and between containers within topologies, which is more reliable and easier to monitor and debug than Storm's model, which involves shared communication threads in the same [JVM](https://en.wikipedia.org/wiki/Java_virtual_machine)
+Resource consumption | Storm requires [scheduler](#schedulers) resources to be provisioned up front, which can lead to over-provisioning; Heron avoids this problem by using cluster resources on demand
+Throughput | For a variety of architectural reasons, Heron has consistently been shown to provide much higher throughput and much lower latency than Storm
 
 ### Storm compatibility
 
 Heron was built to be fully backwards compatible with Storm and thus to enable
-[topology](../topologies) developers to use Heron to run topologies created with
-Storm in mind and using Storm's [topology API](http://storm.apache.org/about/simple-api.html).
+[topology](../topologies) developers to use Heron to run topologies created using
+Storm's [topology API](http://storm.apache.org/about/simple-api.html).
 
 Currently, Heron is compatible with topologies written using:
 
@@ -67,10 +61,13 @@ Heron was initially developed at Twitter with a few main goals in mind:
 For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
 Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 
+Heron thus enables you to achieve major gains along a variety of axes---throughput,
+latency, reliability---without needing to sacrifice engineering resources.
+
 ## Heron Design Goals
 
-For a description of the principles that Heron was designed to fulfill, see
-[Heron Design Goals](/docs/concepts/design-goals).
+For a description of the core goals of Heron as well as the principles that have
+guided its development, see [Heron Design Goals](/docs/concepts/design-goals).
 
 ## Basic system architecture
 
@@ -287,4 +284,9 @@ launched using local scheduler.
     the slave thread, which then executes the assigned instance accordingly.
     
 
+## Codebase
 
+Heron is primarily written in Java, C++, and Python.
+
+A detailed guide to the Heron codebase can be found
+[here](../../contributors/codebase).

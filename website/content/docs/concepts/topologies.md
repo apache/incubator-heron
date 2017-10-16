@@ -79,15 +79,15 @@ you create into both a logical plan and a [physical plan](#physical-plan).
 
 A topology's **physical plan** is related to its logical plan but with the
 crucial difference that a physical plan determines the "physical" execution
-logic of a topology, i.e. how topology processes are divided between
-[Docker](https://www.docker.com) containers. Here's a basic visual representation of a
+logic of a topology, i.e. how topology processes are divided between containers. Here's a
+basic visual representation of a
 physical plan:
 
 ![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
 
 In this example, a Heron topology consists of one [spout](#spouts) and five
 different [bolts](#bolts) (each of which has multiple instances) that have automatically 
-been distributed between five different Docker containers.
+been distributed between five different containers.
 
 ## The Heron Functional API
 

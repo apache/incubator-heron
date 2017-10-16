@@ -25,8 +25,7 @@ guide---Heron's development:
 * [Constrained resource usage](#constrained-resource-usage)
 * [Apache Storm compatibility](#apache-storm-compatibility)
 * [Backpressure handling](#backpressure-handling)
-* [Multiple semantic guarantees](#multiple-semantic-guarantees)
-
+* [Multiple delivery semantics](#multiple-delivery-semantics)
 
 ### Modularity
 
@@ -72,7 +71,7 @@ components will execute at the same speed. Heron has built-in [back pressure
 mechanisms](../architecture#stream-manager) to ensure that topologies can
 self-adjust in case components lag.
 
-### Multiple semantic guarantees
+### Multiple delivery semantics
 
 Heron provides support for
 [at-most-once](../delivery-semantics#available-semantics),
