@@ -106,7 +106,7 @@ public class BaseKVStreamletTest {
             WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
     assertTrue(joinedStreamlet instanceof JoinStreamlet);
     assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
-        .getJoinType(), JoinOperator.JoinType.LEFT);
+        .getJoinType(), JoinOperator.JoinType.OUTER_LEFT);
 
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
@@ -143,7 +143,7 @@ public class BaseKVStreamletTest {
             WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
     assertTrue(joinedStreamlet instanceof JoinStreamlet);
     assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
-        .getJoinType(), JoinOperator.JoinType.OUTER);
+        .getJoinType(), JoinOperator.JoinType.OUTER_RIGHT);
 
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
