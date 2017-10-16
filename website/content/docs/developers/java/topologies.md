@@ -1,94 +1,126 @@
 ---
-title: Writing and Launching a Topology in Java
----
+title: Writing and Launching Topologies in Java
+--- 
 
-A topology specifies components like spouts and bolts, as well as the relation
-between components and proper configurations.
+{{< alert "storm-api" >}}
+
+A topology specifies components like [spouts](../spouts) and [bolts](../bolts), as well as the relation
+between components and proper configurations. The
+[`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.twitter.heron%22%20AND%20a%3A%22heron-api%22)
+enables you to create topology logic in Java.
 
 > If you're interested in creating stateful topologies with [effectively-once
 > semantics](../../../concepts/delivery-semantics) in Java, see [this new
 > guide](../effectively-once).
 
-### Install Heron APIs for development
+## Getting started
 
-Before getting started writing a topology, you need to install the Heron API
-and import its library into your own topology project.
+In order to use the Heron API for Java, you'll need to install the `heron-api` library, which is available
+via [Maven Central](http://search.maven.org/).
 
-* Go to the [releases page](https://github.com/twitter/heron/releases)
-for Heron and download the Heron API installation script for your platform.
-The name of the script for Mac OS X (`darwin`), for example, would be
-`heron-api-install-{{% heronVersion %}}-darwin.sh`.
+### Maven setup
 
-* Once you've downloaded, run it with the `--user` flag set.
-
-* After successful installation, import `~/.heronapi/heron-storm.jar` into
-your project as a dependency. This allows you to use the Heron APIs that
-are necessary to develop your own topology.
-
-### Maven Integration
-
-Alternatively, you can integrate the latest Heron API by including
-the following lines in your project's `pom.xml` file.
+To install the `heron-api` library using Maven, add this to the `dependencies` block of your `pom.xml`
+configuration file:
 
 ```xml
 <dependency>
-  <groupId>com.twitter.heron</groupId>
-  <artifactId>heron-storm</artifactId>
-  <version>{{% heronVersion %}}</version>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-api</artifactId>
+    <version>{{< heronVersion >}}</version>
 </dependency>
 ```
 
-### Writing your own topology
+#### Compiling a JAR with dependencies
 
-[Spouts](../spouts) and [Bolts](../bolts) discuss how to implement a
-spouts and bolts, respectively.
+In order to run a Java topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
 
-After defining the spouts and bolts, a topology can be composed using
+```xml
+<plugin>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <configuration>
+        <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <archive>
+            <manifest>
+                <mainClass></mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+    <executions>
+        <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
+
+```bash
+$ mvn assembly:assembly
+```
+
+By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example topology submission command using a compiled JAR:
+
+```bash
+$ mvn assembly:assembly
+$ heron submit local \
+  target/my-project-1.2.3-jar-with-dependencies.jar \
+  com.example.Main \
+  MyTopology arg1 arg2
+```
+
+### Writing your topology logic
+
+Heron [topologies](../../../concepts/topologies) are processing graphs consisting
+of [spouts](../spouts) that ingest data and [bolts](../bolts) that process that data.
+
+{{< alert "spouts-and-bolts" >}}
+
+Once you've defined the spouts and bolts, a topology can be composed using a
 [`TopologyBuilder`](/api/com/twitter/heron/api/topology/TopologyBuilder.html). The
-`TopologyBuilder` has two major methods to specify the components:
+`TopologyBuilder` has two major methods used to specify topology components:
 
-* `setBolt(String id, IRichBolt bolt, Number parallelismHint)`: `id` is the
-unique identifier that assigned to a bolt, `bolt` is the one previously
-composed, and `parallelismHint` is a number that specifying the number of
-instances of this bolt.
+Method | Description
+:------|:-----------
+`setBolt(String id, IRichBolt bolt, Number parallelismHint)` | `id` is the unique identifier that assigned to a bolt, `bolt` is the one previously composed, and `parallelismHint` is a number that specifies the number of instances of this bolt.
+`setSpout(String id, IRichSpout spout, Number parallelismHint)` | `id` is the unique identifier that assigned to a spout, `spout` is the one previously composed, and `parallelismHint` is a number that specifying the number of instances of this spout.
 
-* `setSpout(String id, IRichSpout spout, Number parallelismHint)`: `id` is the
-unique identifier that assigned to a spout, `spout` is the one previously
-composed, and `parallelismHint` is a number that specifying the number of
-instances of this spout.
-
-A simple example is as follows:
+Here's a simple example:
 
 ```java
 
 TopologyBuilder builder = new TopologyBuilder();
 builder.setSpout("word", new TestWordSpout(), 5);
 builder.setBolt("exclaim", new ExclamationBolt(), 4);
-
 ```
 
-In addition to the component specification, how to transmit Tuples between the
-components must also be specified. This is defined by different
-grouping strategies:
+In addition to the component specification, you also need to specify how tuples
+will be routed between your topology components. There are a few different grouping
+strategies available:
 
-* Fields Grouping: Tuples are transmitted to bolts based on a given field. Tuples
-with the same field will always go to the same bolt.
-* Global Grouping: All the Tuples are transmitted to a single instance of a bolt
-with the lowest task id.
-* Shuffle Grouping: Tuples are randomly transmitted to different instances of
-a bolt.
-* None Grouping: Currently, it equals to shuffle grouping.
-* All Grouping: All Tuples are transmitted to all instances of a bolt.
-* Custom Grouping: User-defined grouping strategy.
+Grouping strategy | Description
+:-----------------|:-----------
+Fields grouping | Tuples are transmitted to bolts based on a given field. Tuples with the same field will always go to the same bolt.
+Global grouping | All tuples are transmitted to a single instance of a bolt with the lowest task id.
+Shuffle Grouping | Tuples are randomly transmitted to different instances of a bolt.
+None grouping | Currently, this is the same as shuffle grouping.
+All grouping | All tuples are transmitted to all instances of a bolt.
+Custom grouping | User-defined grouping strategy.
 
 The following snippet is a simple example of specifying shuffle grouping
-between our `word` spout and `exclaim` bolt.
+between a `word` spout and an `exclaim` bolt.
 
 ```java
 
 builder.setBolt("exclaim", new ExclamationBolt(), 4)
   .shuffleGrouping("word");
-
 ```
 
 Once the components and the grouping are specified, the topology can be built.

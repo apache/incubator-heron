@@ -33,7 +33,7 @@ public class KVFlatMapStreamlet<R, K, V> extends BaseKVStreamlet<K, V> {
 
   public KVFlatMapStreamlet(BaseStreamlet<R> parent,
                             SerializableFunction<? super R,
-                                                 Iterable<? extends KeyValue<K, V>>> flatMapFn) {
+                                ? extends Iterable<KeyValue<K, V>>> flatMapFn) {
     this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
     setNumPartitions(delegate.getNumPartitions());
   }

@@ -27,23 +27,25 @@ import com.twitter.heron.dsl.SerializableBiFunction;
 import com.twitter.heron.dsl.SerializableBinaryOperator;
 import com.twitter.heron.dsl.SerializableConsumer;
 import com.twitter.heron.dsl.SerializableFunction;
-import com.twitter.heron.dsl.SerializableGenerator;
 import com.twitter.heron.dsl.SerializablePredicate;
 import com.twitter.heron.dsl.SerializableSupplier;
 import com.twitter.heron.dsl.SerializableTransformer;
+import com.twitter.heron.dsl.Sink;
+import com.twitter.heron.dsl.Source;
 import com.twitter.heron.dsl.Streamlet;
 import com.twitter.heron.dsl.Window;
 import com.twitter.heron.dsl.WindowConfig;
 import com.twitter.heron.dsl.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.FlatMapStreamlet;
-import com.twitter.heron.dsl.impl.streamlets.GeneratorStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVFlatMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.LogStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.MapStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.RemapStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.SinkStreamlet;
+import com.twitter.heron.dsl.impl.streamlets.SourceStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.dsl.impl.streamlets.UnionStreamlet;
@@ -158,8 +160,8 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * Create a Streamlet based on the generator function
    * @param generator The Generator function to generate the elements
    */
-  static <T> BaseStreamlet<T> createGeneratorStreamlet(SerializableGenerator<T> generator) {
-    return new GeneratorStreamlet<T>(generator);
+  static <T> BaseStreamlet<T> createGeneratorStreamlet(Source<T> generator) {
+    return new SourceStreamlet<T>(generator);
   }
 
   /**
@@ -191,10 +193,10 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
+   */
   @Override
-  public <T> Streamlet<T> flatMap(SerializableFunction<? super R,
-                                                       Iterable<? extends T>> flatMapFn) {
+  public <T> Streamlet<T> flatMap(
+      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -208,7 +210,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   */
   @Override
   public <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      Iterable<? extends KeyValue<K, V>>> flatMapFn) {
+      ? extends Iterable<KeyValue<K, V>>> flatMapFn) {
     KVFlatMapStreamlet<R, K, V> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -310,6 +312,17 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   public void consume(SerializableConsumer<R> consumer) {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
+    return;
+  }
+
+  /**
+   * Uses the sink to consume every element of this streamlet
+   * @param sink The Sink that consumes
+   */
+  @Override
+  public void toSink(Sink<R> sink) {
+    SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
+    addChild(sinkStreamlet);
     return;
   }
 

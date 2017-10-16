@@ -24,15 +24,19 @@ import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.detector.Symptom;
 import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.events.EventManager;
+import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.microsoft.dhalion.resolver.Action;
 
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
@@ -41,15 +45,17 @@ public class RestartContainerResolver implements IResolver {
   private final EventManager eventManager;
   private final String topologyName;
   private final ISchedulerClient schedulerClient;
+  private final int noiseFilterMillis;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
       PhysicalPlanProvider physicalPlanProvider, EventManager eventManager,
-      ISchedulerClient schedulerClient) {
+      ISchedulerClient schedulerClient, HealthPolicyConfig policyConfig) {
     this.topologyName = topologyName;
     this.physicalPlanProvider = physicalPlanProvider;
     this.eventManager = eventManager;
     this.schedulerClient = schedulerClient;
+    this.noiseFilterMillis = (int) policyConfig.getConfig(CONF_NOISE_FILTER, 20);
   }
 
   @Override
@@ -57,7 +63,7 @@ public class RestartContainerResolver implements IResolver {
     List<Action> actions = new ArrayList<>();
 
     for (Diagnosis diagnoses : diagnosis) {
-      Symptom bpSymptom = diagnoses.getSymptoms().get(DIAGNOSIS_SLOW_INSTANCE.text());
+      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_SLOW_INSTANCE.text());
       if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
         // nothing to fix as there is no back pressure
         continue;
@@ -67,12 +73,24 @@ public class RestartContainerResolver implements IResolver {
         throw new UnsupportedOperationException("Multiple components with back pressure symptom");
       }
 
-      // TODO: want to know which stmgr has backpressure
-      String stmgrId = bpSymptom.getComponent().getName();
-
+      // want to know which stmgr has backpressure
+      String stmgrId = null;
+      for (InstanceMetrics im : bpSymptom.getComponent().getMetrics().values()) {
+        if (im.hasMetricAboveLimit(METRIC_BACK_PRESSURE.text(), noiseFilterMillis)) {
+          String instanceId = im.getName();
+          int fromIndex = instanceId.indexOf('_') + 1;
+          int toIndex = instanceId.indexOf('_', fromIndex);
+          stmgrId = instanceId.substring(fromIndex, toIndex);
+          break;
+        }
+      }
+      LOG.info("Restarting container: " + stmgrId);
       boolean b = schedulerClient.restartTopology(
-          RestartTopologyRequest.newBuilder().setContainerIndex(Integer.valueOf(stmgrId)).build());
-      LOG.info("Restarted container: " + stmgrId + "; result: " + b);
+          RestartTopologyRequest.newBuilder()
+          .setContainerIndex(Integer.valueOf(stmgrId))
+          .setTopologyName(topologyName)
+          .build());
+      LOG.info("Restarted container result: " + b);
 
       ContainerRestart action = new ContainerRestart();
       LOG.info("Broadcasting container restart event");
