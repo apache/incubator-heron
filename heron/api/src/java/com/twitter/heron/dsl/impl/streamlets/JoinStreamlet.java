@@ -53,7 +53,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWin
                               BaseKVStreamlet<A, C> right,
                               WindowConfig windowCfg,
                               SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.LEFT, left,
+    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER_LEFT, left,
                                          right, windowCfg, joinFn);
   }
 
@@ -62,7 +62,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWin
                                BaseKVStreamlet<A, C> right,
                                WindowConfig windowCfg,
                                SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER, left,
+    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER_RIGHT, left,
                                          right, windowCfg, joinFn);
   }
 
