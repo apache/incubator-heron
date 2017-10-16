@@ -11,7 +11,7 @@
 It is recommended to start minikube with at least 7 GB of memory ```--memory=7168```, 
 5 cpus ```--cpus=5``` and 20 GB of storage ```--disk-size=20g```
 ```shell
-$ minikube --memory=7168 --cpus=5 --disk-size=20g
+$ minikube start --memory=7168 --cpus=5 --disk-size=20g
 ```
 
 ### Start Components:

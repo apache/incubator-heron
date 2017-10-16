@@ -18,13 +18,18 @@
 
 package org.apache.storm.task;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.storm.generated.Bolt;
+import org.apache.storm.generated.SpoutSpec;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.tuple.Fields;
 import org.json.simple.JSONAware;
+
+import com.twitter.heron.api.generated.TopologyAPI;
 
 // import org.apache.storm.generated.ComponentCommon;
 // import org.apache.storm.generated.GlobalStreamId;
@@ -62,11 +67,25 @@ public class GeneralTopologyContext implements JSONAware {
    *
    * @return the Thrift definition representing the topology
    */
-  /*
+  @SuppressWarnings("deprecation")
   public StormTopology getRawTopology() {
-    return null;
+
+    StormTopology stormTopology = new StormTopology();
+    Map<String, SpoutSpec> spouts = new HashMap<>();
+    for (TopologyAPI.Spout spout : this.delegate.getRawTopology().getSpoutsList()) {
+      spouts.put(spout.getComp().getName(), new SpoutSpec(spout));
+    }
+
+    Map<String, Bolt> bolts = new HashMap<>();
+    for (TopologyAPI.Bolt bolt : this.delegate.getRawTopology().getBoltsList()) {
+      bolts.put(bolt.getComp().getName(), new Bolt(bolt));
+    }
+
+    stormTopology.set_spouts(spouts);
+    stormTopology.set_bolts(bolts);
+    return stormTopology;
   }
-  */
+
 
   /**
    * Gets the component id for the specified task id. The component id maps

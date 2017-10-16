@@ -126,6 +126,12 @@ public class TestTopologyContext implements TopologyContext {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
+  public TopologyAPI.Topology getRawTopology() {
+    return delegate.getRawTopology();
+  }
+
+  @Override
   public String getComponentId(int taskId) {
     return this.delegate.getComponentId(taskId);
   }
