@@ -35,9 +35,9 @@ to overcome many of the shortcomings that Storm exhibited when run in production
 at Twitter scale.
 
 Shortcoming | Solution
-:-----------|:--------------
+:-----------|:--------
 Resource isolation | Heron uses process-based isolation both between topologies and between containers within topologies, which is more reliable and easier to monitor and debug than Storm's model, which involves shared communication threads in the same [JVM](https://en.wikipedia.org/wiki/Java_virtual_machine)
-Resource consumption | Storm requires [scheduler](#schedulers) resources to be provisioned up front, which can lead to over-provisioning; Heron avoids this problem by using cluster resources on demand
+Resource efficiency | Storm requires [scheduler](#schedulers) resources to be provisioned up front, which can lead to over-provisioning. Heron avoids this problem by using cluster resources on demand.
 Throughput | For a variety of architectural reasons, Heron has consistently been shown to provide much higher throughput and much lower latency than Storm
 
 ### Storm compatibility
