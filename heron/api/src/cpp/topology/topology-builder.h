@@ -200,8 +200,8 @@ class TopologyBuilder {
     if (!userConfig->hasConfig(config::Config::TOPOLOGY_MAX_SPOUT_PENDING)) {
       userConfig->setMaxSpoutPending(100);
     }
-    if (!userConfig->hasConfig(config::Config::TOPOLOGY_ENABLE_ACKING)) {
-      userConfig->setEnableAcking(false);
+    if (!userConfig->hasConfig(config::Config::TOPOLOGY_RELIABILITY_MODE)) {
+      userConfig->setTopologyReliabilityMode(config::Config::ATMOST_ONCE);
     }
     if (!userConfig->hasConfig(config::Config::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       userConfig->setEnableMessageTimeouts(true);
