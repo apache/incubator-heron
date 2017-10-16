@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.dsl.impl.operators;
+package com.twitter.heron.streamlet.impl.operators.JoinOperatorTest;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -41,9 +41,9 @@ import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
-import com.twitter.heron.dsl.KeyValue;
-import com.twitter.heron.dsl.KeyedWindow;
-import com.twitter.heron.dsl.SerializableBiFunction;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.KeyedWindow;
+import com.twitter.heron.streamlet.SerializableBiFunction;
 
 public class JoinOperatorTest {
 
