@@ -7,6 +7,7 @@ pkg_version = "1.2.2"
 
 package_file = pkg_name + "-" + pkg_version + ".tar.gz"
 package_dir = pkg_name + "-" + pkg_version
+package_patch = pkg_name + "-" + pkg_version + ".patch"
 
 file_list = [
     "include/cereal/access.hpp",
@@ -92,7 +93,8 @@ file_list = [
 genrule(
     name = "cereal-srcs",
     srcs = [
-        package_file, 
+        package_file,
+        package_patch,
     ],
     outs = file_list,
     cmd = "\n".join([
@@ -103,6 +105,7 @@ genrule(
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
+        "patch -d " + package_dir + " -p1 < " + package_patch,
         "cd " + package_dir,
         "rm -f include/cereal/types/boost_variant.hpp",
         "rm -f unittests/boost_variant.cpp",
