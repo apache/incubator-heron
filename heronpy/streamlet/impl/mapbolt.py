@@ -18,10 +18,10 @@ from heronpy.api.component.component_spec import GlobalStreamId
 from heronpy.api.stream import Grouping
 
 from heronpy.streamlet.streamlet import Streamlet
-from heronpy.streamlet.impl.streamletboltbase import SteamletBoltBase
+from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 # pylint: disable=unused-argument
-class MapBolt(Bolt, StatefulComponent, SteamletBoltBase):
+class MapBolt(Bolt, StatefulComponent, StreamletBoltBase):
   """MapBolt"""
   FUNCTION = 'function'
 
