@@ -5,8 +5,16 @@ title: Heron's Design Goals
 From the beginning, Heron was envisioned as a new kind of stream processing
 system, built to meet the most demanding of technological requirements, to
 handle even the most massive of workloads, and to meet the needs of organizations
-of all sizes and degrees of complexity. A few core design goals have guided
-Heron's development:
+of all sizes and degrees of complexity. Amongst these requirements:
+
+* The ability to process billions of events per minute
+* Extremely low end-to-end latency
+* Predictable behavior regardless of scale
+* 
+
+
+To meet these requirements, a few core design goals have guided---and continue to
+guide---Heron's development:
 
 * [Modularity](#modularity)
 * [Extensibility](#extensibility)
@@ -27,6 +35,7 @@ easy to extend to meet your needs. It offers simple APIs that you can use to
 extend Heron to:
 
 * run on not-yet-supported operating systems
+* use not-yet-supported scheduling platforms to run topologies
 
 ### Isolation
 

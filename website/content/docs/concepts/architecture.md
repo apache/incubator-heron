@@ -3,10 +3,10 @@ title: Heron's Architecture
 ---
 
 Heron is a general-purpose stream processing engine designed for speedy performance,
-low latency, isolation, reliability, and friendliness to developers and administrators
+low latency, isolation, reliability, and ease of use for developers and administrators
 alike.
 
-> We also recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
+> We recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
 The sections below clarify the distinction between [Heron and
 Storm](#relationship-with-apache-storm), describe the [design
@@ -23,17 +23,42 @@ A detailed guide to the Heron codebase can be found
 ## Topologies
 
 You can think of a Heron cluster as a mechanism for managing the lifecycle of
-stream-processing entities called **topologies**. More information can be found
+stream-processing entities called **topologies**. Topologies can be written in
+[Java](../../developers/java/streamlet-api) or [Python](../../developers/python/topologies).
+
+
+More information can be found
 in the [Heron Topologies](../topologies) document.
 
 ## Relationship with Apache Storm
 
-Heron was initially developed at Twitter with two main goals in mind:
+[Apache Storm](https://storm.apache.org) is a stream processing system originally
+open sourced by Twitter in 2011. Heron, also developed at Twitter, was created
+to overcome many of the shortcomings that Storm exhibited when run in production
+at Twitter scale.
 
-1. Providing performance, reliability and ease of troubleshooting by leveraging a process-based
-computing model and full topology isolation.
-2. Retaining full compatibility with Storm's data model and [topology
-API](http://storm.apache.org/about/simple-api.html).
+Shortcoming | Heron solution
+:-----------|:--------------
+Isolation | Heron uses process-based isolation, which is more reliable and easier to debug than Storm's thread-based isolation model
+
+
+### Storm compatibility
+
+Heron was built to be fully backwards compatible with Storm and thus to enable
+[topology](../topologies) developers to use Heron to run topologies created with
+Storm in mind and using Storm's [topology API](http://storm.apache.org/about/simple-api.html).
+
+Currently, Heron is compatible with topologies written using:
+
+1. The [Heron Streamlet API](../topologies#the-streamlet-api) (recommended for new work), or
+1. The [Heron Topology API](../topologies#the-heron-topology-api)
+
+If you have existing topologies created using the [Storm API](http://storm.apache.org/about/simple-api.html)
+
+Heron was initially developed at Twitter with a few main goals in mind:
+
+1. Providing blazing-fast performance, reliability, and easy troubleshooting by leveraging a process-based computing model and full topology isolation.
+2. Retaining full compatibility with Storm's data model and [topology API](http://storm.apache.org/about/simple-api.html).
 
 For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
 Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
