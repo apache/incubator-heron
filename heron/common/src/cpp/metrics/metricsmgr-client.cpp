@@ -28,13 +28,15 @@ namespace heron {
 namespace common {
 
 MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
-                                   const sp_string& _component_id, const sp_string& _task_id,
+                                   const sp_string& _component_name, const sp_string& _instance_id,
+                                   int _instance_index,
                                    EventLoop* eventLoop, const NetworkOptions& _options)
     : Client(eventLoop, _options),
       hostname_(_hostname),
       port_(_port),
-      component_id_(_component_id),
-      task_id_(_task_id),
+      component_name_(_component_name),
+      instance_id_(_instance_id),
+      instance_index_(_instance_index),
       tmaster_location_(NULL),
       metricscache_location_(NULL),
       registered_(false) {
@@ -70,9 +72,9 @@ void MetricsMgrClient::SendRegisterRequest() {
   proto::system::MetricPublisher* publisher = request->mutable_publisher();
   publisher->set_hostname(hostname_);
   publisher->set_port(port_);
-  publisher->set_component_name(component_id_);
-  publisher->set_instance_id(task_id_);
-  publisher->set_instance_index(-1);
+  publisher->set_component_name(component_name_);
+  publisher->set_instance_id(instance_id_);
+  publisher->set_instance_index(instance_index_);
 
   SendRequest(request, NULL);
 }
