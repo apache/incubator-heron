@@ -66,19 +66,19 @@ public final class MultiStageAckingTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word",
+    conf.setComponentRam("word",
         ExampleResources.getComponentRam());
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+    conf.setComponentRam("exclaim1",
         ExampleResources.getComponentRam());
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim2",
+    conf.setComponentRam("exclaim2",
         ExampleResources.getComponentRam());
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+    conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(3 * parallelism, parallelism));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+    conf.setContainerRamRequested(
         ExampleResources.getContainerRam(3 * parallelism, parallelism));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
+    conf.setContainerCpuRequested(1);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(parallelism);

@@ -1,0 +1,113 @@
+##
+## ZooKeeper deployment
+##
+
+## Define a disruption budget to ensure there are at least
+## 2 ZK servers running all the time
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: zk-budget
+spec:
+  selector:
+    matchLabels:
+      app: zk
+  minAvailable: 1
+---
+
+## Define a StatefulSet for ZK servers
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: zk
+  labels:
+    app: heron
+    component: zookeeper
+spec:
+  serviceName: zookeeper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: heron
+        component: zookeeper
+
+    spec:
+      # Make sure multiple pods of ZK don't get scheduled on the
+      # same node, unless there are no other available nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                        - zookeeper
+                topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: zookeeper
+          image: heron/heron:0.16.2
+          command: ["sh", "-c"]
+          args:
+            - >
+              /opt/zookeeper/scripts/start-zookeeper.sh
+          ports:
+            - containerPort: 2181
+              name: client
+            - containerPort: 2888
+              name: server
+            - containerPort: 3888
+              name: leader-election
+          env:
+            - name: ZOOKEEPER_SERVERS
+              value: zk-0
+          readinessProbe:
+              exec:
+                command:
+                  - "/opt/zookeeper/scripts/zookeeper-ruok.sh"
+              initialDelaySeconds: 5
+              timeoutSeconds: 5
+
+          livenessProbe:
+              exec:
+                command:
+                  - "/opt/zookeeper/scripts/zookeeper-ruok.sh"
+              initialDelaySeconds: 15
+              timeoutSeconds: 5
+
+          volumeMounts:
+            - name: datadir
+              mountPath: /heron/data
+      volumes:
+        - name: datadir
+          emptyDir: {}
+
+---
+
+##
+## Define the ZooKeeper headless service
+##
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  name: zookeeper
+  labels:
+    app: heron
+    component: zookeeper
+spec:
+  ports:
+    - port: 2888
+      name: server
+    - port: 3888
+      name: leader-election
+    - port: 2181
+      name: client
+  clusterIP: None
+  selector:
+    app: heron
+    component: zookeeper

@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.proto.system.PhysicalPlans.StMgr;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -30,8 +29,14 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
 /**
- * Implementation of AuroraController that is a wrapper of AuroraCLIController The difference is:
- * the `restart` method implementation is changed to heron-shell
+ * Implementation of AuroraController that is a wrapper of AuroraCLIController.
+ * The difference is `restart` command:
+ * 1. restart whole topology: delegate to AuroraCLIController
+ * 2. restart container 0: delegate to AuroraCLIController
+ * 3. restart container x(x>0): call heron-shell endpoint `/killexecutor`
+ * For backpressure, only containers with heron-stmgr may send out backpressure.
+ * This class is to handle `restart backpressure containers inside container`,
+ * while delegating to AuroraCLIController for all the other scenarios.
  */
 class AuroraHeronShellController implements AuroraController {
   private static final Logger LOG = Logger.getLogger(AuroraHeronShellController.class.getName());
@@ -41,14 +46,13 @@ class AuroraHeronShellController implements AuroraController {
   private final SchedulerStateManagerAdaptor stateMgrAdaptor;
 
   AuroraHeronShellController(String jobName, String cluster, String role, String env,
-      String auroraFilename, boolean isVerbose)
+      String auroraFilename, boolean isVerbose, Config localConfig)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     this.topologyName = jobName;
     this.cliController =
         new AuroraCLIController(jobName, cluster, role, env, auroraFilename, isVerbose);
 
-    Config config =
-        Config.toClusterMode(Config.newBuilder().putAll(ConfigLoader.loadClusterConfig()).build());
+    Config config = Config.toClusterMode(localConfig);
     String stateMgrClass = Context.stateManagerClass(config);
     IStateManager stateMgr = ReflectionUtils.newInstance(stateMgrClass);
     stateMgr.initialize(config);
@@ -68,8 +72,9 @@ class AuroraHeronShellController implements AuroraController {
   // Restart an aurora container
   @Override
   public boolean restart(Integer containerId) {
-    if (containerId == null) {
-      throw new UnsupportedOperationException("Not implemented");
+    // there is no backpressure for container 0, delegate to aurora client
+    if (containerId == null || containerId == 0) {
+      cliController.restart(containerId);
     }
 
     if (stateMgrAdaptor == null) {
@@ -77,12 +82,12 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(containerId);
+    int index = containerId - 1; // stmgr container starts from 1
+    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
     String host = contaienrInfo.getHostName();
     int port = contaienrInfo.getShellPort();
     String url = "http://" + host + ":" + port + "/killexecutor";
-
-    String payload = "secret=" + topologyName;
+    String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
