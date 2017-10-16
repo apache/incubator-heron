@@ -44,6 +44,7 @@ import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.impl.operators.JoinOperator;
 
 public class JoinOperatorTest {
 
