@@ -48,10 +48,11 @@ Storm's [topology API](http://storm.apache.org/about/simple-api.html).
 
 Currently, Heron is compatible with topologies written using:
 
-1. The [Heron Streamlet API](../topologies#the-streamlet-api) (recommended for new work), or
+1. The new [Heron Streamlet API](../topologies#the-streamlet-api) (recommended for new work), or
 1. The [Heron Topology API](../topologies#the-heron-topology-api)
 
-If you have existing topologies created using the [Storm API](http://storm.apache.org/about/simple-api.html)
+If you have existing topologies created using the [Storm API](http://storm.apache.org/about/simple-api.html),
+you can make them Heron compatible by following [these simple instructions](../../migrate-storm-to-heron)
 
 Heron was initially developed at Twitter with a few main goals in mind:
 
@@ -122,6 +123,8 @@ connected graph.
 
 For an illustration, see the figure in the [Topology Master]({{< ref "#topology-master" >}})
 section above.
+
+> In Heron, all topology containerization is handled by the scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Kubernetes](../../operators/deployment/schedulers/kubernetes), [YARN](../../operators/deployment/schedulers/yarn), or something else. Heron schedulers typically use [cgroups](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch01) to manage Heron topology processes.
 
 ### Stream Manager
 
