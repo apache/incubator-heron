@@ -9,9 +9,12 @@ of all sizes and degrees of complexity. Amongst these requirements:
 
 * The ability to process billions of events per minute
 * Extremely low end-to-end latency
-* Predictable behavior regardless of scale
-* 
-
+* Predictable behavior regardless of scale and in the face of issue like extreme traffic spikes and pipeline congestion
+* Simple administration, including:
+  * The ability to deploy on shared infrastructure
+  * Powerful monitoring capabilities
+  * Fine-grained configurability
+* Easy debuggability
 
 To meet these requirements, a few core design goals have guided---and continue to
 guide---Heron's development:
@@ -21,21 +24,27 @@ guide---Heron's development:
 * [Isolation](#isolation)
 * [Constrained resource usage](#constrained-resource-usage)
 * [Apache Storm compatibility](#apache-storm-compatibility)
+* [Backpressure handling](#backpressure-handling)
+* [Multiple semantic guarantees](#multiple-semantic-guarantees)
+
 
 ### Modularity
 
 Heron was designed to serve a wide range of requirements, use cases, platforms,
 programming languages and so on. In order to suit varying---and often
-unforeseeable---needs, Heron 
+unforeseeable---needs, Heron provides support for mulitple:
+
+* [schedulers](../architecture#schedulers)
+* metrics sinks
+* operating systems and platforms
+* topology [uploaders](../architecture#schedulers)
 
 ### Extensibility
 
 Due to its fundamentally [modular](#modularity) character, Heron is remarkably
-easy to extend to meet your needs. It offers simple APIs that you can use to
-extend Heron to:
-
-* run on not-yet-supported operating systems
-* use not-yet-supported scheduling platforms to run topologies
+easy to extend to meet your needs, with simple APIs that you can use to add
+support for new schedulers, programming languages (for topologies), topology
+uploaders, etc.
 
 ### Isolation
 
@@ -56,28 +65,17 @@ that we recommend for all future topology development, Heron is fully API and
 data model compatible with [Apache Storm](http://storm.apache.org), making it
 easy for developers to transition from Storm to Heron.
 
-### Backpressure
+### Backpressure handling
 
 In a distributed system like Heron, there are no guarantees that all system
 components will execute at the same speed. Heron has built-in [back pressure
 mechanisms](../architecture#stream-manager) to ensure that topologies can
 self-adjust in case components lag.
 
-### Performance
-
-Many of Heron's design choices have enabled Heron to achieve higher throughput
-and lower latency than Storm while also offering enhanced configurability to
-fine-tune potential latency/throughput trade-offs.
-
-### Semantic guarantees
+### Multiple semantic guarantees
 
 Heron provides support for
 [at-most-once](../delivery-semantics#available-semantics),
 [at-least-once](../delivery-semantics#available-semantics), and
 [effectively-once](../delivery-semantics#available-semantics) processing
 semantics.
-
-### Efficiency
-
-Heron was built with the goal of achieving all of the above with the minumim
-possible resource usage.

@@ -4,13 +4,15 @@ title: Heron's Architecture
 
 Heron is a general-purpose stream processing engine designed for speedy performance,
 low latency, isolation, reliability, and ease of use for developers and administrators
-alike.
+alike. Heron was [open
+sourced](https://blog.twitter.com/engineering/en_us/topics/open-source/2016/open-sourcing-twitter-heron.html)
+by [Twitter](https://twitter.github.io/) in May 2016.
 
 > We recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
 The sections below:
 
-* clarify the distinction between [Heron and Apache Storm](#relationship-with-apache-storm)
+* clarify the distinction between Heron and [Apache Storm](#relationship-with-apache-storm)
 * describe Heron's basic [system architecture](#basic-system-architecture)
 * explain the role of major [components](#topology-components) of Heron's architecture
 * provide an overview of what happens when [submit a topology](#topology-submission-description)
@@ -73,6 +75,10 @@ For a description of the principles that Heron was designed to fulfill, see
 ## Basic system architecture
 
 In a Heron cluster
+
+### Schedulers
+
+### Uploaders
 
 ## Topology Components
 
