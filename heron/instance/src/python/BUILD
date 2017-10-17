@@ -8,7 +8,7 @@ pex_library(
     deps = [
         '//heronpy/proto:proto-py',
         '//heronpy/api:heron-python-py',
-        '//heronpy/streamlet:heron-python-streamlet-api-py',
+        '//heronpy/streamlet:heron-python-streamlet-py',
         '//heronpy/connectors:heron-pythonconnectors-py',
         '//heron/common/src/python:common-py',
     ],
