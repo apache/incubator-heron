@@ -123,8 +123,8 @@ using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
 $ heron submit local \
-  ~/.heron/examples/heron-dsl-examples.jar \
-  com.twitter.heron.examples.dsl.WordCountDslTopology \
+  ~/.heron/examples/heron-streamlet-api-examples.jar \
+  com.twitter.heron.examples.streamlet.WordCountDslTopology \
   WordCountDslTopology \
   --deploy-deactivated
 ```
