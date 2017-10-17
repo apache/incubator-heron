@@ -280,5 +280,61 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrNetworkBackpressureLowwate
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB]
       .as<int>();
 }
+
+int HeronInternalsConfigReader::GetHeronInstanceReconnectStreammgrIntervalSec() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceReconnectStreammgrTimes() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_TIMES]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceInternalBoltReadQueueCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceInternalBoltWriteQueueCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceInternalSpoutReadQueueCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceInternalSpoutWriteQueueCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceEmitBatchTimeMs() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_TIME_MS]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceSetDataTupleCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceSetDataTupleSizeBytes() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceSetControlTupleCapacity() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_SET_CONTROL_TUPLE_CAPACITY]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceAcknowledgementNbuckets() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_ACKNOWLEDGEMENT_NBUCKETS]
+      .as<int>();
+}
+
 }  // namespace config
 }  // namespace heron
