@@ -297,9 +297,6 @@ Storage | When the topology is deployed to containers by the scheduler, the code
     a connection and registers itself with the stream manager.
     After the successful registration, the gateway thread sends its physical plan to
     the slave thread, which then executes the assigned instance accordingly.
-<<<<<<< HEAD
-    -->
-=======
     
 
 ## Codebase
@@ -308,4 +305,3 @@ Heron is primarily written in Java, C++, and Python.
 
 A detailed guide to the Heron codebase can be found
 [here](../../contributors/codebase).
->>>>>>> upstream/master
