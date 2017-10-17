@@ -28,6 +28,7 @@ java_tests(
     "com.twitter.heron.api.bolt.BaseWindowedBoltTest",
     "com.twitter.heron.streamlet.impl.BaseStreamletTest",
     "com.twitter.heron.streamlet.impl.BaseKVStreamletTest",
+    "com.twitter.heron.streamlet.impl.operators.JoinOperatorTest",
   ],
   runtime_deps = [ ":api-tests" ],
   size = "small",
