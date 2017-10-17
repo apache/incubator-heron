@@ -55,10 +55,10 @@ MetricsMgrSt::~MetricsMgrSt() {
 }
 
 void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
-     const sp_string& _component, const sp_string& _task_id) {
+     const sp_string& _component_id, const sp_string& _instance_id) {
   CHECK(client_ == nullptr) << "MetricsMgrClient started already";
-  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component, _task_id,
-                                 eventLoop_, options_);
+  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component_id, _instance_id,
+                                 -1, eventLoop_, options_);
 }
 
 void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
