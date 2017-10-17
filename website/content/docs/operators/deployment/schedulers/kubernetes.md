@@ -15,7 +15,7 @@ You can use Heron on Kubernetes in multiple environments:
 
 In order to run Heron on Kubernetes, you will need:
 
-* A Kubernetes cluster with at least 3 nodes
+* A Kubernetes cluster with at least 3 nodes (unless you're running locally on [Minikube](#minikube))
 * The [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLI tool installed and set up to communicate with your cluster
 * The [`heron`](../../../../getting-started) CLI tool
 
