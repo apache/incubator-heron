@@ -195,6 +195,8 @@ void Client::OnNewPacket(IncomingPacket* _ipkt) {
   } else if (responseHandlers.count(typname) > 0) {
     // This is a response
     responseHandlers[typname](_ipkt, OK);
+  } else {
+    LOG(ERROR) << "Got a packet type that is not registered " << typname;
   }
   delete _ipkt;
 }

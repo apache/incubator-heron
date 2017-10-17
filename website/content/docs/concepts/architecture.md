@@ -1,58 +1,102 @@
 ---
-title: Heron Architecture
+title: Heron's Architecture
 ---
 
-Heron is a general purpose streaming engine designed for performance, low latency, isolation and
-reliability. It also provides API compatibility with [Apache Storm](http://storm.apache.org).
+Heron is a general-purpose stream processing engine designed for speedy performance,
+low latency, isolation, reliability, and ease of use for developers and administrators
+alike. Heron was [open
+sourced](https://blog.twitter.com/engineering/en_us/topics/open-source/2016/open-sourcing-twitter-heron.html)
+by [Twitter](https://twitter.github.io/) in May 2016.
 
-The sections below clarify the distinction between [Heron and
-Storm]({{< ref "#relationship-with-apache-storm" >}}), describe the [design
-goals]({{< ref "#heron-design-goals" >}}) behind Heron, and explain major
-[components]({{< ref "#topology-components" >}}) of its architecture.
+> We recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
-## Codebase
+The sections below:
 
-A detailed guide to the Heron codebase can be found
-[here]({{< relref "codebase.md" >}}).
+* clarify the distinction between Heron and [Apache Storm](#relationship-with-apache-storm)
+* describe Heron's basic [system architecture](#basic-system-architecture)
+* explain the role of major [components](#topology-components) of Heron's architecture
+* provide an overview of what happens when [submit a topology](#topology-submission-description)
 
 ## Topologies
 
 You can think of a Heron cluster as a mechanism for managing the lifecycle of
-stream-processing entities called **topologies**. More information can be found
+stream-processing entities called **topologies**. Topologies can be written in
+[Java](../../developers/java/streamlet-api) or [Python](../../developers/python/topologies).
+
+
+More information can be found
 in the [Heron Topologies](../topologies) document.
 
 ## Relationship with Apache Storm
 
-Heron was initially developed at Twitter with two main goals in mind:
+[Apache Storm](https://storm.apache.org) is a stream processing system originally
+open sourced by Twitter in 2011. Heron, also developed at Twitter, was created
+to overcome many of the shortcomings that Storm exhibited when run in production
+at Twitter scale.
 
-1. Providing performance, reliability and ease of troubleshooting by leveraging a process-based
-computing model and full topology isolation.
-2. Retaining full compatibility with Storm's data model and [topology
-API](http://storm.apache.org/about/simple-api.html).
+Shortcoming | Solution
+:-----------|:--------
+Resource isolation | Heron uses process-based isolation both between topologies and between containers within topologies, which is more reliable and easier to monitor and debug than Storm's model, which involves shared communication threads in the same [JVM](https://en.wikipedia.org/wiki/Java_virtual_machine)
+Resource efficiency | Storm requires [scheduler](#schedulers) resources to be provisioned up front, which can lead to over-provisioning. Heron avoids this problem by using cluster resources on demand.
+Throughput | For a variety of architectural reasons, Heron has consistently been shown to provide much higher throughput and much lower latency than Storm
+
+### Storm compatibility
+
+Heron was built to be fully backwards compatible with Storm and thus to enable
+[topology](../topologies) developers to use Heron to run topologies created using
+Storm's [topology API](http://storm.apache.org/about/simple-api.html).
+
+Currently, Heron is compatible with topologies written using:
+
+1. The new [Heron Streamlet API](../topologies#the-streamlet-api) (recommended for new work), or
+1. The [Heron Topology API](../topologies#the-heron-topology-api)
+
+If you have existing topologies created using the [Storm API](http://storm.apache.org/about/simple-api.html),
+you can make them Heron compatible by following [these simple instructions](../../migrate-storm-to-heron)
+
+Heron was initially developed at Twitter with a few main goals in mind:
+
+1. Providing blazing-fast performance, reliability, and easy troubleshooting by leveraging a process-based computing model and full topology isolation.
+2. Retaining full compatibility with Storm's data model and [topology API](http://storm.apache.org/about/simple-api.html).
 
 For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
 Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 
+Heron thus enables you to achieve major gains along a variety of axes---throughput,
+latency, reliability---without needing to sacrifice engineering resources.
+
 ## Heron Design Goals
 
-For a description of the principles that Heron was designed to fulfill, see
-[Heron Design Goals](/docs/concepts/design-goals).
+For a description of the core goals of Heron as well as the principles that have
+guided its development, see [Heron Design Goals](/docs/concepts/design-goals).
+
+## Basic system architecture
+
+In a Heron cluster
+
+### Schedulers
+
+### Uploaders
 
 ## Topology Components
+
+From an architectural standpoint, Heron was built as an interconnected set of modular
+components. 
+
 
 The following core components of Heron topologies are discussed in depth in
 the sections below:
 
-* [Topology Master]({{< ref "#topology-master" >}})
-* [Container]({{< ref "#container" >}})
-* [Stream Manager]({{< ref "#stream-manager" >}})
-* [Heron Instance]({{< ref "#heron-instance" >}})
-* [Metrics Manager]({{< ref "#metrics-manager" >}})
-* [Heron Tracker]({{< ref "#heron-tracker" >}})
+* [Topology Master](#topology-master)
+* [Containers](#containers)
+* [Stream Manager](#stream-manager)
+* [Heron Instance](#heron-instance)
+* [Metrics Manager](#metrics-manager)
+* [Heron Tracker](#heron-tracker)
 
 ### Topology Master
 
-The Topology Master \(TM) manages a topology throughout its entire lifecycle,
+The **Topology Master** \(TM) manages a topology throughout its entire lifecycle,
 from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
 The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
@@ -79,6 +123,8 @@ connected graph.
 
 For an illustration, see the figure in the [Topology Master]({{< ref "#topology-master" >}})
 section above.
+
+> In Heron, all topology containerization is handled by the scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Kubernetes](../../operators/deployment/schedulers/kubernetes), [YARN](../../operators/deployment/schedulers/yarn), or something else. Heron schedulers typically use [cgroups](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch01) to manage Heron topology processes.
 
 ### Stream Manager
 
@@ -251,4 +297,15 @@ Storage | When the topology is deployed to containers by the scheduler, the code
     a connection and registers itself with the stream manager.
     After the successful registration, the gateway thread sends its physical plan to
     the slave thread, which then executes the assigned instance accordingly.
+<<<<<<< HEAD
     -->
+=======
+    
+
+## Codebase
+
+Heron is primarily written in Java, C++, and Python.
+
+A detailed guide to the Heron codebase can be found
+[here](../../contributors/codebase).
+>>>>>>> upstream/master

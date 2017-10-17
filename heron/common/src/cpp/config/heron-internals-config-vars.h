@@ -25,6 +25,9 @@
 
 #ifndef HERON_INTERNALS_COFNIG_VARS_H_
 #define HERON_INTERNALS_COFNIG_VARS_H_
+
+#include <string>
+
 #include "basics/basics.h"
 
 namespace heron {
@@ -177,6 +180,43 @@ class HeronInternalsConfigVars {
   // The size based threshold in MB for buffering data tuples waiting for
   // checkpoint markers to arrive before giving up
   static const sp_string HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB;
+
+  /**
+  * HERON_INSTANCE_* configs are for the instance
+  **/
+
+  // Interval in seconds to reconnect to the stream manager
+  static const sp_string HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC;
+
+  // Number of attempts to connect to stream manager before giving up
+  static const sp_string HERON_INSTANCE_RECONNECT_STREAMMGR_TIMES;
+
+  // The queue capacity (num of items) in bolt for buffer packets to read from stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in bolt for buffer packets to write to stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in spout for buffer packets to read from stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in spout for buffer packets to write to stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY;
+
+  // The maximum time in ms for an spout instance to emit tuples per attempt
+  static const sp_string HERON_INSTANCE_EMIT_BATCH_TIME_MS;
+
+  // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY;
+
+  // The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES;
+
+  // The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_CONTROL_TUPLE_CAPACITY;
+
+  // For efficient acknowledgement
+  static const sp_string HERON_INSTANCE_ACKNOWLEDGEMENT_NBUCKETS;
 };
 }  // namespace config
 }  // namespace heron

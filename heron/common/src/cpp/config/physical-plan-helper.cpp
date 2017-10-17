@@ -59,6 +59,33 @@ void PhysicalPlanHelper::GetLocalSpouts(const proto::system::PhysicalPlan& _ppla
   return;
 }
 
+const std::string PhysicalPlanHelper::GetComponentName(const proto::system::PhysicalPlan& _pplan,
+                                                       int _task_id) {
+  for (auto instance : _pplan.instances()) {
+    if (instance.info().task_id() == _task_id) {
+      return instance.info().component_name();
+    }
+  }
+  return EMPTY_STRING;
+}
+
+void PhysicalPlanHelper::GetComponentTaskIds(const proto::system::PhysicalPlan& _pplan,
+                                             const std::string& _component,
+                                             std::list<int>& _retval) {
+  for (auto instance : _pplan.instances()) {
+    if (instance.info().component_name() == _component) {
+      _retval.push_back(instance.info().task_id());
+    }
+  }
+}
+
+void PhysicalPlanHelper::GetTaskIdToComponentName(const proto::system::PhysicalPlan& _pplan,
+                                                  std::map<int, std::string>& retval) {
+  for (auto instance : _pplan.instances()) {
+    retval[instance.info().task_id()] = instance.info().component_name();
+  }
+}
+
 void PhysicalPlanHelper::GetTasks(const proto::system::PhysicalPlan& _pplan,
                                   const sp_string& _stmgr,
                                   std::unordered_set<sp_int32>& _return) {

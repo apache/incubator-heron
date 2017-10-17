@@ -9,7 +9,7 @@ sections:
         url: /docs/getting-started-troubleshooting
   - name: The Heron Functional API
     sublinks:
-    - name: The Heron Functional API for Java
+    - name: The Heron Streamlet API for Java
       url: /docs/developers/java/functional-api
   - name: The Heron Topology API
     sublinks:
