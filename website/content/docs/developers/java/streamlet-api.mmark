@@ -1,11 +1,11 @@
 ---
-title: The Heron Functional API for Java
+title: The Heron Streamlet API for Java
 description: Create Heron topologies in Java using a functional programming style
 ---
 
-{{< alert "functional-api-beta" >}}
+{{< alert "streamlet-api-beta" >}}
 
-{{content/snippets/heron-functional-api.md}}
+{{content/snippets/heron-streamlet-api.md}}
 
 ## Getting started
 
@@ -68,24 +68,24 @@ $ heron submit local \
   MyTopology arg1 arg2
 ```
 
-### Java Functional API starter project
+### Java Streamlet API starter project
 
-If you'd like to up and running quickly with the Heron Functional API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-functional-api-example), which includes an example topology built using the Functional API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
+If you'd like to up and running quickly with the Heron Streamlet API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-streamlet-api-example), which includes an example topology built using the Functional API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
 
 ```bash
-$ git clone https://github.com/streamlio/heron-java-functional-api-example
-$ cd heron-java-functional-api-example
+$ git clone https://github.com/streamlio/heron-java-streamlet-api-example
+$ cd heron-java-streamlet-api-example
 $ mvn assembly:assembly
 $ ls target/*.jar
-heron-java-functional-api-example-latest-jar-with-dependencies.jar
-heron-java-functional-api-example-latest.jar
+target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar
+target/heron-java-streamlet-api-example-latest.jar
 ```
 
 If you're running a [local Heron cluster](../../../getting-started), you can submit the built example topology like this:
 
 ```bash
-$ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.functionalapi.IntegerProcessingTopology \
+$ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
+  io.streaml.heron.streamlet.IntegerProcessingTopology \
   IntegerProcessingTopology
 ```
 
@@ -94,21 +94,21 @@ $ heron submit local target/heron-java-functional-api-example-latest-jar-with-de
 Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology](#java-functional-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
 
 ```bash
-$ heron submit local target/heron-java-functional-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.functionalapi.IntegerProcessingTopology \
+$ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
+  io.streaml.heron.streamlet.IntegerProcessingTopology \
   IntegerProcessingTopology \
   effectively-once
 ```
 
 The other options are `at-most-once` and `at-least-once`. If you don't explicitly select the delivery semantics, at-least-once semantics will be applied.
 
-## Functional API topology configuration
+## Streamlet API topology configuration
 
-Every Functional API topology needs to be configured using a `Config` object. Here's an example baseline configuration:
+Every Streamlet API topology needs to be configured using a `Config` object. Here's an example baseline configuration:
 
 ```java
-import com.twitter.heron.dsl.Config;
-import com.twitter.heron.dsl.Runner;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.Runner;
 
 Config topologyConfig = new Config();
 
@@ -133,7 +133,7 @@ The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
 
 ### Containers and resources
 
-You can set the number of Docker containers to be used by a Functional API topology (as an integer) like so:
+You can set the number of containers to be used by a Functional API topology (as an integer) like so:
 
 ```java
 topologyConfig.setNumContainers(2);
@@ -142,7 +142,7 @@ topologyConfig.setNumContainers(2);
 You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
 
 ```java
-import com.twitter.heron.dsl.Resources;
+import com.twitter.heron.streamlet.Resources;
 
 Resources resources = new Resources();
 resources.withCpu(2.0f);
@@ -208,7 +208,7 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
-import com.twitter.heron.dsl.WindowConfig;
+import com.twitter.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.CreateBuilder();
 
