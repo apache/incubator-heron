@@ -80,7 +80,7 @@ class StatefulController {
 
  private:
   // Get the youngest ckpt id that is older than the given ckpt_id
-  const std::string GetNextInLineCheckpointId(const std::string& _ckpt_id);
+  const std::string& GetNextInLineCheckpointId(const std::string& _ckpt_id);
   // Creates a new ckpt record adding the latest one
   proto::ckptmgr::StatefulConsistentCheckpoints*
     AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
