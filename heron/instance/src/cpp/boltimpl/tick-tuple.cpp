@@ -26,7 +26,6 @@ namespace instance {
 
 const std::string TickTuple::componentName_ = "__system"; // NOLINT
 const std::string TickTuple::streamId_ = "__tick"; // NOLINT
-const std::string TickTuple::emptyString_ = ""; // NOLINT
 
 TickTuple::TickTuple(std::shared_ptr<api::serializer::IPluggableSerializer> serializer)
   : api::tuple::Tuple(serializer) {
@@ -63,7 +62,7 @@ const std::string& TickTuple::getSourceStreamId() const {
 }
 
 const std::string& TickTuple::getUnserializedValue(int index) const {
-  return emptyString_;
+  return EMPTY_STRING;
 }
 
 }  // namespace instance

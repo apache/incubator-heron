@@ -77,7 +77,6 @@ class TickTuple : public api::tuple::Tuple {
  private:
   static const std::string componentName_;
   static const std::string streamId_;
-  static const std::string emptyString_;
 };
 
 }  // namespace instance
