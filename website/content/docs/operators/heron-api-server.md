@@ -62,7 +62,6 @@ Flag | Description
 :----|:-----------
 `--config-path` | A non-default path to a base configuration
 `--port` | The port to bind to (the default is 9000)
-`--release-file` | The path for the `release.yaml` file specifying information about the Heron release
 
 ## Configuration overrides
 
