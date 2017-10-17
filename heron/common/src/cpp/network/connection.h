@@ -95,10 +95,6 @@ class Connection : public BaseConnection {
   sp_int32 registerForBackPressure(VCallback<Connection*> cbStarter,
                                    VCallback<Connection*> cbReliever);
 
-  sp_int32 getOutstandingPackets() const { return mOutstandingPackets.size(); }
-  sp_int32 getOutstandingBytes() const { return mNumOutstandingBytes; }
-
-  sp_int32 getWriteBatchSize() const { return mWriteBatchsize; }
   void setCausedBackPressure() { mCausedBackPressure = true; }
   void unsetCausedBackPressure() { mCausedBackPressure = false; }
   bool hasCausedBackPressure() const { return mCausedBackPressure; }
@@ -108,30 +104,8 @@ class Connection : public BaseConnection {
   sp_int32 removeBackPressure();
 
  private:
-  virtual sp_int32 writeIntoEndPoint(sp_int32 fd);
-
-  sp_int32 writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite);
-
-  void afterWriteIntoIOVector(sp_int32 simumWrites, ssize_t numWritten);
-
-  virtual bool stillHaveDataToWrite();
-
-  virtual void handleDataWritten();
-
-  virtual sp_int32 readFromEndPoint(sp_int32 _fd);
-
-  virtual void handleDataRead();
-
-  // The queue of outstanding packets that need to be sent. C++11 requires all containers'
-  // size() should be O(1).
-  std::deque<OutgoingPacket*> mOutstandingPackets;
-  sp_int64 mNumOutstandingBytes;
-
-  // The queue of packets that have been sent but not yet been reported to the higher layer
-  std::queue<OutgoingPacket*> mSentPackets;
-
-  // The queue of packets that have been received but not yet delivered to the higher layer
-  std::queue<IncomingPacket*> mReceivedPackets;
+  virtual sp_int32 readFromEndPoint(bufferevent* _buffer);
+  virtual void releiveBackPressure();
 
   // Incompletely read next packet
   IncomingPacket* mIncomingPacket;
@@ -145,11 +119,6 @@ class Connection : public BaseConnection {
   // becomes full (outstanding bytes exceed threshold)
   VCallback<Connection*> mOnConnectionBufferFull;
 
-  sp_int32 mIOVectorSize;
-  struct iovec* mIOVector;
-
-  // How many bytes do we want to write in one batch
-  sp_int32 mWriteBatchsize;
   // Have we caused back pressure?
   bool mCausedBackPressure;
   // Are our reads being throttled?

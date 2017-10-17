@@ -57,7 +57,7 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='version')
   return parser
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, cl_args, unknown_args):
   '''
   :param command:
@@ -95,7 +95,7 @@ def run(command, parser, cl_args, unknown_args):
         Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
       sorted_items = sorted(r.json().items(), key=lambda tup: tup[0])
       for key, value in sorted_items:
-        print "%s : %s" % (key, value)
+        print("%s : %s" % (key, value))
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
       Log.error(err)
       return SimpleResult(Status.HeronError)

@@ -14,6 +14,7 @@
 ''' args.py '''
 import argparse
 import os
+import sys
 
 import heron.tools.common.src.python.utils.config as config
 
@@ -183,7 +184,7 @@ def add_dry_run(parser):
   parser.add_argument(
       '--dry-run-format',
       metavar='DRY_RUN_FORMAT',
-      default='table',
+      default='colored_table' if sys.stdout.isatty() else 'table',
       type=dry_run_resp_format,
       help='The format of the dry-run output ([%s], default=%s). '
            'Ignored when dry-run mode is not enabled' % ('|'.join(resp_formats), default_format))

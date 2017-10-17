@@ -40,7 +40,7 @@ def genthrift_java_impl(ctx):
       command = java_cmd,
       use_default_shell_env = True)
 
-  return struct(files = set([srcjar]))
+  return struct(files = depset([srcjar]))
 
 genthrift_java = rule(
     genthrift_java_impl,

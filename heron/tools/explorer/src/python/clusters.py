@@ -21,7 +21,7 @@ def create_parser(subparsers):
   """ create argument parser """
   parser = subparsers.add_parser(
       'clusters',
-      help='Display exisitng clusters',
+      help='Display existing clusters',
       usage="%(prog)s [options]",
       add_help=True)
   args.add_verbose(parser)
@@ -29,7 +29,7 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='clusters')
   return subparsers
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, cl_args, unknown_args):
   """ run command """
   try:
@@ -37,7 +37,7 @@ def run(command, parser, cl_args, unknown_args):
   except:
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
-  print 'Available clusters:'
+  print('Available clusters:')
   for cluster in clusters:
-    print '  %s' % cluster
+    print('  %s' % cluster)
   return True

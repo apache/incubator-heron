@@ -1,5 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
-
 java_library(
     name = "common-tests",
     srcs = glob(["**/*.java"]),

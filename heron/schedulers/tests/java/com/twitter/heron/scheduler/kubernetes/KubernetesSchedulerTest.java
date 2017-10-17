@@ -41,18 +41,24 @@ import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class KubernetesSchedulerTest {
   private static final String[] TOPOLOGY_CONF = {"topology_conf"};
-  private static final String TOPOLOGY_NAME = "topology_name";
+  private static final String TOPOLOGY_NAME = "topology-name";
   private static final int CONTAINER_INDEX = 1;
   private static final String PACKING_PLAN_ID = "packing_plan_id";
   private static final String[] EXECUTOR_CMD = {"executor_cmd"};
 
   private static KubernetesScheduler scheduler;
 
+  private Config mockRuntime;
+
   @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  public final ExpectedException expectedException = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
+    mockRuntime = Mockito.mock(Config.class);
+    Mockito.when(mockRuntime.getStringValue(Key.TOPOLOGY_NAME))
+        .thenReturn(TOPOLOGY_NAME);
+    System.out.println("mock: " + mockRuntime);
   }
 
   @After
@@ -77,7 +83,7 @@ public class KubernetesSchedulerTest {
     Mockito.doReturn(controller).when(scheduler).getController();
     Mockito.doReturn(TOPOLOGY_CONF)
         .when(scheduler).getTopologyConf(Mockito.any(PackingPlan.class));
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
 
     // Fail to schedule due to null PackingPlan
     Assert.assertFalse(scheduler.onSchedule(null));
@@ -111,7 +117,7 @@ public class KubernetesSchedulerTest {
   public void testOnRestart() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
 
     // Construct RestartTopologyRequest
     Scheduler.RestartTopologyRequest restartTopologyRequest =
@@ -135,7 +141,7 @@ public class KubernetesSchedulerTest {
   public void testOnKill() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
 
     // Fail to kill topology
     Mockito.doReturn(false).when(controller).killTopology();
@@ -152,18 +158,18 @@ public class KubernetesSchedulerTest {
   public void testAddContainers() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
 
     // Fail to retrieve base pod
     Mockito.doThrow(new IOException()).when(controller).getBasePod(Mockito.anyString());
-    exception.expect(TopologyRuntimeManagementException.class);
+    expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.addContainers(containers);
 
     // Failure to deploy a container
     Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
     Mockito.doThrow(new IOException()).when(controller).deployContainer(Mockito.anyString());
-    exception.expect(TopologyRuntimeManagementException.class);
+    expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.addContainers(containers);
 
     // Successful deployment
@@ -176,13 +182,13 @@ public class KubernetesSchedulerTest {
   public void testRemoveContainers() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(PackingTestUtils.testContainerPlan(0));
 
     // Failure to remove container
     Mockito.doThrow(new IOException()).when(controller).removeContainer(Mockito.anyString());
-    exception.expect(TopologyRuntimeManagementException.class);
+    expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.removeContainers(containers);
 
     // Successful removal
@@ -198,10 +204,6 @@ public class KubernetesSchedulerTest {
     Config mockConfig = Mockito.mock(Config.class);
     Mockito.when(mockConfig.getStringValue(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI))
         .thenReturn(SCHEDULER_URI);
-
-    Config mockRuntime = Mockito.mock(Config.class);
-    Mockito.when(mockRuntime.getStringValue(Key.TOPOLOGY_NAME))
-        .thenReturn(TOPOLOGY_NAME);
 
     scheduler.initialize(mockConfig, mockRuntime);
 
@@ -227,5 +229,34 @@ public class KubernetesSchedulerTest {
 
     Assert.assertEquals(expectedFetchCommand,
         KubernetesScheduler.getFetchCommand(config, runtime));
+  }
+
+  @Test
+  public void testValidTopologyName() {
+    // test valid names
+    Assert.assertTrue(KubernetesScheduler.topologyNameIsValid("topology"));
+    Assert.assertTrue(KubernetesScheduler.topologyNameIsValid("test-topology"));
+    Assert.assertTrue(KubernetesScheduler.topologyNameIsValid("test.topology"));
+
+    // test invalid names
+    final String invalidCharacters = "!@#$%^&*()_+=</|\":\\; ";
+    for (int i = 0; i < invalidCharacters.length(); ++i) {
+      final String topologyName = "test" + invalidCharacters.charAt(i) + "topology";
+      Assert.assertFalse(KubernetesScheduler.topologyNameIsValid(topologyName));
+    }
+  }
+
+  @Test
+  public void testValidImagePullPolicies() {
+    // test valid names
+    Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(null));
+    Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(""));
+    KubernetesConstants.VALID_IMAGE_PULL_POLICIES.forEach((String policy) ->
+        Assert.assertTrue(KubernetesScheduler.imagePullPolicyIsValid(policy))
+    );
+
+    // test invalid names
+    Assert.assertFalse(KubernetesScheduler.imagePullPolicyIsValid("never"));
+    Assert.assertFalse(KubernetesScheduler.imagePullPolicyIsValid("unknownPolicy"));
   }
 }

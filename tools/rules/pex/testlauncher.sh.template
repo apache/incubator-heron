@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eu
+RUNFILES="${TEST_SRCDIR:-${BASH_SOURCE[0]}.runfiles}"
+export TEST_TMPDIR="${TEST_TMPDIR:-$(mktemp -d)}"
+export PEX_ROOT="${PEX_ROOT:-${TEST_TMPDIR}/.pex}"
+
+export PYTHONDONTWRITEBYTECODE=1
+
+exec "${RUNFILES}/%test_runner%" \
+    ${XML_OUTPUT_FILE:+--junit-xml=$XML_OUTPUT_FILE} \
+    "$@" \
+    %test_files%

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' utils.py '''
+import functools
 import grp
 import os
 import pkgutil
@@ -30,9 +31,9 @@ def format_mode(sres):
   """
   mode = sres.st_mode
 
-  root = (mode & 0700) >> 6
-  group = (mode & 0070) >> 3
-  user = (mode & 07)
+  root = (mode & 0o700) >> 6
+  group = (mode & 0o070) >> 3
+  user = (mode & 0o7)
 
   def stat_type(md):
     ''' stat type'''
@@ -109,8 +110,8 @@ def read_chunk(filename, offset=-1, length=-1, escape_data=False):
   Read a chunk of a file from an offset upto the length.
   """
   try:
-    length = long(length)
-    offset = long(offset)
+    length = int(length)
+    offset = int(offset)
   except ValueError:
     return {}
 
@@ -175,7 +176,7 @@ def chain(cmd_list):
   Returns string output of chained application of commands.
   """
   command = ' | '.join(map(lambda x: ' '.join(x), cmd_list))
-  chained_proc = reduce(pipe, [None] + cmd_list)
+  chained_proc = functools.reduce(pipe, [None] + cmd_list)
   stdout_builder = proc.async_stdout_builder(chained_proc)
   chained_proc.wait()
   return {

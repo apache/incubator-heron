@@ -85,9 +85,17 @@ class PhysicalPlanHelper(object):
           raise RuntimeError("Duplicate my component found")
         my_spbl = spbl
 
+    Log.info(my_spbl.__class__.__name__)
+
     if isinstance(my_spbl, topology_pb2.Spout):
       is_spout = True
     elif isinstance(my_spbl, topology_pb2.Bolt):
+      is_spout = False
+    elif my_spbl.__class__.__name__ == "Spout":
+      Log.info("Mismatch between cpp and python protobuf")
+      is_spout = True
+    elif my_spbl.__class__.__name__ == "Bolt":
+      Log.info("Mismatch between cpp and python protobuf")
       is_spout = False
     else:
       raise RuntimeError("My component neither spout nor bolt")

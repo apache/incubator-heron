@@ -50,10 +50,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts";
   /**
-   * How often a tick tuple from the "__system" component and "__tick" stream should be sent
+   * How often (in milliseconds) a tick tuple from the "__system" component and "__tick" stream should be sent
    * to tasks. Meant to be used as a component-specific configuration.
    */
-  public static final String TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+  public static final String TOPOLOGY_TICK_TUPLE_FREQ_MS = "topology.tick.tuple.freq.ms";
   /**
    * True if Heron should timeout messages or not. Defaults to true. This is meant to be used
    * in unit tests to prevent tuples from being accidentally timed out during the test.
@@ -129,7 +129,7 @@ public class Config extends HashMap<String, Object> {
     ATLEAST_ONCE,
     /**
      * Heron guarantees that each emitted tuple is seen by the downstream components
-     * exactly once. This is achieved via distributed snapshotting approach is described at
+     * effectively once. This is achieved via distributed snapshotting approach is described at
      * https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit
      * In this mode Heron will try to take the snapshots of
      * all of the components of the topology every
@@ -137,7 +137,7 @@ public class Config extends HashMap<String, Object> {
      * any component or detection of any network failure, Heron will initiate a recovery
      * mechanism to revert the topology to the last globally consistent checkpoint
      */
-    EXACTLY_ONCE;
+    EFFECTIVELY_ONCE;
   }
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode
@@ -235,6 +235,13 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
       "topology.update.reactivate.wait.secs";
 
+  /**
+   * Topology-specific environment properties to be added to an Heron instance.
+   * This is added to the existing environment (that of the Heron instance).
+   * This variable contains Map<String, String>
+   */
+  public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -248,7 +255,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_WORKER_CHILDOPTS);
     apiVars.add(TOPOLOGY_COMPONENT_JVMOPTS);
     apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
-    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_MS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
     apiVars.add(TOPOLOGY_CONTAINER_CPU_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_DISK_REQUESTED);
@@ -333,7 +340,11 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+    setTickTupleFrequencyMs(conf, (long) (seconds * 1000));
+  }
+
+  public static void setTickTupleFrequencyMs(Map<String, Object> conf, long millis) {
+    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, millis);
   }
 
   public static void setTopologyReliabilityMode(Map<String, Object> conf,
@@ -461,6 +472,11 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static void setEnvironment(Map<String, Object> conf, Map env) {
+    conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
   public void setDebug(boolean isOn) {

@@ -1,5 +1,4 @@
 package(default_visibility = ["//visibility:public"])
-load("/tools/rules/pex_rules", "pex_library", "pex_test")
 
 pex_library(
     name = "instance-tests-py",
@@ -9,9 +8,9 @@ pex_library(
       "//heronpy/api:heron-python-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
         "mock==1.0.1",
     ],
 )

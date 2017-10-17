@@ -37,4 +37,4 @@ class SerializerHelper(object):
         return serializer
       except Exception as e:
         raise RuntimeError("Error with loading custom serializer class: %s, with error message: %s"
-                           % (serializer_clsname, e.message))
+                           % (serializer_clsname, str(e)))

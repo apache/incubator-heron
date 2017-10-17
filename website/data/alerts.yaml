@@ -1,0 +1,14 @@
+streamlet-api-beta:
+  title: The Heron Streamlet API is in beta
+  content: The Heron Streamlet API is well tested and can be used to build and test topologies locally. The API is not yet fully stable, however, and breaking changes are likely in the coming weeks.
+  type: success
+storm-api:
+  title: This document pertains to the older, Storm-based, Heron Topology API
+  content: |
+    Heron now offers two separate APIs for building topologies: the original, [Storm](https://storm.apache.org)-based Topology API, and the newer [Streamlet API](../../../concepts/topologies#the-heron-streamlet-api). Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
+  type: warning
+spouts-and-bolts:
+  title: Don't want to manually create spouts and bolts? Try the Heron Streamlet API
+  type: success
+  content: |
+    If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](../streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.

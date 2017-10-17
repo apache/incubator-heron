@@ -97,7 +97,7 @@ class PulsarSpout(Spout, DslBoltBase):
     self.logger.info("Generated LogConf at %s" % self.logConfFileName)
 
     # We currently use the high level consumer api
-    # For supporting exactly once, we will need to switch
+    # For supporting effectively once, we will need to switch
     # to using lower level Reader api, when it becomes
     # available in python
     self.client = pulsar.Client(self.pulsar_cluster, log_conf_file_path=self.logConfFileName)

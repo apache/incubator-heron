@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_binary")
+load("/tools/rules/pex/pex_rules", "pex_binary")
 
 release_version = "unversioned"
 
@@ -120,7 +120,7 @@ genrule(
         "--cp $(location conf-local-statemgr)        conf/local/statemgr.yaml",
         "--cp $(location conf-local-uploader)        conf/local/uploader.yaml",
         "--cp $(location heron-core)                 dist/heron-core.tar.gz",
-        "--cp $(location hexamples)                  examples/heron-examples.jar",
+        "--cp $(location hexamples)                  examples/heron-api-examples.jar",
         "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
         "--cp $(location hscheduler-aurora)          lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hscheduler-local)           lib/scheduler/heron-local-scheduler.jar",
@@ -230,7 +230,7 @@ filegroup(
 
 filegroup(
     name = "hexamples",
-    srcs = ["//heron/examples/src/java:heron-examples"],
+    srcs = ["//examples/src/java:heron-api-examples"],
 )
 
 filegroup(
@@ -380,7 +380,7 @@ filegroup(
 
 filegroup(
     name = "hstorm",
-    srcs = ["//heron/storm/src/java:heron-storm"],
+    srcs = ["//storm-compatibility/src/java:heron-storm"],
 )
 
 filegroup(

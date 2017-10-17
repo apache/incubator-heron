@@ -1,4 +1,4 @@
-load("pex_rules", "pex_library")
+load("/tools/rules/pex/pex_rules", "pex_library")
 
 def proto_package_impl(ctx):
   return struct(proto_src = ctx.file.src)
@@ -42,7 +42,7 @@ def genproto_java_impl(ctx):
       command = java_cmd,
       use_default_shell_env = True)
 
-  return struct(files = set([srcjar]))
+  return struct(files = depset([srcjar]))
 
 genproto_java = rule(
     genproto_java_impl,
@@ -80,7 +80,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         srcs = [name+"_java_src"],
         deps = java_deps,
         visibility = visibility,
-        javacopts = [ "-Xlint:-static" ],
+        javacopts = [ "-Xlint:-cast", "-Xlint:-static", "-Xlint:-deprecation"],
     )
 
   if not includes:

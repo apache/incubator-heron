@@ -106,16 +106,21 @@ public final class JavaCheckstyle {
     com.puppycrawl.tools.checkstyle.Main.main(checkstyleArgs);
   }
 
+  @SuppressWarnings("unchecked")
   private static String[] getHeronSourceFiles(String extraActionFile) {
     return getSourceFiles(extraActionFile, Predicates.not(Predicates.or(
-        Predicates.containsPattern("heron/storm.src.java"),
+        Predicates.containsPattern("storm-compatibility-examples.src.java"),
+        Predicates.containsPattern("storm-compatibility.src.java"),
+        Predicates.containsPattern("tools/test/LcovMerger"),
         Predicates.containsPattern("contrib")
     )));
   }
 
+  @SuppressWarnings("unchecked")
   private static String[] getApacheSourceFiles(String extraActionFile) {
     return getSourceFiles(extraActionFile, Predicates.or(
-        Predicates.containsPattern("heron/storm.src.java"),
+        Predicates.containsPattern("storm-compatibility-examples.src.java"),
+        Predicates.containsPattern("storm-compatibility.src.java"),
         Predicates.containsPattern("contrib")
     ));
   }

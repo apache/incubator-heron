@@ -41,13 +41,13 @@ build_exec_image() {
   # need to copy artifacts locally
   TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
   TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
-  
+
   CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
- 
+
   cp $TOOLS_FILE $TOOLS_OUT_FILE
   cp $CORE_FILE $CORE_OUT_FILE
- 
+
   export HERON_VERSION
 
   # build the image

@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/genproto",  "proto_library")
-load("/tools/rules/pex_rules", "pex_library")
+load("/tools/rules/pex/pex_rules", "pex_library")
 
 filegroup(
     name = "proto-srcs",
@@ -194,7 +194,7 @@ pex_library(
         ":proto_ckptmgr_py",
     ],
     reqs = [
-        "protobuf==2.5.0",
+        "protobuf==3.4.0",
         "setuptools==18.0.1",
     ],
 )

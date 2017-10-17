@@ -1,5 +1,4 @@
 package(default_visibility = ["//visibility:public"])
-load("/tools/rules/pex_rules", "pex_library", "pex_test")
 
 pex_library(
     name = "common-utils-mock",
@@ -13,105 +12,105 @@ pex_library(
     ]
 )
 
-pex_test(
+pex_pytest(
     name = "communicator_unittest",
     srcs = ["communicator_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "custom_grouping_unittest",
     srcs = ["custom_grouping_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "metrics_helper_unittest",
     srcs = ["metrics_helper_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "outgoing_tuple_helper_unittest",
     srcs = ["outgoing_tuple_helper_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "pplan_helper_unittest",
     srcs = ["pplan_helper_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "topology_context_impl_unittest",
     srcs = ["topology_context_impl_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "tuple_helper_unittest",
     srcs = ["tuple_helper_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "global_metrics_unittest",
     srcs = ["global_metrics_unittest.py"],
     deps = [
@@ -119,36 +118,36 @@ pex_test(
         "//heron/instance/tests/python:instance-tests-py",
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "py_metrics_unittest",
     srcs = ["py_metrics_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "py==1.4.27",
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "py==1.4.34",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "log_unittest",
     srcs = ["log_unittest.py"],
     deps = [
         "//heron/instance/tests/python/utils:common-utils-mock"
     ],
     reqs = [
-        "pytest==2.6.4",
-        "unittest2==0.5.1",
+        "pytest==3.2.2",
+        "unittest2==1.1.0",
     ],
     size = "small",
 )

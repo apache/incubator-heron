@@ -48,6 +48,11 @@ def heron_client_lib_packing_files():
 
     ]
 
+def heron_client_lib_metricscachemgr_files():
+    return [
+        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
+    ]
+
 def heron_client_lib_statemgr_files():
     return [
         "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
@@ -62,6 +67,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-hdfs-uploader",
         "//heron/uploaders/src/java:heron-scp-uploader",
         "//heron/uploaders/src/java:heron-gcs-uploader",
+        "//heron/uploaders/src/java:heron-dlog-uploader",
     ]
 
 def heron_client_lib_healthmgr_files():

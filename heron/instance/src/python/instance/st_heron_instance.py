@@ -168,7 +168,7 @@ class SingleThreadHeronInstance(object):
       try:
         self.stateful_state = self.serializer.deserialize(restore_msg.state.state)
       except Exception as e:
-        raise RuntimeError("Could not serialize state during restore " + e.message)
+        raise RuntimeError("Could not serialize state during restore " + str(e))
     else:
       Log.info("The restore request does not have an actual state")
     if self.stateful_state is None:
@@ -280,7 +280,7 @@ class SingleThreadHeronInstance(object):
       try:
         self.start_instance_if_possible()
       except Exception as e:
-        Log.error("Error with starting bolt/spout instance: " + e.message)
+        Log.error("Error with starting bolt/spout instance: " + str(e))
         Log.error(traceback.format_exc())
     else:
       Log.info("The instance is deployed in deactivated state")
@@ -293,7 +293,7 @@ class SingleThreadHeronInstance(object):
     context = self.my_pplan_helper.context
     mode = context.get_cluster_config().get(api_constants.TOPOLOGY_RELIABILITY_MODE,
                                             api_constants.TopologyReliabilityMode.ATMOST_ONCE)
-    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EXACTLY_ONCE)
+    is_stateful = bool(mode == api_constants.TopologyReliabilityMode.EFFECTIVELY_ONCE)
     if is_stateful and not self.is_stateful_started:
       return
     try:
@@ -303,7 +303,7 @@ class SingleThreadHeronInstance(object):
       Log.info("Started instance successfully.")
     except Exception as e:
       Log.error(traceback.format_exc())
-      Log.error("Error when starting bolt/spout, bailing out...: %s", e.message)
+      Log.error("Error when starting bolt/spout, bailing out...: %s", str(e))
       self.looper.exit_loop()
 
 def print_usage(argv0):
@@ -324,7 +324,7 @@ def yaml_config_reader(config_path):
 
 # pylint: disable=missing-docstring
 def main():
-  if len(sys.argv) != 12:
+  if len(sys.argv) != 13:
     print_usage(sys.argv[0])
     sys.exit(1)
 
@@ -338,9 +338,15 @@ def main():
   stmgr_port = sys.argv[8]
   metrics_port = sys.argv[9]
   sys_config = yaml_config_reader(sys.argv[10])
-  topology_pex_file_path = sys.argv[11]
+  override_config = yaml_config_reader(sys.argv[11])
+  topology_pex_file_path = sys.argv[12]
 
-  system_config.set_sys_config(sys_config)
+  Log.debug("System config: " + str(sys_config))
+  Log.debug("Override config: " + str(override_config))
+  system_config.set_sys_config(sys_config, override_config)
+
+  # get combined configuration
+  sys_config = system_config.get_sys_config()
 
   # create the protobuf instance
   instance_info = physical_plan_pb2.InstanceInfo()
@@ -368,7 +374,6 @@ def main():
            " and stmgrId: " + stmgr_id + " and stmgrPort: " + stmgr_port +
            " and metricsManagerPort: " + metrics_port +
            "\n **Topology Pex file located at: " + topology_pex_file_path)
-  Log.debug("System config: " + str(sys_config))
 
   heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance, stmgr_port,
                                              metrics_port, topology_pex_file_path)

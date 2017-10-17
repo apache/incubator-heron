@@ -25,7 +25,9 @@
 #ifndef SVCS_COMMON_CONFIG_PHYSICAL_PLAN_HELPER_H_
 #define SVCS_COMMON_CONFIG_PHYSICAL_PLAN_HELPER_H_
 
+#include <list>
 #include <map>
+#include <string>
 #include <unordered_set>
 #include "basics/basics.h"
 #include "proto/messages.h"
@@ -64,6 +66,19 @@ class PhysicalPlanHelper {
                           std::unordered_set<sp_int32>& _return);
 
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
+
+  // Returns the component name for the specified _task_id
+  // If the _task_id is not part of the _pplan, return empty string
+  static const std::string GetComponentName(const proto::system::PhysicalPlan& _pplan,
+                                            int _task_id);
+
+  // For a particular _component, returns all the task_ids
+  static void GetComponentTaskIds(const proto::system::PhysicalPlan& _pplan,
+                                  const std::string& _component, std::list<int>& _retval);
+
+  // Return a mapping from task id -> component name
+  static void GetTaskIdToComponentName(const proto::system::PhysicalPlan& _pplan,
+                                       std::map<int, std::string>& retval);
 };
 }  // namespace config
 }  // namespace heron

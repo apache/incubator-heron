@@ -94,7 +94,7 @@ class GatewayLooper(EventLooper):
       readable_lst, writable_lst, error_lst = \
         select.select(readable_lst, writable_lst, error_lst, timeout)
     except select.error as err:
-      Log.debug("Trivial error: " + err.message)
+      Log.debug("Trivial error: " + str(err))
       if err.args[0] != errno.EINTR:
         raise
       else:

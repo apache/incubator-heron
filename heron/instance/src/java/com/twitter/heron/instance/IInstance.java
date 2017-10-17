@@ -30,18 +30,34 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public interface IInstance {
-  /**
-   * Do the basic setup for HeronInstance
-   */
-  void start(State<Serializable, Serializable> state);
 
   /**
-   * Do the basic clean for HeronInstance
-   * Notice: this method is not guaranteed to invoke
-   * TODO: - to avoid confusing, we in fact have never called this method yet
-   * TODO: - need to consider whether or not call this method more carefully
+   * Initialize the instance. If it's a stateful topology,
+   * the provided state will be used for initialization.
+   * For non-stateful topology, the state will be ignored.
+   * @param state used for stateful topology to initialize the instance state
    */
-  void stop();
+  void init(State<Serializable, Serializable> state);
+
+  /**
+   * Start the execution of the IInstance
+   */
+  void start();
+
+  /**
+   * Clean the instance. After it's called, the IInstance
+   * will be still alive but with an empty state. Before
+   * starting the IInstance again, an `init()` call is needed
+   * to initialize the instance properly.
+   */
+  void clean();
+
+  /**
+   * Destroy the whole IInstance.
+   * Notice: It should only be called when the whole program is
+   * exiting. And in fact, this method should never be called.
+   */
+  void shutdown();
 
   /**
    * Read tuples from a queue and process the tuples

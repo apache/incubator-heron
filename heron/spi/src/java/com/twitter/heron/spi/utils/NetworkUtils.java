@@ -304,8 +304,7 @@ public final class NetworkUtils {
 
     try {
       if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-        LOG.log(Level.SEVERE, "Http Response not OK: " + connection.getResponseCode());
-        return new byte[0];
+        LOG.log(Level.WARNING, "Http Response not OK: " + connection.getResponseCode());
       }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to get response code", e);

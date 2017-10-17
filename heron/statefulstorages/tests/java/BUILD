@@ -1,4 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 test_deps_files = \
@@ -47,4 +46,23 @@ java_tests(
   ],
   runtime_deps = [ ":hdfs-tests" ],
   size = "small",
+)
+
+dlog_deps_files = [
+  "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
+  "@com_google_guava_guava//jar",
+  "@org_apache_distributedlog_core//jar",
+]
+
+java_library(
+  name = "dlog-tests",
+  srcs = glob(["**/dlog/*.java", "**/StatefulStorageTestContext.java"]),
+  deps = test_deps_files + dlog_deps_files,
+)
+
+java_test(
+  name = "DlogStorageTest",
+  srcs = glob(["**/dlog/*.java", "**/StatefulStorageTestContext.java"]),
+  size = "small",
+  deps = test_deps_files + dlog_deps_files,
 )

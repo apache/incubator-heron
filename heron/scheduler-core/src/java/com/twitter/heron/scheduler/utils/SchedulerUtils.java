@@ -215,6 +215,7 @@ public final class SchedulerUtils {
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
     commands.add(Context.systemConfigFile(config));
+    commands.add(Context.overrideFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config).name().toLowerCase());
@@ -368,51 +369,34 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Setup the working directory:
-   * <br> 1. Download heron core and the topology packages into topology working directory,
-   * <br> 2. Extract heron core and the topology packages
-   * <br> 3. Remove the downloaded heron core and the topology packages
+   * Create the directory if it does not exist otherwise clean the directory.
    *
-   * @param workingDirectory the working directory to setup
-   * @param coreReleasePackageURL the URL of core release package
-   * @param coreReleaseDestination the destination of the core release package fetched
-   * @param topologyPackageURL the URL of heron topology release package
-   * @param topologyPackageDestination the destination of heron topology release package fetched
-   * @param isVerbose display verbose output or not
+   * @param directory the working directory to setup
    * @return true if successful
    */
-  public static boolean setupWorkingDirectory(
-      String workingDirectory,
-      String coreReleasePackageURL,
-      String coreReleaseDestination,
-      String topologyPackageURL,
-      String topologyPackageDestination,
-      boolean isVerbose) {
-    // if the working directory does not exist, create it.
-    if (!FileUtils.isDirectoryExists(workingDirectory)) {
-      LOG.fine("The working directory does not exist; creating it.");
-      if (!FileUtils.createDirectory(workingDirectory)) {
-        LOG.severe("Failed to create directory: " + workingDirectory);
+  public static boolean createOrCleanDirectory(String directory) {
+    // if the directory does not exist, create it.
+    if (!FileUtils.isDirectoryExists(directory)) {
+      LOG.fine("The directory does not exist; creating it.");
+      if (!FileUtils.createDirectory(directory)) {
+        LOG.severe("Failed to create directory: " + directory);
         return false;
       }
     }
 
     // Cleanup the directory
-    if (!FileUtils.cleanDir(workingDirectory)) {
-      LOG.severe("Failed to clean directory: " + workingDirectory);
+    if (!FileUtils.cleanDir(directory)) {
+      LOG.severe("Failed to clean directory: " + directory);
       return false;
     }
 
-    // Curl and extract heron core release package and topology package
-    // And then delete the downloaded release package
-    boolean ret =
-        curlAndExtractPackage(
-            workingDirectory, coreReleasePackageURL, coreReleaseDestination, true, isVerbose)
-            &&
-            curlAndExtractPackage(
-                workingDirectory, topologyPackageURL, topologyPackageDestination, true, isVerbose);
+    return true;
+  }
 
-    return ret;
+  public static boolean extractPackage(String workingDirectory, String packageURI,
+        String packageDestination, boolean deletePackage, boolean verbose) {
+    return curlAndExtractPackage(workingDirectory, packageURI, packageDestination,
+        deletePackage, verbose);
   }
 
   /**
