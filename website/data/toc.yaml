@@ -7,7 +7,7 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
-  - name: The Heron Functional API
+  - name: The Heron Streamlet API
     sublinks:
     - name: The Heron Streamlet API for Java
       url: /docs/developers/java/functional-api

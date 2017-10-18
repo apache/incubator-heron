@@ -1,5 +1,5 @@
 ---
-title: Observability With Graphite
+title: Heron observability with Graphite
 ---
 
 To observe Heron's runtime metrics, you can integrate Heron and the Heron UI with
