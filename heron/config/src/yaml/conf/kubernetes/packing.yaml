@@ -1,2 +1,3 @@
 # packing algorithm for packing instances into containers
 heron.class.packing.algorithm:    com.twitter.heron.packing.roundrobin.RoundRobinPacking
+heron.class.repacking.algorithm:  com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking

@@ -2,10 +2,10 @@
 heron.class.uploader:                            com.twitter.heron.uploader.s3.S3Uploader
 
 # S3 bucket to put the jar file into
-heron.uploader.s3.bucket: heron-topologies-public
+heron.uploader.s3.bucket: <bucket_name>
 
 # AWS access key
-heron.uploader.s3.access_key: AKIAIYOB7YJA27HCBM7Q
+heron.uploader.s3.access_key: <access_key>
 
 # AWS secret access key
-heron.uploader.s3.secret_key: 6gRjeWDRvMDBAyxhDsgIkYAE+moVngvCoMsOPgQF
+heron.uploader.s3.secret_key: <secret_key>
