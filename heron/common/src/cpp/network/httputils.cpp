@@ -237,7 +237,7 @@ IncomingHTTPRequest::~IncomingHTTPRequest() {}
 
 const sp_string& IncomingHTTPRequest::GetQuery() const { return query_; }
 
-const sp_string IncomingHTTPRequest::GetValue(const sp_string& _key) const {
+const sp_string& IncomingHTTPRequest::GetValue(const sp_string& _key) const {
   for (size_t i = 0; i < kv_.size(); ++i) {
     if (kv_[i].first == _key) {
       return kv_[i].second;
