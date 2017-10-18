@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "tuple/fields.h"
+#include "serializer/tuple-serializer-utils.h"
 
 namespace heron {
 namespace api {
@@ -29,6 +30,9 @@ namespace tuple {
 
 class Tuple {
  public:
+  explicit Tuple(std::shared_ptr<serializer::IPluggableSerializer> serializer)
+    : serializer_(serializer) { }
+
   virtual ~Tuple() { }
 
   /**
@@ -81,6 +85,9 @@ class Tuple {
    * Internal method used by serialization helper
    */
   virtual const std::string& getUnserializedValue(int index) const = 0;
+
+ private:
+  std::shared_ptr<serializer::IPluggableSerializer> serializer_;
 };
 
 }  // namespace tuple
