@@ -13,12 +13,15 @@ objects.
 Java is currently the only supported language for custom metrics sinks. This may
 change in the future.
 
-## Currently-supported Sinks
+## Currently supported Sinks
 
 Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
+* [`PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html) ---
+  Sends each `MetricsRecord` object to a specified path in the
+  [Prometheus](https://prometheus.io) instance.
 * [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
   --- Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
@@ -140,6 +143,7 @@ sinks:
   - scribe-sink
   - tmaster-sink
   - print-sink
+  - prometheus-sink
 ```
 
 For each sink you are required to specify the followings:

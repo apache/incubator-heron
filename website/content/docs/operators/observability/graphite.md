@@ -15,8 +15,7 @@ To accomplish this, you need to do the following:
 
 ### Exporting Topology Metrics From Heron
 
-Heron supports custom metric exporters from the Metrics Manager. You can build your own metrics sink
-or use the [provided Graphite sink](/docs/contributors/custom-metrics-sink/).
+Heron supports custom metric exporters from the Metrics Manager. You can either build your own Graphite metrics sink or use the [provided Graphite sink](/docs/contributors/custom-metrics-sink/).
 
 ### Gathering Metrics From Aurora
 
