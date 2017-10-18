@@ -175,7 +175,6 @@ public class LocalScheduler implements IScheduler, IScalable {
     LOG.info("Executor for each container have been started.");
     
     new Timer().schedule(new TimerTask() {
-
       @Override
       public void run() {
         synchronized (processToContainer) {
