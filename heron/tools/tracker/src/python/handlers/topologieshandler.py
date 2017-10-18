@@ -70,7 +70,7 @@ class TopologiesHandler(BaseHandler):
         continue
 
       topo_role = execution_state.role
-      if not topo_role: 
+      if not topo_role:
         continue
 
       # This cluster is not asked for.
