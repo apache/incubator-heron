@@ -2,16 +2,22 @@
 title: Heron observability with Scribe
 ---
 
+You can integrate Heron with [Scribe](https://github.com/facebookarchive/scribe/wiki) to monitor and gather runtime metrics exported by Heron topologies.
+
+## Exporting topology metrics from Heron to Scribe
+
+Heron supports custom metric exporters from the Metrics Manager. You can either build your own Scribe metrics sink or use the [provided Scribe sink](/docs/contributors/custom-metrics-sink/).
+
 To set up your Heron cluster to export to Scribe, you need to make two changes to the `metrics_sinks.yaml` configuration file:
 
-* Add `scribe-sink` to the `sinks` list (in addition to `file-sink`, `tmaster-sink`, and `metricscache-sink`).
-* Add a `scribe-sink` map to the file that sets values for the [parameters](#scribe-parameters) listed below. You can start by uncommenting the existing `scribe-sink` map to get the default configuration.
+* Add `scribe-sink` to the `sinks` list
+* Add a `scribe-sink` map to the file that sets values for the [parameters](#scribe-parameters) listed below. You can uncomment the existing `prometheus-sink` map to get the default configuration.
 
 ### Scribe parameters
 
 Parameter | Description | Default
 :---------|:------------|:-------
-`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html)
+`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
 `flush-frequency-ms` | How frequently, in milliseconds, the `flush()` method is called | 60000 (one minute)
 `sink-restart-attempts` | How many times Heron should attempt to publish metrics to Scribe before no longer attempting | -1 (forever)
 `scribe-host` | The Scribe host to export metrics to | 127.0.0.1

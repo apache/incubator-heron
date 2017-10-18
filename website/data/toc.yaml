@@ -107,6 +107,8 @@ sections:
       url: /docs/operators/observability/prometheus
     - name: Graphite
       url: /docs/operators/observability/graphite
+    - name: Scribe
+      url: /docs/operators/observability/scribe
   - name: User Manuals
     sublinks:
       - name: Heron Client

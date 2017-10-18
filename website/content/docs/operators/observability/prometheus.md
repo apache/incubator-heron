@@ -2,7 +2,7 @@
 title: Observability with Prometheus
 ---
 
-You can integrate Heron and the Heron UI with [Prometheus](https://prometheus.io/) to monitor and gather runtime metrics exported by Heron topologies.
+You can integrate Heron with [Prometheus](https://prometheus.io/) to monitor and gather runtime metrics exported by Heron topologies.
 
 ## Exporting topology metrics from Heron to Prometheus
 
@@ -10,7 +10,7 @@ Heron supports custom metric exporters from the Metrics Manager. You can either 
 
 To set up your Heron cluster to export to Prometheus, you need to make two changes to the `metrics_sinks.yaml` configuration file:
 
-* Add `prometheus-sink` to the `sinks` list (in addition to `file-sink`, `tmaster-sink`, and `metricscache-sink`).
+* Add `prometheus-sink` to the `sinks` list
 * Add a `prometheus-sink` map to the file that sets values for the [parameters](#prometheus-parameters) listed below. You can uncomment the existing `prometheus-sink` map to get the default configuration.
 
 ### Prometheus parameters
