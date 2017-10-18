@@ -76,7 +76,7 @@ void StMgrClient::HandleConnect(NetworkErrorCode status) {
                    << " after repeated attempts. Dying...";
     }
     LOG(INFO) << "Retrying again..." << std::endl;
-    AddTimer([this]() { this->OnReConnectTimer(); }, reconnect_interval_ * 1000 * 1000);
+    AddTimer([this]() { this->OnReconnectTimer(); }, reconnect_interval_ * 1000 * 1000);
   }
 }
 
@@ -91,7 +91,7 @@ void StMgrClient::HandleClose(NetworkErrorCode code) {
               << ":" << get_clientoptions().get_port() << " closed connection with code " << code;
   }
   LOG(INFO) << "Will try to reconnect again" << std::endl;
-  AddTimer([this]() { this->OnReConnectTimer(); }, reconnect_interval_ * 1000 * 1000);
+  AddTimer([this]() { this->OnReconnectTimer(); }, reconnect_interval_ * 1000 * 1000);
 }
 
 void StMgrClient::HandleRegisterResponse(void*, proto::stmgr::RegisterInstanceResponse* response,
@@ -122,7 +122,7 @@ void StMgrClient::HandleRegisterResponse(void*, proto::stmgr::RegisterInstanceRe
   delete response;
 }
 
-void StMgrClient::OnReConnectTimer() { Start(); }
+void StMgrClient::OnReconnectTimer() { Start(); }
 
 void StMgrClient::SendRegisterRequest() {
   auto request = new proto::stmgr::RegisterInstanceRequest();

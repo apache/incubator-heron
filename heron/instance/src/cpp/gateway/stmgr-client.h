@@ -52,7 +52,7 @@ class StMgrClient : public Client {
   void HandlePhysicalPlan(proto::stmgr::NewInstanceAssignmentMessage* msg);
   void HandleTupleMessage(proto::system::HeronTupleSet2* tupleMessage);
 
-  void OnReConnectTimer();
+  void OnReconnectTimer();
   void SendRegisterRequest();
 
   std::string topologyName_;
