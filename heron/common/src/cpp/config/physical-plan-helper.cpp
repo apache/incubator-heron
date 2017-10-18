@@ -59,8 +59,8 @@ void PhysicalPlanHelper::GetLocalSpouts(const proto::system::PhysicalPlan& _ppla
   return;
 }
 
-const std::string PhysicalPlanHelper::GetComponentName(const proto::system::PhysicalPlan& _pplan,
-                                                       int _task_id) {
+const std::string& PhysicalPlanHelper::GetComponentName(const proto::system::PhysicalPlan& _pplan,
+                                                        int _task_id) {
   for (auto instance : _pplan.instances()) {
     if (instance.info().task_id() == _task_id) {
       return instance.info().component_name();

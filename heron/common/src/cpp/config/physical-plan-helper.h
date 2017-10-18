@@ -69,8 +69,8 @@ class PhysicalPlanHelper {
 
   // Returns the component name for the specified _task_id
   // If the _task_id is not part of the _pplan, return empty string
-  static const std::string GetComponentName(const proto::system::PhysicalPlan& _pplan,
-                                            int _task_id);
+  static const std::string& GetComponentName(const proto::system::PhysicalPlan& _pplan,
+                                             int _task_id);
 
   // For a particular _component, returns all the task_ids
   static void GetComponentTaskIds(const proto::system::PhysicalPlan& _pplan,
