@@ -204,6 +204,15 @@ Heron has a CLI tool called `heron` that is used to manage topologies.
 Documentation can be found in [Managing
 Topologies](../../operators/heron-cli).
 
+### Heron API server
+
+The [Heron API server](../../operators/heron-api-server) handles all requests from
+the [Heron CLI tool](#heron-cli), uploads topology artifacts to the designated storage
+system, and interacts with the scheduler.
+
+> When running Heron [locally](../../getting-started), you won't need to deploy
+> or configure the Heron API server.
+
 ### Heron Tracker
 
 The **Heron Tracker** (or just Tracker) is a centralized gateway for
@@ -226,6 +235,7 @@ the [logical](../topologies#logical-plan) and
 
 For more information, see the [Heron UI](../../operators/heron-ui) document.
 
+<!--
 ## Topology Submit Sequence
 
 [Topology Lifecycle](../topologies#topology-lifecycle) describes the lifecycle states of a Heron
@@ -233,27 +243,29 @@ topology. The diagram below illustrates the sequence of interactions amongst the
 components during the `submit` and `deactivate` client actions. Additionally, the system interaction
 while viewing a topology on the Heron UI is shown.
 
-<!--
 The source for this diagram lives here:
 https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
+
+<img src="/img/topology-submit-sequence-diagram.png" alt="Topology Sequence Diagram"/>
 -->
-<img src="/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/>
 
-### Topology Submission Description
+## Topology submission
 
-The following describes in more detail how a topology is submitted and
-launched using local scheduler.
+The diagram below illustrates what happens when you submit a Heron topology:
 
-* Client
+{{< diagram
+    width="80"
+    url="https://www.lucidchart.com/publicSegments/view/766a2ee5-7a07-4eff-9fde-dd79d6cc355e/image.png" >}}
 
-    When a topology is submitted using the `heron submit` command, it first executes
-    the `main` of the topology and creates a `.defn` file containing the topology's
-    logical plan. Then, it runs `com.twitter.heron.scheduler.SubmitterMain`, which
-    is responsible for invoking an uploader and a launcher for the topology.
-    The uploader uploads the topology package to the given location, while the
-    launcher registers the topology's logical plan and executor state with
-    the State Manager and invokes the main scheduler.
+Component | Description
+:---------|:-----------
+Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`com.twitter.heron.scheduler.SubmitterMain`](/api/java/com/twitter/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
+Heron API server | When the [Heron API server](../../operators/heron-api-server) has been notified that a topology is being submitted, it does two things. First, it uploads the topology artifacts (a JAR for Java or a PEX for Python, plus a few other files) to a storage service; Heron supports multiple [uploaders](../../operators/deployment/uploaders) for a variety of storage systems, such as [Amazon S3](../../operators/deployment/uploaders/s3), [HDFS](../../operators/deployment/uploaders/hdfs), and the [local filesystem](../../operators/deployment/uploaders/localfs).
+Heron scheduler | When the Heron CLI (client) submits a topology to the Heron API server, the API server notifies the Heron scheduler and also provides the scheduler with the topology's [logical plan](../../concepts/topologies#logical-plan), [physical plan](../../concepts/topologies#physical-plan), and some other artifacts. The scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Aurora](../../operators/deployment/schedulers/aurora), the [local filesystem](../../operators/deployment/schedulers/localfs), or something else, then deploys the topology using containers.
+Storage | When the topology is deployed to containers by the scheduler, the code running in those containers then downloads the remaining necessary topology artifacts (essentially the code that will run in those containers) from the storage system.
 
+
+<!--
 * Shared Services
 
     When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked

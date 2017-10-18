@@ -1,0 +1,1 @@
+<img src="{{ index .Params "url" }}" width="{{ default 100 (index .Params "width")}}%" height="{{ default 100 (index .Params "height")}}%"{{ if isset .Params "alt" }} alt="{{ index .Params "alt" }}"{{end}}>
