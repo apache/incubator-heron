@@ -120,15 +120,66 @@ From the standpoint of both operators and developers [managing topologies'
 lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
 development workflow standpoint, however, the difference is profound.
 
-### Streamlets
+## Streamlets
 
 The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is
-a potentially unbounded, ordered collection of tuples. Streamlets can originate from a
+a potentially unbounded, ordered collection of some data type. Streamlets can originate from a
 wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
 (incubating), random generators, or static files like CVS or Parquet files.
 
-#### Streamlet operations
+### Streamlet example
+
+A visual representation of a streamlet processing graph is shown in the diagram below:
+
+![Example streamlet transformation](https://www.lucidchart.com/publicSegments/view/5c451e53-46f8-4e36-86f4-9a11ca015c21/image.png)
+
+In this diagram, a **source** is used to construct a **source streamlet**. In this case, an integer streamlet
+is produced by random generator that continuously emits random integers between 1 and 100. From there:
+
+* A filter operation is applied to the source streamlet that filters out all values less than or equal to 30
+* A *new streamlet* is produced by the filter operation (with the Heron Streamlet API, you're always transforming streamlets into other streamlets)
+* A map operation adds 15 to each item in the streamlet, which produces the final streamlet in our graph. We *could* hypothetically go much further and add as many transformation steps to the graph as we'd like.
+* Once the final desired streamlet is created, each item in the streamlet is sent to a sink. Sinks are where items leave the processing graph. 
+
+
+#### An example streamlet processing graph in Java
+
+```java
+import java.util.concurrent.ThreadLocalRandom;
+
+int randomInt(int lower, int upper) {
+    return ThreadLocalRandom.current().nextInt(lower, upper + 1);
+}
+```
+
+```java
+import com.twitter.heron.streamlet.Builder;
+
+Builder builder = Builder.createBuilder();
+
+builder.newSource(() -> randomInt(1, 100))
+        .filter(i -> i > 30)
+        .map(i -> i + 15)
+        .log();
+```
+
+#### An example streamlet processing graph in Python
+
+This Python example will be a little bit different from the Java example above. Here, instead of random
+
+```python
+from heronpy.streamlet.builder import Builder
+
+builder = Builder()
+builder.new_source()
+```
+
+### Key-value streamlets
+
+In the example [above](#streamlet-example)
+
+### Streamlet operations
 
 In the Heron Streamlet API, processing data means *transforming streamlets into other
 streamlets*. This can be done using a wide variety of available operations, including
@@ -137,9 +188,10 @@ many that you may be familiar with from functional programming:
 Operation | Description
 :---------|:-----------
 map | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
-flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened
+flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened into a collection type
 join | Joins two separate streamlets into a single streamlet
 filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
+
 
 ### Streamlet API example
 
