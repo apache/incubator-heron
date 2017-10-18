@@ -1,5 +1,5 @@
 ---
-title: Setting Up HDFS Uploader
+title: Setting up the HDFS uploader
 ---
 
 With Heron, you have the option to use HDFS as stable storage for user submitted

@@ -32,8 +32,9 @@ article.hn-docs-content {
   }
 
   img {
-    width: 100%;
-    margin: $base-margin 0;
+    display: block;
+    max-width: 100%;
+    margin: $base-margin auto;
 
     &:hover {
       width: 125%;
