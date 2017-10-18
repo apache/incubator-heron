@@ -19,8 +19,8 @@ genrule(
 )
 
 java_binary(
-    name='dsl-examples-unshaded',
-    srcs = glob(["com/twitter/heron/examples/dsl/**/*.java"]),
+    name='streamlet-examples-unshaded',
+    srcs = glob(["com/twitter/heron/examples/streamlet/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
@@ -30,8 +30,8 @@ java_binary(
 )
 
 genrule(
-    name = 'heron-dsl-examples',
-    srcs = [":dsl-examples-unshaded_deploy.jar"],
-    outs = ["heron-dsl-examples.jar"],
+    name = 'heron-streamlet-examples',
+    srcs = [":streamlet-examples-unshaded_deploy.jar"],
+    outs = ["heron-streamlet-examples.jar"],
     cmd  = "cp $< $@",
 )
