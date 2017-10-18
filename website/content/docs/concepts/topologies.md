@@ -114,7 +114,7 @@ In contrast with the topology API, the Heron Streamlet API offers:
 With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron
 automatically performs the heavy lifting of converting the streamlet-based processing logic
 that you create into spouts and bolts and, from there, into containers that are then deployed using
-whichever [scheduler](../../operators/deployment) your Heron cluster is using.
+whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
 
 From the standpoint of both operators and developers [managing topologies'
 lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
@@ -127,6 +127,10 @@ a potentially unbounded, ordered collection of some data type. Streamlets can or
 wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
 (incubating), random generators, or static files like CVS or Parquet files.
+
+These **source streamlets** can then be manipulated in a wide variety of ways. You can apply
+map, filter, flatMap, and other operations to them. With [key-value streamlets](#key-value-streamlets) you can
+perform join operations.
 
 ### Streamlet example
 
@@ -146,15 +150,9 @@ is produced by random generator that continuously emits random integers between 
 #### An example streamlet processing graph in Java
 
 ```java
-import java.util.concurrent.ThreadLocalRandom;
-
-int randomInt(int lower, int upper) {
-    return ThreadLocalRandom.current().nextInt(lower, upper + 1);
-}
-```
-
-```java
 import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.Runner;
 
 Builder builder = Builder.createBuilder();
 
@@ -162,22 +160,23 @@ builder.newSource(() -> randomInt(1, 100))
         .filter(i -> i > 30)
         .map(i -> i + 15)
         .log();
+
+Config config = new Config();
+config.setNumContainers(2);
+
+String streamletGraphTopologyName = "IntegerProcessingGraph";
+
+new Runner(streamletGraphTopology, config, builder).run();
 ```
 
-#### An example streamlet processing graph in Python
-
-This Python example will be a little bit different from the Java example above. Here, instead of random
-
-```python
-from heronpy.streamlet.builder import Builder
-
-builder = Builder()
-builder.new_source()
-```
+As you can see, the Java code for the example streamlet processing graph requires very little boilerplate.
 
 ### Key-value streamlets
 
-In the example [above](#streamlet-example)
+In the example [above](#streamlet-example), the source streamlet consisted only of integers (31, 47, 82, etc.). In addition
+to single-value streamlets, the Heron Streamlet API also enables you to work with **key-value streamlets**.
+
+There's a wide variety of operations that 
 
 ### Streamlet operations
 
