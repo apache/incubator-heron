@@ -91,6 +91,8 @@ sections:
     sublinks:
       - name: Overview of Heron Configuration
         url: /docs/operators/configuration
+      - name: Client Configuration
+        url: /docs/operators/configuration/client
       - name: System-Level
         url: /docs/operators/configuration/system
       - name: Heron Instance

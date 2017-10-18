@@ -2,9 +2,11 @@
 title: Topology Master
 ---
 
-You can configure the [Topology
-Master](../../../concepts/architecture#metrics-manager) (TM) for a topology
-using the parameters below.
+{{< alert "config-intro" >}}
+
+You can set a default configuratino for the [Topology Master](../../../concepts/architecture#metrics-manager) (**TM**) for the topologies running in a Heron cluster using the parameters below. These parameters can be found in the `heron_internals.yaml`
+
+> Topology Master configuration can be overridden on a per-topology basis. Setting Topology Master configuration at the cluster level only establishes *default* for topologies running in those clusters.
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------

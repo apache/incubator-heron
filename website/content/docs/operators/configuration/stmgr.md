@@ -2,12 +2,12 @@
 title: Stream Manager
 ---
 
-You can configure the [Stream
-Manager](../../../concepts/architecture#stream-manager) (SM) in a
-topology using the parameters below, including how the SM handles [back
-pressure](#back-pressure-parameters).
+You can configure default values for the [Stream Manager](../../../concepts/architecture#stream-manager) (SM) in a
+Heron cluster using the parameters below.
 
-## Back Pressure Parameters
+> Stream Manager configuration can be overridden on a per-topology basis. Setting Stream Manager configuration at the cluster level only establishes *default* for topologies running in those clusters.
+
+## Backpressure Parameters
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------

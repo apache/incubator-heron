@@ -2,9 +2,11 @@
 title: Heron Instance
 ---
 
-You can configure the behavior of the [Heron
-Instances](../../../concepts/architecture#heron-instance) (HIs) in a
-topology using the parameters below.
+You can provide a default configuration for the behavior of [Heron
+Instances](../../../concepts/architecture#heron-instance) (HIs) in
+topologies using the parameters below.
+
+> Heron Instance configuration can be overridden on a per-topology basis. Setting Heron Instance configuration at the cluster level only establishes *default* for topologies running in those clusters.
 
 ## Internal Configuration
 
