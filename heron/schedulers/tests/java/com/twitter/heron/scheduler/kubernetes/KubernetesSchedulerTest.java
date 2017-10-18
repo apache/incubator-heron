@@ -162,18 +162,18 @@ public class KubernetesSchedulerTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
 
     // Fail to retrieve base pod
-    Mockito.doThrow(new IOException()).when(controller).getBaseRC(Mockito.anyString());
+    Mockito.doThrow(new IOException()).when(controller).getBaseReplicaSet(Mockito.anyString());
     expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.addContainers(containers);
 
     // Failure to deploy a container
-    Mockito.doReturn(Mockito.anyString()).when(controller).getBaseRC(Mockito.anyString());
+    Mockito.doReturn(Mockito.anyString()).when(controller).getBaseReplicaSet(Mockito.anyString());
     Mockito.doThrow(new IOException()).when(controller).deployContainer(Mockito.anyString());
     expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.addContainers(containers);
 
     // Successful deployment
-    Mockito.doReturn(Mockito.anyString()).when(controller).getBaseRC(Mockito.anyString());
+    Mockito.doReturn(Mockito.anyString()).when(controller).getBaseReplicaSet(Mockito.anyString());
     Mockito.doNothing().when(controller).deployContainer(Mockito.anyString());
     scheduler.addContainers(containers);
   }

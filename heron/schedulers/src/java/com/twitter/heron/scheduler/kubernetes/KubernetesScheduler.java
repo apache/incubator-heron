@@ -197,10 +197,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     instance.put("replicas", 1);
 
+    ObjectNode matchLabelsInstance = mapper.createObjectNode();
+
+    matchLabelsInstance.put("topology", Runtime.topologyName(runtimeConfiguration));
+
     ObjectNode selectorInstance = mapper.createObjectNode();
 
-    selectorInstance.put(KubernetesConstants.TOPOLOGY_LABEL,
-        Runtime.topologyName(runtimeConfiguration));
+    selectorInstance.set("matchLabels", matchLabelsInstance);
 
     instance.set("selector", selectorInstance);
 
@@ -521,7 +524,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     String basePodName = Runtime.topologyName(runtimeConfiguration) + "-0";
     JsonNode podConfig;
     try {
-      podConfig = controller.getBaseRC(basePodName);
+      podConfig = controller.getBaseReplicaSet(basePodName);
     } catch (IOException ioe) {
       throw new TopologyRuntimeManagementException("Unable to retrieve base pod configuration from "
           + basePodName, ioe);

@@ -2,7 +2,7 @@
 heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:  10.23.251.30:2181
+heron.statemgr.connection.string:  <zk_host>:2181
 
 # path of the root address to store the state in a local file system
 heron.statemgr.root.path: "/heron"
@@ -36,4 +36,4 @@ heron.statemgr.tunnel.retry.interval.ms:        1000
 heron.statemgr.tunnel.verify.count:             10
 
 # SSH tunnel host
-heron.statemgr.tunnel.host:              john@35.202.157.213
+heron.statemgr.tunnel.host:              <user>@<k8s_host>

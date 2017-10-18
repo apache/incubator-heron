@@ -37,4 +37,4 @@ heron.scheduler.tunnel.retry.interval.ms:        1000
 heron.scheduler.tunnel.verify.count:             10
 
 # SSH tunnel host
-heron.scheduler.tunnel.host:              john@35.202.157.213
+heron.scheduler.tunnel.host:              <user>@<k8s_host>

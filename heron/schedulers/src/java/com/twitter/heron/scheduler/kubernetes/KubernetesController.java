@@ -28,18 +28,24 @@ public class KubernetesController {
   private static final Logger LOG = Logger.getLogger(KubernetesController.class.getName());
 
   private final String topologyName;
-  private final String baseUriPath;
+  private final String baseReplicaSetUriPath;
+  private final String basePodURIPath;
   private final boolean isVerbose;
 
   public KubernetesController(String kubernetesURI, String kubernetesNamespace,
                                String topologyName, boolean isVerbose) {
 
     if (kubernetesNamespace == null) {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/default/replicationcontrollers",
+      this.baseReplicaSetUriPath = String.format(
+          "%s/apis/extensions/v1beta1/namespaces/default/replicasets",
           kubernetesURI);
+      this.basePodURIPath = String.format("%s/api/v1/namespaces/default/pods", kubernetesURI);
     } else {
-      this.baseUriPath = String.format("%s/api/v1/namespaces/%s/replicationcontrollers",
+      this.baseReplicaSetUriPath = String.format(
+          "%s/apis/extensions/v1beta1/namespaces/%s/replicasets",
           kubernetesURI, kubernetesNamespace);
+      this.basePodURIPath = String.format("%s/api/v1/namespaces/%s/pods", kubernetesURI,
+          kubernetesNamespace);
     }
     this.topologyName = topologyName;
     this.isVerbose = isVerbose;
@@ -51,34 +57,50 @@ public class KubernetesController {
   protected boolean killTopology() {
 
     // Setup connection
-    String deploymentURI = String.format(
+    String replicaSetURI = String.format(
         "%s?labelSelector=topology%%3D%s",
-        this.baseUriPath,
+        this.baseReplicaSetUriPath,
         this.topologyName);
 
-    // send the delete request to the scheduler
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(deploymentURI);
+    // send the delete request to remove the ReplicaSet
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(replicaSetURI);
     try {
       jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
     } catch (IOException ioe) {
-      LOG.log(Level.SEVERE, "Problem sending delete request: " + deploymentURI, ioe);
+      LOG.log(Level.SEVERE, "Problem sending delete request: " + replicaSetURI, ioe);
       return false;
     }
+
+    String podURI = String.format(
+        "%s?labelSelector=topology%%3D%s",
+        this.basePodURIPath,
+        this.topologyName);
+
+    // send the delete request to remove the Pods
+    jsonAPIClient = new HttpJsonClient(podURI);
+    try {
+      jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
+    } catch (IOException ioe) {
+      LOG.log(Level.SEVERE, "Problem sending delete request: " + podURI, ioe);
+      return false;
+    }
+
+    // send the delete request to remove the Pods
     return true;
   }
 
   /**
-   * Get information about a Replication Controller
+   * Get information about a Replica Set
    */
-  protected JsonNode getBaseRC(String rcId) throws IOException {
+  protected JsonNode getBaseReplicaSet(String replicaSetId) throws IOException {
 
-    String rcURI = String.format(
+    String replicaSetURI = String.format(
         "%s/%s",
-        this.baseUriPath,
-        rcId);
+        this.baseReplicaSetUriPath,
+        replicaSetId);
 
     // send the delete request to the scheduler
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(rcURI);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(replicaSetURI);
     JsonNode result;
     try {
       result = jsonAPIClient.get(HttpURLConnection.HTTP_OK);
@@ -89,13 +111,14 @@ public class KubernetesController {
   }
 
   /**
-   * Deploy a single instance (Replication Controller)
+   * Deploy a single instance (Replica Set). Kubernetes will create a Replica Set, as well as
+   * the needed Pods that are defined in the spec of the Replica Set.
    *
    * @param deployConf, the json body as a string
    */
   protected void deployContainer(String deployConf) throws IOException {
 
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(this.baseUriPath);
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(this.baseReplicaSetUriPath);
     try {
       jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
     } catch (IOException ioe) {
@@ -105,17 +128,28 @@ public class KubernetesController {
   }
 
   /**
-   * Remove a single container (Replication Controller)
+   * Remove a single container (Replica Set)
    *
-   * @param rcId, the replication controller id (TOPOLOGY_NAME-CONTAINER_INDEX)
+   * @param replicaSetId, the Replica Set id (TOPOLOGY_NAME-CONTAINER_INDEX)
    */
-  protected void removeContainer(String rcId) throws IOException {
-    String rcURI = String.format(
+  protected void removeContainer(String replicaSetId) throws IOException {
+    String replicaSetURI = String.format(
         "%s/%s",
-        this.baseUriPath,
-        rcId);
+        this.baseReplicaSetUriPath,
+        replicaSetId);
 
-    HttpJsonClient jsonAPIClient = new HttpJsonClient(rcURI);
+    // Delete the replica set
+    HttpJsonClient jsonAPIClient = new HttpJsonClient(replicaSetURI);
+    jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
+
+    // Delete the pod
+    String podURI = String.format(
+        "%s/%s",
+        this.basePodURIPath,
+        replicaSetId);
+
+    // Delete the replica set
+    jsonAPIClient = new HttpJsonClient(podURI);
     jsonAPIClient.delete(HttpURLConnection.HTTP_OK);
   }
 
