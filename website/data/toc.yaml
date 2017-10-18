@@ -77,6 +77,10 @@ sections:
     sublinks:
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
+      - name: DC/OS Cluster
+        url: /docs/operators/deployment/schedulers/dcos
+      - name: Kubernetes Cluster
+        url: /docs/operators/deployment/schedulers/kubernetes
       - name: Local Cluster
         url: /docs/operators/deployment/schedulers/local
 #      - name: Mesos Cluster
