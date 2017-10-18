@@ -87,8 +87,8 @@ sections:
         url: /docs/operators/deployment/schedulers/yarn
   - name: Cluster Configuration
     sublinks:
-      - name: Overview
-        url: /docs/operators/configuration/config-intro
+      - name: Overview of Heron Configuration
+        url: /docs/operators/configuration
       - name: System-Level
         url: /docs/operators/configuration/system
       - name: Heron Instance

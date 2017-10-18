@@ -2,6 +2,8 @@
 title: Intro to Heron Cluster Configuration
 ---
 
+{{< alert "heron-config" >}}
+
 Heron clusters can be configured at two levels:
 
 1. **The system level** --- System-level configurations apply to the whole

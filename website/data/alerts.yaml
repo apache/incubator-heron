@@ -12,3 +12,10 @@ spouts-and-bolts:
   type: success
   content: |
     If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](../streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.
+heron-config:
+  title: Heron cluster configuration versus topology configuration
+  type: info
+  content: |
+    This guide shows you how to configure the various components of your Heron installation, including the state manager, the Heron API server, metrics sinks, and more.
+
+    You can also provide configuration for the topologies that you run, which will not be covered here. Instead, see the guides to writing topologies in [Java](../../developers/java/streamlet-api) and [Python](../../developers/python/topologies) for more information.
