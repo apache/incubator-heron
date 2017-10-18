@@ -195,9 +195,9 @@
       "expectedResultRelativePath" : "global_grouping/global_grouping_result.json"
     },
     {
-      "topologyName" : "Heron_IntegrationTest_WordCountDSL",
+      "topologyName" : "Heron_IntegrationTest_WordCountStreamlet",
       "classPath"    : "-",
-      "expectedResultRelativePath" : "dsl/word_count_dsl_results.json"
+      "expectedResultRelativePath" : "streamlet/word_count_streamlet_results.json"
     }
   ]
 }

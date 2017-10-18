@@ -5,10 +5,6 @@ $base-line-height: 1.5;
 $yellow: darken(yellow, 9%);
 
 article.hn-docs-content {
-  .alert {
-    margin: 1.5rem 0;
-  }
-
   code {
     color: $heron-blue-green;
     background-color: lighten($light-gray, 25%);
@@ -36,8 +32,9 @@ article.hn-docs-content {
   }
 
   img {
-    width: 100%;
-    margin: $base-margin 0;
+    display: block;
+    max-width: 100%;
+    margin: $base-margin auto;
 
     &:hover {
       width: 125%;

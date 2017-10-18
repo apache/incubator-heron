@@ -21,7 +21,7 @@ import pulsar
 import heronpy.api.src.python.api_constants as api_constants
 from heronpy.api.src.python.spout.spout import Spout
 
-from heronpy.dsl.src.python.dslboltbase import DslBoltBase
+from heronpy.streamlet.src.python.streamletboltbase import StreamletBoltBase
 
 def GenerateLogConfContents(logFileName):
   return """
@@ -46,7 +46,7 @@ def GenerateLogConfig(context):
   flHandler.close()
   return flHandler.name
 
-class PulsarSpout(Spout, DslBoltBase):
+class PulsarSpout(Spout, StreamletBoltBase):
   """PulsarSpout: reads from a pulsar topic"""
 
   # pylint: disable=too-many-instance-attributes

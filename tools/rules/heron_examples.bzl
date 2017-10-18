@@ -15,5 +15,5 @@ def heron_examples_conf_files():
 def heron_examples_lib_files():
     return [
         "//examples/src/java:heron-api-examples",
-        "//examples/src/java:heron-dsl-examples",
+        "//examples/src/java:heron-streamlet-examples",
     ]

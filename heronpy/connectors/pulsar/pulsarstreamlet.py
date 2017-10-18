@@ -13,7 +13,7 @@
 # limitations under the License.
 """Streamlet for Apache Pulsar"""
 
-from heronpy.dsl.src.python.streamlet import Streamlet
+from heronpy.streamlet.src.python.streamlet import Streamlet
 from heronpy.connectors.pulsar.src.python.pulsarspout import PulsarSpout
 
 # pylint: disable=access-member-before-definition
