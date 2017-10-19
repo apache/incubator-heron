@@ -89,7 +89,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
           Context.role(localConfig),
           Context.environ(localConfig),
           AuroraContext.getHeronAuroraPath(localConfig),
-          Context.verbose(localConfig));
+          Context.verbose(localConfig),
+          localConfig);
     }
   }
 

@@ -594,7 +594,8 @@ class HeronExecutor(object):
                       self.metrics_manager_port,
                       self.heron_internals_config_file,
                       self.override_config_file,
-                      self.topology_binary_file]
+                      self.topology_binary_file,
+                      str(self.component_rammap[component_name])]
 
       retval[instance_id] = instance_cmd
 

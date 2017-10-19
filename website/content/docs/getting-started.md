@@ -26,11 +26,13 @@ Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https:
 
 The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
 
-* The Heron [command-line tool](../operators/heron-cli) (or client), which is used to submit, activate, and kill topologies (and more):
+* The Heron command-line client tools:
 
     ```shell
     $ brew install heron-client
     ```
+
+    This will install both the [`heron`](../operators/heron-cli) and [`heron-explorer`](../operators/heron-explorer) tools.
 
 * The [Heron UI](../operators/heron-ui) dashboard:
 
@@ -120,67 +122,51 @@ launch an example [topology](../concepts/topologies) locally (on your machine)
 using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
-# Submit ExclamationTopology locally in deactivated mode.
 $ heron submit local \
-~/.heron/examples/heron-examples.jar \
-com.twitter.heron.examples.ExclamationTopology \
-ExclamationTopology \
---deploy-deactivated
+  ~/.heron/examples/heron-streamlet-api-examples.jar \
+  com.twitter.heron.examples.streamlet.WordCountDslTopology \
+  WordCountDslTopology \
+  --deploy-deactivated
 ```
 
 The output should look something like this:
 
 ```bash
-INFO: Launching topology 'ExclamationTopology'
+INFO: Launching topology 'WordCountDslTopology'
 
 ...
 
-INFO: Topology 'ExclamationTopology' launched successfully
+INFO: Topology 'WordCountDslTopology' launched successfully
 INFO: Elapsed time: 3.409s.
 ```
 
 This will *submit* the topology to your locally running Heron cluster but it
-won't *activate* the topology because the `--deploy-deactivated` flag was set. Activating the topology will be explored in step 5 below.
+won't *activate* the topology because the `--deploy-deactivated` flag was set.
+Activating the topology will be explored in [step
+5](#step-5-explore-topology-management-commands) below.
 
-Note that the output shows whether the topology has been launched successfully as well the working directory for the topology.
+Note that the output shows whether the topology has been launched successfully as well
+the working directory for the topology.
 
 To check what's under the working directory, run:
+
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology
--rw-r--r--   1 username  role     2299 Jun  7 16:44 ExclamationTopology.defn
--rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_exclaim1_1.pid
--rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_word_2.pid
-drwxr-xr-x  11 username  role      374 Jun  7 16:44 heron-conf
-drwxr-xr-x   4 username  role      136 Dec 31  1969 heron-core
--rwxr-xr-x   1 username  role  2182564 Dec 31  1969 heron-examples.jar
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-executor-0.pid
--rw-r--r--   1 username  role        0 Jun  6 13:33 heron-executor.stderr
--rw-r--r--   1 username  role    17775 Jun  7 16:44 heron-executor.stdout
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-shell-0.pid
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-tmaster.pid
-drwxr-xr-x  25 username  role      850 Jun  7 16:44 log-files
--r--r--r--   1 username  role     4506 Jun  8 12:05 metrics.json.metricsmgr-0.0
--rw-r--r--   1 username  role        5 Jun  7 16:44 metricsmgr-0.pid
--r-xr-xr-x   1 username  role      279 Dec 31  1969 release.yaml
--rw-r--r--   1 username  role        5 Jun  7 16:44 stmgr-1.pid
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology
+-rw-r--r--   1 username  staff     6141 Oct 12 09:58 WordCountDslTopology.defn
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_flatmap1_4.pid
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_logger1_3.pid
+# etc.
 ```
 
 All instances' log files can be found in `log-files` under the working directory:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology/log-files
-total 1018440
--rw-r--r--   1 username  role   94145427 Jun  8 12:06 container_1_exclaim1_1.log.0
--rw-r--r--   1 username  role   75675435 Jun  7 16:44 container_1_word_2.log.0
--rw-r--r--   1 username  role  187401024 Jun  8 12:06 gc.container_1_exclaim1_1.log
--rw-r--r--   1 username  role  136318451 Jun  8 12:06 gc.container_1_word_2.log
--rw-r--r--   1 username  role      11039 Jun  8 11:16 gc.metricsmgr.log
--rw-r--r--   1 username  role        300 Jun  7 16:44 heron-shell.log
--rw-r--r--   1 username  role      29631 Jun  7 16:44 heron-ExclamationTopology-scheduler.log.0
--rw-r--r--   1 username  role    2382215 Jun  7 15:16 heron-stmgr-stmgr-1.username.log.INFO
--rw-r--r--   1 username  role       5976 Jun  7 16:44 heron-tmaster-ExclamationTopology2da9ee6b-c919-4e59-8cb0-20a865f6fd7e.username.log.INFO
--rw-r--r--   1 username  role   12023368 Jun  8 12:06 metricsmgr-0.log.0
-
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology/log-files
+total 408
+-rw-r--r--   1 username  staff   5055 Oct 12 09:58 container_1_flatmap1_4.log.0
+-rw-r--r--   1 username  staff      0 Oct 12 09:58 container_1_flatmap1_4.log.0.lck
+-rw-r--r--   1 username  staff   5052 Oct 12 09:58 container_1_logger1_3.log.0
+# etc.
 ```
 
 ## Step 3 --- Start Heron Tracker
@@ -197,7 +183,7 @@ $ heron-tracker
 
 You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
 and see something like the following upon successful submission of the topology:
-![alt tag](/img/heron-tracker.png)
+![Heron Tracker](/img/heron-tracker.png)
 
 To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
 
@@ -215,24 +201,25 @@ $ heron-ui
 
 You can open Heron UI in your browser at [http://localhost:8889](http://localhost:8889)
 and see something like this upon successful submission of the topology:
-![alt tag](/img/heron-ui.png)
+![Heron UI](/img/heron-ui.png)
 
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
+
 ## Step 5 --- Explore topology management commands
 
 In step 2 you submitted a topology to your local cluster. The `heron` CLI tool
 also enables you to activate, deactivate, and kill topologies and more.
 
 ```bash
-$ heron activate local ExclamationTopology
-$ heron deactivate local ExclamationTopology
-$ heron kill local ExclamationTopology
+$ heron activate local WordCountDslTopology
+$ heron deactivate local WordCountDslTopology
+$ heron kill local WordCountDslTopology
 ```
 
 Upon successful actions, a message similar to the following will appear:
 
 ```bash
-INFO: Successfully activated topology 'ExclamationTopology'
+INFO: Successfully activated topology 'WordCountDslTopology'
 INFO: Elapsed time: 1.980s.
 ```
 

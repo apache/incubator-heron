@@ -1,0 +1,55 @@
+##
+## Deployment Pod for tracker and ui
+##
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: heron-tracker
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: heron-tracker
+    spec:
+      containers:
+        - name: heron-tracker
+          image: heron/heron:latest
+          ports:
+            - containerPort: 8888
+              name: api-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-tracker
+              --type=zookeeper
+              --name=kubernetes
+              --hostport=zookeeper:2181
+              --rootpath="/heron"
+        - name: heron-ui
+          image: heron/heron:latest
+          ports:
+            - containerPort: 8889
+              name: app-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-ui
+              --port=8889
+              --base_url=/api/v1/proxy/namespaces/default/services/heron-ui:8889
+---
+
+##
+## Service to expose the heron-ui
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: heron-ui
+spec:
+  selector:
+    app: heron-tracker
+  ports:
+    - protocol: TCP
+      port: 8889
+      targetPort: 8889

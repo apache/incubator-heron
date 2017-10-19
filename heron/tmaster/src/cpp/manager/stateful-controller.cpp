@@ -174,7 +174,7 @@ void StatefulController::HandleCheckpointSave(
   }
 }
 
-const std::string StatefulController::GetNextInLineCheckpointId(const std::string& _ckpt_id) {
+const std::string& StatefulController::GetNextInLineCheckpointId(const std::string& _ckpt_id) {
   if (_ckpt_id.empty()) {
     // There cannot be any checkpoints that are older than empty checkpoint
     LOG(FATAL) << "Could not recover even from the empty state";

@@ -57,15 +57,15 @@ public final class ExclamationTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // resources configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ExampleResources.getComponentRam());
-    com.twitter.heron.api.Config.setComponentRam(conf, "exclaim1",
+    conf.setComponentRam("word", ExampleResources.getComponentRam());
+    conf.setComponentRam("exclaim1",
         ExampleResources.getComponentRam());
 
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf,
+    conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(spouts + bolts, parallelism));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf,
+    conf.setContainerRamRequested(
         ExampleResources.getContainerRam(spouts + bolts, parallelism));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 1);
+    conf.setContainerCpuRequested(1);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(parallelism);
