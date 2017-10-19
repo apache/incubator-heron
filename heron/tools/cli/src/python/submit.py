@@ -347,7 +347,7 @@ def submit_cpp(cl_args, unknown_args, tmp_dir):
   res = execute.heron_cpp(topology_binary_name, tuple(unknown_args))
 
   result.render(res)
-  if not res.is_successful():
+  if not result.is_successful(res):
     err_context = ("Failed to create topology definition " \
       "file when executing cpp binary '%s'") % (topology_binary_name)
     res.add_context(err_context)
