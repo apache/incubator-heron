@@ -257,7 +257,7 @@ class HeronExecutorTest(unittest.TestCase):
     args = ("%s=%s" % (arg[0], (str(arg[1]))) for arg in executor_args)
     command = "./heron-executor %s" % (" ".join(args))
     return command.split()
->>>>>>> Fix unit tests and add ExecutorFlag enum.
+
 
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)

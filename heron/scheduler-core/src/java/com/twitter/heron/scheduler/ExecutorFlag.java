@@ -47,6 +47,7 @@ public enum ExecutorFlag {
   SchedulerClasspath("scheduler-classpath"),
   SchedulerPort("scheduler-port"),
   PythonInstanceBinary("python-instance-binary"),
+  CppInstanceBinary("cpp-instance-binary"),
   MetricsCacheManagerClasspath("metricscache-manager-classpath"),
   MetricsCacheManagerMasterPort("metricscache-manager-master-port"),
   MetricsCacheManagerStatsPort("metricscache-manager-stats-port"),

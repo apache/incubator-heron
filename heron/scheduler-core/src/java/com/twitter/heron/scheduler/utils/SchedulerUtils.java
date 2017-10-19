@@ -253,13 +253,10 @@ public final class SchedulerUtils {
     commands.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
     commands.add(createCommandArg(ExecutorFlag.PythonInstanceBinary,
         Context.pythonInstanceBinary(config)));
-<<<<<<< HEAD
-    commands.add(createCommandArg("--cpp-instance-binary",
+    commands.add(createCommandArg(ExecutorFlag.CppInstanceBinary,
         Context.cppInstanceBinary(config)));
-    commands.add(createCommandArg("--metricscache-manager-classpath",
-=======
+
     commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
->>>>>>> Fix unit tests and add ExecutorFlag enum.
         Context.metricsCacheManagerClassPath(config)));
     commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort,
         metricsCacheMasterPort));
