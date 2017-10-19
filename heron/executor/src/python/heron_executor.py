@@ -35,7 +35,7 @@ import traceback
 
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
-# pylint: disable=unused-import
+# pylint: disable=unused-import,too-many-lines
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python import configloader
