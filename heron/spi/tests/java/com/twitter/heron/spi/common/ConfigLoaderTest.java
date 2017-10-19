@@ -82,7 +82,7 @@ public class ConfigLoaderTest {
                                    String heronConfigPath) {
     // assert that the config filenames passed to loadConfig are never null. If they are, the
     // configs defaults are not producing the config files.
-    PowerMockito.verifyStatic(times(10));
+    PowerMockito.verifyStatic(times(9));
     ConfigLoader.loadConfig(isNotNull(String.class));
     PowerMockito.verifyStatic(never());
     ConfigLoader.loadConfig(isNull(String.class));
@@ -126,6 +126,7 @@ public class ConfigLoaderTest {
     assertKeyValue(config, Key.TMASTER_BINARY, binPath + "/heron-tmaster");
     assertKeyValue(config, Key.SHELL_BINARY, binPath + "/heron-shell");
     assertKeyValue(config, Key.PYTHON_INSTANCE_BINARY, binPath + "/heron-python-instance");
+    assertKeyValue(config, Key.CPP_INSTANCE_BINARY, binPath + "/heron-cpp-instance");
 
     String libPath = config.getStringValue(Key.HERON_LIB);
     assertKeyValue(config, Key.SCHEDULER_JAR, libPath + "/scheduler/heron-scheduler.jar");

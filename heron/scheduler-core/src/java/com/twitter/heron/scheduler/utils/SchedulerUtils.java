@@ -238,6 +238,7 @@ public final class SchedulerUtils {
     commands.add(completeSchedulerProcessClassPath);
     commands.add(schedulerPort);
     commands.add(Context.pythonInstanceBinary(config));
+    commands.add(Context.cppInstanceBinary(config));
     commands.add(Context.metricsCacheManagerClassPath(config));
     commands.add(metricsCacheMasterPort);
     commands.add(metricsCacheStatsPort);
