@@ -57,6 +57,8 @@ const std::string Config::TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container
 const std::string Config::TOPOLOGY_CONTAINER_PADDING_PERCENTAGE =
                                                     "topology.container.padding.percentage";
 // NOLINTNEXTLINE
+const std::string Config::TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+// NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
 // NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
@@ -79,6 +81,7 @@ const std::set<std::string> Config::apiVars_ = {
   Config::TOPOLOGY_CONTAINER_MAX_RAM_HINT,
   Config::TOPOLOGY_CONTAINER_MAX_DISK_HINT,
   Config::TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
+  Config::TOPOLOGY_CONTAINER_RAM_PADDING,
   Config::TOPOLOGY_COMPONENT_RAMMAP,
   Config::TOPOLOGY_NAME
 };
