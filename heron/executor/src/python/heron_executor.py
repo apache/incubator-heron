@@ -620,7 +620,7 @@ class HeronExecutor(object):
           str(component_index),
           self.stmgr_ids[self.shard],
           self.tmaster_controller_port,
-          self.metricsmgr_port,
+          self.metrics_manager_port,
           self.heron_internals_config_file,
           self.override_config_file,
           self.topology_binary_file]
