@@ -224,6 +224,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
     auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
         Context.pythonInstanceBinary(config));
+    auroraProperties.put(AuroraField.CPP_INSTANCE_BINARY,
+        Context.cppInstanceBinary(config));
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));

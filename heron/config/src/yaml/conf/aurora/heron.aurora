@@ -54,6 +54,7 @@ command_to_start_executor = \
   '"{{SCHEDULER_CLASSPATH}}"' \
   '"{{thermos.ports[scheduler]}}"' \
   '{{PYTHON_INSTANCE_BINARY}}' \
+  '{{CPP_INSTANCE_BINARY}}' \
   '{{METRICSCACHEMGR_CLASSPATH}}' \
   '{{thermos.ports[metricscachemgr_masterport]}}' \
   '{{thermos.ports[metricscachemgr_statsport]}}' \

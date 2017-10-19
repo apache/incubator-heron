@@ -35,6 +35,7 @@ genrule(
         ":hstmgr",
         ":htmaster",
         ":hpyinstance",
+        ":hcppinstance",
         ":hscheduler",
         ":hscheduler-aurora",
         ":hscheduler-local",
@@ -58,6 +59,7 @@ genrule(
         "--cp $(location hstmgr)                   heron-core/bin/heron-stmgr",
         "--cp $(location htmaster)                 heron-core/bin/heron-tmaster",
         "--cp $(location hpyinstance)              heron-core/bin/heron-python-instance",
+        "--cp $(location hcppinstance)             heron-core/bin/heron-cpp-instance",
         "--cp $(location hscheduler)               heron-core/lib/scheduler/heron-scheduler.jar",
         "--cp $(location hscheduler-aurora)        heron-core/lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hscheduler-local)         heron-core/lib/scheduler/heron-local-scheduler.jar",
@@ -241,6 +243,11 @@ filegroup(
 filegroup(
     name = "hpyinstance",
     srcs = ["//heron/instance/src/python:heron-python-instance"],
+)
+
+filegroup(
+    name = "hcppinstance",
+    srcs = ["//heron/instance/src/cpp:heron-cpp-instance"],
 )
 
 filegroup(

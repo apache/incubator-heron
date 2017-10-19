@@ -35,7 +35,7 @@ import traceback
 
 from heron.common.src.python.utils import log
 from heron.common.src.python.utils import proc
-# pylint: disable=unused-import
+# pylint: disable=unused-import,too-many-lines
 from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python import configloader
@@ -55,7 +55,7 @@ def print_usage():
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
       " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file> "
-      " <healthmgr_mode> <healthmgr_classpath>")
+      " <healthmgr_mode> <healthmgr_classpath> <cpp_instance_binary>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -210,6 +210,7 @@ class HeronExecutor(object):
     self.scheduler_classpath = parsed_args.scheduler_classpath
     self.scheduler_port = parsed_args.scheduler_port
     self.python_instance_binary = parsed_args.python_instance_binary
+    self.cpp_instance_binary = parsed_args.cpp_instance_binary
 
     self.is_stateful_topology = (parsed_args.is_stateful.lower() == 'true')
     self.ckptmgr_classpath = parsed_args.ckptmgr_classpath
@@ -281,6 +282,7 @@ class HeronExecutor(object):
     parser.add_argument("scheduler_classpath")
     parser.add_argument("scheduler_port")
     parser.add_argument("python_instance_binary")
+    parser.add_argument("cpp_instance_binary")
     parser.add_argument("metricscachemgr_classpath")
     parser.add_argument("metricscachemgr_masterport")
     parser.add_argument("metricscachemgr_statsport")
@@ -600,6 +602,33 @@ class HeronExecutor(object):
 
     return retval
 
+  # Returns the processes for each CPP Heron Instance
+  def _get_cpp_instance_cmd(self, instance_info):
+    # pylint: disable=fixme
+    # TODO: currently ignoring ramsize, heap, etc.
+    retval = {}
+    for (instance_id, component_name, global_task_id, component_index) in instance_info:
+      Log.info("CPP instance %s component: %s" %(instance_id, component_name))
+      instance_cmd = [
+          self.cpp_instance_binary,
+          self.topology_name,
+          self.topology_id,
+          instance_id,
+          component_name,
+          str(global_task_id),
+          str(component_index),
+          self.stmgr_ids[self.shard],
+          self.tmaster_controller_port,
+          self.metricsmgr_port,
+          self.heron_internals_config_file,
+          self.override_config_file,
+          self.topology_bin_file
+      ]
+
+      retval[instance_id] = instance_cmd
+
+    return retval
+
   # Returns the processes to handle streams, including the stream-mgr and the user code containing
   # the stream logic of the topology
   def _get_streaming_processes(self):
@@ -652,6 +681,10 @@ class HeronExecutor(object):
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
       retval.update(self._get_python_instance_cmd(instance_info))
+    elif self.pkg_type == 'so':
+      retval.update(self._get_cpp_instance_cmd(instance_info))
+    elif self.pkg_type == 'dylib':
+      retval.update(self._get_cpp_instance_cmd(instance_info))
     else:
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
 
