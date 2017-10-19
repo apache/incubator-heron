@@ -101,9 +101,7 @@ public class RoundRobinPacking implements IPacking {
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
-    LOG.info("topology config: " + inputTopology.getTopologyConfig().getKvsList());
     containerRamPadding = getContainerRamPadding(inputTopology.getTopologyConfig().getKvsList());
-    LOG.info("container ram padding: " + containerRamPadding);
   }
 
   @Override
@@ -114,8 +112,6 @@ public class RoundRobinPacking implements IPacking {
     // Get the ram map for every instance
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
         getInstancesRamMapInContainer(roundRobinAllocation);
-
-    LOG.info("instancesRamMap: " + instancesRamMap);
 
     ByteAmount containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
@@ -176,12 +172,7 @@ public class RoundRobinPacking implements IPacking {
    */
   private Map<Integer, Map<InstanceId, ByteAmount>> getInstancesRamMapInContainer(
       Map<Integer, List<InstanceId>> allocation) {
-
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
-
-    LOG.info("Ram Map: " + ramMap.toString());
-    //LOG.info("Ram in container: " + );
 
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMapInContainer = new HashMap<>();
 
@@ -204,15 +195,10 @@ public class RoundRobinPacking implements IPacking {
         }
       }
 
-      LOG.info("Ram used: " + usedRam);
-
-
       // Now we have calculated ram for instances specified in ComponentRamMap
       // Then to calculate ram for the rest instances
       ByteAmount containerRamHint = getContainerRamHint(allocation);
       int instancesToAllocate = instancesToBeAccounted.size();
-
-      LOG.info("instances to allocate: " + instancesToAllocate);
 
       if (instancesToAllocate != 0) {
         ByteAmount individualInstanceRam = instanceRamDefault;
