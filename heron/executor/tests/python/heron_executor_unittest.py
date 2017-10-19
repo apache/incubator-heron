@@ -217,7 +217,7 @@ class HeronExecutorTest(unittest.TestCase):
     %s %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
-    scheduler_classpath scheduler_port python_instance_binary
+    scheduler_classpath scheduler_port python_instance_binary cpp_instance_binary
     metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
     is_stateful_enabled ckptmgr_classpath ckptmgr-port stateful_config_file
     healthmgr_mode healthmgr_classpath
