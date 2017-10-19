@@ -39,7 +39,7 @@ cc_binary(
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkshared = 1,
+    linkstatic = 1,
 )
 
 cc_binary(
@@ -78,5 +78,5 @@ cc_binary(
     deps = [
         "//heron/api/src/cpp:cxx-api",
     ],
-    linkshared = 1,
+    linkstatic = 1,
 )
