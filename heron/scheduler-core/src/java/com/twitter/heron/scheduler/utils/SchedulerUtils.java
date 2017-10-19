@@ -426,7 +426,7 @@ public final class SchedulerUtils {
   }
 
   public static boolean extractPackage(String workingDirectory, String packageURI,
-                                       String packageDestination, boolean deletePackage, boolean verbose) {
+      String packageDestination, boolean deletePackage, boolean verbose) {
     return curlAndExtractPackage(workingDirectory, packageURI, packageDestination,
         deletePackage, verbose);
   }
