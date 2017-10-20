@@ -623,8 +623,8 @@ class HeronExecutor(object):
           self.metrics_manager_port,
           self.heron_internals_config_file,
           self.override_config_file,
-          self.topology_binary_file]
-
+          os.path.abspath(self.topology_binary_file)
+      ]
 
       retval[instance_id] = instance_cmd
 

@@ -65,6 +65,8 @@ TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint"
 TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint"
 # Padding percentage for this container.
 TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
+# Amount of ram padding per container.
+TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding"
 
 # Per component ram requirement.
 TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"

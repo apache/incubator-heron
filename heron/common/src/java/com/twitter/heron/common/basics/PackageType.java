@@ -20,7 +20,9 @@ package com.twitter.heron.common.basics;
 public enum PackageType {
   PEX,
   JAR,
-  TAR;
+  TAR,
+  SO,
+  DYLIB;
 
   public static PackageType getPackageType(String packageFile) {
     int dotIndex = packageFile.lastIndexOf('.');

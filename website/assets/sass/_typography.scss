@@ -4,6 +4,16 @@ $base-font-size: 18px;
 $base-line-height: 1.5;
 $yellow: darken(yellow, 9%);
 
+h1.hn-docs-title {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+
+  & + .hn-docs-description {
+    font-size: 1.25rem;
+    text-align: right;
+  }
+}
+
 article.hn-docs-content {
   code {
     color: $heron-blue-green;
