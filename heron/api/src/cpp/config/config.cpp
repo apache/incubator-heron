@@ -23,8 +23,6 @@ namespace heron {
 namespace api {
 namespace config {
 
-#define stringify(name) # name
-
 // NOLINTNEXTLINE
 const std::string Config::TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
 // NOLINTNEXTLINE
@@ -87,7 +85,20 @@ const std::set<std::string> Config::apiVars_ = {
 };
 
 void Config::setTopologyReliabilityMode(Config::TopologyReliabilityMode mode) {
-  config_[Config::TOPOLOGY_RELIABILITY_MODE] = stringify(mode);
+  switch (mode) {
+    case Config::TopologyReliabilityMode::ATMOST_ONCE:
+      config_[Config::TOPOLOGY_RELIABILITY_MODE] = "ATMOST_ONCE";
+      break;
+    case Config::TopologyReliabilityMode::ATLEAST_ONCE:
+      config_[Config::TOPOLOGY_RELIABILITY_MODE] = "ATLEAST_ONCE";
+      break;
+    case Config::TopologyReliabilityMode::EFFECTIVELY_ONCE:
+      config_[Config::TOPOLOGY_RELIABILITY_MODE] = "EFFECTIVELY_ONCE";
+      break;
+    default:
+      config_[Config::TOPOLOGY_RELIABILITY_MODE] = "ATMOST_ONCE";
+      break;
+  }
 }
 
 }  // namespace config
