@@ -279,4 +279,10 @@ public final class TopologyUtils {
 
     throw new IllegalStateException("Failed to find topology defn file");
   }
+
+  public static boolean getTopologyRemoteDebuggingEnabled(TopologyAPI.Topology topology) {
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    return Boolean.parseBoolean(TopologyUtils.getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_REMOTE_DEBUGGING_ENABLE, "false"));
+  }
 }

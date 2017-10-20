@@ -69,7 +69,7 @@ public class KubernetesSchedulerTest {
   public static void beforeClass() throws Exception {
     scheduler = Mockito.spy(KubernetesScheduler.class);
     Mockito.doReturn(EXECUTOR_CMD).when(scheduler)
-        .getExecutorCommand(Mockito.anyInt());
+        .getExecutorCommand(Mockito.anyInt(), Mockito.anyInt());
   }
 
   @AfterClass

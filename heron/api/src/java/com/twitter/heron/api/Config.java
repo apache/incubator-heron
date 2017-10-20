@@ -247,6 +247,11 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
 
+  /**
+   * Enable Remote debugging for java heron instances
+   */
+  public static final String TOPOLOGY_REMOTE_DEBUGGING_ENABLE = "topology.remote.debugging.enable";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -282,6 +287,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
     apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
+    apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
   }
 
   public Config() {
@@ -632,5 +638,9 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  public void setTopologyRemoteDebugging(boolean isOn) {
+    this.put(Config.TOPOLOGY_REMOTE_DEBUGGING_ENABLE, String.valueOf(isOn));
   }
 }

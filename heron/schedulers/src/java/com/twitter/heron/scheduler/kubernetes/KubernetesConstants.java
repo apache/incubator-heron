@@ -73,6 +73,9 @@ public final class KubernetesConstants {
   public static final String METRICS_CACHE_MASTER_PORT = "6007";
   public static final String METRICS_CACHE_STATS_PORT = "6008";
   public static final String CHECKPOINT_MGR_PORT = "6009";
+  // port number the start with when more than one port needed for remote debugging
+  public static final String REMOTE_DEBUGGER_PORT = "6010";
+  public static final String REMOTE_DEBUGGER_PORT_NAME = "remote-debugger";
 
   public static final String[] PORT_LIST = new String[]{
       MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,

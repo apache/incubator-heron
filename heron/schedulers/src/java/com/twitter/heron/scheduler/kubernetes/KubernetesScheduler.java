@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.kubernetes;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,7 @@ import com.google.common.base.Optional;
 import com.google.common.primitives.Ints;
 
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
@@ -164,11 +166,17 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     String[] deploymentConfs =
         new String[Ints.checkedCast(Runtime.numContainers(runtimeConfiguration))];
+
     for (int i = 0; i < Runtime.numContainers(runtimeConfiguration); i++) {
-
-      deploymentConfs[i] = buildKubernetesPodSpec(mapper, i, containerResource);
+      Optional<PackingPlan.ContainerPlan> container = packing.getContainer(i);
+      Set<PackingPlan.InstancePlan> instancePlans;
+      if (container.isPresent()) {
+        instancePlans = container.get().getInstances();
+      } else {
+        instancePlans = new HashSet<>();
+      }
+      deploymentConfs[i] = buildKubernetesPodSpec(mapper, i, containerResource, instancePlans);
     }
-
     return deploymentConfs;
   }
 
@@ -182,7 +190,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    */
   protected String buildKubernetesPodSpec(ObjectMapper mapper,
                                           Integer containerIndex,
-                                          Resource containerResource) {
+                                          Resource containerResource,
+                                          Set<PackingPlan.InstancePlan> instancePlans) {
     ObjectNode instance = mapper.createObjectNode();
 
     instance.put(KubernetesConstants.API_VERSION, KubernetesConstants.API_VERSION_1);
@@ -191,7 +200,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     instance.set(KubernetesConstants.API_SPEC, getContainerSpec(mapper,
         containerIndex,
-        containerResource));
+        containerResource,
+        instancePlans));
 
     return instance.toString();
   }
@@ -303,7 +313,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       setImagePullPolicyIfPresent(containerInfo);
 
       // Port info -- all the same
-      containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
+      containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper, containerPlan.getInstances()));
 
       // In order for the container to run with the correct index, we're copying the base
       // configuration for container with index 0, and replacing the container index with
@@ -349,7 +359,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    */
   protected ObjectNode getContainerSpec(ObjectMapper mapper,
                                         int containerIndex,
-                                        Resource containerResource) {
+                                        Resource containerResource,
+                                        Set<PackingPlan.InstancePlan> instancePlans) {
 
     ObjectNode containerSpec = mapper.createObjectNode();
     ArrayNode containerList = mapper.createArrayNode();
@@ -381,10 +392,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     setImagePullPolicyIfPresent(containerInfo);
 
     // Port information for this container
-    containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper));
+    containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper, instancePlans));
 
     // Heron command for the container
-    String[] command = getExecutorCommand(containerIndex);
+    String[] command = getExecutorCommand(containerIndex, instancePlans.size());
     ArrayNode commandsArray = mapper.createArrayNode();
     for (int i = 0; i < command.length; i++) {
       commandsArray.add(command[i]);
@@ -409,12 +420,22 @@ public class KubernetesScheduler implements IScheduler, IScalable {
     return containerSpec;
   }
 
+  private List<Integer> getRemoteDebuggerPorts(int numberOfInstances) {
+    List<Integer> ports = new LinkedList<>();
+    for (int i = 0; i < numberOfInstances; i++) {
+      ports.add(Integer.parseInt(KubernetesConstants.REMOTE_DEBUGGER_PORT, 10) + i);
+    }
+
+    return ports;
+  }
+
   /**
    * Get the ports the container will need to expose so other containers can access its services
    *
    * @param mapper
    */
-  protected ArrayNode getPorts(ObjectMapper mapper) {
+  protected ArrayNode getPorts(ObjectMapper mapper,
+                               Set<PackingPlan.InstancePlan> instancePlans) {
     ArrayNode ports = mapper.createArrayNode();
 
     for (int i = 0; i < KubernetesConstants.PORT_NAMES.length; i++) {
@@ -423,6 +444,18 @@ public class KubernetesScheduler implements IScheduler, IScalable {
           Integer.parseInt(KubernetesConstants.PORT_LIST[i], 10));
       port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.PORT_NAMES[i]);
       ports.add(port);
+    }
+
+    // if remote debugger enabled
+    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtimeConfiguration))) {
+      List<Integer> portsForRemoteDebugging = getRemoteDebuggerPorts(instancePlans.size());
+
+      for (int i = 0; i < portsForRemoteDebugging.size(); i++) {
+        ObjectNode port = mapper.createObjectNode();
+        port.put(KubernetesConstants.DOCKER_CONTAINER_PORT, portsForRemoteDebugging.get(i));
+        port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.REMOTE_DEBUGGER_PORT_NAME
+            + "-" + String.valueOf(i));
+      }
     }
 
     return ports;
@@ -449,10 +482,18 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    *
    * @param containerIndex
    */
-  protected String[] getExecutorCommand(int containerIndex) {
-    String[] executorCommand =
+  protected String[] getExecutorCommand(int containerIndex,
+                                        int numInstances) {
+    List<String> ports = new LinkedList<>();
+    ports.addAll(Arrays.asList(KubernetesConstants.PORT_LIST));
+    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtimeConfiguration))) {
+      for (Integer port : getRemoteDebuggerPorts(numInstances)) {
+        ports.add(port.toString());
+      }
+    }
+      String[] executorCommand =
         SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
-        containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
+        containerIndex, ports);
     String[] command = {
         "sh",
         "-c",

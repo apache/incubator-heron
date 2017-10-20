@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
@@ -199,6 +204,10 @@ public final class SchedulerUtils {
     String metricsCacheMasterPort = freePorts.get(6);
     String metricsCacheStatsPort = freePorts.get(7);
     String ckptmgrPort = freePorts.get(8);
+    String remoteDebuggerPorts = "";
+    if (freePorts.size() > 9) {
+      remoteDebuggerPorts = StringUtils.join(freePorts.subList(9, freePorts.size()), ",");
+    }
 
     List<String> commands = new ArrayList<>();
     commands.add(topology.getName());
@@ -257,7 +266,8 @@ public final class SchedulerUtils {
         Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
     commands.add(healthMgrMode);
     commands.add(Context.healthMgrClassPath(config));
-
+    commands.add(remoteDebuggerPorts);
+    
     return commands.toArray(new String[commands.size()]);
   }
 

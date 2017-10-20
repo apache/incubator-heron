@@ -32,9 +32,12 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -79,9 +82,9 @@ public class LocalScheduler implements IScheduler, IScalable {
    * Start executor process via running an async shell process
    */
   @VisibleForTesting
-  protected Process startExecutorProcess(int container) {
+  protected Process startExecutorProcess(int container, Set<PackingPlan.InstancePlan> instances) {
     return ShellUtils.runASyncProcess(
-        getExecutorCommand(container),
+        getExecutorCommand(container, instances),
         new File(LocalContext.workingDirectory(config)),
         Integer.toString(container));
   }
@@ -90,25 +93,27 @@ public class LocalScheduler implements IScheduler, IScalable {
    * Start the executor for the given container
    */
   @VisibleForTesting
-  protected void startExecutor(final int container) {
+  protected void startExecutor(final int container, Set<PackingPlan.InstancePlan> instances) {
     LOG.info("Starting a new executor for container: " + container);
 
     // create a process with the executor command and topology working directory
-    final Process containerExecutor = startExecutorProcess(container);
+    final Process containerExecutor = startExecutorProcess(container, instances);
 
     // associate the process and its container id
     processToContainer.put(containerExecutor, container);
     LOG.info("Started the executor for container: " + container);
 
     // add the container for monitoring
-    startExecutorMonitor(container, containerExecutor);
+    startExecutorMonitor(container, containerExecutor, instances);
   }
 
   /**
    * Start the monitor of a given executor
    */
   @VisibleForTesting
-  protected void startExecutorMonitor(final int container, final Process containerExecutor) {
+  protected void startExecutorMonitor(final int container,
+                                      final Process containerExecutor,
+                                      Set<PackingPlan.InstancePlan> instances) {
     // add the container for monitoring
     Runnable r = new Runnable() {
       @Override
@@ -129,7 +134,7 @@ public class LocalScheduler implements IScheduler, IScalable {
           }
           LOG.log(Level.INFO, "Trying to restart container {0}", container);
           // restart the container
-          startExecutor(processToContainer.remove(containerExecutor));
+          startExecutor(processToContainer.remove(containerExecutor), instances);
         } catch (InterruptedException e) {
           if (!isTopologyKilled) {
             LOG.log(Level.SEVERE, "Process is interrupted: ", e);
@@ -141,14 +146,21 @@ public class LocalScheduler implements IScheduler, IScalable {
     monitorService.submit(r);
   }
 
-  private String[] getExecutorCommand(int container) {
+  private String[] getExecutorCommand(int container,  Set<PackingPlan.InstancePlan> instances) {
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
       freePorts.add(SysUtils.getFreePort());
     }
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
+    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtime))
+        && instances != null) {
+      int portsForRemoteDebugging = instances.size();
+      for (int i = 0; i < portsForRemoteDebugging; i++) {
+        freePorts.add(SysUtils.getFreePort());
+      }
+    }
 
+    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;
   }
@@ -162,11 +174,11 @@ public class LocalScheduler implements IScheduler, IScalable {
 
     synchronized (processToContainer) {
       LOG.info("Starting executor for TMaster");
-      startExecutor(0);
+      startExecutor(0, null);
 
       // for each container, run its own executor
       for (PackingPlan.ContainerPlan container : packing.getContainers()) {
-        startExecutor(container.getId());
+        startExecutor(container.getId(), container.getInstances());
       }
     }
 
@@ -271,7 +283,7 @@ public class LocalScheduler implements IScheduler, IScalable {
           throw new RuntimeException(String.format("Found active container for %s, "
               + "cannot launch a duplicate container.", container.getId()));
         }
-        startExecutor(container.getId());
+        startExecutor(container.getId(), container.getInstances());
       }
     }
   }
