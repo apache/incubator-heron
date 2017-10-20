@@ -28,14 +28,23 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends BaseStreamlet<R> {
   private BaseStreamlet<R> parent;
+  private SerializableFunction<? super R, String> logFormatter;
 
   public LogStreamlet(BaseStreamlet<R> parent) {
     this.parent = parent;
     setNumPartitions(parent.getNumPartitions());
   }
 
+  public LogStreamlet(BaseStreamlet<R> parent, SerializableFunction<? super R, String> logFormatter) {
+    this.parent = parent;
+    this.logFormatter = logFormatter;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    LogSink<R> logSink;
+
     if (getName() == null) {
       setName(defaultNameCalculator("logger", stageNames));
     }
@@ -43,8 +52,16 @@ public class LogStreamlet<R> extends BaseStreamlet<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new LogSink<R>(),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+
+    if (null != this.logFormatter) {
+      logSink = new LogSink<R>();
+    } else {
+      logSink = new LogSink<R>(this.logFormatter);
+    }
+
+    bldr.setBolt(getName(), logSink,
+      getNumPartitions()).shuffleGrouping(parent.getName());
+
     return true;
   }
 }
