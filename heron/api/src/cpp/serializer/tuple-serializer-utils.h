@@ -23,7 +23,6 @@
 #include <tuple>
 #include <vector>
 
-#include "glog/logging.h"
 #include "exceptions/serialization-exception.h"
 #include "serializer/ipluggable-serializer.h"
 #include "serializer/cereal-serializer.h"
@@ -40,7 +39,8 @@ void IPluggableSerializer::serialize(std::ostream& ss, const T& t) {
   } else if (string_serializer_) {
     string_serializer_->serialize(ss, t);
   } else {
-    LOG(FATAL) << "Unknown serializer type";
+    std::cout << "Unknown serializer type";
+    ::exit(1);
   }
 }
 
@@ -51,7 +51,8 @@ void IPluggableSerializer::deserialize(std::istream& ss, T& t) {
   } else if (string_serializer_) {
     string_serializer_->deserialize(ss, t);
   } else {
-    LOG(FATAL) << "Unknown serializer type";
+    std::cout << "Unknown serializer type";
+    ::exit(1);
   }
 }
 
