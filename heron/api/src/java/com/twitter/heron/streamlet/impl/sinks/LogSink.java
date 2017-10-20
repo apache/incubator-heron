@@ -32,15 +32,12 @@ public class LogSink<R> extends StreamletOperator {
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
   private OutputCollector collector;
   private SerializableFunction<? super R, String> logTransformer;
-  private boolean hasTransformer;
 
   public LogSink() {
-    this.hasTransformer = false;
   }
 
   public LogSink(SerializableFunction<? super R, String> logTransformer) {
     this.logTransformer = logTransformer;
-    this.hasTransformer = true;
   }
 
   @SuppressWarnings("rawtypes")
@@ -54,7 +51,7 @@ public class LogSink<R> extends StreamletOperator {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
 
-    if (hasTransformer) {
+    if (null != this.logTransformer) {
       String formattedMsg = this.logTransformer.apply(obj);
       LOG.info(formattedMsg);
     } else {
