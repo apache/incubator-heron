@@ -93,6 +93,7 @@ public class RoundRobinPacking implements IPacking {
   private ByteAmount instanceRamDefault;
   private double instanceCpuDefault;
   private ByteAmount instanceDiskDefault;
+  private ByteAmount containerRamPadding = DEFAULT_RAM_PADDING_PER_CONTAINER;
 
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
@@ -100,6 +101,7 @@ public class RoundRobinPacking implements IPacking {
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
+    containerRamPadding = getContainerRamPadding(inputTopology.getTopologyConfig().getKvsList());
   }
 
   @Override
@@ -121,7 +123,7 @@ public class RoundRobinPacking implements IPacking {
 
       // Calculate the resource required for single instance
       Map<InstanceId, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
-      ByteAmount containerRam = DEFAULT_RAM_PADDING_PER_CONTAINER;
+      ByteAmount containerRam = containerRamPadding;
       for (InstanceId instanceId : instanceList) {
         ByteAmount instanceRam = instancesRamMap.get(containerId).get(instanceId);
 
@@ -154,6 +156,12 @@ public class RoundRobinPacking implements IPacking {
   @Override
   public void close() {
 
+  }
+
+  private ByteAmount getContainerRamPadding(List<TopologyAPI.Config.KeyValue> topologyConfig) {
+    return TopologyUtils.getConfigWithDefault(topologyConfig,
+        com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_PADDING,
+        DEFAULT_RAM_PADDING_PER_CONTAINER);
   }
 
   /**
@@ -201,8 +209,8 @@ public class RoundRobinPacking implements IPacking {
         // If container ram is specified
         if (!containerRamHint.equals(NOT_SPECIFIED_NUMBER_VALUE)) {
           // remove ram for heron internal process
-          ByteAmount remainingRam = containerRamHint
-              .minus(DEFAULT_RAM_PADDING_PER_CONTAINER).minus(usedRam);
+          ByteAmount remainingRam =
+              containerRamHint.minus(containerRamPadding).minus(usedRam);
 
           // Split remaining ram evenly
           individualInstanceRam = remainingRam.divide(instancesToAllocate);
