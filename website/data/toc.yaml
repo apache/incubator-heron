@@ -10,7 +10,7 @@ sections:
   - name: The Heron Streamlet API
     sublinks:
     - name: The Heron Streamlet API for Java
-      url: /docs/developers/java/functional-api
+      url: /docs/developers/java/streamlet-api
   - name: The Heron Topology API
     sublinks:
       - name: The Heron Topology API for Java
