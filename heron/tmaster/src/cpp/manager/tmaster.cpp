@@ -71,6 +71,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   stats_port_ = _stats_port;
   myhost_name_ = _myhost_name;
   eventLoop_ = eventLoop;
+  dns_ = new AsyncDNS(eventLoop_);
+  http_client_ = new HTTPClient(eventLoop_, dns_);
+
   metrics_collector_ =
       new TMetricsCollector(config::HeronInternalsConfigReader::Instance()
                                     ->GetHeronTmasterMetricsCollectorMaximumIntervalMin() *
@@ -595,6 +598,25 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
   tmaster_controller_->HandleCleanStatefulCheckpointResponse(_status);
 }
 
+void TMaster::KillContainer(const std::string& host_name,
+    sp_int32 shell_port, sp_string stmgr_id) {
+  HTTPKeyValuePairs kvs;
+  kvs.push_back(make_pair("secret", GetTopologyId()));
+  OutgoingHTTPRequest* request =
+    new OutgoingHTTPRequest(host_name, shell_port,
+        "/killexecutor", BaseHTTPRequest::POST, kvs);
+  auto cb = [](IncomingHTTPResponse* response) {
+    LOG(WARNING) << "Response code of HTTP request of killing heron-executor: "
+      << response->response_code();
+  };
+  if (http_client_->SendRequest(request, std::move(cb)) != SP_OK) {
+    LOG(ERROR) << "Failed to kill " << stmgr_id << " on "
+      << host_name;
+  } else {
+    return;
+  }
+}
+
 proto::system::Status* TMaster::RegisterStMgr(
     const proto::system::StMgr& _stmgr, const std::vector<proto::system::Instance*>& _instances,
     Connection* _conn, proto::system::PhysicalPlan*& _pplan) {
@@ -606,7 +628,12 @@ proto::system::Status* TMaster::RegisterStMgr(
     // Some other dude is already present with us.
     // First check to see if that other guy has timed out
     if (!stmgrs_[stmgr_id]->TimedOut()) {
-      // we reject the new guy
+      sp_string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
+      sp_int32 zombie_port = stmgrs_[stmgr_id]->get_stmgr()->shell_port();
+      sp_string new_host_name = _stmgr.host_name();
+      sp_int32 new_port = _stmgr.shell_port();
+      KillContainer(zombie_host_name, zombie_port, stmgr_id);
+      KillContainer(new_host_name, new_port, stmgr_id);
       LOG(ERROR) << "Another stmgr exists at "
                  << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
                  << stmgrs_[stmgr_id]->get_connection()->getPort()
