@@ -26,11 +26,13 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  * streamlet after logging each element. Since elements of the parents are just logged
  * nothing is emitted, thus this streamlet is empty.
  */
-public class LogStreamlet<R> extends BaseStreamlet<R> {
+public class FormattedLogStreamlet<R> extends BaseStreamlet<R> {
   private BaseStreamlet<R> parent;
+  private SerializableFunction<? super R, String> logFormatter;
 
-  public LogStreamlet(BaseStreamlet<R> parent) {
+  public FormattedLogStreamlet(BaseStreamlet<R> parent, SerializableFunction<? super R, String> logFormatter) {
     this.parent = parent;
+    this.logFormatter = logFormatter;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -43,7 +45,7 @@ public class LogStreamlet<R> extends BaseStreamlet<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new LogSink<R>(),
+    bldr.setBolt(getName(), new LogSink<R>(logFormatter),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

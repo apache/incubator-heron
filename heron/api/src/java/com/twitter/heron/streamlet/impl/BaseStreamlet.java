@@ -38,6 +38,7 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.FormattedLogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
@@ -306,7 +307,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
 
   @Override
   public void formattedLog(SerializableFunction<? super R, String> logTransformer) {
-    LogStreamlet<R> logger = new LogStreamlet<>(this, logTransformer);
+    FormattedLogStreamlet<R> logger = new FormattedLogStreamlet<>(this, logTransformer);
     addChild(logger);
     return;
   }
