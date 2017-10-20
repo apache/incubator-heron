@@ -17,6 +17,7 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.BaseStreamlet;
 import com.twitter.heron.streamlet.impl.sinks.LogSink;
 
@@ -27,9 +28,17 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends BaseStreamlet<R> {
   private BaseStreamlet<R> parent;
+  private SerializableFunction<? super R, String> logTransformer;
 
   public LogStreamlet(BaseStreamlet<R> parent) {
     this.parent = parent;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
+  public LogStreamlet(BaseStreamlet<R> parent,
+          SerializableFunction<? super R, String> logTransformer) {
+    this.parent = parent;
+    this.logTransformer = logTransformer;
     setNumPartitions(parent.getNumPartitions());
   }
 
