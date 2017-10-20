@@ -22,7 +22,6 @@ message RegisterInstanceRequest {
   required heron.proto.system.Instance instance = 1;
   required string topology_name = 2;
   required string topology_id = 3;
-  optional int32 remote_debugger_port = 4;
 }
 
 message RegisterInstanceResponse {

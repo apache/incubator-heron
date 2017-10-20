@@ -157,14 +157,10 @@ public class StreamManagerClient extends HeronClient {
 
   // Build register request and send to stream mgr
   private void sendRegisterRequest() {
-
-    StreamManager.RegisterInstanceRequest.Builder instanceRequestBuilder
-        = StreamManager.RegisterInstanceRequest.newBuilder()
-        .setInstance(instance).setTopologyName(topologyName).setTopologyId(topologyId);
-    if (instance.getInfo().hasRemoteDebuggerPort()) {
-      instanceRequestBuilder.setRemoteDebuggerPort(instance.getInfo().getRemoteDebuggerPort());
-    }
-    StreamManager.RegisterInstanceRequest request = instanceRequestBuilder.build();
+    StreamManager.RegisterInstanceRequest request =
+        StreamManager.RegisterInstanceRequest.newBuilder().
+            setInstance(instance).setTopologyName(topologyName).setTopologyId(topologyId).
+            build();
 
     // The timeout would be the reconnect-interval-seconds
     sendRequest(request, null,

@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;

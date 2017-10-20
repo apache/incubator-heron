@@ -491,8 +491,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
         ports.add(port.toString());
       }
     }
-      String[] executorCommand =
-        SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
+    String[] executorCommand = SchedulerUtils.getExecutorCommand(
+        configuration, runtimeConfiguration,
         containerIndex, ports);
     String[] command = {
         "sh",

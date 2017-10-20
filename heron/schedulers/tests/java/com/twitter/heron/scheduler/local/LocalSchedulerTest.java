@@ -162,7 +162,8 @@ public class LocalSchedulerTest {
     Set<PackingPlan.ContainerPlan> existingContainers = new HashSet<>();
     for (int i = 0; i < LOCAL_NUM_CONTAINER; i++) {
       processes[i] = Mockito.mock(Process.class);
-      Mockito.doReturn(processes[i]).when(scheduler).startExecutorProcess(i, Mockito.mock(Set.class));
+      Mockito.doReturn(processes[i]).when(scheduler)
+          .startExecutorProcess(i, Mockito.mock(Set.class));
       if (i > 0) {
         // ignore the container for TMaster. existing containers simulate the containers created
         // by packing plan
@@ -297,7 +298,8 @@ public class LocalSchedulerTest {
     scheduler.getMonitorService().shutdown();
     scheduler.getMonitorService().awaitTermination(MAX_WAITING_SECOND, TimeUnit.SECONDS);
     // The dead process should not be restarted
-    Mockito.verify(scheduler, Mockito.never()).startExecutor(Mockito.anyInt(), Mockito.mock(Set.class));
+    Mockito.verify(scheduler, Mockito.never())
+        .startExecutor(Mockito.anyInt(), Mockito.mock(Set.class));
     Assert.assertTrue(scheduler.isTopologyKilled());
   }
 }

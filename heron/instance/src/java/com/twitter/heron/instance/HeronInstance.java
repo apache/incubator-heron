@@ -17,7 +17,6 @@ package com.twitter.heron.instance;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +27,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
@@ -41,13 +48,6 @@ import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 /**
  * HeronInstance is just an entry with resource initiation.
@@ -155,7 +155,7 @@ public class HeronInstance {
   private static CommandLine parseCommandLineArgs(String[] args) {
     Options options = new Options();
 
-    Option topologyNameOption= new Option(
+    Option topologyNameOption = new Option(
         CommandLineOptions.TOPOLOGY_NAME_OPTION, true, "Topology Name");
     topologyNameOption.setRequired(true);
     topologyNameOption.setType(String.class);
@@ -203,7 +203,8 @@ public class HeronInstance {
     options.addOption(stmgrPortOption);
 
     Option metricsmgrPortOption
-        = new Option(CommandLineOptions.METRICS_MGR_PORT_OPTION, true, "Metrics Manager Port");
+        = new Option(
+            CommandLineOptions.METRICS_MGR_PORT_OPTION, true, "Metrics Manager Port");
     metricsmgrPortOption.setType(Integer.class);
     metricsmgrPortOption.setRequired(true);
     options.addOption(metricsmgrPortOption);
@@ -235,7 +236,7 @@ public class HeronInstance {
     } catch (ParseException e) {
       System.out.println(e.getMessage());
       formatter.printHelp("Heron Instance", options);
-      System.exit(1);
+      throw new RuntimeException("Incorrect Usage");
     }
     return cmd;
   }
@@ -248,14 +249,16 @@ public class HeronInstance {
     String topologyId = commandLine.getOptionValue(CommandLineOptions.TOPOLOGY_ID_OPTION);
     String instanceId = commandLine.getOptionValue(CommandLineOptions.INSTANCE_ID_OPTION);
     String componentName = commandLine.getOptionValue(CommandLineOptions.COMPONENT_NAME_OPTION);
-    Integer taskId = Integer.parseInt(commandLine.getOptionValue(CommandLineOptions.TASK_ID_OPTION));
+    Integer taskId = Integer.parseInt(
+        commandLine.getOptionValue(CommandLineOptions.TASK_ID_OPTION));
     Integer componentIndex
         = Integer.parseInt(commandLine.getOptionValue(CommandLineOptions.COMPONENT_INDEX_OPTION));
     String streamId = commandLine.getOptionValue(CommandLineOptions.STMGR_ID_OPTION);
     Integer streamPort
         = Integer.parseInt(commandLine.getOptionValue(CommandLineOptions.STMGR_PORT_OPTION));
     Integer metricsPort
-        = Integer.parseInt( commandLine.getOptionValue(CommandLineOptions.METRICS_MGR_PORT_OPTION));
+        = Integer.parseInt(
+            commandLine.getOptionValue(CommandLineOptions.METRICS_MGR_PORT_OPTION));
     String systemConfigFile
         = commandLine.getOptionValue(CommandLineOptions.SYSTEM_CONFIG_FILE);
     String overrideConfigFile
