@@ -70,7 +70,7 @@ class IncomingHTTPRequest : public BaseHTTPRequest {
   const HTTPKeyValuePairs& keyvalues() const { return kv_; }
 
   //! Get the value of a particular key
-  const sp_string GetValue(const sp_string& _key) const;
+  const sp_string& GetValue(const sp_string& _key) const;
 
   //! Get the all the values of a particular key
   bool GetAllValues(const sp_string& _key, std::vector<sp_string>& _values) const;

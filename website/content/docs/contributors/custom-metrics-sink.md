@@ -4,34 +4,28 @@ title: Implementing a Custom Metrics Sink
 
 Each Heron container has its own centralized [Metrics
 Manager](../../concepts/architecture#metrics-manager) (MM), which collects
-metrics from all instances in the container. You can define how the MM processes
-metrics by implementing a **metrics sink**, which specifies how the MM handles
-incoming
+metrics from all [Heron Instances](../../concepts/architecture#heron-instance) in
+the container. You can define how the MM processes metrics by implementing a
+**metrics sink**, which specifies how the MM handles incoming
 [`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html)
 objects.
 
-Java is currently the only supported language for custom metrics sinks. This may
-change in the future.
+> Java is currently the only supported language for custom metrics sinks. This may change in the future.
 
-## Currently-supported Sinks
+## Currently supported Sinks
 
 Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
-* [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
-  --- Sends each `MetricsRecord` object to a
-  [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
-  prefix.
-* [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
-  --- Sends each `MetricsRecord` object to a
-  [Scribe](https://github.com/facebookarchive/scribe) instance according to a
-  Scribe category and namespace.
-* [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html)
-  --- Writes each `MetricsRecord` object to a JSON file at a specified path.
+Sink | How it works
+:----|:------------
+[Prometheus](../../operators/observability/prometheus) | [`PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
+[Graphite](../../operators/observability/graphite) | [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
+[Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
+Local filesystem | [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
 
-More on using those sinks in a Heron cluster can be found in [Metrics
-Manager](../../operators/configuration/metrics-manager).
+More on using those sinks in a Heron cluster can be found in the [Heron metrics overview](../../operators/observability).
 
 ## Java Setup
 
@@ -62,22 +56,12 @@ Each metrics sink must implement the
 [`IMetricsSink`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html)
 interface, which requires you to implement the following methods:
 
-* `void init(Map<String, Object> conf, SinkContext context)` --- Defines the
-  initialization behavior of the sink. The `conf` map is the configuration that
-  is passed to the sink by the `.yaml` configuration file at
-  `heron/config/metrics_sink.yaml`; the
-  [`SinkContext`](/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html)
-  object enables you to access values from the sink's runtime context
-  (the ID of the metrics manager, the ID of the sink, and the name of the
-  topology).
-* `void processRecord(MetricsRecord record)` --- Defines how each
-  `MetricsRecord` that passes through the sink is processed.
-* `void flush()` --- Flush any buffered metrics; this function is called at
-  the interval specified by the `flush-frequency-ms`. More info can be found in
-  the [Stream Manager](../../operators/configuration/stmgr) document.
-* `void close()` --- Closes the stream and releases any system resources
-  associated with it; if the stream is already closed, invoking `close()` has no
-  effect.
+Method | Description
+:------|:-----------
+[`init`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#init-java.util.Map-com.twitter.heron.spi.metricsmgr.sink.SinkContext-) | Defines the initialization behavior of the sink. The `conf` map is the configuration that is passed to the sink by the `.yaml` configuration file at `heron/config/metrics_sink.yaml`; the [`SinkContext`](/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html) object enables you to access values from the sink's runtime context (the ID of the metrics manager, the ID of the sink, and the name of the topology).
+[`processRecord`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#processRecord-com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord-) | Defines how each [`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html) that passes through the sink is processed.
+[`flush`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#flush--) | Flush any buffered metrics; this function is called at the interval specified by the `flush-frequency-ms` parameter. More info can be found in the [Stream Manager](../../concepts/architecture#stream-manager) documentation.
+[`close`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#close--) | Closes the stream and releases any system resources associated with it; if the stream is already closed, invoking `close()` has no effect.
 
 Your implementation of those interfaces will need to be packaged into a JAR file
 and distributed to the `heron-core/lib/metricsmgr` folder of your [Heron
@@ -129,10 +113,10 @@ public class PrintSink implements IMetricsSink {
 ## Configuring Your Custom Sink
 
 The configuration for your sink needs to be provided in the
-[YAML](http://www.yaml.org/) file at `heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`.
+`metrics_sinks.yaml` configuration file in your scheduler's base configuration template.
 
 At the top of that file there's a `sinks` parameter that lists each available
-sink by name. You should add your sink to that list. Here's an example:
+sink by name. You should add the sink you want to use to that list. Here's an example:
 
 ```yaml
 sinks:
@@ -140,38 +124,39 @@ sinks:
   - scribe-sink
   - tmaster-sink
   - print-sink
+  - prometheus-sink
 ```
 
-For each sink you are required to specify the followings:
+For each sink you are required to specify the following:
 
-* `class` --- The Java class name of your custom implementation of the
-  `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
-* `flush-frequency-ms` --- The frequency (in milliseconds) at which the
-  `flush()` method is called in your implementation of `IMetricsSink`.
-* `sink-restart-attempts` --- The number of times that a sink will attempt to
-  restart if it throws exceptions and dies. If you do not set this, the default
-  is 0; if you set it to -1, the sink will attempt to restart forever.
+Parameter | Description
+:---------|:-----------
+`class` | The Java class name of your custom implementation of the `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
+`flush-frequency-ms` | The frequency (in milliseconds) at which the `flush()` method is called in your implementation of `IMetricsSink`.
+`sink-restart-attempts` | The number of times that a sink will attempt to restart if it throws exceptions and dies. If you do not set this, the default is 0; if you set it to -1, the sink will attempt to restart forever.
 
-Below is an example `metrics_sink.yaml` configuration:
+Here is an example `metrics_sinks.yaml` configuration:
 
 ```yaml
 sinks:
-  - print-sink
+  - custom-sink
 
 print-sink:
-  class: "biz.acme.heron.metrics.PrintSink"
+  class: "biz.acme.heron.metrics.CustomSink"
   flush-frequency-ms: 60000 # One minute
   sink-restart-attempts: -1 # Attempt to restart forever
+  some-other-config: false
 ```
 
 It is optional to add other configurations for the sink. All configurations will be constructed
- as an unmodifiable map `Map<String, Object> conf` and passed to `init(conf, context)`.
+as an unmodifiable map `Map<String, Object> conf` and passed to the sink via the `init` function.
 
 ## Using Your Custom Sink
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `heron-core/lib/metricsmgr` folder, and changed the configuration in
-`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
-Any topology submitted using that configuration will include the custom sink.You must [re-compile
-Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution. 
+`metrics_sinks.yaml` file in the base configuration template, any topology submitted using that configuration will include the custom sink.
+
+You must [re-compile
+Heron](../../developers/compiling) if you want to include the configuration in a new distribution of [Heron CLI](../../operators/heron-cli).
 

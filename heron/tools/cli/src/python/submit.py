@@ -110,7 +110,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_bin", os.path.basename(topology_file)   # pex file if pex specified
+      "--topology_bin", os.path.basename(topology_file)   # pex/cpp file if pex/cpp specified
   ]
 
   if Log.getEffectiveLevel() == logging.DEBUG:
@@ -336,6 +336,26 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   return launch_topologies(cl_args, topology_file, tmp_dir)
 
 ################################################################################
+#  Execute the cpp file to create topology definition file by running
+#  the topology's binary.
+################################################################################
+# pylint: disable=unused-argument
+def submit_cpp(cl_args, unknown_args, tmp_dir):
+  # execute main of the topology to create the topology definition
+  topology_file = cl_args['topology-file-name']
+  topology_binary_name = cl_args['topology-class-name']
+  res = execute.heron_cpp(topology_binary_name, tuple(unknown_args))
+
+  result.render(res)
+  if not result.is_successful(res):
+    err_context = ("Failed to create topology definition " \
+      "file when executing cpp binary '%s'") % (topology_binary_name)
+    res.add_context(err_context)
+    return res
+
+  return launch_topologies(cl_args, topology_file, tmp_dir)
+
+################################################################################
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
   '''
@@ -365,9 +385,11 @@ def run(command, parser, cl_args, unknown_args):
   jar_type = topology_file.endswith(".jar")
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
   pex_type = topology_file.endswith(".pex")
-  if not jar_type and not tar_type and not pex_type:
+  cpp_type = topology_file.endswith(".dylib") or topology_file.endswith(".so")
+  if not jar_type and not tar_type and not pex_type and not cpp_type:
     ext_name = os.path.splitext(topology_file)
-    err_context = "Unknown file type '%s'. Please use .tar or .tar.gz or .jar or .pex file"\
+    err_context = "Unknown file type '%s'. Please use .tar "\
+                  "or .tar.gz or .jar or .pex or .dylib or .so file"\
                   % ext_name
     return SimpleResult(Status.InvocationError, err_context)
 
@@ -398,5 +420,7 @@ def run(command, parser, cl_args, unknown_args):
     return submit_fatjar(cl_args, unknown_args, tmp_dir)
   elif tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
+  elif cpp_type:
+    return submit_cpp(cl_args, unknown_args, tmp_dir)
   else:
     return submit_pex(cl_args, unknown_args, tmp_dir)

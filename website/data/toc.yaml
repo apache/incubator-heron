@@ -7,13 +7,10 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
-  - name: The Heron Functional API
-    new: true
+  - name: The Heron Streamlet API
     sublinks:
-    - name: The Heron Functional API for Java
-      url: /docs/developers/java/functional-api
-    - name: The Heron Functional API for Python
-      url: /docs/developers/python/functional-api
+    - name: The Heron Streamlet API for Java
+      url: /docs/developers/java/streamlet-api
   - name: The Heron Topology API
     sublinks:
       - name: Java Topologies
@@ -58,6 +55,8 @@ sections:
         url: /docs/operators/deployment
       - name: Configuration
         url: /docs/operators/deployment/configuration
+      - name: The Heron API server
+        url: /docs/operators/heron-api-server
   - name: State Managers
     sublinks:
       - name: Zookeeper
@@ -104,8 +103,12 @@ sections:
         url: /docs/operators/configuration/tmaster
   - name: Observability
     sublinks:
-      - name: Graphite
-        url: /docs/operators/observability/graphite
+    - name: Prometheus
+      url: /docs/operators/observability/prometheus
+    - name: Graphite
+      url: /docs/operators/observability/graphite
+    - name: Scribe
+      url: /docs/operators/observability/scribe
   - name: User Manuals
     sublinks:
       - name: Heron Client
