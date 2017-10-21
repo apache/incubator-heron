@@ -58,4 +58,5 @@ cc_binary(
         "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,
+    linkopts = ['-ldl'],
 )
