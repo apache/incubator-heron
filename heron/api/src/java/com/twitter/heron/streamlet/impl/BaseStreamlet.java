@@ -305,8 +305,8 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   }
 
   @Override
-  public void formattedLog(SerializableFunction<? super R, String> logTransformer) {
-    LogStreamlet<R> logger = new LogStreamlet<>(this, logTransformer);
+  public void formattedLog(SerializableFunction<? super R, String> logFormatter) {
+    LogStreamlet<R> logger = new LogStreamlet<>(this, logFormatter);
     addChild(logger);
     return;
   }

@@ -31,13 +31,13 @@ public class LogSink<R> extends StreamletOperator {
   private static final long serialVersionUID = -6392422646613189818L;
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
   private OutputCollector collector;
-  private SerializableFunction<? super R, String> logTransformer;
+  private SerializableFunction<? super R, String> logFormatter;
 
   public LogSink() {
   }
 
-  public LogSink(SerializableFunction<? super R, String> logTransformer) {
-    this.logTransformer = logTransformer;
+  public LogSink(SerializableFunction<? super R, String> logFormatter) {
+    this.logFormatter = logFormatter;
   }
 
   @SuppressWarnings("rawtypes")
@@ -51,8 +51,8 @@ public class LogSink<R> extends StreamletOperator {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
 
-    if (null != this.logTransformer) {
-      String formattedMsg = this.logTransformer.apply(obj);
+    if (null != this.logFormatter) {
+      String formattedMsg = this.logFormatter.apply(obj);
       LOG.info(formattedMsg);
     } else {
       LOG.info(String.valueOf(obj));
