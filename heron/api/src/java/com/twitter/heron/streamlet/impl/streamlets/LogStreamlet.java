@@ -35,7 +35,8 @@ public class LogStreamlet<R> extends BaseStreamlet<R> {
     setNumPartitions(parent.getNumPartitions());
   }
 
-  public LogStreamlet(BaseStreamlet<R> parent, SerializableFunction<? super R, String> logFormatter) {
+  public LogStreamlet(BaseStreamlet<R> parent,
+      SerializableFunction<? super R, String> logFormatter) {
     this.parent = parent;
     this.logFormatter = logFormatter;
     setNumPartitions(parent.getNumPartitions());
