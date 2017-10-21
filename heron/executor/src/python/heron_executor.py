@@ -43,6 +43,8 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 Log = log.Log
 
+# pylint: disable=too-many-lines
+
 def print_usage():
   print(
       "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
@@ -55,7 +57,7 @@ def print_usage():
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
       " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
       " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file> "
-      " <healthmgr_mode> <healthmgr_classpath> <cpp_instance_binary>")
+      " <healthmgr_mode> <healthmgr_classpath> <cpp_instance_binary> <java_remote_debugger_ports>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -218,7 +220,9 @@ class HeronExecutor(object):
     self.stateful_config_file = parsed_args.stateful_config_file
     self.healthmgr_mode = parsed_args.healthmgr_mode
     self.healthmgr_classpath = '%s:%s' % (self.scheduler_classpath, parsed_args.healthmgr_classpath)
-
+    self.java_remote_debugger_ports =\
+        parsed_args.java_remote_debugger_ports.split(",")\
+            if parsed_args.java_remote_debugger_ports else None
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -292,6 +296,7 @@ class HeronExecutor(object):
     parser.add_argument("stateful_config_file")
     parser.add_argument("healthmgr_mode")
     parser.add_argument("healthmgr_classpath")
+    parser.add_argument("java_remote_debugger_ports", nargs="?")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -540,24 +545,35 @@ class HeronExecutor(object):
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:ParallelGCThreads=4',
                       '-Xloggc:log-files/gc.%s.log' % instance_id]
+
+      remote_debugger_port = None
+      if self.java_remote_debugger_ports:
+        remote_debugger_port = self.java_remote_debugger_ports.pop()
+        instance_cmd.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
+                            % remote_debugger_port)
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
+
+      instance_args = ['-topology_name', self.topology_name,
+                       '-topology_id', self.topology_id,
+                       '-instance_id', instance_id,
+                       '-component_name', component_name,
+                       '-task_id', str(global_task_id),
+                       '-component_index', str(component_index),
+                       '-stmgr_id', self.stmgr_ids[self.shard],
+                       '-stmgr_port', self.tmaster_controller_port,
+                       '-metricsmgr_port', self.metricsmgr_port,
+                       '-system_config_file', self.heron_internals_config_file,
+                       '-override_config_file', self.override_config_file]
+      if remote_debugger_port:
+        instance_args += ['-remote_debugger_port', remote_debugger_port]
+
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance',
-                           self.topology_name,
-                           self.topology_id,
-                           instance_id,
-                           component_name,
-                           str(global_task_id),
-                           str(component_index),
-                           self.stmgr_ids[self.shard],
-                           self.tmaster_controller_port,
-                           self.metricsmgr_port,
-                           self.heron_internals_config_file,
-                           self.override_config_file])
+                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
+
       retval[instance_id] = instance_cmd
     return retval
 
