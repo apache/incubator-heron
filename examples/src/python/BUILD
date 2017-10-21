@@ -69,3 +69,14 @@ pex_binary(
     ]
 )
 
+pex_binary(
+    name = "join_streamlet_topology",
+    srcs = ["join_streamlet_topology.py"],
+    deps = [
+      '//heronpy/api:heron-python-py',
+      '//heronpy/streamlet:heron-python-streamlet-py',
+      '//heronpy/connectors:heron-pythonconnectors-py',
+    ]
+)
+
+
