@@ -559,7 +559,7 @@ class HeronExecutor(object):
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance'] + + instance_args)
+                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
 
       retval[instance_id] = instance_cmd
     return retval
