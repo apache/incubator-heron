@@ -55,11 +55,15 @@ class TestWordSpout : public api::spout::BaseRichSpout {
     collector_->emit(tup, ++nSent_);
     ++iter_;
     if (iter_ == words_.end()) { iter_ = words_.begin(); }
-    context_->getLogger() << "TestWordSpout emitted " << nSent_ << " and got acks for "
-                          << nAcks_ << " and fails for " << nFails_;
+    logger_ << "TestWordSpout emitted " << nSent_
+            << " and got acks for "
+            << nAcks_ << " and fails for " << nFails_;
+    context_->log(logger_);
     if (nSent_ % 100000 == 0) {
-      context_->getLogger() << "TestWordSpout emitted " << nSent_ << " and got acks for "
-                            << nAcks_ << " and fails for " << nFails_;
+      logger_ << "TestWordSpout emitted " << nSent_
+              << " and got acks for "
+              << nAcks_ << " and fails for " << nFails_;
+      context_->log(logger_);
     }
   }
 
@@ -81,6 +85,7 @@ class TestWordSpout : public api::spout::BaseRichSpout {
   std::shared_ptr<api::spout::ISpoutOutputCollector> collector_;
   std::shared_ptr<api::topology::TaskContext> context_;
   int64_t nSent_, nAcks_, nFails_;
+  std::ostringstream logger_;
 };
 
 extern "C" {
