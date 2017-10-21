@@ -51,7 +51,6 @@ cc_library(
         "//third_party/libevent:libevent-cxx",
         "//heron/common/src/cpp/threads:threads-cxx",
         "//heron/common/src/cpp/errors:errors-cxx",
-        "//heron/common/src/cpp/basics:basics-cxx",
     ],
     linkstatic = 1,
 )

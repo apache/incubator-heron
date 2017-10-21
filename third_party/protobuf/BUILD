@@ -96,7 +96,6 @@ genrule(
         "include/google/protobuf/stubs/type_traits.h",
         "include/google/protobuf/stubs/common.h",
 
-        "lib/libprotobuf-lite.a",
         "lib/libprotobuf.a",
         "lib/libprotoc.a",
     ],

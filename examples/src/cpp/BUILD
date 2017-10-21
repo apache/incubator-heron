@@ -17,6 +17,7 @@ cc_binary(
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
+        "//third_party/glog:glog-cxx",
     ],
     linkstatic = 1,
 )
@@ -38,8 +39,9 @@ cc_binary(
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
+        "//third_party/glog:glog-shared-cxx",
     ],
-    linkstatic = 1,
+    linkshared = 1,
 )
 
 cc_binary(
@@ -59,6 +61,7 @@ cc_binary(
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
+        "//third_party/glog:glog-cxx",
     ],
     linkstatic = 1,
 )
@@ -77,6 +80,7 @@ cc_binary(
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
+        "//third_party/glog:glog-shared-cxx",
     ],
-    linkstatic = 1,
+    linkshared = 1,
 )

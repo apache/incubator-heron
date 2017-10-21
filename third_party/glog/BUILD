@@ -16,9 +16,11 @@ include_files = [
     "include/glog/vlog_is_on.h",
 ]
 
-lib_files = [
-    "lib/libglog.a",
-]
+lib_static_files = ["lib/libglog.a"]
+
+lib_mac_dynamic_files = ["lib/libglog.0.dylib"]
+
+lib_linux_dynamic_files = ["lib/libglog.so"]
 
 common_script = [
     'export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind',
@@ -32,8 +34,9 @@ common_script = [
 ]
 
 mac_script = "\n".join(common_script + [
-    './configure --prefix=$$INSTALL_DIR --enable-shared=no',
+    './configure --prefix=$$INSTALL_DIR',
     'make install',
+    'touch $$INSTALL_DIR/lib/libglog.so',
     'rm -rf $$TMP_DIR',
 ])
 
@@ -41,8 +44,9 @@ linux_script = "\n".join(common_script + [
      'export VAR_LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib"',
      'export VAR_INCL="-I$$UNWIND_DIR/include"',
      'export VAR_LD="-L$$UNWIND_DIR/lib"',
-     './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS="$$VAR_LIBS" CPPFLAGS="$$VAR_INCL" LDFLAGS="$$VAR_LD"',
+     './configure --prefix=$$INSTALL_DIR LIBS="$$VAR_LIBS" CPPFLAGS="$$VAR_INCL" LDFLAGS="$$VAR_LD"',
      'make install LIBS="$$VAR_LIBS" CPPFLAGS="$$VAR_INCL" LDFLAGS="$$VAR_LD"',
+     'touch $$INSTALL_DIR/lib/libglog.0.dylib',
      'rm -rf $$TMP_DIR',
 ])
 
@@ -55,7 +59,7 @@ genrule(
             "//third_party/libunwind:libunwind-files",
          ]
     }),
-    outs = include_files + lib_files,
+    outs = include_files + lib_static_files + lib_mac_dynamic_files + lib_linux_dynamic_files,
     cmd = select({
         "//tools/platform:darwin": mac_script,
         "//conditions:default": linux_script,
@@ -64,7 +68,7 @@ genrule(
 
 cc_library(
     name = "glog-cxx",
-    srcs = ["empty.cc"] + lib_files,
+    srcs = ["empty.cc"] + lib_static_files,
     deps = [
       "//third_party/gflags:gflags-cxx",
     ],
@@ -75,6 +79,22 @@ cc_library(
     linkstatic = 1,
 )
 
+cc_library(
+    name = "glog-shared-cxx",
+    srcs = ["empty.cc"] + select({
+        "//tools/platform:darwin": lib_mac_dynamic_files,
+        "//conditions:default": lib_linux_dynamic_files,
+    }),
+    deps = [
+        "//third_party/gflags:gflags-cxx",
+    ],
+    hdrs = include_files,
+    includes = [
+        "include",
+    ],
+)
+
+
 filegroup(
     name = "glog",
     srcs = [
@@ -84,5 +104,16 @@ filegroup(
 
 filegroup(
     name = "glog-files",
-    srcs = include_files + lib_files
+    srcs = include_files + select({
+        "//tools/platform:darwin": lib_static_files + lib_mac_dynamic_files,
+        "//conditions:default": lib_static_files + lib_linux_dynamic_files,
+    }),
+)
+
+filegroup(
+    name = "glog-dynamic-lib-files",
+    srcs = select({
+        "//tools/platform:darwin": lib_mac_dynamic_files,
+        "//conditions:default": lib_linux_dynamic_files
+    }),
 )

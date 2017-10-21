@@ -120,6 +120,17 @@ def stdout_log_fn(cmd):
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
+def set_ld_library_paths(env):
+  if "LD_LIBRARY_PATH" in env:
+    env["LD_LIBRARY_PATH"] = env["LD_LIBRARY_PATH"] + ":./heron-core/lib/glog/"
+  else:
+    env["LD_LIBRARY_PATH"] = "./heron-core/lib/glog/"
+  if "DYLD_LIBRARY_PATH" in env:
+    env["DYLD_LIBRARY_PATH"] = env["DYLD_LIBRARY_PATH"] + ":./heron-core/lib/glog/"
+  else:
+    env["DYLD_LIBRARY_PATH"] = "./heron-core/lib/glog/"
+
+
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
     """
@@ -986,6 +997,7 @@ def main():
   # PEX_ROOT shell environment before forking the processes
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
+  set_ld_library_paths(shell_env)
 
   # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)

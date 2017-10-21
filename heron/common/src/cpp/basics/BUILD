@@ -46,13 +46,13 @@ cc_library(
     ],
     deps = [
         "//config:config-cxx",
-        "//third_party/glog:glog-cxx",
+        "//third_party/glog:glog-shared-cxx",
         "//third_party/gperftools:tcmalloc-cxx",
         "//third_party/kashmir:kashmir-cxx",
         "//third_party/protobuf:protobuf-cxx",
     ] + select({
         "//tools/platform:darwin": [], 
-        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
+        "//conditions:default": ["//third_party/libunwind:libunwind-shared-cxx"],
     }),
     linkstatic = 1,
 )

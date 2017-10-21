@@ -17,6 +17,7 @@ load("/tools/rules/heron_client", "heron_client_lib_healthmgr_files")
 load("/tools/rules/heron_core", "heron_core_files")
 load("/tools/rules/heron_core", "heron_core_bin_files")
 load("/tools/rules/heron_core", "heron_core_conf_files")
+load("/tools/rules/heron_core", "heron_core_lib_glog_files")
 load("/tools/rules/heron_core", "heron_core_lib_instance_files")
 load("/tools/rules/heron_core", "heron_core_lib_healthmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
@@ -89,6 +90,7 @@ pkg_tar(
     srcs = generated_release_files,
     deps = [
         ":heron-core-bin",
+        ":heron-core-lib-glog",
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
         ":heron-core-lib-healthmgr",
@@ -106,6 +108,12 @@ pkg_tar(
     name = "heron-core-bin",
     package_dir = "heron-core/bin",
     srcs = heron_core_bin_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-glog",
+    package_dir = "heron-core/lib/glog",
+    srcs = heron_core_lib_glog_files(),
 )
 
 pkg_tar(

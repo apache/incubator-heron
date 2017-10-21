@@ -12,7 +12,7 @@ config_patch = "libunwind-1.1-config.patch"
 cache_patch = "libunwind-1.1-cache.patch"
 
 
-out_files = [
+include_files = [
     "include/libunwind-common.h",
     "include/libunwind-coredump.h",
     "include/libunwind-dynamic.h",
@@ -20,11 +20,22 @@ out_files = [
     "include/libunwind-ptrace.h",
     "include/libunwind-x86_64.h",
     "include/unwind.h",
+]
+
+lib_static_files = [
     "lib/libunwind.a",
     "lib/libunwind-coredump.a",
     "lib/libunwind-ptrace.a",
     "lib/libunwind-setjmp.a",
     "lib/libunwind-x86_64.a",
+]
+
+lib_dynamic_files = [
+    "lib/libunwind.so.8.0.1",
+    "lib/libunwind-coredump.so.0.0.0",
+    "lib/libunwind-ptrace.so.0.0.0",
+    "lib/libunwind-setjmp.so.0.0.0",
+    "lib/libunwind-x86_64.so.8.0.1",
 ]
 
 genrule(
@@ -35,7 +46,7 @@ genrule(
         config_patch,
         cache_patch
     ],
-    outs = out_files,
+    outs = include_files + lib_static_files + lib_dynamic_files,
     cmd = "\n".join([
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t libunwind.XXXXX)",
@@ -47,7 +58,7 @@ genrule(
         "patch -d " + package_dir + " -p0 < " + config_patch,
         "patch -d " + package_dir + " -p0 < " + cache_patch,
         "cd " + package_dir,
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
+        "./configure --prefix=$$INSTALL_DIR --disable-minidebuginfo",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),
@@ -58,8 +69,7 @@ cc_library(
     srcs = [
         "include/libunwind.h",
         "empty.cc",
-        "lib/libunwind.a",
-    ],
+    ] + lib_static_files,
     hdrs = [
         "include/libunwind.h",
     ],
@@ -69,7 +79,27 @@ cc_library(
     linkstatic = 1,
 )
 
+cc_library(
+    name = "libunwind-shared-cxx",
+    srcs = [
+        "include/libunwind.h",
+        "empty.cc",
+    ] + lib_dynamic_files,
+    hdrs = [
+        "include/libunwind.h",
+    ],
+    includes = [
+        "include",
+    ],
+)
+
+
 filegroup(
     name = "libunwind-files",
-    srcs = out_files,
+    srcs = include_files + lib_static_files,
+)
+
+filegroup(
+    name = "libunwind-dynamic-files",
+    srcs = lib_dynamic_files, 
 )
