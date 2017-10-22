@@ -163,6 +163,7 @@ class JoinStreamlet(Streamlet):
             GlobalStreamId(self._right.get_name(), self._right._output) :
             Grouping.custom("heronpy.streamlet.impl.joinbolt.JoinGrouping")}
 
+  # pylint: disable=superfluous-parens
   def _build_this(self, builder, stage_names):
     print("join_build_this left: %s right: %s" % (self._left._built, self._right._built))
     print("left: %s right: %s" % (self._left.get_name(), self._right.get_name()))
