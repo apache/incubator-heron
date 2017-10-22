@@ -22,7 +22,7 @@ from heronpy.connectors.mock.arraylooper import ArrayLooper
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
-    print "Topology's name is not specified"
+    print("Topology's name is not specified")
     sys.exit(1)
 
   builder = Builder()
