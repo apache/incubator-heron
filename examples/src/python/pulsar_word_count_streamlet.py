@@ -17,6 +17,7 @@ import sys
 from heronpy.streamlet.streamlet import TimeWindow
 from heronpy.connectors.pulsar.pulsarstreamlet import PulsarStreamlet
 
+# pylint: disable=superfluous-parens
 if __name__ == '__main__':
   if len(sys.argv) != 4:
     print("""
