@@ -144,6 +144,7 @@ def heron_pex(topology_pex, topology_class_name, args=None):
                 (topology_class_name, ex)
       return SimpleResult(Status.HeronError, err_context)
 
+# pylint: disable=superfluous-parens
 def heron_cpp(topology_binary, args=None):
   Log.debug("Executing %s", topology_binary)
   heron_env = os.environ.copy()

@@ -79,6 +79,7 @@ def create_parser(subparsers):
   return parser
 
 
+# pylint: disable=superfluous-parens
 def _list(cl_args):
   cluster = cl_args['cluster']
   config = cliconfig.cluster_config(cluster)
@@ -90,6 +91,7 @@ def _list(cl_args):
 
   return SimpleResult(Status.Ok)
 
+# pylint: disable=superfluous-parens
 def _set(cl_args):
   cluster, prop, value = cl_args['cluster'], cl_args['property'], cl_args['value']
   if cliconfig.is_valid_property(prop):
@@ -101,6 +103,7 @@ def _set(cl_args):
   return SimpleResult(Status.Ok)
 
 
+# pylint: disable=superfluous-parens
 def _unset(cl_args):
   cluster, prop = cl_args['cluster'], cl_args['property']
   if cliconfig.is_valid_property(prop):
