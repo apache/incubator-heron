@@ -42,9 +42,32 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   public static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";
 
   public enum JoinType {
+    /**
+     * Return a new KVStreamlet by inner joining 'this streamlet with ‘other’ streamlet.
+     * The join is done over elements accumulated over a time window defined by TimeWindow.
+     */
     INNER,
+    /**
+     * Return a new KVStreamlet by left joining ‘this’ streamlet with ‘other’ streamlet.
+     * The join is done over elements accumulated over a time window defined by TimeWindow.
+     * Because its a left join, it is guaranteed that all elements of this streamlet will show up
+     * in the resulting joined streamlet.
+     */
     OUTER_LEFT,
-    OUTER_RIGHT;
+    /**
+     * Return a new KVStreamlet by right joining ‘this’ streamlet with ‘other’ streamlet.
+     * The join is done over elements accumulated over a time window defined by TimeWindow.
+     * Because its a right join, it is guaranteed that all elements of the other streamlet will show up
+     * in the resulting joined streamlet.
+     */
+    OUTER_RIGHT,
+    /**
+     * Return a new KVStreamlet by outer joining ‘this’ streamlet with ‘other’ streamlet.
+     * The join is done over elements accumulated over a time window defined by TimeWindow.
+     * Because its a outer join, it is guaranteed that all elements of both this streamlet and
+     * 'other' streamlet will show up in the resulting joined streamlet.
+     */
+    OUTER;
   }
 
   private JoinType joinType;
@@ -119,6 +142,15 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
             innerJoinAndEmit(key, tupleWindow, val);
           } else if (!val.getSecond().isEmpty()) {
             outerRightJoinAndEmit(key, tupleWindow, val);
+          }
+          break;
+        case OUTER:
+          if (!val.getFirst().isEmpty() && !val.getSecond().isEmpty()) {
+            innerJoinAndEmit(key, tupleWindow, val);
+          } else if (!val.getSecond().isEmpty()) {
+            outerRightJoinAndEmit(key, tupleWindow, val);
+          } else if (!val.getFirst().isEmpty()) {
+            outerLeftJoinAndEmit(key, tupleWindow, val);
           }
           break;
         default:

@@ -169,6 +169,10 @@ public class JoinOperatorTest {
           Assert.assertTrue(expectedResultsK1.contains(tuple.getValue()));
           expectedResultsK1.remove(tuple.getValue());
           break;
+        case "key2":
+          Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
+          expectedResultsK2.remove(tuple.getValue());
+          break;
         case "key3":
           Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
           expectedResultsK2.remove(tuple.getValue());
@@ -182,6 +186,63 @@ public class JoinOperatorTest {
     }
     Assert.assertEquals(0, expectedResultsK1.size());
     Assert.assertEquals(0, expectedResultsK2.size());
+  }
+
+  @Test
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void testOuterJoinOperator() {
+    JoinOperator<String, String, String, String> joinOperator
+        = getJoinOperator(JoinOperator.JoinType.OUTER);
+
+    TupleWindow tupleWindow = getTupleWindow();
+
+    Set<String> expectedResultsK1 = new HashSet<>();
+    expectedResultsK1.add("01");
+    expectedResultsK1.add("03");
+    expectedResultsK1.add("21");
+    expectedResultsK1.add("23");
+    expectedResultsK1.add("41");
+    expectedResultsK1.add("43");
+
+    Set<String> expectedResultsK2 = new HashSet<>();
+    expectedResultsK2.add("5null");
+    expectedResultsK2.add("6null");
+    expectedResultsK2.add("7null");
+
+    Set<String> expectedResultsK3 = new HashSet<>();
+    expectedResultsK3.add("null8");
+    expectedResultsK3.add("null9");
+    expectedResultsK3.add("null10");
+    expectedResultsK3.add("null11");
+
+    joinOperator.execute(tupleWindow);
+
+    Assert.assertEquals(13, emittedTuples.size());
+    for (Object object : emittedTuples) {
+      KeyValue<KeyedWindow<String>, String> tuple = (KeyValue<KeyedWindow<String>, String>) object;
+      KeyedWindow<String> keyedWindow = tuple.getKey();
+      switch (keyedWindow.getKey()) {
+        case "key1":
+          Assert.assertTrue(expectedResultsK1.contains(tuple.getValue()));
+          expectedResultsK1.remove(tuple.getValue());
+          break;
+        case "key2":
+          Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
+          expectedResultsK2.remove(tuple.getValue());
+          break;
+        case "key3":
+          Assert.assertTrue(expectedResultsK3.contains(tuple.getValue()));
+          expectedResultsK3.remove(tuple.getValue());
+          break;
+        default:
+          Assert.fail();
+      }
+      Assert.assertEquals(12, keyedWindow.getWindow().getCount());
+      Assert.assertEquals(startTime, keyedWindow.getWindow().getStartTime());
+      Assert.assertEquals(endTime, keyedWindow.getWindow().getEndTime());
+    }
+    Assert.assertEquals(0, expectedResultsK1.size());
+    Assert.assertEquals(0, expectedResultsK3.size());
   }
 
   private TupleWindow getTupleWindow() {
@@ -223,6 +284,8 @@ public class JoinOperatorTest {
         startTime, endTime);
     return tupleWindow;
   }
+
+
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private JoinOperator<String, String, String, String> getJoinOperator(JoinOperator.JoinType type) {

@@ -40,30 +40,13 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWin
   private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createInnerJoinStreamlet(BaseKVStreamlet<A, B> left,
-                               BaseKVStreamlet<A, C> right,
-                               WindowConfig windowCfg,
-                               SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.INNER, left,
-                                         right, windowCfg, joinFn);
-  }
-
-  public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createLeftJoinStreamlet(BaseKVStreamlet<A, B> left,
-                              BaseKVStreamlet<A, C> right,
-                              WindowConfig windowCfg,
-                              SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER_LEFT, left,
-                                         right, windowCfg, joinFn);
-  }
-
-  public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createOuterJoinStreamlet(BaseKVStreamlet<A, B> left,
-                               BaseKVStreamlet<A, C> right,
-                               WindowConfig windowCfg,
-                               SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
-    return new JoinStreamlet<A, B, C, D>(JoinOperator.JoinType.OUTER_RIGHT, left,
-                                         right, windowCfg, joinFn);
+      createJoinStreamlet(BaseKVStreamlet<A, B> left,
+                          BaseKVStreamlet<A, C> right,
+                          WindowConfig windowCfg,
+                          JoinOperator.JoinType joinType,
+                          SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
+    return new JoinStreamlet<>(joinType, left,
+        right, windowCfg, joinFn);
   }
 
   private JoinStreamlet(JoinOperator.JoinType joinType, BaseKVStreamlet<K, V1> left,
