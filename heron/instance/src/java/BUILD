@@ -13,6 +13,7 @@ instance_deps_files =  \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:utils-java",
+        "@commons_cli_commons_cli//jar"
     ]
 
 java_library(

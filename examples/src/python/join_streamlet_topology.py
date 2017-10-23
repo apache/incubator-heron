@@ -21,9 +21,10 @@ from heronpy.streamlet.config import Config
 from heronpy.streamlet.windowconfig import WindowConfig
 from heronpy.connectors.mock.arraylooper import ArrayLooper
 
+# pylint: disable=superfluous-parens
 if __name__ == '__main__':
   if len(sys.argv) != 2:
-    print "Topology's name is not specified"
+    print("Topology's name is not specified")
     sys.exit(1)
 
   builder = Builder()
