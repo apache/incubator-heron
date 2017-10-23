@@ -41,6 +41,7 @@ import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
@@ -60,7 +61,7 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testInnerJoinOperator() {
     JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.INNER);
+        = getJoinOperator(JoinType.INNER);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -92,7 +93,7 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterLeftJoinOperator() {
     JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.OUTER_LEFT);
+        = getJoinOperator(JoinType.OUTER_LEFT);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -140,7 +141,7 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterRightJoinOperator() {
     JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.OUTER_RIGHT);
+        = getJoinOperator(JoinType.OUTER_RIGHT);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -192,7 +193,7 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterJoinOperator() {
     JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.OUTER);
+        = getJoinOperator(JoinType.OUTER);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -288,7 +289,7 @@ public class JoinOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private JoinOperator<String, String, String, String> getJoinOperator(JoinOperator.JoinType type) {
+  private JoinOperator<String, String, String, String> getJoinOperator(JoinType type) {
     JoinOperator<String, String, String, String> joinOperator = new JoinOperator(
         type,
         "leftComponent",

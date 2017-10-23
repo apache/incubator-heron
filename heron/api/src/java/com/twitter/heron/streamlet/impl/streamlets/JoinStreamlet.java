@@ -17,6 +17,7 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.WindowConfig;
@@ -33,7 +34,7 @@ import com.twitter.heron.streamlet.impl.operators.JoinOperator;
  * and the value is of type VR.
  */
 public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWindow<K>, VR> {
-  private JoinOperator.JoinType joinType;
+  private JoinType joinType;
   private BaseKVStreamlet<K, V1> left;
   private BaseKVStreamlet<K, V2> right;
   private WindowConfigImpl windowCfg;
@@ -43,13 +44,13 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWin
       createJoinStreamlet(BaseKVStreamlet<A, B> left,
                           BaseKVStreamlet<A, C> right,
                           WindowConfig windowCfg,
-                          JoinOperator.JoinType joinType,
+                          JoinType joinType,
                           SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
     return new JoinStreamlet<>(joinType, left,
         right, windowCfg, joinFn);
   }
 
-  private JoinStreamlet(JoinOperator.JoinType joinType, BaseKVStreamlet<K, V1> left,
+  private JoinStreamlet(JoinType joinType, BaseKVStreamlet<K, V1> left,
                         BaseKVStreamlet<K, V2> right,
                         WindowConfig windowCfg,
                         SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
@@ -61,7 +62,7 @@ public final class JoinStreamlet<K, V1, V2, VR> extends BaseKVStreamlet<KeyedWin
     setNumPartitions(left.getNumPartitions());
   }
 
-  public JoinOperator.JoinType getJoinType() {
+  public JoinType getJoinType() {
     return joinType;
   }
 
