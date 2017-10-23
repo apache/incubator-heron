@@ -71,8 +71,6 @@ public class HeronSubmitterTest {
     }
   }
 
-
-
   @Test(expected = InvalidTopologyException.class)
   public void testInvalidTopologySubmittion() throws AlreadyAliveException, InvalidTopologyException {
     TopologyBuilder builder = new TopologyBuilder();
