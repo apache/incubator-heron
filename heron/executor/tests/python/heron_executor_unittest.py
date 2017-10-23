@@ -139,8 +139,8 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 " \
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
-           "com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d " \
-           "tmaster_controller_port metricsmgr_port %s %s" \
+           "com.twitter.heron.instance.HeronInstance -topology_name topname -topology_id topid -instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
+           "-stmgr_port tmaster_controller_port -metricsmgr_port metricsmgr_port -system_config_file %s -override_config_file %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
@@ -217,7 +217,7 @@ class HeronExecutorTest(unittest.TestCase):
     %s %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
-    scheduler_classpath scheduler_port python_instance_binary
+    scheduler_classpath scheduler_port python_instance_binary cpp_instance_binary
     metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
     is_stateful_enabled ckptmgr_classpath ckptmgr-port stateful_config_file
     healthmgr_mode healthmgr_classpath
@@ -275,6 +275,9 @@ class HeronExecutorTest(unittest.TestCase):
 
     current_json = json.dumps(current_commands, sort_keys=True).split(' ')
     temp_json = json.dumps(temp_dict, sort_keys=True).split(' ')
+
+    print ("current_json: %s" % current_json)
+    print ("temp_json: %s" % temp_json)
 
     # better test error report
     for (s1, s2) in zip(current_json, temp_json):

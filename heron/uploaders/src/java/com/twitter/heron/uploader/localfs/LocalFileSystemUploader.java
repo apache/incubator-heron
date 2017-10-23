@@ -125,9 +125,12 @@ public class LocalFileSystemUploader implements IUploader {
    */
   @Override
   public boolean undo() {
-    LOG.info("Clean uploaded jar");
-    File file = new File(destTopologyFile);
-    return file.delete();
+    if (destTopologyFile != null) {
+      LOG.info("Clean uploaded jar");
+      File file = new File(destTopologyFile);
+      return file.delete();
+    }
+    return true;
   }
 
   @Override

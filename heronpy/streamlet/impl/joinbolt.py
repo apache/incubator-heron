@@ -27,12 +27,14 @@ from heronpy.streamlet.impl.streamletboltbase import StreamletBoltBase
 
 
 # pylint: disable=unused-argument
+# pylint: disable=too-many-branches
 class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
   """JoinBolt"""
 
-  LEFT = 1
+  OUTER_LEFT = 1
   INNER = 2
-  OUTER = 3
+  OUTER_RIGHT = 3
+  OUTER = 4
   JOINFUNCTION = '__join_function__'
   JOINTYPE = '__join_type__'
   WINDOWDURATION = SlidingWindowBolt.WINDOW_DURATION_SECS
@@ -41,18 +43,18 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
 
   def _add(self, key, value, src_component, mymap):
     if not key in mymap:
-      mymap[key] = (None, None)
+      mymap[key] = ([], [])
     # Join Output should be Key -> (V1, V2) where
     # V1 is coming from the left stream and V2 coming
     # from the right stream. In this case, _joined_component
     # represents the right stream
     if src_component == self._joined_component:
-      mymap[key][1] = value
+      mymap[key][1].append(value)
     else:
-      mymap[key][0] = value
+      mymap[key][0].append(value)
 
   def initialize(self, config, context):
-    super(JoinBolt, self).__init__(config, context)
+    super(JoinBolt, self).initialize(config, context)
     if not JoinBolt.JOINEDCOMPONENT in config:
       raise RuntimeError("%s must be specified in the JoinBolt" % JoinBolt.JOINEDCOMPONENT)
     self._joined_component = config[JoinBolt.JOINEDCOMPONENT]
@@ -74,17 +76,49 @@ class JoinBolt(SlidingWindowBolt, StreamletBoltBase):
     for (key, values) in mymap.items():
       if self._join_type == JoinBolt.INNER:
         if values[0] and values[1]:
-          self.emit_join(key, values, window_config)
-      elif self._join_type == JoinBolt.LEFT:
-        if values[0]:
-          self.emit_join(key, values, window_config)
+          self.inner_join_and_emit(key, values, window_config)
+      elif self._join_type == JoinBolt.OUTER_LEFT:
+        if values[0] and values[1]:
+          self.inner_join_and_emit(key, values, window_config)
+        elif values[0]:
+          self.outer_left_join_and_emit(key, values, window_config)
+      elif self._join_type == JoinBolt.OUTER_RIGHT:
+        if values[0] and values[1]:
+          self.inner_join_and_emit(key, values, window_config)
+        elif values[1]:
+          self.outer_right_join_and_emit(key, values, window_config)
       elif self._join_type == JoinBolt.OUTER:
-        self.emit_join(key, values, window_config)
+        if values[0] and values[1]:
+          self.inner_join_and_emit(key, values, window_config)
+        elif values[0]:
+          self.outer_left_join_and_emit(key, values, window_config)
+        elif values[1]:
+          self.outer_right_join_and_emit(key, values, window_config)
 
   def emit_join(self, key, values, window_config):
     result = self._join_function(values[0], values[1])
     keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
     self.emit([(keyedwindow, result)], stream='output')
+
+  def inner_join_and_emit(self, key, values, window_config):
+    for left_val in values[0]:
+      for right_val in values[1]:
+        result = self._join_function(left_val, right_val)
+        keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
+        self.emit([(keyedwindow, result)], stream='output')
+
+  def outer_left_join_and_emit(self, key, values, window_config):
+    for left_val in values[0]:
+      result = self._join_function(left_val, None)
+      keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
+      self.emit([(keyedwindow, result)], stream='output')
+
+  def outer_right_join_and_emit(self, key, values, window_config):
+    for right_val in values[1]:
+      result = self._join_function(None, right_val)
+      keyedwindow = KeyedWindow(key, Window(window_config.start, window_config.end))
+      self.emit([(keyedwindow, result)], stream='output')
+
 
 # pylint: disable=unused-argument
 class JoinGrouping(ICustomGrouping):
@@ -106,7 +140,7 @@ class JoinStreamlet(Streamlet):
   """JoinStreamlet"""
   def __init__(self, join_type, window_config, join_function, left, right):
     super(JoinStreamlet, self).__init__()
-    if not join_type in [JoinBolt.INNER, JoinBolt.OUTER, JoinBolt.LEFT]:
+    if not join_type in [JoinBolt.INNER, JoinBolt.OUTER_RIGHT, JoinBolt.OUTER_LEFT]:
       raise RuntimeError("join type has to be of one of inner, outer, left")
     if not isinstance(window_config, WindowConfig):
       raise RuntimeError("window config has to be of type WindowConfig")
@@ -129,7 +163,10 @@ class JoinStreamlet(Streamlet):
             GlobalStreamId(self._right.get_name(), self._right._output) :
             Grouping.custom("heronpy.streamlet.impl.joinbolt.JoinGrouping")}
 
+  # pylint: disable=superfluous-parens
   def _build_this(self, builder, stage_names):
+    print("join_build_this left: %s right: %s" % (self._left._built, self._right._built))
+    print("left: %s right: %s" % (self._left.get_name(), self._right.get_name()))
     if not self._left._built or not self._right._built:
       return False
     if not self.get_name():
