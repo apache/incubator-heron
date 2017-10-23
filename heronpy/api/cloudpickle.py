@@ -50,6 +50,8 @@ import dis
 import traceback
 import weakref
 
+# pylint: disable-all
+
 if sys.version < '3':
   from pickle import Pickler # pylint: disable=ungrouped-imports
   try:

@@ -71,7 +71,7 @@ class RepartitionBolt(Bolt, StatefulComponent, StreamletBoltBase):
     self.emitted += 1
     self.ack(tup)
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,deprecated-method
 class RepartitionStreamlet(Streamlet):
   """RepartitionStreamlet"""
   def __init__(self, num_partitions, repartition_function, parent):
