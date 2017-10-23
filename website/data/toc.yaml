@@ -7,10 +7,10 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
-  - name: The Heron Functional API
+  - name: The Heron Streamlet API
     sublinks:
     - name: The Heron Streamlet API for Java
-      url: /docs/developers/java/functional-api
+      url: /docs/developers/java/streamlet-api
   - name: The Heron Topology API
     sublinks:
       - name: The Heron Topology API for Java
@@ -75,6 +75,8 @@ sections:
         url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
+      - name: Kubernetes
+        url: /docs/operators/deployment/schedulers/kubernetes
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
       - name: Local Cluster
@@ -103,8 +105,12 @@ sections:
         url: /docs/operators/configuration/tmaster
   - name: Observability
     sublinks:
-      - name: Graphite
-        url: /docs/operators/observability/graphite
+    - name: Prometheus
+      url: /docs/operators/observability/prometheus
+    - name: Graphite
+      url: /docs/operators/observability/graphite
+    - name: Scribe
+      url: /docs/operators/observability/scribe
   - name: User Manuals
     sublinks:
       - name: Heron Client

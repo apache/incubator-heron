@@ -15,6 +15,7 @@
 import collections
 import logging
 import os
+import resource
 import sys
 import traceback
 import signal
@@ -40,6 +41,9 @@ from heron.instance.src.python.utils import system_config
 
 Log = log.Log
 AssignedInstance = collections.namedtuple('AssignedInstance', 'is_spout, protobuf, py_class')
+
+def set_resource_limit(max_ram):
+  resource.setrlimit(resource.RLIMIT_RSS, (max_ram, max_ram))
 
 # pylint: disable=too-many-instance-attributes
 class SingleThreadHeronInstance(object):
@@ -324,7 +328,7 @@ def yaml_config_reader(config_path):
 
 # pylint: disable=missing-docstring
 def main():
-  if len(sys.argv) != 13:
+  if len(sys.argv) != 14:
     print_usage(sys.argv[0])
     sys.exit(1)
 
@@ -340,13 +344,15 @@ def main():
   sys_config = yaml_config_reader(sys.argv[10])
   override_config = yaml_config_reader(sys.argv[11])
   topology_pex_file_path = sys.argv[12]
+  max_ram = int(sys.argv[13])
 
-  Log.debug("System config: " + str(sys_config))
-  Log.debug("Override config: " + str(override_config))
   system_config.set_sys_config(sys_config, override_config)
 
   # get combined configuration
   sys_config = system_config.get_sys_config()
+
+  # set resource limits
+  set_resource_limit(max_ram)
 
   # create the protobuf instance
   instance_info = physical_plan_pb2.InstanceInfo()
@@ -374,6 +380,9 @@ def main():
            " and stmgrId: " + stmgr_id + " and stmgrPort: " + stmgr_port +
            " and metricsManagerPort: " + metrics_port +
            "\n **Topology Pex file located at: " + topology_pex_file_path)
+  Log.debug("System config: " + str(sys_config))
+  Log.debug("Override config: " + str(override_config))
+  Log.debug("Maximum Ram: " + str(max_ram))
 
   heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance, stmgr_port,
                                              metrics_port, topology_pex_file_path)

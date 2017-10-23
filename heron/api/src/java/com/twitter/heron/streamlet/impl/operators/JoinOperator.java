@@ -25,6 +25,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
@@ -40,12 +41,6 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   private static final long serialVersionUID = 4875450390444745407L;
   public static final String LEFT_COMPONENT_NAME = "_streamlet_joinbolt_left_component_name_";
   public static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";
-
-  public enum JoinType {
-    INNER,
-    OUTER_LEFT,
-    OUTER_RIGHT;
-  }
 
   private JoinType joinType;
   // The source component that represent the left join component
@@ -119,6 +114,15 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
             innerJoinAndEmit(key, tupleWindow, val);
           } else if (!val.getSecond().isEmpty()) {
             outerRightJoinAndEmit(key, tupleWindow, val);
+          }
+          break;
+        case OUTER:
+          if (!val.getFirst().isEmpty() && !val.getSecond().isEmpty()) {
+            innerJoinAndEmit(key, tupleWindow, val);
+          } else if (!val.getSecond().isEmpty()) {
+            outerRightJoinAndEmit(key, tupleWindow, val);
+          } else if (!val.getFirst().isEmpty()) {
+            outerLeftJoinAndEmit(key, tupleWindow, val);
           }
           break;
         default:

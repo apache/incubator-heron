@@ -168,6 +168,12 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
 
   /**
+   * Amount of ram to pad each container for this topology.
+   * In bytes.
+   */
+  static const std::string TOPOLOGY_CONTAINER_RAM_PADDING;
+
+  /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
@@ -244,6 +250,10 @@ class Config {
 
   void setContainerPaddingPercentage(int percentage) {
     config_[Config::TOPOLOGY_CONTAINER_PADDING_PERCENTAGE] = std::to_string(percentage);
+  }
+
+  void setContainerRamPadding(int64_t bytes) {
+    config_[Config::TOPOLOGY_CONTAINER_RAM_PADDING] = std::to_string(bytes);
   }
 
   void setComponentRamMap(const std::string& rammap) {
