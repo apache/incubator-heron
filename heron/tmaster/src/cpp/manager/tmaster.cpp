@@ -602,7 +602,7 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
 
 void TMaster::KillContainer(const std::string& host_name,
     sp_int32 shell_port, sp_string stmgr_id) {
-  LOG(ERROR) << "Start killing " << stmgr_id << " on " <<
+  LOG(INFO) << "Start killing " << stmgr_id << " on " <<
     host_name << ":" << shell_port;
   HTTPKeyValuePairs kvs;
   kvs.push_back(make_pair("secret", GetTopologyId()));
@@ -618,7 +618,7 @@ void TMaster::KillContainer(const std::string& host_name,
     LOG(ERROR) << "Failed to kill " << stmgr_id << " on "
       << host_name << ":" << shell_port;
   }
-  LOG(ERROR) << "Finish killing " << stmgr_id << " on " <<
+  LOG(INFO) << "Finish killing " << stmgr_id << " on " <<
     host_name << ":" << shell_port;
   return;
 }
