@@ -15,7 +15,7 @@
    from a list of files and emits one tuple per line'''
 import glob
 
-from heronpy.dsl.generator import Generator
+from heronpy.streamlet.generator import Generator
 
 class TextFileGenerator(Generator):
   """TextFileGenerator: reads from a list of files"""

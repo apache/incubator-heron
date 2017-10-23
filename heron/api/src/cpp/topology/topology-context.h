@@ -103,9 +103,9 @@ class TopologyContext {
   virtual std::shared_ptr<metric::IMetricsRegistrar> getMetricsRegistrar() = 0;
 
   /**
-   * Gets the logger with which you can do logging
+   * Log the contents of the ostream
    */
-  virtual std::ostream& getLogger() = 0;
+  virtual void log(std::ostringstream& ostr) = 0;
 };
 
 }  // namespace topology

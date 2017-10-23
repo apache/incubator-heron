@@ -4,11 +4,17 @@ $base-font-size: 18px;
 $base-line-height: 1.5;
 $yellow: darken(yellow, 9%);
 
-article.hn-docs-content {
-  .alert {
-    margin: 1.5rem 0;
-  }
+h1.hn-docs-title {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 
+  & + .hn-docs-description {
+    font-size: 1.25rem;
+    text-align: right;
+  }
+}
+
+article.hn-docs-content {
   code {
     color: $heron-blue-green;
     background-color: lighten($light-gray, 25%);
@@ -36,8 +42,9 @@ article.hn-docs-content {
   }
 
   img {
-    width: 100%;
-    margin: $base-margin 0;
+    display: block;
+    max-width: 100%;
+    margin: $base-margin auto;
 
     &:hover {
       width: 125%;
@@ -224,6 +231,7 @@ article.hn-docs-content {
         .vg { color: #f8f8f2 } /* Name.Variable.Global */
         .vi { color: #f8f8f2 } /* Name.Variable.Instance */
         .il { color: #ae81ff } /* Literal.Number.Integer.Long */
+        .clp { color: #f92672 } /* Command-line dollar sign */
       
         &.language-bash {
           .nb, .k { color: $light-gray; }

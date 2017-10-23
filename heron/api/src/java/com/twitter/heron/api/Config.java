@@ -181,6 +181,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
   /**
+   * Amount of ram to pad each container.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+  /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
@@ -264,6 +269,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_DISK_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
+    apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
@@ -398,6 +404,10 @@ public class Config extends HashMap<String, Object> {
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
     conf.put(Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, Integer.toString(percentage));
+  }
+
+  public static void setContainerRamPadding(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
   }
 
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
@@ -564,6 +574,10 @@ public class Config extends HashMap<String, Object> {
 
   public void setContainerPaddingPercentage(int percentage) {
     setContainerPaddingPercentage(this, percentage);
+  }
+
+  public void setContainerRamPadding(ByteAmount nbytes) {
+    setContainerRamPadding(this, nbytes);
   }
 
   public void setComponentRamMap(String ramMap) {

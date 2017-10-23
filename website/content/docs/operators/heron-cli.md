@@ -292,6 +292,64 @@ Arguments of the `kill` command:
 $ heron kill local my-topology
 ```
 
+## Heron CLI configuration
+
+When using the Heron CLI tool to interact with Heron clusters, there are two ways to provide configuration for the tool:
+
+* Via command-line flags, such as `--service-url`
+* Using the `heron config` interface, which enables you to set, unset, and list configs in the local filesystem
+
+### Available parameters
+
+The following parameters can currently be set using the `heron config` interface:
+
+Parameter | Description | Corresponding CLI flag
+:---------|:------------|:----------------------
+`service_url` | The service URL for the Heron cluster | `--service-url`
+
+### Set configuration
+
+You can set a config using the `set` command. Here's an example:
+
+```bash
+$ heron config us-west-staging set service_url http://us-west.staging.example.com:9000
+```
+
+### Unset configuration
+
+You can remove a parameter using the `unset` command. Here's an example:
+
+```bash
+$ heron config apac-australia unset service_url
+```
+
+### List configuration
+
+You can list all of the CLI configs for a Heron cluster using the `list` command. This will return the configs as a list of `parameter = value` pairs. Here's an example:
+
+```bash
+$ heron config local list
+service_url = http://localhost:9000
+```
+
+### Configuration example
+
+Let's say that you need to interact with a Heron cluster called `apac-japan-staging` which has a service
+URL of http://apac-japan.staging.example.com:9000. If you specified the service URL via CLI flags, you'd need
+to set the flag every time you perform an operation involving that cluster:
+
+```bash
+$ heron deactivate apac-japan-staging MyTopology \
+  --service-url http://apac-japan.staging.example.com:9000
+```
+
+Using `heron config`, however, you could set the service URL for that cluster once and for all:
+
+```bash
+$ heron config apac-japan-staging set service_url http://apac-japan.staging.example.com:9000
+$ heron deactivate apac-japan-staging MyTopology
+```
+
 ## Other Commands
 
 ### Version

@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''test_runner.py: module for running dsl in integration tests'''
-from heronpy.dsl.runner import Runner
+'''test_runner.py: module for running the streamlet API in integration tests'''
+from heronpy.streamlet.runner import Runner
 from .test_topology_builder import TestTopologyBuilder
 
 class TestRunner(Runner):
-  """Module for running dsl in integration tests"""
+  """Module for running the streamlet API in integration tests"""
   def __init__(self):
     super(TestRunner, self).__init__()
     pass

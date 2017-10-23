@@ -17,7 +17,7 @@ import collections
 import itertools
 import time
 
-from heronpy.dsl.generator import Generator
+from heronpy.streamlet.generator import Generator
 
 class ArrayLooper(Generator):
   """A ArrayLooper loops the contents of the a user supplied array forever
@@ -36,4 +36,4 @@ class ArrayLooper(Generator):
   def get(self):
     if self._sleep is not None:
       time.sleep(self._sleep)
-    return self._curiter.next()
+    return next(self._curiter)

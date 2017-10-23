@@ -79,35 +79,38 @@ def create_parser(subparsers):
   return parser
 
 
+# pylint: disable=superfluous-parens
 def _list(cl_args):
   cluster = cl_args['cluster']
   config = cliconfig.cluster_config(cluster)
   if config:
     for k, v in config.items():
-      print "%s = %s" % (str(k), str(v))
+      print("%s = %s" % (str(k), str(v)))
   else:
-    print "No config for cluster %s" % cluster
+    print("No config for cluster %s" % cluster)
 
   return SimpleResult(Status.Ok)
 
+# pylint: disable=superfluous-parens
 def _set(cl_args):
   cluster, prop, value = cl_args['cluster'], cl_args['property'], cl_args['value']
   if cliconfig.is_valid_property(prop):
     cliconfig.set_property(cluster, prop, value)
-    print "Updated property [%s] for cluster %s" % (prop, cluster)
+    print("Updated property [%s] for cluster %s" % (prop, cluster))
   else:
-    print "Error: Unknown property [%s] for cluster %s" % (prop, cluster)
+    print("Error: Unknown property [%s] for cluster %s" % (prop, cluster))
 
   return SimpleResult(Status.Ok)
 
 
+# pylint: disable=superfluous-parens
 def _unset(cl_args):
   cluster, prop = cl_args['cluster'], cl_args['property']
   if cliconfig.is_valid_property(prop):
     cliconfig.unset_property(cluster, prop)
-    print "Cleared property [%s] for cluster %s" % (prop, cluster)
+    print("Cleared property [%s] for cluster %s" % (prop, cluster))
   else:
-    print "Error: Unknown property [%s] for cluster %s" % (prop, cluster)
+    print("Error: Unknown property [%s] for cluster %s" % (prop, cluster))
 
   return SimpleResult(Status.Ok)
 
