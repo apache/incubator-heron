@@ -187,7 +187,7 @@ Heron on Google Container Engine supports two static file storage options for to
 
 #### Google Cloud Storage setup
 
-If you're running Heron on GKE, you can use either [Google Cloud Storage](https://cloud.google.com/storage/) or [Apaceh BookKeeper](https://bookkeeper.apache.org) for topology artifact storage.
+If you're running Heron on GKE, you can use either [Google Cloud Storage](https://cloud.google.com/storage/) or [Apache BookKeeper](https://bookkeeper.apache.org) for topology artifact storage.
 
 > If you'd like to use BookKeeper instead of Google Cloud Storage, skip to the [BookKeeper](#bookkeeper-setup) section below.
 
@@ -262,7 +262,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 If you're using Apache BookKeeper:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bk-apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
 ```
 
 ### Managing topologies
