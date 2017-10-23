@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -173,21 +171,6 @@ public class LocalScheduler implements IScheduler, IScalable {
     }
 
     LOG.info("Executor for each container have been started.");
-
-    new Timer().schedule(new TimerTask() {
-      @Override
-      public void run() {
-        synchronized (processToContainer) {
-          int x = 1; // how about 0 ?
-          LOG.info("Starting zombie container " + x);
-          // create a process with the executor command
-          // and topology working directory
-          final Process containerExecutor = startExecutorProcess(x);
-          // associate the process and its container id
-          processToContainer.put(containerExecutor, x);
-          LOG.info("Started the executor for container: " + x);
-        }
-      }}, 2*60*1000);
 
     return true;
   }
