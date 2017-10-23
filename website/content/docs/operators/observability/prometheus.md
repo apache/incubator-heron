@@ -23,7 +23,6 @@ Parameter | Description | Default
 `port` | The port on which Prometheus will scrape for metrics. **Note**: You must supply a `port` *or* `port-file` config. | 8080
 `port-file` | The path to a text file that contains the port number to be used by Prometheus for metrics scraping. **Note**: You must supply a `port` *or* `port-file` config. | `metrics.port`
 `path` | The Prometheus path on which to publish metrics | `/metrics`
-`flat-metrics` | Whether to publish a flat `name: value` JSON map | `true`
 `include-topology-name` | Whether the name of the Heron topology will be included in names for metrics | `true`
 `metrics-cache-max-size` | The maximum number of metrics cached and published | 1000000
 `metrics-cache-ttl-sec` | The time to live (TTL) for metrics, i.e. the time, in seconds after which a metric that was collected will stop being published | 600 (10 minutes)
