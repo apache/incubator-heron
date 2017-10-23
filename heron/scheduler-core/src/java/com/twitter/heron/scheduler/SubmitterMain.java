@@ -34,7 +34,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.scheduler.utils.LauncherUtils;

@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.packing.CommonPackingTests;
 import com.twitter.heron.packing.utils.PackingUtils;

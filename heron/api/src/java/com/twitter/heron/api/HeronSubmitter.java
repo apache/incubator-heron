@@ -26,6 +26,7 @@ import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.api.utils.TopologyUtils;
 
 /**
  * Use this class to submit topologies to run on the Heron cluster. You should run your program
@@ -68,6 +69,7 @@ public final class HeronSubmitter {
             setName(name).
             setState(initialState).
             getTopology();
+    TopologyUtils.validateTopology(fTopology);
     assert fTopology.isInitialized();
 
     if (heronCmdOptions.get("cmdline.topologydefn.tmpdirectory") != null) {

@@ -36,7 +36,7 @@ import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.scheduler.utils.Runtime;
