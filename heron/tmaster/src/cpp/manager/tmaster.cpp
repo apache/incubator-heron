@@ -605,9 +605,9 @@ void TMaster::KillContainer(const std::string& host_name,
   OutgoingHTTPRequest* request =
     new OutgoingHTTPRequest(host_name, shell_port,
         "/killexecutor", BaseHTTPRequest::POST, kvs);
-  auto cb = [](IncomingHTTPResponse* response) {
+  auto cb = [host_name, shell_port](IncomingHTTPResponse* response) {
     LOG(WARNING) << "Response code of HTTP request of killing heron-executor: "
-      << response->response_code();
+      << host_name << ":" << shell_port << " - " << response->response_code();
   };
   if (http_client_->SendRequest(request, std::move(cb)) != SP_OK) {
     LOG(ERROR) << "Failed to kill " << stmgr_id << " on "
