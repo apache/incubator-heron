@@ -96,7 +96,7 @@ class Streamlet(object):
     of the current streamlet
     """
     retval = []
-    for i in xrange(num_clones):
+    for i in range(num_clones):
       retval.append(self.repartition(self.get_num_partitions()))
     return retval
 
