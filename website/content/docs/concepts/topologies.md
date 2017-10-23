@@ -139,7 +139,7 @@ A visual representation of a streamlet processing graph is shown in the diagram 
 ![Example streamlet transformation](https://www.lucidchart.com/publicSegments/view/5c451e53-46f8-4e36-86f4-9a11ca015c21/image.png)
 
 In this diagram, a **source** is used to construct a **source streamlet**. In this case, an integer streamlet
-is produced by random generator that continuously emits random integers between 1 and 100. From there:
+is produced by a random generator that continuously emits random integers between 1 and 100. From there:
 
 * A filter operation is applied to the source streamlet that filters out all values less than or equal to 30
 * A *new streamlet* is produced by the filter operation (with the Heron Streamlet API, you're always transforming streamlets into other streamlets)
