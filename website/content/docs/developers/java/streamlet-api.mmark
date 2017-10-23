@@ -9,7 +9,7 @@ description: Create Heron topologies in Java using a functional programming styl
 
 ## Getting started
 
-In order to use the Heron Functional API for Java, you'll need to install the `heron-api` library.
+In order to use the Heron Streamlet API for Java, you'll need to install the `heron-api` library.
 
 ### Maven setup
 
@@ -25,7 +25,7 @@ In order to use the `heron-api` library, add this to the `dependencies` block of
 
 #### Compiling a JAR with dependencies
 
-In order to run a Java Functional API topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
+In order to run a Java topology created using the Heron Streamlet API in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
 
 ```xml
 <plugin>
@@ -70,7 +70,7 @@ $ heron submit local \
 
 ### Java Streamlet API starter project
 
-If you'd like to up and running quickly with the Heron Streamlet API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-streamlet-api-example), which includes an example topology built using the Functional API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
+If you'd like to up and running quickly with the Heron Streamlet API for Java, you can clone [this repository](https://github.com/streamlio/heron-java-streamlet-api-example), which includes an example topology built using the Streamlet API as well as the necessary Maven configuration. To build a JAR with dependencies of this example topology:
 
 ```bash
 $ git clone https://github.com/streamlio/heron-java-streamlet-api-example
@@ -91,7 +91,7 @@ $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dep
 
 #### Selecting delivery semantics
 
-Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology](#java-functional-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
+Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology](#java-streamlet-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
 
 ```bash
 $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
@@ -122,7 +122,7 @@ You can set the following in the configuration: the topology's [delivery semanti
 
 ### Delivery semantics
 
-You can apply [delivery semantics](../../../concepts/delivery-semantics) to a Functional API topology like this:
+You can apply [delivery semantics](../../../concepts/delivery-semantics) to a Streamlet API topology like this:
 
 ```java
 topologyConfig
@@ -133,7 +133,7 @@ The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
 
 ### Containers and resources
 
-You can set the number of containers to be used by a Functional API topology (as an integer) like so:
+You can set the number of containers to be used by a Streamlet API topology (as an integer) like so:
 
 ```java
 topologyConfig.setNumContainers(2);
@@ -163,7 +163,7 @@ resources.withRam(ByteAmount.fromMegabytes(192).asMegabytes());
 
 ## Streamlets
 
-In the Heron Functional API for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
+In the Heron Streamlet API for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
 
 ## Operations
 
@@ -215,11 +215,11 @@ Builder builder = Builder.CreateBuilder();
 KVStreamlet<String, String> streamlet1 =
         builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
 
-builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
+builder.newSource(() -> new KeyValue<>("heron-api", "streamlet-api"))
     .join(streamlet1, WindowConfig.TumblingCountWindow(10), KeyValue::create);
 ```
 
-In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
+In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `streamlet-api`).
 
 > The effect of a join operation is to create a new streamlet *for each key*.
 
@@ -265,11 +265,3 @@ builder.newSource(() -> randomIntGenerator(1, 100))
 ```
 
 In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
-
-<!--
-
-## Partitioning and parallelism
-
-In the original, Storm-inspired topology API for Heron, you could manage parallelism within your topologies by controlling the number of spouts or bolts performing a specific ingestion or processing operation. The Heron Functional API is different in that you assign **partitions** to specific operations.
-
--->
