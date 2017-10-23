@@ -243,6 +243,8 @@ TMaster::~TMaster() {
   delete tmasterProcessMetrics;
   delete stateful_controller_;
   delete ckptmgr_client_;
+  delete http_client_;
+  delete dns_;
 }
 
 void TMaster::UpdateProcessMetrics(EventLoop::Status) {
