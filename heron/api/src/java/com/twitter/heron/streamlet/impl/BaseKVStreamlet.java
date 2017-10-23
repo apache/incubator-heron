@@ -14,6 +14,7 @@
 
 package com.twitter.heron.streamlet.impl;
 
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KVStreamlet;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
@@ -60,58 +61,34 @@ public abstract class BaseKVStreamlet<K, V> extends BaseStreamlet<KeyValue<K, V>
    * @param windowCfg This is a specification of what kind of windowing strategy you like to
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
-  */
+   */
   @Override
-  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> join(KVStreamlet<K, V2> other,
-                       WindowConfig windowCfg,
-                       SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
-    BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
-    JoinStreamlet<K, V, V2, VR> retval =
-        JoinStreamlet.createInnerJoinStreamlet(this, joinee, windowCfg, joinFunction);
-    addChild(retval);
-    joinee.addChild(retval);
-    return retval;
+  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
+      join(KVStreamlet<K, V2> other, WindowConfig windowCfg,
+           SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+    return join(other, windowCfg, JoinType.INNER, joinFunction);
   }
 
   /**
-   * Return a new KVStreamlet by left joining ‘this’ streamlet with ‘other’ streamlet.
+   * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
+   * is declared by the joinType parameter.
+   * Types of joins {@link JoinType}
    * The join is done over elements accumulated over a time window defined by TimeWindow.
-   * Because its a left join, it is guaranteed that all elements of this streamlet will show up
-   * in the resulting joined streamlet.
    * @param other The Streamlet that we are joining with.
    * @param windowCfg This is a specification of what kind of windowing strategy you like to
    * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinType Type of Join. Options {@link JoinType}
    * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> leftJoin(KVStreamlet<K, V2> other,
-                      WindowConfig windowCfg,
-                      SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
-    BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
-    JoinStreamlet<K, V, V2, VR> retval =
-        JoinStreamlet.createLeftJoinStreamlet(this, joinee, windowCfg, joinFunction);
-    addChild(retval);
-    joinee.addChild(retval);
-    return retval;
-  }
+  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
+        join(KVStreamlet<K, V2> other,
+             WindowConfig windowCfg, JoinType joinType,
+             SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
 
-  /**
-   * Return a new KVStreamlet by outer joining ‘this’ streamlet with ‘other’ streamlet.
-   * The join is done over elements accumulated over a time window defined by TimeWindow.
-   * Because its a outer join, it is guaranteed that all elements of both this streamlet and
-   * 'other' streamlet will show up in the resulting joined streamlet.
-   * @param other The Streamlet that we are joining with.
-   * @param windowCfg This is a specification of what kind of windowing strategy you like to
-   * have. Typical windowing strategies are sliding windows and tumbling windows
-   * @param joinFunction The join function that needs to be applied
-   */
-  @Override
-  public <V2, VR> KVStreamlet<KeyedWindow<K>, VR> outerJoin(KVStreamlet<K, V2> other,
-                         WindowConfig windowCfg,
-                         SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
     BaseKVStreamlet<K, V2> joinee = (BaseKVStreamlet<K, V2>) other;
-    JoinStreamlet<K, V, V2, VR> retval =
-        JoinStreamlet.createOuterJoinStreamlet(this, joinee, windowCfg, joinFunction);
+    JoinStreamlet<K, V, V2, VR> retval = JoinStreamlet.createJoinStreamlet(
+        this, joinee, windowCfg, joinType, joinFunction);
     addChild(retval);
     joinee.addChild(retval);
     return retval;
