@@ -62,7 +62,7 @@ class TaskContextImpl : public api::topology::TaskContext {
   virtual std::shared_ptr<api::metric::IMetricsRegistrar> getMetricsRegistrar() {
     return metricsRegistrar_;
   }
-  virtual std::ostream& getLogger();
+  virtual void log(std::ostringstream& o);
 
   // TaskContext related implementations
   virtual int getThisTaskId();

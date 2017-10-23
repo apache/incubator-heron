@@ -540,24 +540,27 @@ class HeronExecutor(object):
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:ParallelGCThreads=4',
                       '-Xloggc:log-files/gc.%s.log' % instance_id]
+
+      instance_args = ['-topology_name', self.topology_name,
+                       '-topology_id', self.topology_id,
+                       '-instance_id', instance_id,
+                       '-component_name', component_name,
+                       '-task_id', str(global_task_id),
+                       '-component_index', str(component_index),
+                       '-stmgr_id', self.stmgr_ids[self.shard],
+                       '-stmgr_port', self.tmaster_controller_port,
+                       '-metricsmgr_port', self.metricsmgr_port,
+                       '-system_config_file', self.heron_internals_config_file,
+                       '-override_config_file', self.override_config_file]
+
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance',
-                           self.topology_name,
-                           self.topology_id,
-                           instance_id,
-                           component_name,
-                           str(global_task_id),
-                           str(component_index),
-                           self.stmgr_ids[self.shard],
-                           self.tmaster_controller_port,
-                           self.metricsmgr_port,
-                           self.heron_internals_config_file,
-                           self.override_config_file])
+                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
+
       retval[instance_id] = instance_cmd
     return retval
 

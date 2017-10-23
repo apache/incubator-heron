@@ -29,6 +29,7 @@ class Builder(object):
 
   def new_source(self, source):
     """Adds a new source to the computation dag"""
+
     source_streamlet = None
     if callable(source):
       source_streamlet = SupplierStreamlet(source)

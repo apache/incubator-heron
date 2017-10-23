@@ -231,6 +231,7 @@ article.hn-docs-content {
         .vg { color: #f8f8f2 } /* Name.Variable.Global */
         .vi { color: #f8f8f2 } /* Name.Variable.Instance */
         .il { color: #ae81ff } /* Literal.Number.Integer.Long */
+        .clp { color: #f92672 } /* Command-line dollar sign */
       
         &.language-bash {
           .nb, .k { color: $light-gray; }
