@@ -98,7 +98,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   @Override
   public <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<KeyValue<? super K, ? super V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
-    KVMapStreamlet<> retval = new KVMapStreamlet<K, V, K1, V1>(this, mapFn);
+    KVMapStreamlet<K, V, K1, V1> retval = new KVMapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
   }
@@ -112,7 +112,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   public <K1, V1> KVStreamlet<K1, V1> flatMap(
       SerializableFunction<KeyValue<? super K, ? super V>,
           ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn) {
-    KVFlatMapStreamlet<> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
+    KVFlatMapStreamlet<K, V, K1, V1> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
   }
@@ -124,7 +124,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public KVStreamlet<K, V> filter(SerializablePredicate<KeyValue<? super K, ? super V>> filterFn) {
-    KVFilterStreamlet<R> retval = new KVFilterStreamlet<>(this, filterFn);
+    KVFilterStreamlet<K, V> retval = new KVFilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
   }
@@ -145,7 +145,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   public KVStreamlet<K, V> repartition(int numPartitions,
                                   SerializableBiFunction<KeyValue<? super K, ? super V>,
                                       Integer, List<Integer>> partitionFn) {
-    KVRemapStreamlet<> retval = new KVRemapStreamlet<>(this, partitionFn);
+    KVRemapStreamlet<K, V> retval = new KVRemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
     return retval;
@@ -186,7 +186,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public void log() {
-    KVLogStreamlet<> logger = new KVLogStreamlet<>(this);
+    KVLogStreamlet<K, V> logger = new KVLogStreamlet<>(this);
     addChild(logger);
     return;
   }
@@ -208,7 +208,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public void toSink(Sink<KeyValue<? super K, ? super V>> sink) {
-    KVSinkStreamlet<> sinkStreamlet = new KVSinkStreamlet<>(this, sink);
+    KVSinkStreamlet<K, V> sinkStreamlet = new KVSinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
     return;
   }
@@ -224,8 +224,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   @Override
   public <K1, V1> KVStreamlet<K1, V1> transform(
       SerializableTransformer<KeyValue<? super K, ? super V>,
-          KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
-    KVTransformStreamlet<> transformStreamlet =
+          ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+    KVTransformStreamlet<K, V, K1, V1> transformStreamlet =
         new KVTransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;

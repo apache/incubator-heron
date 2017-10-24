@@ -32,11 +32,11 @@ import com.twitter.heron.streamlet.impl.operators.TransformOperator;
 public class KVTransformStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
   private KVStreamletImpl<K, V> parent;
   private SerializableTransformer<KeyValue<? super K, ? super V>,
-      KeyValue<? extends K1, ? extends V1>> serializableTransformer;
+      ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer;
 
   public KVTransformStreamlet(KVStreamletImpl<K, V> parent,
-                              SerializableTransformer<KeyValue<? super K, ? super V>,
-                                  KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+                         SerializableTransformer<KeyValue<? super K, ? super V>,
+                         ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
     this.parent = parent;
     this.serializableTransformer = serializableTransformer;
     setNumPartitions(parent.getNumPartitions());

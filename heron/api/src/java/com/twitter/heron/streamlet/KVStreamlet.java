@@ -84,7 +84,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    */
   <K1, V1> KVStreamlet<K1, V1> transform(
       SerializableTransformer<KeyValue<? super K, ? super V>,
-          KeyValue<? extends K1, ? extends V1>> serializableTransformer);
+          ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
