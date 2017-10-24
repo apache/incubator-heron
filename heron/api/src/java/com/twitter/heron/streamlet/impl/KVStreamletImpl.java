@@ -45,6 +45,7 @@ import com.twitter.heron.streamlet.impl.streamlets.KVLogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVRemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.KVTransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
@@ -221,10 +222,11 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @return Streamlet containing the output of the transformFunction
    */
   @Override
-  public <T> Streamlet<T> transform(
-      SerializableTransformer<? super R, ? extends T> serializableTransformer) {
-    TransformStreamlet<R, T> transformStreamlet =
-        new TransformStreamlet<>(this, serializableTransformer);
+  public <K1, V1> KVStreamlet<K1, V1> transform(
+      SerializableTransformer<KeyValue<? super K, ? super V>,
+          KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+    KVTransformStreamlet<> transformStreamlet =
+        new KVTransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
   }
