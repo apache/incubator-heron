@@ -17,36 +17,42 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.streamlet.SerializableConsumer;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.StreamletImpl;
-import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
+import com.twitter.heron.streamlet.impl.operators.UnionOperator;
 
 /**
- * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
- * streamlet after consuming every element. Since elements of the parents are just consumed
- * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
+ * UnionStreamlet is a Streamlet composed of all the elements of two
+ * parent streamlets.
  */
-public class ConsumerStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
-  private SerializableConsumer<R> consumer;
+public class KVUnionStreamlet<K, V> extends KVStreamletImpl<K, V> {
+  private KVStreamletImpl<K, V> left;
+  private KVStreamletImpl<? extends K, ? extends V> right;
 
-  public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
-    this.parent = parent;
-    this.consumer = consumer;
-    setNumPartitions(parent.getNumPartitions());
+  public KVUnionStreamlet(KVStreamletImpl<K, V> left,
+                          KVStreamletImpl<? extends K, ? extends V> right) {
+    this.left = left;
+    this.right = right;
+    setNumPartitions(left.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    if (!left.isBuilt() || !right.isBuilt()) {
+      // We can only continue to build us if both of our parents are built.
+      // The system will call us again later
+      return false;
+    }
     if (getName() == null) {
-      setName(defaultNameCalculator("consumer", stageNames));
+      setName(defaultNameCalculator("kvunion", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new ConsumerSink<>(consumer),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+    bldr.setBolt(getName(), new UnionOperator<KeyValue<K, V>>(),
+        getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
     return true;
   }
 }

@@ -38,47 +38,13 @@ import com.twitter.heron.classification.InterfaceStability;
  * Streamlet before doing the transformation.
  */
 @InterfaceStability.Evolving
-public interface Streamlet<R> {
-  /**
-   * Sets the name of the Streamlet.
-   * @param sName The name given by the user for this streamlet
-   * @return Returns back the Streamlet with changed name
-  */
-  Streamlet<R> setName(String sName);
-
-  /**
-   * Gets the name of the Streamlet.
-   * @return Returns the name of the Streamlet
-   */
-  String getName();
-
-  /**
-   * Sets the number of partitions of the streamlet
-   * @param numPartitions The user assigned number of partitions
-   * @return Returns back the Streamlet with changed number of partitions
-   */
-  Streamlet<R> setNumPartitions(int numPartitions);
-
-  /**
-   * Gets the number of partitions of this Streamlet.
-   * @return the number of partitions of this Streamlet
-   */
-  int getNumPartitions();
+public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */
-
   <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn);
-
-  /**
-   * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
-   * This differs from the above map transformation in that it returns a KVStreamlet
-   * instead of a plain Streamlet.
-   * @param mapFn The Map function that should be applied to each element
-  */
-  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -87,15 +53,6 @@ public interface Streamlet<R> {
    */
   <T> Streamlet<T> flatMap(
       SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn);
-
-  /**
-   * Return a new KVStreamlet by applying map_function to each element of this Streamlet
-   * and flattening the result. It differs from the above flatMap in that it returns a`
-   * KVStreamlet instead of a plain Streamlet
-   * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
-  <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      ? extends Iterable<KeyValue<K, V>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet

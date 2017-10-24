@@ -31,16 +31,16 @@ import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link BaseStreamlet}
+ * Unit tests for {@link StreamletImpl}
  */
-public class BaseKVStreamletTest {
+public class KVStreamletImplTest {
 
-  private <T> boolean isFullyBuilt(BaseStreamlet<T> streamlet) {
+  private <T> boolean isFullyBuilt(StreamletImpl<T> streamlet) {
     if (!streamlet.isBuilt()) {
       return false;
     }
     for (Streamlet<?> child : streamlet.getChildren()) {
-      BaseStreamlet<?> aChild = (BaseStreamlet<?>) child;
+      StreamletImpl<?> aChild = (StreamletImpl<?>) child;
       if (!isFullyBuilt(aChild)) {
         return false;
       }
@@ -55,12 +55,12 @@ public class BaseKVStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testJoinStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(leftStreamlet instanceof KVMapStreamlet);
 
-    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
@@ -92,12 +92,12 @@ public class BaseKVStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testLeftJoinStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(leftStreamlet instanceof KVMapStreamlet);
 
-    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
@@ -130,12 +130,12 @@ public class BaseKVStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testRightJoinStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(leftStreamlet instanceof KVMapStreamlet);
 
-    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
@@ -168,12 +168,12 @@ public class BaseKVStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testOuterJoinStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(leftStreamlet instanceof KVMapStreamlet);
 
-    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
@@ -206,7 +206,7 @@ public class BaseKVStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testReduceByKeyAndWindowStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> streamlet =
         baseStreamlet.mapToKV(x -> new KeyValue<>(x, 1));
     assertTrue(streamlet instanceof KVMapStreamlet);

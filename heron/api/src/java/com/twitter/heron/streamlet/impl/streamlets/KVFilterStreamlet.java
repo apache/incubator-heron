@@ -17,35 +17,37 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.streamlet.SerializableConsumer;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.SerializablePredicate;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.StreamletImpl;
-import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
+import com.twitter.heron.streamlet.impl.operators.FilterOperator;
 
 /**
- * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
- * streamlet after consuming every element. Since elements of the parents are just consumed
- * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
+ * FilterStreamlet represents a Streamlet that is made up of elements from
+ * the parent Streamlet after applying a user supplied filter function.
  */
-public class ConsumerStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
-  private SerializableConsumer<R> consumer;
+public class KVFilterStreamlet<K, V> extends KVStreamletImpl<K, V> {
+  private KVStreamletImpl<K, V> parent;
+  private SerializablePredicate<KeyValue<? super K, ? super V>> filterFn;
 
-  public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
+  public KVFilterStreamlet(KVStreamletImpl<K, V> parent,
+                           SerializablePredicate<KeyValue<? super K, ? super V>> filterFn) {
     this.parent = parent;
-    this.consumer = consumer;
+    this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("consumer", stageNames));
+      setName(defaultNameCalculator("kvfilter", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new ConsumerSink<>(consumer),
+    bldr.setBolt(getName(), new FilterOperator<KeyValue<K, V>>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

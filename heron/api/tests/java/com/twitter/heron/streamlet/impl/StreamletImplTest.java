@@ -45,16 +45,16 @@ import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link BaseStreamlet}
+ * Unit tests for {@link StreamletImpl}
  */
-public class BaseStreamletTest {
+public class StreamletImplTest {
 
-  private <T> boolean isFullyBuilt(BaseStreamlet<T> streamlet) {
+  private <T> boolean isFullyBuilt(StreamletImpl<T> streamlet) {
     if (!streamlet.isBuilt()) {
       return false;
     }
     for (Streamlet<?> child : streamlet.getChildren()) {
-      BaseStreamlet<?> aChild = (BaseStreamlet<?>) child;
+      StreamletImpl<?> aChild = (StreamletImpl<?>) child;
       if (!isFullyBuilt(aChild)) {
         return false;
       }
@@ -68,7 +68,7 @@ public class BaseStreamletTest {
 
   @Test
   public void testBasicParams() throws Exception {
-    Streamlet<Double> sample = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     sample.setName("MyStreamlet");
     sample.setNumPartitions(20);
     assertEquals("MyStreamlet", sample.getName());
@@ -77,21 +77,21 @@ public class BaseStreamletTest {
     assertEquals("AnotherName", sample.getName());
     sample.setNumPartitions(10);
     assertEquals(10, sample.getNumPartitions());
-    BaseStreamlet<Double> bStreamlet = (BaseStreamlet<Double>) sample;
+    StreamletImpl<Double> bStreamlet = (StreamletImpl<Double>) sample;
     assertFalse(bStreamlet.isBuilt());
     assertEquals(bStreamlet.getChildren().size(), 0);
   }
 
   @Test
   public void testSupplierStreamlet() throws Exception {
-    Streamlet<Double> streamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     assertTrue(streamlet instanceof SupplierStreamlet);
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testMapStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).map((num) -> num * 10);
     assertTrue(streamlet instanceof MapStreamlet);
     MapStreamlet<Double, Double> mStreamlet = (MapStreamlet<Double, Double>) streamlet;
@@ -104,7 +104,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testFlatMapStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .flatMap((num) -> Arrays.asList(num * 10));
     assertTrue(streamlet instanceof FlatMapStreamlet);
@@ -118,7 +118,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testMapToKVStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Double> streamlet = baseStreamlet.setNumPartitions(20)
         .mapToKV((num) -> new KeyValue<>(num, num));
     assertTrue(streamlet instanceof KVMapStreamlet);
@@ -133,7 +133,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testFlatMapToKVStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Double> streamlet = baseStreamlet.setNumPartitions(20)
         .flatMapToKV((num) -> Arrays.asList(new KeyValue<>(num, num)));
     assertTrue(streamlet instanceof KVFlatMapStreamlet);
@@ -148,7 +148,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testFilterStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).filter((num) -> num != 0);
     assertTrue(streamlet instanceof FilterStreamlet);
     FilterStreamlet<Double> mStreamlet = (FilterStreamlet<Double>) streamlet;
@@ -161,7 +161,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testRepartitionStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).repartition(40);
     assertTrue(streamlet instanceof MapStreamlet);
     MapStreamlet<Double, Double> mStreamlet = (MapStreamlet<Double, Double>) streamlet;
@@ -175,7 +175,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testCloneStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     List<Streamlet<Double>> streamlets = baseStreamlet.setNumPartitions(20).clone(2);
     assertEquals(streamlets.size(), 2);
     assertTrue(streamlets.get(0) instanceof MapStreamlet);
@@ -189,8 +189,8 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testUnionStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
-    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet1.union(baseStreamlet2);
     assertTrue(streamlet instanceof UnionStreamlet);
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
@@ -204,7 +204,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testReduceByWindowStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Window, Double> streamlet =
         baseStreamlet.reduceByWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
     assertTrue(streamlet instanceof ReduceByWindowStreamlet);
@@ -216,7 +216,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testTransformStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet =
         baseStreamlet.transform(new SerializableTransformer<Double, Double>() {
           @Override
@@ -243,7 +243,7 @@ public class BaseStreamletTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testSimpleBuild() throws Exception {
-    Streamlet<String> baseStreamlet = BaseStreamlet.createSupplierStreamlet(() -> "sa re ga ma");
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> "sa re ga ma");
     baseStreamlet.flatMap(x -> Arrays.asList(x.split(" ")))
                  .mapToKV(x -> new KeyValue<>(x, 1))
                  .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
@@ -272,13 +272,13 @@ public class BaseStreamletTest {
   @SuppressWarnings("unchecked")
   public void testComplexBuild() throws Exception {
     // First source
-    Streamlet<String> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> "sa re ga ma");
+    Streamlet<String> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> "sa re ga ma");
     KVStreamlet<String, Integer> leftStream =
         baseStreamlet1.flatMap(x -> Arrays.asList(x.split(" ")))
         .mapToKV(x -> new KeyValue<>(x, 1));
 
     // Second source
-    Streamlet<String> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> "I Love You");
+    Streamlet<String> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> "I Love You");
     KVStreamlet<String, Integer> rightStream =
         baseStreamlet2.flatMap(x -> Arrays.asList(x.split(" ")))
         .mapToKV(x -> new KeyValue<>(x, 1));

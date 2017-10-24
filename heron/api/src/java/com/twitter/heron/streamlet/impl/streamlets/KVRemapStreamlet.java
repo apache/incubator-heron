@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.groupings.RemapCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.MapOperator;
@@ -30,12 +32,13 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
  * that give users more flexibility over the operation. The remapFn allows for
  * users to choose which destination shards every transformed element can go.
  */
-public class RemapStreamlet<R> extends StreamletImpl<R> {
-  private StreamletImpl<R> parent;
-  private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
+public class KVRemapStreamlet<K, V> extends KVStreamletImpl<K, V> {
+  private KVStreamletImpl<K, V> parent;
+  private SerializableBiFunction<KeyValue<? super K, ? super V>, Integer, List<Integer>> remapFn;
 
-  public RemapStreamlet(StreamletImpl<R> parent,
-                        SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
+  public KVRemapStreamlet(KVStreamletImpl<K, V> parent,
+                          SerializableBiFunction<KeyValue<? super K, ? super V>,
+                              Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());
@@ -44,15 +47,15 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("remap", stageNames));
+      setName(defaultNameCalculator("kvremap", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
+    bldr.setBolt(getName(), new MapOperator<KeyValue<K, V>, KeyValue<K, V>>((a) -> a),
         getNumPartitions())
-        .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));
+        .customGrouping(parent.getName(), new RemapCustomGrouping<KeyValue<K, V>>(remapFn));
     return true;
   }
 }
