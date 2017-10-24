@@ -146,3 +146,35 @@ There are three delivery semantics available corresponding to the three delivery
 * `ATMOST_ONCE`
 * `ATLEAST_ONCE`
 * `EFFECTIVELY_ONCE`
+
+## Acking
+
+In distributed systems, an **ack** (short for "acknowledgment") is a message that confirms that some action has been taken. In Heron, an ack is
+
+When creating Heron bolts, you can 
+
+### Acking spouts
+
+Heron spouts don't emit acks, but they can receive *acks* when bolts directly downstream have acked a tuple. In order to receive an ack from downstream bolts, spouts need to specify a tuple ID when emitting the tuple using the `nextTuple` method. Here's an example:
+
+```java
+public class AckReceivingSpout {
+    public void nextTuple() {
+        collector.emit(new Values("some-value"), "some-tuple-id");
+    }
+}
+```
+
+If no ID is specified, as in the example below, then the spout *will not receive acks*:
+
+```java
+public class NoAckReceivedSpout {
+    public void nextTuple() {
+        collector.emit(new Values("some-value"));
+    }
+}
+```
+
+When specifying an ID for the tuple being emitted, the ID is of type `Object`, which means that you can serialize to/deserialize from any data type that you'd like. The tuple ID could thus be a simple `String` or `long` or something more complex, like a `Map` or POJO.
+
+### Acking bolts
