@@ -228,7 +228,7 @@ When specifying an ID for the tuple being emitted, the ID is of type `Object`, w
 
 ### Specifying ack reception logic
 
-In order to specify what your spout does when an ack is received, you need to implement an `ack` function in your spout. That function takes a Java `Object` containing the tuple's ID, which means that you can potentially deserialize the message ID to any type you'd like.
+In order to specify what your spout does when an ack is received, you need to implement an `ack` function in your spout. That function takes a Java `Object` containing the tuple's ID, which means that you can potentially serialize the message ID to any type you'd like.
 
 In this example, the spout simply logs the message ID:
 

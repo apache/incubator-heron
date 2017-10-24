@@ -108,9 +108,6 @@ public final class AckingTopology {
     }
 
     public void nextTuple() {
-      // Explicitly slow down the spout to prevent the stream manager from being  the bottleneck
-      Utils.sleep(1);
-
       final String word = words[rand.nextInt(words.length)];
 
       // To enable acking, we need to emit each tuple with a MessageId, which is an Object
