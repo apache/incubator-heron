@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.api.utils.TopologyUtils;
+import com.twitter.heron.api.utils.Utils;
 
 /**
  * Use this class to submit topologies to run on the Heron cluster. You should run your program

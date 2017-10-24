@@ -16,10 +16,8 @@ package com.twitter.heron.api;
 import java.util.Map;
 
 import org.junit.Test;
-import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.bolt.BaseBasicBolt;
-import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
@@ -72,7 +70,8 @@ public class HeronSubmitterTest {
   }
 
   @Test(expected = InvalidTopologyException.class)
-  public void testInvalidTopologySubmittion() throws AlreadyAliveException, InvalidTopologyException {
+  public void testInvalidTopologySubmittion()
+      throws AlreadyAliveException, InvalidTopologyException {
     TopologyBuilder builder = new TopologyBuilder();
 
     int spouts = 2;

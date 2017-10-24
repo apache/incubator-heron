@@ -41,7 +41,8 @@ public final class TopologyUtils {
   private TopologyUtils() {
   }
 
-  public static TopologyAPI.Topology getTopology(String topologyDefnFile) throws InvalidTopologyException {
+  public static TopologyAPI.Topology getTopology(String topologyDefnFile)
+      throws InvalidTopologyException {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
       TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
@@ -150,7 +151,8 @@ public final class TopologyUtils {
    * Throw a IllegalArgumentException if verifyTopology returns false
    * @param topology to validate
    */
-  public static void validateTopology(TopologyAPI.Topology topology) throws InvalidTopologyException {
+  public static void validateTopology(TopologyAPI.Topology topology)
+      throws InvalidTopologyException {
     if (!TopologyUtils.verifyTopology(topology)) {
       throw new InvalidTopologyException();
     }

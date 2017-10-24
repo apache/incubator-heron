@@ -15,8 +15,8 @@ package com.twitter.heron.apiserver.actions;
 
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.api.utils.TopologyUtils;
+import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.spi.common.Config;
 
 public class ActionFactoryImpl implements ActionFactory {
