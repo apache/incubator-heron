@@ -20,7 +20,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
 
 /**
@@ -30,10 +29,10 @@ import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
  */
 public class KVSinkStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private Sink<KeyValue<? super K, ? super V>> sink;
+  private Sink<? super KeyValue<K, V>> sink;
 
   public KVSinkStreamlet(KVStreamletImpl<K, V> parent,
-                         Sink<KeyValue<? super K, ? super V>> sink) {
+                         Sink<? super KeyValue<K, V>> sink) {
     this.parent = parent;
     this.sink = sink;
     setNumPartitions(parent.getNumPartitions());

@@ -14,7 +14,6 @@
 
 package com.twitter.heron.streamlet.impl;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,34 +21,6 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.BaseStreamlet;
-import com.twitter.heron.streamlet.KVStreamlet;
-import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableBiFunction;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
-import com.twitter.heron.streamlet.SerializableConsumer;
-import com.twitter.heron.streamlet.SerializableFunction;
-import com.twitter.heron.streamlet.SerializablePredicate;
-import com.twitter.heron.streamlet.SerializableSupplier;
-import com.twitter.heron.streamlet.SerializableTransformer;
-import com.twitter.heron.streamlet.Sink;
-import com.twitter.heron.streamlet.Source;
-import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.streamlet.Window;
-import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.KVFlatMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
 
 /**
  * A simple class that takes care of the basics of a streamlet(currently name and npartitions).

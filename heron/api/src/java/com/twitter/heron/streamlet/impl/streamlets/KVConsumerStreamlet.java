@@ -20,7 +20,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableConsumer;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
 
 /**
@@ -30,10 +29,10 @@ import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
  */
 public class KVConsumerStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableConsumer<KeyValue<? super K, ? super V>> consumer;
+  private SerializableConsumer<? super KeyValue<K, V>> consumer;
 
   public KVConsumerStreamlet(KVStreamletImpl<K, V> parent,
-                             SerializableConsumer<KeyValue<? super K, ? super V>> consumer) {
+                             SerializableConsumer<? super KeyValue<K, V>> consumer) {
     this.parent = parent;
     this.consumer = consumer;
     setNumPartitions(parent.getNumPartitions());

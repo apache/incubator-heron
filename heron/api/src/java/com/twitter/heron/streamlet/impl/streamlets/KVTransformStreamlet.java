@@ -20,7 +20,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.TransformOperator;
 
 /**
@@ -31,12 +30,12 @@ import com.twitter.heron.streamlet.impl.operators.TransformOperator;
  */
 public class KVTransformStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableTransformer<KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer;
+  private SerializableTransformer<? super KeyValue<K, V>,
+      ? extends KeyValue<K1, V1>> serializableTransformer;
 
   public KVTransformStreamlet(KVStreamletImpl<K, V> parent,
-                         SerializableTransformer<KeyValue<? super K, ? super V>,
-                         ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+                         SerializableTransformer<? super KeyValue<K, V>,
+                         ? extends KeyValue<K1, V1>> serializableTransformer) {
     this.parent = parent;
     this.serializableTransformer = serializableTransformer;
     setNumPartitions(parent.getNumPartitions());
@@ -51,8 +50,8 @@ public class KVTransformStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> 
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new TransformOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(serializableTransformer),
+    bldr.setBolt(getName(), new TransformOperator<KeyValue<K, V>,
+            KeyValue<K1, V1>>(serializableTransformer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

@@ -29,8 +29,8 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
    */
-  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn);
+  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<? super KeyValue<K, V>,
+      ? extends KeyValue<K1, V1>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -38,15 +38,14 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
    */
   <K1, V1> KVStreamlet<K1, V1> flatMap(
-      SerializableFunction<KeyValue<? super K, ? super V>,
-          ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn);
+      SerializableFunction<? super KeyValue<K, V>, ? extends Iterable<KeyValue<K1, V1>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
    */
-  KVStreamlet<K, V> filter(SerializablePredicate<KeyValue<? super K, ? super V>> filterFn);
+  KVStreamlet<K, V> filter(SerializablePredicate<? super KeyValue<K, V>> filterFn);
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
@@ -57,8 +56,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * A more generalized version of repartition where a user can determine which partitions
    * any particular tuple should go to
    */
-  KVStreamlet<K, V> repartition(int numPartitions,
-                                SerializableBiFunction<KeyValue<? super K, ? super V>,
+  KVStreamlet<K, V> repartition(int numPartitions, SerializableBiFunction<? super KeyValue<K, V>,
                                     Integer, List<Integer>> partitionFn);
 
   /**
@@ -72,19 +70,17 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
    */
-  KVStreamlet<K, V> union(KVStreamlet<? extends K, ? extends V> other);
+  KVStreamlet<K, V> union(KVStreamlet<K, V> other);
 
   /**
    * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
-   * @param <T> The return type of the transform
    * @return Streamlet containing the output of the transformFunction
    */
-  <K1, V1> KVStreamlet<K1, V1> transform(
-      SerializableTransformer<KeyValue<? super K, ? super V>,
-          ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer);
+  <K1, V1> KVStreamlet<K1, V1> transform(SerializableTransformer<? super KeyValue<K, V>,
+          ? extends KeyValue<K1, V1>> serializableTransformer);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
@@ -98,7 +94,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param consumer The user supplied consumer function that is invoked for each element
    * of this streamlet.
    */
-  void consume(SerializableConsumer<KeyValue<? super K, ? super V>> consumer);
+  void consume(SerializableConsumer<? super KeyValue<K, V>> consumer);
 
   /**
    * Applies the sink's put function to every element of the stream
@@ -106,7 +102,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param sink The Sink whose put method consumes each element
    * of this streamlet.
    */
-  void toSink(Sink<KeyValue<? super K, ? super V>> sink);
+  void toSink(Sink<? super KeyValue<K, V>> sink);
 
   /**
    * Return a new KVStreamlet by inner joining 'this streamlet with ‘other’ streamlet.

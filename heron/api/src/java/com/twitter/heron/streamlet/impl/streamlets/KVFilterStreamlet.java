@@ -20,7 +20,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializablePredicate;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.FilterOperator;
 
 /**
@@ -29,10 +28,10 @@ import com.twitter.heron.streamlet.impl.operators.FilterOperator;
  */
 public class KVFilterStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializablePredicate<KeyValue<? super K, ? super V>> filterFn;
+  private SerializablePredicate<? super KeyValue<K, V>> filterFn;
 
   public KVFilterStreamlet(KVStreamletImpl<K, V> parent,
-                           SerializablePredicate<KeyValue<? super K, ? super V>> filterFn) {
+                           SerializablePredicate<? super KeyValue<K, V>> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());

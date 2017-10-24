@@ -21,7 +21,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.groupings.RemapCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.MapOperator;
 
@@ -34,10 +33,10 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
  */
 public class KVRemapStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableBiFunction<KeyValue<? super K, ? super V>, Integer, List<Integer>> remapFn;
+  private SerializableBiFunction<? super KeyValue<K, V>, Integer, List<Integer>> remapFn;
 
   public KVRemapStreamlet(KVStreamletImpl<K, V> parent,
-                          SerializableBiFunction<KeyValue<? super K, ? super V>,
+                          SerializableBiFunction<? super KeyValue<K, V>,
                               Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;

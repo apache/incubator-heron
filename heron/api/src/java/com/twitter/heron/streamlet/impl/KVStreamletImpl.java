@@ -16,7 +16,6 @@ package com.twitter.heron.streamlet.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KVStreamlet;
@@ -31,12 +30,7 @@ import com.twitter.heron.streamlet.SerializableSupplier;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
-import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.streamlet.Window;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
@@ -47,18 +41,9 @@ import com.twitter.heron.streamlet.impl.streamlets.KVRemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVTransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierKVStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
-
-import static java.util.function.DoubleUnaryOperator.identity;
 
 /**
  * Some transformations like join and reduce assume a certain structure of the tuples
@@ -96,8 +81,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param mapFn The Map Function that should be applied to each element
    */
   @Override
-  public <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
+  public <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<? super KeyValue<K, V>,
+      ? extends KeyValue<K1, V1>> mapFn) {
     KVMapStreamlet<K, V, K1, V1> retval = new KVMapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -109,9 +94,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param flatMapFn The FlatMap Function that should be applied to each element
    */
   @Override
-  public <K1, V1> KVStreamlet<K1, V1> flatMap(
-      SerializableFunction<KeyValue<? super K, ? super V>,
-          ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn) {
+  public <K1, V1> KVStreamlet<K1, V1> flatMap(SerializableFunction<? super KeyValue<K, V>,
+          ? extends Iterable<KeyValue<K1, V1>>> flatMapFn) {
     KVFlatMapStreamlet<K, V, K1, V1> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -123,7 +107,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param filterFn The filter Function that should be applied to each element
    */
   @Override
-  public KVStreamlet<K, V> filter(SerializablePredicate<KeyValue<? super K, ? super V>> filterFn) {
+  public KVStreamlet<K, V> filter(SerializablePredicate<? super KeyValue<K, V>> filterFn) {
     KVFilterStreamlet<K, V> retval = new KVFilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
@@ -143,7 +127,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public KVStreamlet<K, V> repartition(int numPartitions,
-                                  SerializableBiFunction<KeyValue<? super K, ? super V>,
+                                       SerializableBiFunction<? super KeyValue<K, V>,
                                       Integer, List<Integer>> partitionFn) {
     KVRemapStreamlet<K, V> retval = new KVRemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
@@ -170,9 +154,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * the new streamlet will contain tuples belonging to both Streamlets
    */
   @Override
-  public KVStreamlet<K, V> union(KVStreamlet<? extends K, ? extends V> other) {
-    KVStreamletImpl<? extends K, ? extends V> joinee =
-        (KVStreamletImpl<? extends K, ? extends V>) other;
+  public KVStreamlet<K, V> union(KVStreamlet<K, V> other) {
+    KVStreamletImpl<K, V> joinee = (KVStreamletImpl<K, V>) other;
     KVUnionStreamlet<K, V> retval = new KVUnionStreamlet<>(this, joinee);
     addChild(retval);
     joinee.addChild(retval);
@@ -196,7 +179,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param consumer The user supplied consumer function that is invoked for each element
    */
   @Override
-  public void consume(SerializableConsumer<KeyValue<? super K, ? super V>> consumer) {
+  public void consume(SerializableConsumer<? super KeyValue<K, V>> consumer) {
     KVConsumerStreamlet<K, V> consumerStreamlet = new KVConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
     return;
@@ -207,7 +190,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param sink The Sink that consumes
    */
   @Override
-  public void toSink(Sink<KeyValue<? super K, ? super V>> sink) {
+  public void toSink(Sink<? super KeyValue<K, V>> sink) {
     KVSinkStreamlet<K, V> sinkStreamlet = new KVSinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
     return;
@@ -218,13 +201,11 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
-   * @param <T> The return type of the transform
    * @return Streamlet containing the output of the transformFunction
    */
   @Override
-  public <K1, V1> KVStreamlet<K1, V1> transform(
-      SerializableTransformer<KeyValue<? super K, ? super V>,
-          ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+  public <K1, V1> KVStreamlet<K1, V1> transform(SerializableTransformer<? super KeyValue<K, V>,
+          ? extends KeyValue<K1, V1>> serializableTransformer) {
     KVTransformStreamlet<K, V, K1, V1> transformStreamlet =
         new KVTransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
