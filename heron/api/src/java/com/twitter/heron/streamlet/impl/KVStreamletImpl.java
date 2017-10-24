@@ -38,10 +38,13 @@ import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFlatMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.KVLogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVRemapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
@@ -182,7 +185,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public void log() {
-    LogStreamlet<KeyValue<K, V>> logger = new LogStreamlet<KeyValue<K, V>>(this);
+    KVLogStreamlet<> logger = new KVLogStreamlet<>(this);
     addChild(logger);
     return;
   }
@@ -192,8 +195,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param consumer The user supplied consumer function that is invoked for each element
    */
   @Override
-  public void consume(SerializableConsumer<R> consumer) {
-    ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
+  public void consume(SerializableConsumer<KeyValue<? super K, ? super V>> consumer) {
+    KVConsumerStreamlet<K, V> consumerStreamlet = new KVConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
     return;
   }
@@ -203,8 +206,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param sink The Sink that consumes
    */
   @Override
-  public void toSink(Sink<R> sink) {
-    SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
+  public void toSink(Sink<KeyValue<? super K, ? super V>> sink) {
+    KVSinkStreamlet<> sinkStreamlet = new KVSinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
     return;
   }
