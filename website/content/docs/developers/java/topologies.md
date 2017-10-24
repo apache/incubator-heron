@@ -208,13 +208,17 @@ If you want a spout to receive acks from downstream bolts, the spout needs to sp
 import com.twitter.heron.api.spout.BaseRichSpout;
 
 public class AckReceivingSpout extends BaseRichSpout {
+    private Object generateMessageId() {
+        // Some logic to produce a unique ID
+    }
+
     public void nextTuple() {
-        collector.emit(new Values(someValue), "some-tuple-id");
+        collector.emit(new Values(someValue), generateMessageId());
     }
 }
 ```
 
-In this example, each tuple emitted by the spout has the same ID: `some-tuple-id`. If no ID is specified, as in the example below, then the spout *will not receive acks*:
+In this example, each tuple emitted by the spout includes a unique message ID. If no ID is specified, as in the example below, then the spout simply *will not receive acks*:
 
 ```java
 public class NoAckReceivedSpout extends BaseRichSpout {
@@ -223,6 +227,8 @@ public class NoAckReceivedSpout extends BaseRichSpout {
     }
 }
 ```
+
+> When implementing acking logic---as well as [failing logic](#failing)---each tuple that is acked/failed **must have a unique ID**. Otherwise, the spout receiving the ack will not be able to identify *which* tuple has been acked/failed.
 
 When specifying an ID for the tuple being emitted, the ID is of type `Object`, which means that you can serialize to/deserialize from any data type that you'd like. The message ID could thus be a simple `String` or `long` or something more complex, like a hash, `Map`, or POJO.
 
@@ -234,12 +240,16 @@ In this example, the spout simply logs the message ID:
 
 ```java
 public class AckReceivingSpout extends BaseRichSpout {
+    private Object generateMessageId() {
+        // Some logic to produce a unique ID
+    }
+
     public void nextTuple() {
-        collector.emit(new Values(someValue), "some-message-id");
+        collector.emit(new Values(someValue), generateMessageId());
     }
 
     public void ack(Object messageId) {
-        // This will print "some-message-id" whenever 
+        // This will simply print the message ID whenever an ack arrives
         System.out.println((String) messageId);
     }
 }
