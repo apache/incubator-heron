@@ -110,13 +110,13 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
   /**
    * What is the reliability mode under which we are running this topology
-   * Topology writers must set TOPOLOGY_RELIABILITY_MODE to one
-   * one of the following modes
+   * @deprecated use {@link #TopologyDeliverySemantics} instead
    */
+   @Deprecated
   public enum TopologyReliabilityMode {
     /**
      * Heron provides no guarantees wrt tuple delivery. Tuples emitted by
-     * components can get lost for any reason(network issues, component failures,
+     * components can get lost for any reason (network issues, component failures,
      * overloaded downstream component, etc).
      */
     ATMOST_ONCE,
@@ -139,12 +139,46 @@ public class Config extends HashMap<String, Object> {
      */
     EFFECTIVELY_ONCE;
   }
+
+  /**
+   * The delivery semantics to apply to the topology. Must take one of the following
+   * three values.
+   */
+   
+  public enum TopologyDeliverySemantics {
+    /**
+     * In this mode, Heron makes no guarantees regarding data delivery. Data emitted by
+     * components can get lost for a variety of reasons (network issues, component failures,
+     * etc.).
+     */
+    ATMOST_ONCE,
+    /**
+     * Heron guarantees that each emitted datum is seen by downstream operators at least
+     * once. This is achieved via an anchoring process by which emitted data are anchored
+     * based on input data. Note that in failure scenarios, downstream operators can
+     * potentially see the same tuple multiple times.
+     */
+    ATLEAST_ONCE,
+    /**
+     * In this mode, Heron guarantees that each emitted datum is seen by downstream
+     * operators at least once. This is achieved via distributed snapshotting, an
+     * approach that is described at https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit.
+     * In this mode, Heron will try to take snapshots of all of the components of the
+     * topology every TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure
+     * of any component or detection of any network failure, Heron will initiate a recovery
+     * mechanism to revert the topology to the last globally consistent checkpoint.
+     */
+    EFFECTIVELY_ONCE;
+  }
+
   /**
    * A Heron topology can be run in any one of the TopologyReliabilityMode
    * mode. The format of this flag is the string encoded values of the
    * underlying TopologyReliabilityMode value.
    */
   public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
+
+  public static final String TOPOLOGY_DELIVERY_SEMANTICS = "topology.delivery.semantics";
 
   /**
    * Number of cpu cores per container to be reserved for this topology
@@ -322,14 +356,14 @@ public class Config extends HashMap<String, Object> {
 
   /**
    * Is topology running with acking enabled?
-   * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead.
+   * @deprecated use {@link #setTopologyDeliverySemantics(Map, TopologyDeliverySemantics)} instead.
    */
   @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
     if (acking) {
-      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATLEAST_ONCE);
+      setTopologyDeliverySemantics(conf, Config.TopologyDeliverySemantics.ATLEAST_ONCE);
     } else {
-      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATMOST_ONCE);
+      setTopologyDeliverySemantics(conf, Config.TopologyDeliverySemantics.ATMOST_ONCE);
     }
   }
 
@@ -353,9 +387,19 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, millis);
   }
 
+  /**
+   * The delivery semantics (previously reliability mode) to apply to the topology.
+   * @deprecated use {@link #setTopologyDeliverySemantics(Map, TopologyDeliverySemantics)} instead
+   */
+  @Deprecated
   public static void setTopologyReliabilityMode(Map<String, Object> conf,
                                                 Config.TopologyReliabilityMode mode) {
     conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
+  }
+
+  public static void setTopologyDeliverySemantics(Map<String, Object) conf,
+                                                  Config.TopologySemantics semantics) {
+    conf.put(Config.TOPOLOGY_DELIVERY_SEMANTICS, String.valueOf(semantics));
   }
 
   public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
@@ -518,9 +562,9 @@ public class Config extends HashMap<String, Object> {
   }
 
   /**
-   * Is topology running with acking enabled?
+   * Is the topology running with acking enabled?
    * The SupressWarning will be removed once TOPOLOGY_ENABLE_ACKING is removed
-   * @deprecated use {@link #setTopologyReliabilityMode(TopologyReliabilityMode)} instead
+   * @deprecated use {@link #setTopologyDeliverySemantics(TopologyDeliverySemantics)} instead
    */
   @Deprecated
   @SuppressWarnings("deprecation")
@@ -532,8 +576,17 @@ public class Config extends HashMap<String, Object> {
     setMessageTimeoutSecs(this, secs);
   }
 
+  /**
+   * The delivery semantics (previously reliability mode) to apply to the topology.
+   * @deprecated use {@link #setTopologyDeliverySemantics(TopologyDeliverySemantics)} instead
+   */
+  @Deprecated
   public void setTopologyReliabilityMode(Config.TopologyReliabilityMode mode) {
     setTopologyReliabilityMode(this, mode);
+  }
+
+  public void setTopologyDeliverySemantics(Config.TopologyDeliverySemantics semantics) {
+    setTopologyDeliverySemantics(this, semantics);
   }
 
   public void setComponentParallelism(int parallelism) {
