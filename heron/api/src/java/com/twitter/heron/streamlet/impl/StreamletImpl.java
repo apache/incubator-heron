@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.streamlet.KVStreamlet;
+import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.SerializableConsumer;
@@ -36,6 +37,7 @@ import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
@@ -95,6 +97,20 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn) {
     MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
+   * This differs from the above map transformation in that it returns a KVStreamlet
+   * instead of a plain Streamlet.
+   * @param mapFn The Map function that should be applied to each element
+   */
+  @Override
+  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
+      ? extends KeyValue<K, V>> mapFn) {
+    MapToKVStreamlet<R, K, V> retval = new MapToKVStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
   }

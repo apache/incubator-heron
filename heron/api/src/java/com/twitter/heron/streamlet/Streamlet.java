@@ -47,6 +47,14 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
   <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn);
 
   /**
+   * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
+   * This differs from the above map transformation in that it returns a KVStreamlet
+   * instead of a plain Streamlet.
+   * @param mapFn The Map function that should be applied to each element
+   */
+  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn);
+
+  /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
    * flattening the result
    * @param flatMapFn The FlatMap Function that should be applied to each element

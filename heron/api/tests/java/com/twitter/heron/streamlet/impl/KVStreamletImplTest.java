@@ -24,7 +24,7 @@ import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 
@@ -35,13 +35,12 @@ import static org.junit.Assert.*;
  */
 public class KVStreamletImplTest {
 
-  private <T> boolean isFullyBuilt(StreamletImpl<T> streamlet) {
+  private <T> boolean isFullyBuilt(BaseStreamletImpl<T> streamlet) {
     if (!streamlet.isBuilt()) {
       return false;
     }
-    for (Streamlet<?> child : streamlet.getChildren()) {
-      StreamletImpl<?> aChild = (StreamletImpl<?>) child;
-      if (!isFullyBuilt(aChild)) {
+    for (BaseStreamletImpl<?> child : streamlet.getChildren()) {
+      if (!isFullyBuilt(child)) {
         return false;
       }
     }
@@ -58,12 +57,12 @@ public class KVStreamletImplTest {
     Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(leftStreamlet instanceof KVMapStreamlet);
+    assertTrue(leftStreamlet instanceof MapToKVStreamlet);
 
     Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(rightStreamlet instanceof KVMapStreamlet);
+    assertTrue(rightStreamlet instanceof MapToKVStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
         leftStreamlet.join(rightStreamlet, WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
@@ -74,18 +73,18 @@ public class KVStreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
     assertEquals(supplierStreamlet1.getChildren().get(0), leftStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
 
     SupplierStreamlet<Double> supplierStreamlet2 = (SupplierStreamlet<Double>) baseStreamlet2;
     assertEquals(supplierStreamlet2.getChildren().size(), 1);
     assertEquals(supplierStreamlet2.getChildren().get(0), rightStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet)
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet)
             .getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
   }
 
@@ -95,12 +94,12 @@ public class KVStreamletImplTest {
     Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(leftStreamlet instanceof KVMapStreamlet);
+    assertTrue(leftStreamlet instanceof MapToKVStreamlet);
 
     Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(rightStreamlet instanceof KVMapStreamlet);
+    assertTrue(rightStreamlet instanceof MapToKVStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
         leftStreamlet.join(rightStreamlet,
@@ -113,17 +112,17 @@ public class KVStreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
     assertEquals(supplierStreamlet1.getChildren().get(0), leftStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
 
     SupplierStreamlet<Double> supplierStreamlet2 = (SupplierStreamlet<Double>) baseStreamlet2;
     assertEquals(supplierStreamlet2.getChildren().size(), 1);
     assertEquals(supplierStreamlet2.getChildren().get(0), rightStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
   }
 
@@ -133,12 +132,12 @@ public class KVStreamletImplTest {
     Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(leftStreamlet instanceof KVMapStreamlet);
+    assertTrue(leftStreamlet instanceof MapToKVStreamlet);
 
     Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(rightStreamlet instanceof KVMapStreamlet);
+    assertTrue(rightStreamlet instanceof MapToKVStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
         leftStreamlet.join(rightStreamlet,
@@ -151,17 +150,17 @@ public class KVStreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
     assertEquals(supplierStreamlet1.getChildren().get(0), leftStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
 
     SupplierStreamlet<Double> supplierStreamlet2 = (SupplierStreamlet<Double>) baseStreamlet2;
     assertEquals(supplierStreamlet2.getChildren().size(), 1);
     assertEquals(supplierStreamlet2.getChildren().get(0), rightStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
   }
 
@@ -171,12 +170,12 @@ public class KVStreamletImplTest {
     Streamlet<Double> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(leftStreamlet instanceof KVMapStreamlet);
+    assertTrue(leftStreamlet instanceof MapToKVStreamlet);
 
     Streamlet<Double> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> rightStreamlet =
         baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(rightStreamlet instanceof KVMapStreamlet);
+    assertTrue(rightStreamlet instanceof MapToKVStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
         leftStreamlet.join(rightStreamlet,
@@ -189,17 +188,17 @@ public class KVStreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
     assertEquals(supplierStreamlet1.getChildren().get(0), leftStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
 
     SupplierStreamlet<Double> supplierStreamlet2 = (SupplierStreamlet<Double>) baseStreamlet2;
     assertEquals(supplierStreamlet2.getChildren().size(), 1);
     assertEquals(supplierStreamlet2.getChildren().get(0), rightStreamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
         instanceof JoinStreamlet);
   }
 
@@ -209,7 +208,7 @@ public class KVStreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> streamlet =
         baseStreamlet.mapToKV(x -> new KeyValue<>(x, 1));
-    assertTrue(streamlet instanceof KVMapStreamlet);
+    assertTrue(streamlet instanceof MapToKVStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> rStreamlet =
         streamlet.reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
@@ -219,9 +218,9 @@ public class KVStreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-    assertEquals(((KVMapStreamlet<Double, Double, Integer>) streamlet).getChildren().size(),
+    assertEquals(((MapToKVStreamlet<Double, Double, Integer>) streamlet).getChildren().size(),
         1);
-    assertTrue(((KVMapStreamlet<Double, Double, Integer>) streamlet).getChildren().get(0)
+    assertTrue(((MapToKVStreamlet<Double, Double, Integer>) streamlet).getChildren().get(0)
         instanceof ReduceByKeyAndWindowStreamlet);
   }
 }
