@@ -550,7 +550,7 @@ class HeronExecutor(object):
                        '-component_index', str(component_index),
                        '-stmgr_id', self.stmgr_ids[self.shard],
                        '-stmgr_port', self.tmaster_controller_port,
-                       '-metricsmgr_port', self.metricsmgr_port,
+                       '-metricsmgr_port', self.metrics_manager_port,
                        '-system_config_file', self.heron_internals_config_file,
                        '-override_config_file', self.override_config_file]
 
