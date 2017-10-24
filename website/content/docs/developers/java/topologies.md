@@ -153,6 +153,8 @@ In distributed systems, an **ack** (short for "acknowledgment") is a message tha
 
 > You can see acking at work in a complete Heron topology in [this topology](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/api/AckingTopology.java).
 
+Whereas acking a tuple indicates that some operation has succeeded, the opposite can be indicated when a bolt [fails](#failing) a tuple.
+
 ### Acking bolts
 
 Each Heron bolt has an `OutputCollector` that can ack tuples using the `ack` method. Tuples can be acked inside the `execute` method that each bolt uses to process incoming tuples. *When* a bolt acks tuples is up to you. Tuples can be acked immediately upon receipt, after data has been saved to a database, after a message has been successfully published to a pub-sub topic, etc.
@@ -160,10 +162,11 @@ Each Heron bolt has an `OutputCollector` that can ack tuples using the `ack` met
 Here's an example of a bolt that acks tuples when they're successfully processed:
 
 ```java
+import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 
-public class AckingBolt {
+public class AckingBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -202,9 +205,11 @@ Heron spouts don't emit acks, but they can receive acks when downstream bolts ha
 If you want a spout to receive acks from downstream bolts, the spout needs to specify a message ID every time the spout's `SpoutOutputCollector` emits a tuple to downstream bolts. Here's an example:
 
 ```java
-public class AckReceivingSpout {
+import com.twitter.heron.api.spout.BaseRichSpout;
+
+public class AckReceivingSpout extends BaseRichSpout {
     public void nextTuple() {
-        collector.emit(new Values("some-value"), "some-tuple-id");
+        collector.emit(new Values(someValue), "some-tuple-id");
     }
 }
 ```
@@ -212,9 +217,9 @@ public class AckReceivingSpout {
 In this example, each tuple emitted by the spout has the same ID: `some-tuple-id`. If no ID is specified, as in the example below, then the spout *will not receive acks*:
 
 ```java
-public class NoAckReceivedSpout {
+public class NoAckReceivedSpout extends BaseRichSpout {
     public void nextTuple() {
-        collector.emit(new Values("some-value"));
+        collector.emit(new Values(someValue));
     }
 }
 ```
@@ -228,14 +233,14 @@ In order to specify what your spout does when an ack is received, you need to im
 In this example, the spout simply logs the message ID:
 
 ```java
-public class AckReceivingSpout {
+public class AckReceivingSpout extends BaseRichSpout {
     public void nextTuple() {
-        collector.emit(new Values("some-value"), "some-tuple-id");
+        collector.emit(new Values(someValue), "some-message-id");
     }
 
-    public void ack(Object tupleId) {
-        // This will print "some-tuple-id" whenever 
-        System.out.println((String) tupleId);
+    public void ack(Object messageId) {
+        // This will print "some-message-id" whenever 
+        System.out.println((String) messageId);
     }
 }
 ```
@@ -243,7 +248,7 @@ public class AckReceivingSpout {
 In this example, the spout performs a series of actions when receiving the ack:
 
 ```java
-public class AckReceivingSpout {
+public class AckReceivingSpout extends BaseRichSpout {
     public void nextTuple() {
         if (someCondition) {
             String randomHash = // Generate a random hash as a message ID
@@ -251,9 +256,56 @@ public class AckReceivingSpout {
         }
     }
 
-    public void ack(Object tupleId) {
+    public void ack(Object messageId) {
         saveItemToDatabase(item);
         publishToPubSubTopic(message);
     }
 }
+```
+
+### Failing
+
+**Failing** a tuple is essentially the opposite of acking it, i.e. it indicates that some operation has failed. Bolts can fail tuples by calling the `fail` method on the `OutputCollector` rather than `ack`. Here's an example:
+
+
+```java
+public class AckingBolt extends BaseRichBolt {
+    public void execute(Tuple tuple) {
+        try {
+            someProcessingOperation(tuple);
+            collector.ack(tuple);
+        } catch (Exception e) {
+            collector.fail(tuple);
+        }
+    }
+}
+```
+
+In this example, an exception-throwing processing operation is attempted. If it succeeds, the tuple is acked; if it fails and an exception is thrown, the tuple is failed.
+
+As with acks, spouts can be set up to handle failed tuples by implementing the `fail` method, which takes the message ID as the argument (just like the `ack` method). Here's an example:
+
+```java
+public class AckReceivingSpout extends BaseRichSpout {
+    public void nextTuple() {
+        collector.emit(new Values(someValue), someMessageId);
+    }
+
+    public void fail(Object messageId) {
+        // Process the messageId
+    }
+}
+```
+
+As with acking, spouts must include a message ID when emitting tuples or else they will not receive fail messages.
+
+### Acking, failing, and timeouts
+
+If you're setting up your spouts and bolts to include an ack/fail logic, you can specify that a tuple will automatically be failed if a timeout threshold is reached before the tuple is acked. In this example, all tuples passing through all bolts will be failed if not acked within 10 seconds:
+
+```java
+import com.twitter.heron.api.Config;
+
+Config config = new Config();
+config.setMessageTimeoutSecs(10);
 ```
