@@ -64,8 +64,13 @@ class TopologiesHandler(BaseHandler):
     for topology in topologies:
       cluster = topology.cluster
       environ = topology.environ
-      topo_role = topology.execution_state.role
-      if not cluster or not topo_role or not environ:
+      execution_state = topology.execution_state
+
+      if not cluster or not execution_state or not environ:
+        continue
+
+      topo_role = execution_state.role
+      if not topo_role:
         continue
 
       # This cluster is not asked for.

@@ -22,9 +22,10 @@ from examples.src.python.bolt import StatefulCountBolt
 
 # Topology is defined using a topology builder
 # Refer to multi_stream_topology for defining a topology by subclassing Topology
+# pylint: disable=superfluous-parens
 if __name__ == '__main__':
   if len(sys.argv) != 2:
-    print "Topology's name is not specified"
+    print("Topology's name is not specified")
     sys.exit(1)
 
   builder = TopologyBuilder(name=sys.argv[1])

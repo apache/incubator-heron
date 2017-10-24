@@ -17,12 +17,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KVStreamlet;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.operators.JoinOperator;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
@@ -69,7 +69,46 @@ public class BaseKVStreamletTest {
         leftStreamlet.join(rightStreamlet, WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
     assertTrue(joinedStreamlet instanceof JoinStreamlet);
     assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
-        .getJoinType(), JoinOperator.JoinType.INNER);
+        .getJoinType(), JoinType.INNER);
+
+    SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
+    assertEquals(supplierStreamlet1.getChildren().size(), 1);
+    assertEquals(supplierStreamlet1.getChildren().get(0), leftStreamlet);
+    assertEquals(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().size(),
+        1);
+    assertTrue(((KVMapStreamlet<Double, Double, Integer>) leftStreamlet).getChildren().get(0)
+        instanceof JoinStreamlet);
+
+    SupplierStreamlet<Double> supplierStreamlet2 = (SupplierStreamlet<Double>) baseStreamlet2;
+    assertEquals(supplierStreamlet2.getChildren().size(), 1);
+    assertEquals(supplierStreamlet2.getChildren().get(0), rightStreamlet);
+    assertEquals(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet)
+            .getChildren().size(),
+        1);
+    assertTrue(((KVMapStreamlet<Double, Double, Integer>) rightStreamlet).getChildren().get(0)
+        instanceof JoinStreamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testLeftJoinStreamlet() throws Exception {
+    Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    KVStreamlet<Double, Integer> leftStreamlet =
+        baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
+    assertTrue(leftStreamlet instanceof KVMapStreamlet);
+
+    Streamlet<Double> baseStreamlet2 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
+    KVStreamlet<Double, Integer> rightStreamlet =
+        baseStreamlet2.mapToKV(x -> new KeyValue<>(x, 1));
+    assertTrue(rightStreamlet instanceof KVMapStreamlet);
+
+    KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
+        leftStreamlet.join(rightStreamlet,
+            WindowConfig.TumblingCountWindow(10),
+            JoinType.OUTER_LEFT, (x, y) -> x + y);
+    assertTrue(joinedStreamlet instanceof JoinStreamlet);
+    assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
+        .getJoinType(), JoinType.OUTER_LEFT);
 
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
@@ -90,7 +129,7 @@ public class BaseKVStreamletTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testLeftJoinStreamlet() throws Exception {
+  public void testRightJoinStreamlet() throws Exception {
     Streamlet<Double> baseStreamlet1 = BaseStreamlet.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Double, Integer> leftStreamlet =
         baseStreamlet1.mapToKV(x -> new KeyValue<>(x, 1));
@@ -102,11 +141,12 @@ public class BaseKVStreamletTest {
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
-        leftStreamlet.leftJoin(rightStreamlet,
-            WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+        leftStreamlet.join(rightStreamlet,
+            WindowConfig.TumblingCountWindow(10),
+            JoinType.OUTER_RIGHT, (x, y) -> x + y);
     assertTrue(joinedStreamlet instanceof JoinStreamlet);
     assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
-        .getJoinType(), JoinOperator.JoinType.OUTER_LEFT);
+        .getJoinType(), JoinType.OUTER_RIGHT);
 
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
@@ -139,11 +179,12 @@ public class BaseKVStreamletTest {
     assertTrue(rightStreamlet instanceof KVMapStreamlet);
 
     KVStreamlet<KeyedWindow<Double>, Integer> joinedStreamlet =
-        leftStreamlet.outerJoin(rightStreamlet,
-            WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+        leftStreamlet.join(rightStreamlet,
+            WindowConfig.TumblingCountWindow(10),
+            JoinType.OUTER, (x, y) -> x + y);
     assertTrue(joinedStreamlet instanceof JoinStreamlet);
     assertEquals(((JoinStreamlet<Double, Integer, Integer, Integer>) joinedStreamlet)
-        .getJoinType(), JoinOperator.JoinType.OUTER_RIGHT);
+        .getJoinType(), JoinType.OUTER);
 
     SupplierStreamlet<Double> supplierStreamlet1 = (SupplierStreamlet<Double>) baseStreamlet1;
     assertEquals(supplierStreamlet1.getChildren().size(), 1);

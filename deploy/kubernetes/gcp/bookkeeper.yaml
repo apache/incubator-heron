@@ -32,6 +32,8 @@ data:
   BK_zkServers: zookeeper
   # the default manager is flat, which is not good for supporting large number of ledgers
   BK_ledgerManagerType: "hierarchical"
+  # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
+  #BK_statsProviderClass: org.apache.bookkeeper.stats.PrometheusMetricsProvider
 ---
 
 ## BookKeeper servers need to access the local disks and the pods
@@ -51,26 +53,23 @@ spec:
       labels:
         app: bookkeeper
         component: bookie
+        # Specify cluster to allow aggregation by cluster in
+        # the metrics
         cluster: bookkeeper
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+
     spec:
-      initContainers:
-        # The first time, initialize BK to wipe data for minikube
-        - name: bookie-format
-          image: apachedistributedlog/distributedlog:0.5.0
-          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
-          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
-          envFrom:
-            - configMapRef:
-                name: bookie-config
       containers:
         - name: bookie
           image: apachedistributedlog/distributedlog:0.5.0
           resources:
             requests:
-              memory: "1Gi"
+              memory: "3Gi"
               cpu: "1000m"
             limits:
-              memory: "2Gi"
+              memory: "5Gi"
               cpu: "2000m"
           # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
           command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
@@ -127,4 +126,31 @@ spec:
   selector:
     app: bookkeeper
     component: bookie
+
+---
+##
+## Run BookKeeper auto-recovery from a different set of containers
+## Auto-Recovery makes sure to restore the replication factor when any bookie
+## crashes and it's not recovering on its own.
+##
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: bookie-autorecovery
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: bookkeeper
+        component: bookkeeper-replication
+    spec:
+      containers:
+        - name: replication-worker
+          image: apachedistributedlog/distributedlog:0.5.0
+          command: [ "/bin/bash", "/opt/bookkeeper/entrypoint.sh" ]
+          args: ["/opt/bookkeeper/bin/bookkeeper", "autorecovery"]
+          envFrom:
+            - configMapRef:
+                name: bookie-config
 

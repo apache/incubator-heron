@@ -49,8 +49,10 @@ class AckFailBolt : public api::bolt::BaseRichBolt {
       collector_->ack(tup);
     }
     if (++nItems_ % 100000 == 0) {
-      context_->getLogger() << std::get<0>(value) << "!!!";
-      context_->getLogger() << "Processed " << ++nItems_ << " items";
+      logger_ << std::get<0>(value) << "!!!";
+      context_->log(logger_);
+      logger_ << "Processed " << ++nItems_ << " items";
+      context_->log(logger_);
     }
   }
 
@@ -61,6 +63,7 @@ class AckFailBolt : public api::bolt::BaseRichBolt {
   int64_t nItems_;
   std::shared_ptr<api::bolt::IBoltOutputCollector> collector_;
   std::shared_ptr<api::topology::TaskContext> context_;
+  std::ostringstream logger_;
 };
 
 extern "C" {

@@ -150,8 +150,9 @@ void TaskContextImpl::getAllComponentNames(std::unordered_set<std::string>& retv
   config::TopologyConfigHelper::GetAllComponentNames(pplan_->topology(), retval);
 }
 
-std::ostream& TaskContextImpl::getLogger() {
-  return LOG(INFO);
+void TaskContextImpl::log(std::ostringstream& ostr) {
+  LOG(INFO) << ostr.str();
+  ostr.str(std::string());  // reset it
 }
 
 int TaskContextImpl::getThisTaskId() {

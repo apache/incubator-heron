@@ -96,7 +96,7 @@ class Streamlet(object):
     of the current streamlet
     """
     retval = []
-    for i in xrange(num_clones):
+    for i in range(num_clones):
       retval.append(self.repartition(self.get_num_partitions()))
     return retval
 
@@ -152,31 +152,42 @@ class Streamlet(object):
     """Return a new Streamlet by joining join_streamlet with this streamlet
     """
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
-    join_streamlet = JoinStreamlet(JoinBolt.INNER, window_config,
-                                   join_function, self, join_streamlet)
-    self._add_child(join_streamlet)
-    join_streamlet._add_child(join_streamlet)
-    return join_streamlet
+    join_streamlet_result = JoinStreamlet(JoinBolt.INNER, window_config,
+                                          join_function, self, join_streamlet)
+    self._add_child(join_streamlet_result)
+    join_streamlet._add_child(join_streamlet_result)
+    return join_streamlet_result
+
+  def outer_right_join(self, join_streamlet, window_config, join_function):
+    """Return a new Streamlet by outer right join_streamlet with this streamlet
+    """
+    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
+    join_streamlet_result = JoinStreamlet(JoinBolt.OUTER_RIGHT, window_config,
+                                          join_function, self, join_streamlet)
+    self._add_child(join_streamlet_result)
+    join_streamlet._add_child(join_streamlet_result)
+    return join_streamlet_result
+
+  def outer_left_join(self, join_streamlet, window_config, join_function):
+    """Return a new Streamlet by left join_streamlet with this streamlet
+    """
+    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
+    join_streamlet_result = JoinStreamlet(JoinBolt.OUTER_LEFT, window_config,
+                                          join_function, self, join_streamlet)
+    self._add_child(join_streamlet_result)
+    join_streamlet._add_child(join_streamlet_result)
+    return join_streamlet_result
 
   def outer_join(self, join_streamlet, window_config, join_function):
-    """Return a new Streamlet by outer joining join_streamlet with this streamlet
+    """Return a new Streamlet by outer join_streamlet with this streamlet
     """
     from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
-    join_streamlet = JoinStreamlet(JoinBolt.OUTER, window_config,
-                                   join_function, self, join_streamlet)
-    self._add_child(join_streamlet)
-    join_streamlet._add_child(join_streamlet)
-    return join_streamlet
 
-  def left_join(self, join_streamlet, window_config, join_function):
-    """Return a new Streamlet by left joining join_streamlet with this streamlet
-    """
-    from heronpy.streamlet.impl.joinbolt import JoinStreamlet, JoinBolt
-    join_streamlet = JoinStreamlet(JoinBolt.LEFT, window_config,
-                                   join_function, self, join_streamlet)
-    self._add_child(join_streamlet)
-    join_streamlet._add_child(join_streamlet)
-    return join_streamlet
+    join_streamlet_result = JoinStreamlet(JoinBolt.OUTER, window_config,
+                                          join_function, self, join_streamlet)
+    self._add_child(join_streamlet_result)
+    join_streamlet._add_child(join_streamlet_result)
+    return join_streamlet_result
 
   def reduce_by_key_and_window(self, window_config, reduce_function):
     """Return a new Streamlet in which each (key, value) pair of this Streamlet are collected
