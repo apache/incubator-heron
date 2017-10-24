@@ -149,61 +149,15 @@ There are three delivery semantics available corresponding to the three delivery
 
 ## Acking
 
-In distributed systems, an **ack** (short for "acknowledgment") is a message that confirms that some action has been taken. In Heron, you can create bolts that emit acks when some desired operation has occurred (for example data has been successfully stored in a database or a message has been successfully produced on a topic in a pub-sub messaging system).
+In distributed systems, an **ack** (short for "acknowledgment") is a message that confirms that some action has been taken. In Heron, you can create [bolts](#acking-bolts) that emit acks when some desired operation has occurred (for example data has been successfully stored in a database or a message has been successfully produced on a topic in a pub-sub messaging system). Those acks can then be received and acted upon by upstream [spouts](#ack-receiving-spouts).
 
-Using the Heron topology API for Java, you can create [bolts](#acking-bolts) that emit acks and [spouts](#ack-receiving-spouts) that receive acks.
-
-### Ack-receiving spouts
-
-Heron spouts don't emit acks, but they can receive acks when bolts directly downstream have acked a tuple. In order to receive an ack from downstream bolts, spouts need to do two things:
-
-1. [Specify](#specifying-a-tuple-id) a tuple ID when they emit tuples using the `nextTuple` method
-1. [Implement](#specifying-ack-reception-logic) an `ack` function that specifies what will happen when an ack is received from downstream bolts
-
-### Specifying a tuple ID
-
-If you want a spout to receive acks from downstream bolts, the spout needs to specify a tuple ID every time the spout's `SpoutOutputCollector` emits a tuple to downstream bolts. Here's an example:
-
-```java
-public class AckReceivingSpout {
-    public void nextTuple() {
-        collector.emit(new Values("some-value"), "some-tuple-id");
-    }
-}
-```
-
-In this example, each tuple emitted by the spout has the same ID: `some-tuple-id`. If no ID is specified, as in the example below, then the spout *will not receive acks*:
-
-```java
-public class NoAckReceivedSpout {
-    public void nextTuple() {
-        collector.emit(new Values("some-value"));
-    }
-}
-```
-
-When specifying an ID for the tuple being emitted, the ID is of type `Object`, which means that you can serialize to/deserialize from any data type that you'd like. The tuple ID could thus be a simple `String` or `long` or something more complex, like a hash, `Map`, or POJO.
-
-### Specifying ack reception logic
-
-In order to specify what your spout does when an ack is received, you need to implement an `ack` function in your spout. That function takes a Java `Object` containing the tuple's ID, which means that you can potentially deserialize the tuple ID to any type you'd like.
-
-Here's an example that simply logs the tuple ID:
-
-```java
-public class AckReceivingSpout {
-    public void nextTuple() {
-        collector.emit(new Values("some-value"), "some-tuple-id");
-    }
-
-    public void ack(Object tupleId) {
-        // This will print "some-tuple-id" whenever 
-        System.out.println(tupleId.toString());
-    }
-}
-```
+> You can see acking at work in a complete Heron topology in [this topology](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/api/AckingTopology.java).
 
 ### Acking bolts
+
+Each Heron bolt has an `OutputCollector` that can ack tuples using the `ack` method. Tuples can be acked inside the `execute` method that each bolt uses to process incoming tuples. *When* a bolt acks tuples is up to you. Tuples can be acked immediately upon receipt, after data has been saved to a database, after a message has been successfully published to a pub-sub topic, etc.
+
+Here's an example of a bolt that acks tuples when they're successfully processed:
 
 ```java
 import com.twitter.heron.api.bolt.OutputCollector;
@@ -233,5 +187,73 @@ public class AckingBolt {
 
 In this bolt, there's an `applyProcessingOperation` function that processes each incoming tuple. One of two things can result from this function:
 
-1. The operation succeeds, in which case the bolt sends an ack. Any upstream spouts---such as a spout like the `AckReceivingSpout` above---would then receive that ack.
-1. The operation fails and throws an exception, in which case the tuple is failed rather than acked
+1. The operation succeeds, in which case the bolt sends an ack. Any upstream spouts---such as a spout like the `AckReceivingSpout` below---would then receive that ack, along with the message ID that the bolt provides.
+1. The operation fails and throws an exception, in which case the tuple is failed rather than acked.
+
+### Ack-receiving spouts
+
+Heron spouts don't emit acks, but they can receive acks when downstream bolts have acked a tuple. In order to receive an ack from downstream bolts, spouts need to do two things:
+
+1. [Specify](#specifying-a-message-id) a message ID when they emit tuples using the `nextTuple` method
+1. [Implement](#specifying-ack-reception-logic) an `ack` function that specifies what will happen when an ack is received from downstream bolts
+
+### Specifying a message ID
+
+If you want a spout to receive acks from downstream bolts, the spout needs to specify a message ID every time the spout's `SpoutOutputCollector` emits a tuple to downstream bolts. Here's an example:
+
+```java
+public class AckReceivingSpout {
+    public void nextTuple() {
+        collector.emit(new Values("some-value"), "some-tuple-id");
+    }
+}
+```
+
+In this example, each tuple emitted by the spout has the same ID: `some-tuple-id`. If no ID is specified, as in the example below, then the spout *will not receive acks*:
+
+```java
+public class NoAckReceivedSpout {
+    public void nextTuple() {
+        collector.emit(new Values("some-value"));
+    }
+}
+```
+
+When specifying an ID for the tuple being emitted, the ID is of type `Object`, which means that you can serialize to/deserialize from any data type that you'd like. The message ID could thus be a simple `String` or `long` or something more complex, like a hash, `Map`, or POJO.
+
+### Specifying ack reception logic
+
+In order to specify what your spout does when an ack is received, you need to implement an `ack` function in your spout. That function takes a Java `Object` containing the tuple's ID, which means that you can potentially deserialize the message ID to any type you'd like.
+
+In this example, the spout simply logs the message ID:
+
+```java
+public class AckReceivingSpout {
+    public void nextTuple() {
+        collector.emit(new Values("some-value"), "some-tuple-id");
+    }
+
+    public void ack(Object tupleId) {
+        // This will print "some-tuple-id" whenever 
+        System.out.println((String) tupleId);
+    }
+}
+```
+
+In this example, the spout performs a series of actions when receiving the ack:
+
+```java
+public class AckReceivingSpout {
+    public void nextTuple() {
+        if (someCondition) {
+            String randomHash = // Generate a random hash as a message ID
+            collector.emit(new Values(val), randomHash);
+        }
+    }
+
+    public void ack(Object tupleId) {
+        saveItemToDatabase(item);
+        publishToPubSubTopic(message);
+    }
+}
+```

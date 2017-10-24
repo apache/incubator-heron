@@ -56,18 +56,20 @@ public final class AckingTopology {
     Config conf = new Config();
     conf.setDebug(true);
 
-    // Put an arbitrary large number here if you don't want to slow the topology down
+    // Put an arbitrarily large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
-    // To enable acking
+    // To enable at-least-once delivery semantics
     conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
+
+    // Extra JVM options
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
-    // component resource configuration
+    // Component resource configuration
     conf.setComponentRam("word", ExampleResources.getComponentRam());
     conf.setComponentRam("exclaim1", ExampleResources.getComponentRam());
 
-    // container resource configuration
+    // Container resource configuration
     conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(spouts + bolts, 2));
     conf.setContainerRamRequested(
@@ -103,18 +105,20 @@ public final class AckingTopology {
     }
 
     public void nextTuple() {
-      // We explicitly slow down the spout to avoid the stream mgr to be the bottleneck
+      // Explicitly slow down the spout to prevent the stream manager from being  the bottleneck
       Utils.sleep(1);
 
       final String word = words[rand.nextInt(words.length)];
 
-      // To enable acking, we need to emit tuple with MessageId, which is an object
+      // To enable acking, we need to emit each tuple with a MessageId, which is an Object
       collector.emit(new Values(word), "MESSAGE_ID");
     }
 
+    // Specifies what happens when an ack is received from downstream bolts
     public void ack(Object msgId) {
     }
 
+    // Specifies what happens when a tuple is failed by a downstream bolt
     public void fail(Object msgId) {
     }
 
@@ -139,11 +143,10 @@ public final class AckingTopology {
 
     @Override
     public void execute(Tuple tuple) {
-      // We need to ack a tuple when we consider it is done successfully
-      // Or we could fail it by invoking collector.fail(tuple)
-      // If we do not do the ack or fail explicitly
-      // After the MessageTimeout Seconds, which could be set in Config, the spout will
-      // fail this tuple
+      // We need to ack a tuple when we deem that some operation has successfully completed.
+      // Tuples can also be failed by invoking collector.fail(tuple)
+      // If we do not explicitly ack or fail the tuple after MessageTimeout seconds, which
+      // can be set in the topology config, the spout will automatically fail the tuple
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
