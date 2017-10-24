@@ -56,6 +56,9 @@ public final class AckingTopology {
     Config conf = new Config();
     conf.setDebug(true);
 
+    // Specifies that all tuples will be automatically failed if not acked within 10 seconds
+    conf.setMessageTimeoutSecs(10);
+
     // Put an arbitrarily large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
 
