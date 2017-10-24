@@ -110,7 +110,11 @@ public final class AckingTopology {
     public void nextTuple() {
       final String word = words[rand.nextInt(words.length)];
 
-      // To enable acking, we need to emit each tuple with a MessageId, which is an Object
+      // To enable acking, we need to emit each tuple with a MessageId, which is an Object.
+      // Each new message emitted needs to be annotated with a unique ID, which allows
+      // the spout to keep track of which messages should be acked back to the producer or
+      // retried when the appropriate ack/fail happens. For the sake of simplicity here,
+      // however, we'll tag all tuples with the same message ID.
       collector.emit(new Values(word), "MESSAGE_ID");
     }
 
