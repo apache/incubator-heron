@@ -13,9 +13,9 @@
 # limitations under the License.
 """ Python program related metrics."""
 import gc
-import psutil
+import resource
 import traceback
-from heronpy.api.metrics import AssignableMetrics, MultiAssignableMetrics
+from heronpy.api.metrics import AssignableMetrics
 from .metrics_helper import BaseMetricsHelper
 import heron.instance.src.python.utils.system_constants as constants
 from heron.instance.src.python.utils import system_config
@@ -25,23 +25,23 @@ from heron.common.src.python.utils.log import Log
 class PyMetrics(BaseMetricsHelper):
   """Helper class to collect PyHeron program metrics"""
   def __init__(self, metrics_collector):
-    self.process = psutil.Process()
     # total sys cpu time
     self.sys_cpu_time = AssignableMetrics(0)
     # total user cpu time
     self.user_cpu_time = AssignableMetrics(0)
-    # threads cpu usage
-    self.threads = MultiAssignableMetrics()
-    # number of open file descriptors
-    self.fd_nums = AssignableMetrics(0)
-    # number of threads
-    self.num_threads = AssignableMetrics([])
+    # threads cpu usage. Not supported
+    # Add it back when we find an alternative to psutil
+    # self.threads = MultiAssignableMetrics()
+    # number of open file descriptors. Not supported
+    # Add it back when we find an alternative to psutil
+    # self.fd_nums = AssignableMetrics(0)
     # rss: aka "Resident Set Size"
     # this is the non-swapped physical memory a process has used.
     self.physical_memory = AssignableMetrics(0)
     # vms: "Virtual Memory Size", this is the total
-    # amount of virtual memory used by the process.
-    self.virtual_memory = AssignableMetrics(0)
+    # amount of virtual memory used by the process. Not supported
+    # Add it back when we find an alternative to psutil
+    # self.virtual_memory = AssignableMetrics(0)
     # stats about three generations of GC
     # count is the number of objects in one generation
     # threshold is the collect frequency of one generation
@@ -50,9 +50,9 @@ class PyMetrics(BaseMetricsHelper):
     self.g3_count, self.g3_threshold = AssignableMetrics(0), AssignableMetrics(0)
     PY_SYS_CPU_TIME = '__py-sys-cpu-time-secs'
     PY_USER_CPU_TIME = '__py-user-cpu-time-secs'
-    PY_FD_NUMS = '__py-file-descriptors-number'
+    # PY_FD_NUMS = '__py-file-descriptors-number'
     PY_PHYSICAL_MEMORY = '__py-physical-memory-byte'
-    PY_VIRTUAL_MEMORY = '__py-virtual-memory-byte'
+    # PY_VIRTUAL_MEMORY = '__py-virtual-memory-byte'
     PY_GC_GENERATION_1_COUNT = '__py-generation-1-count'
     PY_GC_GENERATION_2_COUNT = '__py-generation-2-count'
     PY_GC_GENERATION_3_COUNT = '__py-generation-3-count'
@@ -61,9 +61,9 @@ class PyMetrics(BaseMetricsHelper):
     PY_GC_GENERATION_3_THRESHOLD = '__py-generation-3-collection-threshold'
     self.metrics = {PY_SYS_CPU_TIME: self.sys_cpu_time,
                     PY_USER_CPU_TIME: self.user_cpu_time,
-                    PY_FD_NUMS: self.fd_nums,
+                    # PY_FD_NUMS: self.fd_nums,
                     PY_PHYSICAL_MEMORY: self.physical_memory,
-                    PY_VIRTUAL_MEMORY: self.virtual_memory,
+                    # PY_VIRTUAL_MEMORY: self.virtual_memory,
                     PY_GC_GENERATION_1_COUNT: self.g1_count,
                     PY_GC_GENERATION_2_COUNT: self.g2_count,
                     PY_GC_GENERATION_3_COUNT: self.g3_count,
@@ -75,34 +75,30 @@ class PyMetrics(BaseMetricsHelper):
     interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
 
-  def update_cpu_time(self):
+  def update_cpu_and_memory_metrics(self):
     try:
-      t = self.process.cpu_times()
-      self.sys_cpu_time.update(t.system)
-      self.user_cpu_time.update(t.user)
+      r = resource.getrusage(resource.RUSAGE_SELF)
+      self.sys_cpu_time.update(r.ru_stime)
+      self.user_cpu_time.update(r.ru_utime)
+      self.physical_memory.update(r.ru_maxrss)
+      # self.virtual_memory.update(m.vms)
     except Exception as e:
       Log.error(traceback.format_exc(e))
 
   def update_threads_time(self):
-    try:
-      for t in self.process.threads():
-        self.threads.update(t.id, (t.user_time, t.system_time))
-    except Exception as e:
-      Log.error(traceback.format_exc(e))
+    # try:
+    #   for t in self.process.threads():
+    #     self.threads.update(t.id, (t.user_time, t.system_time))
+    # except Exception as e:
+    #   Log.error(traceback.format_exc(e))
+    pass
 
   def update_fds(self):
-    try:
-      self.fd_nums.update(self.process.num_fds())
-    except Exception as e:
-      Log.error(traceback.format_exc(e))
-
-  def update_memory_usage(self):
-    try:
-      m = self.process.memory_info()
-      self.physical_memory.update(m.rss)
-      self.virtual_memory.update(m.vms)
-    except Exception as e:
-      Log.error(traceback.format_exc(e))
+    # try:
+    #   self.fd_nums.update(self.process.num_fds())
+    # except Exception as e:
+    #   Log.error(traceback.format_exc(e))
+    pass
 
   def update_gc_stat(self):
     try:
@@ -118,8 +114,7 @@ class PyMetrics(BaseMetricsHelper):
       Log.error(traceback.format_exc(e))
 
   def update_all(self):
-    self.update_cpu_time()
+    self.update_cpu_and_memory_metrics()
     self.update_threads_time()
     self.update_fds()
-    self.update_memory_usage()
     self.update_gc_stat()
