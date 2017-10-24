@@ -35,7 +35,7 @@ import com.twitter.heron.streamlet.Streamlet;
  * the computation nodes.
  */
 public final class BuilderImpl implements Builder {
-  private List<StreamletImpl<?>> sources;
+  private List<BaseStreamletImpl<?>> sources;
   public BuilderImpl() {
     sources = new LinkedList<>();
   }
@@ -79,10 +79,10 @@ public final class BuilderImpl implements Builder {
   public TopologyBuilder build() {
     TopologyBuilder builder = new TopologyBuilder();
     Set<String> stageNames = new HashSet<>();
-    for (StreamletImpl<?> streamlet : sources) {
+    for (BaseStreamletImpl<?> streamlet : sources) {
       streamlet.build(builder, stageNames);
     }
-    for (StreamletImpl<?> streamlet : sources) {
+    for (BaseStreamletImpl<?> streamlet : sources) {
       if (!streamlet.allBuilt()) {
         throw new RuntimeException("Topology cannot be fully built! Are all sources added?");
       }
