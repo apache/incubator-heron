@@ -41,6 +41,11 @@ article.hn-docs-content {
     margin-bottom: $base-margin;
   }
 
+  h5 {
+    font-size: $base-font-size * 1.2;
+    margin-bottom: $base-margin;
+  }
+
   img {
     display: block;
     max-width: 100%;

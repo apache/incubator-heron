@@ -178,7 +178,7 @@ to single-value streamlets, the Heron Streamlet API also enables you to work wit
 
 There's a wide variety of operations that 
 
-### Streamlet operations
+## Streamlet operations
 
 In the Heron Streamlet API, processing data means *transforming streamlets into other
 streamlets*. This can be done using a wide variety of available operations, including
@@ -186,11 +186,87 @@ many that you may be familiar with from functional programming:
 
 Operation | Description
 :---------|:-----------
-map | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
-flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened into a collection type
-join | Joins two separate streamlets into a single streamlet
-filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
+[map](#map-operations) | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
+[flatMap](#flatMap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened into a collection type
+[join](#join-operations) | Joins two separate streamlets into a single streamlet
+[filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 
+### Join operations
+
+Join operations in the Streamlet API take two [key-value streamlets](#key-value-streamlets) and 
+
+You may already be familiar with `JOIN` operations in SQL databases, like this:
+
+```sql
+SELECT username, email
+FROM all_users
+INNER JOIN banned_users ON all_users.username NOT IN banned_users.username;
+```
+
+Joins in the Heron Streamlet API are quite different from SQL joins in that all Streamlet API joins are:
+
+* on a key in a [key-value streamlet](#key-value-streamlet) rather than on a row of data
+* over elements accumulated during a specified [time window](#windowing)
+* performed using a join function that specifies how 
+
+> If you'd like to unite two streamlets into one *without* applying a window or a join function, you can use a [union](#union-operations) operation.
+
+All join operations are done:
+
+1. Over elements accumulated during a specified [time window](#windowing).
+1. In accordance with a function that performs the join.
+
+> Join operations can be performed only on [key-value streamlets](#key-value-streamlets), since joins can be performed only on a key.
+
+#### Inner joins
+
+Inner joins operate over the [Cartesian product](https://en.wikipedia.org/wiki/Cartesian_product) of the left stream and the right stream, i.e. over all the whole set of all ordered pairs between the two streams. Imagine this set of key-value pairs accumulated within a time window:
+
+Left Streamlet | Right Streamlet
+:--------------|:---------------
+("player1", 4) | ("player1", 10)
+("player1", 5) | ("player1", 12)
+("player1", 17) | 
+
+An inner join operation would thus apply the join function to every possible pairing of key-values, thus **3 &times; 2 = 6** in total.
+
+If the join function, say, added the values together, then the resulting stream would look like this:
+
+Operation | Joined Streamlet
+:---------|:----------------
+4 + 10 | ("player1", 14)
+4 + 12 | ("player1", 16)
+5 + 10 | ("player1", 15)
+5 + 12 | ("player1", 17)
+17 + 10 | ("player1", 27)
+17 + 12 | ("player1", 29)
+
+> Inner joins are in a certain sense the "default" join type in the Heron Streamlet API. If you call the `join` method without specifying a join type, inner join will be used.
+
+##### Java example
+
+```java
+playerScoresLeft
+        .join(playerScoresRight, WindowConfig.)
+
+
+scores1
+        .join(scores2, WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+```
+
+#### Outer left joins
+
+Left stream | Right stream
+:-----------|:------------
+("player1", 4) | ("player1", 10)
+("player1", 5) | ("player1", 12)
+("player1", 17) | 
+
+> With an outer left join, *all* elements in each Streamlet are guaranteed to be included in the resulting joined Streamlet.
+
+#### Outer right joins
+
+#### Outer joins
 
 ### Streamlet API example
 
