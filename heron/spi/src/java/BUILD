@@ -23,6 +23,7 @@ java_library(
         "**/spi/utils/**/*.java",
         "**/spi/statemgr/**/*.java",
         "**/spi/metricsmgr/**/*.java",
+        "**/spi/keymgr/**/*.java",
     ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = [
@@ -53,6 +54,7 @@ utils_deps_files = \
         ":statefulstorage-spi-java",
         ":packing-spi-java",
         ":metricsmgr-spi-java",
+        ":keymgr-spi-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
@@ -89,6 +91,10 @@ packing_deps_files = [
 uploader_deps_files = [
     ":common-spi-java",
     "//heron/common/src/java:config-java",
+]
+
+keymgr_deps_files = [
+    ":common-spi-java",
 ]
 
 statemgr_deps_files = \
@@ -194,6 +200,14 @@ java_library(
     deps = statemgr_deps_files,
 )
 
+java_library(
+    name='keymgr-spi-java',
+    srcs = glob(
+        ["**/spi/keymgr/**/*.java"],
+    ),
+    deps = keymgr_deps_files,
+)
+
 java_binary(
     name = "spi-unshaded",
     srcs = glob([
@@ -205,6 +219,7 @@ java_binary(
         "**/spi/statemgr/**/*.java",
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",
+        "**/spi/keymgr/**/*.java",
     ]),
     deps = [
         "//heron/api/src/java:classification"
