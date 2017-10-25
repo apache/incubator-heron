@@ -30,8 +30,6 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.Utils;
-
 
 /**
  * This is a basic example of a Heron topology with acking enable.
