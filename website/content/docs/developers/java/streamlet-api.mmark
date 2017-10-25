@@ -171,11 +171,11 @@ Operation | Description | Example
 :---------|:------------|:-------
 [`map`](#map-operations) | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
 [`flatMap`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
-[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
 [`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
 [`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
 [`mapToKV`](#map-to-kv-operations) | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
 `log` | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
+[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
 
 <!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
 
@@ -203,6 +203,17 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 
 > One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
 
+### Filter operations
+
+Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example:
+
+```java
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .filter((i) -> i < 7);
+```
+
+In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
+
 ### Join operations
 
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
@@ -222,16 +233,6 @@ builder.newSource(() -> new KeyValue<>("heron-api", "streamlet-api"))
 In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `streamlet-api`).
 
 > The effect of a join operation is to create a new streamlet *for each key*.
-
-### Filter operations
-
-Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example:
-
-```java
-Builder builder = Builder.CreateBuilder();
-
-builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-```
 
 ### Repartition operations
 

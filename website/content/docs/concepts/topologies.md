@@ -2,16 +2,7 @@
 title: Heron Topologies
 ---
 
-> ## New Streamlet API for Heron
-> As of version 0.16.0, Heron offers a new **Streamlet API** that you can use
-> to write topologies in a more declarative, functional manner, without
-> needing to specify spout and bolt logic directly. The Streamlet API is
-> **currently in beta** and available for
-> [Java](../../developers/java/streamlet-api). The Streamlet API for Python will
-> be available soon.
->
-> More information on the Streamlet API can be found
-> [below](#the-heron-streamlet-api).
+{{< alert "new-streamlet-api" >}}
 
 A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) used to process
@@ -126,11 +117,13 @@ The core construct underlying the Heron Streamlet API is that of the **streamlet
 a potentially unbounded, ordered collection of some data type. Streamlets can originate from a
 wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
-(incubating), random generators, or static files like CVS or Parquet files.
+(incubating), random generators, or static files like CVS or [Apache Parquet](https://parquet.apache.org/) files.
 
 These **source streamlets** can then be manipulated in a wide variety of ways. You can apply
-map, filter, flatMap, and other operations to them. With [key-value streamlets](#key-value-streamlets) you can
-perform join operations.
+[map](#map-operations), [filter](#filter-operations), [flatMap](#flatmap-operations), and many
+other operations to them. With [key-value streamlets](#key-value-streamlets) you can these
+same operations as well as [join](#join-operations) and [reduce by key and window](#reduce-by-key-and-window-operations)
+operations.
 
 ### Streamlet example
 
@@ -206,27 +199,133 @@ Operation | Description
 
 ### Map operations
 
+Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet. Here's a Java example:
+
+```java
+import com.twitter.heron.streamlet.Builder;
+
+Builder builder = Builder.createBuilder();
+
+builder.newSource(() -> 1)
+    .map(i -> i + 12);
+```
+
+In this example, a supplier streamlet emits an indefinite series of 1s. The `map` operation then adds 12 to each incoming element, producing a streamlet of 13s. The effect of this operation is to transform the `Streamlet<Integer>` into a transformed `Streamlet<Integer>`, although map operations can also convert streamlets into streamlets of a different type.
+
 ### FlatMap operations
+
+FlatMap operations are like [map operations](#map-operations) but with the important difference that each element of the streamlet is "flattened" into another type. In the Java example below, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
+
+```java
+builder.newSource(() -> "I have nothing to declare but my genius")
+        .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")));
+```
+
+The effect of this operation is to transform the `Streamlet<String>` into a `Streamlet<List<String>>`.
+
+> One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
 
 ### Filter operations
 
+Filter operations retain elements in a streamlet, while potentially excluding some elements, on the basis of a provided filtering function. Here's a Java example:
+
+```java
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .filter((i) -> i < 7);
+```
+
+In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
+
 ### Union operations
+
+Union operations combine two streamlets of the same type into a single streamlet without modifying the elements. Here's a Java example:
+
+```java
+Streamlet<String> oohs = builder.newSource(() -> "ooh");
+Streamlet<String> aahs = builder.newSource(() -> "aah");
+
+Streamlet<String> combined = oohs
+        .union(aahs);
+```
+
+Here, one streamlet is an endless series of "ooh"s while the other is an endless series of "aah"s. The `union` operation combines them into a single streamlet of alternating "ooh"s and "aah"s.
 
 ### Transform operations
 
-Transform operations require you to implement three different method:
+Transform operations are highly flexible operations that are most useful for:
 
-* A `setup` method that enables you to pass a context object to the operation
-* A `transform` operation that performs the actual transformation
-* A `cleanup` method that enables you
+* operations involving state in [stateful topologies](../../concepts/delivery-semantics#stateful-topologies)
+* operations that don't neatly fit into the other categories
 
-## Reduce by key and window operations
+Transform operations require you to implement three different methods:
+
+* A `setup` method that enables you to pass a context object to the operation and to specify what happens prior to the `transform` step
+* A `transform` operation that performs the desired transformation
+* A `cleanup` method that allows you to specify what happens after the `transform` step
+
+The context object available to a transform operation provides access to:
+
+* the current state of the topology
+* the topology's configuration
+* the name of the stream
+* the stream partition
+* the current task ID
+
+Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
+
+```java
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.SerializableTransformer;
+
+import java.util.function.Consumer;
+
+public class CountNumberOfItems implements SerializableTransformer<String, String> {
+    private int numberOfItems;
+
+    public void setup(Context context) {
+        numberOfItems = (int) context.getState("number-of-items");
+        context.getState().put("number-of-items", numberOfItems + 1);
+    }
+
+    public void transform(String in, Consumer<String> consumer) {
+        String transformedString = // Apply some transformation
+        consumer.accept(transformedString);
+    }
+
+    public void cleanup() {
+        System.out.println(
+                String.format("Successfully processed new state: %d", numberOfItems));
+    }
+}
+```
+
+This operation does a few things:
+
+* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
+* In the `cleanup` step, the current count of items processed is logged.
+
+Here's that operation within the context of a streamlet processing graph:
+
+```java
+Builder builder = Builder.createBuilder();
+
+builder.newSource(() -> "Some string over and over")
+        .transform(new CountNumberOfItems())
+        .log();
+```
+
+### Reduce by key and window operations
 
 
 
 ### Join operations
 
-Join operations in the Streamlet API take two [key-value streamlets](#key-value-streamlets) and 
+Join operations in the Streamlet API take two [key-value streamlets](#key-value-streamlets) and join them together:
+
+* based on the key in the key-value streamlet
+* over elements accumulated during a specified [time window](#windowing)
+* using a join function that specifies *how* values will be processed
 
 You may already be familiar with `JOIN` operations in SQL databases, like this:
 
@@ -236,13 +335,7 @@ FROM all_users
 INNER JOIN banned_users ON all_users.username NOT IN banned_users.username;
 ```
 
-Joins in the Heron Streamlet API are quite different from SQL joins in that all Streamlet API joins are:
-
-* on a key in a [key-value streamlet](#key-value-streamlet) rather than on a row of data
-* over elements accumulated during a specified [time window](#windowing)
-* performed using a join function that specifies how 
-
-> If you'd like to unite two streamlets into one *without* applying a window or a join function, you can use a [union](#union-operations) operation.
+> If you'd like to unite two streamlets into one *without* applying a window or a join function, you can use a [union](#union-operations) operation, which are available for key-value streamlets as well as normal streamlets.
 
 All join operations are done:
 
