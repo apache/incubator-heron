@@ -17,8 +17,8 @@ package com.twitter.heron.scheduler.utils;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;

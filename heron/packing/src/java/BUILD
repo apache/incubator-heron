@@ -37,6 +37,7 @@ java_library(
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:packing-spi-java",
         "//heron/spi/src/java:utils-spi-java",
+        "//heron/api/src/java:api-java"
     ],
 )
 
