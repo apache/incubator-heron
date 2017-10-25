@@ -1,5 +1,5 @@
 header.hn-docs-header.page-header
-  h1.hn-docs-title {{.Title}}
+  h1.hn-docs-title {{.Title}} {{ if .Params.new }}<span class="label label-success">NEW</span>{{ end }}
   .hn-docs-description {{.Description}}
 article.hn-docs-content
   {{.Content}}

@@ -1,6 +1,7 @@
 ---
 title: The Heron Streamlet API for Java
 description: Create Heron topologies in Java using a functional programming style
+new: true
 ---
 
 {{< alert "streamlet-api-beta" >}}
@@ -139,7 +140,7 @@ You can set the number of containers to be used by a Functional API topology (as
 topologyConfig.setNumContainers(2);
 ```
 
-You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
+You can set the CPU (as a `float`) and RAM (as a `long` expressing the number of bytes) per container like this:
 
 ```java
 import com.twitter.heron.streamlet.Resources;
@@ -170,7 +171,7 @@ In the Heron Functional API for Java, processing graphs consist of [streamlets](
 Operation | Description | Example
 :---------|:------------|:-------
 [`map`](#map-operations) | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
-[`flatMap`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
+[`flat_map`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
 [`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
 [`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
 [`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
@@ -205,21 +206,23 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 
 ### Join operations
 
-Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
+Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each key-value object (a Python two-tuple) in a streamlet has, by definition, a key. Here's an example:
 
 ```java
 import com.twitter.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.CreateBuilder();
 
-KVStreamlet<String, String> streamlet1 =
-        builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
+KVStreamlet<String, Integer> player1Scores =
+        builder.newKVSource(() -> new KeyValue<>("score", 10));
+KVStreamlet<String, Integer> player2Scores =
+        builder.newKVSource(() -> new KeyValue<>("score", 12));
 
-builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
-    .join(streamlet1, WindowConfig.TumblingCountWindow(10), KeyValue::create);
+player1Scores
+        .join()
 ```
 
-In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
+Here, two streamlets are created, each of which emits a `KeyValue<String, String>` object in which the key is `heron-api`. In `streamlet`, the value of the `KeyValue` object is `topology-api` while in `streamlet2` the value is `functional-api`. The streamlet resulting from the join operation would consist of a key-value streamlet consisting of `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
 
 > The effect of a join operation is to create a new streamlet *for each key*.
 

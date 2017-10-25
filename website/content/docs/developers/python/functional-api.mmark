@@ -1,0 +1,183 @@
+---
+title: The Heron Functional API for Python
+description: Create Heron topologies in Python using a functional programming style
+new: true
+---
+
+{{< alert "functional-api-beta" >}}
+
+{{content/snippets/heron-functional-api.md}}
+
+## Getting started
+
+If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Python topologies to a Heron cluster, they need to be packaged as a Python executable ([PEX](https://pex.readthedocs.io/en/stable/whatispex.html)) file. In order to produce PEX files, we recommend using a build tool like [Pants](http://www.pantsbuild.org/python_readme.html) or [Bazel](https://github.com/benley/bazel_rules_pex).
+
+> #### Example Functional API topologies buildable as PEXes
+> * See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
+> * See [this repo](https://github.com/streamlio/bazel-dev-environment) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
+>
+> Regardless of which build tool you use, make sure to update the version of the `heronpy` library to the most recent version ({{< heronVersion >}}). For Pants you can set the version in `3rdparty/python/requirements.txt` and for Bazel you can set the version in each topology's root `BUILD` file (in the `reqs` list of the `pex_binary` declaration).
+
+## Functional API topology configuration
+
+Every Functional API topology needs to be configured using a [`Config`](TODO) object.
+
+### Selecting delivery semantics
+
+You can select one of three [delivery semantics](../../../concepts/delivery-semantics)---at least once, at most once, or effectively once---to a topology like this:
+
+```python
+from heronpy.dsl.config import Config
+
+topology_config = Config()
+topology_config.set_delivery_semantics(Config.EFFECTIVELY_ONCE)
+```
+
+The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
+
+### Containers and resources
+
+You can set the number of containers to be used by a Functional API topology (as an integer) like so:
+
+```python
+topology_config.set_num_containers(2)
+```
+
+You can set the CPU (as a `float`) and RAM (as an `int` expressing the number of bytes) per container like this:
+
+```python
+from heronpy.dsl.resources import Resources
+
+topology_resources = Resources()
+topology_resources.set_cpu(2.0)
+topology_resources.set_ram(104857600)
+
+topology_config.set_container_resources(topology_resources)
+```
+
+> The default CPU is `1.0` while the default RAM is `104857600` (100 megabytes).
+
+There are also some helper methods that make it easier to specify RAM in megabytes and gigabytes (`set_ram_in_mb` and `set_ram_in_gb`, respectively). Here are two examples:
+
+```python
+topology_resources.set_ram_in_mb(500) # 500 megabytes
+topology_resources.set_ram_in_gb(5)   # 5 gigabytes
+```
+
+## Streamlets
+
+In the Heron Functional API for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
+
+## Operations
+
+Operation | Description | Example
+:---------|:------------|:-------
+[`map`](#map-operations) | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
+[`flat_map`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
+[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
+[`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
+[`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
+[`mapToKV`](#map-to-kv-operations) | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
+`log` | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
+
+<!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
+
+### Map operations
+
+Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet. Here's an example:
+
+```python
+from heron.dsl.builder import Builder
+from heronpy.connectors.mock.arraylooper import ArrayLooper
+
+builder.new_source(ArrayLooper([1]))
+    .map(lambda i: i + 12)
+```
+
+In this example, a supplier streamlet emits an indefinite series of 1s. The `map` operation then adds 12 to each incoming element, producing a streamlet of 13s.
+
+### FlatMap operations
+
+FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into another type. In this example, a supplier streamlet emits the same sentence over and over again; the `flat_map` operation transforms each sentence into a Python `list` of individual words:
+
+```java
+from heronpy.connectors.mock.arraylooper import ArrayLooper
+
+builder.new_source(ArrayLooper(["I have nothing to declare but my genius]))
+    .flat_map(lambda sentence: sentence.split())
+```
+
+The effect of this operation is to transform a string streamlet into a list streamlet.
+
+> One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
+
+### Join operations
+
+Join operations unify two streamlets *on a key*. Each key-value object (a Python two-tuple) in a streamlet has, by definition, a key and a value.
+
+```java
+from heronpy.streamlet.windowconfig import WindowConfig
+
+streamlet1 = builder.new_source(ArrayLooper[('heron-api', 'topology-api')])
+streamlet2 = builder.new_source(ArrayLooper[('heron-api', 'functional-api')])
+
+streamlet2
+    .join(streamlet1)
+
+import com.twitter.heron.dsl.WindowConfig;
+
+Builder builder = Builder.CreateBuilder();
+
+KVStreamlet<String, String> streamlet1 =
+        builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
+
+builder.newSource(() -> new KeyValue<>("heron-api", "functional-api"))
+    .join(streamlet1, WindowConfig.TumblingCountWindow(10), KeyValue::create);
+```
+
+In this case, the resulting streamlet would consist of an indefinite stream with two `KeyValue` objects with the key `heron-api` but different values (`topology-api` and `functional-api`).
+
+> The effect of a join operation is to create a new streamlet *for each key*.
+
+### Filter operations
+
+Filter operations retain elements in a streamlet, while potentially excluding some or all elements, on the basis of a provided filtering function. Here's an example:
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+```
+
+### Repartition operations
+
+When you assign a number of [partitions](#partitioning-and-parallelism) to a processing step, each step that comes after it inherits that number of partitions. Thus, if you assign 5 partitions to a `map` operation, then any `mapToKV`, `flatMap`, `filter`, etc. operations that come after it will also be assigned 5 partitions. But you can also change the number of partitions for a processing step (as well as the number of partitions for downstream operations) using `repartition`. Here's an example:
+
+```java
+import java.util.concurrent.ThreadLocalRandom;
+
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .setNumPartitions(5)
+        .map(i -> i + 1)
+        .repartition(2)
+        .filter(i -> i > 7)
+        .filter(i -> i < 2)
+        .log();
+```
+
+In this example, the supplier streamlet emits random integers between one and ten. That operation is assigned 5 partitions. After the `map` operation, the `repartition` function is used to assign 2 partitions to all downstream operations.
+
+### Map-to-KV operations
+
+Map-to-KV operations enable you to transform a streamlet into a KV streamlet, for example a `Streamlet<String>` into a `Streamlet<KeyValue<String, Boolean>>`, using a mapping function. Here's an example:
+
+```java
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> randomIntGenerator(1, 100))
+        .mapToKV((num) -> new KeyValue<>(num, num > 50));
+```
+
+In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
