@@ -174,9 +174,11 @@ As you can see, the Java code for the example streamlet processing graph require
 ### Key-value streamlets
 
 In the example [above](#streamlet-example), the source streamlet consisted only of integers (31, 47, 82, etc.). In addition
-to single-value streamlets, the Heron Streamlet API also enables you to work with **key-value streamlets**.
+to single-value streamlets, the Heron Streamlet API also enables you to work with **key-value streamlets**. With key-value
+streamlets, every element of the streamlet is a [`KeyValue`](/api/java/com/twitter/heron/streamlet/KeyValue.html) object in
+which the key and value can be any type you'd like.
 
-There's a wide variety of operations that 
+There's a variety of [operations](#key-value-streamlet-operations) that are only available for key-value streamlets.
 
 ## Streamlet operations
 
@@ -188,8 +190,39 @@ Operation | Description
 :---------|:-----------
 [map](#map-operations) | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
 [flatMap](#flatMap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened into a collection type
-[join](#join-operations) | Joins two separate streamlets into a single streamlet
 [filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
+[union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
+[transform](#transform-operations) | TODO
+
+### Key-value streamlet operations
+
+There are also some operations that are available only for [key-value streamlets](#key-value-streamlets).
+
+Operation | Description
+:---------|:-----------
+[reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
+
+[join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
+
+### Map operations
+
+### FlatMap operations
+
+### Filter operations
+
+### Union operations
+
+### Transform operations
+
+Transform operations require you to implement three different method:
+
+* A `setup` method that enables you to pass a context object to the operation
+* A `transform` operation that performs the actual transformation
+* A `cleanup` method that enables you
+
+## Reduce by key and window operations
+
+
 
 ### Join operations
 
