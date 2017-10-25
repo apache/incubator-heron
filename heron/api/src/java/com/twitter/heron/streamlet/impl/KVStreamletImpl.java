@@ -30,6 +30,7 @@ import com.twitter.heron.streamlet.SerializableSupplier;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
+import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
@@ -40,6 +41,7 @@ import com.twitter.heron.streamlet.impl.streamlets.KVLogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVRemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.KVToStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVTransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
@@ -86,6 +88,18 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
       SerializableFunction<? super KeyValue<? super K, ? super V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
     KVMapStreamlet<K, V, K1, V1> retval = new KVMapStreamlet<>(this, mapFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet by applying mapFn to each element of this KVStreamlet
+   * @param mapFn The Map Function that should be applied to each element
+   */
+  @Override
+  public <R> Streamlet<R> mapToStreamlet(
+      SerializableFunction<? super KeyValue<? super K, ? super V>, ? extends R> mapFn) {
+    KVToStreamlet<K, V, R> retval = new KVToStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
   }
