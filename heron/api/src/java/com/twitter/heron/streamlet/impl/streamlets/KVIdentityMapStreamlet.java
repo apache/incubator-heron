@@ -18,40 +18,31 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.operators.TransformOperator;
+import com.twitter.heron.streamlet.impl.operators.MapOperator;
 
 /**
- * TransformStreamlet represents a Streamlet that is made up of applying the user
- * supplied transform function to each element of the parent streamlet. It differs
- * from the simple MapStreamlet in the sense that it provides setup/cleanup flexibility
- * for the users to setup things and cleanup before the beginning of the computation
+ * MapStreamlet represents a Streamlet that is made up of applying the user
+ * supplied map function to each element of the parent streamlet.
  */
-public class KVTransformStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
+public class KVIdentityMapStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableTransformer<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer;
 
-  public KVTransformStreamlet(KVStreamletImpl<K, V> parent,
-                         SerializableTransformer<? super KeyValue<? super K, ? super V>,
-                         ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
+  public KVIdentityMapStreamlet(KVStreamletImpl<K, V> parent) {
     this.parent = parent;
-    this.serializableTransformer = serializableTransformer;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("kvtransform", stageNames));
+      setName(defaultNameCalculator("kvidentitymap", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new TransformOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(serializableTransformer),
+    bldr.setBolt(getName(), new MapOperator<KeyValue<K, V>, KeyValue<K, V>>(a -> a),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

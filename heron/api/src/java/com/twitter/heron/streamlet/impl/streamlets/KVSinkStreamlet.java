@@ -29,10 +29,10 @@ import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
  */
 public class KVSinkStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private Sink<? super KeyValue<K, V>> sink;
+  private Sink<? super KeyValue<? super K, ? super V>> sink;
 
   public KVSinkStreamlet(KVStreamletImpl<K, V> parent,
-                         Sink<? super KeyValue<K, V>> sink) {
+                         Sink<? super KeyValue<? super K, ? super V>> sink) {
     this.parent = parent;
     this.sink = sink;
     setNumPartitions(parent.getNumPartitions());

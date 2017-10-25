@@ -29,12 +29,12 @@ import com.twitter.heron.streamlet.impl.operators.FlatMapOperator;
  */
 public class KVFlatMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<K, V>,
-      ? extends Iterable<KeyValue<K1, V1>>> flatMapFn;
+  private SerializableFunction<? super KeyValue<? super K, ? super V>,
+      ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn;
 
   public KVFlatMapStreamlet(KVStreamletImpl<K, V> parent,
-                            SerializableFunction<? super KeyValue<K, V>,
-                              ? extends Iterable<KeyValue<K1, V1>>> flatMapFn) {
+                            SerializableFunction<? super KeyValue<? super K, ? super V>,
+                              ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn) {
     this.parent = parent;
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());
@@ -49,7 +49,8 @@ public class KVFlatMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new FlatMapOperator<KeyValue<K, V>, KeyValue<K1, V1>>(flatMapFn),
+    bldr.setBolt(getName(), new FlatMapOperator<KeyValue<? super K, ? super V>,
+            KeyValue<? extends K1, ? extends V1>>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

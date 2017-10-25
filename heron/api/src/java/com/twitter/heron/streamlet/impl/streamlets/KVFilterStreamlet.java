@@ -28,10 +28,10 @@ import com.twitter.heron.streamlet.impl.operators.FilterOperator;
  */
 public class KVFilterStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializablePredicate<? super KeyValue<K, V>> filterFn;
+  private SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn;
 
   public KVFilterStreamlet(KVStreamletImpl<K, V> parent,
-                           SerializablePredicate<? super KeyValue<K, V>> filterFn) {
+                           SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());
