@@ -76,7 +76,11 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
 
   /**
    * A more generalized version of repartition where a user can determine which partitions
-   * any particular tuple should go to
+   * any particular tuple should go to. For each element of the current streamlet, the user
+   * supplied partitionFn is invoked passing in the element as the first argument. The second
+   * argument is the number of partitions of the downstream streamlet. The partitionFn should
+   * return 0 or more unique numbers between 0 and npartitions to indicate which partitions
+   * this element should be routed to.
    */
   Streamlet<R> repartition(int numPartitions,
                            SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn);
