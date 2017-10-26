@@ -255,7 +255,7 @@ Here, one streamlet is an endless series of "ooh"s while the other is an endless
 Transform operations are highly flexible operations that are most useful for:
 
 * operations involving state in [stateful topologies](../../concepts/delivery-semantics#stateful-topologies)
-* operations that don't neatly fit into the other categories
+* operations that don't neatly fit into the other categories or into a lambda-based logic
 
 Transform operations require you to implement three different methods:
 
@@ -317,7 +317,20 @@ builder.newSource(() -> "Some string over and over")
 
 ### Reduce by key and window operations
 
+When working with [key-value streamlets](#key-value-streamlets), you can combine two such streamlets together by:
 
+* key
+* [time window](#window-operations)
+* via a reduce function
+
+```java
+Builder builder = Builder.createBuilder();
+
+KVStreamlet<String, String> s1 = builder.newKVSource(() -> new KeyValue<>("foo", "bar"));
+
+s1
+        .reduceByKeyAndWindow()
+```
 
 ### Join operations
 
