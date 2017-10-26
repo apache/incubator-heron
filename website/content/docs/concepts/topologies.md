@@ -117,7 +117,7 @@ The core construct underlying the Heron Streamlet API is that of the **streamlet
 a potentially unbounded, ordered collection of some data type. Streamlets can originate from a
 wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
-(incubating), random generators, or static files like CVS or [Apache Parquet](https://parquet.apache.org/) files.
+(incubating), random generators, or static files like CSV or [Apache Parquet](https://parquet.apache.org/) files.
 
 These **source streamlets** can then be manipulated in a wide variety of ways. You can apply
 [map](#map-operations), [filter](#filter-operations), [flatMap](#flatmap-operations), and many
