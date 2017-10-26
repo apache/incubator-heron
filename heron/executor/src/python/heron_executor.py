@@ -615,18 +615,18 @@ class HeronExecutor(object):
       Log.info("CPP instance %s component: %s" %(instance_id, component_name))
       instance_cmd = [
           self.cpp_instance_binary,
-          self.topology_name,
-          self.topology_id,
-          instance_id,
-          component_name,
-          str(global_task_id),
-          str(component_index),
-          self.stmgr_ids[self.shard],
-          self.tmaster_controller_port,
-          self.metrics_manager_port,
-          self.heron_internals_config_file,
-          self.override_config_file,
-          os.path.abspath(self.topology_binary_file)
+          '--topology_name=%s' % self.topology_name,
+          '--topology_id=%s' % self.topology_id,
+          '--instance_id=%s' % instance_id,
+          '--component_name=%s' % component_name,
+          '--task_id=%s' % str(global_task_id),
+          '--component_index=%s' % str(component_index),
+          '--stmgr_id=%s' % self.stmgr_ids[self.shard],
+          '--stmgr_port=%s' % str(self.tmaster_controller_port),
+          '--metricsmgr_port=%s' % str(self.metrics_manager_port),
+          '--config_file=%s' % self.heron_internals_config_file,
+          '--override_config_file=%s' % self.override_config_file,
+          '--topology_binary=%s' % os.path.abspath(self.topology_binary_file)
       ]
 
       retval[instance_id] = instance_cmd
