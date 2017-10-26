@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package com.twitter.heron.common.utils.topology;
+package com.twitter.heron.api.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.ByteAmount;
 
@@ -40,13 +41,12 @@ public final class TopologyUtils {
   private TopologyUtils() {
   }
 
-  public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
+  public static TopologyAPI.Topology getTopology(String topologyDefnFile)
+      throws InvalidTopologyException {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
       TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
-      if (!TopologyUtils.verifyTopology(topology)) {
-        throw new RuntimeException("Topology object is Malformed");
-      }
+      validateTopology(topology);
 
       return topology;
     } catch (IOException e) {
@@ -144,6 +144,17 @@ public final class TopologyUtils {
     } else {
       return Config.TopologyReliabilityMode.valueOf(mode)
              == Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
+    }
+  }
+
+  /**
+   * Throw a IllegalArgumentException if verifyTopology returns false
+   * @param topology to validate
+   */
+  public static void validateTopology(TopologyAPI.Topology topology)
+      throws InvalidTopologyException {
+    if (!TopologyUtils.verifyTopology(topology)) {
+      throw new InvalidTopologyException();
     }
   }
 

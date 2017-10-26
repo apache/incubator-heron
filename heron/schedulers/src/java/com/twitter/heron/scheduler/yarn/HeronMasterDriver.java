@@ -53,6 +53,7 @@ import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
 
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.scheduler.SchedulerMain;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
@@ -553,7 +554,11 @@ public class HeronMasterDriver {
     @Override
     public void run() {
       HeronExecutorTask tMasterTask = getTMasterExecutorTask();
-      tMasterTask.startExecutor();
+      try {
+        tMasterTask.startExecutor();
+      } catch (InvalidTopologyException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -583,7 +588,7 @@ public class HeronMasterDriver {
             httpPort,
             false);
         schedulerMain.runScheduler();
-      } catch (IOException e) {
+      } catch (IOException | InvalidTopologyException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);
       }
     }

@@ -51,7 +51,7 @@ public class LogSink<R> extends StreamletOperator {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
 
-    if (null != this.logFormatter) {
+    if (null != logFormatter) {
       String formattedMsg = this.logFormatter.apply(obj);
       LOG.info(formattedMsg);
     } else {

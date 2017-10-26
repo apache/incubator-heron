@@ -147,11 +147,13 @@ class HeronExecutorTest(unittest.TestCase):
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
       ProcessInfo(MockPOpen(), 'heron-tmaster',
-                  'tmaster_binary %s master_port '
-                  'tmaster_controller_port tmaster_stats_port '
-                  'topname topid zknode zkroot '
-                  '%s %s metrics_sinks_config_file metricsmgr_port '
-                  'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  'tmaster_binary --topology_name=topname --topology_id=topid '
+                  '--zkhostportlist=zknode --zkroot=zkroot --myhost=%s --master_port=master_port '
+                  '--controller_port=tmaster_controller_port --stats_port=tmaster_stats_port '
+                  '--config_file=%s --override_config_file=%s '
+                  '--metrics_sinks_yaml=metrics_sinks_config_file '
+                  '--metricsmgr_port=metricsmgr_port '
+                  '--ckptmgr_port=ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
@@ -161,9 +163,14 @@ class HeronExecutorTest(unittest.TestCase):
   MockPOpen.set_next_pid(37)
   expected_processes_container_1 = [
       ProcessInfo(MockPOpen(), 'stmgr-1',
-                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
-                  'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-1'
+                  'stmgr_binary --topology_name=topname --topology_id=topid '
+                  '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
+                  '--stmgr_id=stmgr-1 '
+                  '--instance_ids=container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 '
+                  '--myhost=%s --data_port=master_port '
+                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--shell_port=shell-port --config_file=%s --override_config_file=%s '
+                  '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-1'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
@@ -180,9 +187,14 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
                   get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
-                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
-                  'container_7_word_11,container_7_exclaim1_210 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-7'
+                  'stmgr_binary --topology_name=topname --topology_id=topid '
+                  '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
+                  '--stmgr_id=stmgr-7 '
+                  '--instance_ids=container_7_word_11,container_7_exclaim1_210 --myhost=%s '
+                  '--data_port=master_port '
+                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--shell_port=shell-port --config_file=%s --override_config_file=%s '
+                  '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-7'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),
@@ -209,19 +221,55 @@ class HeronExecutorTest(unittest.TestCase):
   # <scheduler_classpath> <scheduler_port> <python_instance_binary>
   @staticmethod
   def get_args(shard_id):
-    return ("""
-    ./heron-executor %d topname topid topdefnfile
-    zknode zkroot tmaster_binary stmgr_binary
-    metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
-    master_port tmaster_controller_port tmaster_stats_port
-    %s %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
-    heron_java_home shell-port heron_shell_binary metricsmgr_port
-    cluster role environ instance_classpath metrics_sinks_config_file
-    scheduler_classpath scheduler_port python_instance_binary cpp_instance_binary
-    metricscachemgr_classpath metricscachemgr_masterport metricscachemgr_statsport
-    is_stateful_enabled ckptmgr_classpath ckptmgr-port stateful_config_file
-    healthmgr_mode healthmgr_classpath
-    """ % (shard_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)).replace("\n", '').split()
+    executor_args = [
+      ("--shard", shard_id),
+      ("--topology-name", "topname"),
+      ("--topology-id", "topid"),
+      ("--topology-defn-file", "topdefnfile"),
+      ("--state-manager-connection", "zknode"),
+      ("--state-manager-root", "zkroot"),
+      ("--tmaster-binary", "tmaster_binary"),
+      ("--stmgr-binary", "stmgr_binary"),
+      ("--metrics-manager-classpath", "metricsmgr_classpath"),
+      ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;"),
+      ("--classpath", "classpath"),
+      ("--master-port", "master_port"),
+      ("--tmaster-controller-port", "tmaster_controller_port"),
+      ("--tmaster-stats-port", "tmaster_stats_port"),
+      ("--heron-internals-config-file", INTERNAL_CONF_PATH),
+      ("--override-config-file", OVERRIDE_PATH),
+      ("--component-ram-map", "exclaim1:536870912,word:536870912"),
+      ("--component-jvm-opts", ""),
+      ("--pkg-type", "jar"),
+      ("--topology-binary-file", "topology_bin_file"),
+      ("--heron-java-home", "heron_java_home"),
+      ("--shell-port", "shell-port"),
+      ("--heron-shell-binary", "heron_shell_binary"),
+      ("--metrics-manager-port", "metricsmgr_port"),
+      ("--cluster", "cluster"),
+      ("--role", "role"),
+      ("--environment", "environ"),
+      ("--instance-classpath", "instance_classpath"),
+      ("--metrics-sinks-config-file", "metrics_sinks_config_file"),
+      ("--scheduler-classpath", "scheduler_classpath"),
+      ("--scheduler-port", "scheduler_port"),
+      ("--python-instance-binary", "python_instance_binary"),
+      ("--cpp-instance-binary", "cpp_instance_binary"),
+      ("--metricscache-manager-classpath", "metricscachemgr_classpath"),
+      ("--metricscache-manager-master-port", "metricscachemgr_masterport"),
+      ("--metricscache-manager-stats-port", "metricscachemgr_statsport"),
+      ("--is-stateful", "is_stateful_enabled"),
+      ("--checkpoint-manager-classpath", "ckptmgr_classpath"),
+      ("--checkpoint-manager-port", "ckptmgr-port"),
+      ("--stateful-config-file", "stateful_config_file"),
+      ("--health-manager-mode", "healthmgr_mode"),
+      ("--health-manager-classpath", "healthmgr_classpath")
+    ]
+
+    args = ("%s=%s" % (arg[0], (str(arg[1]))) for arg in executor_args)
+    command = "./heron-executor %s" % (" ".join(args))
+    return command.split()
+
 
   def test_update_packing_plan(self):
     self.executor_0.update_packing_plan(self.packing_plan_expected)
@@ -310,4 +358,3 @@ class HeronExecutorTest(unittest.TestCase):
     self.assertEquals(expected_process.name, found_processes[pid].name)
     self.assertEquals(expected_process.command, found_processes[pid].command_str)
     self.assertEquals(1, found_processes[pid].attempts)
-

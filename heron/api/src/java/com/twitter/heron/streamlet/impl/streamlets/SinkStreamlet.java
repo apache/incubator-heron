@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Sink;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
 
 /**
@@ -26,11 +26,11 @@ import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
  * streamlet after consuming every element. Since elements of the parents are just consumed
  * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
-public class SinkStreamlet<R> extends BaseStreamlet<R> {
-  private BaseStreamlet<R> parent;
+public class SinkStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private Sink<R> sink;
 
-  public SinkStreamlet(BaseStreamlet<R> parent, Sink<R> sink) {
+  public SinkStreamlet(StreamletImpl<R> parent, Sink<R> sink) {
     this.parent = parent;
     this.sink = sink;
     setNumPartitions(parent.getNumPartitions());

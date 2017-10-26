@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.SerializableFunction;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.LogSink;
 
 /**
@@ -26,16 +26,16 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  * streamlet after logging each element. Since elements of the parents are just logged
  * nothing is emitted, thus this streamlet is empty.
  */
-public class LogStreamlet<R> extends BaseStreamlet<R> {
-  private BaseStreamlet<R> parent;
+public class LogStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private SerializableFunction<? super R, String> logFormatter;
 
-  public LogStreamlet(BaseStreamlet<R> parent) {
+  public LogStreamlet(StreamletImpl<R> parent) {
     this.parent = parent;
     setNumPartitions(parent.getNumPartitions());
   }
 
-  public LogStreamlet(BaseStreamlet<R> parent,
+  public LogStreamlet(StreamletImpl<R> parent,
       SerializableFunction<? super R, String> logFormatter) {
     this.parent = parent;
     this.logFormatter = logFormatter;
@@ -54,10 +54,10 @@ public class LogStreamlet<R> extends BaseStreamlet<R> {
     }
     stageNames.add(getName());
 
-    if (null != this.logFormatter) {
-      logSink = new LogSink<R>();
-    } else {
+    if (null != logFormatter) {
       logSink = new LogSink<R>(this.logFormatter);
+    } else {
+      logSink = new LogSink<R>();
     }
 
     bldr.setBolt(getName(), logSink,

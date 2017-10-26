@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.ResourceExceededException;
 import com.twitter.heron.packing.builder.Container;
 import com.twitter.heron.packing.builder.ContainerIdScorer;

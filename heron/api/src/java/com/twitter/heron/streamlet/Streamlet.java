@@ -38,38 +38,12 @@ import com.twitter.heron.classification.InterfaceStability;
  * Streamlet before doing the transformation.
  */
 @InterfaceStability.Evolving
-public interface Streamlet<R> {
-  /**
-   * Sets the name of the Streamlet.
-   * @param sName The name given by the user for this streamlet
-   * @return Returns back the Streamlet with changed name
-  */
-  Streamlet<R> setName(String sName);
-
-  /**
-   * Gets the name of the Streamlet.
-   * @return Returns the name of the Streamlet
-   */
-  String getName();
-
-  /**
-   * Sets the number of partitions of the streamlet
-   * @param numPartitions The user assigned number of partitions
-   * @return Returns back the Streamlet with changed number of partitions
-   */
-  Streamlet<R> setNumPartitions(int numPartitions);
-
-  /**
-   * Gets the number of partitions of this Streamlet.
-   * @return the number of partitions of this Streamlet
-   */
-  int getNumPartitions();
+public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */
-
   <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn);
 
   /**
@@ -77,7 +51,7 @@ public interface Streamlet<R> {
    * This differs from the above map transformation in that it returns a KVStreamlet
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
-  */
+   */
   <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn);
 
   /**
@@ -87,15 +61,6 @@ public interface Streamlet<R> {
    */
   <T> Streamlet<T> flatMap(
       SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn);
-
-  /**
-   * Return a new KVStreamlet by applying map_function to each element of this Streamlet
-   * and flattening the result. It differs from the above flatMap in that it returns a`
-   * KVStreamlet instead of a plain Streamlet
-   * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
-  <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      ? extends Iterable<KeyValue<K, V>>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
@@ -111,7 +76,11 @@ public interface Streamlet<R> {
 
   /**
    * A more generalized version of repartition where a user can determine which partitions
-   * any particular tuple should go to
+   * any particular tuple should go to. For each element of the current streamlet, the user
+   * supplied partitionFn is invoked passing in the element as the first argument. The second
+   * argument is the number of partitions of the downstream streamlet. The partitionFn should
+   * return 0 or more unique numbers between 0 and npartitions to indicate which partitions
+   * this element should be routed to.
    */
   Streamlet<R> repartition(int numPartitions,
                            SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn);
@@ -160,7 +129,7 @@ public interface Streamlet<R> {
   /**
    * Logs every element of the streamlet using a supplied formatting
    * function. This acts as a sink function in the sense that the operation
-   * returns void and terminates the processing graph;
+   * returns void and terminates the processing graph.
    */
   void formattedLog(SerializableFunction<? super R, String> logFormatter);
 
