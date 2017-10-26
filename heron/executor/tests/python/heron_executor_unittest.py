@@ -161,9 +161,14 @@ class HeronExecutorTest(unittest.TestCase):
   MockPOpen.set_next_pid(37)
   expected_processes_container_1 = [
       ProcessInfo(MockPOpen(), 'stmgr-1',
-                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
-                  'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-1'
+                  'stmgr_binary --topology_name=topname --topology_id=topid '
+                  '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
+                  '--stmgr_id=stmgr-1 '
+                  '--instance_ids=container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 '
+                  '--myhost=%s --data_port=master_port '
+                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--shell_port=shell-port --config_file=%s --override_config_file=%s '
+                  '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-1'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
@@ -180,9 +185,14 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'container_7_exclaim1_210',
                   get_expected_instance_command('exclaim1', 210, 7)),
       ProcessInfo(MockPOpen(), 'stmgr-7',
-                  'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-7 '
-                  'container_7_word_11,container_7_exclaim1_210 %s master_port '
-                  'tmaster_controller_port metricsmgr_port shell-port %s %s ckptmgr-port ckptmgr-7'
+                  'stmgr_binary --topology_name=topname --topology_id=topid '
+                  '--topologydefn_file=topdefnfile --zkhostportlist=zknode --zkroot=zkroot '
+                  '--stmgr_id=stmgr-7 '
+                  '--instance_ids=container_7_word_11,container_7_exclaim1_210 --myhost=%s '
+                  '--data_port=master_port '
+                  '--local_data_port=tmaster_controller_port --metricsmgr_port=metricsmgr_port '
+                  '--shell_port=shell-port --config_file=%s --override_config_file=%s '
+                  '--ckptmgr_port=ckptmgr-port --ckptmgr_id=ckptmgr-7'
                   % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'metricsmgr-7', get_expected_metricsmgr_command(7)),
       ProcessInfo(MockPOpen(), 'heron-shell-7', get_expected_shell_command(7)),

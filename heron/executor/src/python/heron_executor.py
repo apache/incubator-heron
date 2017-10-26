@@ -652,22 +652,22 @@ class HeronExecutor(object):
 
     stmgr_cmd = [
         self.stmgr_binary,
-        self.topology_name,
-        self.topology_id,
-        self.topology_defn_file,
-        self.state_manager_connection,
-        self.state_manager_root,
-        self.stmgr_ids[self.shard],
-        ','.join(map(lambda x: x[0], instance_info)),
-        self.master_host,
-        self.master_port,
-        self.tmaster_controller_port,
-        self.metrics_manager_port,
-        self.shell_port,
-        self.heron_internals_config_file,
-        self.override_config_file,
-        self.checkpoint_manager_port,
-        self.ckptmgr_ids[self.shard]]
+        '--topology_name=%s' % self.topology_name,
+        '--topology_id=%s' % self.topology_id,
+        '--topologydefn_file=%s' % self.topology_defn_file,
+        '--zkhostportlist=%s' % self.state_manager_connection,
+        '--zkroot=%s' % self.state_manager_root,
+        '--stmgr_id=%s' % self.stmgr_ids[self.shard],
+        '--instance_ids=%s' % ','.join(map(lambda x: x[0], instance_info)),
+        '--myhost=%s' % self.master_host,
+        '--data_port=%s' % str(self.master_port),
+        '--local_data_port=%s' % str(self.tmaster_controller_port),
+        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
+        '--shell_port=%s' % str(self.shell_port),
+        '--config_file=%s' % self.heron_internals_config_file,
+        '--override_config_file=%s' % self.override_config_file,
+        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
+        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard]]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
