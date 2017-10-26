@@ -185,6 +185,7 @@ Operation | Description
 [flatMap](#flatMap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened into a collection type
 [filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
+[clone](#clone-operations) | Creates any number of identical copies of a streamlet
 [transform](#transform-operations) | TODO
 [toSink](#sink-operations) | TODO
 
@@ -250,6 +251,24 @@ Streamlet<String> combined = oohs
 ```
 
 Here, one streamlet is an endless series of "ooh"s while the other is an endless series of "aah"s. The `union` operation combines them into a single streamlet of alternating "ooh"s and "aah"s.
+
+### Clone operations
+
+Clone operations enable you to create any number of "copies" of a streamlet. Each of the "copy" streamlets contains all the elements of and can be manipulated just like the "original" streamlet.
+
+```java
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+Streamlet<Integer> integers = builder.newSource(() -> ThreadLocalRandom.current().nextInt(100));
+
+List<Streamlet<Integer>> copies = integers.clone(5);
+Streamlet<Integer> ints1 = copies.get(0);
+Streamlet<Integer> ints2 = copies.get(1);
+// and so on
+```
+
+In this example, a streamlet of random integers between 1 and 100 is split into 5 identical streams.
 
 ### Transform operations
 
