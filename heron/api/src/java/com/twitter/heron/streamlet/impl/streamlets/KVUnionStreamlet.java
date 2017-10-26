@@ -18,39 +18,40 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.operators.MapOperator;
+import com.twitter.heron.streamlet.impl.operators.UnionOperator;
 
 /**
- * MapStreamlet represents a Streamlet that is made up of applying the user
- * supplied map function to each element of the parent streamlet.
+ * UnionStreamlet is a Streamlet composed of all the elements of two
+ * parent streamlets.
  */
-public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
-  private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn;
+public class KVUnionStreamlet<K, V> extends KVStreamletImpl<K, V> {
+  private KVStreamletImpl<K, V> left;
+  private KVStreamletImpl<? extends K, ? extends V> right;
 
-  public KVMapStreamlet(KVStreamletImpl<K, V> parent,
-                        SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
-    this.parent = parent;
-    this.mapFn = mapFn;
-    setNumPartitions(parent.getNumPartitions());
+  public KVUnionStreamlet(KVStreamletImpl<K, V> left,
+                          KVStreamletImpl<? extends K, ? extends V> right) {
+    this.left = left;
+    this.right = right;
+    setNumPartitions(left.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    if (!left.isBuilt() || !right.isBuilt()) {
+      // We can only continue to build us if both of our parents are built.
+      // The system will call us again later
+      return false;
+    }
     if (getName() == null) {
-      setName(defaultNameCalculator("kvmap", stageNames));
+      setName(defaultNameCalculator("kvunion", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(mapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+    bldr.setBolt(getName(), new UnionOperator<KeyValue<K, V>>(),
+        getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
     return true;
   }
 }

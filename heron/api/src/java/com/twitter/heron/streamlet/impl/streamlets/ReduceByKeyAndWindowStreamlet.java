@@ -20,7 +20,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.BaseKVStreamlet;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
@@ -32,12 +32,12 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type V.
  */
-public class ReduceByKeyAndWindowStreamlet<K, V> extends BaseKVStreamlet<KeyedWindow<K>, V> {
-  private BaseKVStreamlet<K, V> parent;
+public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWindow<K>, V> {
+  private KVStreamletImpl<K, V> parent;
   private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
 
-  public ReduceByKeyAndWindowStreamlet(BaseKVStreamlet<K, V> parent,
+  public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
                        WindowConfig windowCfg,
                        SerializableBinaryOperator<V> reduceFn) {
     this.parent = parent;

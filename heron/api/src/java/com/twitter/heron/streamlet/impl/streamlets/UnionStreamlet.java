@@ -17,18 +17,18 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.UnionOperator;
 
 /**
  * UnionStreamlet is a Streamlet composed of all the elements of two
  * parent streamlets.
  */
-public class UnionStreamlet<I> extends BaseStreamlet<I> {
-  private BaseStreamlet<I> left;
-  private BaseStreamlet<? extends I> right;
+public class UnionStreamlet<I> extends StreamletImpl<I> {
+  private StreamletImpl<I> left;
+  private StreamletImpl<? extends I> right;
 
-  public UnionStreamlet(BaseStreamlet<I> left, BaseStreamlet<? extends I> right) {
+  public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<? extends I> right) {
     this.left = left;
     this.right = right;
     setNumPartitions(left.getNumPartitions());

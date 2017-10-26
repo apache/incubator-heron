@@ -19,7 +19,7 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableSupplier;
-import com.twitter.heron.streamlet.impl.BaseKVStreamlet;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.sources.SupplierSource;
 
 /**
@@ -27,7 +27,7 @@ import com.twitter.heron.streamlet.impl.sources.SupplierSource;
  * from a user supplied Supplier Function. The supplier function is the
  * source of all tuples for this Streamlet.
  */
-public class SupplierKVStreamlet<K, V> extends BaseKVStreamlet<K, V> {
+public class SupplierKVStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private SerializableSupplier<KeyValue<K, V>> supplier;
 
   public SupplierKVStreamlet(SerializableSupplier<KeyValue<K, V>> supplier) {

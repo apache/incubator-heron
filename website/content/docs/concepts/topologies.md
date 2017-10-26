@@ -459,7 +459,7 @@ Here's the corresponding Java code for the processing logic shown in the diagram
 package heron.streamlet.example;
 
 import com.twitter.heron.streamlet.*;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 
 import java.util.concurrent.ThreadLocalRandom;
 

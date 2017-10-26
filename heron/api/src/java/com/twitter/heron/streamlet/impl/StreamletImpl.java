@@ -15,12 +15,9 @@
 package com.twitter.heron.streamlet.impl;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KVStreamlet;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableBiFunction;
@@ -38,10 +35,9 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.KVFlatMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.KVMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
@@ -69,90 +65,20 @@ import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
  * tranformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
-public abstract class BaseStreamlet<R> implements Streamlet<R> {
-  private static final Logger LOG = Logger.getLogger(BaseStreamlet.class.getName());
-  protected String name;
-  protected int nPartitions;
-  private List<BaseStreamlet<?>> children;
-  private boolean built;
+public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
+    implements Streamlet<R> {
+  private static final Logger LOG = Logger.getLogger(StreamletImpl.class.getName());
 
-  public boolean isBuilt() {
-    return built;
-  }
-
-  boolean allBuilt() {
-    if (!built) {
-      return false;
-    }
-    for (BaseStreamlet<?> child : children) {
-      if (!child.allBuilt()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Sets the name of the Streamlet.
-   * @param sName The name given by the user for this streamlet
-   * @return Returns back the Streamlet with changed name
-  */
   @Override
-  public Streamlet<R> setName(String sName) {
-    if (sName == null || sName.isEmpty()) {
-      throw new IllegalArgumentException("Streamlet name cannot be null/empty");
-    }
-    this.name = sName;
+  protected StreamletImpl<R> returnThis() {
     return this;
-  }
-
-  /**
-   * Gets the name of the Streamlet.
-   * @return Returns the name of the Streamlet
-   */
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets the number of partitions of the streamlet
-   * @param numPartitions The user assigned number of partitions
-   * @return Returns back the Streamlet with changed number of partitions
-   */
-  @Override
-  public Streamlet<R> setNumPartitions(int numPartitions) {
-    if (numPartitions < 1) {
-      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
-    }
-    this.nPartitions = numPartitions;
-    return this;
-  }
-
-  /**
-   * Gets the number of partitions of this Streamlet.
-   * @return the number of partitions of this Streamlet
-   */
-  @Override
-  public int getNumPartitions() {
-    return nPartitions;
-  }
-
-  /**
-   * Gets all the children of this streamlet.
-   * Children of a streamlet are streamlets that are resulting from transformations of elements of
-   * this and potentially other streamlets.
-   * @return The kid streamlets
-   */
-  public List<BaseStreamlet<?>> getChildren() {
-    return children;
   }
 
   /**
    * Create a Streamlet based on the supplier function
    * @param supplier The Supplier function to generate the elements
    */
-  static <T> BaseStreamlet<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
+  static <T> StreamletImpl<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
     return new SupplierStreamlet<T>(supplier);
   }
 
@@ -160,7 +86,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * Create a Streamlet based on the generator function
    * @param generator The Generator function to generate the elements
    */
-  static <T> BaseStreamlet<T> createGeneratorStreamlet(Source<T> generator) {
+  static <T> StreamletImpl<T> createGeneratorStreamlet(Source<T> generator) {
     return new SourceStreamlet<T>(generator);
   }
 
@@ -180,11 +106,11 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
    * This differs from the above map transformation in that it returns a KVStreamlet
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
-  */
+   */
   @Override
   public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
-                                                               ? extends KeyValue<K, V>> mapFn) {
-    KVMapStreamlet<R, K, V> retval = new KVMapStreamlet<>(this, mapFn);
+      ? extends KeyValue<K, V>> mapFn) {
+    MapToKVStreamlet<R, K, V> retval = new MapToKVStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
   }
@@ -198,20 +124,6 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   public <T> Streamlet<T> flatMap(
       SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
-    addChild(retval);
-    return retval;
-  }
-
-  /**
-   * Return a new KVStreamlet by applying map_function to each element of this Streamlet
-   * and flattening the result. It differs from the above flatMap in that it returns a
-   * KVStreamlet instead of a plain Streamlet
-   * @param flatMapFn The FlatMap Function that should be applied to each element
-  */
-  @Override
-  public <K, V> KVStreamlet<K, V> flatMapToKV(SerializableFunction<? super R,
-      ? extends Iterable<KeyValue<K, V>>> flatMapFn) {
-    KVFlatMapStreamlet<R, K, V> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
   }
@@ -285,7 +197,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   */
   @Override
   public Streamlet<R> union(Streamlet<? extends R> other) {
-    BaseStreamlet<? extends R> joinee = (BaseStreamlet<? extends R>) other;
+    StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) other;
     UnionStreamlet<R> retval = new UnionStreamlet<>(this, joinee);
     addChild(retval);
     joinee.addChild(retval);
@@ -346,44 +258,7 @@ public abstract class BaseStreamlet<R> implements Streamlet<R> {
   /**
    * Only used by the implementors
    */
-  protected BaseStreamlet() {
-    this.nPartitions = -1;
-    this.children = new LinkedList<>();
-    this.built = false;
-  }
-
-  public void build(TopologyBuilder bldr, Set<String> stageNames) {
-    if (built) {
-      throw new RuntimeException("Logic Error While building " + getName());
-    }
-    if (doBuild(bldr, stageNames)) {
-      built = true;
-      for (BaseStreamlet<?> streamlet : children) {
-        streamlet.build(bldr, stageNames);
-      }
-    }
-  }
-
-  // This is the main interface that every Streamlet implementation should implement
-  // The main tasks are generally to make sure that appropriate names/partitions are
-  // computed and add a spout/bolt to the TopologyBuilder
-  protected abstract boolean doBuild(TopologyBuilder bldr, Set<String> stageNames);
-
-  public  <T> void addChild(BaseStreamlet<T> child) {
-    children.add(child);
-  }
-
-  protected String defaultNameCalculator(String prefix, Set<String> stageNames) {
-    int index = 1;
-    String calculatedName;
-    while (true) {
-      calculatedName = new StringBuilder(prefix).append(index).toString();
-      if (!stageNames.contains(calculatedName)) {
-        break;
-      }
-      index++;
-    }
-    LOG.info("Calculated stage Name as " + calculatedName);
-    return calculatedName;
+  protected StreamletImpl() {
+    super();
   }
 }
