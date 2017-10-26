@@ -186,6 +186,7 @@ Operation | Description
 [filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
 [transform](#transform-operations) | TODO
+[toSink](#sink-operations) | TODO
 
 ### Key-value streamlet operations
 
@@ -314,6 +315,45 @@ builder.newSource(() -> "Some string over and over")
         .transform(new CountNumberOfItems())
         .log();
 ```
+
+### Sink operations
+
+In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
+
+```java
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Sink;
+
+public class FormattedLogSink implements Sink<T> {
+    private String streamletName;
+
+    public void setup(Context context) {
+        streamletName = context.getStreamletName();
+    }
+
+    public void put(T element) {
+        String message = String.format("Streamlet %s has produced an element with a value of: '%s'",
+                streamletName,
+                element.toString());
+        System.out.println(message);
+    }
+
+    public void cleanup() {}
+}
+```
+
+In this example, the sink fetches the name of the enclosing streamlet from the context passed in the `setup` method. The `put` method specifies how the sink handles each element that is received (in this case, a formatted message is logged to stdout). The `cleanup` method enables you to specify what happens after the element has been processed by the sink.
+
+Here is the `FormattedLogSink` at work in an example processing graph:
+
+```java
+Builder builder = Builder.createBuilder();
+
+builder.newSource(() -> "Here is a string to be passed to the sink")
+        .toSink(new FormattedLogSink());
+```
+
+> [Log operations](#log-operations) rely on a log sink that is provided out of the box. You'll need to implement other sinks yourself.
 
 ### Reduce by key and window operations
 
@@ -504,18 +544,12 @@ on a variety of factors.
 
 ## Window operations
 
-<!--
-> For documentation on using time windows in Heron topologies, see:
-> 
-> * [Window operations in Java](../../developers/java/topologies)
--->
-
 **Windowed computations** gather results from a topology or topology component within a specified finite time frame rather than, say, on a per-tuple basis.
 
 Here are some examples of window operations:
 
 * Counting how many customers have purchased a product during each one-hour period in the last 24 hours.
-* Determining which player in an online game has the highest score during a 15-minute period.
+* Determining which player in an online game has the highest score within the last 1000 computations.
 
 ### Sliding windows
 
