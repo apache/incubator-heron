@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.SerializableTransformer;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.TransformOperator;
 
 /**
@@ -27,11 +27,11 @@ import com.twitter.heron.streamlet.impl.operators.TransformOperator;
  * from the simple MapStreamlet in the sense that it provides setup/cleanup flexibility
  * for the users to setup things and cleanup before the beginning of the computation
  */
-public class TransformStreamlet<R, T> extends BaseStreamlet<T> {
-  private BaseStreamlet<R> parent;
+public class TransformStreamlet<R, T> extends StreamletImpl<T> {
+  private StreamletImpl<R> parent;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
-  public TransformStreamlet(BaseStreamlet<R> parent,
+  public TransformStreamlet(StreamletImpl<R> parent,
                        SerializableTransformer<? super R, ? extends T> serializableTransformer) {
     this.parent = parent;
     this.serializableTransformer = serializableTransformer;

@@ -27,8 +27,8 @@ java_tests(
     "com.twitter.heron.api.metric.CountStatAndMetricTest",
     "com.twitter.heron.api.metric.LatencyStatAndMetricTest",
     "com.twitter.heron.api.bolt.BaseWindowedBoltTest",
-    "com.twitter.heron.streamlet.impl.BaseStreamletTest",
-    "com.twitter.heron.streamlet.impl.BaseKVStreamletTest",
+    "com.twitter.heron.streamlet.impl.StreamletImplTest",
+    "com.twitter.heron.streamlet.impl.KVStreamletImplTest",
     "com.twitter.heron.streamlet.impl.operators.JoinOperatorTest",
     "com.twitter.heron.api.HeronSubmitterTest"
   ],
