@@ -588,19 +588,19 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       Log.info("Python instance %s component: %s" %(instance_id, component_name))
       instance_cmd = [self.python_instance_binary,
-                      self.topology_name,
-                      self.topology_id,
-                      instance_id,
-                      component_name,
-                      str(global_task_id),
-                      str(component_index),
-                      self.stmgr_ids[self.shard],
-                      self.tmaster_controller_port,
-                      self.metrics_manager_port,
-                      self.heron_internals_config_file,
-                      self.override_config_file,
-                      self.topology_binary_file,
-                      str(self.component_ram_map[component_name])]
+                      '--topology_name=%s' % self.topology_name,
+                      '--topology_id=%s' % self.topology_id,
+                      '--instance_id=%s' % instance_id,
+                      '--component_name=%s' % component_name,
+                      '--task_id=%s' % str(global_task_id),
+                      '--component_index=%s' % str(component_index),
+                      '--stmgr_id=%s' % self.stmgr_ids[self.shard],
+                      '--stmgr_port=%s' % self.tmaster_controller_port,
+                      '--metricsmgr_port=%s' % self.metrics_manager_port,
+                      '--sys_config=%s' % self.heron_internals_config_file,
+                      '--override_config=%s' % self.override_config_file,
+                      '--topology_pex=%s' % self.topology_binary_file,
+                      '--max_ram=%s' % str(self.component_ram_map[component_name])]
 
       retval[instance_id] = instance_cmd
 
