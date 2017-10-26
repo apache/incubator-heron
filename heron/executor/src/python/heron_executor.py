@@ -464,19 +464,19 @@ class HeronExecutor(object):
     retval = {}
     tmaster_cmd = [
         self.tmaster_binary,
-        self.master_host,
-        self.master_port,
-        self.tmaster_controller_port,
-        self.tmaster_stats_port,
-        self.topology_name,
-        self.topology_id,
-        self.state_manager_connection,
-        self.state_manager_root,
-        self.heron_internals_config_file,
-        self.override_config_file,
-        self.metrics_sinks_config_file,
-        self.metrics_manager_port,
-        self.checkpoint_manager_port]
+        '--topology_name=%s' % self.topology_name,
+        '--topology_id=%s' % self.topology_id,
+        '--zkhostportlist=%s' % self.state_manager_connection,
+        '--zkroot=%s' % self.state_manager_root,
+        '--myhost=%s' % self.master_host,
+        '--master_port=%s' % str(self.master_port),
+        '--controller_port=%s' % str(self.tmaster_controller_port),
+        '--stats_port=%s' % str(self.tmaster_stats_port),
+        '--config_file=%s' % self.heron_internals_config_file,
+        '--override_config_file=%s' % self.override_config_file,
+        '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
+        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
+        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
     retval["heron-tmaster"] = tmaster_cmd
 
     retval["heron-metricscache"] = self._get_metrics_cache_cmd()

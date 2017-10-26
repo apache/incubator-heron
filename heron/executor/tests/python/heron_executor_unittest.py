@@ -147,11 +147,13 @@ class HeronExecutorTest(unittest.TestCase):
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
       ProcessInfo(MockPOpen(), 'heron-tmaster',
-                  'tmaster_binary %s master_port '
-                  'tmaster_controller_port tmaster_stats_port '
-                  'topname topid zknode zkroot '
-                  '%s %s metrics_sinks_config_file metricsmgr_port '
-                  'ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
+                  'tmaster_binary --topology_name=topname --topology_id=topid '
+                  '--zkhostportlist=zknode --zkroot=zkroot --myhost=%s --master_port=master_port '
+                  '--controller_port=tmaster_controller_port --stats_port=tmaster_stats_port '
+                  '--config_file=%s --override_config_file=%s '
+                  '--metrics_sinks_yaml=metrics_sinks_config_file '
+                  '--metricsmgr_port=metricsmgr_port '
+                  '--ckptmgr_port=ckptmgr-port' % (HOSTNAME, INTERNAL_CONF_PATH, OVERRIDE_PATH)),
       ProcessInfo(MockPOpen(), 'heron-shell-0', get_expected_shell_command(0)),
       ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
       ProcessInfo(MockPOpen(), 'heron-metricscache', get_expected_metricscachemgr_command()),
