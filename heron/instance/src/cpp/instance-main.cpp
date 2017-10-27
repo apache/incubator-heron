@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "gflags/gflags.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "threads/threads.h"
@@ -28,41 +29,36 @@
 #include "gateway/gateway.h"
 #include "slave/slave.h"
 
+DEFINE_string(topology_name, "", "Name of the topology");
+DEFINE_string(topology_id, "", "Id of the topology");
+DEFINE_string(instance_id, "", "My Instance Id");
+DEFINE_string(component_name, "", "My Component Name");
+DEFINE_int32(task_id, 0, "My Task Id");
+DEFINE_int32(component_index, 0, "The index of my component");
+DEFINE_string(stmgr_id, "", "The Id of my stmgr");
+DEFINE_int32(stmgr_port, 0, "The port used to communicate with my stmgr");
+DEFINE_int32(metricsmgr_port, 0, "The port of the local metricsmgr");
+DEFINE_string(config_file, "", "The heron internals config file");
+DEFINE_string(override_config_file, "", "The override heron internals config file");
+DEFINE_string(topology_binary, "", "The topology .so/dylib file");
+
 int main(int argc, char* argv[]) {
-  if (argc != 13) {
-    std::cout << "Usage: " << argv[0] << " "
-              << "<topname> <topid> <instance_id> "
-              << "<component_name> <task_id> <component_index> <stmgr_id>"
-              << "<stmgr_port> <metricsmgr_port> <heron_internals_config_filename>"
-              << "<override_config_filename> <topology_so>";
-    ::exit(1);
-  }
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  std::string topologyName = argv[1];
-  std::string topologyId = argv[2];
-  std::string instanceId = argv[3];
-  std::string componentName = argv[4];
-  int taskId = atoi(argv[5]);
-  int componentIndex = atoi(argv[6]);
-  std::string stmgrId = argv[7];
-  int stmgrPort = atoi(argv[8]);
-  int metricsMgrPort = atoi(argv[9]);
-  std::string heron_internals_config_filename = argv[10];
-  std::string heron_override_config_filename = argv[11];
-  std::string topologySo = argv[12];
-
-  heron::common::Initialize(argv[0], instanceId.c_str());
+  heron::common::Initialize(argv[0], FLAGS_instance_id.c_str());
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
   EventLoopImpl eventLoop;
-  heron::config::HeronInternalsConfigReader::Create(&eventLoop, heron_internals_config_filename,
-                                                    heron_override_config_filename);
+  heron::config::HeronInternalsConfigReader::Create(&eventLoop, FLAGS_config_file,
+                                                    FLAGS_override_config_file);
 
-  auto gateway = new heron::instance::Gateway(topologyName, topologyId, instanceId,
-                                              componentName, taskId, componentIndex,
-                                              stmgrId, stmgrPort, metricsMgrPort, &eventLoop);
-  auto slave = new heron::instance::Slave(taskId, topologySo);
+  auto gateway = new heron::instance::Gateway(FLAGS_topology_name, FLAGS_topology_id,
+                                              FLAGS_instance_id, FLAGS_component_name,
+                                              FLAGS_task_id, FLAGS_component_index,
+                                              FLAGS_stmgr_id, FLAGS_stmgr_port,
+                                              FLAGS_metricsmgr_port, &eventLoop);
+  auto slave = new heron::instance::Slave(FLAGS_task_id, FLAGS_topology_binary);
 
   auto dataToSlave = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
                                slave->eventLoop(),
