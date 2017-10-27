@@ -189,6 +189,15 @@ Operation | Description
 [transform](#transform-operations) | TODO
 [toSink](#sink-operations) | TODO
 
+### Non-key-value streamlet operations
+
+There are a few operations that are available only for non-key-value streamlets.
+
+Operation | Description
+:---------|:-----------
+[reduceByWindow](#reduce-by-window-operations) | Like [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) operations except that keys are not involved, only values
+[mapToKv](#maptokv-operations) | Enables you to convert a non-key-value streamlet into a key-value-streamlet using a provided function
+
 ### Key-value streamlet operations
 
 There are also some operations that are available only for [key-value streamlets](#key-value-streamlets).
@@ -196,7 +205,6 @@ There are also some operations that are available only for [key-value streamlets
 Operation | Description
 :---------|:-----------
 [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
-
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
 
 ### Map operations
