@@ -18,38 +18,32 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.operators.MapOperator;
+import com.twitter.heron.streamlet.impl.sinks.LogSink;
 
 /**
- * MapStreamlet represents a Streamlet that is made up of applying the user
- * supplied map function to each element of the parent streamlet.
+ * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
+ * streamlet after logging each element. Since elements of the parents are just logged
+ * nothing is emitted, thus this streamlet is empty.
  */
-public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
+public class KVLogStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn;
 
-  public KVMapStreamlet(KVStreamletImpl<K, V> parent,
-                        SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
+  public KVLogStreamlet(KVStreamletImpl<K, V> parent) {
     this.parent = parent;
-    this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("kvmap", stageNames));
+      setName(defaultNameCalculator("kvlogger", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(mapFn),
+    bldr.setBolt(getName(), new LogSink<KeyValue<K, V>>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

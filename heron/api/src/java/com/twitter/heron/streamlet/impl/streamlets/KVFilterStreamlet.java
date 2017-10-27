@@ -18,38 +18,35 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableFunction;
+import com.twitter.heron.streamlet.SerializablePredicate;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
-import com.twitter.heron.streamlet.impl.operators.MapOperator;
+import com.twitter.heron.streamlet.impl.operators.FilterOperator;
 
 /**
- * MapStreamlet represents a Streamlet that is made up of applying the user
- * supplied map function to each element of the parent streamlet.
+ * FilterStreamlet represents a Streamlet that is made up of elements from
+ * the parent Streamlet after applying a user supplied filter function.
  */
-public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
+public class KVFilterStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn;
+  private SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn;
 
-  public KVMapStreamlet(KVStreamletImpl<K, V> parent,
-                        SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
+  public KVFilterStreamlet(KVStreamletImpl<K, V> parent,
+                           SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn) {
     this.parent = parent;
-    this.mapFn = mapFn;
+    this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("kvmap", stageNames));
+      setName(defaultNameCalculator("kvfilter", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(mapFn),
+    bldr.setBolt(getName(), new FilterOperator<KeyValue<K, V>>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

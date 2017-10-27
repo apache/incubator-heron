@@ -20,20 +20,20 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.MapOperator;
 
 /**
  * MapStreamlet represents a Streamlet that is made up of applying the user
  * supplied map function to each element of the parent streamlet.
  */
-public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
+public class KVToStreamlet<K, V, R> extends StreamletImpl<R> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn;
+  private SerializableFunction<? super KeyValue<? super K, ? super V>, ? extends R> mapFn;
 
-  public KVMapStreamlet(KVStreamletImpl<K, V> parent,
-                        SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
+  public KVToStreamlet(KVStreamletImpl<K, V> parent,
+                       SerializableFunction<? super KeyValue<? super K, ? super V>,
+                           ? extends R> mapFn) {
     this.parent = parent;
     this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());
@@ -42,14 +42,13 @@ public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     if (getName() == null) {
-      setName(defaultNameCalculator("kvmap", stageNames));
+      setName(defaultNameCalculator("kvtostreamlet", stageNames));
     }
     if (stageNames.contains(getName())) {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>,
-            KeyValue<? extends K1, ? extends V1>>(mapFn),
+    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>, R>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }
