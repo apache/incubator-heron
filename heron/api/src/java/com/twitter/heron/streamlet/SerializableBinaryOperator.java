@@ -24,5 +24,5 @@ import java.util.function.BinaryOperator;
  * definitions with a Serializable tag to ensure that any supplied
  * lambda functions automatically become serializable.
  */
-public interface SerializableBinaryOperator<T> extends BinaryOperator<T>, Serializable {
+public interface SerializableBinaryOperator<T> extends SerializableBiFunction<T, T, T> {
 }

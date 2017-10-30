@@ -246,8 +246,8 @@ public class StreamletImplTest {
         (MapToKVStreamlet<String, String, Integer>) fStreamlet.getChildren().get(0);
     assertEquals(mkvStreamlet.getChildren().size(), 1);
     assertTrue(mkvStreamlet.getChildren().get(0) instanceof ReduceByKeyAndWindowStreamlet);
-    ReduceByKeyAndWindowStreamlet<String, Integer> rStreamlet =
-        (ReduceByKeyAndWindowStreamlet<String, Integer>) mkvStreamlet.getChildren().get(0);
+    ReduceByKeyAndWindowStreamlet<String, Integer, Integer> rStreamlet =
+        (ReduceByKeyAndWindowStreamlet<String, Integer, Integer>) mkvStreamlet.getChildren().get(0);
     assertEquals(rStreamlet.getChildren().size(), 0);
   }
 

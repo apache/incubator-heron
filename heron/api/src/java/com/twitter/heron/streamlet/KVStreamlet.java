@@ -157,7 +157,10 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * same key are reduced using the BiFunction/identity and the result is emitted.
    * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
    * Typical windowing strategies are sliding windows and tumbling windows
-   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   * @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
    */
   <VR> KVStreamlet<KeyedWindow<K>, VR> reduceByKeyAndWindow(WindowConfig windowCfg,
                             VR identity,
