@@ -14,9 +14,6 @@
 
 package com.twitter.heron.streamlet;
 
-import java.io.Serializable;
-import java.util.function.BinaryOperator;
-
 /**
  * All user supplied transformation functions have to be serializable.
  * Thus all Strealmet transformation definitions take Serializable

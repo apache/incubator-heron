@@ -32,7 +32,6 @@ import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
@@ -45,6 +44,7 @@ import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVToStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVTransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierKVStreamlet;
 
