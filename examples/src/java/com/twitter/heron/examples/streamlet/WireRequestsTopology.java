@@ -81,7 +81,7 @@ public class WireRequestsTopology {
              * throttles are applied to different bank branches.
              */
             Utils.sleep(delay);
-            this.customerId = randomFromList(CUSTOMERS);
+            this.customerId = StreamletUtils.randomFromList(CUSTOMERS);
             this.amount = ThreadLocalRandom.current().nextInt(1000);
             LOG.info(String.format("New wire request: %s", this));
         }
