@@ -62,6 +62,10 @@ public class TransformsTopology {
         public void cleanup() {}
     }
 
+    /**
+     * All Heron topologies require a main function that defines the topology's behavior
+     * at runtime
+     */
     public static void main(String[] args) throws Exception {
         Builder builder = Builder.createBuilder();
 
@@ -76,8 +80,16 @@ public class TransformsTopology {
         Config config = new Config();
         config.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
 
+        /**
+         * Fetches the topology name from the first command-line argument
+         */
         String topologyName = StreamletUtils.getTopologyName(args);
 
+        /**
+         * Finally, the processing graph and configuration are passed to the Runner,
+         * which converts the graph into a Heron topology that can be run in a Heron
+         * cluster.
+         */
         new Runner().run(topologyName, config, builder);
     }
 }

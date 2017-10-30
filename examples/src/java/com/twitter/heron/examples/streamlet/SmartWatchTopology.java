@@ -54,6 +54,10 @@ public class SmartWatchTopology {
         }
     }
 
+    /**
+     * All Heron topologies require a main function that defines the topology's behavior
+     * at runtime
+     */
     public static void main(String[] args) throws Exception {
         int jogLength = 20;
 
@@ -69,8 +73,16 @@ public class SmartWatchTopology {
 
         Config config = new Config();
 
+        /**
+         * Fetches the topology name from the first command-line argument
+         */
         String topologyName = StreamletUtils.getTopologyName(args);
 
+        /**
+         * Finally, the processing graph and configuration are passed to the Runner,
+         * which converts the graph into a Heron topology that can be run in a Heron
+         * cluster.
+         */
         new Runner().run(topologyName, config, processingGraphBuilder);
     }
 }
