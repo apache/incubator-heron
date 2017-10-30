@@ -24,7 +24,7 @@ import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
+import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.Window;
 
 /**
@@ -33,12 +33,15 @@ import com.twitter.heron.streamlet.Window;
  * For every time window, the bolt goes over all the tuples in that window and applies the reduce
  * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
  */
-public class ReduceByKeyAndWindowOperator<K, V> extends StreamletWindowOperator {
-  private static final long serialVersionUID = 2833576046687750496L;
-  private SerializableBinaryOperator<V> reduceFn;
+public class ReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator {
+  private static final long serialVersionUID = 2833576046687752396L;
+  private VR identity;
+  private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByKeyAndWindowOperator(SerializableBinaryOperator<V> reduceFn) {
+  public ReduceByKeyAndWindowOperator(VR identity,
+                         SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
+    this.identity = identity;
     this.reduceFn = reduceFn;
   }
 
@@ -51,7 +54,7 @@ public class ReduceByKeyAndWindowOperator<K, V> extends StreamletWindowOperator 
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    Map<K, V> reduceMap = new HashMap<>();
+    Map<K, VR> reduceMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
       KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
       addMap(reduceMap, tup);
@@ -75,11 +78,10 @@ public class ReduceByKeyAndWindowOperator<K, V> extends StreamletWindowOperator 
     }
   }
 
-  private void addMap(Map<K, V> reduceMap, KeyValue<K, V> tup) {
-    if (reduceMap.containsKey(tup.getKey())) {
-      reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
-    } else {
-      reduceMap.put(tup.getKey(), tup.getValue());
+  private void addMap(Map<K, VR> reduceMap, KeyValue<K, V> tup) {
+    if (!reduceMap.containsKey(tup.getKey())) {
+      reduceMap.put(tup.getKey(), identity);
     }
+    reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
   }
 }

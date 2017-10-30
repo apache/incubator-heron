@@ -31,7 +31,7 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByWindowOperator;
  * applying user supplied reduceFn on all elements within each window defined by a
  * user supplied Window Config.
  * ReduceByWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo<K> type and the value is of type V.
+ * KeyWindowInfo<K> type and the value is of type T.
  */
 public class ReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window, T> {
   private StreamletImpl<R> parent;

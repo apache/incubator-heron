@@ -23,7 +23,7 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
-import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
+import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
 
 /**
  * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
@@ -59,8 +59,8 @@ public class ReduceByKeyAndWindowStreamlet<K, V, VR>
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
-        new GeneralReduceByKeyAndWindowOperator<K, V, VR>(identity, reduceFn);
+    ReduceByKeyAndWindowOperator<K, V, VR> bolt =
+        new ReduceByKeyAndWindowOperator<K, V, VR>(identity, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
