@@ -20,7 +20,7 @@ import com.twitter.heron.streamlet.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class WindowedWordCount {
+public class WordCountStreamletTopology {
     private static final int DEFAULT_PARALLELISM = 2;
 
     private static final List<String> SENTENCES = Arrays.asList(
