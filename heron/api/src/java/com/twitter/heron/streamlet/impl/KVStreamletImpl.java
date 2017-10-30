@@ -32,7 +32,6 @@ import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
 import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
@@ -302,8 +301,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <VR> KVStreamlet<KeyedWindow<K>, VR>
-  reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
-                       SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
+      reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
+                           SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
     GeneralReduceByKeyAndWindowStreamlet<K, V, VR> retval =
         new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
     addChild(retval);
