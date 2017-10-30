@@ -58,6 +58,20 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
     spec:
+      # Make sure multiple pods of bookkeeper don't get scheduled on the
+      # same node, unless there are no other available nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                        - bookkeeper
+                topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 0
       containers:
         - name: bookie
