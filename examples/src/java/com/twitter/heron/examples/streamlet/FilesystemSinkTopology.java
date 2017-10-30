@@ -96,7 +96,7 @@ public class FilesystemSinkTopology {
         Builder processingGraphBuilder = Builder.createBuilder();
 
         /**
-         * Creates a temporary file to write output to.
+         * Creates a temporary file to write output into.
          */
         File file = File.createTempFile("filesystem-sink-example", ".tmp");
 
@@ -115,6 +115,7 @@ public class FilesystemSinkTopology {
                     Utils.sleep(500);
                     return ThreadLocalRandom.current().nextInt(100);
                 })
+                .setName("incoming-integers")
                 /**
                  * Here, the FilesystemSink implementation of the Sink
                  * interface is passed to the toSink function.

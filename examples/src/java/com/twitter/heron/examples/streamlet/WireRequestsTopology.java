@@ -28,42 +28,66 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
+/**
+ * This topology demonstrates how different streamlets can be united into one
+ * using union operations. Wire requests (customers asking to wire money) are
+ * created for three different bank branches. Each bank branch is a separate
+ * streamlet. In each branch's streamlet, the request amount is checked to make
+ * sure that no one requests a wire transfer of more than $500. Then, the
+ * wire request streamlets for all three branches are combined into one using a
+ * union operation. Each element in the unified streamlet then passes through a
+ * fraud detection filter that ensures that no "bad" customers are allowed to
+ * make requests.
+ */
 public class WireRequestsTopology {
     private static final Logger LOG =
             Logger.getLogger(WireRequestsTopology.class.getName());
 
-    private static final List<String> USERS = Arrays.asList(
+    /**
+     * A list of current customers (some good, some bad).
+     */
+    private static final List<String> CUSTOMERS = Arrays.asList(
             "honest-tina",
             "honest-jeff",
             "scheming-dave",
             "scheming-linda"
     );
 
-    private static final List<String> FRAUDULENT_USERS = Arrays.asList(
+    /**
+     * A list of bad customers whose requests should be rejected.
+     */
+    private static final List<String> FRAUDULENT_CUSTOMERS = Arrays.asList(
             "scheming-dave",
             "scheming-linda"
     );
 
+    /**
+     * The maximum allowable amount for transfers. Requests for more than this
+     * amount need to be rejected.
+     */
     private static final int MAX_ALLOWABLE_AMOUNT = 500;
 
-    private static <T> T randomFromList(List<T> ls) {
-        return ls.get(new Random().nextInt(ls.size()));
-    }
-
+    /**
+     * A POJO for wire requests.
+     */
     private static class WireRequest implements Serializable {
         private static final long serialVersionUID = 1311441220738558016L;
-        private String userId;
+        private String customerId;
         private int amount;
 
         WireRequest(long delay) {
+            /**
+             * The pace at which requests are generated is throttled. Different
+             * throttles are applied to different bank branches.
+             */
             Utils.sleep(delay);
-            this.userId = randomFromList(USERS);
+            this.customerId = randomFromList(CUSTOMERS);
             this.amount = ThreadLocalRandom.current().nextInt(1000);
             LOG.info(String.format("New wire request: %s", this));
         }
 
-        String getUserId() {
-            return userId;
+        String getCustomerId() {
+            return customerId;
         }
 
         int getAmount() {
@@ -72,29 +96,36 @@ public class WireRequestsTopology {
 
         @Override
         public String toString() {
-            return String.format("(user: %s, amount: %d)", userId, amount);
+            return String.format("(customer: %s, amount: %d)", customerId, amount);
         }
     }
 
+    /**
+     * Each request is checked to make sure that requests from untrustworthy customers
+     * are rejected.
+     */
     private static boolean fraudDetect(WireRequest request) {
         String logMessage;
 
-        boolean fraudulent = FRAUDULENT_USERS.contains(request.getUserId());
+        boolean fraudulent = FRAUDULENT_CUSTOMERS.contains(request.getCustomerId());
 
         if (fraudulent) {
-            logMessage = String.format("Rejected fraudulent user %s",
-                    request.getUserId());
+            logMessage = String.format("Rejected fraudulent customer %s",
+                    request.getCustomerId());
+            LOG.warning(logMessage);
         } else {
-            logMessage = String.format("Accepted request for $%d from user %s",
+            logMessage = String.format("Accepted request for $%d from customer %s",
                     request.getAmount(),
-                    request.getUserId());
+                    request.getCustomerId());
+            LOG.info(logMessage);
         }
-
-        System.out.println(logMessage);
 
         return !fraudulent;
     }
 
+    /**
+     * Each request is checked to make sure that no one requests an amount over $500.
+     */
     private static boolean checkRequestAmount(WireRequest request) {
         boolean sufficientBalance = request.getAmount() < MAX_ALLOWABLE_AMOUNT;
 
@@ -112,22 +143,37 @@ public class WireRequestsTopology {
     public static void main(String[] args) throws Exception {
         Builder builder = Builder.createBuilder();
 
+        /**
+         * Requests from the "quiet" bank branch (high request throttling).
+         */
         Streamlet<WireRequest> quietBranch = builder.newSource(() -> new WireRequest(20))
                 .setNumPartitions(1)
                 .setName("quiet-branch-requests")
                 .filter(WireRequestsTopology::checkRequestAmount)
                 .setName("quiet-branch-check-balance");
+
+        /**
+         * Requests from the "medium" bank branch (medium request throttling).
+         */
         Streamlet<WireRequest> mediumBranch = builder.newSource(() -> new WireRequest(10))
                 .setNumPartitions(2)
                 .setName("medium-branch-requests")
                 .filter(WireRequestsTopology::checkRequestAmount)
                 .setName("medium-branch-check-balance");
+
+        /**
+         * Requests from the "busy" bank branch (low request throttling).
+         */
         Streamlet<WireRequest> busyBranch = builder.newSource(() -> new WireRequest(5))
                 .setNumPartitions(4)
                 .setName("busy-branch-requests")
                 .filter(WireRequestsTopology::checkRequestAmount)
                 .setName("busy-branch-check-balance");
 
+        /**
+         * Here, the streamlets for the three bank branches are united into one. The fraud
+         * detection filter then operates on that unified streamlet.
+         */
         quietBranch
                 .union(mediumBranch)
                 .setNumPartitions(2)

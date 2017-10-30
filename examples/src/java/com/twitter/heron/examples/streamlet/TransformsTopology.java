@@ -35,6 +35,10 @@ public class TransformsTopology {
 
         public void setup(Context context) {}
 
+        /**
+         * Here, the incoming value is accepted as-is and not changed (hence the "do nothing"
+         * in the class name).
+         */
         public void transform(T in, Consumer<T> consumer) {
             consumer.accept(in);
         }
@@ -42,8 +46,10 @@ public class TransformsTopology {
         public void cleanup() {}
     }
 
-    // This transformer increments incoming values by a user-supplied increment (which can also,
-    // of course, be negative).
+    /**
+     * This transformer increments incoming values by a user-supplied increment (which can also,
+     * of course, be negative).
+     */
     private static class IncrementTransformer implements SerializableTransformer<Integer, Integer> {
         private static final long serialVersionUID = -3198491688219997702L;
         private int increment;
@@ -54,6 +60,10 @@ public class TransformsTopology {
 
         public void setup(Context context) {}
 
+        /**
+         * Here, the incoming value is incremented by the value specified in the
+         * transformer's constructor.
+         */
         public void transform(Integer in, Consumer<Integer> consumer) {
             int incrementedValue = in + increment;
             consumer.accept(incrementedValue);
@@ -69,6 +79,12 @@ public class TransformsTopology {
     public static void main(String[] args) throws Exception {
         Builder builder = Builder.createBuilder();
 
+        /**
+         * The processing graph consists of a supplier streamlet that emits
+         * random integers between 1 and 100. From there, a series of transformers
+         * is applied. At the end of the graph, the original value is ultimately
+         * unchanged.
+         */
         builder.newSource(() -> ThreadLocalRandom.current().nextInt(100))
                 .transform(new DoNothingTransformer<>())
                 .transform(new IncrementTransformer(10))
@@ -78,7 +94,6 @@ public class TransformsTopology {
                 .log();
 
         Config config = new Config();
-        config.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
 
         /**
          * Fetches the topology name from the first command-line argument

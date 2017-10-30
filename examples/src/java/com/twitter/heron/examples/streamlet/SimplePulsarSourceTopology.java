@@ -22,6 +22,11 @@ import org.apache.pulsar.client.api.PulsarClientException;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * This topology demonstrates how sources work in the Heron Streamlet API
+ * for Java. The example source here reads from an Apache Pulsar topic and
+ * injects incoming messages into the processing graph.
+ */
 public class SimplePulsarSourceTopology {
     private static class PulsarSource implements Source<String> {
         private static final long serialVersionUID = -3433804102901363106L;
@@ -37,6 +42,11 @@ public class SimplePulsarSourceTopology {
             this.subscription = subscription;
         }
 
+        /**
+         * The setup functions defines the instantiation logic for the source.
+         * Here, a Pulsar client and consumer are created that will listen on
+         * the Pulsar topic.
+         */
         public void setup(Context context) {
             try {
                 client = PulsarClient.create(pulsarConnectionUrl);
@@ -46,6 +56,11 @@ public class SimplePulsarSourceTopology {
             }
         }
 
+        /**
+         * The get function defines how elements for the source streamlet are
+         * "gotten." In this case, the Pulsar consumer for the specified topic
+         * listens for incoming messages.
+         */
         public String get() {
             try {
                 return new String(consumer.receive().getData(), "utf-8");
@@ -64,17 +79,25 @@ public class SimplePulsarSourceTopology {
     public static void main(String[] args) throws Exception {
         Builder processingGraphBuilder = Builder.createBuilder();
 
+        /**
+         * A Pulsar source is constructed for a specific Pulsar installation, topic, and
+         * subsecription.
+         */
         Source<String> pulsarSource = new PulsarSource(
                 "pulsar://localhost:6650", // Pulsar connection URL
                 "persistent://sample/standalone/ns1/heron-pulsar-test-topic", // Pulsar topic
-                "subscription-1" // Subscription name for Pulsar topic
+                "subscription-1" // Subscription name for the Pulsar topic
         );
 
+        /**
+         * In this processing graph, the source streamlet consists of messages on a
+         * Pulsar topic. Those messages are simply logged without any processing logic
+         * applied to them.
+         */
         processingGraphBuilder.newSource(pulsarSource)
                 .log();
 
         Config config = new Config();
-        config.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
 
         /**
          * Fetches the topology name from the first command-line argument
