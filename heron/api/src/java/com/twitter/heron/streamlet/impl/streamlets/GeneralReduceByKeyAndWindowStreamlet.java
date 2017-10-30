@@ -19,13 +19,11 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
-import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
 
 /**
  * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
@@ -39,12 +37,12 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
   private KVStreamletImpl<K, V> parent;
   private WindowConfigImpl windowCfg;
   VR identity;
-  private SerializableBiFunction<VR, V, VR> reduceFn;
+  private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
 
   public GeneralReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
-                                              WindowConfig windowCfg,
-                                              VR identity,
-                                              SerializableBiFunction<VR, V, VR> reduceFn) {
+                             WindowConfig windowCfg,
+                             VR identity,
+                             SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
     this.parent = parent;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.identity = identity;

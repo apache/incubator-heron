@@ -303,7 +303,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   @Override
   public <VR> KVStreamlet<KeyedWindow<K>, VR>
   reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
-                       SerializableBiFunction<VR, V, VR> reduceFn) {
+                       SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
     GeneralReduceByKeyAndWindowStreamlet<K, V, VR> retval =
         new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
     addChild(retval);

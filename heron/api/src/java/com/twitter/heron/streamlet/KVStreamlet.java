@@ -160,6 +160,6 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   <VR> KVStreamlet<KeyedWindow<K>, VR> reduceByKeyAndWindow(WindowConfig windowCfg,
-                                                       VR identity,
-                                                       SerializableBiFunction<VR, V, VR> reduceFn);
+                            VR identity,
+                            SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn);
 }

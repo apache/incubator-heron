@@ -25,7 +25,6 @@ import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.Window;
 
 /**
@@ -37,11 +36,11 @@ import com.twitter.heron.streamlet.Window;
 public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator {
   private static final long serialVersionUID = 2833576046687752396L;
   private VR identity;
-  private SerializableBiFunction<VR, V, VR> reduceFn;
+  private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
   private OutputCollector collector;
 
   public GeneralReduceByKeyAndWindowOperator(VR identity,
-                                             SerializableBiFunction<VR, V, VR> reduceFn) {
+                           SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
     this.identity = identity;
     this.reduceFn = reduceFn;
   }
