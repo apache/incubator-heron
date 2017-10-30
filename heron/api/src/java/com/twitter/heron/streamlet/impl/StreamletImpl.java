@@ -216,6 +216,13 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
     return;
   }
 
+  @Override
+  public void formattedLog(SerializableFunction<? super R, String> logFormatter) {
+    LogStreamlet<R> logger = new LogStreamlet<>(this, logFormatter);
+    addChild(logger);
+    return;
+  }
+
   /**
    * Applies the consumer function for every element of this streamlet
    * @param consumer The user supplied consumer function that is invoked for each element

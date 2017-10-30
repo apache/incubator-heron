@@ -122,8 +122,16 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
   /**
    * Logs every element of the streamlet using String.valueOf function
    * This is one of the sink functions in the sense that this operation returns void
+   * and terminates the processing graph.
    */
   void log();
+
+  /**
+   * Logs every element of the streamlet using a supplied formatting
+   * function. This acts as a sink function in the sense that the operation
+   * returns void and terminates the processing graph.
+   */
+  void formattedLog(SerializableFunction<? super R, String> logFormatter);
 
   /**
    * Applies the consumer function to every element of the stream

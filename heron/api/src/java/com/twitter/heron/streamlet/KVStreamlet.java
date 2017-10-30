@@ -93,6 +93,13 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
           ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer);
 
   /**
+   * Logs every element of the streamlet using a supplied formatting
+   * function. This acts as a sink function in the sense that the operation
+   * returns void and terminates the processing graph.
+   */
+  void formattedLog(SerializableFunction<KeyValue<K, V>, String> logFormatter);
+
+  /**
    * Logs every element of the streamlet using String.valueOf function
    * This is one of the sink functions in the sense that this operation returns void
    */

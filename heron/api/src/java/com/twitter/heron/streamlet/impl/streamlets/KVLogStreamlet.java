@@ -18,6 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.LogSink;
 
@@ -28,14 +29,24 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class KVLogStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
+  private SerializableFunction<KeyValue<K, V>, String> logFormatter;
 
   public KVLogStreamlet(KVStreamletImpl<K, V> parent) {
     this.parent = parent;
     setNumPartitions(parent.getNumPartitions());
   }
 
+  public KVLogStreamlet(KVStreamletImpl<K, V> parent,
+      SerializableFunction<KeyValue<K, V>, String> logFormatter) {
+    this.parent = parent;
+    this.logFormatter = logFormatter;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    LogSink<KeyValue<K, V>> logSink;    
+
     if (getName() == null) {
       setName(defaultNameCalculator("kvlogger", stageNames));
     }
@@ -43,7 +54,14 @@ public class KVLogStreamlet<K, V> extends KVStreamletImpl<K, V> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new LogSink<KeyValue<K, V>>(),
+
+    if (null != logFormatter) {
+      logSink = new LogSink<KeyValue<K, V>>(this.logFormatter);
+    } else {
+      logSink = new LogSink<KeyValue<K, V>>();
+    }
+
+    bldr.setBolt(getName(), logSink,
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }

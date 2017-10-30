@@ -17,6 +17,7 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.LogSink;
 
@@ -27,14 +28,24 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
+  private SerializableFunction<? super R, String> logFormatter;
 
   public LogStreamlet(StreamletImpl<R> parent) {
     this.parent = parent;
     setNumPartitions(parent.getNumPartitions());
   }
 
+  public LogStreamlet(StreamletImpl<R> parent,
+      SerializableFunction<? super R, String> logFormatter) {
+    this.parent = parent;
+    this.logFormatter = logFormatter;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    LogSink<R> logSink;
+
     if (getName() == null) {
       setName(defaultNameCalculator("logger", stageNames));
     }
@@ -42,8 +53,16 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new LogSink<R>(),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+
+    if (null != logFormatter) {
+      logSink = new LogSink<R>(this.logFormatter);
+    } else {
+      logSink = new LogSink<R>();
+    }
+
+    bldr.setBolt(getName(), logSink,
+      getNumPartitions()).shuffleGrouping(parent.getName());
+
     return true;
   }
 }

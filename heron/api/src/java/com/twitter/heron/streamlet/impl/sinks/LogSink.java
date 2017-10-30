@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.impl.operators.StreamletOperator;
 
 /**
@@ -30,8 +31,13 @@ public class LogSink<R> extends StreamletOperator {
   private static final long serialVersionUID = -6392422646613189818L;
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
   private OutputCollector collector;
+  private SerializableFunction<? super R, String> logFormatter;
 
   public LogSink() {
+  }
+
+  public LogSink(SerializableFunction<? super R, String> logFormatter) {
+    this.logFormatter = logFormatter;
   }
 
   @SuppressWarnings("rawtypes")
@@ -44,7 +50,13 @@ public class LogSink<R> extends StreamletOperator {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    LOG.info(String.valueOf(obj));
+
+    if (null != logFormatter) {
+      String formattedMsg = this.logFormatter.apply(obj);
+      LOG.info(formattedMsg);
+    } else {
+      LOG.info(String.valueOf(obj));
+    }
     collector.ack(tuple);
   }
 }

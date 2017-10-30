@@ -196,6 +196,13 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
     return;
   }
 
+  @Override
+  public void formattedLog(SerializableFunction<KeyValue<K, V>, String> logFormatter) {
+    KVLogStreamlet<K, V> logger = new KVLogStreamlet<>(this, logFormatter);
+    addChild(logger);
+    return;
+  }
+
   /**
    * Applies the consumer function for every element of this streamlet
    * @param consumer The user supplied consumer function that is invoked for each element
