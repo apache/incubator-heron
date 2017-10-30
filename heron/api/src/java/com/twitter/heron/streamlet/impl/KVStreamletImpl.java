@@ -32,6 +32,8 @@ import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
@@ -287,6 +289,23 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
       reduceByKeyAndWindow(WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
     ReduceByKeyAndWindowStreamlet<K, V> retval =
         new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet in which for each time_window, all elements are belonging to the
+   * same key are reduced using the BiFunction/identity and the result is emitted.
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  @Override
+  public <VR> KVStreamlet<KeyedWindow<K>, VR>
+  reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
+                       SerializableBiFunction<VR, V, VR> reduceFn) {
+    GeneralReduceByKeyAndWindowStreamlet<K, V, VR> retval =
+        new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
     addChild(retval);
     return retval;
   }
