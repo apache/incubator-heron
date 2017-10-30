@@ -36,7 +36,7 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
     extends KVStreamletImpl<KeyedWindow<K>, VR> {
   private KVStreamletImpl<K, V> parent;
   private WindowConfigImpl windowCfg;
-  VR identity;
+  private VR identity;
   private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
 
   public GeneralReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
