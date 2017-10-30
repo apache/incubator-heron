@@ -17,7 +17,7 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
+import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.Window;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
@@ -33,16 +33,18 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByWindowOperator;
  * ReduceByWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type V.
  */
-public class ReduceByWindowStreamlet<I> extends KVStreamletImpl<Window, I> {
-  private StreamletImpl<I> parent;
+public class ReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window, T> {
+  private StreamletImpl<R> parent;
   private WindowConfigImpl windowCfg;
-  private SerializableBinaryOperator<I> reduceFn;
+  private T identity;
+  private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
 
-  public ReduceByWindowStreamlet(StreamletImpl<I> parent,
-                                 WindowConfig windowCfg,
-                                 SerializableBinaryOperator<I> reduceFn) {
+  public ReduceByWindowStreamlet(StreamletImpl<R> parent, WindowConfig windowCfg,
+                           T identity,
+                           SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
     this.parent = parent;
     this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.identity = identity;
     this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -56,10 +58,10 @@ public class ReduceByWindowStreamlet<I> extends KVStreamletImpl<Window, I> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    ReduceByWindowOperator<I> bolt = new ReduceByWindowOperator<>(reduceFn);
+    ReduceByWindowOperator<R, T> bolt = new ReduceByWindowOperator<>(reduceFn, identity);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<I>());
+        .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<T>());
     return true;
   }
 }

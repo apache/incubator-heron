@@ -185,8 +185,27 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
                                                SerializableBinaryOperator<R> reduceFn) {
-    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
-                                                                      windowConfig, reduceFn);
+    ReduceByWindowStreamlet<R, R> retval = new ReduceByWindowStreamlet<>(this, windowConfig,
+                                                                null, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
+   * windowConfig and applying reduceFn on those tuples
+   * @param windowConfig This is a specification of what kind of windowing strategy you like
+   * to have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
+   */
+  @Override
+  public <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
+                             SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
+    ReduceByWindowStreamlet<R, T> retval = new ReduceByWindowStreamlet<>(this,
+        windowConfig, identity, reduceFn);
     addChild(retval);
     return retval;
   }

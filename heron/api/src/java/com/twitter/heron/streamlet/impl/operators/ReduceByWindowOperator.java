@@ -22,7 +22,7 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.SerializableBinaryOperator;
+import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.Window;
 
 /**
@@ -31,13 +31,16 @@ import com.twitter.heron.streamlet.Window;
  * For every window, the bolt applies reduceFn to all the tuples in that window, and emits
  * the resulting value as output
  */
-public class ReduceByWindowOperator<I> extends StreamletWindowOperator {
+public class ReduceByWindowOperator<R, T> extends StreamletWindowOperator {
   private static final long serialVersionUID = 6513775685209414130L;
-  private SerializableBinaryOperator<I> reduceFn;
+  private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
+  private T identity;
   private OutputCollector collector;
 
-  public ReduceByWindowOperator(SerializableBinaryOperator<I> reduceFn) {
+  public ReduceByWindowOperator(SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn,
+                                T identity) {
     this.reduceFn = reduceFn;
+    this.identity = identity;
   }
 
   @SuppressWarnings("rawtypes")
@@ -49,14 +52,10 @@ public class ReduceByWindowOperator<I> extends StreamletWindowOperator {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    I reducedValue = null;
+    T reducedValue = identity;
     for (Tuple tuple : inputWindow.get()) {
-      I tup = (I) tuple.getValue(0);
-      if (reducedValue == null) {
-        reducedValue = tup;
-      } else {
-        reducedValue = reduceFn.apply(reducedValue, tup);
-      }
+      R tup = (R) tuple.getValue(0);
+      reducedValue = reduceFn.apply(reducedValue, tup);
     }
     long startWindow;
     long endWindow;
