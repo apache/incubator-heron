@@ -15,11 +15,11 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -47,6 +47,7 @@ public class WireRequestsTopology {
     }
 
     private static class WireRequest implements Serializable {
+        private static final long serialVersionUID = 1311441220738558016L;
         private String userId;
         private int amount;
 

@@ -15,8 +15,8 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -40,6 +40,8 @@ public class ImpressionsAndClicksTopology {
             .collect(Collectors.toList());
 
     private static class AdImpression implements Serializable {
+        private static final long serialVersionUID = 3283110635310800177L;
+
         private String adId;
         private String userId;
         private String impressionId;
@@ -71,6 +73,7 @@ public class ImpressionsAndClicksTopology {
     }
 
     private static class AdClick implements Serializable {
+        private static final long serialVersionUID = 7202766159176178988L;
         private String adId;
         private String userId;
         private String clickId;

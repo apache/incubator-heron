@@ -15,8 +15,8 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -28,10 +28,11 @@ import java.util.logging.Logger;
 public class TransformsTopology {
     private static final Logger LOG = Logger.getLogger(TransformsTopology.class.getName());
 
-
     // This transformer leaves incoming values unmodified. The Consumer simply accepts incoming
     // values as-is during the transform phase.
     private static class DoNothingTransformer<T> implements SerializableTransformer<T, T> {
+        private static final long serialVersionUID = 3717991700067221067L;
+
         public void setup(Context context) {}
 
         public void transform(T in, Consumer<T> consumer) {
@@ -44,6 +45,7 @@ public class TransformsTopology {
     // This transformer increments incoming values by a user-supplied increment (which can also,
     // of course, be negative).
     private static class IncrementTransformer implements SerializableTransformer<Integer, Integer> {
+        private static final long serialVersionUID = -3198491688219997702L;
         private int increment;
 
         IncrementTransformer(int increment) {
@@ -60,60 +62,15 @@ public class TransformsTopology {
         public void cleanup() {}
     }
 
-    private static class SetStateTransformer implements SerializableTransformer<Integer, Integer> {
-        private Context ctx;
-
-        public void setup(Context context) {
-            this.ctx = context;
-        }
-
-        public void transform(Integer in, Consumer<Integer> consumer) {
-            ctx.getState().put("value", in);
-
-            consumer.accept(in);
-        }
-
-        public void cleanup() {}
-    }
-
-    private static class VerifyStateTransformer implements SerializableTransformer<Integer, Integer> {
-        private Context ctx;
-
-        public void setup(Context context) {
-            this.ctx = context;
-        }
-
-        public void transform(Integer in, Consumer<Integer> consumer) {
-            int receivedState = (int) ctx.getState().get("value");
-
-
-            String msg;
-
-            if (in != receivedState) {
-                msg = String.format("Value of %d does not match the expected %d", in, receivedState);
-                LOG.warning(msg);
-            } else {
-                msg = String.format("Value of %d matches the expected %d", in, receivedState);
-                LOG.info(msg);
-            }
-
-            consumer.accept(in);
-        }
-
-        public void cleanup() {}
-    }
-
     public static void main(String[] args) throws Exception {
         Builder builder = Builder.createBuilder();
 
         builder.newSource(() -> ThreadLocalRandom.current().nextInt(100))
-                .transform(new SetStateTransformer())
                 .transform(new DoNothingTransformer<>())
                 .transform(new IncrementTransformer(10))
                 .transform(new IncrementTransformer(-7))
                 .transform(new DoNothingTransformer<>())
                 .transform(new IncrementTransformer(-3))
-                .transform(new VerifyStateTransformer())
                 .log();
 
         Config config = new Config();

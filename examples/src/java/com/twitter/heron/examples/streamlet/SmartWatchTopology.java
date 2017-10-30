@@ -15,8 +15,8 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -33,9 +33,9 @@ public class SmartWatchTopology {
     );
 
     private static class SmartWatchReading implements Serializable {
+        private static final long serialVersionUID = -6555650939020508026L;
         private final String userId;
         private final float distanceRun;
-
 
         SmartWatchReading() {
             Utils.sleep(5);

@@ -14,8 +14,8 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 
 public class SimplePulsarSourceTopology {
     private static class PulsarSource implements Source<String> {
+        private static final long serialVersionUID = -3433804102901363106L;
         private PulsarClient client;
         private Consumer consumer;
         private String pulsarConnectionUrl;

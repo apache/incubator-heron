@@ -14,8 +14,8 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.util.Arrays;
 import java.util.List;

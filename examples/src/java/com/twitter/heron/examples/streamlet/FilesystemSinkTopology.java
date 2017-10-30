@@ -15,8 +15,8 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.*;
-import io.streaml.heron.streamlet.utils.StreamletUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class FilesystemSinkTopology {
     private static class FilesystemSink<T> implements Sink<T> {
+        private static final long serialVersionUID = -96514621878356224L;
         private Path tempFilePath;
         private File tempFile;
 
