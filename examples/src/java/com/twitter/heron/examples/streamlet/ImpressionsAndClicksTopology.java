@@ -26,19 +26,37 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * This topology demonstrates the use of join operations in the Heron
+ * Streamlet API for Java. Two independent streamlets, one consisting
+ * of ad impressions, the other of ad clicks, is joined together. A join
+ * function then checks if the userId matches on the impression and click.
+ * Finally, a reduce function counts the number of impression/click matches
+ * over the specified time window.
+ */
 public class ImpressionsAndClicksTopology {
-    private static final Logger LOG = Logger.getLogger(ImpressionsAndClicksTopology.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger(ImpressionsAndClicksTopology.class.getName());
 
+    /**
+     * A list of company IDs to be used to generate random clicks and impressions.
+     */
     private static final List<String> ADS = Arrays.asList(
             "acme",
             "blockchain-inc",
             "omnicorp"
     );
 
+    /**
+     * A list of 100 active users ("user1" through "user100").
+     */
     private static final List<String> USERS = IntStream.range(1, 100)
             .mapToObj(i -> String.format("user%d", i))
             .collect(Collectors.toList());
 
+    /**
+     * A POJO for incoming ad impressions (generated every 50 milliseconds). 
+     */
     private static class AdImpression implements Serializable {
         private static final long serialVersionUID = 3283110635310800177L;
 
@@ -72,6 +90,9 @@ public class ImpressionsAndClicksTopology {
         }
     }
 
+    /**
+     * A POJO for incoming ad clicks (generated every 50 milliseconds).
+     */
     private static class AdClick implements Serializable {
         private static final long serialVersionUID = 7202766159176178988L;
         private String adId;
@@ -104,12 +125,24 @@ public class ImpressionsAndClicksTopology {
         }
     }
 
-    private static int incrementIfSameUser(String userId1, String userId2) {
-        return (userId1.equals(userId2)) ? 1 : 0;
+    /**
+     * The join function for the processing graph. For each incoming KeyValue object
+     * pair joined during the specified time window, if the userId matches then a KeyValue
+     * object with a value of 1 is returned (else 0).
+     */
+    private static KeyValue<String, Integer> incrementIfSameUser(String userId1, String userId2) {
+        return (userId1.equals(userId2)) ? new KeyValue<>(userId1, 1) : new KeyValue<>(userId1, 0);
     }
 
-    private static int countCumulativeClicks(int cumulative, int incoming) {
-        return cumulative + incoming;
+    /**
+     * The reduce function for the processing graph. A cumulative total of clicks is counted
+     * for each userId.
+     */
+    private static KeyValue<String, Integer> countCumulativeClicks(
+            KeyValue<String, Integer> cumulative,
+            KeyValue<String, Integer> incoming) {
+        int total = cumulative.getValue() + incoming.getValue();
+        return new KeyValue<>(incoming.getKey(), total);
     }
 
     /**
@@ -119,14 +152,44 @@ public class ImpressionsAndClicksTopology {
     public static void main(String[] args) throws Exception {
         Builder processingGraphBuilder = Builder.createBuilder();
 
-        KVStreamlet<String, String> impressions = processingGraphBuilder.newSource((AdImpression::new))
+        /**
+         * A KVStreamlet is produced. Each element is a KeyValue object where the key
+         * is the impression ID and the user ID is the value.
+         */
+        KVStreamlet<String, String> impressions = processingGraphBuilder
+                .newSource((AdImpression::new))
                 .mapToKV(impression -> new KeyValue<>(impression.getAdId(), impression.getUserId()));
-        KVStreamlet<String, String> clicks = processingGraphBuilder.newSource(AdClick::new)
+
+        /**
+         * A KVStreamlet is produced. Each element is a KeyValue object where the key
+         * is the ad ID and the user ID is the value.
+         */
+        KVStreamlet<String, String> clicks = processingGraphBuilder
+                .newSource(AdClick::new)
                 .mapToKV(click -> new KeyValue<>(click.getAdId(), click.getUserId()));
 
+        /**
+         * Here, the impressions KVStreamlet is joined to the clicks KVStreamlet.
+         */
         impressions
-                .join(clicks, WindowConfig.TumblingCountWindow(100), ImpressionsAndClicksTopology::incrementIfSameUser)
-                .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(200), ImpressionsAndClicksTopology::countCumulativeClicks)
+                /**
+                 * The join function here essentially provides the reduce function
+                 * with a streamlet of KeyValue objects where the userId matches across
+                 * an impression and a click (meaning that the user has clicked on the
+                 * ad).
+                 */
+                .join(
+                        clicks,
+                        WindowConfig.TumblingCountWindow(100),
+                        ImpressionsAndClicksTopology::incrementIfSameUser
+                )
+                /**
+                 * The reduce function counts the number of ad clicks per user.
+                 */
+                .reduceByKeyAndWindow(
+                        WindowConfig.TumblingCountWindow(200),
+                        ImpressionsAndClicksTopology::countCumulativeClicks
+                )
                 .log();
 
         Config config = new Config();

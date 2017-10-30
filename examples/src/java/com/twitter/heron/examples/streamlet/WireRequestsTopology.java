@@ -26,8 +26,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 public class WireRequestsTopology {
+    private static final Logger LOG =
+            Logger.getLogger(WireRequestsTopology.class.getName());
+
     private static final List<String> USERS = Arrays.asList(
             "honest-tina",
             "honest-jeff",
@@ -55,7 +59,7 @@ public class WireRequestsTopology {
             Utils.sleep(delay);
             this.userId = randomFromList(USERS);
             this.amount = ThreadLocalRandom.current().nextInt(1000);
-            System.out.println(String.format("New wire request: %s", this));
+            LOG.info(String.format("New wire request: %s", this));
         }
 
         String getUserId() {
@@ -94,7 +98,7 @@ public class WireRequestsTopology {
     private static boolean checkRequestAmount(WireRequest request) {
         boolean sufficientBalance = request.getAmount() < MAX_ALLOWABLE_AMOUNT;
 
-        if (!sufficientBalance) System.out.println(
+        if (!sufficientBalance) LOG.warning(
                 String.format("Rejected excessive request of $%d",
                         request.getAmount()));
 

@@ -20,13 +20,13 @@ import com.twitter.heron.streamlet.*;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * This is a very simple topology that shows a series of
+ */
 public final class IntegerProcessingTopology {
     private static final float CPU = 2.0f;
     private static final long GIGABYTES_OF_RAM = 6;
     private static final int NUM_CONTAINERS = 2;
-
-    private IntegerProcessingTopology() {
-    }
 
     /**
      * All Heron topologies require a main function that defines the topology's behavior

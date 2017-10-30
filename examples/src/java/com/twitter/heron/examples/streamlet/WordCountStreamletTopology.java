@@ -85,7 +85,8 @@ public class WordCountStreamletTopology {
                  * computations. The reduce function simply sums all the count
                  * values together to produce the count within that window.
                  */
-                .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), WindowedWordCount::reduce)
+                .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10),
+                        WordCountStreamletTopology::reduce)
                 /**
                  * Finally, the word/count KeyValue objects are logged.
                  */

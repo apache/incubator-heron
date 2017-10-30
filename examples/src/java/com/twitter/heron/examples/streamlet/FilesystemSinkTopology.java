@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 /**
  * This topology demonstrates how sinks work in the Heron Streamlet API for Java.
@@ -33,6 +34,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * integers) is written to that temporary file.
  */
 public class FilesystemSinkTopology {
+    private static final Logger LOG =
+            Logger.getLogger(FilesystemSinkTopology.class.getName());
+
     /**
      * Implements the Sink interface, which defines what happens when the toSink
      * method is invoked in a processing graph.
@@ -66,7 +70,7 @@ public class FilesystemSinkTopology {
 
             try {
                 Files.write(tempFilePath, bytes, StandardOpenOption.APPEND);
-                System.out.println(
+                LOG.info(
                         String.format("Wrote %s to %s",
                                 new String(bytes),
                                 tempFilePath.toAbsolutePath()
@@ -95,9 +99,10 @@ public class FilesystemSinkTopology {
          * Creates a temporary file to write output to.
          */
         File file = File.createTempFile("filesystem-sink-example", ".tmp");
-        System.out.println(
+
+        LOG.info(
                 String.format("Ready to write to file %s",
-                        f.getAbsolutePath()
+                        file.getAbsolutePath()
                 )
         );
 
