@@ -29,7 +29,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 
 This deploys bookkeeper in a `DaemonSet` and requires the ability of exposing `hostPort` for pods communication.
 In some environments like K8S on DC/OS, `hostPort` is not well supported. You can consider deploying bookkeeper in
-a `StatefulSet` as below:
+a `StatefulSet` with `Persistent Volumes` as below. Please see [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for more details.
 
 ```shell
 $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.stateful.yaml
