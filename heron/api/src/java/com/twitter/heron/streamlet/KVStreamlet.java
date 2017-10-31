@@ -29,14 +29,14 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * Return a new KVStreamlet by applying mapFn to each element of this KVStreamlet
    * @param mapFn The Map Function that should be applied to each element
    */
-  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<? super KeyValue<? super K, ? super V>,
+  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<? super KeyValue<K, V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn);
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this KVStreamlet
    * @param mapFn The Map Function that should be applied to each element
    */
-  <R> Streamlet<R> mapToStreamlet(SerializableFunction<? super KeyValue<? super K, ? super V>,
+  <R> Streamlet<R> mapToStreamlet(SerializableFunction<? super KeyValue<K, V>,
                                   ? extends R> mapFn);
 
   /**

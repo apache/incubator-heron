@@ -86,7 +86,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <K1, V1> KVStreamlet<K1, V1> map(
-      SerializableFunction<? super KeyValue<? super K, ? super V>,
+      SerializableFunction<? super KeyValue<K, V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
     KVMapStreamlet<K, V, K1, V1> retval = new KVMapStreamlet<>(this, mapFn);
     addChild(retval);
@@ -99,7 +99,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <R> Streamlet<R> mapToStreamlet(
-      SerializableFunction<? super KeyValue<? super K, ? super V>, ? extends R> mapFn) {
+      SerializableFunction<? super KeyValue<K, V>, ? extends R> mapFn) {
     KVToStreamlet<K, V, R> retval = new KVToStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
