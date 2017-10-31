@@ -96,7 +96,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param mapFn The Map Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn) {
+  public <T> Streamlet<T> map(SerializableFunction<R, ? extends T> mapFn) {
     MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -109,7 +109,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param mapFn The Map function that should be applied to each element
    */
   @Override
-  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
+  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<R,
       ? extends KeyValue<K, V>> mapFn) {
     MapToKVStreamlet<R, K, V> retval = new MapToKVStreamlet<>(this, mapFn);
     addChild(retval);
@@ -123,7 +123,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> flatMap(
-      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
+      SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -135,7 +135,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param filterFn The filter Function that should be applied to each element
   */
   @Override
-  public Streamlet<R> filter(SerializablePredicate<? super R> filterFn) {
+  public Streamlet<R> filter(SerializablePredicate<R> filterFn) {
     FilterStreamlet<R> retval = new FilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
@@ -155,7 +155,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public Streamlet<R> repartition(int numPartitions,
-                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn) {
+                           SerializableBiFunction<R, Integer, List<Integer>> partitionFn) {
     RemapStreamlet<R> retval = new RemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
@@ -203,7 +203,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
-                             SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
+                             SerializableBiFunction<T, R, ? extends T> reduceFn) {
     GeneralReduceByWindowStreamlet<R, T> retval = new GeneralReduceByWindowStreamlet<>(this,
         windowConfig, identity, reduceFn);
     addChild(retval);
@@ -267,7 +267,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> transform(
-      SerializableTransformer<? super R, ? extends T> serializableTransformer) {
+      SerializableTransformer<R, ? extends T> serializableTransformer) {
     TransformStreamlet<R, T> transformStreamlet =
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
