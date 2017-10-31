@@ -32,11 +32,11 @@ import com.twitter.heron.streamlet.Window;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
@@ -190,7 +190,7 @@ public class StreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     KVStreamlet<Window, Double> streamlet =
         baseStreamlet.reduceByWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
-    assertTrue(streamlet instanceof GeneralReduceByWindowStreamlet);
+    assertTrue(streamlet instanceof ReduceByWindowStreamlet);
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
@@ -245,9 +245,9 @@ public class StreamletImplTest {
     MapToKVStreamlet<String, String, Integer> mkvStreamlet =
         (MapToKVStreamlet<String, String, Integer>) fStreamlet.getChildren().get(0);
     assertEquals(mkvStreamlet.getChildren().size(), 1);
-    assertTrue(mkvStreamlet.getChildren().get(0) instanceof GeneralReduceByKeyAndWindowStreamlet);
-    GeneralReduceByKeyAndWindowStreamlet<String, Integer, Integer> rStreamlet =
-        (GeneralReduceByKeyAndWindowStreamlet<String, Integer, Integer>) mkvStreamlet
+    assertTrue(mkvStreamlet.getChildren().get(0) instanceof ReduceByKeyAndWindowStreamlet);
+    ReduceByKeyAndWindowStreamlet<String, Integer> rStreamlet =
+        (ReduceByKeyAndWindowStreamlet<String, Integer>) mkvStreamlet
             .getChildren().get(0);
     assertEquals(rStreamlet.getChildren().size(), 0);
   }

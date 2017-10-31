@@ -39,6 +39,7 @@ import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByWindowStreamle
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet;
@@ -185,9 +186,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
                                                SerializableBinaryOperator<R> reduceFn) {
-    GeneralReduceByWindowStreamlet<R, R> retval =
-        new GeneralReduceByWindowStreamlet<>(this, windowConfig,
-            null, reduceFn);
+    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this, windowConfig, reduceFn);
     addChild(retval);
     return retval;
   }
