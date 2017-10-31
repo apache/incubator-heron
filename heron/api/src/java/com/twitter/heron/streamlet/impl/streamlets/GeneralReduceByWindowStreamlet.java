@@ -37,11 +37,11 @@ public class GeneralReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window
   private StreamletImpl<R> parent;
   private WindowConfigImpl windowCfg;
   private T identity;
-  private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
+  private SerializableBiFunction<T,  R, ? extends T> reduceFn;
 
   public GeneralReduceByWindowStreamlet(StreamletImpl<R> parent, WindowConfig windowCfg,
                            T identity,
-                           SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
+                           SerializableBiFunction<T, R, ? extends T> reduceFn) {
     this.parent = parent;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.identity = identity;

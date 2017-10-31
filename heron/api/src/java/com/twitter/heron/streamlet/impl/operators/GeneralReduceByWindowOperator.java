@@ -33,12 +33,12 @@ import com.twitter.heron.streamlet.Window;
  */
 public class GeneralReduceByWindowOperator<R, T> extends StreamletWindowOperator {
   private static final long serialVersionUID = 6513775685209414130L;
-  private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
+  private SerializableBiFunction<T, R, ? extends T> reduceFn;
   private T identity;
   private OutputCollector collector;
 
   public GeneralReduceByWindowOperator(
-      SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn,
+      SerializableBiFunction<T, R, ? extends T> reduceFn,
       T identity) {
     this.reduceFn = reduceFn;
     this.identity = identity;

@@ -53,11 +53,11 @@ public class GeneralReduceByWindowOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testReduceByWindowOperator() {
-    ReduceByWindowOperator<Integer> reduceOperator = getReduceByWindowOperator();
+    GeneralReduceByWindowOperator<Integer, Integer> reduceOperator = getReduceByWindowOperator(15);
 
     TupleWindow tupleWindow = getTupleWindow();
 
-    Integer expectedResult = 10;
+    Integer expectedResult = 25;
 
     reduceOperator.execute(tupleWindow);
 
@@ -92,10 +92,9 @@ public class GeneralReduceByWindowOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private GeneralReduceByWindowOperator<Integer, Integer> getReduceByWindowOperator() {
+  private GeneralReduceByWindowOperator<Integer, Integer> getReduceByWindowOperator(int initValue) {
     GeneralReduceByWindowOperator<Integer, Integer> reduceByWindowOperator =
-        new GeneralReduceByWindowOperator<Integer, Integer>(0,
-        (o, o2) -> o + o2);
+        new GeneralReduceByWindowOperator<>((o, o2) -> o + o2, initValue);
 
     reduceByWindowOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {

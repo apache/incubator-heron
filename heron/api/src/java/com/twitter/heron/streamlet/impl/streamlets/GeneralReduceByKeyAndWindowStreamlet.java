@@ -37,12 +37,12 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
   private KVStreamletImpl<K, V> parent;
   private WindowConfigImpl windowCfg;
   private VR identity;
-  private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
+  private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
 
   public GeneralReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
                             WindowConfig windowCfg,
                             VR identity,
-                            SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
+                            SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
     this.parent = parent;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.identity = identity;
