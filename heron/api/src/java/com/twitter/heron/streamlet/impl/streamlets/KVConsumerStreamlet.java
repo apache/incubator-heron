@@ -29,10 +29,10 @@ import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
  */
 public class KVConsumerStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableConsumer<? super KeyValue<? super K, ? super V>> consumer;
+  private SerializableConsumer<KeyValue<K, V>> consumer;
 
   public KVConsumerStreamlet(KVStreamletImpl<K, V> parent,
-                            SerializableConsumer<? super KeyValue<? super K, ? super V>> consumer) {
+                            SerializableConsumer<KeyValue<K, V>> consumer) {
     this.parent = parent;
     this.consumer = consumer;
     setNumPartitions(parent.getNumPartitions());

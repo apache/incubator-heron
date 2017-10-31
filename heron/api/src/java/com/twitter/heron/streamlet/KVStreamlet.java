@@ -29,14 +29,14 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * Return a new KVStreamlet by applying mapFn to each element of this KVStreamlet
    * @param mapFn The Map Function that should be applied to each element
    */
-  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<? super KeyValue<K, V>,
+  <K1, V1> KVStreamlet<K1, V1> map(SerializableFunction<KeyValue<K, V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn);
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this KVStreamlet
    * @param mapFn The Map Function that should be applied to each element
    */
-  <R> Streamlet<R> mapToStreamlet(SerializableFunction<? super KeyValue<K, V>,
+  <R> Streamlet<R> mapToStreamlet(SerializableFunction<KeyValue<K, V>,
                                   ? extends R> mapFn);
 
   /**
@@ -45,7 +45,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
    */
   <K1, V1> KVStreamlet<K1, V1> flatMap(
-      SerializableFunction<? super KeyValue<? super K, ? super V>,
+      SerializableFunction<KeyValue<K, V>,
           ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn);
 
   /**
@@ -53,7 +53,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
    */
-  KVStreamlet<K, V> filter(SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn);
+  KVStreamlet<K, V> filter(SerializablePredicate<KeyValue<K, V>> filterFn);
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
@@ -65,7 +65,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * any particular tuple should go to
    */
   KVStreamlet<K, V> repartition(int numPartitions,
-                                SerializableBiFunction<? super KeyValue<? super K, ? super V>,
+                                SerializableBiFunction<KeyValue<K, V>,
                                     Integer, List<Integer>> partitionFn);
 
   /**
@@ -89,7 +89,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @return Streamlet containing the output of the transformFunction
    */
   <K1, V1> KVStreamlet<K1, V1> transform(
-      SerializableTransformer<? super KeyValue<? super K, ? super V>,
+      SerializableTransformer<KeyValue<K, V>,
           ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer);
 
   /**
@@ -104,7 +104,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param consumer The user supplied consumer function that is invoked for each element
    * of this streamlet.
    */
-  void consume(SerializableConsumer<? super KeyValue<? super K, ? super V>> consumer);
+  void consume(SerializableConsumer<KeyValue<K, V>> consumer);
 
   /**
    * Applies the sink's put function to every element of the stream
@@ -112,7 +112,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    * @param sink The Sink whose put method consumes each element
    * of this streamlet.
    */
-  void toSink(Sink<? super KeyValue<? super K, ? super V>> sink);
+  void toSink(Sink<KeyValue<K, V>> sink);
 
   /**
    * Return a new KVStreamlet by inner joining 'this streamlet with ‘other’ streamlet.
@@ -124,7 +124,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    */
   <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
         join(KVStreamlet<K, V2> other, WindowConfig windowCfg,
-             SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
+             SerializableBiFunction<V, V2, ? extends VR> joinFunction);
 
 
   /**
@@ -140,7 +140,7 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    */
   <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
         join(KVStreamlet<K, V2> other, WindowConfig windowCfg, JoinType joinType,
-             SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction);
+             SerializableBiFunction<V, V2, ? extends VR> joinFunction);
 
   /**
    * Return a new Streamlet in which for each time_window, all elements are belonging to the
@@ -164,5 +164,5 @@ public interface KVStreamlet<K, V> extends BaseStreamlet<KVStreamlet<K, V>> {
    */
   <VR> KVStreamlet<KeyedWindow<K>, VR> reduceByKeyAndWindow(WindowConfig windowCfg,
                             VR identity,
-                            SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn);
+                            SerializableBiFunction<VR, V, ? extends VR> reduceFn);
 }
