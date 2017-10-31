@@ -21,6 +21,7 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
 
 /**
  * This topology demonstrates how sources work in the Heron Streamlet API
@@ -28,6 +29,9 @@ import java.io.UnsupportedEncodingException;
  * injects incoming messages into the processing graph.
  */
 public class SimplePulsarSourceTopology {
+    private static final Logger LOG =
+            Logger.getLogger(SimplePulsarSourceTopology.class.getName());
+
     private static class PulsarSource implements Source<String> {
         private static final long serialVersionUID = -3433804102901363106L;
         private PulsarClient client;
@@ -95,7 +99,8 @@ public class SimplePulsarSourceTopology {
          * applied to them.
          */
         processingGraphBuilder.newSource(pulsarSource)
-                .log();
+                .setName("incoming-pulsar-messages")
+                .consume(s -> LOG.info(String.format("Message received from Pulsar: \"%s\"", s)));
 
         Config config = new Config();
 
