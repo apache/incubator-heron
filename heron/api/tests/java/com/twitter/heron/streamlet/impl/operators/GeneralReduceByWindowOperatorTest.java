@@ -39,7 +39,7 @@ import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.Window;
 
-public class ReduceByWindowOperatorTest {
+public class GeneralReduceByWindowOperatorTest {
 
   private List<Object> emittedTuples;
   private long startTime = 1508099660801L;
@@ -55,7 +55,7 @@ public class ReduceByWindowOperatorTest {
   public void testReduceByWindowOperator() {
     ReduceByWindowOperator<Integer> reduceOperator = getReduceByWindowOperator();
 
-    TupleWindow tupleWindow = getTupleWindow(5);
+    TupleWindow tupleWindow = getTupleWindow();
 
     Integer expectedResult = 10;
 
@@ -72,35 +72,13 @@ public class ReduceByWindowOperatorTest {
     }
   }
 
-  @Test
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public void testSingleElementReduce() {
-    ReduceByWindowOperator<Integer> reduceOperator = getReduceByWindowOperator();
-
-    TupleWindow tupleWindow = getTupleWindow(1);
-
-    Integer expectedResult = 0;
-
-    reduceOperator.execute(tupleWindow);
-
-    Assert.assertEquals(1, emittedTuples.size());
-    for (Object object : emittedTuples) {
-      KeyValue<Window, Integer> tuple = (KeyValue<Window, Integer>) object;
-      Window window = tuple.getKey();
-      Assert.assertEquals(1, window.getCount());
-      Assert.assertEquals(startTime, window.getStartTime());
-      Assert.assertEquals(endTime, window.getEndTime());
-      Assert.assertEquals(expectedResult, tuple.getValue());
-    }
-  }
-
-  private TupleWindow getTupleWindow(int count) {
+  private TupleWindow getTupleWindow() {
     TopologyAPI.StreamId componentStreamId
         = TopologyAPI.StreamId.newBuilder()
         .setComponentName("sourceComponent").setId("default").build();
 
     List<Tuple> tuples = new LinkedList<>();
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < 5; i++) {
       Tuple tuple = getTuple(componentStreamId, new Fields("a"),
             new Values(i));
       tuples.add(tuple);
@@ -114,8 +92,9 @@ public class ReduceByWindowOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private ReduceByWindowOperator<Integer> getReduceByWindowOperator() {
-    ReduceByWindowOperator<Integer> reduceByWindowOperator = new ReduceByWindowOperator<>(
+  private GeneralReduceByWindowOperator<Integer, Integer> getReduceByWindowOperator() {
+    GeneralReduceByWindowOperator<Integer, Integer> reduceByWindowOperator =
+        new GeneralReduceByWindowOperator<Integer, Integer>(0,
         (o, o2) -> o + o2);
 
     reduceByWindowOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
