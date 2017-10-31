@@ -28,11 +28,11 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
  */
 public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableFunction<? super KeyValue<? super K, ? super V>,
+  private SerializableFunction<? super KeyValue<K, V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn;
 
   public KVMapStreamlet(KVStreamletImpl<K, V> parent,
-                        SerializableFunction<? super KeyValue<? super K, ? super V>,
+                        SerializableFunction<? super KeyValue<K, V>,
       ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
     this.parent = parent;
     this.mapFn = mapFn;
@@ -48,7 +48,7 @@ public class KVMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    bldr.setBolt(getName(), new MapOperator<KeyValue<? super K, ? super V>,
+    bldr.setBolt(getName(), new MapOperator<KeyValue<K, V>,
             KeyValue<? extends K1, ? extends V1>>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
