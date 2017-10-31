@@ -14,6 +14,7 @@
 
 package com.twitter.heron.streamlet.impl.operators;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.api.bolt.OutputCollector;
@@ -22,25 +23,26 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.Window;
 
 /**
- * ReduceByWindowOperator is the class that implements the reduceByWindow functionality.
- * It takes in a reduceFn Function as input.
- * For every window, the bolt applies reduceFn to all the tuples in that window, and emits
- * the resulting value as output
+ * ReduceByKeyAndWindowOperator is the class that implements reduceByKeyAndWindow functionality.
+ * It takes in a reduceFunction Function as an input.
+ * For every time window, the bolt goes over all the tuples in that window and applies the reduce
+ * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
  */
-public class ReduceByWindowOperator<R, T> extends StreamletWindowOperator {
-  private static final long serialVersionUID = 6513775685209414130L;
-  private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
-  private T identity;
+public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator {
+  private static final long serialVersionUID = 2833576046687752396L;
+  private VR identity;
+  private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
   private OutputCollector collector;
 
-  public ReduceByWindowOperator(SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn,
-                                T identity) {
-    this.reduceFn = reduceFn;
+  public GeneralReduceByKeyAndWindowOperator(VR identity,
+                            SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
     this.identity = identity;
+    this.reduceFn = reduceFn;
   }
 
   @SuppressWarnings("rawtypes")
@@ -52,10 +54,10 @@ public class ReduceByWindowOperator<R, T> extends StreamletWindowOperator {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    T reducedValue = identity;
+    Map<K, VR> reduceMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
-      R tup = (R) tuple.getValue(0);
-      reducedValue = reduceFn.apply(reducedValue, tup);
+      KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
+      addMap(reduceMap, tup);
     }
     long startWindow;
     long endWindow;
@@ -70,6 +72,16 @@ public class ReduceByWindowOperator<R, T> extends StreamletWindowOperator {
       endWindow = inputWindow.getEndTimestamp();
     }
     Window window = new Window(startWindow, endWindow, inputWindow.get().size());
-    collector.emit(new Values(new KeyValue<>(window, reducedValue)));
+    for (K key : reduceMap.keySet()) {
+      KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
+      collector.emit(new Values(new KeyValue<>(keyedWindow, reduceMap.get(key))));
+    }
+  }
+
+  private void addMap(Map<K, VR> reduceMap, KeyValue<K, V> tup) {
+    if (!reduceMap.containsKey(tup.getKey())) {
+      reduceMap.put(tup.getKey(), identity);
+    }
+    reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
   }
 }

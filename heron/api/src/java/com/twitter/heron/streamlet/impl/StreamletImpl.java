@@ -35,10 +35,10 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet;
@@ -185,8 +185,9 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
                                                SerializableBinaryOperator<R> reduceFn) {
-    ReduceByWindowStreamlet<R, R> retval = new ReduceByWindowStreamlet<>(this, windowConfig,
-                                                                null, reduceFn);
+    GeneralReduceByWindowStreamlet<R, R> retval =
+        new GeneralReduceByWindowStreamlet<>(this, windowConfig,
+            null, reduceFn);
     addChild(retval);
     return retval;
   }
@@ -204,7 +205,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
                              SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
-    ReduceByWindowStreamlet<R, T> retval = new ReduceByWindowStreamlet<>(this,
+    GeneralReduceByWindowStreamlet<R, T> retval = new GeneralReduceByWindowStreamlet<>(this,
         windowConfig, identity, reduceFn);
     addChild(retval);
     return retval;

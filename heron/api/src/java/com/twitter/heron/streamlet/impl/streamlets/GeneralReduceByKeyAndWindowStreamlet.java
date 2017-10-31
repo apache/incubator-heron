@@ -23,7 +23,7 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
-import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
+import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
 
 /**
  * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
@@ -32,14 +32,14 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type V.
  */
-public class ReduceByKeyAndWindowStreamlet<K, V, VR>
+public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
     extends KVStreamletImpl<KeyedWindow<K>, VR> {
   private KVStreamletImpl<K, V> parent;
   private WindowConfigImpl windowCfg;
   private VR identity;
   private SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn;
 
-  public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
+  public GeneralReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
                             WindowConfig windowCfg,
                             VR identity,
                             SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
@@ -59,8 +59,8 @@ public class ReduceByKeyAndWindowStreamlet<K, V, VR>
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    ReduceByKeyAndWindowOperator<K, V, VR> bolt =
-        new ReduceByKeyAndWindowOperator<K, V, VR>(identity, reduceFn);
+    GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
+        new GeneralReduceByKeyAndWindowOperator<K, V, VR>(identity, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());

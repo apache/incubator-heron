@@ -24,7 +24,7 @@ import com.twitter.heron.streamlet.impl.KVStreamletImpl;
 import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByWindowCustomGrouping;
-import com.twitter.heron.streamlet.impl.operators.ReduceByWindowOperator;
+import com.twitter.heron.streamlet.impl.operators.GeneralReduceByWindowOperator;
 
 /**
  * ReduceByWindowStreamlet represents a KVStreamlet that is the result of
@@ -33,13 +33,13 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByWindowOperator;
  * ReduceByWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type T.
  */
-public class ReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window, T> {
+public class GeneralReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window, T> {
   private StreamletImpl<R> parent;
   private WindowConfigImpl windowCfg;
   private T identity;
   private SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn;
 
-  public ReduceByWindowStreamlet(StreamletImpl<R> parent, WindowConfig windowCfg,
+  public GeneralReduceByWindowStreamlet(StreamletImpl<R> parent, WindowConfig windowCfg,
                            T identity,
                            SerializableBiFunction<? super T, ? super R, ? extends T> reduceFn) {
     this.parent = parent;
@@ -58,7 +58,8 @@ public class ReduceByWindowStreamlet<R, T> extends KVStreamletImpl<Window, T> {
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    ReduceByWindowOperator<R, T> bolt = new ReduceByWindowOperator<>(reduceFn, identity);
+    GeneralReduceByWindowOperator<R, T> bolt =
+        new GeneralReduceByWindowOperator<>(reduceFn, identity);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), new ReduceByWindowCustomGrouping<T>());

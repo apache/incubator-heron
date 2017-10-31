@@ -32,6 +32,7 @@ import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
@@ -44,7 +45,6 @@ import com.twitter.heron.streamlet.impl.streamlets.KVSinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVToStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVTransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVUnionStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierKVStreamlet;
 
@@ -285,8 +285,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   @Override
   public KVStreamlet<KeyedWindow<K>, V>
       reduceByKeyAndWindow(WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
-    ReduceByKeyAndWindowStreamlet<K, V, V> retval =
-        new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, null, reduceFn);
+    GeneralReduceByKeyAndWindowStreamlet<K, V, V> retval =
+        new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, null, reduceFn);
     addChild(retval);
     return retval;
   }
@@ -305,8 +305,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   public <VR> KVStreamlet<KeyedWindow<K>, VR>
       reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
                            SerializableBiFunction<? super VR, ? super V, ? extends VR> reduceFn) {
-    ReduceByKeyAndWindowStreamlet<K, V, VR> retval =
-        new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
+    GeneralReduceByKeyAndWindowStreamlet<K, V, VR> retval =
+        new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
     addChild(retval);
     return retval;
   }

@@ -23,9 +23,9 @@ import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 
 import static org.junit.Assert.*;
@@ -212,7 +212,7 @@ public class KVStreamletImplTest {
 
     KVStreamlet<KeyedWindow<Double>, Integer> rStreamlet =
         streamlet.reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
-    assertTrue(rStreamlet instanceof ReduceByKeyAndWindowStreamlet);
+    assertTrue(rStreamlet instanceof GeneralReduceByKeyAndWindowStreamlet);
 
 
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
@@ -221,6 +221,6 @@ public class KVStreamletImplTest {
     assertEquals(((MapToKVStreamlet<Double, Double, Integer>) streamlet).getChildren().size(),
         1);
     assertTrue(((MapToKVStreamlet<Double, Double, Integer>) streamlet).getChildren().get(0)
-        instanceof ReduceByKeyAndWindowStreamlet);
+        instanceof GeneralReduceByKeyAndWindowStreamlet);
   }
 }
