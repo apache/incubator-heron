@@ -5,6 +5,7 @@ sinks:
   - file-sink
   - tmaster-sink
   - prometheus-sink
+  - metricscache-sink
 
 ########### Now we would specify the detailed configuration for every unique sink
 ########### Syntax: sink-id: - option(s)
