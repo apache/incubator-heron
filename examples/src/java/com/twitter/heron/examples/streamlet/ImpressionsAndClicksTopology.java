@@ -190,7 +190,12 @@ public class ImpressionsAndClicksTopology {
                         WindowConfig.TumblingCountWindow(200),
                         ImpressionsAndClicksTopology::countCumulativeClicks
                 )
-                .log();
+                .consume(kw -> {
+                    String userId = kw.getValue().getKey();
+                    int totalUserClicks = kw.getValue().getValue();
+
+                    LOG.info(String.format("(user: %s, clicks: %d)", userId, totalClicks);
+                });
 
         Config config = new Config();
 
