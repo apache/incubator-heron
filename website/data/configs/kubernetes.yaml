@@ -88,3 +88,74 @@ configfiles:
     description: The maximum interval (in minutes) for metrics to be kept in the topology master
     default: 180
   - name: heron.tmaster.establish.retry.times
+    description: The maximum number of times to retry establishing connection with the topology master
+    default: 30
+  - name: heron.tmaster.establish.retry.interval.sec
+    description: The interval at which to retry establishing connection with the topology master
+    default: 1
+  - name: heron.tmaster.network.master.options.maximum.packet.mb
+    description: Maximum packet size (in MB) of topology master's network options to connect to stream managers
+    default: 16
+  - name: heron.tmaster.network.controller.options.maximum.packet.mb
+    description: Maximum packet size (in MB) of the topology master's network options to connect to scheduler
+    default: 1
+  - name: heron.tmaster.network.stats.options.maximum.packet.mb
+    description: Maximum packet size (in MB) of the topology master's network options for stat queries
+    default: 1
+  - name: heron.tmaster.metrics.collector.purge.interval.sec
+    description: The interval (in seconds) at which the topology master purges metrics from socket
+    default: 60
+  - name: heron.tmaster.metrics.collector.maximum.exception
+    description: The maximum number of exceptions to be stored in the topology metrics collector, to prevent out-of-memory errors
+    default: 256
+  - name: heron.tmaster.metrics.network.bindallinterfaces
+    description: Whether the metrics reporter should bind on all interfaces
+    default: "False"
+  - name: heron.tmaster.stmgr.state.timeout.sec
+    description: The timeout (in seconds) for the stream manager, compared with (current time - last heartbeat time)
+    default: 60
+  - name: heron.metricsmgr.network.read.batch.time.ms
+    description: The maximum batch time (in milliseconds) for the metrics manager to read from socket
+    default: 16
+  - name: heron.metricsmgr.network.read.batch.size.bytes
+    description: The maximum batch size (in bytes) to read from socket
+    default: 32768
+  - name: heron.metricsmgr.network.write.batch.time.ms
+    description: The maximum batch time (in milliseconds) for the metrics manager to write to socket
+    default: 32768
+  - name: heron.metricsmgr.network.options.socket.send.buffer.size.bytes
+    description: The maximum socket send buffer size (in bytes)
+    default: 6553600
+  - name: heron.metricsmgr.network.options.socket.received.buffer.size.bytes
+    description: The maximum socket received buffer size (in bytes) for the metrics manager's network options
+    default: 8738000
+  - name: heron.metricsmgr.network.options.maximum.packetsize.bytes
+    description: The maximum packet size that the metrics manager can read
+    default: 1048576
+  - name: heron.instance.network.options.maximum.packetsize.bytes
+    description: The maximum size of packets that Heron instances can read
+    default: 10485760
+  - name: heron.instance.internal.bolt.read.queue.capacity
+    description: The queue capacity (num of items) in bolt for buffer packets to read from stream manager
+    default: 128
+  - name: heron.instance.internal.bolt.write.queue.capacity
+    description: The queue capacity (num of items) in bolt for buffer packets to write to stream manager
+    default: 128
+  - name: heron.instance.internal.spout.read.queue.capacity
+    description: The queue capacity (num of items) in spout for buffer packets to read from stream manager
+    default: 1024
+  - name: heron.instance.internal.spout.write.queue.capacity
+    description: The queue capacity (num of items) in spout for buffer packets to write to stream manager
+    default: 128
+  - name: heron.instance.internal.metrics.write.queue.capacity
+    description: The queue capacity (num of items) for metrics packets to write to metrics manager
+    default: 128
+  - name: heron.instance.network.read.batch.time.ms
+    description: Time based, the maximum batch time in ms for instance to read from stream manager per attempt
+    default: 16
+  - name: heron.instance.network.read.batch.size.bytes
+    description: Size based, the maximum batch size in bytes to read from stream manager
+    default: 32768
+  - name: heron.instance.network.write.batch.time.ms
+    
+

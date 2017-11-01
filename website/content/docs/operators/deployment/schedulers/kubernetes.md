@@ -3,10 +3,6 @@ title: Kubernetes
 new: true
 ---
 
-{{< configtable "kubernetes" "client" >}}
-
-{{< configtable "kubernetes" "heron_internals" >}}
-
 Heron supports deployment on [Kubernetes](https://kubernetes.io/) (sometimes called **k8s**). Heron deployments on Kubernetes use Docker as the containerization format for Heron topologies and use the Kubernetes API for scheduling.
 
 You can use Heron on Kubernetes in multiple environments:
