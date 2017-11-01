@@ -16,6 +16,7 @@ package com.twitter.heron.examples.streamlet.utils;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * A collection of helper functions for the Streamlet API example topologies
@@ -46,5 +47,10 @@ public class StreamletUtils {
      */
     public static int getParallelism(String[] args, int defaultParallelism) {
         return (args.length > 1) ? Integer.parseInt(args[1]) : defaultParallelism;
+    }
+
+    public static String intListAsString(List<Integer> ls) {
+        List<String> s = ls.stream().map(i -> i.toString()).collect(Collectors.toList());
+        return String.join(", ", s);
     }
 }
