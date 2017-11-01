@@ -32,6 +32,7 @@
 
 package com.twitter.heron.api.windowing.triggers;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
@@ -46,14 +47,14 @@ import com.twitter.heron.api.windowing.TriggerPolicy;
  *
  * @param <T> the type of event tracked by this policy.
  */
-public class CountTriggerPolicy<T> implements TriggerPolicy<T> {
+public class CountTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Integer> {
   private final int count;
   private final AtomicInteger currentCount;
   private final TriggerHandler handler;
-  private final EvictionPolicy<T> evictionPolicy;
+  private final EvictionPolicy<T, ?> evictionPolicy;
   private boolean started;
 
-  public CountTriggerPolicy(int count, TriggerHandler handler, EvictionPolicy<T>
+  public CountTriggerPolicy(int count, TriggerHandler handler, EvictionPolicy<T, ?>
       evictionPolicy) {
     this.count = count;
     this.currentCount = new AtomicInteger();
@@ -85,6 +86,16 @@ public class CountTriggerPolicy<T> implements TriggerPolicy<T> {
   @Override
   public void shutdown() {
     // NOOP
+  }
+
+  @Override
+  public Integer getState() {
+    return currentCount.get();
+  }
+
+  @Override
+  public void restoreState(Integer state) {
+    currentCount.set(state);
   }
 
   @Override
