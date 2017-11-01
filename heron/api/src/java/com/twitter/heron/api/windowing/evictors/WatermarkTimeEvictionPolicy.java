@@ -32,13 +32,15 @@
 
 package com.twitter.heron.api.windowing.evictors;
 
+import java.io.Serializable;
+
 import com.twitter.heron.api.windowing.Event;
 
 /**
  * An eviction policy that evicts events based on time duration taking
  * watermark time and event lag into account.
  */
-public class WatermarkTimeEvictionPolicy<T> extends TimeEvictionPolicy<T> {
+public class WatermarkTimeEvictionPolicy<T extends Serializable> extends TimeEvictionPolicy<T> {
   private final long lag;
 
   /**

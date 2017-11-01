@@ -32,6 +32,7 @@
 
 package com.twitter.heron.api.windowing.evictors;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.windowing.Event;
@@ -41,7 +42,8 @@ import com.twitter.heron.api.windowing.EvictionPolicy;
 /**
  * Eviction policy that evicts events based on time duration.
  */
-public class TimeEvictionPolicy<T> implements EvictionPolicy<T> {
+public class TimeEvictionPolicy<T extends Serializable>
+    implements EvictionPolicy<T, EvictionContext> {
   private static final Logger LOG = Logger.getLogger(TimeEvictionPolicy.class.getName());
 
   private final long windowLength;
@@ -107,6 +109,16 @@ public class TimeEvictionPolicy<T> implements EvictionPolicy<T> {
   @Override
   public void reset() {
     // NOOP
+  }
+
+  @Override
+  public EvictionContext getState() {
+    return evictionContext;
+  }
+
+  @Override
+  public void restoreState(EvictionContext state) {
+    this.evictionContext = state;
   }
 
   @Override

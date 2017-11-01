@@ -32,8 +32,10 @@
 
 package com.twitter.heron.api.windowing.evictors;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.twitter.heron.api.Pair;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionContext;
 import com.twitter.heron.api.windowing.EvictionPolicy;
@@ -44,7 +46,8 @@ import com.twitter.heron.api.windowing.EvictionPolicy;
  *
  * @param <T> the type of event tracked by this policy.
  */
-public class WatermarkCountEvictionPolicy<T> implements EvictionPolicy<T> {
+public class WatermarkCountEvictionPolicy<T extends Serializable>
+    implements EvictionPolicy<T, Pair<Long, Long>> {
   protected final int threshold;
   protected final AtomicLong currentCount;
   private EvictionContext context;
@@ -120,6 +123,17 @@ public class WatermarkCountEvictionPolicy<T> implements EvictionPolicy<T> {
   @Override
   public void reset() {
     processed = 0;
+  }
+
+  @Override
+  public Pair<Long, Long> getState() {
+    return Pair.of(currentCount.get(), processed);
+  }
+
+  @Override
+  public void restoreState(Pair<Long, Long> state) {
+    currentCount.set(state.getFirst());
+    processed = state.getSecond();
   }
 
   @Override
