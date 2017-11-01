@@ -22,89 +22,93 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-// In this topology, a supplier generates an indefinite series of random integers between 1
-// and 100. From there, a series of transform operations are applied that ultimately leave
-// the original value unchanged.
+/**
+ * In this topology, a supplier generates an indefinite series of random integers between 1
+ * and 100. From there, a series of transform operations are applied that ultimately leave
+ * the original value unchanged.
+ */
 public class TransformsTopology {
-    private static final Logger LOG = Logger.getLogger(TransformsTopology.class.getName());
+  private static final Logger LOG = Logger.getLogger(TransformsTopology.class.getName());
 
-    // This transformer leaves incoming values unmodified. The Consumer simply accepts incoming
-    // values as-is during the transform phase.
-    private static class DoNothingTransformer<T> implements SerializableTransformer<T, T> {
-        private static final long serialVersionUID = 3717991700067221067L;
+  /**
+   * This transformer leaves incoming values unmodified. The Consumer simply accepts incoming
+   * values as-is during the transform phase.
+   */
+  private static class DoNothingTransformer<T> implements SerializableTransformer<T, T> {
+    private static final long serialVersionUID = 3717991700067221067L;
 
-        public void setup(Context context) {}
-
-        /**
-         * Here, the incoming value is accepted as-is and not changed (hence the "do nothing"
-         * in the class name).
-         */
-        public void transform(T in, Consumer<T> consumer) {
-            consumer.accept(in);
-        }
-
-        public void cleanup() {}
-    }
+    public void setup(Context context) {}
 
     /**
-     * This transformer increments incoming values by a user-supplied increment (which can also,
-     * of course, be negative).
+     * Here, the incoming value is accepted as-is and not changed (hence the "do nothing"
+     * in the class name).
      */
-    private static class IncrementTransformer implements SerializableTransformer<Integer, Integer> {
-        private static final long serialVersionUID = -3198491688219997702L;
-        private int increment;
-
-        IncrementTransformer(int increment) {
-            this.increment = increment;
-        }
-
-        public void setup(Context context) {}
-
-        /**
-         * Here, the incoming value is incremented by the value specified in the
-         * transformer's constructor.
-         */
-        public void transform(Integer in, Consumer<Integer> consumer) {
-            int incrementedValue = in + increment;
-            consumer.accept(incrementedValue);
-        }
-
-        public void cleanup() {}
+    public void transform(T in, Consumer<T> consumer) {
+      consumer.accept(in);
     }
+
+    public void cleanup() {}
+  }
+
+  /**
+   * This transformer increments incoming values by a user-supplied increment (which can also,
+   * of course, be negative).
+   */
+  private static class IncrementTransformer implements SerializableTransformer<Integer, Integer> {
+    private static final long serialVersionUID = -3198491688219997702L;
+    private int increment;
+
+    IncrementTransformer(int increment) {
+      this.increment = increment;
+    }
+
+    public void setup(Context context) {}
 
     /**
-     * All Heron topologies require a main function that defines the topology's behavior
-     * at runtime
+     * Here, the incoming value is incremented by the value specified in the
+     * transformer's constructor.
      */
-    public static void main(String[] args) throws Exception {
-        Builder builder = Builder.createBuilder();
-
-        /**
-         * The processing graph consists of a supplier streamlet that emits
-         * random integers between 1 and 100. From there, a series of transformers
-         * is applied. At the end of the graph, the original value is ultimately
-         * unchanged.
-         */
-        builder.newSource(() -> ThreadLocalRandom.current().nextInt(100))
-                .transform(new DoNothingTransformer<>())
-                .transform(new IncrementTransformer(10))
-                .transform(new IncrementTransformer(-7))
-                .transform(new DoNothingTransformer<>())
-                .transform(new IncrementTransformer(-3))
-                .log();
-
-        Config config = new Config();
-
-        /**
-         * Fetches the topology name from the first command-line argument
-         */
-        String topologyName = StreamletUtils.getTopologyName(args);
-
-        /**
-         * Finally, the processing graph and configuration are passed to the Runner,
-         * which converts the graph into a Heron topology that can be run in a Heron
-         * cluster.
-         */
-        new Runner().run(topologyName, config, builder);
+    public void transform(Integer in, Consumer<Integer> consumer) {
+      int incrementedValue = in + increment;
+      consumer.accept(incrementedValue);
     }
+
+    public void cleanup() {}
+  }
+
+  /**
+   * All Heron topologies require a main function that defines the topology's behavior
+   * at runtime
+   */
+  public static void main(String[] args) throws Exception {
+    Builder builder = Builder.createBuilder();
+
+    /**
+     * The processing graph consists of a supplier streamlet that emits
+     * random integers between 1 and 100. From there, a series of transformers
+     * is applied. At the end of the graph, the original value is ultimately
+     * unchanged.
+     */
+    builder.newSource(() -> ThreadLocalRandom.current().nextInt(100))
+        .transform(new DoNothingTransformer<>())
+        .transform(new IncrementTransformer(10))
+        .transform(new IncrementTransformer(-7))
+        .transform(new DoNothingTransformer<>())
+        .transform(new IncrementTransformer(-3))
+        .log();
+
+    Config config = new Config();
+
+    /**
+     * Fetches the topology name from the first command-line argument
+     */
+    String topologyName = StreamletUtils.getTopologyName(args);
+
+    /**
+     * Finally, the processing graph and configuration are passed to the Runner,
+     * which converts the graph into a Heron topology that can be run in a Heron
+     * cluster.
+     */
+    new Runner().run(topologyName, config, builder);
+  }
 }

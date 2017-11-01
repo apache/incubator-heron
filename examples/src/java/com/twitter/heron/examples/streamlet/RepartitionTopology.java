@@ -24,53 +24,53 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 public class RepartitionTopology {
-    private static final Logger LOG =
-            Logger.getLogger(RepartitionTopology.class.getName());
+  private static final Logger LOG =
+      Logger.getLogger(RepartitionTopology.class.getName());
 
-    private static List<Integer> repartitionStreamlet(int incomingInteger, int numPartitions) {
-        List<Integer> partitions;
+  private static List<Integer> repartitionStreamlet(int incomingInteger, int numPartitions) {
+    List<Integer> partitions;
 
-        if (incomingInteger >= 0 && incomingInteger < 25) {
-            partitions = Arrays.asList(0, 1);
-        } else if (incomingInteger > 26 && incomingInteger < 50) {
-            partitions = Arrays.asList(2, 3);
-        } else if (incomingInteger > 50 && incomingInteger < 75) {
-            partitions = Arrays.asList(4, 5);
-        } else if (incomingInteger > 76 && incomingInteger <= 100) {
-            partitions = Arrays.asList(6, 7);
-        } else {
-            partitions = Arrays.asList(ThreadLocalRandom.current().nextInt(0, 8));
-        }
-
-        String logMessage = String.format("Sending value %d to partitions: %s",
-                incomingInteger,
-                StreamletUtils.intListAsString(partitions));
-
-        LOG.info(logMessage);
-
-        return partitions;
+    if (incomingInteger >= 0 && incomingInteger < 25) {
+      partitions = Arrays.asList(0, 1);
+    } else if (incomingInteger > 26 && incomingInteger < 50) {
+      partitions = Arrays.asList(2, 3);
+    } else if (incomingInteger > 50 && incomingInteger < 75) {
+      partitions = Arrays.asList(4, 5);
+    } else if (incomingInteger > 76 && incomingInteger <= 100) {
+      partitions = Arrays.asList(6, 7);
+    } else {
+      partitions = Arrays.asList(ThreadLocalRandom.current().nextInt(0, 8));
     }
 
-    public static void main(String[] args) throws Exception {
-        Builder processingGraphBuilder = Builder.createBuilder();
+    String logMessage = String.format("Sending value %d to partitions: %s",
+        incomingInteger,
+        StreamletUtils.intListAsString(partitions));
 
-        Streamlet<Integer> randomIntegers = processingGraphBuilder
-                .newSource(() -> {
-                    Utils.sleep(50);
-                    return ThreadLocalRandom.current().nextInt(100);
-                })
-                .setNumPartitions(2)
-                .setName("random-integer-source");
+    LOG.info(logMessage);
 
-        randomIntegers
-                .repartition(8, RepartitionTopology::repartitionStreamlet)
-                .setName("repartition-incoming-values")
-                .repartition(2)
-                .setName("reduce-partitions-for-logging-operation")
-                .log();
+    return partitions;
+  }
 
-        String topologyName = StreamletUtils.getTopologyName(args);
+  public static void main(String[] args) throws Exception {
+    Builder processingGraphBuilder = Builder.createBuilder();
 
-        new Runner().run(topologyName, new Config(), processingGraphBuilder);
-    }
+    Streamlet<Integer> randomIntegers = processingGraphBuilder
+        .newSource(() -> {
+          Utils.sleep(50);
+          return ThreadLocalRandom.current().nextInt(100);
+        })
+        .setNumPartitions(2)
+        .setName("random-integer-source");
+
+    randomIntegers
+        .repartition(8, RepartitionTopology::repartitionStreamlet)
+        .setName("repartition-incoming-values")
+        .repartition(2)
+        .setName("reduce-partitions-for-logging-operation")
+        .log();
+
+    String topologyName = StreamletUtils.getTopologyName(args);
+
+    new Runner().run(topologyName, new Config(), processingGraphBuilder);
+  }
 }

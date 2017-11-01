@@ -34,86 +34,85 @@ import java.util.logging.Logger;
  * result is logged using a consume operation (which allows for a formatted log).
  */
 public class SmartWatchTopology {
-    private static final Logger LOG =
-            Logger.getLogger(SmartWatchTopology.class.getName());
+  private static final Logger LOG =
+      Logger.getLogger(SmartWatchTopology.class.getName());
 
-    private static final List<String> JOGGERS = Arrays.asList(
-            "bill",
-            "ted"
-    );
+  private static final List<String> JOGGERS = Arrays.asList(
+      "bill",
+      "ted"
+  );
 
-    private static class SmartWatchReading implements Serializable {
-        private static final long serialVersionUID = -6555650939020508026L;
-        private final String joggerId;
-        private final int feetRun;
+  private static class SmartWatchReading implements Serializable {
+    private static final long serialVersionUID = -6555650939020508026L;
+    private final String joggerId;
+    private final int feetRun;
 
 
-        SmartWatchReading() {
-            Utils.sleep(1000);
-            this.joggerId = StreamletUtils.randomFromList(JOGGERS);
-            this.feetRun = ThreadLocalRandom.current().nextInt(200, 400);
-            LOG.info(String.format("Emitted smart watch reading: %s", this));
-        }
-
-        KeyValue<String, Integer> toKV() {
-            return new KeyValue<>(joggerId, feetRun);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(user: %s, distance: %d)", joggerId, feetRun);
-        }
+    SmartWatchReading() {
+      Utils.sleep(1000);
+      this.joggerId = StreamletUtils.randomFromList(JOGGERS);
+      this.feetRun = ThreadLocalRandom.current().nextInt(200, 400);
+      LOG.info(String.format("Emitted smart watch reading: %s", this));
     }
 
-    private static int reduce(int cumulativeFeetRun, int incomingFeetRun) {
-        LOG.info("Calculating...");
-        return cumulativeFeetRun + incomingFeetRun;
+    KeyValue<String, Integer> toKV() {
+      return new KeyValue<>(joggerId, feetRun);
     }
 
-    public static void main(String[] args) throws Exception {
-        Builder processingGraphBuilder = Builder.createBuilder();
-
-        processingGraphBuilder.newSource(SmartWatchReading::new)
-                .setName("incoming-watch-readings")
-                .mapToKV(SmartWatchReading::toKV)
-                .setName("map-smart-watch-readings-to-kv")
-                .reduceByKeyAndWindow(
-                        // The time window (1 minute of clock time)
-                        WindowConfig.TumblingTimeWindow(Duration.ofSeconds(10)),
-                        // The optional "identity" value that acts as a starting point for the reduce function. This is
-                        // returned if the reduce function is provided with no values to work with inside of the time
-                        // window.
-                        0,
-                        // The reduce function (produces a cumulative sum)
-                        SmartWatchTopology::reduce
-                )
-                .setName("reduce-to-total-distance-per-jogger")
-                .map(kw -> {
-                    // The per-key result of the previous reduce step
-                    long totalFeetRun = kw.getValue();
-                    LOG.info("Total feet run " + totalFeetRun);
-                    // The amount of time elapsed
-                    long startTime = kw.getKey().getWindow().getStartTime();
-                    LOG.info("Start time " + startTime);
-                    long endTime = kw.getKey().getWindow().getEndTime();
-                    LOG.info("End time " + endTime);
-                    long timeLengthMillis = endTime - startTime; // Cast to float to use as denominator
-                    LOG.info("Time length " + timeLengthMillis);
-                    float feetPerMinute = totalFeetRun / (float) (timeLengthMillis / 1000);
-                    LOG.info("Feet per minute " + feetPerMinute);
-                    // Reduce to two decimal places
-                    String paceString = new DecimalFormat("#.##").format(feetPerMinute);
-                    LOG.info("As decimal " + paceString);
-                    // Return a per-jogger average pace
-                    return new KeyValue<>(kw.getKey().getKey(), paceString);
-                })
-                .setName("calculate-average-speed")
-                .consume(kv -> LOG.info(String.format("(runner: %s, avgFeetPerMinute: %s)", kv.getKey(), kv.getValue())));
-
-        Config config = new Config();
-
-        String topologyName = StreamletUtils.getTopologyName(args);
-
-        new Runner().run(topologyName, config, processingGraphBuilder);
+    @Override
+    public String toString() {
+      return String.format("(user: %s, distance: %d)", joggerId, feetRun);
     }
+  }
+
+  private static int reduce(int cumulativeFeetRun, int incomingFeetRun) {
+    return cumulativeFeetRun + incomingFeetRun;
+  }
+
+  public static void main(String[] args) throws Exception {
+    Builder processingGraphBuilder = Builder.createBuilder();
+
+    processingGraphBuilder.newSource(SmartWatchReading::new)
+        .setName("incoming-watch-readings")
+        .mapToKV(SmartWatchReading::toKV)
+        .setName("map-smart-watch-readings-to-kv")
+        .reduceByKeyAndWindow(
+            // The time window (1 minute of clock time)
+            WindowConfig.TumblingTimeWindow(Duration.ofSeconds(10)),
+            // The optional "identity" value that acts as a starting point for the reduce function. This is
+            // returned if the reduce function is provided with no values to work with inside of the time
+            // window.
+            0,
+            // The reduce function (produces a cumulative sum)
+            SmartWatchTopology::reduce
+        )
+        .setName("reduce-to-total-distance-per-jogger")
+        .map(kw -> {
+          // The per-key result of the previous reduce step
+          long totalFeetRun = kw.getValue();
+          LOG.info("Total feet run " + totalFeetRun);
+          // The amount of time elapsed
+          long startTime = kw.getKey().getWindow().getStartTime();
+          LOG.info("Start time " + startTime);
+          long endTime = kw.getKey().getWindow().getEndTime();
+          LOG.info("End time " + endTime);
+          long timeLengthMillis = endTime - startTime; // Cast to float to use as denominator
+          LOG.info("Time length " + timeLengthMillis);
+          float feetPerMinute = totalFeetRun / (float) (timeLengthMillis / 1000);
+          LOG.info("Feet per minute " + feetPerMinute);
+          // Reduce to two decimal places
+          String paceString = new DecimalFormat("#.##").format(feetPerMinute);
+          LOG.info("As decimal " + paceString);
+          // Return a per-jogger average pace
+          return new KeyValue<>(kw.getKey().getKey(), paceString);
+        })
+        .setName("calculate-average-speed")
+        .consume(kv -> LOG.info(String.format("(runner: %s, avgFeetPerMinute: %s)", kv.getKey(), kv.getValue())));
+
+    Config config = new Config();
+
+    String topologyName = StreamletUtils.getTopologyName(args);
+
+    new Runner().run(topologyName, config, processingGraphBuilder);
+  }
 }

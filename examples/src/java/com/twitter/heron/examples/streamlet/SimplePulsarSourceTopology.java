@@ -29,91 +29,91 @@ import java.util.logging.Logger;
  * injects incoming messages into the processing graph.
  */
 public class SimplePulsarSourceTopology {
-    private static final Logger LOG =
-            Logger.getLogger(SimplePulsarSourceTopology.class.getName());
+  private static final Logger LOG =
+          Logger.getLogger(SimplePulsarSourceTopology.class.getName());
 
-    private static class PulsarSource implements Source<String> {
-        private static final long serialVersionUID = -3433804102901363106L;
-        private PulsarClient client;
-        private Consumer consumer;
-        private String pulsarConnectionUrl;
-        private String consumeTopic;
-        private String subscription;
+  private static class PulsarSource implements Source<String> {
+    private static final long serialVersionUID = -3433804102901363106L;
+    private PulsarClient client;
+    private Consumer consumer;
+    private String pulsarConnectionUrl;
+    private String consumeTopic;
+    private String subscription;
 
-        PulsarSource(String url, String topic, String subscription) {
-            this.pulsarConnectionUrl = url;
-            this.consumeTopic = topic;
-            this.subscription = subscription;
-        }
-
-        /**
-         * The setup functions defines the instantiation logic for the source.
-         * Here, a Pulsar client and consumer are created that will listen on
-         * the Pulsar topic.
-         */
-        public void setup(Context context) {
-            try {
-                client = PulsarClient.create(pulsarConnectionUrl);
-                consumer = client.subscribe(consumeTopic, subscription);
-            } catch (PulsarClientException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /**
-         * The get function defines how elements for the source streamlet are
-         * "gotten." In this case, the Pulsar consumer for the specified topic
-         * listens for incoming messages.
-         */
-        public String get() {
-            try {
-                return new String(consumer.receive().getData(), "utf-8");
-            } catch (PulsarClientException | UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public void cleanup() {}
+    PulsarSource(String url, String topic, String subscription) {
+      this.pulsarConnectionUrl = url;
+      this.consumeTopic = topic;
+      this.subscription = subscription;
     }
 
     /**
-     * All Heron topologies require a main function that defines the topology's behavior
-     * at runtime
+     * The setup functions defines the instantiation logic for the source.
+     * Here, a Pulsar client and consumer are created that will listen on
+     * the Pulsar topic.
      */
-    public static void main(String[] args) throws Exception {
-        Builder processingGraphBuilder = Builder.createBuilder();
-
-        /**
-         * A Pulsar source is constructed for a specific Pulsar installation, topic, and
-         * subsecription.
-         */
-        Source<String> pulsarSource = new PulsarSource(
-                "pulsar://localhost:6650", // Pulsar connection URL
-                "persistent://sample/standalone/ns1/heron-pulsar-test-topic", // Pulsar topic
-                "subscription-1" // Subscription name for the Pulsar topic
-        );
-
-        /**
-         * In this processing graph, the source streamlet consists of messages on a
-         * Pulsar topic. Those messages are simply logged without any processing logic
-         * applied to them.
-         */
-        processingGraphBuilder.newSource(pulsarSource)
-                .setName("incoming-pulsar-messages")
-                .consume(s -> LOG.info(String.format("Message received from Pulsar: \"%s\"", s)));
-
-        Config config = new Config();
-
-        /**
-         * Fetches the topology name from the first command-line argument
-         */
-        String topologyName = StreamletUtils.getTopologyName(args);
-
-        /**
-         * Finally, the processing graph and configuration are passed to the Runner,
-         * which converts the graph into a Heron topology that can be run in a Heron
-         * cluster.
-         */
-        new Runner().run(topologyName, config, processingGraphBuilder);
+    public void setup(Context context) {
+      try {
+        client = PulsarClient.create(pulsarConnectionUrl);
+        consumer = client.subscribe(consumeTopic, subscription);
+      } catch (PulsarClientException e) {
+        throw new RuntimeException(e);
+      }
     }
+
+    /**
+     * The get function defines how elements for the source streamlet are
+     * "gotten." In this case, the Pulsar consumer for the specified topic
+     * listens for incoming messages.
+     */
+    public String get() {
+      try {
+        return new String(consumer.receive().getData(), "utf-8");
+      } catch (PulsarClientException | UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public void cleanup() {}
+  }
+
+  /**
+   * All Heron topologies require a main function that defines the topology's behavior
+   * at runtime
+   */
+  public static void main(String[] args) throws Exception {
+    Builder processingGraphBuilder = Builder.createBuilder();
+
+    /**
+     * A Pulsar source is constructed for a specific Pulsar installation, topic, and
+     * subsecription.
+     */
+    Source<String> pulsarSource = new PulsarSource(
+        "pulsar://localhost:6650", // Pulsar connection URL
+        "persistent://sample/standalone/ns1/heron-pulsar-test-topic", // Pulsar topic
+        "subscription-1" // Subscription name for the Pulsar topic
+    );
+
+    /**
+     * In this processing graph, the source streamlet consists of messages on a
+     * Pulsar topic. Those messages are simply logged without any processing logic
+     * applied to them.
+     */
+    processingGraphBuilder.newSource(pulsarSource)
+        .setName("incoming-pulsar-messages")
+        .consume(s -> LOG.info(String.format("Message received from Pulsar: \"%s\"", s)));
+
+    Config config = new Config();
+
+    /**
+     * Fetches the topology name from the first command-line argument
+     */
+    String topologyName = StreamletUtils.getTopologyName(args);
+
+    /**
+     * Finally, the processing graph and configuration are passed to the Runner,
+     * which converts the graph into a Heron topology that can be run in a Heron
+     * cluster.
+     */
+    new Runner().run(topologyName, config, processingGraphBuilder);
+  }
 }

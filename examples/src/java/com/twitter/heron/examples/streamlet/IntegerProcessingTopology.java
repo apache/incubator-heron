@@ -24,50 +24,50 @@ import java.util.concurrent.ThreadLocalRandom;
  * This is a very simple topology that shows a series of
  */
 public final class IntegerProcessingTopology {
-    private static final float CPU = 2.0f;
-    private static final long GIGABYTES_OF_RAM = 6;
-    private static final int NUM_CONTAINERS = 2;
+  private static final float CPU = 2.0f;
+  private static final long GIGABYTES_OF_RAM = 6;
+  private static final int NUM_CONTAINERS = 2;
+
+  /**
+   * All Heron topologies require a main function that defines the topology's behavior
+   * at runtime
+   */
+  public static void main(String[] args) throws Exception {
+    Builder builder = Builder.createBuilder();
+
+    Streamlet<Integer> zeroes = builder.newSource(() -> 0);
+
+    builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+        .setNumPartitions(5)
+        .setName("random-ints")
+        .map(i -> i + 1)
+        .setName("add-one")
+        .repartition(2)
+        .setName("repartition")
+        .union(zeroes)
+        .setName("unify-streams")
+        .filter(i -> i != 2)
+        .setName("remove-twos")
+        .log();
+
+    Config conf = new Config();
+    conf.setNumContainers(NUM_CONTAINERS);
+
+    Resources resources = new Resources();
+    resources.withCpu(CPU);
+    resources.withRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM).asBytes());
+    conf.setContainerResources(resources);
 
     /**
-     * All Heron topologies require a main function that defines the topology's behavior
-     * at runtime
+     * Fetches the topology name from the first command-line argument
      */
-    public static void main(String[] args) throws Exception {
-        Builder builder = Builder.createBuilder();
+    String topologyName = StreamletUtils.getTopologyName(args);
 
-        Streamlet<Integer> zeroes = builder.newSource(() -> 0);
-
-        builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-                .setNumPartitions(5)
-                .setName("random-ints")
-                .map(i -> i + 1)
-                .setName("add-one")
-                .repartition(2)
-                .setName("repartition")
-                .union(zeroes)
-                .setName("unify-streams")
-                .filter(i -> i != 2)
-                .setName("remove-twos")
-                .log();
-
-        Config conf = new Config();
-        conf.setNumContainers(NUM_CONTAINERS);
-
-        Resources resources = new Resources();
-        resources.withCpu(CPU);
-        resources.withRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM).asBytes());
-        conf.setContainerResources(resources);
-
-        /**
-         * Fetches the topology name from the first command-line argument
-         */
-        String topologyName = StreamletUtils.getTopologyName(args);
-
-        /**
-         * Finally, the processing graph and configuration are passed to the Runner,
-         * which converts the graph into a Heron topology that can be run in a Heron
-         * cluster.
-         */
-        new Runner().run(topologyName, conf, builder);
-    }
+    /**
+     * Finally, the processing graph and configuration are passed to the Runner,
+     * which converts the graph into a Heron topology that can be run in a Heron
+     * cluster.
+     */
+    new Runner().run(topologyName, conf, builder);
+  }
 }

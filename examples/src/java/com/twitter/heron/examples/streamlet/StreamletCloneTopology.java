@@ -34,118 +34,118 @@ import java.util.stream.IntStream;
  * logging sink while the other goes to a dummy database sink.
  */
 public class StreamletCloneTopology {
-    private static final Logger LOG =
-            Logger.getLogger(StreamletCloneTopology.class.getName());
+  private static final Logger LOG =
+      Logger.getLogger(StreamletCloneTopology.class.getName());
 
-    /**
-     * A list of players of the game ("player1" through "player100").
-     */
-    private static final List<String> PLAYERS = IntStream.range(1, 100)
-            .mapToObj(i -> String.format("player%d", i))
-            .collect(Collectors.toList());
+  /**
+   * A list of players of the game ("player1" through "player100").
+   */
+  private static final List<String> PLAYERS = IntStream.range(1, 100)
+      .mapToObj(i -> String.format("player%d", i))
+      .collect(Collectors.toList());
 
-    /**
-     * A POJO for game scores.
-     */
-    private static class GameScore implements Serializable {
-        private static final long serialVersionUID = 1089454399729015529L;
-        private String playerId;
-        private int score;
+  /**
+   * A POJO for game scores.
+   */
+  private static class GameScore implements Serializable {
+    private static final long serialVersionUID = 1089454399729015529L;
+    private String playerId;
+    private int score;
 
-        GameScore() {
-            this.playerId = StreamletUtils.randomFromList(PLAYERS);
-            this.score = ThreadLocalRandom.current().nextInt(1000);
-        }
-
-        String getPlayerId() {
-            return playerId;
-        }
-
-        int getScore() {
-            return score;
-        }
+    GameScore() {
+      this.playerId = StreamletUtils.randomFromList(PLAYERS);
+      this.score = ThreadLocalRandom.current().nextInt(1000);
     }
 
-    /**
-     * A phony database sink. This sink doesn't actually interact with a database.
-     * Instead, it logs each incoming score to stdout.
-     */
-    private static class DatabaseSink implements Sink<GameScore> {
-        private static final long serialVersionUID = 5544736723673011054L;
-
-        private void saveToDatabase(GameScore score) {
-            // This is a dummy operation, so no database logic will be implemented here
-        }
-
-        public void setup(Context context) {}
-
-        public void put(GameScore score) {
-            String logMessage = String.format("Saving a score of %d for player %s to the database",
-                    score.getScore(),
-                    score.getPlayerId());
-            LOG.info(logMessage);
-            saveToDatabase(score);
-        }
-
-        public void cleanup() {}
+    String getPlayerId() {
+      return playerId;
     }
 
-    /**
-     * A logging sink that simply prints a formatted log message for each incoming score.
-     */
-    private static class FormattedLogSink implements Sink<GameScore> {
-        private static final long serialVersionUID = 1251089445039059977L;
-        public void setup(Context context) {}
+    int getScore() {
+      return score;
+    }
+  }
 
-        public void put(GameScore score) {
-            String logMessage = String.format("The current score for player %s is %d",
-                    score.getPlayerId(),
-                    score.getScore());
-            LOG.info(logMessage);
-        }
+  /**
+   * A phony database sink. This sink doesn't actually interact with a database.
+   * Instead, it logs each incoming score to stdout.
+   */
+  private static class DatabaseSink implements Sink<GameScore> {
+    private static final long serialVersionUID = 5544736723673011054L;
 
-        public void cleanup() {}
+    private void saveToDatabase(GameScore score) {
+      // This is a dummy operation, so no database logic will be implemented here
     }
 
-    /**
-     * All Heron topologies require a main function that defines the topology's behavior
-     * at runtime
-     */
-    public static void main(String[] args) throws Exception {
-        Builder processingGraphBuilder = Builder.createBuilder();
+    public void setup(Context context) {}
 
-        /**
-         * A supplier streamlet of random GameScore objects is cloned into two
-         * separate streamlets.
-         */
-        List<Streamlet<GameScore>> splitGameScoreStreamlet = processingGraphBuilder
-                .newSource(GameScore::new)
-                .clone(2);
-
-        /**
-         * Elements in the first cloned streamlet go to the database sink.
-         */
-        splitGameScoreStreamlet.get(0)
-                .toSink(new DatabaseSink());
-
-        /**
-         * Elements in the second cloned streamlet go to the logging sink.
-         */
-        splitGameScoreStreamlet.get(1)
-                .toSink(new FormattedLogSink());
-
-        Config config = new Config();
-
-        /**
-         * Fetches the topology name from the first command-line argument
-         */
-        String topologyName = StreamletUtils.getTopologyName(args);
-
-        /**
-         * Finally, the processing graph and configuration are passed to the Runner,
-         * which converts the graph into a Heron topology that can be run in a Heron
-         * cluster.
-         */
-        new Runner().run(topologyName, config, processingGraphBuilder);
+    public void put(GameScore score) {
+      String logMessage = String.format("Saving a score of %d for player %s to the database",
+          score.getScore(),
+          score.getPlayerId());
+      LOG.info(logMessage);
+      saveToDatabase(score);
     }
+
+    public void cleanup() {}
+  }
+
+  /**
+   * A logging sink that simply prints a formatted log message for each incoming score.
+   */
+  private static class FormattedLogSink implements Sink<GameScore> {
+    private static final long serialVersionUID = 1251089445039059977L;
+    public void setup(Context context) {}
+
+    public void put(GameScore score) {
+      String logMessage = String.format("The current score for player %s is %d",
+          score.getPlayerId(),
+          score.getScore());
+      LOG.info(logMessage);
+    }
+
+    public void cleanup() {}
+  }
+
+  /**
+   * All Heron topologies require a main function that defines the topology's behavior
+   * at runtime
+   */
+  public static void main(String[] args) throws Exception {
+    Builder processingGraphBuilder = Builder.createBuilder();
+
+    /**
+     * A supplier streamlet of random GameScore objects is cloned into two
+     * separate streamlets.
+     */
+    List<Streamlet<GameScore>> splitGameScoreStreamlet = processingGraphBuilder
+        .newSource(GameScore::new)
+        .clone(2);
+
+    /**
+     * Elements in the first cloned streamlet go to the database sink.
+     */
+    splitGameScoreStreamlet.get(0)
+        .toSink(new DatabaseSink());
+
+    /**
+     * Elements in the second cloned streamlet go to the logging sink.
+     */
+    splitGameScoreStreamlet.get(1)
+        .toSink(new FormattedLogSink());
+
+    Config config = new Config();
+
+    /**
+     * Fetches the topology name from the first command-line argument
+     */
+    String topologyName = StreamletUtils.getTopologyName(args);
+
+    /**
+     * Finally, the processing graph and configuration are passed to the Runner,
+     * which converts the graph into a Heron topology that can be run in a Heron
+     * cluster.
+     */
+    new Runner().run(topologyName, config, processingGraphBuilder);
+  }
 }
