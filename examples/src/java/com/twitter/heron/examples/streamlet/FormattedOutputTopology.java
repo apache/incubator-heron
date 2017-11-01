@@ -37,7 +37,7 @@ import com.twitter.heron.streamlet.Runner;
  * filter is also applied to this source streamlet prior to logging).
  */
 public final class FormattedOutputTopology {
-  private FormattedOutputTopology() {    
+  private FormattedOutputTopology() {
   }
   
   private static final Logger LOG =
@@ -92,7 +92,7 @@ public final class FormattedOutputTopology {
         // emitted every two seconds
         .newSource(SensorReading::new)
         // A simple filter that excludes a percentage of the sensor readings
-        .filter(reading -> (reading.getHumidity() < .9 && reading.getTemperature() < 90))
+        .filter(reading -> reading.getHumidity() < .9 && reading.getTemperature() < 90)
         // In the consumer operation, each reading is converted to a formatted
         // string and logged
         .consume(reading -> LOG.info(

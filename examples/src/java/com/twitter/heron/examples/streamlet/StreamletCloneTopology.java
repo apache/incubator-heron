@@ -21,13 +21,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 
 /**
  * This topology demonstrates clone operations on streamlets in the Heron
@@ -85,7 +85,8 @@ public final class StreamletCloneTopology {
       // This is a dummy operation, so no database logic will be implemented here
     }
 
-    public void setup(Context context) {}
+    public void setup(Context context) {
+    }
 
     public void put(GameScore score) {
       String logMessage = String.format("Saving a score of %d for player %s to the database",
@@ -95,7 +96,8 @@ public final class StreamletCloneTopology {
       saveToDatabase(score);
     }
 
-    public void cleanup() {}
+    public void cleanup() {
+    }
   }
 
   /**
@@ -103,7 +105,8 @@ public final class StreamletCloneTopology {
    */
   private static class FormattedLogSink implements Sink<GameScore> {
     private static final long serialVersionUID = 1251089445039059977L;
-    public void setup(Context context) {}
+    public void setup(Context context) {
+    }
 
     public void put(GameScore score) {
       String logMessage = String.format("The current score for player %s is %d",
@@ -112,7 +115,8 @@ public final class StreamletCloneTopology {
       LOG.info(logMessage);
     }
 
-    public void cleanup() {}
+    public void cleanup() {
+    }
   }
 
   /**

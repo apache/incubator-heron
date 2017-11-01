@@ -84,14 +84,14 @@ public final class FilesystemSinkTopology {
             )
         );
       } catch (IOException e) {
-          throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
 
     /**
      * Any cleanup logic for the sink can be applied here.
      */
-    public void cleanup() { 
+    public void cleanup() {
     }
   }
 
@@ -113,7 +113,8 @@ public final class FilesystemSinkTopology {
         )
     );
 
-    processingGraphBuilder.newSource(() -> {
+    processingGraphBuilder
+        .newSource(() -> {
           /**
            * This applies a "brake" that makes the processing
            * graph write to the temporary file at a reasonable

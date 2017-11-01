@@ -86,9 +86,9 @@ public final class SmartWatchTopology {
         .reduceByKeyAndWindow(
             // The time window (1 minute of clock time)
             WindowConfig.TumblingTimeWindow(Duration.ofSeconds(10)),
-            // The optional "identity" value that acts as a starting point for the reduce function. This is
-            // returned if the reduce function is provided with no values to work with inside of the time
-            // window.
+            // The optional "identity" value that acts as a starting point for the
+            // reduce function. This is returned if the reduce function is provided
+            // with no values to work with inside of the time window.
             0,
             // The reduce function (produces a cumulative sum)
             SmartWatchTopology::reduce
@@ -114,7 +114,13 @@ public final class SmartWatchTopology {
           return new KeyValue<>(kw.getKey().getKey(), paceString);
         })
         .setName("calculate-average-speed")
-        .consume(kv -> LOG.info(String.format("(runner: %s, avgFeetPerMinute: %s)", kv.getKey(), kv.getValue())));
+        .consume(kv -> {
+          String logMessage = String.format("(runner: %s, avgFeetPerMinute: %s)",
+              kv.getKey(),
+              kv.getValue());
+
+          LOG.info(logMessage);
+        });
 
     Config config = new Config();
 

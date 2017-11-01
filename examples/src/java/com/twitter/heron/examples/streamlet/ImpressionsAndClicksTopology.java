@@ -40,7 +40,7 @@ import com.twitter.heron.streamlet.WindowConfig;
  * over the specified time window.
  */
 public final class ImpressionsAndClicksTopology {
-  private ImpressionsAndClicksTopology() { 
+  private ImpressionsAndClicksTopology() {
   }
 
   private static final Logger LOG =
@@ -63,7 +63,7 @@ public final class ImpressionsAndClicksTopology {
       .collect(Collectors.toList());
 
   /**
-   * A POJO for incoming ad impressions (generated every 50 milliseconds). 
+   * A POJO for incoming ad impressions (generated every 50 milliseconds).
    */
   private static class AdImpression implements Serializable {
     private static final long serialVersionUID = 3283110635310800177L;

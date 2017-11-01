@@ -81,7 +81,8 @@ public final class SimplePulsarSourceTopology {
       }
     }
 
-    public void cleanup() {}
+    public void cleanup() {
+    }
   }
 
   /**

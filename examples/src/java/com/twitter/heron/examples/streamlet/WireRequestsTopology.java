@@ -17,7 +17,6 @@ package com.twitter.heron.examples.streamlet;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
@@ -132,9 +131,11 @@ public final class WireRequestsTopology {
   private static boolean checkRequestAmount(WireRequest request) {
     boolean sufficientBalance = request.getAmount() < MAX_ALLOWABLE_AMOUNT;
 
-    if (!sufficientBalance) LOG.warning(
-        String.format("Rejected excessive request of $%d",
-            request.getAmount()));
+    if (!sufficientBalance) {
+      LOG.warning(
+          String.format("Rejected excessive request of $%d",
+              request.getAmount()));
+    }
 
     return sufficientBalance;
   }
