@@ -33,6 +33,7 @@
 
 package com.twitter.heron.api.topology;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,10 +41,13 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BasicBoltExecutor;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IStatefulWindowedBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.StatefulWindowedBoltExecutor;
 import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.windowing.TupleWindow;
 
 /**
@@ -201,6 +205,50 @@ public class TopologyBuilder {
   public BoltDeclarer setBolt(String id, IWindowedBolt bolt, Number parallelismHint) throws
       IllegalArgumentException {
     return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint);
+  }
+
+  /**
+   * Define a new bolt in this topology. This defines a stateful windowed bolt, intended for stateful
+   * windowing operations. The {@link IStatefulWindowedBolt#execute(TupleWindow)} method is triggered
+   * for each window interval with the list of current events in the window. During initialization of
+   * this bolt (potentially after failure) {@link IStatefulWindowedBolt#initState(State)}
+   * is invoked with its previously saved state.
+   * @param id the id of this component.
+   * This id is referenced by other components that want to consume this bolt's outputs.
+   * @param bolt the stateful windowed bolt
+   * @param <K> Type of key for {@link com.twitter.heron.api.state.HashMapState}
+   * @param <V> Type of value for {@link com.twitter.heron.api.state.HashMapState}
+   * @return use the returned object to declare the inputs to this component
+   * @throws IllegalArgumentException {@code parallelism_hint} is not positive
+   */
+  @SuppressWarnings("rawtypes")
+  public <K extends Serializable, V extends Serializable> BoltDeclarer setBolt(
+      String id, IStatefulWindowedBolt<K, V> bolt) throws
+      IllegalArgumentException {
+    return setBolt(id, bolt, null);
+  }
+
+  /**
+   * Define a new bolt in this topology. This defines a stateful windowed bolt, intended for stateful
+   * windowing operations. The {@link IStatefulWindowedBolt#execute(TupleWindow)} method is triggered
+   * for each window interval with the list of current events in the window. During initialization of
+   * this bolt (potentially after failure) {@link IStatefulWindowedBolt#initState(State)}
+   * is invoked with its previously saved state.
+   * @param id the id of this component.
+   * This id is referenced by other components that want to consume this bolt's outputs.
+   * @param bolt the stateful windowed bolt
+   * @param parallelismHint the number of tasks that should be assigned to execute this bolt.
+   * Each task will run on a thread in a process somwehere around the cluster.
+   * @param <K> Type of key for {@link com.twitter.heron.api.state.HashMapState}
+   * @param <V> Type of value for {@link com.twitter.heron.api.state.HashMapState}
+   * @return use the returned object to declare the inputs to this component
+   * @throws IllegalArgumentException {@code parallelism_hint} is not positive
+   */
+  @SuppressWarnings("rawtypes")
+  public <K extends Serializable, V extends Serializable> BoltDeclarer setBolt(
+      String id, IStatefulWindowedBolt<K, V> bolt, Number parallelismHint) throws
+      IllegalArgumentException {
+    return setBolt(id, new StatefulWindowedBoltExecutor<K, V>(bolt), parallelismHint);
   }
 
   /**

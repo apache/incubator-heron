@@ -35,7 +35,8 @@ import com.twitter.heron.proto.system.HeronTuples;
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TupleImpl implements Tuple {
-  private final TopologyContext context;
+  private static final long serialVersionUID = -5524957157094337394L;
+  private final Fields fields;
   private final TopologyAPI.StreamId stream;
   private final long tupleKey;
   private final List<HeronTuples.RootId> roots;
@@ -54,22 +55,20 @@ public class TupleImpl implements Tuple {
                    long tupleKey, List<HeronTuples.RootId> roots,
                    List<Object> values, long creationTime, boolean isCheckRequired,
                    int sourceTaskId) {
-    this.context = context;
     this.stream = stream;
     this.tupleKey = tupleKey;
     this.roots = roots;
     this.values = values;
     this.creationTime = creationTime;
     this.sourceTaskId = sourceTaskId;
+    this.fields = context.getComponentOutputFields(
+        this.stream.getComponentName(), this.stream.getId());
 
     if (isCheckRequired) {
-      Fields schema = context.getComponentOutputFields(stream.getComponentName(),
-          stream.getId());
-
-      if (values.size() != schema.size()) {
+      if (values.size() != this.fields.size()) {
         throw new IllegalArgumentException(
             "Tuple created with wrong number of fields. "
-                + "Expected " + schema.size() + " fields but got "
+                + "Expected " + this.fields.size() + " fields but got "
                 + values.size() + " fields"
         );
       }
@@ -206,7 +205,7 @@ public class TupleImpl implements Tuple {
 
   @Override
   public Fields getFields() {
-    return context.getComponentOutputFields(getSourceComponent(), getSourceStreamId());
+    return this.fields;
   }
 
   @Override
