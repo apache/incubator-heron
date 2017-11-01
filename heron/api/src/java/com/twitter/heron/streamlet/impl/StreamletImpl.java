@@ -35,6 +35,7 @@ import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
@@ -95,7 +96,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param mapFn The Map Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn) {
+  public <T> Streamlet<T> map(SerializableFunction<R, ? extends T> mapFn) {
     MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -108,7 +109,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param mapFn The Map function that should be applied to each element
    */
   @Override
-  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
+  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<R,
       ? extends KeyValue<K, V>> mapFn) {
     MapToKVStreamlet<R, K, V> retval = new MapToKVStreamlet<>(this, mapFn);
     addChild(retval);
@@ -122,7 +123,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> flatMap(
-      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
+      SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -134,7 +135,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param filterFn The filter Function that should be applied to each element
   */
   @Override
-  public Streamlet<R> filter(SerializablePredicate<? super R> filterFn) {
+  public Streamlet<R> filter(SerializablePredicate<R> filterFn) {
     FilterStreamlet<R> retval = new FilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
@@ -154,7 +155,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public Streamlet<R> repartition(int numPartitions,
-                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn) {
+                           SerializableBiFunction<R, Integer, List<Integer>> partitionFn) {
     RemapStreamlet<R> retval = new RemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
@@ -185,8 +186,26 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   @Override
   public KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
                                                SerializableBinaryOperator<R> reduceFn) {
-    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
-                                                                      windowConfig, reduceFn);
+    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this, windowConfig, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
+   * windowConfig and applying reduceFn on those tuples
+   * @param windowConfig This is a specification of what kind of windowing strategy you like
+   * to have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
+   */
+  @Override
+  public <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
+                             SerializableBiFunction<T, R, ? extends T> reduceFn) {
+    GeneralReduceByWindowStreamlet<R, T> retval = new GeneralReduceByWindowStreamlet<>(this,
+        windowConfig, identity, reduceFn);
     addChild(retval);
     return retval;
   }
@@ -248,7 +267,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> transform(
-      SerializableTransformer<? super R, ? extends T> serializableTransformer) {
+      SerializableTransformer<R, ? extends T> serializableTransformer) {
     TransformStreamlet<R, T> transformStreamlet =
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
