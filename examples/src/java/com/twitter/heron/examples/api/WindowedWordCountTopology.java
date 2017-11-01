@@ -33,10 +33,13 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.windowing.TupleWindow;
-import com.twitter.heron.api.bolt.BaseWindowedBolt.Count;
 
-public class WindowedWordCountTopology {
-  public static class SentenceSpout extends BaseRichSpout {
+public final class WindowedWordCountTopology {
+
+  private WindowedWordCountTopology() {
+  }
+
+  private static class SentenceSpout extends BaseRichSpout {
     private static final long serialVersionUID = 2879005791639364028L;
     private SpoutOutputCollector collector;
 
@@ -46,7 +49,7 @@ public class WindowedWordCountTopology {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "HiddenField"})
     public void open(Map map, TopologyContext topologyContext,
                      SpoutOutputCollector spoutOutputCollector) {
       collector = spoutOutputCollector;
@@ -78,9 +81,10 @@ public class WindowedWordCountTopology {
   private static class WindowSumBolt extends BaseWindowedBolt {
     private static final long serialVersionUID = 8458595466693183050L;
     private OutputCollector collector;
-    Map<String, Integer> counts = new HashMap<String, Integer>();
+    private Map<String, Integer> counts = new HashMap<String, Integer>();
 
     @Override
+    @SuppressWarnings("HiddenField")
     public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector
         collector) {
       this.collector = collector;
@@ -108,7 +112,8 @@ public class WindowedWordCountTopology {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("sentence", new SentenceSpout(), parallelism);
     builder.setBolt("split", new SplitSentence(), parallelism).shuffleGrouping("sentence");
-    builder.setBolt("consumer", new WindowSumBolt().withWindow(Count.of(10)), parallelism)
+    builder.setBolt("consumer", new WindowSumBolt()
+        .withWindow(BaseWindowedBolt.Count.of(10)), parallelism)
         .fieldsGrouping("split", new Fields("word"));
     Config conf = new Config();
 
