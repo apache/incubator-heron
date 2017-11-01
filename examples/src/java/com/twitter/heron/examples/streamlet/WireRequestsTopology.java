@@ -39,7 +39,10 @@ import com.twitter.heron.streamlet.Streamlet;
  * fraud detection filter that ensures that no "bad" customers are allowed to
  * make requests.
  */
-public class WireRequestsTopology {
+public final class WireRequestsTopology {
+  private WireRequestsTopology() {
+  }
+
   private static final Logger LOG =
       Logger.getLogger(WireRequestsTopology.class.getName());
 

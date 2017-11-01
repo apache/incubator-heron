@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * A collection of helper functions for the Streamlet API example topologies
  */
-public class StreamletUtils {
+public final class StreamletUtils {
   /**
    * Fetches the topology's name from the first command-line argument or
    * throws an exception if not present.
@@ -35,7 +35,7 @@ public class StreamletUtils {
   }
 
   /**
-   * Selects a random item from a list. Used in many source streamlets.
+   * Selects a random item from a list. Used in many example source streamlets.
    */
   public static <T> T randomFromList(List<T> ls) {
     return ls.get(new Random().nextInt(ls.size()));
@@ -49,8 +49,10 @@ public class StreamletUtils {
     return (args.length > 1) ? Integer.parseInt(args[1]) : defaultParallelism;
   }
 
+  /**
+   * Converts a list of integers into a comma-separated string.
+   */
   public static String intListAsString(List<Integer> ls) {
-    List<String> s = ls.stream().map(i -> i.toString()).collect(Collectors.toList());
-    return String.join(", ", s);
+    return String.join(", ", ls.stream().map(i -> i.toString()).collect(Collectors.toList()));
   }
 }

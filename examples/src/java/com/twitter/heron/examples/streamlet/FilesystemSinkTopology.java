@@ -37,7 +37,10 @@ import com.twitter.heron.streamlet.Sink;
  * from the source streamlet (an indefinite series of randomly generated
  * integers) is written to that temporary file.
  */
-public class FilesystemSinkTopology {
+public final class FilesystemSinkTopology {
+  private FilesystemSinkTopology() {
+  }
+
   private static final Logger LOG =
       Logger.getLogger(FilesystemSinkTopology.class.getName());
 
@@ -88,7 +91,8 @@ public class FilesystemSinkTopology {
     /**
      * Any cleanup logic for the sink can be applied here.
      */
-    public void cleanup() {}
+    public void cleanup() { 
+    }
   }
 
   /**

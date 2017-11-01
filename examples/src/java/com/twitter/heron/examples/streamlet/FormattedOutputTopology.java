@@ -27,7 +27,10 @@ import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 
-public class FormattedOutputTopology {
+public final class FormattedOutputTopology {
+  private FormattedOutputTopology() {    
+  }
+  
   private static final Logger LOG =
       Logger.getLogger(FormattedOutputTopology.class.getName());
 

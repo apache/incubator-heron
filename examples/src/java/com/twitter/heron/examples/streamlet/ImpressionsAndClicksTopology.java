@@ -39,7 +39,10 @@ import com.twitter.heron.streamlet.WindowConfig;
  * Finally, a reduce function counts the number of impression/click matches
  * over the specified time window.
  */
-public class ImpressionsAndClicksTopology {
+public final class ImpressionsAndClicksTopology {
+  private ImpressionsAndClicksTopology() { 
+  }
+
   private static final Logger LOG =
       Logger.getLogger(ImpressionsAndClicksTopology.class.getName());
 

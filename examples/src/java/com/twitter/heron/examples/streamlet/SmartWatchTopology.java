@@ -37,7 +37,10 @@ import com.twitter.heron.streamlet.WindowConfig;
  * run in the last minute. The reduced value is then used to provide a per-runner average pace (feet per minute) and the
  * result is logged using a consume operation (which allows for a formatted log).
  */
-public class SmartWatchTopology {
+public final class SmartWatchTopology {
+  private SmartWatchTopology() {
+  }
+
   private static final Logger LOG =
       Logger.getLogger(SmartWatchTopology.class.getName());
 

@@ -28,7 +28,10 @@ import com.twitter.heron.streamlet.WindowConfig;
  * This topology uses the Heron Streamlet API for Java to implement
  * the classic word count example for stream processing.
  */
-public class WordCountStreamletTopology {
+public final class WordCountStreamletTopology {
+  private WordCountStreamletTopology() {
+  }
+
   /**
    * The default parallelism (the number of containers across which topology processing
    * instances are distributed) for this topology, which can be overridden using

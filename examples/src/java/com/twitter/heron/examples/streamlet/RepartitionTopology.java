@@ -26,7 +26,10 @@ import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
 
-public class RepartitionTopology {
+public final class RepartitionTopology {
+  private RepartitionTopology() {
+  }
+
   private static final Logger LOG =
       Logger.getLogger(RepartitionTopology.class.getName());
 

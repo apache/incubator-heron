@@ -38,7 +38,10 @@ import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
  * streamlet is cloned into two. One of the cloned streams goes to a custom
  * logging sink while the other goes to a dummy database sink.
  */
-public class StreamletCloneTopology {
+public final class StreamletCloneTopology {
+  private StreamletCloneTopology() {
+  }
+
   private static final Logger LOG =
       Logger.getLogger(StreamletCloneTopology.class.getName());
 

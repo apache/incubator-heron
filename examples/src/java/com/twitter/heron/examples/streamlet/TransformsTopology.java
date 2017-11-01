@@ -31,7 +31,10 @@ import com.twitter.heron.streamlet.SerializableTransformer;
  * and 100. From there, a series of transform operations are applied that ultimately leave
  * the original value unchanged.
  */
-public class TransformsTopology {
+public final class TransformsTopology {
+  private TransformsTopology() {
+  }
+
   private static final Logger LOG = Logger.getLogger(TransformsTopology.class.getName());
 
   /**
@@ -41,7 +44,8 @@ public class TransformsTopology {
   private static class DoNothingTransformer<T> implements SerializableTransformer<T, T> {
     private static final long serialVersionUID = 3717991700067221067L;
 
-    public void setup(Context context) {}
+    public void setup(Context context) {
+    }
 
     /**
      * Here, the incoming value is accepted as-is and not changed (hence the "do nothing"
@@ -51,7 +55,8 @@ public class TransformsTopology {
       consumer.accept(in);
     }
 
-    public void cleanup() {}
+    public void cleanup() {
+    }
   }
 
   /**
@@ -66,7 +71,8 @@ public class TransformsTopology {
       this.increment = increment;
     }
 
-    public void setup(Context context) {}
+    public void setup(Context context) {
+    }
 
     /**
      * Here, the incoming value is incremented by the value specified in the
@@ -77,7 +83,8 @@ public class TransformsTopology {
       consumer.accept(incrementedValue);
     }
 
-    public void cleanup() {}
+    public void cleanup() {
+    }
   }
 
   /**

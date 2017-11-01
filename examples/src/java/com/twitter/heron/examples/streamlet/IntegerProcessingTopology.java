@@ -28,6 +28,9 @@ import com.twitter.heron.streamlet.Streamlet;
  * This is a very simple topology that shows a series of
  */
 public final class IntegerProcessingTopology {
+  private IntegerProcessingTopology() {
+  }
+
   private static final float CPU = 2.0f;
   private static final long GIGABYTES_OF_RAM = 6;
   private static final int NUM_CONTAINERS = 2;
