@@ -32,6 +32,7 @@ import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.KVFilterStreamlet;
@@ -85,8 +86,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <K1, V1> KVStreamlet<K1, V1> map(
-      SerializableFunction<? super KeyValue<? super K, ? super V>,
-      ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
+      SerializableFunction<KeyValue<K, V>,
+        ? extends KeyValue<? extends K1, ? extends V1>> mapFn) {
     KVMapStreamlet<K, V, K1, V1> retval = new KVMapStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -98,7 +99,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <R> Streamlet<R> mapToStreamlet(
-      SerializableFunction<? super KeyValue<? super K, ? super V>, ? extends R> mapFn) {
+      SerializableFunction<KeyValue<K, V>, ? extends R> mapFn) {
     KVToStreamlet<K, V, R> retval = new KVToStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
@@ -111,7 +112,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <K1, V1> KVStreamlet<K1, V1> flatMap(
-      SerializableFunction<? super KeyValue<? super K, ? super V>,
+      SerializableFunction<KeyValue<K, V>,
           ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn) {
     KVFlatMapStreamlet<K, V, K1, V1> retval = new KVFlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
@@ -125,7 +126,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public KVStreamlet<K, V> filter(
-      SerializablePredicate<? super KeyValue<? super K, ? super V>> filterFn) {
+      SerializablePredicate<KeyValue<K, V>> filterFn) {
     KVFilterStreamlet<K, V> retval = new KVFilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
@@ -148,8 +149,8 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public KVStreamlet<K, V> repartition(int numPartitions,
-                                     SerializableBiFunction<? super KeyValue<? super K, ? super V>,
-                                      Integer, List<Integer>> partitionFn) {
+                                     SerializableBiFunction<KeyValue<K, V>,
+                                     Integer, List<Integer>> partitionFn) {
     KVRemapStreamlet<K, V> retval = new KVRemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
@@ -201,7 +202,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param consumer The user supplied consumer function that is invoked for each element
    */
   @Override
-  public void consume(SerializableConsumer<? super KeyValue<? super K, ? super V>> consumer) {
+  public void consume(SerializableConsumer<KeyValue<K, V>> consumer) {
     KVConsumerStreamlet<K, V> consumerStreamlet = new KVConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
     return;
@@ -212,7 +213,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    * @param sink The Sink that consumes
    */
   @Override
-  public void toSink(Sink<? super KeyValue<? super K, ? super V>> sink) {
+  public void toSink(Sink<KeyValue<K, V>> sink) {
     KVSinkStreamlet<K, V> sinkStreamlet = new KVSinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
     return;
@@ -227,7 +228,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
    */
   @Override
   public <K1, V1> KVStreamlet<K1, V1> transform(
-      SerializableTransformer<? super KeyValue<? super K, ? super V>,
+      SerializableTransformer<KeyValue<K, V>,
           ? extends KeyValue<? extends K1, ? extends V1>> serializableTransformer) {
     KVTransformStreamlet<K, V, K1, V1> transformStreamlet =
         new KVTransformStreamlet<>(this, serializableTransformer);
@@ -246,7 +247,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   @Override
   public <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
       join(KVStreamlet<K, V2> other, WindowConfig windowCfg,
-           SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+           SerializableBiFunction<V, V2, ? extends VR> joinFunction) {
     return join(other, windowCfg, JoinType.INNER, joinFunction);
   }
 
@@ -265,7 +266,7 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
   public <V2, VR> KVStreamlet<KeyedWindow<K>, VR>
         join(KVStreamlet<K, V2> other,
              WindowConfig windowCfg, JoinType joinType,
-             SerializableBiFunction<? super V, ? super V2, ? extends VR> joinFunction) {
+             SerializableBiFunction<V, V2, ? extends VR> joinFunction) {
 
     KVStreamletImpl<K, V2> joinee = (KVStreamletImpl<K, V2>) other;
     JoinStreamlet<K, V, V2, VR> retval = JoinStreamlet.createJoinStreamlet(
@@ -287,6 +288,26 @@ public abstract class KVStreamletImpl<K, V> extends BaseStreamletImpl<KVStreamle
       reduceByKeyAndWindow(WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
     ReduceByKeyAndWindowStreamlet<K, V> retval =
         new ReduceByKeyAndWindowStreamlet<>(this, windowCfg, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet in which for each time_window, all elements are belonging to the
+   * same key are reduced using the BiFunction/identity and the result is emitted.
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   *  @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
+   */
+  @Override
+  public <VR> KVStreamlet<KeyedWindow<K>, VR>
+      reduceByKeyAndWindow(WindowConfig windowCfg, VR identity,
+                           SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
+    GeneralReduceByKeyAndWindowStreamlet<K, V, VR> retval =
+        new GeneralReduceByKeyAndWindowStreamlet<>(this, windowCfg, identity, reduceFn);
     addChild(retval);
     return retval;
   }

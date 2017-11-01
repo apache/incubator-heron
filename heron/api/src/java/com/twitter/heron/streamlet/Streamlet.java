@@ -44,7 +44,7 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */
-  <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn);
+  <T> Streamlet<T> map(SerializableFunction<R, ? extends T> mapFn);
 
   /**
    * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
@@ -52,7 +52,7 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
    * instead of a plain Streamlet.
    * @param mapFn The Map function that should be applied to each element
    */
-  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R, ? extends KeyValue<K, V>> mapFn);
+  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<R, ? extends KeyValue<K, V>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -60,14 +60,14 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
    * @param flatMapFn The FlatMap Function that should be applied to each element
    */
   <T> Streamlet<T> flatMap(
-      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn);
+      SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
    * and including only those elements that satisfy the filterFn
    * @param filterFn The filter Function that should be applied to each element
   */
-  Streamlet<R> filter(SerializablePredicate<? super R> filterFn);
+  Streamlet<R> filter(SerializablePredicate<R> filterFn);
 
   /**
    * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
@@ -83,7 +83,7 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
    * this element should be routed to.
    */
   Streamlet<R> repartition(int numPartitions,
-                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn);
+                           SerializableBiFunction<R, Integer, List<Integer>> partitionFn);
 
   /**
    * Clones the current Streamlet. It returns an array of numClones Streamlets where each
@@ -103,6 +103,19 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
                                         SerializableBinaryOperator<R> reduceFn);
 
   /**
+   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
+   * windowConfig and applying reduceFn on those tuples
+   * @param windowConfig This is a specification of what kind of windowing strategy you like
+   * to have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
+   */
+  <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
+                               SerializableBiFunction<T, R, ? extends T> reduceFn);
+
+  /**
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
@@ -117,7 +130,7 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
    * @return Streamlet containing the output of the transformFunction
    */
   <T> Streamlet<T> transform(
-      SerializableTransformer<? super R, ? extends T> serializableTransformer);
+      SerializableTransformer<R, ? extends T> serializableTransformer);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
