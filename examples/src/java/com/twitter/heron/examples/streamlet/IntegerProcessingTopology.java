@@ -25,12 +25,17 @@ import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
 
 /**
- * This is a very simple topology that shows a series of
+ * This is a very simple topology that shows a series of streamlet operations
+ * on a source streamlet of random integers (between 1 and 10). First, 1 is added
+ * to each integer. That streamlet is then united with a streamlet that consists
+ * of an indefinite stream of zeroes. At that point, all 2s are excluded from the
+ * streamlet. The final output of the processing graph is then logged.
  */
 public final class IntegerProcessingTopology {
   private IntegerProcessingTopology() {
   }
 
+  // Heron resources to be applied to the topology
   private static final float CPU = 2.0f;
   private static final long GIGABYTES_OF_RAM = 6;
   private static final int NUM_CONTAINERS = 2;

@@ -27,6 +27,15 @@ import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 
+/**
+ * This topology demonstrates the use of consume operations in the Heron
+ * Streamlet API for Java. A consume operation terminates a processing
+ * graph, like a simpler version of a sink (which requires implementing
+ * the Sink interface). Here, the consume operation is used to produce
+ * custom-formatted logging output for a processing graph in which random
+ * sensor readings are fed into the graph every two seconds (a simple
+ * filter is also applied to this source streamlet prior to logging).
+ */
 public final class FormattedOutputTopology {
   private FormattedOutputTopology() {    
   }
@@ -34,10 +43,18 @@ public final class FormattedOutputTopology {
   private static final Logger LOG =
       Logger.getLogger(FormattedOutputTopology.class.getName());
 
+  /**
+   * A list of devices emitting sensor readings ("device1" through "device100").
+   */
   private static final List<String> DEVICES = IntStream.range(1, 100)
       .mapToObj(i -> String.format("device%d", i))
       .collect(Collectors.toList());
 
+  /**
+   * Sensor readings consist of a device ID, a temperature reading, and
+   * a humidity reading. The temperature and humidity readings are
+   * randomized within a range.
+   */
   private static class SensorReading implements Serializable {
     private static final long serialVersionUID = 3418308641606699744L;
     private String deviceId;
@@ -45,6 +62,7 @@ public final class FormattedOutputTopology {
     private double humidity;
 
     SensorReading() {
+      // Readings are produced only every two seconds
       Utils.sleep(2000);
       this.deviceId = StreamletUtils.randomFromList(DEVICES);
       // Each temperature reading is a double between 70 and 100
@@ -70,8 +88,13 @@ public final class FormattedOutputTopology {
     Builder processingGraphBuilder = Builder.createBuilder();
 
     processingGraphBuilder
+        // The source streamlet is an indefinite series of sensor readings
+        // emitted every two seconds
         .newSource(SensorReading::new)
-        .filter(reading -> (reading.humidity < .9 && reading.temperature < 90))
+        // A simple filter that excludes a percentage of the sensor readings
+        .filter(reading -> (reading.getHumidity() < .9 && reading.getTemperature() < 90))
+        // In the consumer operation, each reading is converted to a formatted
+        // string and logged
         .consume(reading -> LOG.info(
             String.format("Reading from device %s: (temp: %f, humidity: %f)",
                 reading.getDeviceId(),
@@ -79,10 +102,18 @@ public final class FormattedOutputTopology {
                 reading.getHumidity())
         ));
 
+    /**
+     * Fetches the topology name from the first command-line argument
+     */
     String topologyName = StreamletUtils.getTopologyName(args);
 
     Config config = new Config();
 
+    /**
+     * Finally, the processing graph and configuration are passed to the Runner,
+     * which converts the graph into a Heron topology that can be run in a Heron
+     * cluster.
+     */
     new Runner().run(topologyName, config, processingGraphBuilder);
   }
 }
