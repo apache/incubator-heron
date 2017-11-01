@@ -33,6 +33,7 @@ java_tests(
     "com.twitter.heron.streamlet.impl.operators.ReduceByWindowOperatorTest",
     "com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "com.twitter.heron.streamlet.impl.operators.GeneralReduceByWindowOperatorTest",
+    "com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
     "com.twitter.heron.api.HeronSubmitterTest"
   ],
   runtime_deps = [ ":api-tests" ],

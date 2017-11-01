@@ -55,9 +55,10 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
   @Override
   public void execute(TupleWindow inputWindow) {
     Map<K, VR> reduceMap = new HashMap<>();
+    Map<K, Integer> windowCountMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
       KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
-      addMap(reduceMap, tup);
+      addMap(reduceMap, windowCountMap, tup);
     }
     long startWindow;
     long endWindow;
@@ -71,17 +72,19 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
     } else {
       endWindow = inputWindow.getEndTimestamp();
     }
-    Window window = new Window(startWindow, endWindow, inputWindow.get().size());
     for (K key : reduceMap.keySet()) {
+      Window window = new Window(startWindow, endWindow, windowCountMap.get(key));
       KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
       collector.emit(new Values(new KeyValue<>(keyedWindow, reduceMap.get(key))));
     }
   }
 
-  private void addMap(Map<K, VR> reduceMap, KeyValue<K, V> tup) {
+  private void addMap(Map<K, VR> reduceMap, Map<K, Integer> windowCountMap, KeyValue<K, V> tup) {
     if (!reduceMap.containsKey(tup.getKey())) {
       reduceMap.put(tup.getKey(), identity);
+      windowCountMap.put(tup.getKey(), 0);
     }
     reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
+    windowCountMap.put(tup.getKey(), windowCountMap.get(tup.getKey()) + 1);
   }
 }
