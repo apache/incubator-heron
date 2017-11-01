@@ -16,7 +16,11 @@ package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-import com.twitter.heron.streamlet.*;
+import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.Runner;
+import com.twitter.heron.streamlet.WindowConfig;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;

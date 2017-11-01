@@ -15,7 +15,11 @@
 package com.twitter.heron.examples.streamlet;
 
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-import com.twitter.heron.streamlet.*;
+import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Runner;
+import com.twitter.heron.streamlet.Source;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
