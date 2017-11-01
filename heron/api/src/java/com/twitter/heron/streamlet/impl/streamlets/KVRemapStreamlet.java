@@ -33,11 +33,11 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
  */
 public class KVRemapStreamlet<K, V> extends KVStreamletImpl<K, V> {
   private KVStreamletImpl<K, V> parent;
-  private SerializableBiFunction<? super KeyValue<? super K, ? super V>,
+  private SerializableBiFunction<KeyValue<K, V>,
       Integer, List<Integer>> remapFn;
 
   public KVRemapStreamlet(KVStreamletImpl<K, V> parent,
-                          SerializableBiFunction<? super KeyValue<? super K, ? super V>,
+                          SerializableBiFunction<KeyValue<K, V>,
                               Integer, List<Integer>> remapFn) {
     this.parent = parent;
     this.remapFn = remapFn;
