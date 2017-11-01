@@ -86,7 +86,7 @@ heron.streammgr.connection.read.batch.size.mb: 1
 # Maximum batch size in MB to write by stream manager to socket
 heron.streammgr.connection.write.batch.size.mb: 1
 
-# Number of times we should wait to see a buffer full while enqueueing data
+# Number of times Heron should wait to see a buffer full while enqueueing data
 # before declaring start of back pressure
 heron.streammgr.network.backpressure.threshold: 3
 

@@ -6,45 +6,85 @@ configfiles:
     default: file:///vagrant/.herondata/dist/heron-core-release.tar.gz
   - name: heron.config.is.role.required
     description: Whether a role is required to submit a topology
-    default: False
+    default: "False"
   - name: heron.config.is.env.required
     description: Whether an environment is required to submit a topology
-    default: False
+    default: "False"
 - file: heron_internals
-  groups:
-  - name: System-level configs
-    configs:
-    - name: heron.logging.directory
-      description: The relative path to the logging directory
-      default: log-files
-    - name: heron.logging.maximum.size.mb
-      description: The maximum log file size (in MB)
-      default: 100
-    - name: heron.logging.maximum.files
-      description: The maximum number of log files
-      default: 5
-    - name: heron.check.tmaster.location.interval.sec
-      description: The interval, in seconds, after which to check if the topology master location has been fetched or not
-      default: 120
-    - name: heron.logging.prune.interval.sec
-      description: The interval, in seconds, at which to prune C++ log files
-      default: 300
-    - name: heron.logging.flush.interval.sec
-      description: The interval, in seconds, at which to flush C++ log files
-      default: 10
-    - name: heron.logging.err.threshold
-      description: The threshold level at which to log errors
-      default: 3
-    - name: heron.metrics.export.interval.sec
-      description: The interval, in seconds, at which different components export metrics to the metrics manager
-      default: 60
-    - name: heron.metrics.max.exceptions.per.message.count
-      description: The maximum count of exceptions in one `MetricPublisherPublishMessage` protobuf message
-      default: 1024
-    - name: heron.streammgr.cache.drain.frequency.ms
-  - name: Stream manager configs
-    configs:
-    - name: heron.streammgr.cache.drain.frequency.ms
-      description: The frequency, in milliseconds, at which to drain the tuple cache in the stream manager
-      default: 10
-    - name: 
+  configs:
+  - name: heron.logging.directory
+    description: The relative path to the logging directory
+    default: log-files
+  - name: heron.logging.maximum.size.mb
+    description: The maximum log file size (in MB)
+    default: 100
+  - name: heron.logging.maximum.files
+    description: The maximum number of log files
+    default: 5
+  - name: heron.check.tmaster.location.interval.sec
+    description: The interval, in seconds, after which to check if the topology master location has been fetched or not
+    default: 120
+  - name: heron.logging.prune.interval.sec
+    description: The interval, in seconds, at which to prune C++ log files
+    default: 300
+  - name: heron.logging.flush.interval.sec
+    description: The interval, in seconds, at which to flush C++ log files
+    default: 10
+  - name: heron.logging.err.threshold
+    description: The threshold level at which to log errors
+    default: 3
+  - name: heron.metrics.export.interval.sec
+    description: The interval, in seconds, at which different components export metrics to the metrics manager
+    default: 60
+  - name: heron.metrics.max.exceptions.per.message.count
+    description: The maximum count of exceptions in one `MetricPublisherPublishMessage` protobuf message
+    default: 1024
+  - name: heron.streammgr.cache.drain.frequency.ms
+    description: The frequency, in milliseconds, at which to drain the tuple cache in the stream manager
+    default: 10
+  - name: heron.streammgr.stateful.buffer.size.mb
+    description: The sized-based threshold (in MB) for buffering data tuples waiting for checkpoint markers before giving up
+    default: 100
+  - name: heron.streammgr.cache.drain.size.mb
+    description: The sized-based threshold (in MB) for draining the tuple cache
+    default: 100
+  - name: heron.streammgr.xormgr.rotatingmap.nbuckets
+    description: For efficient acknowledgements
+    default: 3
+  - name: heron.streammgr.mempool.max.message.number
+    description: The max number of messages in the memory pool for each message type
+    default: 512
+  - name: heron.streammgr.client.reconnect.interval.sec
+    description: The reconnect interval to other stream managers (in seconds) for the stream manager client
+    default: 1
+  - name: heron.streammgr.client.reconnect.max.attempts
+    description: The max reconnect attempts to other stream managers for the stream manager client
+    default: 300
+  - name: heron.streammgr.client.reconnect.tmaster.interval.sec
+    description: The reconnect interval to the topology master (in seconds) for the stream manager client
+    default: 10
+  - name: heron.streammgr.network.options.maximum.packet.mb
+    description: The maximum packet size (in MB) of the stream manager's network options
+    default: 10
+  - name: heron.streammgr.tmaster.heartbeat.interval.sec
+    description: The interval (in seconds) at which to send heartbeats
+    default: 10
+  - name: heron.streammgr.connection.read.batch.size.mb
+    description: The maximum batch size (in MB) for the stream manager to read from socket
+    default: 1
+  - name: heron.streammgr.connection.write.batch.size.mb
+    description: Maximum batch size (in MB) for the stream manager to write to socket
+    default: 1
+  - name: heron.streammgr.network.backpressure.threshold
+    description: The number of times Heron should wait to see a buffer full while enqueueing data before declaring the start of backpressure
+    default: 3
+  - name: heron.streammgr.network.backpressure.highwatermark.mb
+    description: The high-water mark on the number (in MB) that can be left outstanding on a connection
+    default: 100
+  - name: heron.streammgr.network.backpressure.lowwatermark.mb
+    description: The low-water mark on the number (in MB) that can be left outstanding on a connection
+    default: 
+  - name: heron.tmaster.metrics.collector.maximum.interval.min
+    description: The maximum interval (in minutes) for metrics to be kept in the topology master
+    default: 180
+  - name: heron.tmaster.establish.retry.times

@@ -1,0 +1,28 @@
+{{- $scheduler := .Get 0 }}
+{{- $file := .Get 1 }}
+{{- $schedulerConfigs := index .Site.Data.configs $scheduler }}
+{{- $configFiles := index $schedulerConfigs "configfiles" }}
+
+{{- range $configFiles }}
+{{- if eq .file $file }}
+<h3>{{ .file }}.yaml</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{- range .configs }}
+    <tr>
+      <td><code>{{ .name }}</code></td>
+      <td>{{ if .description }}{{ .description | markdownify }}{{ end }}</td>
+      <td>{{ if .default }}<code>{{ .default }}</code>{{ end }}</td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+{{- end }}
+{{- end }}
