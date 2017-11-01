@@ -14,7 +14,10 @@
 
 package com.twitter.heron.streamlet.impl.operators;
 
-import com.twitter.heron.api.bolt.BaseWindowedBolt;
+import java.io.Serializable;
+
+import com.twitter.heron.api.bolt.BaseStatefulWindowedBolt;
+import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.tuple.Fields;
 
@@ -22,7 +25,8 @@ import com.twitter.heron.api.tuple.Fields;
  * The Bolt interface that other windowed operators of the streamlet packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class StreamletWindowOperator extends BaseWindowedBolt {
+public abstract class StreamletWindowOperator
+    extends BaseStatefulWindowedBolt<Serializable, Serializable> {
   private static final long serialVersionUID = -4836560876041237959L;
   private static final String OUTPUTFIELDNAME = "output";
 
@@ -35,5 +39,10 @@ public abstract class StreamletWindowOperator extends BaseWindowedBolt {
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields(OUTPUTFIELDNAME));
+  }
+
+  @Override
+  public void initState(State<Serializable, Serializable> state) {
+    // nothing really
   }
 }
