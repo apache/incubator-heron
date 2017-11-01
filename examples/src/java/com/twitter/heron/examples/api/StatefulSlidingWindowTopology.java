@@ -58,11 +58,14 @@ public final class StatefulSlidingWindowTopology {
     private OutputCollector collector;
 
     @Override
-    public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector) {
+    @SuppressWarnings("HiddenField")
+    public void prepare(Map<String, Object> topoConf, TopologyContext context,
+                        OutputCollector collector) {
       this.collector = collector;
     }
 
     @Override
+    @SuppressWarnings("HiddenField")
     public void initState(State<String, Long> state) {
       this.state = state;
       sum = state.getOrDefault("sum", 0L);
@@ -87,7 +90,8 @@ public final class StatefulSlidingWindowTopology {
     }
   }
 
-  public static class IntegerSpout extends BaseRichSpout implements IStatefulComponent<String, Long> {
+  public static class IntegerSpout extends BaseRichSpout
+      implements IStatefulComponent<String, Long> {
     private static final Logger LOG = Logger.getLogger(IntegerSpout.class.getName());
     private static final long serialVersionUID = 5454291010750852782L;
     private SpoutOutputCollector collector;
@@ -130,6 +134,7 @@ public final class StatefulSlidingWindowTopology {
     }
 
     @Override
+    @SuppressWarnings("HiddenField")
     public void initState(State<String, Long> state) {
       this.state = state;
       this.msgId = this.state.getOrDefault("msgId", 0L);
@@ -144,7 +149,8 @@ public final class StatefulSlidingWindowTopology {
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("integer", new IntegerSpout(), 1);
-    builder.setBolt("sumbolt", new WindowSumBolt().withWindow(BaseWindowedBolt.Count.of(5), BaseWindowedBolt.Count.of(3)), 1).shuffleGrouping("integer");
+    builder.setBolt("sumbolt", new WindowSumBolt().withWindow(BaseWindowedBolt.Count.of(5),
+        BaseWindowedBolt.Count.of(3)), 1).shuffleGrouping("integer");
     builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("sumbolt");
     Config conf = new Config();
     conf.setDebug(true);
