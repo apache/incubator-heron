@@ -14,6 +14,9 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
+
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -23,9 +26,6 @@ import com.twitter.heron.streamlet.Source;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
-
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Logger;
 
 /**
  * This topology demonstrates how sources work in the Heron Streamlet API

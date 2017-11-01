@@ -14,6 +14,8 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
@@ -21,8 +23,6 @@ import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This is a very simple topology that shows a series of

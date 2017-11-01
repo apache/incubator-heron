@@ -14,14 +14,6 @@
 
 package com.twitter.heron.examples.streamlet;
 
-import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.KeyValue;
-import com.twitter.heron.streamlet.Runner;
-import com.twitter.heron.streamlet.WindowConfig;
-
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.time.Duration;
@@ -29,6 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
+
+import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
+import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.Runner;
+import com.twitter.heron.streamlet.WindowConfig;
 
 /**
  * This topology shows an example usage of a reduce function. A source streamlet emits smart watch readings every 10

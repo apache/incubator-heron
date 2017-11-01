@@ -14,6 +14,10 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
+
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
@@ -21,10 +25,6 @@ import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.SerializableTransformer;
-
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 /**
  * In this topology, a supplier generates an indefinite series of random integers between 1

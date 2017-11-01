@@ -14,6 +14,14 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
@@ -22,14 +30,6 @@ import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KVStreamlet;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.WindowConfig;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * This topology demonstrates the use of join operations in the Heron

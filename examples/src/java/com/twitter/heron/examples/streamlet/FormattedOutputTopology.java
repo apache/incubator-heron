@@ -14,18 +14,18 @@
 
 package com.twitter.heron.examples.streamlet;
 
-import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Runner;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
+import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.Runner;
 
 public class FormattedOutputTopology {
   private static final Logger LOG =

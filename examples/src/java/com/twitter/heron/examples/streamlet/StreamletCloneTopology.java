@@ -14,6 +14,13 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
@@ -21,13 +28,6 @@ import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * This topology demonstrates clone operations on streamlets in the Heron
