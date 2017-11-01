@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
  * A collection of helper functions for the Streamlet API example topologies
  */
 public final class StreamletUtils {
+  private StreamletUtils() {
+  }
+
   /**
    * Fetches the topology's name from the first command-line argument or
    * throws an exception if not present.
