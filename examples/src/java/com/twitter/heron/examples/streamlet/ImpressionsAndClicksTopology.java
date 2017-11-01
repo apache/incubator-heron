@@ -157,7 +157,7 @@ public class ImpressionsAndClicksTopology {
          * is the impression ID and the user ID is the value.
          */
         KVStreamlet<String, String> impressions = processingGraphBuilder
-                .newSource((AdImpression::new))
+                .newSource(AdImpression::new)
                 .mapToKV(impression -> new KeyValue<>(impression.getAdId(), impression.getUserId()));
 
         /**
@@ -194,7 +194,7 @@ public class ImpressionsAndClicksTopology {
                     String userId = kw.getValue().getKey();
                     int totalUserClicks = kw.getValue().getValue();
 
-                    LOG.info(String.format("(user: %s, clicks: %d)", userId, totalClicks);
+                    LOG.info(String.format("(user: %s, clicks: %d)", userId, totalUserClicks));
                 });
 
         Config config = new Config();
