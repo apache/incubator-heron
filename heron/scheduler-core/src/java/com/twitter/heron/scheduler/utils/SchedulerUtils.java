@@ -53,15 +53,15 @@ public final class SchedulerUtils {
     private static final long serialVersionUID = 3594142561871208879L;
 
     public enum ExecutorPortNames {
-      MASTER_PORT("master-port"),
-      TMASTER_CONTROLLER_PORT("tmaster-controller-port"),
-      TMASTER_STATS_PORT("tmaster-stats-port"),
+      MASTER_PORT("master"),
+      TMASTER_CONTROLLER_PORT("tmaster-ctl"),
+      TMASTER_STATS_PORT("tmaster-stats"),
       SHELL_PORT("shell-port"),
-      METRICS_MANAGER_PORT("metrics-manager-port"),
-      SCHEDULER_PORT("scheduler-port"),
-      METRICS_CACHE_MASTER_PORT("metrics-cache-port"),
-      METRICS_CACHE_STATS_PORT("metrics-cache-stats-port"),
-      CHECKPOINT_MANAGER_PORT("checkpoint-manager-port");
+      METRICS_MANAGER_PORT("metrics-mgr"),
+      SCHEDULER_PORT("scheduler"),
+      METRICS_CACHE_MASTER_PORT("metrics-cache-m"),
+      METRICS_CACHE_STATS_PORT("metrics-cache-s"),
+      CHECKPOINT_MANAGER_PORT("ckptmgr");
 
       private final String name;
 
