@@ -33,6 +33,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
+import com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector;
 import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
 import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.RestartContainerResolver;
@@ -60,13 +61,14 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
   @Inject
   AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
       BackPressureDetector backPressureDetector,
+      ProcessingRateSkewDetector processingRateSkewDetector,
       WaitQueueDisparityDetector waitQueueDisparityDetector,
       SlowInstanceDiagnoser slowInstanceDiagnoser,
       RestartContainerResolver restartContainerResolver) {
     this.policyConfig = policyConfig;
     this.restartContainerResolver = restartContainerResolver;
 
-    registerDetectors(backPressureDetector, waitQueueDisparityDetector);
+    registerDetectors(backPressureDetector, waitQueueDisparityDetector, processingRateSkewDetector);
     registerDiagnosers(slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,

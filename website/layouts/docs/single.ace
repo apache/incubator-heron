@@ -21,3 +21,10 @@ html lang={{.Site.LanguageCode}}
               {{partial "docs/main.html" .}}
     script src=https://code.jquery.com/jquery-2.2.1.min.js
     script src=/js/app.min.js
+    = javascript
+      $('pre code').each(function() {
+        console.log(this);
+        this.innerHTML = this.innerHTML.replace(/\$\s/g, function(matched) {
+          return `<span class=\"clp\">${matched}</span>`;
+        });
+      });

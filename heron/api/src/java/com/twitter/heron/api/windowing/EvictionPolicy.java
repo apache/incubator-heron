@@ -1,26 +1,48 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 package com.twitter.heron.api.windowing;
+
+import java.io.Serializable;
 
 /**
  * Eviction policy tracks events and decides whether
  * an event should be evicted from the window or not.
  *
  * @param <T> the type of event that is tracked.
+ * @param <S> the type of state that is used
  */
-public interface EvictionPolicy<T> {
+public interface EvictionPolicy<T extends Serializable, S> {
   /**
    * The action to be taken when {@link EvictionPolicy#evict(Event)} is invoked.
    */
@@ -78,4 +100,19 @@ public interface EvictionPolicy<T> {
    * Resets the eviction policy.
    */
   void reset();
+
+  /**
+   * Return runtime state to be checkpointed by the framework for restoring the eviction policy
+   * in case of failures.
+   *
+   * @return the state
+   */
+  S getState();
+
+  /**
+   * Restore the eviction policy from the state that was earlier checkpointed by the framework.
+   *
+   * @param state the state
+   */
+  void restoreState(S state);
 }

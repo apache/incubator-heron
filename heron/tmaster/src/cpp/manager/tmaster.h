@@ -162,6 +162,10 @@ class TMaster {
   // Function called when a new stateful ckpt record is saved
   void HandleStatefulCheckpointSave(std::string _oldest_ckpt);
 
+  // Function called to kill container
+  void KillContainer(const std::string& host_name,
+                     sp_int32 port, sp_string stmgr_id);
+
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;
 
@@ -228,6 +232,10 @@ class TMaster {
 
   // Stateful Controller
   StatefulController* stateful_controller_;
+
+  // HTTP client
+  AsyncDNS* dns_;
+  HTTPClient* http_client_;
 
   // Copy of the EventLoop
   EventLoop* eventLoop_;

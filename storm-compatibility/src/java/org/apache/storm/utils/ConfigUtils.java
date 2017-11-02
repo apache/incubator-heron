@@ -48,12 +48,12 @@ public final class ConfigUtils {
           heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_WORKERS)) {
-      Integer nWorkers = (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_WORKERS);
+      Integer nWorkers = Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_WORKERS));
       com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
       Integer nAckers =
-          (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS);
+          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
       if (nAckers > 0) {
         com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
                  com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
@@ -67,18 +67,18 @@ public final class ConfigUtils {
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =
-          (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS);
+          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
       com.twitter.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
       Integer nPending =
-          Integer.parseInt(
+          Utils.getInt(
               heronConfig.get(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
       com.twitter.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
       Integer tSecs =
-          Integer.parseInt(
+          Utils.getInt(
               heronConfig.get(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
       com.twitter.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
     }
