@@ -21,8 +21,6 @@ public final class Constants {
 
   static final String DEFAULT_HERON_LOCAL = "~/.heron";
 
-  static final String DEFAULT_HERON_CLUSTER = "$HERON_HOME";
-
   static final String DEFAULT_HERON_CONFIG_DIRECTORY = "conf";
 
   static final String DEFAULT_HERON_RELEASE_FILE = "release.yaml";
