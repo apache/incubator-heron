@@ -179,12 +179,12 @@ public final class ImpressionsAndClicksTopology {
         // (meaning that the user has clicked on the ad).
         .join(
             clicks,
-            WindowConfig.TumblingCountWindow(100),
+            WindowConfig.TumblingCountWindow(50),
             ImpressionsAndClicksTopology::incrementIfSameUser
         )
         // The reduce function counts the number of ad clicks per user.
         .reduceByKeyAndWindow(
-            WindowConfig.TumblingCountWindow(200),
+            WindowConfig.TumblingCountWindow(100),
             ImpressionsAndClicksTopology::countCumulativeClicks
         )
         .consume(kw -> {
