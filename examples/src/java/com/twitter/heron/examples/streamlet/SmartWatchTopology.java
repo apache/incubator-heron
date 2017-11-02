@@ -97,19 +97,19 @@ public final class SmartWatchTopology {
         .map(kw -> {
           // The per-key result of the previous reduce step
           long totalFeetRun = kw.getValue();
-          LOG.info("Total feet run " + totalFeetRun);
+          LOG.info(String.format("Total feet run: %d", totalFeetRun));
+
           // The amount of time elapsed
           long startTime = kw.getKey().getWindow().getStartTime();
-          LOG.info("Start time " + startTime);
           long endTime = kw.getKey().getWindow().getEndTime();
-          LOG.info("End time " + endTime);
           long timeLengthMillis = endTime - startTime; // Cast to float to use as denominator
-          LOG.info("Time length " + timeLengthMillis);
+
+          // The feet-per-minute calculation
           float feetPerMinute = totalFeetRun / (float) (timeLengthMillis / 1000);
-          LOG.info("Feet per minute " + feetPerMinute);
+
           // Reduce to two decimal places
           String paceString = new DecimalFormat("#.##").format(feetPerMinute);
-          LOG.info("As decimal " + paceString);
+
           // Return a per-jogger average pace
           return new KeyValue<>(kw.getKey().getKey(), paceString);
         })
