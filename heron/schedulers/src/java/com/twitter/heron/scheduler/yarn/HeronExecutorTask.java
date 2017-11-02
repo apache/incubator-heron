@@ -169,7 +169,7 @@ public class HeronExecutorTask implements Task {
     String[] executorCmd = SchedulerUtils.executorCommand(config,
         runtime,
         heronExecutorId,
-        freePorts);
+        SchedulerUtils.ExecutorPorts.withRequiredPorts(freePorts));
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;

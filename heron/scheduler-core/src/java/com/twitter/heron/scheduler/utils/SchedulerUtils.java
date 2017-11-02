@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +40,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 public final class SchedulerUtils {
-  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
+  public static final int PORTS_REQUIRED_FOR_EXECUTOR = ExecutorPorts.getRequiredNumOfPorts();
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
   public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
@@ -50,18 +49,83 @@ public final class SchedulerUtils {
   /**
    * Enum that defines the type of ports that an heron executor needs
    */
-  public enum ExecutorPorts {
-    MASTER_PORT,
-    TMASTER_CONTROLLER_PORT,
-    TMASTER_STATS_PORT,
-    SHELL_PORT,
-    METRICS_MANAGER_PORT,
-    SCHEDULER_PORT,
-    METRICS_CACHE_MASTER_PORT,
-    METRICS_CACHE_STATS_PORT,
-    CHECKPOINT_MANAGER_PORT;
+  public static class ExecutorPorts extends HashMap<ExecutorPorts.ExecutorPortNames, Object> {
+    private static final long serialVersionUID = 3594142561871208879L;
 
-    public static Object getRequired(Map<ExecutorPorts, Object> ports, ExecutorPorts type) {
+    public enum ExecutorPortNames {
+      MASTER_PORT("master-port"),
+      TMASTER_CONTROLLER_PORT("tmaster-controller-port"),
+      TMASTER_STATS_PORT("tmaster-stats-port"),
+      SHELL_PORT("shell-port"),
+      METRICS_MANAGER_PORT("metrics-manager-port"),
+      SCHEDULER_PORT("scheduler-port"),
+      METRICS_CACHE_MASTER_PORT("metrics-cache-port"),
+      METRICS_CACHE_STATS_PORT("metrics-cache-stats-port"),
+      CHECKPOINT_MANAGER_PORT("checkpoint-manager-port");
+
+      private final String name;
+
+      ExecutorPortNames(String name) {
+        this.name = name;
+      }
+
+      public String toString() {
+        return this.name;
+      }
+
+      public static String[] getPortNames() {
+        List<String> names = new LinkedList<>();
+        for (ExecutorPortNames executorPortNames : ExecutorPortNames.values()) {
+          names.add(executorPortNames.toString());
+        }
+
+        return (String[]) names.toArray();
+      }
+    }
+
+    public static String[] getRequiredPorts() {
+      return new String[]{
+          ExecutorPortNames.MASTER_PORT.toString(),
+          ExecutorPortNames.TMASTER_CONTROLLER_PORT.toString(),
+          ExecutorPortNames.TMASTER_STATS_PORT.toString(),
+          ExecutorPortNames.SHELL_PORT.toString(),
+          ExecutorPortNames.METRICS_MANAGER_PORT.toString(),
+          ExecutorPortNames.SCHEDULER_PORT.toString(),
+          ExecutorPortNames.METRICS_CACHE_MASTER_PORT.toString(),
+          ExecutorPortNames.METRICS_CACHE_STATS_PORT.toString(),
+          ExecutorPortNames.CHECKPOINT_MANAGER_PORT.toString()
+      };
+    }
+
+    public static int getRequiredNumOfPorts() {
+      return getRequiredPorts().length;
+    }
+
+    public static ExecutorPorts withRequiredPorts(List<Integer> portsToUse) {
+      ExecutorPorts executorPorts = new ExecutorPorts();
+      executorPorts.setRequiredPorts(portsToUse);
+      return executorPorts;
+    }
+
+    public void setRequiredPorts(List<Integer> portsToUse) {
+      if (portsToUse.size() < getRequiredNumOfPorts()) {
+        throw new IllegalArgumentException("Did not provide enough Ports. "
+            + "Number of ports provided: " + portsToUse.size()
+            + ". Number of ports required: " + getRequiredNumOfPorts());
+      }
+
+      for (int i = 0; i < portsToUse.size(); i++) {
+        int port = portsToUse.get(i);
+        if (port == -1) {
+          throw new IllegalArgumentException("Invalid Port: "
+              + port + ". Failed to find enough ports for executor");
+        } else {
+          this.put(ExecutorPortNames.values()[i], port);
+        }
+      }
+    }
+
+    public static Object getRequired(ExecutorPorts ports, ExecutorPortNames type) {
       Object ret = getOptional(ports, type);
       if (ret == null) {
         throw new IllegalArgumentException("Required executor port "
@@ -70,7 +134,7 @@ public final class SchedulerUtils {
       return ports.get(type);
     }
 
-    public static Object getOptional(Map<ExecutorPorts, Object> ports, ExecutorPorts type) {
+    public static Object getOptional(ExecutorPorts ports, ExecutorPortNames type) {
       return ports.get(type);
     }
   }
@@ -164,24 +228,13 @@ public final class SchedulerUtils {
       Config config,
       Config runtime,
       int containerIndex,
-      List<Integer> freePorts) {
+      ExecutorPorts freePorts) {
     // First let us have some safe checks
     if (freePorts.size() < PORTS_REQUIRED_FOR_EXECUTOR) {
       throw new RuntimeException("Failed to find enough ports for executor");
     }
-    for (int port : freePorts) {
-      if (port == -1) {
-        throw new RuntimeException("Failed to find available ports for executor");
-      }
-    }
 
-    // Convert port to string
-    List<String> ports = new LinkedList<>();
-    for (int port : freePorts) {
-      ports.add(Integer.toString(port));
-    }
-
-    return getExecutorCommand(config, runtime, containerIndex, ports);
+    return getExecutorCommand(config, runtime, containerIndex, freePorts);
   }
 
   /**
@@ -197,7 +250,7 @@ public final class SchedulerUtils {
       Config config,
       Config runtime,
       int containerIndex,
-      List<String> ports) {
+      ExecutorPorts ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
     commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
@@ -218,26 +271,27 @@ public final class SchedulerUtils {
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, Map<ExecutorPorts, Object> freePorts) {
+      Config config, Config runtime, ExecutorPorts freePorts) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    String masterPort = (String) ExecutorPorts.getRequired(freePorts, ExecutorPorts.MASTER_PORT);
-    String tmasterControllerPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.TMASTER_CONTROLLER_PORT);
-    String tmasterStatsPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.TMASTER_CONTROLLER_PORT);
-    String shellPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.SHELL_PORT);
-    String metricsmgrPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.METRICS_MANAGER_PORT);
-    String schedulerPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.SCHEDULER_PORT);
-    String metricsCacheMasterPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.METRICS_CACHE_MASTER_PORT);
-    String metricsCacheStatsPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.METRICS_CACHE_STATS_PORT);
-    String ckptmgrPort = (String) ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.CHECKPOINT_MANAGER_PORT);
+    String masterPort = ExecutorPorts.getRequired(freePorts,
+        ExecutorPorts.ExecutorPortNames.MASTER_PORT).toString();
+    String tmasterControllerPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.TMASTER_CONTROLLER_PORT).toString();
+    String tmasterStatsPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.TMASTER_CONTROLLER_PORT).toString();
+    String shellPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.SHELL_PORT).toString();
+    String metricsmgrPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.METRICS_MANAGER_PORT).toString();
+    String schedulerPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.SCHEDULER_PORT).toString();
+    String metricsCacheMasterPort =  ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.METRICS_CACHE_MASTER_PORT).toString();
+    String metricsCacheStatsPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.METRICS_CACHE_STATS_PORT).toString();
+    String ckptmgrPort = ExecutorPorts.getRequired(
+        freePorts, ExecutorPorts.ExecutorPortNames.CHECKPOINT_MANAGER_PORT).toString();
 
     List<String> commands = new ArrayList<>();
     commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));

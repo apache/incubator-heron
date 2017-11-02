@@ -14,9 +14,9 @@
 
 package com.twitter.heron.scheduler.marathon;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +27,7 @@ import com.google.common.base.Joiner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts.ExecutorPortNames;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
@@ -197,12 +198,13 @@ public class MarathonScheduler implements IScheduler {
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
-    for (String portName : MarathonConstants.PORT_NAMES) {
+    for (Map.Entry<ExecutorPortNames, Object> entry
+        : MarathonConstants.EXECUTOR_PORTS.entrySet()) {
       ObjectNode port = mapper.createObjectNode();
       port.put(MarathonConstants.DOCKER_CONTAINER_PORT, 0);
       port.put(MarathonConstants.PROTOCOL, MarathonConstants.TCP);
       port.put(MarathonConstants.HOST_PORT, 0);
-      port.put(MarathonConstants.PORT_NAME, portName);
+      port.put(MarathonConstants.PORT_NAME, entry.getKey().toString());
 
       ports.add(port);
     }
@@ -212,7 +214,7 @@ public class MarathonScheduler implements IScheduler {
 
   protected String getExecutorCommand(int containerIndex) {
     String[] commands = SchedulerUtils.getExecutorCommand(config, runtime,
-        containerIndex, Arrays.asList(MarathonConstants.PORT_LIST));
+        containerIndex, MarathonConstants.EXECUTOR_PORTS);
     return "cd $MESOS_SANDBOX && " + Joiner.on(" ").join(commands);
   }
 }

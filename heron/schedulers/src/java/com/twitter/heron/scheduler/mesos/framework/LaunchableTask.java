@@ -206,7 +206,8 @@ public class LaunchableTask {
   protected String executorCommand(
       Config config, Config runtime, int containerIndex) {
     String[] executorCmd =
-        SchedulerUtils.executorCommand(config, runtime, containerIndex, freePorts);
+        SchedulerUtils.executorCommand(config, runtime, containerIndex,
+            SchedulerUtils.ExecutorPorts.withRequiredPorts(freePorts));
     return join(executorCmd, " ");
   }
 }

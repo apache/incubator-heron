@@ -142,12 +142,14 @@ public class LocalScheduler implements IScheduler, IScalable {
   }
 
   private String[] getExecutorCommand(int container) {
+
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
       freePorts.add(SysUtils.getFreePort());
     }
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
+    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container,
+        SchedulerUtils.ExecutorPorts.withRequiredPorts(freePorts));
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;

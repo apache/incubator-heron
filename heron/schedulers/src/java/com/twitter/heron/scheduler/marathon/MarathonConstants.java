@@ -14,6 +14,9 @@
 
 package com.twitter.heron.scheduler.marathon;
 
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts.ExecutorPortNames;
+
 public final class MarathonConstants {
   private MarathonConstants() {
 
@@ -50,10 +53,6 @@ public final class MarathonConstants {
   public static final String DOCKER_FORCE_PULL = "forcePullImage";
   public static final String DOCKER_NETWORK_BRIDGE = "BRIDGE";
 
-  public static final String[] PORT_NAMES = new String[]{
-      "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmgr", "scheduler",
-      "metrics-cache-master", "metrics-cache-stats", "ckptmgr"};
-
   public static final String MASTER_PORT = "$PORT0";
   public static final String TMASTER_CONTROLLER_PORT = "$PORT1";
   public static final String TMASTER_STATS_PORT = "$PORT2";
@@ -64,10 +63,19 @@ public final class MarathonConstants {
   public static final String METRICS_CACHE_STATS_PORT = "$PORT7";
   public static final String CKPTMGR_PORT = "$PORT8";
 
-  public static final String[] PORT_LIST = new String[]{
-      MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
-      SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
-      METRICS_CACHE_STATS_PORT, CKPTMGR_PORT};
+  public static final ExecutorPorts EXECUTOR_PORTS
+      = new ExecutorPorts();
+  static {
+    EXECUTOR_PORTS.put(ExecutorPortNames.MASTER_PORT, MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.TMASTER_CONTROLLER_PORT, TMASTER_CONTROLLER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.TMASTER_STATS_PORT, TMASTER_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.SHELL_PORT, SHELL_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.METRICS_MANAGER_PORT, METRICSMGR_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.SCHEDULER_PORT, SCHEDULER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.METRICS_CACHE_MASTER_PORT, METRICS_CACHE_MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.METRICS_CACHE_STATS_PORT, METRICS_CACHE_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPortNames.CHECKPOINT_MANAGER_PORT, CKPTMGR_PORT);
+  }
 
   public static final String JOB_LINK = "/ui/#/group/%2F";
 }

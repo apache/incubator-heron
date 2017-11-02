@@ -15,9 +15,9 @@
 package com.twitter.heron.scheduler.kubernetes;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -38,6 +38,7 @@ import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts.ExecutorPortNames;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
@@ -417,11 +418,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
-    for (int i = 0; i < KubernetesConstants.PORT_NAMES.length; i++) {
+    for (Map.Entry<ExecutorPortNames, Object> entry
+        : KubernetesConstants.EXECUTOR_PORTS.entrySet()) {
       ObjectNode port = mapper.createObjectNode();
+      ExecutorPortNames portName = entry.getKey();
       port.put(KubernetesConstants.DOCKER_CONTAINER_PORT,
-          Integer.parseInt(KubernetesConstants.PORT_LIST[i], 10));
-      port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.PORT_NAMES[i]);
+          Integer.parseInt((String) entry.getValue(), 10));
+      port.put(KubernetesConstants.PORT_NAME, portName.toString());
       ports.add(port);
     }
 
@@ -452,7 +455,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   protected String[] getExecutorCommand(int containerIndex) {
     String[] executorCommand =
         SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
-        containerIndex, Arrays.asList(KubernetesConstants.PORT_LIST));
+        containerIndex, KubernetesConstants.EXECUTOR_PORTS);
     String[] command = {
         "sh",
         "-c",
