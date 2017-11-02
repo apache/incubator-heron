@@ -78,10 +78,8 @@ public final class WireRequestsTopology {
     private int amount;
 
     WireRequest(long delay) {
-      /**
-       * The pace at which requests are generated is throttled. Different
-       * throttles are applied to different bank branches.
-       */
+      // The pace at which requests are generated is throttled. Different
+      // throttles are applied to different bank branches.
       Utils.sleep(delay);
       this.customerId = StreamletUtils.randomFromList(CUSTOMERS);
       this.amount = ThreadLocalRandom.current().nextInt(1000);
@@ -147,37 +145,29 @@ public final class WireRequestsTopology {
   public static void main(String[] args) throws Exception {
     Builder builder = Builder.createBuilder();
 
-    /**
-     * Requests from the "quiet" bank branch (high request throttling).
-     */
+    // Requests from the "quiet" bank branch (high throttling).
     Streamlet<WireRequest> quietBranch = builder.newSource(() -> new WireRequest(20))
         .setNumPartitions(1)
         .setName("quiet-branch-requests")
         .filter(WireRequestsTopology::checkRequestAmount)
         .setName("quiet-branch-check-balance");
 
-    /**
-     * Requests from the "medium" bank branch (medium request throttling).
-     */
+    // Requests from the "medium" bank branch (medium throttling).
     Streamlet<WireRequest> mediumBranch = builder.newSource(() -> new WireRequest(10))
         .setNumPartitions(2)
         .setName("medium-branch-requests")
         .filter(WireRequestsTopology::checkRequestAmount)
         .setName("medium-branch-check-balance");
 
-    /**
-     * Requests from the "busy" bank branch (low request throttling).
-     */
+    // Requests from the "busy" bank branch (low throttling).
     Streamlet<WireRequest> busyBranch = builder.newSource(() -> new WireRequest(5))
         .setNumPartitions(4)
         .setName("busy-branch-requests")
         .filter(WireRequestsTopology::checkRequestAmount)
         .setName("busy-branch-check-balance");
 
-    /**
-     * Here, the streamlets for the three bank branches are united into one. The fraud
-     * detection filter then operates on that unified streamlet.
-     */
+    // Here, the streamlets for the three bank branches are united into one. The fraud
+    // detection filter then operates on that unified streamlet.
     quietBranch
         .union(mediumBranch)
         .setNumPartitions(2)
@@ -193,16 +183,11 @@ public final class WireRequestsTopology {
     config.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
     config.setNumContainers(2);
 
-    /**
-     * Fetches the topology name from the first command-line argument
-     */
+    // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
-    /**
-     * Finally, the processing graph and configuration are passed to the Runner,
-     * which converts the graph into a Heron topology that can be run in a Heron
-     * cluster.
-     */
+    // Finally, the processing graph and configuration are passed to the Runner, which converts
+    // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, builder);
   }
 }

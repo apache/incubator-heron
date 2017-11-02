@@ -158,18 +158,14 @@ public final class ImpressionsAndClicksTopology {
   public static void main(String[] args) throws Exception {
     Builder processingGraphBuilder = Builder.createBuilder();
 
-    /**
-     * A KVStreamlet is produced. Each element is a KeyValue object where the key
-     * is the impression ID and the user ID is the value.
-     */
+    // A KVStreamlet is produced. Each element is a KeyValue object where the key
+    // is the impression ID and the user ID is the value.
     KVStreamlet<String, String> impressions = processingGraphBuilder
         .newSource(AdImpression::new)
         .mapToKV(impression -> new KeyValue<>(impression.getAdId(), impression.getUserId()));
 
-    /**
-     * A KVStreamlet is produced. Each element is a KeyValue object where the key
-     * is the ad ID and the user ID is the value.
-     */
+    // A KVStreamlet is produced. Each element is a KeyValue object where the key
+    // is the ad ID and the user ID is the value.
     KVStreamlet<String, String> clicks = processingGraphBuilder
         .newSource(AdClick::new)
         .mapToKV(click -> new KeyValue<>(click.getAdId(), click.getUserId()));
@@ -178,20 +174,15 @@ public final class ImpressionsAndClicksTopology {
      * Here, the impressions KVStreamlet is joined to the clicks KVStreamlet.
      */
     impressions
-        /**
-         * The join function here essentially provides the reduce function
-         * with a streamlet of KeyValue objects where the userId matches across
-         * an impression and a click (meaning that the user has clicked on the
-         * ad).
-         */
+        // The join function here essentially provides the reduce function with a streamlet
+        // of KeyValue objects where the userId matches across an impression and a click
+        // (meaning that the user has clicked on the ad).
         .join(
             clicks,
             WindowConfig.TumblingCountWindow(100),
             ImpressionsAndClicksTopology::incrementIfSameUser
         )
-        /**
-         * The reduce function counts the number of ad clicks per user.
-         */
+        // The reduce function counts the number of ad clicks per user.
         .reduceByKeyAndWindow(
             WindowConfig.TumblingCountWindow(200),
             ImpressionsAndClicksTopology::countCumulativeClicks
@@ -205,16 +196,11 @@ public final class ImpressionsAndClicksTopology {
 
     Config config = new Config();
 
-    /**
-     * Fetches the topology name from the first command-line argument
-     */
+    // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
-    /**
-     * Finally, the processing graph and configuration are passed to the Runner,
-     * which converts the graph into a Heron topology that can be run in a Heron
-     * cluster.
-     */
+    // Finally, the processing graph and configuration are passed to the Runner, which converts
+    // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
   }
 }

@@ -102,9 +102,7 @@ public final class FilesystemSinkTopology {
   public static void main(String[] args) throws Exception {
     Builder processingGraphBuilder = Builder.createBuilder();
 
-    /**
-     * Creates a temporary file to write output into.
-     */
+    // Creates a temporary file to write output into.
     File file = File.createTempFile("filesystem-sink-example", ".tmp");
 
     LOG.info(
@@ -115,33 +113,29 @@ public final class FilesystemSinkTopology {
 
     processingGraphBuilder
         .newSource(() -> {
-          /**
-           * This applies a "brake" that makes the processing
-           * graph write to the temporary file at a reasonable
-           * pace.
-           */
+          // This applies a "brake" that makes the processing graph write
+          // to the temporary file at a reasonable, readable pace.
           Utils.sleep(500);
           return ThreadLocalRandom.current().nextInt(100);
         })
         .setName("incoming-integers")
-        /**
-         * Here, the FilesystemSink implementation of the Sink
-         * interface is passed to the toSink function.
-         */
+        // Here, the FilesystemSink implementation of the Sink
+        // interface is passed to the toSink function.
         .toSink(new FilesystemSink<>(file));
 
-    Config config = new Config();
+    // The topology's parallelism (the number of containers across which the topology's
+    // processing instance will be split) can be defined via the second command-line
+    // argument (or else the default of 2 will be used).
+    int topologyParallelism = StreamletUtils.getParallelism(args, 2);
 
-    /**
-     * Fetches the topology name from the first command-line argument
-     */
+    Config config = new Config();
+    config.setNumContainers(topologyParallelism);
+
+    // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
-    /**
-     * Finally, the processing graph and configuration are passed to the Runner,
-     * which converts the graph into a Heron topology that can be run in a Heron
-     * cluster.
-     */
+    // Finally, the processing graph and configuration are passed to the Runner, which converts
+    // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
   }
 }

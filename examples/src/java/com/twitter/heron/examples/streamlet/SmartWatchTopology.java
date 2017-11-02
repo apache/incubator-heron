@@ -94,15 +94,22 @@ public final class SmartWatchTopology {
             SmartWatchTopology::reduce
         )
         .setName("reduce-to-total-distance-per-jogger")
-        .map(kw -> {
+        .map(keyWindow -> {
           // The per-key result of the previous reduce step
-          long totalFeetRun = kw.getValue();
-          LOG.info(String.format("Total feet run: %d", totalFeetRun));
+          long totalFeetRun = keyWindow.getValue();
 
           // The amount of time elapsed
-          long startTime = kw.getKey().getWindow().getStartTime();
-          long endTime = kw.getKey().getWindow().getEndTime();
+          long startTime = keyWindow.getKey().getWindow().getStartTime();
+          long endTime = keyWindow.getKey().getWindow().getEndTime();
           long timeLengthMillis = endTime - startTime; // Cast to float to use as denominator
+
+          LOG.info(
+              String.format("Calculating the average speed for jogger %s from time %d to %d",
+                  keyWindow.getKey().getKey(),
+                  startTime,
+                  endTime
+              )
+          );
 
           // The feet-per-minute calculation
           float feetPerMinute = totalFeetRun / (float) (timeLengthMillis / 1000);
@@ -111,7 +118,7 @@ public final class SmartWatchTopology {
           String paceString = new DecimalFormat("#.##").format(feetPerMinute);
 
           // Return a per-jogger average pace
-          return new KeyValue<>(kw.getKey().getKey(), paceString);
+          return new KeyValue<>(keyWindow.getKey().getKey(), paceString);
         })
         .setName("calculate-average-speed")
         .consume(kv -> {
@@ -124,8 +131,11 @@ public final class SmartWatchTopology {
 
     Config config = new Config();
 
+    // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
+    // Finally, the processing graph and configuration are passed to the Runner, which converts
+    // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
   }
 }

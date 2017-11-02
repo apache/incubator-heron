@@ -109,16 +109,11 @@ public final class TransformsTopology {
 
     Config config = new Config();
 
-    /**
-     * Fetches the topology name from the first command-line argument
-     */
+    // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
-    /**
-     * Finally, the processing graph and configuration are passed to the Runner,
-     * which converts the graph into a Heron topology that can be run in a Heron
-     * cluster.
-     */
+    // Finally, the processing graph and configuration are passed to the Runner, which converts
+    // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, builder);
   }
 }
