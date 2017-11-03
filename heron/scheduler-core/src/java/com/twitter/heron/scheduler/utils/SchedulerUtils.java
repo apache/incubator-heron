@@ -279,7 +279,7 @@ public final class SchedulerUtils {
     String tmasterControllerPort = ExecutorPorts.getRequired(
         freePorts, ExecutorPorts.ExecutorPortNames.TMASTER_CONTROLLER_PORT).toString();
     String tmasterStatsPort = ExecutorPorts.getRequired(
-        freePorts, ExecutorPorts.ExecutorPortNames.TMASTER_CONTROLLER_PORT).toString();
+        freePorts, ExecutorPorts.ExecutorPortNames.TMASTER_STATS_PORT).toString();
     String shellPort = ExecutorPorts.getRequired(
         freePorts, ExecutorPorts.ExecutorPortNames.SHELL_PORT).toString();
     String metricsmgrPort = ExecutorPorts.getRequired(
