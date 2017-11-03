@@ -53,14 +53,15 @@ public class ReduceByKeyAndWindowOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testReduceByWindowOperator() {
-    ReduceByKeyAndWindowOperator<String, Integer> reduceOperator = getReduceByWindowOperator();
+    ReduceByKeyAndWindowOperator<String, Integer, String> reduceOperator =
+        getReduceByWindowOperator();
 
     TupleWindow tupleWindow = getTupleWindow(3, 5);
 
     HashMap<String, Integer> expectedResults = new HashMap<>();
-    expectedResults.put("0", 10);
-    expectedResults.put("1", 10);
-    expectedResults.put("2", 10);
+    expectedResults.put("0", 5);
+    expectedResults.put("1", 5);
+    expectedResults.put("2", 5);
 
     reduceOperator.execute(tupleWindow);
 
@@ -86,7 +87,7 @@ public class ReduceByKeyAndWindowOperatorTest {
     for (int i = 0; i < nkeys; i++) {
       for (int j = 0; j < count; ++j) {
         Tuple tuple = getTuple(componentStreamId, new Fields("a"),
-            new Values(new KeyValue<>(String.valueOf(i), j)));
+            new Values(String.valueOf(i)));
         tuples.add(tuple);
       }
     }
@@ -99,9 +100,9 @@ public class ReduceByKeyAndWindowOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private ReduceByKeyAndWindowOperator<String, Integer> getReduceByWindowOperator() {
-    ReduceByKeyAndWindowOperator<String, Integer> reduceByWindowOperator =
-        new ReduceByKeyAndWindowOperator<>((o, o2) -> o + o2);
+  private ReduceByKeyAndWindowOperator<String, Integer, String> getReduceByWindowOperator() {
+    ReduceByKeyAndWindowOperator<String, Integer, String> reduceByWindowOperator =
+        new ReduceByKeyAndWindowOperator<>(x -> x, x -> 1, (o, o2) -> o + o2);
 
     reduceByWindowOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {

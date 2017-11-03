@@ -289,12 +289,16 @@ public class JoinOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private JoinOperator<String, String, String, String> getJoinOperator(JoinType type) {
-    JoinOperator<String, String, String, String> joinOperator = new JoinOperator(
+  private JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String>
+  getJoinOperator(JoinType type) {
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator =
+        new JoinOperator(
         type,
         "leftComponent",
         "rightComponent",
-        (SerializableBiFunction<String, String, String>) (o, o2) -> o + o2);
+        x -> x.getKey(),
+        x -> x.getKey(),
+        (o, o2) -> o + o2);
 
     joinOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {
