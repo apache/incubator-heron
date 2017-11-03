@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Source;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sources.ComplexSource;
 
 /**
@@ -26,7 +26,7 @@ import com.twitter.heron.streamlet.impl.sources.ComplexSource;
  * from a user supplied Supplier Function. The supplier function is the
  * source of all tuples for this Streamlet.
  */
-public class SourceStreamlet<R> extends BaseStreamlet<R> {
+public class SourceStreamlet<R> extends StreamletImpl<R> {
   private Source<R> generator;
 
   public SourceStreamlet(Source<R> generator) {

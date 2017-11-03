@@ -384,7 +384,7 @@ genrule(
     stamp = 1,
     tools = [
         "//heronpy/api:heron-python-package",
-        "//heronpy/streamlet:heron-streamlet-api-package",
+        "//heronpy/streamlet:heron-python-streamlet-api-package",
         "//heronpy/connectors:heron-pythonconnectors-package",
         "//heronpy/proto:proto-py-package",
     ],
@@ -405,7 +405,7 @@ genrule(
         'echo $$HERON_VERSION',
         'mkdir -p $$TMP_DIR $$HERONPY_DIR',
         'unzip -qd $$HERONPYAPI_UNZIP $(location //heronpy/api:heron-python-package)',
-        'unzip -qd $$HERONPYSTREAMLET_UNZIP $(location //heronpy/streamlet:heron-streamlet-api-package)',
+        'unzip -qd $$HERONPYSTREAMLET_UNZIP $(location //heronpy/streamlet:heron-python-streamlet-api-package)',
         'unzip -qd $$HERONPYCONNECTORS_UNZIP $(location //heronpy/connectors:heron-pythonconnectors-package)',
         'unzip -qd $$HERONPYPROTO_UNZIP $(location //heronpy/proto:proto-py-package)',
         'find $$HERONPYAPI_UNZIP -name "*.pyc" -exec rm {} \;',

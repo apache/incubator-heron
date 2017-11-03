@@ -19,29 +19,39 @@ import java.util.Set;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableFunction;
-import com.twitter.heron.streamlet.impl.BaseKVStreamlet;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.KVStreamletImpl;
+import com.twitter.heron.streamlet.impl.operators.FlatMapOperator;
 
 /**
- * KVFlatMapStreamlet represents a KVStreamlet that is made up of applying the user
+ * FlatMapStreamlet represents a Streamlet that is made up of applying the user
  * supplied flatMap function to each element of the parent streamlet and flattening
- * out the result. The only difference between this and FlatMapStreamlet is that
- * KVFlatMapStreamlet ensures that resulting elements are of type KeyValue.
+ * out the result.
  */
-public class KVFlatMapStreamlet<R, K, V> extends BaseKVStreamlet<K, V> {
-  private FlatMapStreamlet<? super R, ? extends KeyValue<K, V>> delegate;
+public class KVFlatMapStreamlet<K, V, K1, V1> extends KVStreamletImpl<K1, V1> {
+  private KVStreamletImpl<K, V> parent;
+  private SerializableFunction<KeyValue<K, V>,
+      ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn;
 
-  public KVFlatMapStreamlet(BaseStreamlet<R> parent,
-                            SerializableFunction<? super R,
-                                ? extends Iterable<KeyValue<K, V>>> flatMapFn) {
-    this.delegate = new FlatMapStreamlet<>(parent, flatMapFn);
-    setNumPartitions(delegate.getNumPartitions());
+  public KVFlatMapStreamlet(KVStreamletImpl<K, V> parent,
+                            SerializableFunction<KeyValue<K, V>,
+                              ? extends Iterable<KeyValue<? extends K1, ? extends V1>>> flatMapFn) {
+    this.parent = parent;
+    this.flatMapFn = flatMapFn;
+    setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    boolean retval = this.delegate.doBuild(bldr, stageNames);
-    setName(delegate.getName());
-    return retval;
+    if (getName() == null) {
+      setName(defaultNameCalculator("kvflatmap", stageNames));
+    }
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException("Duplicate Names");
+    }
+    stageNames.add(getName());
+    bldr.setBolt(getName(), new FlatMapOperator<KeyValue<K, V>,
+            KeyValue<? extends K1, ? extends V1>>(flatMapFn),
+        getNumPartitions()).shuffleGrouping(parent.getName());
+    return true;
   }
 }

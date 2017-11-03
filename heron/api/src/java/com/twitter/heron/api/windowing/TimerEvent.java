@@ -32,10 +32,14 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
+
 /**
  * Timer event used to trigger actions in windowing that needs to occur on a set frequency
  */
-public class TimerEvent<T> extends EventImpl<T> {
+public class TimerEvent<T extends Serializable> extends EventImpl<T> {
+  private static final long serialVersionUID = -9174292711796600228L;
+
   public TimerEvent(T event, long ts) {
     super(event, ts);
   }

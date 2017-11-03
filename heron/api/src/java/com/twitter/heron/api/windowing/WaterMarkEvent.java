@@ -32,11 +32,15 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
+
 /**
  * Watermark event used for tracking progress of time when
  * processing event based ts.
  */
-public class WaterMarkEvent<T> extends EventImpl<T> {
+public class WaterMarkEvent<T extends Serializable> extends EventImpl<T> {
+  private static final long serialVersionUID = 6326428182594026128L;
+
   public WaterMarkEvent(long ts) {
     super(null, ts);
   }
