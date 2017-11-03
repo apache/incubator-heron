@@ -263,7 +263,7 @@ public class JoinOperatorTest {
         tuple = getTuple(leftComponentStreamId, new Fields("a"),
             new Values(new KeyValue<String, String>("key1", String.valueOf(i))));
       } else {
-        tuple = getTuple(rightComponentStreamId, new Fields("b"),
+        tuple = getTuple(rightComponentStreamId, new Fields("a"),
             new Values(new KeyValue<String, String>("key1", String.valueOf(i))));
       }
       tuples.add(tuple);
@@ -292,7 +292,7 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   private JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String>
         getJoinOperator(JoinType type) {
-    SerializableFunction<KeyValue<String, String>, String> f = x -> x.getKey();
+    SerializableFunction<KeyValue<String, String>, String> f = x -> x == null ? "null" : x.getKey();
     JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator =
         new JoinOperator(
         type,
@@ -301,7 +301,7 @@ public class JoinOperatorTest {
             f,
             f,
         (SerializableBiFunction<KeyValue<String, String>, KeyValue<String, String>, String>)
-            (o, o2) -> o.getValue() + o2.getValue());
+            (o, o2) -> (o == null ? "null" : o.getValue()) + (o2 == null ? "null" : o2.getValue()));
 
     joinOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {
