@@ -49,7 +49,6 @@ public final class WindowedWordCountTopology {
   );
 
   public static void main(String[] args) throws Exception {
-    /*
     Builder processingGraphBuilder = Builder.createBuilder();
 
     processingGraphBuilder
@@ -60,11 +59,15 @@ public final class WindowedWordCountTopology {
         // Each sentence is "flattened" into a Streamlet<String> of individual words
         .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
         .setName("flatten-into-individual-words")
-        // The KeyValue object is used to obtain a per-word count
-        .mapToKV((word) -> new KeyValue<>(word, 1))
-        .setName("map-to-kv")
         // The reduce operation performs the per-key (i.e. per-word) sum within each time window
-        .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(50), (x, y) -> x + y)
+        .reduceByKeyAndWindow(
+            // The key extractor (the word is left unchanged)
+            word -> word,
+            // Value extractor (the value is always 1)
+            word -> 1,
+            WindowConfig.TumblingCountWindow(50),
+            (x, y) -> x + y
+        )
         .setName("reduce-operation")
         // The final output is logged using a user-supplied format
         .consume(kv -> {
@@ -89,6 +92,5 @@ public final class WindowedWordCountTopology {
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
-    */
   }
 }

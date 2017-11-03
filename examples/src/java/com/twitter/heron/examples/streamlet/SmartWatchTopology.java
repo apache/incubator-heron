@@ -61,12 +61,17 @@ public final class SmartWatchTopology {
       LOG.info(String.format("Emitted smart watch reading: %s", this));
     }
 
-    String getJoggerid() {
+    String getJoggerId() {
       return joggerId;
     }
 
     int getFeetRun() {
       return feetRun;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("(jogger: %s, feetRun: %d)", joggerId, feetRun);
     }
   }
 
