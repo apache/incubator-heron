@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableFunction;
 
 /**

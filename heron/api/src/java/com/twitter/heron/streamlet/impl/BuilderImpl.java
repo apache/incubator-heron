@@ -22,7 +22,6 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableSupplier;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;

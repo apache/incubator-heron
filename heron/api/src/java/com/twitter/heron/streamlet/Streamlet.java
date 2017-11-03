@@ -123,9 +123,9 @@ public interface Streamlet<R> {
    * @param joinFunction The join function that needs to be applied
    */
   <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-  join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
-       SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
-       SerializableBiFunction<R, S, ? extends T> joinFunction);
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             SerializableBiFunction<R, S, ? extends T> joinFunction);
 
 
   /**
@@ -144,9 +144,9 @@ public interface Streamlet<R> {
    * @param joinFunction The join function that needs to be applied
    */
   <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-  join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
-       SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg, JoinType joinType,
-       SerializableBiFunction<R, S, ? extends T> joinFunction);
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction);
 
   /**
    * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by

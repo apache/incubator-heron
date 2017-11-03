@@ -293,9 +293,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-  join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
-       SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
-       SerializableBiFunction<R, S, ? extends T> joinFunction) {
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             SerializableBiFunction<R, S, ? extends T> joinFunction) {
     return join(other, thisKeyExtractor, otherKeyExtractor,
         windowCfg, JoinType.INNER, joinFunction);
   }
@@ -317,9 +317,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-  join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
-       SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg, JoinType joinType,
-       SerializableBiFunction<R, S, ? extends T> joinFunction) {
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction) {
 
     StreamletImpl<S> joinee = (StreamletImpl<S>) other;
     JoinStreamlet<K, R, S, T> retval = JoinStreamlet.createJoinStreamlet(

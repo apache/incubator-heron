@@ -101,7 +101,7 @@ public class GeneralReduceByKeyAndWindowOperatorTest {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer>
-  getReduceByWindowOperator(Integer identity) {
+        getReduceByWindowOperator(Integer identity) {
     GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer>
         reduceByWindowOperator = new GeneralReduceByKeyAndWindowOperator<>(
             x -> x.getKey(), identity, (o, o2) -> o + o2.getValue());

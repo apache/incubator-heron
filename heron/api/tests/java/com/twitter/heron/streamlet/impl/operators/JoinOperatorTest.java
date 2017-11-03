@@ -291,7 +291,7 @@ public class JoinOperatorTest {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String>
-  getJoinOperator(JoinType type) {
+        getJoinOperator(JoinType type) {
     SerializableFunction<KeyValue<String, String>, String> f = x -> x.getKey();
     JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator =
         new JoinOperator(
