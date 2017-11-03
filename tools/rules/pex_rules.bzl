@@ -239,7 +239,6 @@ pex_binary = rule(
             executable = True,
         ),
     },
-    cfg = "host",
 )
 
 pex_test = rule(
@@ -253,5 +252,4 @@ pex_test = rule(
         ),
     },
     test = True,
-    cfg = "host",
 )
