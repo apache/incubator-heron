@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -56,9 +55,9 @@ public final class ImpressionsAndClicksTopology {
   );
 
   /**
-   * A list of 100 active users ("user1" through "user100").
+   * A list of 25 active users ("user1" through "user25").
    */
-  private static final List<String> USERS = IntStream.range(1, 100)
+  private static final List<String> USERS = IntStream.range(1, 25)
       .mapToObj(i -> String.format("user%d", i))
       .collect(Collectors.toList());
 
@@ -73,7 +72,6 @@ public final class ImpressionsAndClicksTopology {
     private String impressionId;
 
     AdImpression() {
-      Utils.sleep(50);
       this.adId = StreamletUtils.randomFromList(ADS);
       this.userId = StreamletUtils.randomFromList(USERS);
       this.impressionId = UUID.randomUUID().toString();
@@ -107,7 +105,6 @@ public final class ImpressionsAndClicksTopology {
     private String clickId;
 
     AdClick() {
-      Utils.sleep(50);
       this.adId = StreamletUtils.randomFromList(ADS);
       this.userId = StreamletUtils.randomFromList(USERS);
       this.clickId = UUID.randomUUID().toString();
