@@ -54,7 +54,6 @@ public final class SmartWatchTopology {
     private final String joggerId;
     private final int feetRun;
 
-
     SmartWatchReading() {
       Utils.sleep(1000);
       this.joggerId = StreamletUtils.randomFromList(JOGGERS);
@@ -62,37 +61,29 @@ public final class SmartWatchTopology {
       LOG.info(String.format("Emitted smart watch reading: %s", this));
     }
 
-    KeyValue<String, Integer> toKV() {
-      return new KeyValue<>(joggerId, feetRun);
+    String getJoggerid() {
+      return joggerId;
     }
 
-    @Override
-    public String toString() {
-      return String.format("(user: %s, distance: %d)", joggerId, feetRun);
+    int getFeetRun() {
+      return feetRun;
     }
-  }
-
-  private static int reduce(int cumulativeFeetRun, int incomingFeetRun) {
-    return cumulativeFeetRun + incomingFeetRun;
   }
 
   public static void main(String[] args) throws Exception {
-    /*
     Builder processingGraphBuilder = Builder.createBuilder();
 
     processingGraphBuilder.newSource(SmartWatchReading::new)
         .setName("incoming-watch-readings")
-        .mapToKV(SmartWatchReading::toKV)
-        .setName("map-smart-watch-readings-to-kv")
         .reduceByKeyAndWindow(
+            // Key extractor
+            reading -> reading.getJoggerId(),
+            // Value extractor
+            reading -> reading.getFeetRun(),
             // The time window (1 minute of clock time)
             WindowConfig.TumblingTimeWindow(Duration.ofSeconds(10)),
-            // The optional "identity" value that acts as a starting point for the
-            // reduce function. This is returned if the reduce function is provided
-            // with no values to work with inside of the time window.
-            0,
             // The reduce function (produces a cumulative sum)
-            SmartWatchTopology::reduce
+            (cumulative, incoming) -> cumulative + incoming
         )
         .setName("reduce-to-total-distance-per-jogger")
         .map(keyWindow -> {
@@ -138,6 +129,5 @@ public final class SmartWatchTopology {
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
-    */
   }
 }

@@ -130,26 +130,6 @@ public final class ImpressionsAndClicksTopology {
   }
 
   /**
-   * The join function for the processing graph. For each incoming KeyValue object
-   * pair joined during the specified time window, if the userId matches then a KeyValue
-   * object with a value of 1 is returned (else 0).
-   */
-  private static KeyValue<String, Integer> incrementIfSameUser(String userId1, String userId2) {
-    return (userId1.equals(userId2)) ? new KeyValue<>(userId1, 1) : new KeyValue<>(userId1, 0);
-  }
-
-  /**
-   * The reduce function for the processing graph. A cumulative total of clicks is counted
-   * for each userId.
-   */
-  private static KeyValue<String, Integer> countCumulativeClicks(
-      KeyValue<String, Integer> cumulative,
-      KeyValue<String, Integer> incoming) {
-    int total = cumulative.getValue() + incoming.getValue();
-    return new KeyValue<>(incoming.getKey(), total);
-  }
-
-  /**
    * All Heron topologies require a main function that defines the topology's behavior
    * at runtime
    */
