@@ -77,6 +77,7 @@ public final class SmartWatchTopology {
   }
 
   public static void main(String[] args) throws Exception {
+    /*
     Builder processingGraphBuilder = Builder.createBuilder();
 
     processingGraphBuilder.newSource(SmartWatchReading::new)
@@ -137,5 +138,6 @@ public final class SmartWatchTopology {
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
+    */
   }
 }

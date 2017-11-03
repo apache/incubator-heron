@@ -25,9 +25,10 @@ import java.util.stream.IntStream;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.KVStreamlet;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.Runner;
+import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
 
 /**
@@ -157,15 +158,13 @@ public final class ImpressionsAndClicksTopology {
 
     // A KVStreamlet is produced. Each element is a KeyValue object where the key
     // is the impression ID and the user ID is the value.
-    KVStreamlet<String, String> impressions = processingGraphBuilder
-        .newSource(AdImpression::new)
-        .mapToKV(impression -> new KeyValue<>(impression.getAdId(), impression.getUserId()));
+    Streamlet<AdImpression> impressions = processingGraphBuilder
+        .newSource(AdImpression::new);
 
     // A KVStreamlet is produced. Each element is a KeyValue object where the key
     // is the ad ID and the user ID is the value.
-    KVStreamlet<String, String> clicks = processingGraphBuilder
-        .newSource(AdClick::new)
-        .mapToKV(click -> new KeyValue<>(click.getAdId(), click.getUserId()));
+    Streamlet<AdClick> clicks = processingGraphBuilder
+        .newSource(AdClick::new);
 
     /**
      * Here, the impressions KVStreamlet is joined to the clicks KVStreamlet.
@@ -175,20 +174,36 @@ public final class ImpressionsAndClicksTopology {
         // of KeyValue objects where the userId matches across an impression and a click
         // (meaning that the user has clicked on the ad).
         .join(
+            // The other streamlet that's being joined to
             clicks,
-            WindowConfig.TumblingCountWindow(50),
-            ImpressionsAndClicksTopology::incrementIfSameUser
+            // Key extractor for the impressions streamlet
+            impression -> impression.getUserId(),
+            // Key extractor for the clicks streamlet
+            click -> click.getUserId(),
+            // Window configuration for the join operation
+            WindowConfig.TumblingCountWindow(25),
+            // Join type (inner join means that all elements from both streams will be included)
+            JoinType.INNER,
+            // For each element resulting from the join operation, a value of 1 will be provided
+            // if the user IDs match between the elements (or a value of 0 if they don't).
+            (user1, user2) -> (user1.getAdId().equals(user2.getAdId())) ? 1 : 0
         )
         // The reduce function counts the number of ad clicks per user.
         .reduceByKeyAndWindow(
-            WindowConfig.TumblingCountWindow(100),
-            ImpressionsAndClicksTopology::countCumulativeClicks
+            // Key extractor for the reduce operation
+            kv -> String.format("user-%s", kv.getKey().getKey()),
+            // Value extractor for the reduce operation
+            kv -> kv.getValue(),
+            // Window configuration for the reduce operation
+            WindowConfig.TumblingCountWindow(50),
+            // A running cumulative total is calculated for each key
+            (cumulative, incoming) -> cumulative + incoming
         )
+        // Finally, the consumer operation provides formatted log output
         .consume(kw -> {
-          String userId = kw.getValue().getKey();
-          int totalUserClicks = kw.getValue().getValue();
-
-          LOG.info(String.format("(user: %s, clicks: %d)", userId, totalUserClicks));
+          LOG.info(String.format("(user: %s, clicks: %d)",
+              kw.getKey().getKey(),
+              kw.getValue()));
         });
 
     Config config = new Config();

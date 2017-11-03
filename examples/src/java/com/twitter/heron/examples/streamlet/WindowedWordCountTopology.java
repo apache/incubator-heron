@@ -49,6 +49,7 @@ public final class WindowedWordCountTopology {
   );
 
   public static void main(String[] args) throws Exception {
+    /*
     Builder processingGraphBuilder = Builder.createBuilder();
 
     processingGraphBuilder
@@ -88,5 +89,6 @@ public final class WindowedWordCountTopology {
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, processingGraphBuilder);
+    */
   }
 }
