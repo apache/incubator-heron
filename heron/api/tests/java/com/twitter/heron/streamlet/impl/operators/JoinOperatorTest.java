@@ -45,6 +45,7 @@ import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 
 public class JoinOperatorTest {
 
@@ -60,7 +61,7 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testInnerJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
         = getJoinOperator(JoinType.INNER);
 
     TupleWindow tupleWindow = getTupleWindow();
@@ -92,7 +93,7 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterLeftJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
         = getJoinOperator(JoinType.OUTER_LEFT);
 
     TupleWindow tupleWindow = getTupleWindow();
@@ -140,7 +141,7 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterRightJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
         = getJoinOperator(JoinType.OUTER_RIGHT);
 
     TupleWindow tupleWindow = getTupleWindow();
@@ -192,7 +193,7 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
         = getJoinOperator(JoinType.OUTER);
 
     TupleWindow tupleWindow = getTupleWindow();
@@ -291,14 +292,15 @@ public class JoinOperatorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   private JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String>
   getJoinOperator(JoinType type) {
+    SerializableFunction<KeyValue<String, String>, String> f = x -> x.getKey();
     JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator =
         new JoinOperator(
         type,
         "leftComponent",
         "rightComponent",
-        x -> x.getKey(),
-        x -> x.getKey(),
-        (o, o2) -> o + o2);
+            f,
+            f,
+        (SerializableBiFunction<String, String, String>) (o, o2) -> o + o2);
 
     joinOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {
