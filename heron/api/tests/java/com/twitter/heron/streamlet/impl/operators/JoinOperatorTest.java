@@ -300,7 +300,8 @@ public class JoinOperatorTest {
         "rightComponent",
             f,
             f,
-        (SerializableBiFunction<String, String, String>) (o, o2) -> o + o2);
+        (SerializableBiFunction<KeyValue<String, String>, KeyValue<String, String>, String>)
+            (o, o2) -> o.getValue() + o2.getValue());
 
     joinOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {
