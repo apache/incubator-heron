@@ -7,7 +7,6 @@ ENV bazelVersion 0.5.4
 RUN apt-get update && apt-get -y install \
       automake \
       build-essential \
-      cmake \
       curl \
       libssl-dev \
       git \
@@ -21,6 +20,8 @@ RUN apt-get update && apt-get -y install \
       unzip \
       wget
 
+RUN add-apt-repository ppa:george-edison55/cmake-3.x && apt-get -y update && \
+      apt-get -y install cmake
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
 RUN apt-get -y install openjdk-8-jdk

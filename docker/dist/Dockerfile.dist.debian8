@@ -1,34 +1,28 @@
-FROM ubuntu:14.04
+FROM openjdk:8-jdk-slim
 
 RUN apt-get -y update && apt-get -y install \
+    netcat \
     python \
     unzip \
-    software-properties-common \
-    supervisor \
-    curl && \
-    apt-get clean all
-
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-8-jdk && apt-get clean all
-
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-RUN update-ca-certificates -f
+    curl \
+    supervisor && \
+    apt-get clean all && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD artifacts /heron
 
 WORKDIR /heron
 
-# run heron installers
-RUN /heron/heron-client-install.sh && /heron/heron-tools-install.sh
+# run heron tools install
+RUN /heron/heron-tools-install.sh && \
+    tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron && \
+    rm -rf /heron/heron-core.tar.gz && \
+    rm -rf /heron/heron-tools-install.sh && \
+    rm -rf /opt/heron/heron-core/lib/scheduler/heron-local-scheduler.jar && \
+    rm -rf /opt/heron/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
+    rm -rf /opt/heron/heron-core/lib/scheduler/heron-slurm-scheduler.jar
 
-RUN tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron
-
-RUN rm -f /heron/heron-tools-install.sh && \
-    rm -f /heron/heron-client-install.sh && \
-    rm -f /heron/heron-core.tar.gz
-
-ENV HERON_HOME /heron/heron-core/
-RUN export HERON_HOME
+ENV HERON_HOME /opt/heron/heron-core/
 
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.10
@@ -63,5 +57,3 @@ ADD dist/scripts /opt/zookeeper/scripts
 RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
     && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
     && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
-
-CMD ["supervisord", "-n"]
