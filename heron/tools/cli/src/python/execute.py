@@ -98,7 +98,6 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   topology_jar = os.path.basename(topology_tar).replace(".tar.gz", "").replace(".tar", "") + ".jar"
 
   extra_jars = [
-      os.path.join(tmpdir, "heron-instance.jar"),
       os.path.join(tmpdir, topology_jar),
       os.path.join(tmpdir, "*"),
       os.path.join(tmpdir, "libs/*")
