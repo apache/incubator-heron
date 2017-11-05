@@ -34,6 +34,7 @@
 package com.twitter.heron.api;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -265,6 +266,8 @@ public class Config extends HashMap<String, Object> {
    * This variable contains Map<String, String>
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
+  public static final String TOPOLOGY_TIMER_EVENTS = "topology.timer.events";
 
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
@@ -651,5 +654,22 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void registerTopologyTimerEvents(Map<String, Object> conf,
+                                                 String name, Duration timerDuration,
+                                                 Runnable task) {
+    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
+      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
+    }
+
+    Map<String, Pair<Duration, Runnable>> timers
+        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timers.containsKey(name)) {
+      throw new IllegalArgumentException("Timer with name " + name + " already exists");
+    }
+    timers.put(name, Pair.of(timerDuration, task));
   }
 }

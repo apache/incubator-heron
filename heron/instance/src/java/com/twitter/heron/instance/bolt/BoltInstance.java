@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.Pair;
 import com.twitter.heron.api.bolt.IBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -222,7 +223,7 @@ public class BoltInstance implements IInstance {
     };
     looper.addTasksOnWakeup(boltTasks);
 
-    PrepareTickTupleTimer();
+    prepareTimerEvents();
   }
 
   @Override
@@ -298,7 +299,22 @@ public class BoltInstance implements IInstance {
   public void deactivate() {
   }
 
-  private void PrepareTickTupleTimer() {
+  @SuppressWarnings("unchecked")
+  private void prepareTimerEvents() {
+    Map<String, Pair<Duration, Runnable>> timerEvents =
+        (Map<String, Pair<Duration, Runnable>>) helper.getTopologyContext()
+            .getTopologyConfig().get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timerEvents != null) {
+      for (Map.Entry<String, Pair<Duration, Runnable>> entry : timerEvents.entrySet()) {
+        Duration duration = entry.getValue().getFirst();
+        Runnable task = entry.getValue().getSecond();
+
+       looper.registerPeriodicEvent(duration, task);
+      }
+    }
+
+    // prepare tick tuple
     Object tickTupleFreqMs =
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS);
 
@@ -311,7 +327,7 @@ public class BoltInstance implements IInstance {
         }
       };
 
-      looper.registerTimerEvent(freq, r);
+      looper.registerPeriodicEvent(freq, r);
     }
   }
 
@@ -323,7 +339,5 @@ public class BoltInstance implements IInstance {
     boltMetrics.executeTuple(t.getSourceStreamId(), t.getSourceComponent(), latency);
 
     collector.sendOutTuples();
-    // reschedule ourselves again
-    PrepareTickTupleTimer();
   }
 }
