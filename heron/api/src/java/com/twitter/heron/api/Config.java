@@ -267,6 +267,12 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
 
+  /**
+   * Timer events registered for a topology.
+   * This is a Map<String, Pair<Duration, Runnable>>.
+   * Where the key is the name and the value contains the frequency of the event
+   * and the task to run.
+   */
   public static final String TOPOLOGY_TIMER_EVENTS = "topology.timer.events";
 
   private static final long serialVersionUID = 2550967708478837032L;
@@ -656,6 +662,13 @@ public class Config extends HashMap<String, Object> {
     setTopologyStatefulStartClean(this, clean);
   }
 
+  /**
+   * Registers a timer event that executes periodically
+   * @param conf the map with the existing topology configs
+   * @param name the name of the timer
+   * @param timerDuration the frequency in which to run the task
+   * @param task the task to run
+   */
   @SuppressWarnings("unchecked")
   public static void registerTopologyTimerEvents(Map<String, Object> conf,
                                                  String name, Duration timerDuration,
