@@ -24,19 +24,14 @@ import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.KVStreamlet;
-import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.streamlet.Window;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
@@ -47,18 +42,6 @@ import static org.junit.Assert.*;
  * Unit tests for {@link StreamletImpl}
  */
 public class StreamletImplTest {
-
-  private <T> boolean isFullyBuilt(BaseStreamletImpl<T> streamlet) {
-    if (!streamlet.isBuilt()) {
-      return false;
-    }
-    for (BaseStreamletImpl<?> child : streamlet.getChildren()) {
-      if (!isFullyBuilt(child)) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   @Before
   public void setUp() {
@@ -93,21 +76,6 @@ public class StreamletImplTest {
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).map((num) -> num * 10);
     assertTrue(streamlet instanceof MapStreamlet);
     MapStreamlet<Double, Double> mStreamlet = (MapStreamlet<Double, Double>) streamlet;
-    assertEquals(20, mStreamlet.getNumPartitions());
-    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
-    assertEquals(supplierStreamlet.getChildren().size(), 1);
-    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testMapToKVStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    KVStreamlet<Double, Double> streamlet = baseStreamlet.setNumPartitions(20)
-        .mapToKV((num) -> new KeyValue<>(num, num));
-    assertTrue(streamlet instanceof MapToKVStreamlet);
-    MapToKVStreamlet<Double, Double, Double> mStreamlet =
-        (MapToKVStreamlet<Double, Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
@@ -186,18 +154,6 @@ public class StreamletImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testReduceByWindowStreamlet() throws Exception {
-    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    KVStreamlet<Window, Double> streamlet =
-        baseStreamlet.reduceByWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
-    assertTrue(streamlet instanceof ReduceByWindowStreamlet);
-    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
-    assertEquals(supplierStreamlet.getChildren().size(), 1);
-    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
   public void testTransformStreamlet() throws Exception {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet =
@@ -228,26 +184,22 @@ public class StreamletImplTest {
   public void testSimpleBuild() throws Exception {
     Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> "sa re ga ma");
     baseStreamlet.flatMap(x -> Arrays.asList(x.split(" ")))
-                 .mapToKV(x -> new KeyValue<>(x, 1))
-                 .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+                 .reduceByKeyAndWindow(x -> x, x -> 1, WindowConfig.TumblingCountWindow(10),
+                     (x, y) -> x + y);
     SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
     assertFalse(supplierStreamlet.isBuilt());
     TopologyBuilder builder = new TopologyBuilder();
     Set<String> stageNames = new HashSet<>();
     supplierStreamlet.build(builder, stageNames);
-    assertTrue(isFullyBuilt(supplierStreamlet));
+    assertTrue(supplierStreamlet.allBuilt());
     assertEquals(supplierStreamlet.getChildren().size(), 1);
     assertTrue(supplierStreamlet.getChildren().get(0) instanceof FlatMapStreamlet);
     FlatMapStreamlet<String, String> fStreamlet =
         (FlatMapStreamlet<String, String>) supplierStreamlet.getChildren().get(0);
     assertEquals(fStreamlet.getChildren().size(), 1);
-    assertTrue(fStreamlet.getChildren().get(0) instanceof MapToKVStreamlet);
-    MapToKVStreamlet<String, String, Integer> mkvStreamlet =
-        (MapToKVStreamlet<String, String, Integer>) fStreamlet.getChildren().get(0);
-    assertEquals(mkvStreamlet.getChildren().size(), 1);
-    assertTrue(mkvStreamlet.getChildren().get(0) instanceof ReduceByKeyAndWindowStreamlet);
-    ReduceByKeyAndWindowStreamlet<String, Integer> rStreamlet =
-        (ReduceByKeyAndWindowStreamlet<String, Integer>) mkvStreamlet
+    assertTrue(fStreamlet.getChildren().get(0) instanceof ReduceByKeyAndWindowStreamlet);
+    ReduceByKeyAndWindowStreamlet<String, Integer, Integer> rStreamlet =
+        (ReduceByKeyAndWindowStreamlet<String, Integer, Integer>) fStreamlet
             .getChildren().get(0);
     assertEquals(rStreamlet.getChildren().size(), 0);
   }
@@ -257,18 +209,17 @@ public class StreamletImplTest {
   public void testComplexBuild() throws Exception {
     // First source
     Streamlet<String> baseStreamlet1 = StreamletImpl.createSupplierStreamlet(() -> "sa re ga ma");
-    KVStreamlet<String, Integer> leftStream =
-        baseStreamlet1.flatMap(x -> Arrays.asList(x.split(" ")))
-        .mapToKV(x -> new KeyValue<>(x, 1));
+    Streamlet<String> leftStream =
+        baseStreamlet1.flatMap(x -> Arrays.asList(x.split(" ")));
 
     // Second source
     Streamlet<String> baseStreamlet2 = StreamletImpl.createSupplierStreamlet(() -> "I Love You");
-    KVStreamlet<String, Integer> rightStream =
-        baseStreamlet2.flatMap(x -> Arrays.asList(x.split(" ")))
-        .mapToKV(x -> new KeyValue<>(x, 1));
+    Streamlet<String> rightStream =
+        baseStreamlet2.flatMap(x -> Arrays.asList(x.split(" ")));
 
     // join
-    leftStream.join(rightStream, WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+    leftStream.join(rightStream, x -> x, x -> x,
+        WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
 
     SupplierStreamlet<String> supplierStreamlet1 = (SupplierStreamlet<String>) baseStreamlet1;
     SupplierStreamlet<String> supplierStreamlet2 = (SupplierStreamlet<String>) baseStreamlet2;
@@ -278,11 +229,11 @@ public class StreamletImplTest {
     Set<String> stageNames = new HashSet<>();
     supplierStreamlet1.build(builder, stageNames);
     assertTrue(supplierStreamlet1.isBuilt());
-    assertFalse(isFullyBuilt(supplierStreamlet1));
+    assertFalse(supplierStreamlet1.allBuilt());
 
     supplierStreamlet2.build(builder, stageNames);
-    assertTrue(isFullyBuilt(supplierStreamlet1));
-    assertTrue(isFullyBuilt(supplierStreamlet2));
+    assertTrue(supplierStreamlet1.allBuilt());
+    assertTrue(supplierStreamlet2.allBuilt());
 
     // go over all stuff
     assertEquals(supplierStreamlet1.getChildren().size(), 1);
@@ -290,13 +241,9 @@ public class StreamletImplTest {
     FlatMapStreamlet<String, String> fStreamlet =
         (FlatMapStreamlet<String, String>) supplierStreamlet1.getChildren().get(0);
     assertEquals(fStreamlet.getChildren().size(), 1);
-    assertTrue(fStreamlet.getChildren().get(0) instanceof MapToKVStreamlet);
-    MapToKVStreamlet<String, String, Integer> mkvStreamlet =
-        (MapToKVStreamlet<String, String, Integer>) fStreamlet.getChildren().get(0);
-    assertEquals(mkvStreamlet.getChildren().size(), 1);
-    assertTrue(mkvStreamlet.getChildren().get(0) instanceof JoinStreamlet);
-    JoinStreamlet<String, Integer, Integer, Integer> jStreamlet =
-        (JoinStreamlet<String, Integer, Integer, Integer>) mkvStreamlet.getChildren().get(0);
+    assertTrue(fStreamlet.getChildren().get(0) instanceof JoinStreamlet);
+    JoinStreamlet<String, String, String, String> jStreamlet =
+        (JoinStreamlet<String, String, String, String>) fStreamlet.getChildren().get(0);
     assertEquals(jStreamlet.getChildren().size(), 0);
 
     assertEquals(supplierStreamlet2.getChildren().size(), 1);
@@ -304,13 +251,9 @@ public class StreamletImplTest {
     fStreamlet =
         (FlatMapStreamlet<String, String>) supplierStreamlet2.getChildren().get(0);
     assertEquals(fStreamlet.getChildren().size(), 1);
-    assertTrue(fStreamlet.getChildren().get(0) instanceof MapToKVStreamlet);
-    mkvStreamlet =
-        (MapToKVStreamlet<String, String, Integer>) fStreamlet.getChildren().get(0);
-    assertEquals(mkvStreamlet.getChildren().size(), 1);
-    assertTrue(mkvStreamlet.getChildren().get(0) instanceof JoinStreamlet);
+    assertTrue(fStreamlet.getChildren().get(0) instanceof JoinStreamlet);
     jStreamlet =
-        (JoinStreamlet<String, Integer, Integer, Integer>) mkvStreamlet.getChildren().get(0);
+        (JoinStreamlet<String, String, String, String>) fStreamlet.getChildren().get(0);
     assertEquals(jStreamlet.getChildren().size(), 0);
   }
 }

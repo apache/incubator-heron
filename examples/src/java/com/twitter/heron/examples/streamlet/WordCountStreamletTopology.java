@@ -18,7 +18,6 @@ import java.util.Arrays;
 
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.WindowConfig;
 
@@ -51,8 +50,7 @@ public final class WordCountStreamletTopology {
     Builder builder = Builder.createBuilder();
     builder.newSource(() -> "Mary had a little lamb")
         .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")))
-        .mapToKV((word) -> new KeyValue<>(word, 1))
-        .reduceByKeyAndWindow(WindowConfig.TumblingCountWindow(10), (x, y) -> x + y)
+        .reduceByKeyAndWindow(x -> x, WindowConfig.TumblingCountWindow(10), 0, (x, y) -> x + 1)
         .log();
     Config conf = new Config();
     conf.setNumContainers(parallelism);

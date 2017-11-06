@@ -17,10 +17,12 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.KVStreamletImpl;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
@@ -33,17 +35,20 @@ import com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOpe
  * KeyWindowInfo<K> type and the value is of type V.
  */
 public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
-    extends KVStreamletImpl<KeyedWindow<K>, VR> {
-  private KVStreamletImpl<K, V> parent;
+    extends StreamletImpl<KeyValue<KeyedWindow<K>, VR>> {
+  private StreamletImpl<V> parent;
+  private SerializableFunction<V, K> keyExtractor;
   private WindowConfigImpl windowCfg;
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
 
-  public GeneralReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
+  public GeneralReduceByKeyAndWindowStreamlet(StreamletImpl<V> parent,
+                            SerializableFunction<V, K> keyExtractor,
                             WindowConfig windowCfg,
                             VR identity,
                             SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
     this.parent = parent;
+    this.keyExtractor = keyExtractor;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.identity = identity;
     this.reduceFn = reduceFn;
@@ -60,10 +65,11 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
     }
     stageNames.add(getName());
     GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
-        new GeneralReduceByKeyAndWindowOperator<K, V, VR>(identity, reduceFn);
+        new GeneralReduceByKeyAndWindowOperator<K, V, VR>(keyExtractor, identity, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
+        .customGrouping(parent.getName(),
+            new ReduceByKeyAndWindowCustomGrouping<K, V>(keyExtractor));
     return true;
   }
 }
