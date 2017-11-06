@@ -310,7 +310,7 @@ public class BoltInstance implements IInstance {
         Duration duration = entry.getValue().getFirst();
         Runnable task = entry.getValue().getSecond();
 
-       looper.registerPeriodicEvent(duration, task);
+        looper.registerPeriodicEvent(duration, task);
       }
     }
 
