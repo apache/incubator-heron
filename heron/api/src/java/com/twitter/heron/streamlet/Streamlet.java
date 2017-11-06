@@ -38,21 +38,39 @@ import com.twitter.heron.classification.InterfaceStability;
  * Streamlet before doing the transformation.
  */
 @InterfaceStability.Evolving
-public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
+public interface Streamlet<R> {
+
+  /**
+   * Sets the name of the BaseStreamlet.
+   * @param sName The name given by the user for this BaseStreamlet
+   * @return Returns back the Streamlet with changed name
+   */
+  Streamlet<R> setName(String sName);
+
+  /**
+   * Gets the name of the Streamlet.
+   * @return Returns the name of the Streamlet
+   */
+  String getName();
+
+  /**
+   * Sets the number of partitions of the streamlet
+   * @param numPartitions The user assigned number of partitions
+   * @return Returns back the Streamlet with changed number of partitions
+   */
+  Streamlet<R> setNumPartitions(int numPartitions);
+
+  /**
+   * Gets the number of partitions of this Streamlet.
+   * @return the number of partitions of this Streamlet
+   */
+  int getNumPartitions();
 
   /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */
   <T> Streamlet<T> map(SerializableFunction<R, ? extends T> mapFn);
-
-  /**
-   * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
-   * This differs from the above map transformation in that it returns a KVStreamlet
-   * instead of a plain Streamlet.
-   * @param mapFn The Map function that should be applied to each element
-   */
-  <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<R, ? extends KeyValue<K, V>> mapFn);
 
   /**
    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -93,27 +111,73 @@ public interface Streamlet<R> extends BaseStreamlet<Streamlet<R>> {
   List<Streamlet<R>> clone(int numClones);
 
   /**
-   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
-   * windowConfig and applying reduceFn on those tuples
-   * @param windowConfig This is a specification of what kind of windowing strategy you like
-   * to have. Typical windowing strategies are sliding windows and tumbling windows
-   * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
+   * Return a new Streamlet by inner joining 'this streamlet with ‘other’ streamlet.
+   * The join is done over elements accumulated over a time window defined by windowCfg.
+   * The elements are compared using the thisKeyExtractor for this streamlet with the
+   * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
+   * @param other The Streamlet that we are joining with.
+   * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to
+   * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinFunction The join function that needs to be applied
    */
-  KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
-                                        SerializableBinaryOperator<R> reduceFn);
+  <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             SerializableBiFunction<R, S, ? extends T> joinFunction);
+
 
   /**
-   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
-   * windowConfig and applying reduceFn on those tuples
-   * @param windowConfig This is a specification of what kind of windowing strategy you like
-   * to have. Typical windowing strategies are sliding windows and tumbling windows
+   * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
+   * is declared by the joinType parameter.
+   * The join is done over elements accumulated over a time window defined by windowCfg.
+   * The elements are compared using the thisKeyExtractor for this streamlet with the
+   * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
+   * Types of joins {@link JoinType}
+   * @param other The Streamlet that we are joining with.
+   * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to
+   * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinType Type of Join. Options {@link JoinType}
+   * @param joinFunction The join function that needs to be applied
+   */
+  <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction);
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
+   * windowCfg and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   * to be reduced on
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  <K, V> Streamlet<KeyValue<KeyedWindow<K>, V>> reduceByKeyAndWindow(
+      SerializableFunction<R, K> keyExtractor, SerializableFunction<R, V> valueExtractor,
+      WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn);
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
+   * windowCfg and applying reduceFn on those tuples. For each window, the value identity is used
+   * as a initial value. All the matching tuples are reduced using reduceFn startin from this
+   * initial value.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
    * @param identity The identity element is both the initial value inside the reduction window
    * and the default result if there are no elements in the window
    * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
    * and the next element of the stream. It returns a new partial result.
    */
-  <T> KVStreamlet<Window, T> reduceByWindow(WindowConfig windowConfig, T identity,
-                               SerializableBiFunction<T, R, ? extends T> reduceFn);
+  <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+      SerializableFunction<R, K> keyExtractor, WindowConfig windowCfg,
+      T identity, SerializableBiFunction<T, R, ? extends T> reduceFn);
 
   /**
    * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
