@@ -18,7 +18,7 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.SerializableConsumer;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
 
 /**
@@ -26,11 +26,11 @@ import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
  * streamlet after consuming every element. Since elements of the parents are just consumed
  * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
-public class ConsumerStreamlet<R> extends BaseStreamlet<R> {
-  private BaseStreamlet<R> parent;
+public class ConsumerStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private SerializableConsumer<R> consumer;
 
-  public ConsumerStreamlet(BaseStreamlet<R> parent, SerializableConsumer<R> consumer) {
+  public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
     this.parent = parent;
     this.consumer = consumer;
     setNumPartitions(parent.getNumPartitions());

@@ -31,9 +31,10 @@ import org.apache.reef.task.Task;
 import org.apache.reef.task.events.CloseEvent;
 import org.apache.reef.wake.EventHandler;
 
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
@@ -109,7 +110,7 @@ public class HeronExecutorTask implements Task {
     return null;
   }
 
-  public void startExecutor() {
+  public void startExecutor() throws InvalidTopologyException {
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
     String[] executorCmd = getExecutorCommand();
 
@@ -144,7 +145,7 @@ public class HeronExecutorTask implements Task {
     return envs;
   }
 
-  String[] getExecutorCommand() {
+  String[] getExecutorCommand() throws InvalidTopologyException {
     String topologyDefFile = getTopologyDefnFile();
     Topology topology = getTopology(topologyDefFile);
     Config config = SchedulerConfigUtils.loadConfig(cluster,
@@ -178,7 +179,7 @@ public class HeronExecutorTask implements Task {
     return TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
   }
 
-  Topology getTopology(String topologyDefFile) {
+  Topology getTopology(String topologyDefFile) throws InvalidTopologyException {
     return TopologyUtils.getTopology(topologyDefFile);
   }
 

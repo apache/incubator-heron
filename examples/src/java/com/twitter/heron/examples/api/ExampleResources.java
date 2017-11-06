@@ -17,7 +17,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 
 public final class ExampleResources {
 
-  static final long COMPONENT_RAM_MB = 256;
+  static final long COMPONENT_RAM_MB = 512;
 
   static ByteAmount getComponentRam() {
     return ByteAmount.fromMegabytes(COMPONENT_RAM_MB);

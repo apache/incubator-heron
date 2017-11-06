@@ -11,7 +11,7 @@ pex_library(
         "//heron/common/src/python:common-py",
     ],
     reqs = [
-        "requests==2.11.1",
+        "requests==2.12.3",
         "tornado==4.0.2",
     ],
 )

@@ -77,8 +77,8 @@ public final class ExclamationTopology {
     private OutputCollector collector;
 
     @Override
-    @SuppressWarnings("HiddenField")
-    public void prepare(Map<String, Object> stormConf, TopologyContext context,
+    @SuppressWarnings({"HiddenField", "rawtypes"})
+    public void prepare(Map stormConf, TopologyContext context,
                         OutputCollector collector) {
       this.collector = collector;
 

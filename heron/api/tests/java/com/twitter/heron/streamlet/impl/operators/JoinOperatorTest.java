@@ -41,9 +41,11 @@ import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 
 public class JoinOperatorTest {
 
@@ -59,8 +61,8 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testInnerJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.INNER);
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
+        = getJoinOperator(JoinType.INNER);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -91,8 +93,8 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterLeftJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.OUTER_LEFT);
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
+        = getJoinOperator(JoinType.OUTER_LEFT);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -139,8 +141,8 @@ public class JoinOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testOuterRightJoinOperator() {
-    JoinOperator<String, String, String, String> joinOperator
-        = getJoinOperator(JoinOperator.JoinType.OUTER_RIGHT);
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
+        = getJoinOperator(JoinType.OUTER_RIGHT);
 
     TupleWindow tupleWindow = getTupleWindow();
 
@@ -169,6 +171,10 @@ public class JoinOperatorTest {
           Assert.assertTrue(expectedResultsK1.contains(tuple.getValue()));
           expectedResultsK1.remove(tuple.getValue());
           break;
+        case "key2":
+          Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
+          expectedResultsK2.remove(tuple.getValue());
+          break;
         case "key3":
           Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
           expectedResultsK2.remove(tuple.getValue());
@@ -182,6 +188,63 @@ public class JoinOperatorTest {
     }
     Assert.assertEquals(0, expectedResultsK1.size());
     Assert.assertEquals(0, expectedResultsK2.size());
+  }
+
+  @Test
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void testOuterJoinOperator() {
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator
+        = getJoinOperator(JoinType.OUTER);
+
+    TupleWindow tupleWindow = getTupleWindow();
+
+    Set<String> expectedResultsK1 = new HashSet<>();
+    expectedResultsK1.add("01");
+    expectedResultsK1.add("03");
+    expectedResultsK1.add("21");
+    expectedResultsK1.add("23");
+    expectedResultsK1.add("41");
+    expectedResultsK1.add("43");
+
+    Set<String> expectedResultsK2 = new HashSet<>();
+    expectedResultsK2.add("5null");
+    expectedResultsK2.add("6null");
+    expectedResultsK2.add("7null");
+
+    Set<String> expectedResultsK3 = new HashSet<>();
+    expectedResultsK3.add("null8");
+    expectedResultsK3.add("null9");
+    expectedResultsK3.add("null10");
+    expectedResultsK3.add("null11");
+
+    joinOperator.execute(tupleWindow);
+
+    Assert.assertEquals(13, emittedTuples.size());
+    for (Object object : emittedTuples) {
+      KeyValue<KeyedWindow<String>, String> tuple = (KeyValue<KeyedWindow<String>, String>) object;
+      KeyedWindow<String> keyedWindow = tuple.getKey();
+      switch (keyedWindow.getKey()) {
+        case "key1":
+          Assert.assertTrue(expectedResultsK1.contains(tuple.getValue()));
+          expectedResultsK1.remove(tuple.getValue());
+          break;
+        case "key2":
+          Assert.assertTrue(expectedResultsK2.contains(tuple.getValue()));
+          expectedResultsK2.remove(tuple.getValue());
+          break;
+        case "key3":
+          Assert.assertTrue(expectedResultsK3.contains(tuple.getValue()));
+          expectedResultsK3.remove(tuple.getValue());
+          break;
+        default:
+          Assert.fail();
+      }
+      Assert.assertEquals(12, keyedWindow.getWindow().getCount());
+      Assert.assertEquals(startTime, keyedWindow.getWindow().getStartTime());
+      Assert.assertEquals(endTime, keyedWindow.getWindow().getEndTime());
+    }
+    Assert.assertEquals(0, expectedResultsK1.size());
+    Assert.assertEquals(0, expectedResultsK3.size());
   }
 
   private TupleWindow getTupleWindow() {
@@ -200,7 +263,7 @@ public class JoinOperatorTest {
         tuple = getTuple(leftComponentStreamId, new Fields("a"),
             new Values(new KeyValue<String, String>("key1", String.valueOf(i))));
       } else {
-        tuple = getTuple(rightComponentStreamId, new Fields("b"),
+        tuple = getTuple(rightComponentStreamId, new Fields("a"),
             new Values(new KeyValue<String, String>("key1", String.valueOf(i))));
       }
       tuples.add(tuple);
@@ -224,13 +287,21 @@ public class JoinOperatorTest {
     return tupleWindow;
   }
 
+
+
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private JoinOperator<String, String, String, String> getJoinOperator(JoinOperator.JoinType type) {
-    JoinOperator<String, String, String, String> joinOperator = new JoinOperator(
+  private JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String>
+        getJoinOperator(JoinType type) {
+    SerializableFunction<KeyValue<String, String>, String> f = x -> x == null ? "null" : x.getKey();
+    JoinOperator<String, KeyValue<String, String>, KeyValue<String, String>, String> joinOperator =
+        new JoinOperator(
         type,
         "leftComponent",
         "rightComponent",
-        (SerializableBiFunction<String, String, String>) (o, o2) -> o + o2);
+            f,
+            f,
+        (SerializableBiFunction<KeyValue<String, String>, KeyValue<String, String>, String>)
+            (o, o2) -> (o == null ? "null" : o.getValue()) + (o2 == null ? "null" : o2.getValue()));
 
     joinOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {

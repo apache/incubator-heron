@@ -1,24 +1,46 @@
-//  Copyright 2017 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,15 +53,20 @@ import static com.twitter.heron.api.windowing.EvictionPolicy.Action.EXPIRE;
 import static com.twitter.heron.api.windowing.EvictionPolicy.Action.PROCESS;
 import static com.twitter.heron.api.windowing.EvictionPolicy.Action.STOP;
 
-
 /**
  * Tracks a window of events and fires {@link WindowLifecycleListener} callbacks
  * on expiry of events or activation of the window due to {@link TriggerPolicy}.
  *
  * @param <T> the type of event in the window.
  */
-public class WindowManager<T> implements TriggerHandler {
+public class WindowManager<T extends Serializable> implements TriggerHandler {
   private static final Logger LOG = Logger.getLogger(WindowManager.class.getName());
+  private static final String EVICTION_STATE_KEY = "es";
+  private static final String TRIGGER_STATE_KEY = "ts";
+  private static final String QUEUE = "queue";
+  private static final String EXPIRED_EVENTS = "expired.events";
+  private static final String PRE_WINDOW_EVENTS = "pre.window.events";
+  private static final String EVENTS_SINCE_LAST_EXPIRY = "events.since.last.expiry";
 
   /**
    * Expire old events every EXPIRE_EVENTS_THRESHOLD to
@@ -51,8 +78,8 @@ public class WindowManager<T> implements TriggerHandler {
   public static final int EXPIRE_EVENTS_THRESHOLD = 100;
 
   protected final Collection<Event<T>> queue;
-  protected EvictionPolicy<T> evictionPolicy;
-  protected TriggerPolicy<T> triggerPolicy;
+  protected EvictionPolicy<T, ?> evictionPolicy;
+  protected TriggerPolicy<T, ?> triggerPolicy;
   protected final WindowLifecycleListener<T> windowLifecycleListener;
   private final List<T> expiredEvents;
   private final Set<Event<T>> prevWindowEvents;
@@ -86,11 +113,11 @@ public class WindowManager<T> implements TriggerHandler {
     this(lifecycleListener, new ConcurrentLinkedQueue<>());
   }
 
-  public void setEvictionPolicy(EvictionPolicy<T> evictionPolicy) {
+  public void setEvictionPolicy(EvictionPolicy<T, ?> evictionPolicy) {
     this.evictionPolicy = evictionPolicy;
   }
 
-  public void setTriggerPolicy(TriggerPolicy<T> triggerPolicy) {
+  public void setTriggerPolicy(TriggerPolicy<T, ?> triggerPolicy) {
     this.triggerPolicy = triggerPolicy;
   }
 
@@ -306,5 +333,57 @@ public class WindowManager<T> implements TriggerHandler {
   public String toString() {
     return "WindowManager{" + "evictionPolicy=" + evictionPolicy + ", triggerPolicy="
         + triggerPolicy + '}';
+  }
+
+  /**
+   * Restore state associated with the window manager
+   * @param state
+   */
+  @SuppressWarnings("unchecked")
+  public void restoreState(Map<String, Serializable> state) {
+    LOG.info("Restoring window manager state");
+
+    //restore eviction policy state
+    if (state.get(EVICTION_STATE_KEY) != null) {
+      ((EvictionPolicy) evictionPolicy).restoreState(state.get(EVICTION_STATE_KEY));
+    }
+
+    // restore trigger policy state
+    if (state.get(TRIGGER_STATE_KEY) != null) {
+      ((TriggerPolicy) triggerPolicy).restoreState(state.get(TRIGGER_STATE_KEY));
+    }
+
+    // restore all pending events to the queue
+    this.queue.addAll((Collection<Event<T>>) state.get(QUEUE));
+
+    // restore all expired events
+    this.expiredEvents.addAll((List<T>) state.get(EXPIRED_EVENTS));
+
+    // restore all prevWindowEvents
+    this.prevWindowEvents.addAll((Set<Event<T>>) state.get(PRE_WINDOW_EVENTS));
+
+    // restore the count of the number events since last expiry
+    this.eventsSinceLastExpiry.set((int) state.get(EVENTS_SINCE_LAST_EXPIRY));
+  }
+
+  /**
+   * Get the state of the window manager
+   * @return a Map representing the state of the window manager
+   */
+  public Map<String, Serializable> getState() {
+    Map<String, Serializable> ret = new HashMap<>();
+    // get potential eviction policy state
+    if (evictionPolicy.getState() != null) {
+      ret.put(EVICTION_STATE_KEY, (Serializable) evictionPolicy.getState());
+    }
+    // get potential trigger policy state
+    if (triggerPolicy.getState() != null) {
+      ret.put(TRIGGER_STATE_KEY, (Serializable) triggerPolicy.getState());
+    }
+    ret.put(QUEUE, (Serializable) this.queue);
+    ret.put(EXPIRED_EVENTS, (Serializable) this.expiredEvents);
+    ret.put(PRE_WINDOW_EVENTS, (Serializable) this.prevWindowEvents);
+    ret.put(EVENTS_SINCE_LAST_EXPIRY, this.eventsSinceLastExpiry.get());
+    return ret;
   }
 }

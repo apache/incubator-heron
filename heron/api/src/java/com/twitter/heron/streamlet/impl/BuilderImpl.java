@@ -22,8 +22,6 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.KVStreamlet;
-import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.SerializableSupplier;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
@@ -35,22 +33,14 @@ import com.twitter.heron.streamlet.Streamlet;
  * the computation nodes.
  */
 public final class BuilderImpl implements Builder {
-  private List<BaseStreamlet<?>> sources;
+  private List<StreamletImpl<?>> sources;
   public BuilderImpl() {
     sources = new LinkedList<>();
   }
 
   @Override
   public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
-    BaseStreamlet<R> retval = BaseStreamlet.createSupplierStreamlet(supplier);
-    retval.setNumPartitions(1);
-    sources.add(retval);
-    return retval;
-  }
-
-  @Override
-  public <K, V> KVStreamlet<K, V> newKVSource(SerializableSupplier<KeyValue<K, V>> supplier) {
-    BaseKVStreamlet<K, V> retval = BaseKVStreamlet.createSupplierKVStreamlet(supplier);
+    StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
     retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
@@ -58,15 +48,7 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(Source<R> generator) {
-    BaseStreamlet<R> retval = BaseStreamlet.createGeneratorStreamlet(generator);
-    retval.setNumPartitions(1);
-    sources.add(retval);
-    return retval;
-  }
-
-  @Override
-  public <K, V> KVStreamlet<K, V> newKVSource(Source<KeyValue<K, V>> generator) {
-    BaseKVStreamlet<K, V> retval = BaseKVStreamlet.createGeneratorKVStreamlet(generator);
+    StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
     retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
@@ -79,10 +61,10 @@ public final class BuilderImpl implements Builder {
   public TopologyBuilder build() {
     TopologyBuilder builder = new TopologyBuilder();
     Set<String> stageNames = new HashSet<>();
-    for (BaseStreamlet<?> streamlet : sources) {
+    for (StreamletImpl<?> streamlet : sources) {
       streamlet.build(builder, stageNames);
     }
-    for (BaseStreamlet<?> streamlet : sources) {
+    for (StreamletImpl<?> streamlet : sources) {
       if (!streamlet.allBuilt()) {
         throw new RuntimeException("Topology cannot be fully built! Are all sources added?");
       }

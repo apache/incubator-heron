@@ -38,6 +38,7 @@ import com.twitter.heron.apiserver.resources.HeronResource;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.Logging;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Key;
 
 public final class Runtime {
 
@@ -157,10 +158,15 @@ public final class Runtime {
         cmd.getOptionValue(Flag.Cluster.name)).toFile().getAbsolutePath();
   }
 
+  // Get the heron home directory
+  // In local mode this is ~/.heron
+  // If running in a cluster this is ./heron-core and assumes the
+  // heron has been installed in the container's working directory
+  // working-dir/heron-core
   private static String getHeronDirectory(CommandLine cmd) {
     final String cluster = cmd.getOptionValue(Flag.Cluster.name);
     return "local".equalsIgnoreCase(cluster)
-        ? Constants.DEFAULT_HERON_LOCAL : Constants.DEFAULT_HERON_CLUSTER;
+        ? Constants.DEFAULT_HERON_LOCAL : Key.HERON_CLUSTER_HOME.getDefaultString();
   }
 
   private static String getReleaseFile(String toolsHome, CommandLine cmd) {

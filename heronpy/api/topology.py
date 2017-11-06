@@ -39,7 +39,7 @@ class TopologyType(type):
     spout_specs = {}
     # Copy HeronComponentSpec items out of class_dict
     specs = TopologyType.class_dict_to_specs(class_dict)
-    for spec in specs.itervalues():
+    for spec in iter(specs.values()):
       if spec.is_spout:
         TopologyType.add_spout_specs(spec, spout_specs)
       else:

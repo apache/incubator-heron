@@ -18,18 +18,18 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.SerializablePredicate;
-import com.twitter.heron.streamlet.impl.BaseStreamlet;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.operators.FilterOperator;
 
 /**
  * FilterStreamlet represents a Streamlet that is made up of elements from
  * the parent Streamlet after applying a user supplied filter function.
  */
-public class FilterStreamlet<R> extends BaseStreamlet<R> {
-  private BaseStreamlet<R> parent;
+public class FilterStreamlet<R> extends StreamletImpl<R> {
+  private StreamletImpl<R> parent;
   private SerializablePredicate<? super R> filterFn;
 
-  public FilterStreamlet(BaseStreamlet<R> parent, SerializablePredicate<? super R> filterFn) {
+  public FilterStreamlet(StreamletImpl<R> parent, SerializablePredicate<? super R> filterFn) {
     this.parent = parent;
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());

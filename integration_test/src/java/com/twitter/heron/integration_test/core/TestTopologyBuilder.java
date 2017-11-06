@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.core;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,11 +23,14 @@ import java.util.Map;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IStatefulWindowedBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.StatefulWindowedBoltExecutor;
 import com.twitter.heron.api.bolt.WindowedBoltExecutor;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.IRichSpout;
 import com.twitter.heron.api.topology.BoltDeclarer;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.SpoutDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
@@ -74,13 +78,24 @@ public class TestTopologyBuilder extends TopologyBuilder {
   }
 
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint, boolean ackAuto) {
-    return super.setBolt(id, new IntegrationTestBolt(bolt, ackAuto), parallelismHint);
+    if (bolt instanceof IStatefulComponent) {
+      return super.setBolt(id, new StatefulIntegrationTestBolt<>(bolt, ackAuto), parallelismHint);
+    } else {
+      return super.setBolt(id, new IntegrationTestBolt(bolt, ackAuto), parallelismHint);
+    }
   }
 
   public BoltDeclarer setBolt(String id, IWindowedBolt bolt,
                               Number parallelismHint, boolean ackAuto) throws
       IllegalArgumentException {
     return setBolt(id, new WindowedBoltExecutor(bolt), parallelismHint, ackAuto);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public <K extends Serializable, V extends Serializable> BoltDeclarer setBolt(
+      String id, IStatefulWindowedBolt<K, V> bolt, Number parallelismHint, boolean ackAuto) throws
+      IllegalArgumentException {
+    return setBolt(id, new StatefulWindowedBoltExecutor<K, V>(bolt), parallelismHint, ackAuto);
   }
 
   @Override
@@ -112,7 +127,12 @@ public class TestTopologyBuilder extends TopologyBuilder {
         break;
       case DEFAULT:
       default:
-        wrappedSpout = new IntegrationTestSpout(spout, maxExecutionCount, topologyStartedUrl);
+        if (spout instanceof IStatefulComponent) {
+          wrappedSpout
+              = new StatefulIntegrationTestSpout<>(spout, maxExecutionCount, topologyStartedUrl);
+        } else {
+          wrappedSpout = new IntegrationTestSpout(spout, maxExecutionCount, topologyStartedUrl);
+        }
     }
 
     return setSpout(id, wrappedSpout, parallelismHint);
