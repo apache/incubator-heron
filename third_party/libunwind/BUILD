@@ -31,10 +31,15 @@ lib_static_files = [
 ]
 
 lib_dynamic_files = [
+    "lib/libunwind.so.8",
     "lib/libunwind.so.8.0.1",
+    "lib/libunwind-coredump.so.0",
     "lib/libunwind-coredump.so.0.0.0",
+    "lib/libunwind-ptrace.so.0",
     "lib/libunwind-ptrace.so.0.0.0",
+    "lib/libunwind-setjmp.so.0",
     "lib/libunwind-setjmp.so.0.0.0",
+    "lib/libunwind-x86_64.so.8",
     "lib/libunwind-x86_64.so.8.0.1",
 ]
 

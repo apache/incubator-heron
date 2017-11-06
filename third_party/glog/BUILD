@@ -20,7 +20,11 @@ lib_static_files = ["lib/libglog.a"]
 
 lib_mac_dynamic_files = ["lib/libglog.0.dylib"]
 
-lib_linux_dynamic_files = ["lib/libglog.so"]
+lib_linux_dynamic_files = [
+   "lib/libglog.so",
+   "lib/libglog.so.0",
+   "lib/libglog.so.0.0.0",
+]
 
 common_script = [
     'export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind',
@@ -36,7 +40,7 @@ common_script = [
 mac_script = "\n".join(common_script + [
     './configure --prefix=$$INSTALL_DIR',
     'make install',
-    'touch $$INSTALL_DIR/lib/libglog.so',
+    'touch $$INSTALL_DIR/lib/libglog.so $$INSTALL_DIR/lib/libglog.so.0 $$INSTALL_DIR/lib/libglog.so.0.0.0',
     'rm -rf $$TMP_DIR',
 ])
 
