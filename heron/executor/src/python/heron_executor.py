@@ -123,12 +123,14 @@ def stdout_log_fn(cmd):
 def set_ld_library_paths(env):
   if "LD_LIBRARY_PATH" in env:
     env["LD_LIBRARY_PATH"] = env["LD_LIBRARY_PATH"] + ":./heron-core/lib/glog/"
+    env["LD_LIBRARY_PATH"] = env["LD_LIBRARY_PATH"] + ":./heron-core/lib/libunwind/"
   else:
-    env["LD_LIBRARY_PATH"] = "./heron-core/lib/glog/"
+    env["LD_LIBRARY_PATH"] = "./heron-core/lib/glog/:./heron-core/lib/libunwind/"
   if "DYLD_LIBRARY_PATH" in env:
     env["DYLD_LIBRARY_PATH"] = env["DYLD_LIBRARY_PATH"] + ":./heron-core/lib/glog/"
+    env["DYLD_LIBRARY_PATH"] = env["DYLD_LIBRARY_PATH"] + ":./heron-core/lib/libunwind/"
   else:
-    env["DYLD_LIBRARY_PATH"] = "./heron-core/lib/glog/"
+    env["DYLD_LIBRARY_PATH"] = "./heron-core/lib/glog/:./heron-core/lib/libunwind/"
 
 
 class ProcessInfo(object):

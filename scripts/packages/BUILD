@@ -18,6 +18,7 @@ load("/tools/rules/heron_core", "heron_core_files")
 load("/tools/rules/heron_core", "heron_core_bin_files")
 load("/tools/rules/heron_core", "heron_core_conf_files")
 load("/tools/rules/heron_core", "heron_core_lib_glog_files")
+load("/tools/rules/heron_core", "heron_core_lib_libunwind_files")
 load("/tools/rules/heron_core", "heron_core_lib_instance_files")
 load("/tools/rules/heron_core", "heron_core_lib_healthmgr_files")
 load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
@@ -91,6 +92,7 @@ pkg_tar(
     deps = [
         ":heron-core-bin",
         ":heron-core-lib-glog",
+        ":heron-core-lib-libunwind",
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
         ":heron-core-lib-healthmgr",
@@ -114,6 +116,12 @@ pkg_tar(
     name = "heron-core-lib-glog",
     package_dir = "heron-core/lib/glog",
     srcs = heron_core_lib_glog_files(),
+)
+
+pkg_tar(
+    name = "heron-core-lib-libunwind",
+    package_dir = "heron-core/lib/libunwind",
+    srcs = heron_core_lib_libunwind_files(),
 )
 
 pkg_tar(

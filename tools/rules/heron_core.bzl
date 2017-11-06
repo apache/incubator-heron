@@ -29,6 +29,7 @@ def heron_core_lib_files():
         heron_core_lib_statemgr_files() + \
         heron_core_lib_instance_files() + \
         heron_core_lib_glog_files() + \
+        heron_core_lib_libunwind_files() + \
         heron_core_lib_ckptmgr_files() + \
         heron_core_lib_statefulstorage_files() + \
         heron_core_lib_downloader_files()
@@ -57,6 +58,11 @@ def heron_core_lib_healthmgr_files():
 def heron_core_lib_glog_files():
     return [
         "//third_party/glog:glog-dynamic-lib-files"
+    ]
+
+def heron_core_lib_libunwind_files():
+    return [
+        "//third_party/libunwind:libunwind-dynamic-files"
     ]
 
 def heron_core_lib_metricsmgr_files():
