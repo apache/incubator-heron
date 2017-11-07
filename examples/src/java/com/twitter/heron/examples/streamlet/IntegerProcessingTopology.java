@@ -50,12 +50,10 @@ public final class IntegerProcessingTopology {
     Streamlet<Integer> zeroes = builder.newSource(() -> 0);
 
     builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .setNumPartitions(5)
+        .setNumPartitions(2)
         .setName("random-ints")
         .map(i -> i + 1)
         .setName("add-one")
-        .repartition(2)
-        .setName("repartition")
         .union(zeroes)
         .setName("unify-streams")
         .filter(i -> i != 2)

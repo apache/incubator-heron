@@ -58,7 +58,6 @@ public final class SmartWatchTopology {
       Utils.sleep(1000);
       this.joggerId = StreamletUtils.randomFromList(JOGGERS);
       this.feetRun = ThreadLocalRandom.current().nextInt(200, 400);
-      LOG.info(String.format("Emitted smart watch reading: %s", this));
     }
 
     String getJoggerId() {
@@ -67,11 +66,6 @@ public final class SmartWatchTopology {
 
     int getFeetRun() {
       return feetRun;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("(jogger: %s, feetRun: %d)", joggerId, feetRun);
     }
   }
 
@@ -99,14 +93,6 @@ public final class SmartWatchTopology {
           long startTime = keyWindow.getKey().getWindow().getStartTime();
           long endTime = keyWindow.getKey().getWindow().getEndTime();
           long timeLengthMillis = endTime - startTime; // Cast to float to use as denominator
-
-          LOG.info(
-              String.format("Calculating the average speed for jogger %s from time %d to %d",
-                  keyWindow.getKey().getKey(),
-                  startTime,
-                  endTime
-              )
-          );
 
           // The feet-per-minute calculation
           float feetPerMinute = totalFeetRun / (float) (timeLengthMillis / 1000);
