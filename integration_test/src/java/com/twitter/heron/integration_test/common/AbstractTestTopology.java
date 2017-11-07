@@ -115,11 +115,20 @@ public abstract class AbstractTestTopology {
     return options;
   }
 
+
+
   public final void submit() throws AlreadyAliveException, InvalidTopologyException {
+    this.submit(null);
+  }
+
+  public final void submit(Config userConf) throws AlreadyAliveException, InvalidTopologyException {
     TestTopologyBuilder builder = new TestTopologyBuilder(
         httpServerResultsUrl, httpServerStateUrl, stateUpdateToken, spoutWrapperType);
 
     Config conf = buildConfig(new BasicConfig());
+    if (userConf != null) {
+      conf.putAll(userConf);
+    }
     HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
   }
 

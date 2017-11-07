@@ -33,6 +33,7 @@
 
 package com.twitter.heron.api.tuple;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -48,7 +49,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
  * use another type, you'll need to implement and register a serializer for that type.
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
-public interface Tuple {
+public interface Tuple extends Serializable {
 
   /**
    * Returns the number of fields in this tuple.

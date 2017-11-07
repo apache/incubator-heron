@@ -19,7 +19,7 @@ import java.util.List;
 
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.SerializableFunction;
 
 /**
  * JoinCustomGrouping is the class that routes the incoming tuples into the
@@ -28,9 +28,11 @@ import com.twitter.heron.streamlet.KeyValue;
  */
 public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   private static final long serialVersionUID = 2007892247960031525L;
+  private SerializableFunction<V, K> keyExtractor;
   private List<Integer> taskIds;
 
-  public JoinCustomGrouping() {
+  public JoinCustomGrouping(SerializableFunction<V, K> keyExtractor) {
+    this.keyExtractor = keyExtractor;
   }
 
   @Override
@@ -43,8 +45,8 @@ public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
-    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
-    int index = obj.getKey().hashCode() % taskIds.size();
+    V obj = (V) values.get(0);
+    int index = keyExtractor.apply(obj).hashCode() % taskIds.size();
     ret.add(taskIds.get(index));
     return ret;
   }

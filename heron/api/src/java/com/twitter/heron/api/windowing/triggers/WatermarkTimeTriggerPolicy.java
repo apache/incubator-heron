@@ -32,6 +32,7 @@
 
 package com.twitter.heron.api.windowing.triggers;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
@@ -45,17 +46,17 @@ import com.twitter.heron.api.windowing.WindowManager;
  * Handles watermark events and triggers {@link TriggerHandler#onTrigger()} for each window
  * interval that has events to be processed up to the watermark ts.
  */
-public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
+public class WatermarkTimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Long> {
   private static final Logger LOG = Logger.getLogger(WatermarkTimeTriggerPolicy.class.getName());
   private final long slidingIntervalMs;
   private final TriggerHandler handler;
-  private final EvictionPolicy<T> evictionPolicy;
+  private final EvictionPolicy<T, ?> evictionPolicy;
   private final WindowManager<T> windowManager;
   private volatile long nextWindowEndTs;
   private boolean started;
 
   public WatermarkTimeTriggerPolicy(long slidingIntervalMs, TriggerHandler handler,
-                                    EvictionPolicy<T> evictionPolicy, WindowManager<T>
+                                    EvictionPolicy<T, ?> evictionPolicy, WindowManager<T>
                                         windowManager) {
     this.slidingIntervalMs = slidingIntervalMs;
     this.handler = handler;
@@ -136,6 +137,16 @@ public class WatermarkTimeTriggerPolicy<T> implements TriggerPolicy<T> {
       return nextTs;
     }
     return nextTs + (slidingIntervalMs - (nextTs % slidingIntervalMs));
+  }
+
+  @Override
+  public Long getState() {
+    return nextWindowEndTs;
+  }
+
+  @Override
+  public void restoreState(Long state) {
+    nextWindowEndTs = state;
   }
 
   @Override

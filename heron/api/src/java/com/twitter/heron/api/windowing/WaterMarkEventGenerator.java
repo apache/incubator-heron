@@ -33,6 +33,7 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +46,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
  * across all the input streams (minus the lag). Once a watermark event is emitted
  * any tuple coming with an earlier timestamp can be considered as late events.
  */
-public class WaterMarkEventGenerator<T> {
+public class WaterMarkEventGenerator<T extends Serializable> {
   private final WindowManager<T> windowManager;
   private final int eventTsLag;
   private final Set<TopologyAPI.StreamId> inputStreams;
