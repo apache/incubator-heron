@@ -26,6 +26,16 @@ import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
 
+/**
+ * This topology demonstrates the usage of a simple repartitioning algorithm
+ * using the Heron Streamlet API for Java. Normally, streamlet elements are
+ * distributed randomly across downstream instances when processed.
+ * Repartitioning enables you to select which instances (partitions) to send
+ * elements to on the basis of a user-defined logic. Here, a source streamlet
+ * emits an indefinite series of random integers between 1 and 100. The value
+ * of that number then determines to which topology instance (partition) the
+ * element is routed.
+ */
 public final class RepartitionTopology {
   private RepartitionTopology() {
   }
@@ -33,6 +43,12 @@ public final class RepartitionTopology {
   private static final Logger LOG =
       Logger.getLogger(RepartitionTopology.class.getName());
 
+  /**
+   * The repartition function that determines to which partition each incoming
+   * streamlet element is routed (across 8 possible partitions). Integers between 1
+   * and 24 are routed to partitions 0 and 1, integers between 25 and 40 to partitions
+   * 2 and 3, and so on.
+   */
   private static List<Integer> repartitionStreamlet(int incomingInteger, int numPartitions) {
     List<Integer> partitions;
 
@@ -57,11 +73,16 @@ public final class RepartitionTopology {
     return partitions;
   }
 
+  /**
+   * All Heron topologies require a main function that defines the topology's behavior
+   * at runtime
+   */
   public static void main(String[] args) throws Exception {
     Builder processingGraphBuilder = Builder.createBuilder();
 
     Streamlet<Integer> randomIntegers = processingGraphBuilder
         .newSource(() -> {
+          // Random integers are emitted every 50 milliseconds
           Utils.sleep(50);
           return ThreadLocalRandom.current().nextInt(100);
         })
@@ -69,8 +90,12 @@ public final class RepartitionTopology {
         .setName("random-integer-source");
 
     randomIntegers
+        // The specific repartition logic is applied here
         .repartition(8, RepartitionTopology::repartitionStreamlet)
         .setName("repartition-incoming-values")
+        // Here, a generic repartition logic is applied (simply
+        // changing the number of partitions without specifying
+        // how repartitioning will take place)
         .repartition(2)
         .setName("reduce-partitions-for-logging-operation")
         .log();
