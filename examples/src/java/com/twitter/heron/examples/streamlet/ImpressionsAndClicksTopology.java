@@ -164,7 +164,7 @@ public final class ImpressionsAndClicksTopology {
             // Join type (inner join means that all elements from both streams will be included)
             JoinType.INNER,
             // For each element resulting from the join operation, a value of 1 will be provided
-            // if the user IDs match between the elements (or a value of 0 if they don't).
+            // if the ad IDs match between the elements (or a value of 0 if they don't).
             (user1, user2) -> (user1.getAdId().equals(user2.getAdId())) ? 1 : 0
         )
         // The reduce function counts the number of ad clicks per user.
