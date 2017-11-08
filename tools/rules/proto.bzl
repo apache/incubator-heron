@@ -48,7 +48,7 @@ genproto_java = rule(
     genproto_java_impl,
     attrs = genproto_base_attrs + {
         "_protoc": attr.label(
-            default = Label("//third_party/protobuf:protoc"),
+            default = Label("@com_google_protobuf//:protoc"),
             allow_files = True,
             single_file = True,
         ),

@@ -698,3 +698,22 @@ new_http_archive(
     ])
 )
 # end pex repos
+
+http_archive(
+    name = "com_github_gflags_gflags",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    strip_prefix = "gflags-2.2.1",
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+
+new_http_archive(
+    name = "com_google_googletest",
+    urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
+    strip_prefix = "googletest-release-1.8.0",
+    build_file = "third_party/gtest/gtest.BUILD",
+)
