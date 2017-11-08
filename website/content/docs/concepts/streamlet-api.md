@@ -6,46 +6,47 @@ new: true
 
 {{< alert "streamlet-api-beta" >}}
 
-When Heron was first created, the model for creating topologies was deeply
-indebted to the Apache Storm model. Under that model, developers creating topologies
-needed to explicitly define the behavior of every spout and bolt in the topology.
-Although this provided a powerful low-level API for creating topologies, that approach
-presented a variety of drawbacks for developers:
+Heron initially offered a **Topology API**---heavily indebted to the [Storm API](http://storm.apache.org/about/simple-api.html)---for developing topology logic. In the original Topology API, developers creating topologies were required to explicitly define the behavior of every [spout](../topologies/spouts) and [bolt](../topologies/bolts) in each topology and then specify how those spouts and bolts are meant to be interconnected. Although the Storm API provided a powerful low-level API for creating topologies, this spouts-and-bolts model presented a variety of drawbacks for Heron developers:
 
-* **Verbosity** --- In both the Java and Python topology APIs, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts. This often led to the problem of...
-* **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
-* **Tuple-based data model** --- In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
+Drawback | Description
+:--------|:-----------
+Verbosity | In the original Topology API for both Java and Python, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts.
+Difficult debugging | When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
+Tuple-based data model | In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
 
 In contrast with the topology API, the Heron Streamlet API offers:
 
-* **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron Streamlet API enables you to write functions, such as map, flatMap, join, and filter functions, instead.
-* **Easy debugging** --- With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
-* **Completely flexible, type-safe data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish. In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than runtime.
+Advantage | Description
+:---------|:-----------
+Boilerplate-free code | Instead of needing to implement spout and bolt classes over and over again, the Heron Streamlet API enables you to create stream processing logic out of functions, such as map, flatMap, join, and filter functions, instead.
+Easy debugging | With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
+Completely flexible, type-safe data model | Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.<br /><br />In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than at runtime.
 
 ### Heron Streamlet API topologies
 
-With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron
-automatically performs the heavy lifting of converting the streamlet-based processing logic
-that you create into spouts and bolts and, from there, into containers that are then deployed using
-whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
+With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron automatically performs the heavy lifting of converting the streamlet-based processing logic that you create into spouts and bolts and, from there, into containers that are then deployed using whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
 
-From the standpoint of both operators and developers [managing topologies'
-lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
-development workflow standpoint, however, the difference is profound.
+From the standpoint of both operators and developers [managing topologies' lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a development workflow standpoint, however, the difference is profound. You can think of the Streamlet API as a highly convenient tool for creating spouts, bolts, and the logic that connects them.
+
+## Supported languages
+
+The Heron Streamlet API is currently available for:
+
+* [Java](/docs/developers/java/streamlet-api)
 
 ## Streamlets
 
-The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is
-a potentially unbounded, ordered collection of some data type. Streamlets can originate from a
-wide variety of sources, such as pub-sub messaging systems like [Apache
-Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
-(incubating), random generators, or static files like CSV or [Apache Parquet](https://parquet.apache.org/) files.
+The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is an unbounded, ordered collection of **elements** of some data type (from simple types like integers and strings to application-specific data types).
 
-These **source streamlets** can then be manipulated in a wide variety of ways. You can apply
-[map](#map-operations), [filter](#filter-operations), [flatMap](#flatmap-operations), and many
-other operations to them. With [key-value streamlets](#key-value-streamlets) you can these
-same operations as well as [join](#join-operations) and [reduce by key and window](#reduce-by-key-and-window-operations)
-operations.
+**Source streamlets** supply a Heron processing graph with data inputs. These inputs can come from a wide variety of sources, such as pub-sub messaging systems like [Apache
+Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org) (incubating), random generators, or static files like CSV or [Apache Parquet](https://parquet.apache.org/) files.
+
+Source streamlets can then be manipulated in a wide variety of ways. You can:
+
+* apply [map](#map-operations), [filter](#filter-operations), [flatMap](#flatmap-operations), and many other operations to them
+* apply operations, such as [join](#join-operations) and [union](#union-operations) operations, that combine streamlets together
+* [reduce](#reduce-by-key-and-window-operations) all elements in a streamlet to some single value, based on key
+* send data to [sinks](#sink-operations) (store elements)
 
 ### Streamlet example
 
@@ -53,8 +54,7 @@ A visual representation of a streamlet processing graph is shown in the diagram 
 
 ![Example streamlet transformation](https://www.lucidchart.com/publicSegments/view/5c451e53-46f8-4e36-86f4-9a11ca015c21/image.png)
 
-In this diagram, a **source** is used to construct a **source streamlet**. In this case, an integer streamlet
-is produced by a random generator that continuously emits random integers between 1 and 100. From there:
+In this diagram, the **source streamlet** is produced by a random generator that continuously emits random integers between 1 and 100. From there:
 
 * A filter operation is applied to the source streamlet that filters out all values less than or equal to 30
 * A *new streamlet* is produced by the filter operation (with the Heron Streamlet API, you're always transforming streamlets into other streamlets)
@@ -62,7 +62,9 @@ is produced by a random generator that continuously emits random integers betwee
 * Once the final desired streamlet is created, each item in the streamlet is sent to a sink. Sinks are where items leave the processing graph. 
 
 
-#### An example streamlet processing graph in Java
+#### Java example
+
+The code below shows how you could implement the processing graph shown [above](#streamlet-example) in Java:
 
 ```java
 import com.twitter.heron.streamlet.Builder;
@@ -71,29 +73,23 @@ import com.twitter.heron.streamlet.Runner;
 
 Builder builder = Builder.createBuilder();
 
+// Source streamlet
 builder.newSource(() -> randomInt(1, 100))
+        // Filter operation
         .filter(i -> i > 30)
+        // Map operation
         .map(i -> i + 15)
+        // Log sink
         .log();
 
 Config config = new Config();
+// This topology will be spread across two containers
 config.setNumContainers(2);
 
-String streamletGraphTopologyName = "IntegerProcessingGraph";
-
-new Runner(streamletGraphTopology, config, builder).run();
+new Runner("IntegerProcessingGraph", config, builder).run();
 ```
 
-As you can see, the Java code for the example streamlet processing graph requires very little boilerplate.
-
-### Key-value streamlets
-
-In the example [above](#streamlet-example), the source streamlet consisted only of integers (31, 47, 82, etc.). In addition
-to single-value streamlets, the Heron Streamlet API also enables you to work with **key-value streamlets**. With key-value
-streamlets, every element of the streamlet is a [`KeyValue`](/api/java/com/twitter/heron/streamlet/KeyValue.html) object in
-which the key and value can be any type you'd like.
-
-There's a variety of [operations](#key-value-streamlet-operations) that are only available for key-value streamlets.
+As you can see, the Java code for the example streamlet processing graph requires very little boilerplate and is heavily indebted to Java 8 [lambda](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html) patterns.
 
 ## Streamlet operations
 
@@ -108,24 +104,8 @@ Operation | Description
 [filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
 [clone](#clone-operations) | Creates any number of identical copies of a streamlet
-[transform](#transform-operations) | TODO
-[toSink](#sink-operations) | TODO
-
-### Non-key-value streamlet operations
-
-There are a few operations that are available only for non-key-value streamlets.
-
-Operation | Description
-:---------|:-----------
-[reduceByWindow](#reduce-by-window-operations) | Like [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) operations except that keys are not involved, only values
-[mapToKv](#maptokv-operations) | Enables you to convert a non-key-value streamlet into a key-value-streamlet using a provided function
-
-### Key-value streamlet operations
-
-There are also some operations that are available only for [key-value streamlets](#key-value-streamlets).
-
-Operation | Description
-:---------|:-----------
+[transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations)
+[toSink](#sink-operations) | 
 [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
 
