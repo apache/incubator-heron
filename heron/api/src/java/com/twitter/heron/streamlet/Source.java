@@ -15,6 +15,7 @@
 package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Source is how Streamlet's originate. The get method
@@ -24,6 +25,6 @@ import java.io.Serializable;
  */
 public interface Source<T> extends Serializable {
   void setup(Context context);
-  T get();
+  Collection<T> get();
   void cleanup();
 }

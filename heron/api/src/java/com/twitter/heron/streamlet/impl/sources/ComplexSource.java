@@ -15,6 +15,7 @@
 package com.twitter.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import com.twitter.heron.api.spout.SpoutOutputCollector;
@@ -58,9 +59,10 @@ public class ComplexSource<R> extends StreamletSource {
 
   @Override
   public void nextTuple() {
-    R val = generator.get();
+    Collection<R> val = generator.get();
     if (val != null) {
-      collector.emit(new Values(val));
+      for (R tuple : val)
+      collector.emit(new Values(tuple));
     }
   }
 }
