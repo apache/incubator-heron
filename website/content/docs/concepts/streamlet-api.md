@@ -364,13 +364,13 @@ Left streamlet | Right streamlet
 
 An inner join operation would thus apply the join function to all key-values with matching keys, thus **3 &times; 2 = 6** in total, producing this set of key-values:
 
-Included key-values
-:------------------
-("player1", 4)
-("player1", 5)
-("player1", 10)
-("player1", 12)
-("player1", 17)
+Included key-values |
+:-------------------|
+("player1", 4) |
+("player1", 5) |
+("player1", 10) |
+("player1", 12) |
+("player1", 17) |
 
 > Note that the `("player2", 27)` key-value pair was *not* included in the stream because there's no matching key-value in the left streamlet.
 
@@ -442,12 +442,12 @@ Left streamlet | Right streamlet
 
 The resulting set of key-values within the time window:
 
-Included key-values
-:------------------
-("player1", 4)
-("player1", 10)
-("player2", 5)
-("player3", 17)
+Included key-values |
+:-------------------|
+("player1", 4) |
+("player1", 10) |
+("player2", 5) |
+("player3", 17) |
 
 In this case, key-values with a key of `player4` are excluded because they are in the right stream but have no matching key with any element in the left stream.
 
@@ -463,12 +463,12 @@ Left streamlet | Right streamlet
 
 The resulting set of key-values within the time window:
 
-Included key-values
-:------------------
-("player1", 4)
-("player1", 10)
-("player2", 5)
-("player4", 17)
+Included key-values |
+:-------------------|
+("player1", 4) |
+("player1", 10) |
+("player2", 5) |
+("player4", 17) |
 
 In this case, key-values with a key of `player3` are excluded because they are in the left stream but have no matching key with any element in the right stream.
 
