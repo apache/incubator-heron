@@ -48,7 +48,9 @@ Source streamlets can then be manipulated in a wide variety of ways. You can:
 * [reduce](#reduce-by-key-and-window-operations) all elements in a streamlet to some single value, based on key
 * send data to [sinks](#sink-operations) (store elements)
 
-### Streamlet example
+A complete set of source streamlets and streamlet operations is called a **processing graph**.
+
+### Complete streamlet processing graph example
 
 A visual representation of a streamlet processing graph is shown in the diagram below:
 
@@ -62,7 +64,7 @@ In this diagram, the **source streamlet** is produced by a random generator that
 * Once the final desired streamlet is created, each item in the streamlet is sent to a sink. Sinks are where items leave the processing graph. 
 
 
-#### Java example
+#### Java processing graph example
 
 The code below shows how you could implement the processing graph shown [above](#streamlet-example) in Java:
 
@@ -86,6 +88,7 @@ Config config = new Config();
 // This topology will be spread across two containers
 config.setNumContainers(2);
 
+// Submit the processing graph to Heron as a topology
 new Runner("IntegerProcessingGraph", config, builder).run();
 ```
 
@@ -93,9 +96,7 @@ As you can see, the Java code for the example streamlet processing graph require
 
 ## Streamlet operations
 
-In the Heron Streamlet API, processing data means *transforming streamlets into other
-streamlets*. This can be done using a wide variety of available operations, including
-many that you may be familiar with from functional programming:
+In the Heron Streamlet API, processing data means *transforming streamlets into other streamlets*. This can be done using a wide variety of available operations, including many that you may be familiar with from functional programming:
 
 Operation | Description
 :---------|:-----------
@@ -105,9 +106,10 @@ Operation | Description
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
 [clone](#clone-operations) | Creates any number of identical copies of a streamlet
 [transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations)
-[toSink](#sink-operations) | 
 [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
+[toSink](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc.
+[consume](#consume-operations) | 
 
 ### Map operations
 
@@ -126,7 +128,9 @@ In this example, a supplier streamlet emits an indefinite series of 1s. The `map
 
 ### FlatMap operations
 
-FlatMap operations are like [map operations](#map-operations) but with the important difference that each element of the streamlet is "flattened" into another type. In the Java example below, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
+FlatMap operations are like [map operations](#map-operations) but with the important difference that each element of the streamlet is "flattened" into another type. In the Java example below, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words.
+
+#### Java example
 
 ```java
 builder.newSource(() -> "I have nothing to declare but my genius")
@@ -139,18 +143,20 @@ The effect of this operation is to transform the `Streamlet<String>` into a `Str
 
 ### Filter operations
 
-Filter operations retain elements in a streamlet, while potentially excluding some elements, on the basis of a provided filtering function. Here's a Java example:
+Filter operations retain some elements in a streamlet and exclude other elements on the basis of a provided filtering function. Here's a Java example:
 
 ```java
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .filter((i) -> i < 7);
+        .filter(i -> i < 7);
 ```
 
 In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
 
 ### Union operations
 
-Union operations combine two streamlets of the same type into a single streamlet without modifying the elements. Here's a Java example:
+Union operations combine two streamlets of the same type into a single streamlet without modifying the elements.
+
+#### Java example
 
 ```java
 Streamlet<String> oohs = builder.newSource(() -> "ooh");
@@ -164,7 +170,9 @@ Here, one streamlet is an endless series of "ooh"s while the other is an endless
 
 ### Clone operations
 
-Clone operations enable you to create any number of "copies" of a streamlet. Each of the "copy" streamlets contains all the elements of and can be manipulated just like the "original" streamlet.
+Clone operations enable you to create any number of "copies" of a streamlet. Each of the "copy" streamlets contains all the elements of the original and can be manipulated just like the original streamlet.
+
+#### Java example
 
 ```java
 import java.util.List;
@@ -245,60 +253,38 @@ builder.newSource(() -> "Some string over and over")
         .log();
 ```
 
-### Sink operations
-
-In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
-
-```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Sink;
-
-public class FormattedLogSink implements Sink<T> {
-    private String streamletName;
-
-    public void setup(Context context) {
-        streamletName = context.getStreamletName();
-    }
-
-    public void put(T element) {
-        String message = String.format("Streamlet %s has produced an element with a value of: '%s'",
-                streamletName,
-                element.toString());
-        System.out.println(message);
-    }
-
-    public void cleanup() {}
-}
-```
-
-In this example, the sink fetches the name of the enclosing streamlet from the context passed in the `setup` method. The `put` method specifies how the sink handles each element that is received (in this case, a formatted message is logged to stdout). The `cleanup` method enables you to specify what happens after the element has been processed by the sink.
-
-Here is the `FormattedLogSink` at work in an example processing graph:
-
-```java
-Builder builder = Builder.createBuilder();
-
-builder.newSource(() -> "Here is a string to be passed to the sink")
-        .toSink(new FormattedLogSink());
-```
-
-> [Log operations](#log-operations) rely on a log sink that is provided out of the box. You'll need to implement other sinks yourself.
-
 ### Reduce by key and window operations
 
-When working with [key-value streamlets](#key-value-streamlets), you can combine two such streamlets together by:
+You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/streams/reduction.html) operations to streamlets by specifying:
 
-* key
-* [time window](#window-operations)
-* via a reduce function
+* a key extractor that determines what counts as the key for the streamlet
+* a value extractor that determines which value is chosen for each element of the streamlet
+* a [time window](../topologies#window-operations) across which the operation will take place
+* a reduce function that produces a single value for each key in the streamlet
+
+Here is an example for Java:
 
 ```java
+import java.util.Arrays;
+
+import com.twitter.heron.streamlet.WindowConfig;
+
 Builder builder = Builder.createBuilder();
 
-KVStreamlet<String, String> s1 = builder.newKVSource(() -> new KeyValue<>("foo", "bar"));
-
-s1
-        .reduceByKeyAndWindow()
+builder.newSource(() -> "Mary had a little lamb")
+        .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+        .reduceByKeyAndWindow(
+            // Key extractor (in this case, each word acts as the key)
+            word -> word,
+            // Value extractor (each word appears only once, hence the value is always 1)
+            word -> 1,
+            // Window configuration
+            WindowConfig.TumblingCountWindow(50),
+            // Reduce operation (a running sum)
+            (x, y) -> x + y
+        )
+        // The result is logged
+        .log();
 ```
 
 ### Join operations
@@ -376,60 +362,44 @@ Left stream | Right stream
 
 #### Outer joins
 
-### Streamlet API example
+### Sink operations
 
-You can see an example streamlet-based processing graph in the diagram below:
-
-![Streamlet-based processing graph for Heron](https://www.lucidchart.com/publicSegments/view/dc74f0b2-0d3d-46da-b80d-0bc70ad4f64c/image.png)
-
-Here's the corresponding Java code for the processing logic shown in the diagram:
+In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
 
 ```java
-package heron.streamlet.example;
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Sink;
 
-import com.twitter.heron.streamlet.*;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
+public class FormattedLogSink implements Sink<T> {
+    private String streamletName;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-public final class ExampleStreamletAPITopology {
-    public ExampleStreamletAPITopology() {}
-
-    private int randomInt(int lower, int upper) {
-        return ThreadLocalRandom.current().nextInt(lower, upper + 1);
+    public void setup(Context context) {
+        streamletName = context.getStreamletName();
     }
 
-    public static void main(String[] args) {
-        Builder builder = Builder.CreateBuilder();
-
-        builder.newSource(() -> 0)
-                .setName("zeroes");
-
-        builder.newSource(() -> randomInt(1, 10))
-                .setName("random-ints")
-                .map(i -> i + 1)
-                .setName("add-one")
-                .union(zeroes)
-                .setName("unify-streams")
-                .filter(i -> i != 2)
-                .setName("remove-all-twos")
-                .log();
-
-        Config conf = new Config();
-        conf.setNumContainers(2);
-
-        new Runner().run("ExampleStreamletAPITopology", conf, builder);
+    public void put(T element) {
+        String message = String.format("Streamlet %s has produced an element with a value of: '%s'",
+                streamletName,
+                element.toString());
+        System.out.println(message);
     }
+
+    public void cleanup() {}
 }
 ```
 
-That Java code will produce this [logical plan](#logical-plan):
+In this example, the sink fetches the name of the enclosing streamlet from the context passed in the `setup` method. The `put` method specifies how the sink handles each element that is received (in this case, a formatted message is logged to stdout). The `cleanup` method enables you to specify what happens after the element has been processed by the sink.
 
-![Heron Streamlet API logical plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
+Here is the `FormattedLogSink` at work in an example processing graph:
 
-### Key-value streamlets
+```java
+Builder builder = Builder.createBuilder();
 
-In order to perform some operations, such as streamlet joins and streamlet reduce operations, you'll need to create **key-value** streamlets.
+builder.newSource(() -> "Here is a string to be passed to the sink")
+        .toSink(new FormattedLogSink());
+```
+
+> [Log operations](#log-operations) rely on a log sink that is provided out of the box. You'll need to implement other sinks yourself.
 
 ## Partitioning
 
