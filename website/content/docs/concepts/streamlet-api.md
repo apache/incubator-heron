@@ -22,12 +22,6 @@ Boilerplate-free code | Instead of needing to implement spout and bolt classes o
 Easy debugging | With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
 Completely flexible, type-safe data model | Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.<br /><br />In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than at runtime.
 
-### Heron Streamlet API topologies
-
-With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron automatically performs the heavy lifting of converting the streamlet-based processing logic that you create into spouts and bolts and, from there, into containers that are then deployed using whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
-
-From the standpoint of both operators and developers [managing topologies' lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a development workflow standpoint, however, the difference is profound. You can think of the Streamlet API as a highly convenient tool for creating spouts, bolts, and the logic that connects them.
-
 ## Supported languages
 
 The Heron Streamlet API is currently available for:
@@ -41,18 +35,38 @@ The core construct underlying the Heron Streamlet API is that of the **streamlet
 **Source streamlets** supply a Heron processing graph with data inputs. These inputs can come from a wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org) (incubating), random generators, or static files like CSV or [Apache Parquet](https://parquet.apache.org/) files.
 
-Source streamlets can then be manipulated in a wide variety of ways. You can:
+Source streamlets can then be manipulated in a wide variety of ways. You can, for example:
 
 * apply [map](#map-operations), [filter](#filter-operations), [flatMap](#flatmap-operations), and many other operations to them
 * apply operations, such as [join](#join-operations) and [union](#union-operations) operations, that combine streamlets together
 * [reduce](#reduce-by-key-and-window-operations) all elements in a streamlet to some single value, based on key
 * send data to [sinks](#sink-operations) (store elements)
 
-A complete set of source streamlets and streamlet operations is called a **processing graph**.
+A complete graph of source streamlets and streamlet operations is called a **processing graph**.
+
+### Heron Streamlet API topologies
+
+With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron automatically performs the heavy lifting of converting the streamlet-based processing logic that you create into spouts and bolts and, from there, into containers that are then deployed using whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
+
+From the standpoint of both operators and developers [managing topologies' lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a development workflow standpoint, however, the difference is profound. You can think of the Streamlet API as a highly convenient tool for creating spouts, bolts, and the logic that connects them.
+
+The basic workflow looks like this:
+
+{{< diagram
+    width="60"
+    url="https://www.lucidchart.com/publicSegments/view/6b2e9b49-ef1f-45c9-8094-1e2cefbaed7b/image.png" >}}
+
+When creating topologies using the Heron Streamlet API, you simply write code (example [below](#complete-streamlet-processing-graph-example)) in a highly functional style. From there:
+
+* that code is automatically converted into spouts, bolts, and the necessary connective logic between spouts and bolts
+* the spouts and bolts are automatically converted into a [logical plan](../topologies#logical-plan) that specifies how the spouts and bolts are connected to each other
+* the logical plan is automatically converted into a [physical plan](../topologies#physical-plan) that determines how the spout and bolt [instances](../architecture#heron-instances) (the colored boxes above) are distributed across the specified number of containers (in this case two)
+
+With a physical plan in place, the Streamlet API topology can be submitted to a Heron cluster.
 
 ### Complete streamlet processing graph example
 
-A visual representation of a streamlet processing graph is shown in the diagram below:
+A visual representation of a simple streamlet processing graph is shown in the diagram below:
 
 ![Example streamlet transformation](https://www.lucidchart.com/publicSegments/view/5c451e53-46f8-4e36-86f4-9a11ca015c21/image.png)
 
@@ -69,20 +83,27 @@ In this diagram, the **source streamlet** is produced by a random generator that
 The code below shows how you could implement the processing graph shown [above](#streamlet-example) in Java:
 
 ```java
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 
 Builder builder = Builder.createBuilder();
 
+// Function for generating random integers
+int randomInt(int lower, int upper) {
+    return ThreadLocalRandom.current().nextInt(lower, upper + 1);
+}
+
 // Source streamlet
 builder.newSource(() -> randomInt(1, 100))
-        // Filter operation
-        .filter(i -> i > 30)
-        // Map operation
-        .map(i -> i + 15)
-        // Log sink
-        .log();
+    // Filter operation
+    .filter(i -> i > 30)
+    // Map operation
+    .map(i -> i + 15)
+    // Log sink
+    .log();
 
 Config config = new Config();
 // This topology will be spread across two containers
@@ -108,12 +129,15 @@ Operation | Description
 [transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations)
 [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
+[log](#log-operations) | Logs the final streamlet output of the processing graph to stdout
 [toSink](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc.
-[consume](#consume-operations) | 
+[consume](#consume-operations) | Consume operations are like sink operations except they don't require implementing a full sink interface (consume operations are thus suited for simple operations like logging)
 
 ### Map operations
 
-Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet. Here's a Java example:
+Map operations create a new streamlet by applying the supplied mapping function to each element in the original streamlet.
+
+#### Java example
 
 ```java
 import com.twitter.heron.streamlet.Builder;
@@ -137,17 +161,19 @@ builder.newSource(() -> "I have nothing to declare but my genius")
         .flatMap((sentence) -> Arrays.asList(sentence.split("\\s+")));
 ```
 
-The effect of this operation is to transform the `Streamlet<String>` into a `Streamlet<List<String>>`.
+The effect of this operation is to transform the `Streamlet<String>` into a `Streamlet<List<String>>` containing each word emitted by the source streamlet.
 
 > One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
 
 ### Filter operations
 
-Filter operations retain some elements in a streamlet and exclude other elements on the basis of a provided filtering function. Here's a Java example:
+Filter operations retain some elements in a streamlet and exclude other elements on the basis of a provided filtering function.
+
+#### Java example
 
 ```java
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .filter(i -> i < 7);
+        .filter(i -> i <= 7);
 ```
 
 In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
@@ -183,7 +209,7 @@ Streamlet<Integer> integers = builder.newSource(() -> ThreadLocalRandom.current(
 List<Streamlet<Integer>> copies = integers.clone(5);
 Streamlet<Integer> ints1 = copies.get(0);
 Streamlet<Integer> ints2 = copies.get(1);
-// and so on
+// and so on...
 ```
 
 In this example, a streamlet of random integers between 1 and 100 is split into 5 identical streams.
@@ -226,7 +252,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
     }
 
     public void transform(String in, Consumer<String> consumer) {
-        String transformedString = // Apply some transformation
+        String transformedString = // Apply some operation to the incoming value
         consumer.accept(transformedString);
     }
 
@@ -249,8 +275,8 @@ Here's that operation within the context of a streamlet processing graph:
 Builder builder = Builder.createBuilder();
 
 builder.newSource(() -> "Some string over and over")
-        .transform(new CountNumberOfItems())
-        .log();
+    .transform(new CountNumberOfItems())
+    .log();
 ```
 
 ### Reduce by key and window operations
@@ -262,7 +288,9 @@ You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/strea
 * a [time window](../topologies#window-operations) across which the operation will take place
 * a reduce function that produces a single value for each key in the streamlet
 
-Here is an example for Java:
+Reduce by key and window operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value, as well as information about the window in which the operation took place).
+
+#### Java example
 
 ```java
 import java.util.Arrays;
@@ -272,27 +300,28 @@ import com.twitter.heron.streamlet.WindowConfig;
 Builder builder = Builder.createBuilder();
 
 builder.newSource(() -> "Mary had a little lamb")
-        .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
-        .reduceByKeyAndWindow(
-            // Key extractor (in this case, each word acts as the key)
-            word -> word,
-            // Value extractor (each word appears only once, hence the value is always 1)
-            word -> 1,
-            // Window configuration
-            WindowConfig.TumblingCountWindow(50),
-            // Reduce operation (a running sum)
-            (x, y) -> x + y
-        )
-        // The result is logged
-        .log();
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .reduceByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (each word appears only once, hence the value is always 1)
+        word -> 1,
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+        // Reduce operation (a running sum)
+        (x, y) -> x + y
+    )
+    // The result is logged
+    .log();
 ```
 
 ### Join operations
 
-Join operations in the Streamlet API take two [key-value streamlets](#key-value-streamlets) and join them together:
+Join operations in the Streamlet API take two streamlets (a "left" and a "right" streamlet) and join them together:
 
-* based on the key in the key-value streamlet
-* over elements accumulated during a specified [time window](#windowing)
+* based on a key extractor for each streamlet
+* over key-value elements accumulated during a specified [time window](#windowing)
+* based on a [join type](#join-types) ([inner](#inner-joins), [outer left](#outer-left-joins), [outer right](#outer-right-joins), or [outer](#outer-joins))
 * using a join function that specifies *how* values will be processed
 
 You may already be familiar with `JOIN` operations in SQL databases, like this:
@@ -312,19 +341,40 @@ All join operations are done:
 
 > Join operations can be performed only on [key-value streamlets](#key-value-streamlets), since joins can be performed only on a key.
 
+#### Join types
+
+The Heron Streamlet API supports four types of joins:
+
+Type | What the join operation yields
+:----|:------------------------------
+[Inner](#inner-joins) | All key-values with matched keys across the left and right stream
+[Outer left](#outer-left-joins) | All key-values with matched keys across both streams plus unmatched keys in the left stream
+[Outer right](#outer-right-joins) | All key-values with matched keys across both streams plus unmatched keys in the left stream
+[Outer](#outer-joins) |
+
 #### Inner joins
 
 Inner joins operate over the [Cartesian product](https://en.wikipedia.org/wiki/Cartesian_product) of the left stream and the right stream, i.e. over all the whole set of all ordered pairs between the two streams. Imagine this set of key-value pairs accumulated within a time window:
 
-Left Streamlet | Right Streamlet
+Left streamlet | Right streamlet
 :--------------|:---------------
 ("player1", 4) | ("player1", 10)
 ("player1", 5) | ("player1", 12)
-("player1", 17) | 
+("player1", 17) | ("player2", 27)
 
-An inner join operation would thus apply the join function to every possible pairing of key-values, thus **3 &times; 2 = 6** in total.
+An inner join operation would thus apply the join function to all key-values with matching keys, thus **3 &times; 2 = 6** in total, producing this set of key-values:
 
-If the join function, say, added the values together, then the resulting stream would look like this:
+Included key-values
+:------------------
+("player1", 4)
+("player1", 5)
+("player1", 10)
+("player1", 12)
+("player1", 17)
+
+> Note that the `("player2", 27)` key-value pair was *not* included in the stream because there's no matching key-value in the left streamlet.
+
+If the supplied join function, say, added the values together, then the resulting joined stream would look like this:
 
 Operation | Joined Streamlet
 :---------|:----------------
@@ -335,32 +385,96 @@ Operation | Joined Streamlet
 17 + 10 | ("player1", 27)
 17 + 12 | ("player1", 29)
 
-> Inner joins are in a certain sense the "default" join type in the Heron Streamlet API. If you call the `join` method without specifying a join type, inner join will be used.
+> Inner joins are the "default" join type in the Heron Streamlet API. If you call the `join` method without specifying a join type, an inner join will be applied.
 
 ##### Java example
 
 ```java
-playerScoresLeft
-        .join(playerScoresRight, WindowConfig.)
-
+Streamlet<KeyValue<String, Integer>> scores1 = /* A stream of player scores */;
+Streamlet<KeyValue<String, Integer>> scores2 = /* A second stream of player scores */;
 
 scores1
-        .join(scores2, WindowConfig.TumblingCountWindow(10), (x, y) -> x + y);
+    .join(
+        scores2,
+        // Key extractor for the left stream (scores1)
+        kv -> kv.getKey(),
+        // Key extractor for the right stream (scores2)
+        kv -> kv.getKey(),
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+        // Join function (selects the larger score as the value)
+        (x, y) -> (x.getValue() > y.getValue()) ? x.getValue() : y.getValue()
+    )
+    .log();
+```
+
+By default, an [inner join](#inner-joins) is applied. You can also specify a different join type. Here's an example for an outer right join:
+
+```java
+import com.twitter.heron.streamlet.JoinType;
+
+scores1
+    .join(
+        scores2,
+        // Key extractor for the left stream
+        kv -> kv.getKey(),
+        // Key extractor for the right stream
+        kv -> kv.getKey(),
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+        // Specify a non-default join type (outer right in this case)
+        JoinType.OUTER_RIGHT,
+        // Join function (selects the larger score as the value)
+        (x, y) -> (x.getValue() > y.getValue()) ? x.getValue() : y.getValue()
+    )
+    .log();
 ```
 
 #### Outer left joins
 
-Left stream | Right stream
-:-----------|:------------
-("player1", 4) | ("player1", 10)
-("player1", 5) | ("player1", 12)
-("player1", 17) | 
+An outer left join includes the results of an [inner join](#inner-joins) *plus* all of the unmatched keys in the left stream. Take this example left and right streamlet:
 
-> With an outer left join, *all* elements in each Streamlet are guaranteed to be included in the resulting joined Streamlet.
+Left streamlet | Right streamlet
+:--------------|:---------------
+("player1", 4) | ("player1", 10)
+("player2", 5) | ("player4", 12)
+("player3", 17) |
+
+The resulting set of key-values within the time window:
+
+Included key-values
+:------------------
+("player1", 4)
+("player1", 10)
+("player2", 5)
+("player3", 17)
+
+In this case, key-values with a key of `player4` are excluded because they are in the right stream but have no matching key with any element in the left stream.
 
 #### Outer right joins
 
+An outer right join includes the results of an [inner join](#inner-joins) *plus* all of the unmatched keys in the right stream. Take this example left and right streamlet (from [above](#outer-left-joins)):
+
+Left streamlet | Right streamlet
+:--------------|:---------------
+("player1", 4) | ("player1", 10)
+("player2", 5) | ("player4", 12)
+("player3", 17) |
+
+The resulting set of key-values within the time window:
+
+Included key-values
+:------------------
+("player1", 4)
+("player1", 10)
+("player2", 5)
+("player4", 17)
+
+In this case, key-values with a key of `player3` are excluded because they are in the left stream but have no matching key with any element in the right stream.
+
 #### Outer joins
+
+Outer joins include *all* key-values across both the left and right stream, regardless of whether or not any given element has a matching key in the other stream. If you want to ensure that no element is left out of a resulting joined streamlet, use an outer join.
 
 ### Sink operations
 
