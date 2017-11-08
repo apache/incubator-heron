@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.grouping.CustomStreamGroupingDelegate;
 import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
@@ -36,8 +37,8 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public BoltDeclarer addConfigurations(Map conf) {
     // Translate config to heron config and then apply.
-    Map<String, Object> henronConf = Utils.ConfigUtils.translateConfig(conf);
-    delegate.addConfigurations((Map<String, Object>) henronConf);
+    Map<String, Object> henronConf = ConfigUtils.translateConfig(conf);
+    delegate.addConfigurations(henronConf);
     return this;
   }
 

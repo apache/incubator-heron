@@ -20,6 +20,8 @@ package org.apache.storm.topology;
 
 import java.util.Map;
 
+import org.apache.storm.utils.ConfigUtils;
+
 public class SpoutDeclarerImpl implements SpoutDeclarer {
   private com.twitter.heron.api.topology.SpoutDeclarer delegate;
 
@@ -31,7 +33,7 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public SpoutDeclarer addConfigurations(Map conf) {
     // Translate config to heron config and then apply.
-    Map<String, Object> henronConf = Utils.ConfigUtils.translateConfig(conf);
+    Map<String, Object> henronConf = ConfigUtils.translateConfig(conf);
     delegate.addConfigurations(henronConf);
     return this;
   }
