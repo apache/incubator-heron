@@ -534,7 +534,7 @@ You could apply varying numbers of partitions to each step in that topology like
 ```java
 Builder builder = Builder.CreateBuilder();
 
-builder.newSource(() -> 0)
+Streamlet<Integer> zeroes = builder.newSource(() -> 0)
         .setName("zeroes");
 
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
@@ -542,15 +542,32 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .setNumPartitions(3)
         .map(i -> i + 1)
         .setName("add-one")
-        .setNumPartitions(3)
+        .repartition(3)
         .union(zeroes)
         .setName("unify-streams")
-        .setNumPartitions(2)
+        .repartition(2)
         .filter(i -> i != 2)
         .setName("remove-all-twos")
-        .setNumPartitions(2)
+        .repartition(1)
         .log();
 ```
 
-The number of partitions to assign to each processing step when using the Streamlet API depends
-on a variety of factors.
+### Repartition operations
+
+As explained [above](#partitioning), when you set a number of partitions for a specific operation (included for source streamlets), the same number of partitions is applied to all downstream operations *until* a different number is explicitly set.
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.CreateBuilder();
+
+builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
+    .repartition(4, (element, numPartitions) -> {
+        if (element > 5) {
+            return Arrays.asList(0, 1);
+        } else {
+            return Arrays.asList(2, 3);
+        }
+    });
+```
+
