@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.Pair;
 import com.twitter.heron.api.bolt.IBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -48,6 +47,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -223,7 +223,8 @@ public class BoltInstance implements IInstance {
     };
     looper.addTasksOnWakeup(boltTasks);
 
-    prepareTimerEvents();
+    PrepareTickTupleTimer();
+    InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
   @Override
@@ -299,33 +300,14 @@ public class BoltInstance implements IInstance {
   public void deactivate() {
   }
 
-  @SuppressWarnings("unchecked")
-  private void prepareTimerEvents() {
-    Map<String, Pair<Duration, Runnable>> timerEvents =
-        (Map<String, Pair<Duration, Runnable>>) helper.getTopologyContext()
-            .getTopologyConfig().get(Config.TOPOLOGY_TIMER_EVENTS);
-
-    if (timerEvents != null) {
-      for (Map.Entry<String, Pair<Duration, Runnable>> entry : timerEvents.entrySet()) {
-        Duration duration = entry.getValue().getFirst();
-        Runnable task = entry.getValue().getSecond();
-
-        looper.registerPeriodicEvent(duration, task);
-      }
-    }
-
-    // prepare tick tuple
+  public void PrepareTickTupleTimer() {
     Object tickTupleFreqMs =
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS);
 
     if (tickTupleFreqMs != null) {
       Duration freq = TypeUtils.getDuration(tickTupleFreqMs, ChronoUnit.MILLIS);
 
-      Runnable r = new Runnable() {
-        public void run() {
-          SendTickTuple();
-        }
-      };
+      Runnable r = () -> SendTickTuple();
 
       looper.registerPeriodicEvent(freq, r);
     }

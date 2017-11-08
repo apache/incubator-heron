@@ -673,6 +673,9 @@ public class Config extends HashMap<String, Object> {
   public static void registerTopologyTimerEvents(Map<String, Object> conf,
                                                  String name, Duration timerDuration,
                                                  Runnable task) {
+    if (timerDuration.isZero() || timerDuration.isNegative()) {
+      throw new IllegalArgumentException("Timer duration needs to be positive");
+    }
     if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
       conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
     }
