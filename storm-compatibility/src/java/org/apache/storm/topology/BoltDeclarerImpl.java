@@ -18,11 +18,13 @@
 
 package org.apache.storm.topology;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.grouping.CustomStreamGroupingDelegate;
 import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
@@ -35,13 +37,18 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   @Override
   @SuppressWarnings({"rawtypes", "unchecked"})
   public BoltDeclarer addConfigurations(Map conf) {
-    delegate.addConfigurations((Map<String, Object>) conf);
+    // Translate config to heron config and then apply.
+    Map<String, Object> henronConf = ConfigUtils.translateConfig(conf);
+    delegate.addConfigurations(henronConf);
     return this;
   }
 
   @Override
   public BoltDeclarer addConfiguration(String config, Object value) {
-    delegate.addConfiguration(config, value);
+    Map<String, Object> configMap = new HashMap<String, Object>();
+    configMap.put(config, value);
+
+    addConfigurations(configMap);
     return this;
   }
 

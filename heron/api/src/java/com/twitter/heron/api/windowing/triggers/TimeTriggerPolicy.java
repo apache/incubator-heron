@@ -32,6 +32,8 @@
 
 package com.twitter.heron.api.windowing.triggers;
 
+import java.io.Serializable;
+
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
@@ -41,18 +43,20 @@ import com.twitter.heron.api.windowing.TriggerPolicy;
 /**
  * Invokes {@link TriggerHandler#onTrigger()} after the duration.
  */
-public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
+
+public class TimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Void> {
 
   private long duration;
   private final TriggerHandler handler;
-  private final EvictionPolicy<T> evictionPolicy;
+  private final EvictionPolicy<T, ?> evictionPolicy;
   private boolean started = false;
+
 
   public TimeTriggerPolicy(long millis, TriggerHandler handler) {
     this(millis, handler, null);
   }
 
-  public TimeTriggerPolicy(long millis, TriggerHandler handler, EvictionPolicy<T>
+  public TimeTriggerPolicy(long millis, TriggerHandler handler, EvictionPolicy<T, ?>
       evictionPolicy) {
     this.duration = millis;
     this.handler = handler;
@@ -96,5 +100,15 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
      */
     evictionPolicy.setContext(new DefaultEvictionContext(now, null, null, duration));
     handler.onTrigger();
+  }
+
+  @Override
+  public Void getState() {
+    return null;
+  }
+
+  @Override
+  public void restoreState(Void state) {
+
   }
 }

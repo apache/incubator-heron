@@ -29,6 +29,7 @@ import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.Window;
 
 /**
@@ -47,15 +48,21 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   private String leftComponent;
   // The source component that represent the right join component
   private String rightComponent;
+  private SerializableFunction<V1, K> leftKeyExtractor;
+  private SerializableFunction<V2, K> rightKeyExtractor;
   // The user supplied join function
-  private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
+  private SerializableBiFunction<V1, V2, ? extends VR> joinFn;
   private OutputCollector collector;
 
   public JoinOperator(JoinType joinType, String leftComponent, String rightComponent,
-                      SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+                      SerializableFunction<V1, K> leftKeyExtractor,
+                      SerializableFunction<V2, K> rightKeyExtractor,
+                      SerializableBiFunction<V1, V2, ? extends VR> joinFn) {
     this.joinType = joinType;
     this.leftComponent = leftComponent;
     this.rightComponent = rightComponent;
+    this.leftKeyExtractor = leftKeyExtractor;
+    this.rightKeyExtractor = rightKeyExtractor;
     this.joinFn = joinFn;
   }
 
@@ -79,13 +86,13 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
     Map<K, Pair<List<V1>, List<V2>>> joinMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
       if (tuple.getSourceComponent().equals(leftComponent)) {
-        KeyValue<K, V1> tup = (KeyValue<K, V1>) tuple.getValue(0);
-        if (tup.getKey() != null) {
+        V1 tup = (V1) tuple.getValue(0);
+        if (tup != null) {
           addMapLeft(joinMap, tup);
         }
       } else {
-        KeyValue<K, V2> tup = (KeyValue<K, V2>) tuple.getValue(0);
-        if (tup.getKey() != null) {
+        V2 tup = (V2) tuple.getValue(0);
+        if (tup != null) {
           addMapRight(joinMap, tup);
         }
       }
@@ -131,18 +138,20 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
     }
   }
 
-  private void addMapLeft(Map<K, Pair<List<V1>, List<V2>>> joinMap, KeyValue<K, V1> tup) {
-    if (!joinMap.containsKey(tup.getKey())) {
-      joinMap.put(tup.getKey(), Pair.of(new LinkedList<>(), new LinkedList<>()));
+  private void addMapLeft(Map<K, Pair<List<V1>, List<V2>>> joinMap, V1 tup) {
+    K key = leftKeyExtractor.apply(tup);
+    if (!joinMap.containsKey(key)) {
+      joinMap.put(key, Pair.of(new LinkedList<>(), new LinkedList<>()));
     }
-    joinMap.get(tup.getKey()).getFirst().add(tup.getValue());
+    joinMap.get(key).getFirst().add(tup);
   }
 
-  private void addMapRight(Map<K, Pair<List<V1>, List<V2>>> joinMap, KeyValue<K, V2> tup) {
-    if (!joinMap.containsKey(tup.getKey())) {
-      joinMap.put(tup.getKey(), Pair.of(new LinkedList<>(), new LinkedList<>()));
+  private void addMapRight(Map<K, Pair<List<V1>, List<V2>>> joinMap, V2 tup) {
+    K key = rightKeyExtractor.apply(tup);
+    if (!joinMap.containsKey(key)) {
+      joinMap.put(key, Pair.of(new LinkedList<>(), new LinkedList<>()));
     }
-    joinMap.get(tup.getKey()).getSecond().add(tup.getValue());
+    joinMap.get(key).getSecond().add(tup);
   }
 
   private KeyedWindow<K> getKeyedWindow(K key, TupleWindow tupleWindow) {

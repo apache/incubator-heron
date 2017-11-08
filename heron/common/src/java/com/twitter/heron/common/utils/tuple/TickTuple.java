@@ -32,6 +32,8 @@ import com.twitter.heron.api.tuple.Tuple;
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TickTuple implements Tuple {
+  private static final long serialVersionUID = -7405457325549296084L;
+
   public TickTuple() {
   }
 

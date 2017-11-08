@@ -55,7 +55,7 @@ public interface IBolt extends Serializable {
    * @param collector The collector is used to emit tuples from this bolt. Tuples can be emitted at any time, including the prepare and cleanup methods. The collector is thread-safe and should be saved as an instance variable of this bolt object.
    */
   @SuppressWarnings("rawtypes")
-  void prepare(Map<String, Object> stormConf, TopologyContext context, OutputCollector collector);
+  void prepare(Map stormConf, TopologyContext context, OutputCollector collector);
 
   /**
    * Process a single tuple of input. The Tuple object contains metadata on it
