@@ -18,6 +18,7 @@
 
 package backtype.storm.topology;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import backtype.storm.utils.ConfigUtils;
@@ -40,7 +41,7 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
 
   @Override
   public SpoutDeclarer addConfiguration(String config, Object value) {
-    Map<String, Object> configMap = new Map<String, Object>();
+    Map<String, Object> configMap = new HashMap<String, Object>();
     configMap.put(config, value);
 
     addConfigurations(configMap);

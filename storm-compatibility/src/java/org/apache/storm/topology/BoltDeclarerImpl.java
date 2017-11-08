@@ -18,6 +18,7 @@
 
 package org.apache.storm.topology;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.grouping.CustomStreamGrouping;
@@ -44,7 +45,7 @@ public class BoltDeclarerImpl implements BoltDeclarer {
 
   @Override
   public BoltDeclarer addConfiguration(String config, Object value) {
-    Map<String, Object> configMap = new Map<String, Object>();
+    Map<String, Object> configMap = new HashMap<String, Object>();
     configMap.put(config, value);
 
     addConfigurations(configMap);
