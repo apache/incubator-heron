@@ -36,6 +36,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -142,14 +143,18 @@ public class LocalScheduler implements IScheduler, IScalable {
   }
 
   private String[] getExecutorCommand(int container) {
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    ports.put(ExecutorPort.MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.TMASTER_CONTROLLER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.TMASTER_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.SHELL_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.SCHEDULER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
 
-    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(SysUtils.getFreePort());
-    }
-
-    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container,
-        SchedulerUtils.ExecutorPorts.withRequiredPorts(freePorts));
+    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, ports);
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;

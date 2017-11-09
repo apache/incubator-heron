@@ -27,7 +27,7 @@ import com.google.common.base.Joiner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
-import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts.ExecutorPortNames;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
@@ -198,13 +198,13 @@ public class MarathonScheduler implements IScheduler {
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
-    for (Map.Entry<ExecutorPortNames, Object> entry
+    for (Map.Entry<ExecutorPort, String> entry
         : MarathonConstants.EXECUTOR_PORTS.entrySet()) {
       ObjectNode port = mapper.createObjectNode();
       port.put(MarathonConstants.DOCKER_CONTAINER_PORT, 0);
       port.put(MarathonConstants.PROTOCOL, MarathonConstants.TCP);
       port.put(MarathonConstants.HOST_PORT, 0);
-      port.put(MarathonConstants.PORT_NAME, entry.getKey().toString());
+      port.put(MarathonConstants.PORT_NAME, entry.getKey().getName());
 
       ports.add(port);
     }

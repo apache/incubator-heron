@@ -269,6 +269,6 @@ public class MesosScheduler implements IScheduler {
     // Convert them from bytes to MB
     container.diskInMB = maxResourceContainer.getDisk().asMegabytes();
     container.memInMB = maxResourceContainer.getRam().asMegabytes();
-    container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
+    container.ports = SchedulerUtils.ExecutorPort.getRequiredNumOfPorts();
   }
 }

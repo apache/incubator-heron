@@ -38,7 +38,7 @@ import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
-import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPorts.ExecutorPortNames;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
@@ -418,13 +418,13 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
 
-    for (Map.Entry<ExecutorPortNames, Object> entry
+    for (Map.Entry<ExecutorPort, String> entry
         : KubernetesConstants.EXECUTOR_PORTS.entrySet()) {
       ObjectNode port = mapper.createObjectNode();
-      ExecutorPortNames portName = entry.getKey();
+      ExecutorPort portName = entry.getKey();
       port.put(KubernetesConstants.DOCKER_CONTAINER_PORT,
-          Integer.parseInt((String) entry.getValue(), 10));
-      port.put(KubernetesConstants.PORT_NAME, portName.toString());
+          Integer.parseInt(entry.getValue(), 10));
+      port.put(KubernetesConstants.PORT_NAME, portName.getName());
       ports.add(port);
     }
 

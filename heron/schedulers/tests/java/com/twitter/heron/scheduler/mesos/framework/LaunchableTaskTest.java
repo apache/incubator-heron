@@ -110,7 +110,7 @@ public class LaunchableTaskTest {
     container.cpu = CPU;
     container.diskInMB = DISK;
     container.memInMB = MEM;
-    container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
+    container.ports = SchedulerUtils.ExecutorPort.getRequiredNumOfPorts();
     container.shell = true;
     container.retries = Integer.MAX_VALUE;
     container.dependencies = new ArrayList<>();
@@ -122,7 +122,7 @@ public class LaunchableTaskTest {
 
     // List of free ports
     List<Integer> freePorts = new ArrayList<>();
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
+    for (int i = 0; i < SchedulerUtils.ExecutorPort.getRequiredNumOfPorts(); i++) {
       freePorts.add(i);
     }
 

@@ -17,7 +17,9 @@ package com.twitter.heron.scheduler.slurm;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -125,13 +128,19 @@ public class SlurmScheduler implements IScheduler {
   }
 
   protected String[] getExecutorCommand(PackingPlan packing) {
-    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(SysUtils.getFreePort());
-    }
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    ports.put(ExecutorPort.MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.TMASTER_CONTROLLER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.TMASTER_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.SHELL_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.SCHEDULER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
+    ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime,
-        SchedulerUtils.ExecutorPorts.withRequiredPorts(freePorts));
+        ports);
 
     LOG.log(Level.FINE, "Executor command line: ", Arrays.toString(executorCmd));
     return executorCmd;
