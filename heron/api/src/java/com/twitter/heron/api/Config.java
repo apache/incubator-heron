@@ -34,6 +34,7 @@
 package com.twitter.heron.api;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -265,6 +266,14 @@ public class Config extends HashMap<String, Object> {
    * This variable contains Map<String, String>
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
+  /**
+   * Timer events registered for a topology.
+   * This is a Map<String, Pair<Duration, Runnable>>.
+   * Where the key is the name and the value contains the frequency of the event
+   * and the task to run.
+   */
+  public static final String TOPOLOGY_TIMER_EVENTS = "topology.timer.events";
 
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
@@ -651,5 +660,32 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  /**
+   * Registers a timer event that executes periodically
+   * @param conf the map with the existing topology configs
+   * @param name the name of the timer
+   * @param interval the frequency in which to run the task
+   * @param task the task to run
+   */
+  @SuppressWarnings("unchecked")
+  public static void registerTopologyTimerEvents(Map<String, Object> conf,
+                                                 String name, Duration interval,
+                                                 Runnable task) {
+    if (interval.isZero() || interval.isNegative()) {
+      throw new IllegalArgumentException("Timer duration needs to be positive");
+    }
+    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
+      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
+    }
+
+    Map<String, Pair<Duration, Runnable>> timers
+        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timers.containsKey(name)) {
+      throw new IllegalArgumentException("Timer with name " + name + " already exists");
+    }
+    timers.put(name, Pair.of(interval, task));
   }
 }
