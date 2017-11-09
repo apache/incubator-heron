@@ -47,6 +47,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -223,6 +224,7 @@ public class BoltInstance implements IInstance {
     looper.addTasksOnWakeup(boltTasks);
 
     PrepareTickTupleTimer();
+    InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
   @Override
@@ -305,13 +307,9 @@ public class BoltInstance implements IInstance {
     if (tickTupleFreqMs != null) {
       Duration freq = TypeUtils.getDuration(tickTupleFreqMs, ChronoUnit.MILLIS);
 
-      Runnable r = new Runnable() {
-        public void run() {
-          SendTickTuple();
-        }
-      };
+      Runnable r = () -> SendTickTuple();
 
-      looper.registerTimerEvent(freq, r);
+      looper.registerPeriodicEvent(freq, r);
     }
   }
 
@@ -323,7 +321,5 @@ public class BoltInstance implements IInstance {
     boltMetrics.executeTuple(t.getSourceStreamId(), t.getSourceComponent(), latency);
 
     collector.sendOutTuples();
-    // reschedule ourselves again
-    PrepareTickTupleTimer();
   }
 }
