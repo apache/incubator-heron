@@ -666,14 +666,14 @@ public class Config extends HashMap<String, Object> {
    * Registers a timer event that executes periodically
    * @param conf the map with the existing topology configs
    * @param name the name of the timer
-   * @param timerDuration the frequency in which to run the task
+   * @param interval the frequency in which to run the task
    * @param task the task to run
    */
   @SuppressWarnings("unchecked")
   public static void registerTopologyTimerEvents(Map<String, Object> conf,
-                                                 String name, Duration timerDuration,
+                                                 String name, Duration interval,
                                                  Runnable task) {
-    if (timerDuration.isZero() || timerDuration.isNegative()) {
+    if (interval.isZero() || interval.isNegative()) {
       throw new IllegalArgumentException("Timer duration needs to be positive");
     }
     if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
@@ -686,6 +686,6 @@ public class Config extends HashMap<String, Object> {
     if (timers.containsKey(name)) {
       throw new IllegalArgumentException("Timer with name " + name + " already exists");
     }
-    timers.put(name, Pair.of(timerDuration, task));
+    timers.put(name, Pair.of(interval, task));
   }
 }

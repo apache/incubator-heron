@@ -300,7 +300,7 @@ public class BoltInstance implements IInstance {
   public void deactivate() {
   }
 
-  public void PrepareTickTupleTimer() {
+  private void PrepareTickTupleTimer() {
     Object tickTupleFreqMs =
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS);
 
