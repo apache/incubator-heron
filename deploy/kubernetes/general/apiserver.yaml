@@ -48,7 +48,7 @@ spec:
       serviceAccountName: heron-apiserver
       containers:
         - name: heron-apiserver
-          image: heron/heron:0.16.2
+          image: heron/heron:latest
           command: ["sh", "-c"]
           args:
             - >-
@@ -57,7 +57,7 @@ spec:
               --cluster kubernetes
               -D heron.statemgr.connection.string=zookeeper:2181
               -D heron.kubernetes.scheduler.uri=http://localhost:8001
-              -D heron.executor.docker.image=heron/heron:0.16.2
+              -D heron.executor.docker.image=heron/heron:latest
               -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://zookeeper:2181/distributedlog
         - name: kubectl-proxy
