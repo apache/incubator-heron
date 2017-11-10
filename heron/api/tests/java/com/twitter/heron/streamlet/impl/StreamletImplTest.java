@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableTransformer;
