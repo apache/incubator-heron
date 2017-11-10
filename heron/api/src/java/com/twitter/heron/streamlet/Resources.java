@@ -27,9 +27,14 @@ public final class Resources implements Serializable {
   private float cpu;
   private long ram;
 
-  public Resources(Builder builder) {
+  private Resources(Builder builder) {
     this.cpu = builder.cpu;
     this.ram = builder.ram;
+  }
+
+  public static Resources defaultResources() {
+    return new Builder()
+        .build();
   }
 
   public float getCpu() {
