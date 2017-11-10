@@ -44,7 +44,7 @@ public final class ConfigUtils {
     doSerializationTranslation(heronConfig);
 
     // Now look at supported apis
-    doStormTranslation(heronConfig, stormConfig);
+    doStormTranslation(heronConfig);
 
     doTaskHooksTranslation(heronConfig);
 
@@ -60,7 +60,7 @@ public final class ConfigUtils {
   public static Config translateComponentConfig(Map stormConfig) {
     Config heronConfig = new Config((Map<String, Object>) stormConfig);
 
-    doStormTranslation(heronConfig, stormConfig);
+    doStormTranslation(heronConfig);
 
     return heronConfig;
   }
@@ -114,11 +114,9 @@ public final class ConfigUtils {
 
   /**
    * Translate storm config into heron config
-   * @param stormConfig the storm config
    * @param heron the heron config object to receive the results.
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private static void doStormTranslation(Config heronConfig, Map stormConfig) {
+  private static void doStormTranslation(Config heronConfig) {
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       heronConfig.put(backtype.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS,
           heronConfig.get(backtype.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());
