@@ -20,7 +20,7 @@ roundrobin_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files + \
     test_deps_files + [
-        "//heron/api/src/java:api-java-low-levela",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/spi/src/java:utils-spi-java",
     ]
 
