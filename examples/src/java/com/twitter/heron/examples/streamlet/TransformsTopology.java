@@ -65,12 +65,14 @@ public final class TransformsTopology {
   private static class IncrementTransformer implements SerializableTransformer<Integer, Integer> {
     private static final long serialVersionUID = -3198491688219997702L;
     private int increment;
+    private int total;
 
     IncrementTransformer(int increment) {
       this.increment = increment;
     }
 
     public void setup(Context context) {
+      context.registerMetric("InCrementMetric", 30, () -> total);
     }
 
     /**
@@ -79,6 +81,7 @@ public final class TransformsTopology {
      */
     public void transform(Integer in, Consumer<Integer> consumer) {
       int incrementedValue = in + increment;
+      total += increment;
       consumer.accept(incrementedValue);
     }
 
