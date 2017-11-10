@@ -31,6 +31,10 @@ public final class KeyValue<K, V> implements Serializable {
     return new KeyValue<R, T>(k, v);
   }
 
+  public KeyValue() {
+    // nothing really
+  }
+
   public KeyValue(K k, V v) {
     this.key = k;
     this.value = v;

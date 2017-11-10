@@ -17,6 +17,7 @@ package com.twitter.heron.streamlet;
 import java.io.Serializable;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.streamlet.impl.KryoSerializer;
 
 /**
  * Config is the way users configure the execution of the topology.
@@ -35,10 +36,6 @@ public final class Config implements Serializable {
 
   public Config() {
     heronConfig = new com.twitter.heron.api.Config();
-  }
-
-  Config(com.twitter.heron.api.Config config) {
-    heronConfig = config;
   }
 
   com.twitter.heron.api.Config getHeronConfig() {
@@ -68,6 +65,13 @@ public final class Config implements Serializable {
   public void setContainerResources(Resources resource) {
     heronConfig.setContainerCpuRequested(resource.getCpu());
     heronConfig.setContainerRamRequested(ByteAmount.fromBytes(resource.getRam()));
+  }
+
+  /**
+   * Sets to use Kryo Serializer for serializing tuples
+   */
+  public void useKryoSerializer() {
+    heronConfig.setSerializationClassName(KryoSerializer.class.getName());
   }
 
   /**

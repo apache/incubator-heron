@@ -84,6 +84,7 @@ public final class WindowedWordCountTopology {
 
     Config config = new Config();
     config.setNumContainers(topologyParallelism);
+    config.useKryoSerializer();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
