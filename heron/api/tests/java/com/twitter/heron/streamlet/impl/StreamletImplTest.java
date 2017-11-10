@@ -23,7 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
@@ -255,5 +257,20 @@ public class StreamletImplTest {
     jStreamlet =
         (JoinStreamlet<String, String, String, String>) fStreamlet.getChildren().get(0);
     assertEquals(jStreamlet.getChildren().size(), 0);
+  }
+
+  @Test
+  public void testResourcesBuilder() {
+    Resources res1 = new Resources.Builder()
+        .build();
+    assertEquals(0, Float.compare(res1.getCpu(), 1.0f));
+    assertEquals(res1.getRam(), 104857600);
+
+    Resources res2 = new Resources.Builder()
+        .setCpu(5.1f)
+        .setRamInGB(20)
+        .build();
+    assertEquals(0, Float.compare(res2.getCpu(), 5.1f));
+    assertEquals(res2.getRam(), 20 * 1024 * 1024);
   }
 }

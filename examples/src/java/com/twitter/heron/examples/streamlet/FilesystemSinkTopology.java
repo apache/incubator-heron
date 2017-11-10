@@ -128,8 +128,9 @@ public final class FilesystemSinkTopology {
     // argument (or else the default of 2 will be used).
     int topologyParallelism = StreamletUtils.getParallelism(args, 2);
 
-    Config config = new Config();
-    config.setNumContainers(topologyParallelism);
+    Config config = new Config.Builder()
+        .setNumContainers(topologyParallelism)
+        .build();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
