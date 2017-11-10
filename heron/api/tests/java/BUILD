@@ -2,6 +2,7 @@ load("/tools/rules/heron_deps", "heron_java_api_proto_files")
 
 api_deps_files = [
     "//heron/api/src/java:api-java-low-level",
+    "//heron/api/src/java:api-java",
     "//heron/common/src/java:utils-java",
     "//heron/common/src/java:basics-java",
     "//third_party/java:junit4",

@@ -14,6 +14,7 @@ java_library(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
         "//third_party/java:jackson",
@@ -31,6 +32,7 @@ java_library(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
@@ -46,6 +48,7 @@ java_library(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "@com_googlecode_json_simple_json_simple//jar",
         "@commons_cli_commons_cli//jar",
@@ -61,6 +64,7 @@ java_library(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         ":common",
         ":core"
@@ -74,6 +78,7 @@ java_binary(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         "@commons_cli_commons_cli//jar",
         "@com_googlecode_json_simple_json_simple//jar",
@@ -96,6 +101,7 @@ java_binary(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//storm-compatibility/src/java:storm-compatibility-java",
         ":common",
         ":core"
