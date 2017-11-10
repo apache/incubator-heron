@@ -20,7 +20,7 @@ api_deps_files =  \
         "//heron/common/src/java:basics-java",
     ]
 
-# Legacy Low Level Api
+# Low Level Api
 java_library(
     name = "api-java-low-level",
     srcs = glob(["com/twitter/heron/api/**/*.java"]),
@@ -28,7 +28,7 @@ java_library(
     deps = api_deps_files,
 )
 
-# External Api
+# Functional Api
 java_library(
     name = "api-java",
     srcs = glob(["com/twitter/heron/streamlet/**/*.java"]),
