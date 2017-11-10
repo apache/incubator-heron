@@ -34,8 +34,8 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
   @SuppressWarnings({"rawtypes", "unchecked"})
   public SpoutDeclarer addConfigurations(Map conf) {
     // Translate config to heron config and then apply.
-    Map<String, Object> henronConf = ConfigUtils.translateConfig(conf);
-    delegate.addConfigurations(henronConf);
+    Map<String, Object> heronConf = ConfigUtils.translateComponentConfig(conf);
+    delegate.addConfigurations(heronConf);
     return this;
   }
 
