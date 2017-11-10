@@ -25,6 +25,14 @@ public final class StreamletUtils {
   private StreamletUtils() {
   }
 
+  public static void sleep(long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Fetches the topology's name from the first command-line argument or
    * throws an exception if not present.

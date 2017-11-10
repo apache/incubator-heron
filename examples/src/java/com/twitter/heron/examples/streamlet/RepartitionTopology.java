@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -83,7 +82,7 @@ public final class RepartitionTopology {
     Streamlet<Integer> randomIntegers = processingGraphBuilder
         .newSource(() -> {
           // Random integers are emitted every 50 milliseconds
-          Utils.sleep(50);
+          StreamletUtils.sleep(50);
           return ThreadLocalRandom.current().nextInt(100);
         })
         .setNumPartitions(2)

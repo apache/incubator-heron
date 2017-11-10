@@ -20,11 +20,20 @@ api_deps_files =  \
         "//heron/common/src/java:basics-java",
     ]
 
+# Legacy Low Level Api
 java_library(
-    name = "api-java",
-    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
+    name = "api-java-low-level",
+    srcs = glob(["com/twitter/heron/api/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files,
+)
+
+# External Api
+java_library(
+    name = "api-java",
+    srcs = glob(["com/twitter/heron/streamlet/**/*.java"]),
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    deps = api_deps_files + [":api-java-low-level"]
 )
 
 java_binary(

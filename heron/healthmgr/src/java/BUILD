@@ -5,7 +5,7 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 healthmgr_deps_files = [
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
     "//heron/api/src/java:classification",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
