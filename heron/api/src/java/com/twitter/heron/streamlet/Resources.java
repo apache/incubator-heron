@@ -22,8 +22,6 @@ import java.io.Serializable;
  */
 public final class Resources implements Serializable {
   private static final long serialVersionUID = 630451253428388496L;
-  private static float CPU_DEFAULT = 1.0f;
-  private static long RAM_DEFAULT = 104857600;
   private float cpu;
   private long ram;
 
@@ -55,8 +53,8 @@ public final class Resources implements Serializable {
     private long ram;
 
     public Builder() {
-      this.cpu = CPU_DEFAULT;
-      this.ram = RAM_DEFAULT;
+      this.cpu = 1.0f;
+      this.ram = 104857600;
     }
 
     /**
@@ -81,8 +79,8 @@ public final class Resources implements Serializable {
      * Sets the total number of CPUs to be used by the topology
      * @param cpu The number of CPUs (as a float)
      */
-    public Builder setCpu(float cpu) {
-      this.cpu = cpu;
+    public Builder setCpu(float containerCpu) {
+      this.cpu = containerCpu;
       return this;
     }
 
@@ -90,8 +88,8 @@ public final class Resources implements Serializable {
      * Sets the RAM to be used by the topology (in bytes)
      * @param ram The number of bytes of RAM
      */
-    public Builder setRam(long ram) {
-      this.ram = ram;
+    public Builder setRam(long containerRam) {
+      this.ram = containerRam;
       return this;
     }
 

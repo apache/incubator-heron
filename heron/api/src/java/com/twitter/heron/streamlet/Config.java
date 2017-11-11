@@ -15,7 +15,6 @@
 package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.twitter.heron.common.basics.ByteAmount;
 
@@ -81,7 +80,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets resources used per container by this topology
-     * @param resources The resource per container to dedicate per container
+     * @param resources The resource to dedicate per container
      */
     public Builder setContainerResources(Resources resources) {
       config.setContainerCpuRequested(resources.getCpu());
