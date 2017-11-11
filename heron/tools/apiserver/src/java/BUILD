@@ -11,6 +11,7 @@ api_deps_files = [
 
 scheduler_deps_files = [
   "//heron/scheduler-core/src/java:scheduler-java",
+  "//heron/schedulers/src/java:ecs-scheduler-java",
   "//heron/schedulers/src/java:local-scheduler-java",
   "//heron/schedulers/src/java:kubernetes-scheduler-java",
   "//heron/schedulers/src/java:marathon-scheduler-java",
