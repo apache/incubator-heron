@@ -53,6 +53,12 @@ kubernetes_deps_files = \
         "//third_party/java:jackson",
     ]
 
+ecs_deps_files = \
+    scheduler_deps_files + [
+        ":scheduler-utils-java",
+        "//third_party/java:jackson",
+    ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -211,6 +217,25 @@ genrule(
     name = "heron-kubernetes-scheduler",
     srcs = [":kubernetes-scheduler-unshaded_deploy.jar"],
     outs = ["heron-kubernetes-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='ecs-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/ecs/**/*.java"]),
+    deps = ecs_deps_files,
+)
+
+java_binary(
+    name='ecs-scheduler-unshaded',
+    srcs=glob(["com/twitter/heron/scheduler/ecs/**/*.java"]),
+    deps = ecs_deps_files,
+)
+
+genrule(
+    name = "heron-ecs-scheduler",
+    srcs = [":ecs-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-ecs-scheduler.jar"],
     cmd  = "cp $< $@",
 )
 
