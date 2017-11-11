@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -80,7 +79,7 @@ public final class WireRequestsTopology {
     WireRequest(long delay) {
       // The pace at which requests are generated is throttled. Different
       // throttles are applied to different bank branches.
-      Utils.sleep(delay);
+      StreamletUtils.sleep(delay);
       this.customerId = StreamletUtils.randomFromList(CUSTOMERS);
       this.amount = ThreadLocalRandom.current().nextInt(1000);
       LOG.info(String.format("New wire request: %s", this));

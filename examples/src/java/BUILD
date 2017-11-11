@@ -4,7 +4,7 @@ java_binary(
     name='api-examples-unshaded',
     srcs = glob(["com/twitter/heron/examples/api/**/*.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/simulator/src/java:simulator-java"
     ],
