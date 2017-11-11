@@ -21,73 +21,35 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
 
 /**
  * Config is the way users configure the execution of the topology.
- * Things like tuple delivery semantics, resources used, as well as
- * user defined key/value pairs are passed on to the runner via
+ * Things like streamlet delivery semantics, resources used, as well as
+ * user-defined key/value pairs are passed on to the topology runner via
  * this class.
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
+
   private com.twitter.heron.api.Config heronConfig;
+
   public enum DeliverySemantics {
     ATMOST_ONCE,
     ATLEAST_ONCE,
     EFFECTIVELY_ONCE
   }
 
-  public Config() {
-    heronConfig = new com.twitter.heron.api.Config();
+  private Config(Builder builder) {
+    heronConfig = builder.config;
   }
 
-  com.twitter.heron.api.Config getHeronConfig() {
+  public static Config defaultConfig() {
+    return new Builder()
+        .build();
+  }
+
+  public com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
   }
 
-  /**
-   * Sets the delivery semantics of the topology
-   * @param semantic The delivery semantic to be enforced
-   */
-  public void setDeliverySemantics(DeliverySemantics semantic) {
-    heronConfig.setTopologyReliabilityMode(translateSemantics(semantic));
-  }
-
-  /**
-   * Sets the number of containers to run this topology
-   * @param numContainers The number of containers to distribute this topology
-   */
-  public void setNumContainers(int numContainers) {
-    heronConfig.setNumStmgrs(numContainers);
-  }
-
-  /**
-   * Sets resources used per container by this topology
-   * @param resource The resource per container to dedicate per container
-   */
-  public void setContainerResources(Resources resource) {
-    heronConfig.setContainerCpuRequested(resource.getCpu());
-    heronConfig.setContainerRamRequested(ByteAmount.fromBytes(resource.getRam()));
-  }
-
-  /**
-   * Sets to use Kryo Serializer for serializing tuples
-   */
-  public void useKryoSerializer() {
-    try {
-      heronConfig.setSerializationClassName(new KryoSerializer().getClass().getName());
-    } catch (NoClassDefFoundError e) {
-      throw new RuntimeException("Please link with kryo");
-    }
-  }
-
-  /**
-   * Sets some user defined key value mapping
-   * @param key The user defined key
-   * @param value The user defined object
-   */
-  public void setUserConfig(String key, Object value) {
-    heronConfig.put(key, value);
-  }
-
-  private com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
+  private static com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
       DeliverySemantics semantics) {
     switch (semantics) {
       case ATMOST_ONCE:
@@ -98,6 +60,69 @@ public final class Config implements Serializable {
         return com.twitter.heron.api.Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
       default:
         return com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE;
+    }
+  }
+
+  public static class Builder {
+    private com.twitter.heron.api.Config config;
+
+    public Builder() {
+      config = new com.twitter.heron.api.Config();
+    }
+
+    /**
+     * Sets the number of containers to run this topology
+     * @param numContainers The number of containers to distribute this topology
+     */
+    public Builder setNumContainers(int numContainers) {
+      config.setNumStmgrs(numContainers);
+      return this;
+    }
+
+    /**
+     * Sets resources used per container by this topology
+     * @param resources The resource to dedicate per container
+     */
+    public Builder setContainerResources(Resources resources) {
+      config.setContainerCpuRequested(resources.getCpu());
+      config.setContainerRamRequested(ByteAmount.fromBytes(resources.getRam()));
+      return this;
+    }
+
+    /**
+     * Sets the delivery semantics of the topology
+     * @param semantic The delivery semantic to be enforced
+     */
+    public Builder setDeliverySemantics(DeliverySemantics semantic) {
+      config.setTopologyReliabilityMode(Config.translateSemantics(semantic));
+      return this;
+    }
+
+    /**
+     * Sets some user-defined key/value mapping
+     * @param key The user-defined key
+     * @param value The user-defined value
+     */
+    public Builder setUserConfig(String key, Object value) {
+      config.put(key, value);
+      return this;
+    }
+
+    /**
+     * Sets the topology to use the Kryo serializer for serializing
+     * streamlet elements
+     */
+    public Builder useKryoSerializer() {
+      try {
+        config.setSerializationClassName(new KryoSerializer().getClass().getName());
+      } catch (NoClassDefFoundError e) {
+        throw new RuntimeException("Please link with kryo");
+      }
+      return this;
+    }
+
+    public Config build() {
+      return new Config(this);
     }
   }
 }

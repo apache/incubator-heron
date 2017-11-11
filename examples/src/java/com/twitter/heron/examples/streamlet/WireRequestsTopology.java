@@ -178,9 +178,10 @@ public final class WireRequestsTopology {
         .setName("all-branches-fraud-detect")
         .log();
 
-    Config config = new Config();
-    config.setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
-    config.setNumContainers(2);
+    Config config = new Config.Builder()
+        .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
+        .setNumContainers(2)
+        .build();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);

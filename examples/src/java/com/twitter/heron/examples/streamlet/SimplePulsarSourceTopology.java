@@ -114,7 +114,7 @@ public final class SimplePulsarSourceTopology {
         .setName("incoming-pulsar-messages")
         .consume(s -> LOG.info(String.format("Message received from Pulsar: \"%s\"", s)));
 
-    Config config = new Config();
+    Config config = Config.defaultConfig();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
