@@ -77,7 +77,7 @@ public final class Resources implements Serializable {
 
     /**
      * Sets the total number of CPUs to be used by the topology
-     * @param cpu The number of CPUs (as a float)
+     * @param containerCpu The number of CPUs (as a float)
      */
     public Builder setCpu(float containerCpu) {
       this.cpu = containerCpu;
@@ -86,7 +86,7 @@ public final class Resources implements Serializable {
 
     /**
      * Sets the RAM to be used by the topology (in bytes)
-     * @param ram The number of bytes of RAM
+     * @param containerRam The number of bytes of RAM
      */
     public Builder setRam(long containerRam) {
       this.ram = containerRam;
