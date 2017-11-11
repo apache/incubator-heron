@@ -40,14 +40,6 @@ public class KryoSerializer implements IPluggableSerializer {
   private Output kryoOut;
   private Input kryoIn;
 
-  public KryoSerializer() {
-    try {
-      Kryo k = getKryo();
-    } catch (NoClassDefFoundError e) {
-      throw new RuntimeException("Please link with kryo");
-    }
-  }
-
   @Override
   public void initialize(Map<String, Object> config) {
     kryo = getKryo();

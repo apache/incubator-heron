@@ -71,7 +71,11 @@ public final class Config implements Serializable {
    * Sets to use Kryo Serializer for serializing tuples
    */
   public void useKryoSerializer() {
-    heronConfig.setSerializationClassName(new KryoSerializer().getClass().getName());
+    try {
+      heronConfig.setSerializationClassName(new KryoSerializer().getClass().getName());
+    } catch (NoClassDefFoundError e) {
+      throw new RuntimeException("Please link with kryo");
+    }
   }
 
   /**

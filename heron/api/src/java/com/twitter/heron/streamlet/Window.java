@@ -28,6 +28,10 @@ public final class Window implements Serializable {
   private long endTimeMs;
   private long count;
 
+  public Window() {
+    // nothing really
+  }
+
   public Window(long startTimeMs, long endTimeMs, long count) {
     this.startTimeMs = startTimeMs;
     this.endTimeMs = endTimeMs;

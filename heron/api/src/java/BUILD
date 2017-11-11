@@ -18,6 +18,7 @@ api_deps_files =  \
     heron_java_api_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
+        "//third_party/java:kryo-neverlink",
     ]
 
 java_library(
