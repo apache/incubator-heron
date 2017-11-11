@@ -31,9 +31,8 @@ import com.esotericsoftware.kryo.serializers.MapSerializer;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 
 /**
- * Context is the information available at runtime for operators like transform.
- * It contains basic things like config, runtime information like task,
- * the stream that it is operating on, ProcessState, etc.
+ * KryoSerializer is a wrapper around Heron's IPluggableSerializer.
+ * Streamlet based topologies turning on kryo serialization are based off of it.
  */
 public class KryoSerializer implements IPluggableSerializer {
   private Kryo kryo;
