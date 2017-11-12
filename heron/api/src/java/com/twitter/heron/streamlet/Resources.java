@@ -18,12 +18,22 @@ import java.io.Serializable;
 
 /**
  * Resources needed by the topology are encapsulated in this class.
- * Currently we deal with cpu and ram. Others can be added later.
+ * Currently we deal with CPU and RAM. Others can be added later.
  */
 public final class Resources implements Serializable {
   private static final long serialVersionUID = 630451253428388496L;
   private float cpu;
   private long ram;
+
+  private Resources(Builder builder) {
+    this.cpu = builder.cpu;
+    this.ram = builder.ram;
+  }
+
+  public static Resources defaultResources() {
+    return new Builder()
+        .build();
+  }
 
   public float getCpu() {
     return cpu;
@@ -33,31 +43,58 @@ public final class Resources implements Serializable {
     return ram;
   }
 
-  public Resources() {
-    this.cpu = 1.0f;
-    this.ram = 104857600;
-  }
-
-  public Resources withCpu(float ncpu) {
-    this.cpu = ncpu;
-    return this;
-  }
-
-  public Resources withRam(long nram) {
-    this.ram = nram;
-    return this;
-  }
-
-  public Resources withRamInMB(long nram) {
-    return withRam(nram * 1024 * 1024);
-  }
-
-  public Resources withRamInGB(long nram) {
-    return withRamInMB(nram * 1024);
-  }
-
   @Override
   public String toString() {
-    return "{ CPU: " + String.valueOf(cpu) + " RAM: " + String.valueOf(ram) + " }";
+    return String.format("{ CPU: %s RAM: %s }", String.valueOf(cpu), String.valueOf(ram));
+  }
+
+  public static class Builder {
+    private float cpu;
+    private long ram;
+
+    public Builder() {
+      this.cpu = 1.0f;
+      this.ram = 104857600;
+    }
+
+    /**
+     * Sets the RAM to be used by the topology (in megabytes)
+     * @param nram The number of megabytes of RAM
+     */
+    public Builder setRamInMB(long nram) {
+      this.ram = nram * 1024;
+      return this;
+    }
+
+    /**
+     * Sets the RAM to be used by the topology (in gigabytes)
+     * @param nram The number of gigabytes of RAM
+     */
+    public Builder setRamInGB(long nram) {
+      this.ram = nram * 1024 * 1024;
+      return this;
+    }
+
+    /**
+     * Sets the total number of CPUs to be used by the topology
+     * @param containerCpu The number of CPUs (as a float)
+     */
+    public Builder setCpu(float containerCpu) {
+      this.cpu = containerCpu;
+      return this;
+    }
+
+    /**
+     * Sets the RAM to be used by the topology (in bytes)
+     * @param containerRam The number of bytes of RAM
+     */
+    public Builder setRam(long containerRam) {
+      this.ram = containerRam;
+      return this;
+    }
+
+    public Resources build() {
+      return new Resources(this);
+    }
   }
 }
