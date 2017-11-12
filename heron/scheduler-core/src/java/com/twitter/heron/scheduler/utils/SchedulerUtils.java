@@ -17,8 +17,10 @@ package com.twitter.heron.scheduler.utils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,14 +86,14 @@ public final class SchedulerUtils {
       return portMap.get(executorPort);
     }
 
-    public static int getRequiredNumOfPorts() {
-      int num = 0;
+    public static Set<ExecutorPort> getRequiredPorts() {
+      Set<ExecutorPort> executorPorts = new HashSet<>();
       for (ExecutorPort executorPort : ExecutorPort.values()) {
         if (executorPort.isRequired()) {
-          num++;
+          executorPorts.add(executorPort);
         }
       }
-      return num;
+      return executorPorts;
     }
   }
 
@@ -170,7 +172,7 @@ public final class SchedulerUtils {
 
     return commands.toArray(new String[0]);
   }
-  
+
   /**
    * Utils method to construct the command to start heron-executor
    *

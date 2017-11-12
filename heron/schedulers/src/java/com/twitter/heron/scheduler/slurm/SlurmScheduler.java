@@ -129,15 +129,13 @@ public class SlurmScheduler implements IScheduler {
 
   protected String[] getExecutorCommand(PackingPlan packing) {
     Map<ExecutorPort, String> ports = new HashMap<>();
-    ports.put(ExecutorPort.MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.TMASTER_CONTROLLER_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.TMASTER_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.SHELL_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.METRICS_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.SCHEDULER_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
-    ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
+    for (ExecutorPort executorPort : ExecutorPort.getRequiredPorts()) {
+      int port = SysUtils.getFreePort();
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+      ports.put(executorPort, String.valueOf(port));
+    }
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime,
         ports);
