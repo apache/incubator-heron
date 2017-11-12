@@ -28,7 +28,7 @@ public final class Window implements Serializable {
   private long endTimeMs;
   private long count;
 
-  public Window() {
+  Window() {
     // nothing really
   }
 

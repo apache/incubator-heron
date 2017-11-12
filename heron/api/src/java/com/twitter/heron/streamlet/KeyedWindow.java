@@ -26,7 +26,7 @@ public class KeyedWindow<T> implements Serializable {
   private T key;
   private Window window;
 
-  public KeyedWindow() {
+  KeyedWindow() {
     // nothing really
   }
 

@@ -45,7 +45,7 @@ public final class Config implements Serializable {
         .build();
   }
 
-  public com.twitter.heron.api.Config getHeronConfig() {
+  com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
   }
 
@@ -116,7 +116,7 @@ public final class Config implements Serializable {
       try {
         config.setSerializationClassName(new KryoSerializer().getClass().getName());
       } catch (NoClassDefFoundError e) {
-        throw new RuntimeException("Please link with kryo");
+        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
       }
       return this;
     }

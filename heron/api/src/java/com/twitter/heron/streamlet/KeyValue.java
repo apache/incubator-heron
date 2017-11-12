@@ -31,7 +31,7 @@ public final class KeyValue<K, V> implements Serializable {
     return new KeyValue<R, T>(k, v);
   }
 
-  public KeyValue() {
+  KeyValue() {
     // nothing really
   }
 
