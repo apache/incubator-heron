@@ -185,7 +185,7 @@ public final class ImpressionsAndClicksTopology {
               kw.getValue()));
         });
 
-    Config config = new Config();
+    Config config = Config.defaultConfig();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
