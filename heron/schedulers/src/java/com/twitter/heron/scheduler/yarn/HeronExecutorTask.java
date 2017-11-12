@@ -172,7 +172,7 @@ public class HeronExecutorTask implements Task {
     ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
     ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config,
+    String[] executorCmd = SchedulerUtils.getExecutorCommand(config,
         runtime,
         heronExecutorId,
         ports);

@@ -154,7 +154,7 @@ public class LocalScheduler implements IScheduler, IScalable {
     ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(SysUtils.getFreePort()));
     ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(SysUtils.getFreePort()));
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, ports);
+    String[] executorCmd = SchedulerUtils.getExecutorCommand(config, runtime, container, ports);
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;

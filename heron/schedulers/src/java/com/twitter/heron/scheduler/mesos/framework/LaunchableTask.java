@@ -219,7 +219,7 @@ public class LaunchableTask {
     ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(freePorts.get(8)));
 
     String[] executorCmd =
-        SchedulerUtils.executorCommand(config, runtime, containerIndex, ports);
+        SchedulerUtils.getExecutorCommand(config, runtime, containerIndex, ports);
     return join(executorCmd, " ");
   }
 }

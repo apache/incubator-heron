@@ -170,32 +170,15 @@ public final class SchedulerUtils {
 
     return commands.toArray(new String[0]);
   }
-
-  /**
-   * Utils method to construct the command to start heron-executor
-   *
-   * @param config The static Config
-   * @param runtime The runtime Config
-   * @param containerIndex the executor/container index
-   * @param ports list of free ports
-   * @return String[] representing the command to start heron-executor
-   */
-  public static String[] executorCommand(
-      Config config,
-      Config runtime,
-      int containerIndex,
-      Map<ExecutorPort, String> ports) {
-
-    return getExecutorCommand(config, runtime, containerIndex, ports);
-  }
-
+  
   /**
    * Utils method to construct the command to start heron-executor
    *
    * @param config The static config
    * @param runtime The runtime config
    * @param containerIndex the executor/container index
-   * @param ports list of free ports in String
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
    * @return String[] representing the command to start heron-executor
    */
   public static String[] getExecutorCommand(
@@ -219,7 +202,8 @@ public final class SchedulerUtils {
    *
    * @param config The static Config
    * @param runtime The runtime Config
-   * @param ports list of free ports
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
