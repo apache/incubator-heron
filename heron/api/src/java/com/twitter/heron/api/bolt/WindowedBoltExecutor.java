@@ -226,8 +226,6 @@ public class WindowedBoltExecutor implements IRichBolt,
       } else {
         watermarkIntervalMs = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
-      // Use tick tuple to perodically generate watermarks
-//      Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
       waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager, watermarkIntervalMs,
           maxLagMs, getComponentStreams(context), topoConf);
     } else {
@@ -302,8 +300,6 @@ public class WindowedBoltExecutor implements IRichBolt,
         return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
             evictionPolicy, manager);
       } else {
-        // set tick tuple frequency in milliseconds for timer in TimeTriggerPolicy
-//        Config.setTickTupleFrequencyMs(topoConf, slidingIntervalDurationMs);
         return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
             evictionPolicy, topoConf);
       }
