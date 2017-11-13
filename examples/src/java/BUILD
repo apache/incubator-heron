@@ -25,6 +25,7 @@ java_binary(
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
         "//heron/simulator/src/java:simulator-java",
+        "//third_party/java:kryo",
         "@apache_pulsar_client//jar",
     ],
     create_executable = 0,

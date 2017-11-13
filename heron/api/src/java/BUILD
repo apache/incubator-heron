@@ -33,13 +33,16 @@ java_library(
     name = "api-java",
     srcs = glob(["com/twitter/heron/streamlet/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    deps = api_deps_files + [":api-java-low-level"]
+    deps = api_deps_files + [
+        ":api-java-low-level",
+        "//third_party/java:kryo-neverlink",
+    ]
 )
 
 java_binary(
     name = "api-unshaded",
     srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
-    deps = api_deps_files,
+    deps = api_deps_files + ["//third_party/java:kryo-neverlink"],
 )
 
 jarjar_binary(

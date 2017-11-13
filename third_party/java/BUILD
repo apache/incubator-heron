@@ -96,6 +96,7 @@ java_library(
         "@com_esotericsoftware_reflectasm//jar",
         "@com_esotericsoftware_minlog//jar",
         "@org_objenesis_objenesis//jar",
+        "@org_objectweb_asm//jar",
     ],
 )
 
