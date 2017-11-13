@@ -36,6 +36,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScalable;
@@ -142,12 +143,16 @@ public class LocalScheduler implements IScheduler, IScalable {
   }
 
   private String[] getExecutorCommand(int container) {
-    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(SysUtils.getFreePort());
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    for (ExecutorPort executorPort : ExecutorPort.getRequiredPorts()) {
+      int port = SysUtils.getFreePort();
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+      ports.put(executorPort, String.valueOf(port));
     }
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
+    String[] executorCmd = SchedulerUtils.getExecutorCommand(config, runtime, container, ports);
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;
