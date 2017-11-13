@@ -14,12 +14,19 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
 
 public class UploaderUtilsTest {
 
@@ -54,5 +61,43 @@ public class UploaderUtilsTest {
     String customizedFilename =
         UploaderUtils.generateFilename(topologyName, role, tag, version, extension);
     Assert.assertTrue(customizedFilename.endsWith(extension));
+  }
+
+  @Test
+  public void testCopyToOutputStream() throws Exception {
+    String fileContent = "temp file test content";
+    String prefix = "myTestFile";
+    String suffix = ".tmp";
+    File tempFile = null;
+    try {
+      // create temp file
+      tempFile = File.createTempFile(prefix, suffix);
+
+      // write content to temp file
+      writeContentToFile(tempFile.getAbsolutePath(), fileContent);
+
+      // copy file content to output stream
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      UploaderUtils.copyToOutputStream(tempFile.getAbsolutePath(), out);
+      Assert.assertEquals(fileContent, new String(out.toByteArray()));
+    } finally {
+      if (tempFile != null) {
+        tempFile.deleteOnExit();
+      }
+    }
+  }
+
+  @Test(expected = FileNotFoundException.class)
+  public void testCopyToOutputStreamWithInvalidFile() throws Exception {
+    UploaderUtils.copyToOutputStream("invalid_file_name", new ByteArrayOutputStream());
+  }
+
+  private void writeContentToFile(String fileName, String content) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
+      bw.write(content);
+    } catch (IOException e) {
+      fail("Unexpected IOException has been thrown so unit test fails. Error message: "
+          + e.getMessage());
+    }
   }
 }

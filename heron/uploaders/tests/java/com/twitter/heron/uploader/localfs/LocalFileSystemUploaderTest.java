@@ -30,13 +30,14 @@ import com.twitter.heron.spi.uploader.UploaderException;
 
 public class LocalFileSystemUploaderTest {
 
+  private static final String TOPOLOGY_PACKAGE_FILE_NAME = "some-topology.tar";
+
   private Config config;
   private String fileSystemDirectory;
   private String testTopologyDirectory;
 
   @Before
   public void before() throws Exception {
-
     // form the file system directory using bazel environ files
     fileSystemDirectory = Paths.get(System.getenv("JAVA_RUNFILES"), "topologies").toString();
 
@@ -60,17 +61,17 @@ public class LocalFileSystemUploaderTest {
   }
 
   @Test
-  public void testUploader() throws Exception {
-
+  public void testUploader() {
     // identify the location of the test topology tar file
-    String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
+    String topologyPackage = Paths.get(testTopologyDirectory,
+        TOPOLOGY_PACKAGE_FILE_NAME).toString();
 
-    Config newconfig = Config.newBuilder()
+    Config newConfig = Config.newBuilder()
         .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
-    uploader.initialize(newconfig);
+    uploader.initialize(newConfig);
     Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
@@ -79,33 +80,32 @@ public class LocalFileSystemUploaderTest {
   }
 
   @Test(expected = UploaderException.class)
-  public void testSourceNotExists() throws Exception {
-
+  public void testSourceNotExists() {
     // identify the location of the test topology tar file
     String topologyPackage = Paths.get(
         testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
-    Config newconfig = Config.newBuilder()
+    Config newConfig = Config.newBuilder()
         .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
-    uploader.initialize(newconfig);
+    uploader.initialize(newConfig);
     uploader.uploadPackage();
   }
 
   @Test
-  public void testUndo() throws Exception {
-
+  public void testUndo() {
     // identify the location of the test topology tar file
-    String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
+    String topologyPackage = Paths.get(testTopologyDirectory,
+        TOPOLOGY_PACKAGE_FILE_NAME).toString();
 
-    Config newconfig = Config.newBuilder()
+    Config newConfig = Config.newBuilder()
         .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
-    uploader.initialize(newconfig);
+    uploader.initialize(newConfig);
     Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
@@ -113,7 +113,95 @@ public class LocalFileSystemUploaderTest {
     Assert.assertTrue(new File(destFile).isFile());
 
     // now undo the file
-    uploader.undo();
+    Assert.assertTrue(uploader.undo());
     Assert.assertFalse(new File(destFile).isFile());
   }
+
+  @Test
+  public void testUseDefaultFileSystemDirectoryWhenNotSet() {
+    // identify the location of the test topology tar file
+    String topologyPackage = Paths.get(testTopologyDirectory,
+        TOPOLOGY_PACKAGE_FILE_NAME).toString();
+
+    // set file system directory as null
+    Config newConfig = Config.newBuilder()
+        .putAll(config)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
+        .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), null)
+        .build();
+
+    // create the uploader
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
+    uploader.initialize(newConfig);
+
+    // get default file system directory
+    String defaultFileSystemDirectory = LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString();
+
+    String destDirectory = uploader.getTopologyDirectory();
+    String destFile = uploader.getTopologyFile();
+
+    // verify usage of default file system directory for destination directory and file
+    Assert.assertEquals(destDirectory, defaultFileSystemDirectory);
+    Assert.assertTrue(destFile.contains(defaultFileSystemDirectory));
+  }
+
+  @Test
+  public void testUploadPackageWhenTopologyFileAlreadyExists() {
+    // identify the location of the test topology tar file
+    String topologyPackage = Paths.get(testTopologyDirectory,
+        TOPOLOGY_PACKAGE_FILE_NAME).toString();
+
+    Config newConfig = Config.newBuilder()
+        .putAll(config).put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
+
+    // create the uploader and load the package
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
+    uploader.initialize(newConfig);
+    Assert.assertNotNull(uploader.uploadPackage());
+
+    // verify if the file exists
+    String destFile = uploader.getTopologyFile();
+    Assert.assertTrue(new File(destFile).isFile());
+
+    // load same package again by overriding existing one
+    Assert.assertNotNull(uploader.uploadPackage());
+    String destFile2 = uploader.getTopologyFile();
+    Assert.assertTrue(new File(destFile2).isFile());
+
+    // verify that existing file is overridden
+    Assert.assertEquals(destFile, destFile2);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testUploadPackageWhenFileSystemDirectoryIsInvalid() {
+    // identify the location of the test topology tar file
+    String topologyPackage = Paths.get(testTopologyDirectory,
+        TOPOLOGY_PACKAGE_FILE_NAME).toString();
+
+    String invalidFileSystemDirectory = "invalid%path";
+
+    // set invalid file system directory
+    Config newConfig = Config.newBuilder()
+        .putAll(config)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackage)
+        .put(LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.value(), invalidFileSystemDirectory).build();
+
+    // create the uploader and load the package
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
+    uploader.initialize(newConfig);
+    uploader.uploadPackage();
+  }
+
+  @Test
+  public void testGetUri() {
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
+    Assert.assertEquals(uploader.getUri("testFileName").toString(), "file://testFileName");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGetUriWhenDestFileNameIsInvalid() {
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
+    uploader.getUri("invalid_%_DestFilePath");
+  }
+
 }
