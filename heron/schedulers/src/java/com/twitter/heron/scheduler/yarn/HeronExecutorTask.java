@@ -15,10 +15,9 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +36,7 @@ import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.SchedulerConfigUtils;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMap;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
@@ -156,20 +156,24 @@ public class HeronExecutorTask implements Task {
         verboseMode,
         topology);
 
-    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(SysUtils.getFreePort());
-    }
-
     Config runtime = Config.newBuilder()
         .put(Key.COMPONENT_RAMMAP, componentRamMap)
         .put(Key.TOPOLOGY_DEFINITION, topology)
         .build();
 
-    String[] executorCmd = SchedulerUtils.executorCommand(config,
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    for (ExecutorPort executorPort : ExecutorPort.getRequiredPorts()) {
+      int port = SysUtils.getFreePort();
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+      ports.put(executorPort, String.valueOf(port));
+    }
+
+    String[] executorCmd = SchedulerUtils.getExecutorCommand(config,
         runtime,
         heronExecutorId,
-        freePorts);
+        ports);
 
     LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;
