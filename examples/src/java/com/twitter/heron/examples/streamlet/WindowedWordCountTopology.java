@@ -84,6 +84,7 @@ public final class WindowedWordCountTopology {
 
     Config config = new Config.Builder()
         .setNumContainers(topologyParallelism)
+        .useKryoSerializer()
         .build();
 
     // Fetches the topology name from the first command-line argument

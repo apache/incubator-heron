@@ -17,6 +17,7 @@ package com.twitter.heron.streamlet;
 import java.io.Serializable;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.streamlet.impl.KryoSerializer;
 
 /**
  * Config is the way users configure the execution of the topology.
@@ -104,6 +105,19 @@ public final class Config implements Serializable {
      */
     public Builder setUserConfig(String key, Object value) {
       config.put(key, value);
+      return this;
+    }
+
+    /**
+     * Sets the topology to use the Kryo serializer for serializing
+     * streamlet elements
+     */
+    public Builder useKryoSerializer() {
+      try {
+        config.setSerializationClassName(new KryoSerializer().getClass().getName());
+      } catch (NoClassDefFoundError e) {
+        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
+      }
       return this;
     }
 
