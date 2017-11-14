@@ -27,7 +27,6 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
-  private boolean useKryoSerializer;
 
   private com.twitter.heron.api.Config heronConfig;
 
@@ -38,7 +37,6 @@ public final class Config implements Serializable {
   }
 
   private Config(Builder builder) {
-    useKryoSerializer = builder.useKryo;
     heronConfig = builder.config;
   }
 
