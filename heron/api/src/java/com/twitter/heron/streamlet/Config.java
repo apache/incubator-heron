@@ -27,8 +27,11 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
-
-  private com.twitter.heron.api.Config heronConfig;
+  private final com.twitter.heron.api.Config heronConfig;
+  private final int numContainers;
+  private final DeliverySemantics deliverySemantics;
+  private final Serializer serializer;
+  private final Resources resources;
 
   public enum DeliverySemantics {
     ATMOST_ONCE,
@@ -36,7 +39,16 @@ public final class Config implements Serializable {
     EFFECTIVELY_ONCE
   }
 
+  public enum Serializer {
+    KRYO,
+    JAVA
+  }
+
   private Config(Builder builder) {
+    numContainers = builder.numContainers;
+    deliverySemantics = builder.deliverySemantics;
+    serializer = builder.serializer;
+    resources = builder.resources;
     heronConfig = builder.config;
   }
 
@@ -47,6 +59,22 @@ public final class Config implements Serializable {
 
   com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
+  }
+
+  public int getNumContainers() {
+    return numContainers;
+  }
+
+  public DeliverySemantics getDeliverySemantics() {
+    return deliverySemantics;
+  }
+
+  public Serializer getSerializer() {
+    return serializer;
+  }
+
+  public Resources getResources() {
+    return resources;
   }
 
   private static com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
@@ -65,10 +93,16 @@ public final class Config implements Serializable {
 
   public static class Builder {
     private com.twitter.heron.api.Config config;
-    private boolean useKryo;
+    private int numContainers;
+    protected Serializer serializer;
+    private DeliverySemantics deliverySemantics;
+    private Resources resources;
 
     public Builder() {
-      useKryo = true;
+      serializer = Serializer.KRYO;
+      numContainers = 1;
+      deliverySemantics = DeliverySemantics.ATMOST_ONCE;
+      resources = Resources.defaultResources();
       config = new com.twitter.heron.api.Config();
     }
 
@@ -76,8 +110,9 @@ public final class Config implements Serializable {
      * Sets the number of containers to run this topology
      * @param numContainers The number of containers to distribute this topology
      */
-    public Builder setNumContainers(int numContainers) {
-      config.setNumStmgrs(numContainers);
+    public Builder setNumContainers(int containers) {
+      numContainers = containers;
+      config.setNumStmgrs(containers);
       return this;
     }
 
@@ -85,7 +120,8 @@ public final class Config implements Serializable {
      * Sets resources used per container by this topology
      * @param resources The resource to dedicate per container
      */
-    public Builder setContainerResources(Resources resources) {
+    public Builder setContainerResources(Resources containerResources) {
+      resources = containerResources;
       config.setContainerCpuRequested(resources.getCpu());
       config.setContainerRamRequested(resources.getRam());
       return this;
@@ -95,8 +131,9 @@ public final class Config implements Serializable {
      * Sets the delivery semantics of the topology
      * @param semantic The delivery semantic to be enforced
      */
-    public Builder setDeliverySemantics(DeliverySemantics semantic) {
-      config.setTopologyReliabilityMode(Config.translateSemantics(semantic));
+    public Builder setDeliverySemantics(DeliverySemantics semantics) {
+      deliverySemantics = semantics;
+      config.setTopologyReliabilityMode(Config.translateSemantics(semantics));
       return this;
     }
 
@@ -111,36 +148,24 @@ public final class Config implements Serializable {
     }
 
     /**
-     * Sets the topology to use the Kryo serializer for serializing
+     * Sets the topology to use the specified serializer for serializing
      * streamlet elements
+     * @param topologySerializer The serializer to be used in this topology
      */
-    public Builder useKryoSerializer() {
+    public Builder setSerializer(Serializer topologySerializer) {
+      serializer = topologySerializer;
+      if (serializer == Serializer.KRYO) {
+        try {
+          config.setSerializationClassName(new KryoSerializer().getClass().getName());
+        } catch (NoClassDefFoundError e) {
+          throw new RuntimeException("Linking with kryo is needed because setSerializer is used. " +
+              "You may be attempting to set the serializer more than once.");
+        }
+      }
       return this;
     }
 
-    /**
-     * Sets the topology to use the Kryo serializer if set to true, otherwise
-     * standard Java serialization will be used.
-     * @param useKryo Whether the Kryo serializer will be used for this topology
-     */
-    public Builder useKryoSerializer(boolean kryo) {
-      useKryo = kryo;
-      return this;
-    }
-
-    private void setSerializerToKryo() {
-      try {
-        config.setSerializationClassName(new KryoSerializer().getClass().getName());
-      } catch (NoClassDefFoundError e) {
-        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
-      }
-    }
-
-    public Config build() {
-      if (useKryo) {
-        setSerializerToKryo();
-      }
-      
+    public Config build() {      
       return new Config(this);
     }
   }
