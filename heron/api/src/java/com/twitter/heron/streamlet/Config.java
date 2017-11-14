@@ -51,13 +51,6 @@ public final class Config implements Serializable {
     return heronConfig;
   }
 
-  /**
-   * Whether the Kryo serializer is used for this topology.
-   */
-  public boolean getUseKryo() {
-    return useKryoSerializer;
-  }
-
   private static com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
       DeliverySemantics semantics) {
     switch (semantics) {
@@ -124,12 +117,7 @@ public final class Config implements Serializable {
      * streamlet elements
      */
     public Builder useKryoSerializer() {
-      useKryo = true;
-      try {
-        config.setSerializationClassName(new KryoSerializer().getClass().getName());
-      } catch (NoClassDefFoundError e) {
-        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
-      }
+      useKryo = false;
       return this;
     }
 
@@ -139,15 +127,23 @@ public final class Config implements Serializable {
      * @param useKryo Whether the Kryo serializer will be used for this topology
      */
     public Builder useKryoSerializer(boolean kryo) {
-      if (kryo) {
-        useKryoSerializer();
-      } else {
-        useKryo = false;
-      }
+      useKryo = kryo;
       return this;
     }
 
+    private void setSerializerToKryo() {
+      try {
+        config.setSerializationClassName(new KryoSerializer().getClass().getName());
+      } catch (NoClassDefFoundError e) {
+        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
+      }
+    }
+
     public Config build() {
+      if (useKryo) {
+        setSerializerToKryo();
+      }
+      
       return new Config(this);
     }
   }
