@@ -270,8 +270,8 @@ public class StreamletImplTest {
         .setCpu(5.1f)
         .setRamInGB(20)
         .build();
-    assertEquals(0, Float.compare(res2.getCpu(), 5.1f));
-    assertEquals(res2.getRam(), ByteAmount.fromGigabytes(20));
+    assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
+    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
   }
 
   @Test(expected = RuntimeException.class)
