@@ -274,19 +274,6 @@ public class StreamletImplTest {
     assertEquals(res2.getRam(), ByteAmount.fromGigabytes(20));
   }
 
-  @Test
-  public void testConfigBuilder() {
-    Config defaultConfig = Config.defaultConfig();
-    assertTrue(defaultConfig.getUseKryo());
-
-    Config nonDefaultConfig = new Config.Builder()
-        .useKryoSerializer(false)
-        .build();
-    assertFalse(nonDefaultConfig.getUseKryo());
-    assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
-    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
-  }
-
   @Test(expected = RuntimeException.class)
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
