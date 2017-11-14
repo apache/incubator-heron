@@ -85,7 +85,7 @@ public final class Config implements Serializable {
      */
     public Builder setContainerResources(Resources resources) {
       config.setContainerCpuRequested(resources.getCpu());
-      config.setContainerRamRequested(ByteAmount.fromBytes(resources.getRam()));
+      config.setContainerRamRequested(resources.getRam());
       return this;
     }
 

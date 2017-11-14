@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableTransformer;
@@ -262,13 +263,13 @@ public class StreamletImplTest {
   public void testResourcesBuilder() {
     Resources defaultResoures = Resources.defaultResources();
     assertEquals(0, Float.compare(defaultResoures.getCpu(), 1.0f));
-    assertEquals(defaultResoures.getRam(), 104857600);
+    assertEquals(defaultResoures.getRam(), ByteAmount.fromMegabytes(100));
 
     Resources res2 = new Resources.Builder()
         .setCpu(5.1f)
         .setRamInGB(20)
         .build();
     assertEquals(0, Float.compare(res2.getCpu(), 5.1f));
-    assertEquals(res2.getRam(), 20 * 1024 * 1024);
+    assertEquals(res2.getRam(), ByteAmount.fromGigabytes(20));
   }
 }
