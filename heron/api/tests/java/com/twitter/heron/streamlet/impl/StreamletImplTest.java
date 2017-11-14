@@ -296,7 +296,8 @@ public class StreamletImplTest {
         .setUserConfig("key", "value")
         .build();
     assertEquals(nonDefaultConfig.getNumContainers(), 8);
-    assertEquals(nonDefaultConfig.getDeliverySemantics(), Config.DeliverySemantics.EFFECTIVELY_ONCE);
+    assertEquals(nonDefaultConfig.getDeliverySemantics(),
+        Config.DeliverySemantics.EFFECTIVELY_ONCE);
     assertEquals(0, Float.compare(nonDefaultConfig.getResources().getCpu(), 3.1f));
     assertEquals(nonDefaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(2500));
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
