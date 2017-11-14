@@ -45,6 +45,18 @@ public final class Resources implements Serializable {
     return ram;
   }
 
+  public long getRamBytes() {
+    return ram.asBytes();
+  }
+
+  public long getRamMegabytes() {
+    return ram.asMegabytes();
+  }
+
+  public long getRamGigabytes() {
+    return ram.asGigabytes();
+  }
+
   @Override
   public String toString() {
     return String.format("{ CPU: %s RAM: %s }", String.valueOf(cpu), String.valueOf(ram));
