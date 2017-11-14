@@ -94,7 +94,7 @@ public final class Config implements Serializable {
   public static class Builder {
     private com.twitter.heron.api.Config config;
     private int numContainers;
-    protected Serializer serializer;
+    private Serializer serializer;
     private DeliverySemantics deliverySemantics;
     private Resources resources;
 
