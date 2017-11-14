@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableTransformer;
@@ -270,5 +271,16 @@ public class StreamletImplTest {
         .build();
     assertEquals(0, Float.compare(res2.getCpu(), 5.1f));
     assertEquals(res2.getRam(), 20 * 1024 * 1024);
+  }
+
+  @Test
+  public void testConfigBuilder() {
+    Config defaultConfig = Config.defaultConfig();
+    assertTrue(defaultConfig.getUseKryo());
+    
+    Config nonDefaultConfig = new Config.Builder()
+        .useKryoSerializer(false)
+        .build();
+    assertFalse(nonDefaultConfig.getUseKryo());
   }
 }
