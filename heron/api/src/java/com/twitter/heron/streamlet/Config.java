@@ -27,6 +27,7 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
+  private boolean useKryoSerializer;
 
   private com.twitter.heron.api.Config heronConfig;
 
@@ -37,6 +38,7 @@ public final class Config implements Serializable {
   }
 
   private Config(Builder builder) {
+    useKryoSerializer = builder.useKryo;
     heronConfig = builder.config;
   }
 
@@ -47,6 +49,13 @@ public final class Config implements Serializable {
 
   com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
+  }
+
+  /**
+   * Whether the Kryo serializer is used for this topology.
+   */
+  public boolean getUseKryo() {
+    return useKryoSerializer;
   }
 
   private static com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
@@ -65,8 +74,10 @@ public final class Config implements Serializable {
 
   public static class Builder {
     private com.twitter.heron.api.Config config;
+    private boolean useKryo;
 
     public Builder() {
+      useKryo = true;
       config = new com.twitter.heron.api.Config();
     }
 
@@ -113,10 +124,25 @@ public final class Config implements Serializable {
      * streamlet elements
      */
     public Builder useKryoSerializer() {
+      useKryo = true;
       try {
         config.setSerializationClassName(new KryoSerializer().getClass().getName());
       } catch (NoClassDefFoundError e) {
         throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
+      }
+      return this;
+    }
+
+    /**
+     * Sets the topology to use the Kryo serializer if set to true, otherwise
+     * standard Java serialization will be used.
+     * @param useKryo Whether the Kryo serializer will be used for this topology
+     */
+    public Builder useKryoSerializer(boolean kryo) {
+      if (kryo) {
+        useKryoSerializer();
+      } else {
+        useKryo = false;
       }
       return this;
     }
