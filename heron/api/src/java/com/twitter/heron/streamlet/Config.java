@@ -117,7 +117,6 @@ public final class Config implements Serializable {
      * streamlet elements
      */
     public Builder useKryoSerializer() {
-      useKryo = false;
       return this;
     }
 
