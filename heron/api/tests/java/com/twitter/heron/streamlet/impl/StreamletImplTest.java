@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
@@ -263,14 +264,14 @@ public class StreamletImplTest {
   public void testResourcesBuilder() {
     Resources defaultResoures = Resources.defaultResources();
     assertEquals(0, Float.compare(defaultResoures.getCpu(), 1.0f));
-    assertEquals(defaultResoures.getRam(), 104857600);
+    assertEquals(defaultResoures.getRam(), ByteAmount.fromMegabytes(100));
 
     Resources nonDefaultResources = new Resources.Builder()
         .setCpu(5.1f)
         .setRamInGB(20)
         .build();
     assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
-    assertEquals(nonDefaultResources.getRam(), 20 * 1024 * 1024);
+    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
   }
 
   @Test(expected = RuntimeException.class)
@@ -279,7 +280,7 @@ public class StreamletImplTest {
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
     assertEquals(defaultConfig.getNumContainers(), 1);
     assertEquals(0, Float.compare(defaultConfig.getResources().getCpu(), 1.0f));
-    assertEquals(defaultConfig.getResources().getRam(), 104857600);
+    assertEquals(defaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(100));
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
 
     Resources nonDefaultResources = new Resources.Builder()
@@ -297,7 +298,7 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getNumContainers(), 8);
     assertEquals(nonDefaultConfig.getDeliverySemantics(), Config.DeliverySemantics.EFFECTIVELY_ONCE);
     assertEquals(0, Float.compare(nonDefaultConfig.getResources().getCpu(), 3.1f));
-    assertEquals(nonDefaultConfig.getResources().getRam(), 2500 * 1024);
+    assertEquals(nonDefaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(2500));
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
 
     Config multiSetConfig = new Config.Builder()

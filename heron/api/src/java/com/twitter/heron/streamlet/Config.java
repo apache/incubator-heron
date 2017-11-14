@@ -123,7 +123,7 @@ public final class Config implements Serializable {
     public Builder setContainerResources(Resources containerResources) {
       resources = containerResources;
       config.setContainerCpuRequested(resources.getCpu());
-      config.setContainerRamRequested(ByteAmount.fromBytes(resources.getRam()));
+      config.setContainerRamRequested(resources.getRam());
       return this;
     }
 
