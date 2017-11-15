@@ -274,7 +274,7 @@ public class StreamletImplTest {
     assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
@@ -306,5 +306,6 @@ public class StreamletImplTest {
         .setSerializer(Config.Serializer.JAVA)
         .setSerializer(Config.Serializer.KRYO)
         .build();
+    assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
   }
 }

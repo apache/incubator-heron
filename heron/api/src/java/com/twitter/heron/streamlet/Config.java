@@ -16,7 +16,6 @@ package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.impl.KryoSerializer;
 
 /**
@@ -108,7 +107,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets the number of containers to run this topology
-     * @param numContainers The number of containers to distribute this topology
+     * @param containers The number of containers to distribute this topology
      */
     public Builder setNumContainers(int containers) {
       numContainers = containers;
@@ -118,7 +117,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets resources used per container by this topology
-     * @param resources The resource to dedicate per container
+     * @param containerResources The resource to dedicate per container
      */
     public Builder setContainerResources(Resources containerResources) {
       resources = containerResources;
@@ -129,7 +128,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets the delivery semantics of the topology
-     * @param semantic The delivery semantic to be enforced
+     * @param semantics The delivery semantic to be enforced
      */
     public Builder setDeliverySemantics(DeliverySemantics semantics) {
       deliverySemantics = semantics;
@@ -147,6 +146,16 @@ public final class Config implements Serializable {
       return this;
     }
 
+    private void applySerializer(Serializer serializer) {
+      if (serializer == Serializer.KRYO) {
+        try {
+          config.setSerializationClassName(KryoSerializer.class.getName());
+        } catch (NoClassDefFoundError e) {
+          throw new RuntimeException("Linking with Kryo is needed because setSerializer is used");
+        }
+      }
+    }
+
     /**
      * Sets the topology to use the specified serializer for serializing
      * streamlet elements
@@ -154,18 +163,11 @@ public final class Config implements Serializable {
      */
     public Builder setSerializer(Serializer topologySerializer) {
       serializer = topologySerializer;
-      if (serializer == Serializer.KRYO) {
-        try {
-          config.setSerializationClassName(new KryoSerializer().getClass().getName());
-        } catch (NoClassDefFoundError e) {
-          throw new RuntimeException("Linking with kryo is needed because setSerializer is used. " +
-              "You may be attempting to set the serializer more than once.");
-        }
-      }
       return this;
     }
 
     public Config build() {      
+      applySerializer(serializer);
       return new Config(this);
     }
   }
