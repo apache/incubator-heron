@@ -69,6 +69,16 @@ class AuroraHeronShellController implements AuroraController {
     return cliController.killJob();
   }
 
+  private StMgr searchContainer(Integer id) {
+    String prefix = "stmgr-" + id;
+    for (StMgr sm : stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrsList()) {
+      if (sm.getId().equals(prefix)) {
+        return sm;
+      }
+    }
+    return null;
+  }
+
   // Restart an aurora container
   @Override
   public boolean restart(Integer containerId) {
@@ -82,19 +92,13 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    String host = "x";
-    int port = -1;
-    int offset = "stmgr-".length();
-    for (StMgr sm : stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrsList()) {
-      Integer id = Integer.valueOf(sm.getId().substring(offset));
-      LOG.info("comparing container " + offset + " " + sm.getId() + " with " + containerId);
-      if (containerId.equals(id)) {
-        host = sm.getHostName();
-        port = sm.getShellPort();
-        break;
-      }
+    StMgr sm = searchContainer(containerId);
+    if (sm == null) {
+      LOG.warning("container not found in pplan " + containerId);
+      return false;
     }
-    String url = "http://" + host + ":" + port + "/killexecutor";
+
+    String url = "http://" + sm.getHostName() + ":" + sm.getShellPort() + "/killexecutor";
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
