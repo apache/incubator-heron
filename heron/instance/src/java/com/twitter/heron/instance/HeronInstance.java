@@ -299,11 +299,17 @@ public class HeronInstance {
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
+    String logMsg = "\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName
         + " with taskId " + taskId + " and componentIndex " + componentIndex
         + " and stmgrId " + streamId + " and stmgrPort " + streamPort
-        + " and metricsManagerPort " + metricsPort);
+        + " and metricsManagerPort " + metricsPort;
+
+    if (remoteDebuggerPort != null) {
+      logMsg += " and remoteDebuggerPort " + remoteDebuggerPort;
+    }
+
+    LOG.info(logMsg);
 
     LOG.info("System Config: " + systemConfig);
 

@@ -33,6 +33,7 @@ message InstanceInfo {
   required int32 component_index = 2; // specific to this component
   required string component_name = 3;
   repeated string params = 4;
+  // the port a remote debugger can be attached to for this instance.  Currently JVM instances only
   optional int32 remote_debugger_port = 5;
 }
 
