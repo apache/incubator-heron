@@ -46,7 +46,7 @@ public final class Config implements Serializable {
   private Config(Builder builder) {
     numContainers = builder.numContainers;
     deliverySemantics = builder.deliverySemantics;
-    serializer = builder.topologySerializer;
+    serializer = builder.serializer;
     resources = builder.resources;
     heronConfig = builder.config;
   }
@@ -93,12 +93,12 @@ public final class Config implements Serializable {
   public static class Builder {
     private com.twitter.heron.api.Config config;
     private int numContainers;
-    private Serializer topologySerializer;
+    private Serializer serializer;
     private DeliverySemantics deliverySemantics;
     private Resources resources;
 
     public Builder() {
-      topologySerializer = Serializer.KRYO;
+      serializer = Serializer.KRYO;
       numContainers = 1;
       deliverySemantics = DeliverySemantics.ATMOST_ONCE;
       resources = Resources.defaultResources();
@@ -151,7 +151,8 @@ public final class Config implements Serializable {
         try {
           config.setSerializationClassName(KryoSerializer.class.getName());
         } catch (NoClassDefFoundError e) {
-          throw new RuntimeException("Linking with Kryo is needed because setTopologySerializer is used");
+          throw new RuntimeException(
+              "Linking with Kryo is needed because setTopologySerializer is used");
         }
       }
     }
@@ -162,12 +163,12 @@ public final class Config implements Serializable {
      * @param topologySerializer The topologySerializer to be used in this topology
      */
     public Builder setTopologySerializer(Serializer topologySerializer) {
-      this.topologySerializer = topologySerializer;
+      serializer = topologySerializer;
       return this;
     }
 
     public Config build() {
-      applySerializer(topologySerializer);
+      applySerializer(serializer);
       return new Config(this);
     }
   }
