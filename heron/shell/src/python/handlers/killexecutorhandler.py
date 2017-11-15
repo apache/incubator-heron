@@ -31,13 +31,34 @@ class KillExecutorHandler(tornado.web.RequestHandler):
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing parent executor' request")
     data = dict(urlparse.parse_qsl(self.request.body))
+
+    def status_finish(ret):
+      self.set_status(ret)
+      self.finish()
+
     sharedSecret = data.get('secret')
     if sharedSecret != options.secret:
-      self.set_status(403)
-      self.finish()
+      status_finish(403)
       return
-    logger.info("Killing parent executor response 200")
-    self.set_status(200)
-    self.finish()
-    logger.info("Killing parent executor")
-    os.killpg(os.getppid(), signal.SIGTERM)
+
+    def kill_parent():
+      status_finish(200)
+      logger.info("Killing parent executor")
+      os.killpg(os.getppid(), signal.SIGTERM)
+
+    processName = data.get('process')
+    if processName:
+      filepath = processName + '.pid'
+      if os.path.isfile(filepath):
+        if processName.startswith('heron-executor-'):
+          kill_parent()
+        else:
+          firstLine = open(filepath).readline()
+          logger.info("Killing process " + processName + " " + firstLine)
+          os.killpg(int(firstLine), signal.SIGTERM)
+          status_finish(200)
+      else:
+        logger.info(filepath + " not found")
+        status_finish(422)
+    else:
+      kill_parent()
