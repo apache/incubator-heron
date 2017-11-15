@@ -102,6 +102,10 @@ class AuroraHeronShellController implements AuroraController {
     try {
       NetworkUtils.sendHttpPostRequest(con, "X", payload.getBytes());
       return NetworkUtils.checkHttpResponseCode(con, 200);
+    } catch (ConnectException e) {
+      // if heron-shell command fails, delegate to aurora client
+      LOG.info("heron-shell killexecutor failed; try aurora client ..");
+      cliController.restart(containerId);
     } finally {
       con.disconnect();
     }
