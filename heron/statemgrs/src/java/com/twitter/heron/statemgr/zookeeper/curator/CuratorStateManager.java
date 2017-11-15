@@ -31,6 +31,8 @@ import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
 import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -337,6 +339,16 @@ public class CuratorStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> setMetricsCacheLocation(
       TopologyMaster.MetricsCacheLocation location,
       String topologyName) {
+    client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+      @Override
+      public void stateChanged(CuratorFramework arg0, ConnectionState arg1) {
+        if (arg1 == ConnectionState.RECONNECTED || arg1 == ConnectionState.CONNECTED) {
+          LOG.info("zk session state changed to " + arg1);
+          createNode(
+              StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
+        }
+      }
+    });
     return createNode(
         StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
   }
