@@ -53,9 +53,9 @@ class KillExecutorHandler(tornado.web.RequestHandler):
         if processName.startswith('heron-executor-'):
           kill_parent()
         else:
-          firstLine = open(filepath).readline()
-          logger.info("Killing process " + processName + " " + firstLine)
-          os.killpg(int(firstLine), signal.SIGTERM)
+          firstLine = int(open(filepath).readline())
+          logger.info("Killing process " + processName + " " + str(firstLine))
+          os.kill(firstLine, signal.SIGTERM)
           status_finish(200)
       else:
         logger.info(filepath + " not found")
