@@ -48,6 +48,8 @@ public final class ConfigUtils {
 
     doTaskHooksTranslation(heronConfig);
 
+    doTopologyLevelTranslation(heronConfig);
+
     return heronConfig;
   }
 
@@ -113,7 +115,10 @@ public final class ConfigUtils {
   }
 
   /**
-   * Translate storm config into heron config
+   * Translate storm config into heron config. This funciton is used by both topology
+   * and component level config translations. Therefore NO config should be generated
+   * when a key does NOT exist if the key is for both topology and component.
+   * Otherwise the component config might overwrite the topolgy config with a wrong value.
    * @param heron the heron config object to receive the results.
    */
   private static void doStormTranslation(Config heronConfig) {
@@ -125,20 +130,7 @@ public final class ConfigUtils {
       Integer nWorkers = Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_WORKERS));
       com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
     }
-    if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
-      Integer nAckers =
-          Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
-      if (nAckers > 0) {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
-      } else {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
-      }
-    } else {
-      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
-    }
+
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =
           Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
@@ -160,6 +152,27 @@ public final class ConfigUtils {
       Boolean dBg =
           Boolean.parseBoolean(heronConfig.get(backtype.storm.Config.TOPOLOGY_DEBUG).toString());
       com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
+    }
+  }
+
+  /**
+   * Translate topology config.
+   * @param heron the heron config object to receive the results.
+   */
+  private static void doTopologyLevelTranslation(Config heronConfig) {
+    if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
+      Integer nAckers =
+          Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
+      if (nAckers > 0) {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+      } else {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+      }
+    } else {
+      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
   }
 }
