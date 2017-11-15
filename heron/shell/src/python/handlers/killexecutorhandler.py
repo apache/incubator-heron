@@ -28,37 +28,38 @@ class KillExecutorHandler(tornado.web.RequestHandler):
   @tornado.web.asynchronous
   def post(self):
     """ post method """
-    logger = logging.getLogger(__file__)
-    logger.info("Received 'Killing parent executor' request")
-    data = dict(urlparse.parse_qsl(self.request.body))
-
     def status_finish(ret):
       self.set_status(ret)
       self.finish()
-
-    sharedSecret = data.get('secret')
-    if sharedSecret != options.secret:
-      status_finish(403)
-      return
 
     def kill_parent():
       status_finish(200)
       logger.info("Killing parent executor")
       os.killpg(os.getppid(), signal.SIGTERM)
 
+    logger = logging.getLogger(__file__)
+    logger.info("Received 'Killing parent executor' request")
+    data = dict(urlparse.parse_qsl(self.request.body))
+
+    # check shared secret
+    sharedSecret = data.get('secret')
+    if sharedSecret != options.secret:
+      status_finish(403)
+      return
+
     processName = data.get('process')
     if processName:
       filepath = processName + '.pid'
-      if os.path.isfile(filepath):
-        if processName.startswith('heron-executor-'):
+      if os.path.isfile(filepath): # process found
+        if processName.startswith('heron-executor-'): # kill heron-executor
           kill_parent()
-        else:
+        else: # kill other normal process
           firstLine = int(open(filepath).readline())
           logger.info("Killing process " + processName + " " + str(firstLine))
           os.kill(firstLine, signal.SIGTERM)
           status_finish(200)
-      else:
+      else: # process not found
         logger.info(filepath + " not found")
         status_finish(422)
-    else:
+    else: # process name not given, which means kill the container
       kill_parent()
