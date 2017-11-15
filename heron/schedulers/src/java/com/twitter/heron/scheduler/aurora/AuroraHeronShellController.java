@@ -74,7 +74,7 @@ class AuroraHeronShellController implements AuroraController {
   public boolean restart(Integer containerId) {
     // there is no backpressure for container 0, delegate to aurora client
     if (containerId == null || containerId == 0) {
-      cliController.restart(containerId);
+      return cliController.restart(containerId);
     }
 
     if (stateMgrAdaptor == null) {
@@ -100,12 +100,12 @@ class AuroraHeronShellController implements AuroraController {
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
     try {
-      NetworkUtils.sendHttpPostRequest(con, "X", payload.getBytes());
-      return NetworkUtils.checkHttpResponseCode(con, 200);
-    } catch (ConnectException e) {
-      // if heron-shell command fails, delegate to aurora client
-      LOG.info("heron-shell killexecutor failed; try aurora client ..");
-      cliController.restart(containerId);
+      if (NetworkUtils.sendHttpPostRequest(con, "X", payload.getBytes())) {
+        return NetworkUtils.checkHttpResponseCode(con, 200);
+      } else { // if heron-shell command fails, delegate to aurora client
+        LOG.info("heron-shell killexecutor failed; try aurora client ..");
+        return cliController.restart(containerId);
+      }
     } finally {
       con.disconnect();
     }
