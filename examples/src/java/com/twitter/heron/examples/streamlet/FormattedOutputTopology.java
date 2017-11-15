@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -63,7 +62,7 @@ public final class FormattedOutputTopology {
 
     SensorReading() {
       // Readings are produced only every two seconds
-      Utils.sleep(2000);
+      StreamletUtils.sleep(2000);
       this.deviceId = StreamletUtils.randomFromList(DEVICES);
       // Each temperature reading is a double between 70 and 100
       this.temperature = 70 + 30 * new Random().nextDouble();
@@ -105,7 +104,7 @@ public final class FormattedOutputTopology {
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
-    Config config = new Config();
+    Config config = Config.defaultConfig();
 
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.

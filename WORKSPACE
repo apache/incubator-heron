@@ -285,6 +285,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_objectweb_asm",
+  artifact = "org.ow2.asm:asm:5.0.4",
+)
+
+maven_jar(
   name = "org_apache_mesos_mesos",
   artifact = "org.apache.mesos:mesos:0.22.0",
 )

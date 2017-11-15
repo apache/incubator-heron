@@ -23,7 +23,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -115,7 +114,7 @@ public final class FilesystemSinkTopology {
         .newSource(() -> {
           // This applies a "brake" that makes the processing graph write
           // to the temporary file at a reasonable, readable pace.
-          Utils.sleep(500);
+          StreamletUtils.sleep(500);
           return ThreadLocalRandom.current().nextInt(100);
         })
         .setName("incoming-integers")
@@ -128,8 +127,9 @@ public final class FilesystemSinkTopology {
     // argument (or else the default of 2 will be used).
     int topologyParallelism = StreamletUtils.getParallelism(args, 2);
 
-    Config config = new Config();
-    config.setNumContainers(topologyParallelism);
+    Config config = new Config.Builder()
+        .setNumContainers(topologyParallelism)
+        .build();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);

@@ -16,7 +16,6 @@ package com.twitter.heron.examples.streamlet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -60,19 +59,21 @@ public final class IntegerProcessingTopology {
         .setName("remove-twos")
         .log();
 
-    Config conf = new Config();
-    conf.setNumContainers(NUM_CONTAINERS);
+    Resources resources = new Resources.Builder()
+        .setCpu(CPU)
+        .setRamInGB(GIGABYTES_OF_RAM)
+        .build();
 
-    Resources resources = new Resources();
-    resources.withCpu(CPU);
-    resources.withRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM).asBytes());
-    conf.setContainerResources(resources);
+    Config config = new Config.Builder()
+        .setNumContainers(NUM_CONTAINERS)
+        .setContainerResources(resources)
+        .build();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
-    new Runner().run(topologyName, conf, builder);
+    new Runner().run(topologyName, config, builder);
   }
 }
