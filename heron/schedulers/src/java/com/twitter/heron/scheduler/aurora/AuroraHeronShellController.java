@@ -82,10 +82,18 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    int index = containerId - 1; // stmgr container starts from 1
-    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-    String host = contaienrInfo.getHostName();
-    int port = contaienrInfo.getShellPort();
+    String host = "x";
+    int port = -1;
+    int offset = "stmgr-".length();
+    for (StMgr sm : stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrsList()) {
+      Integer id = Integer.valueOf(sm.getId().substring(offset));
+      LOG.info("comparing container " + offset + " " + sm.getId() + " with " + containerId);
+      if (containerId.equals(id)) {
+        host = sm.getHostName();
+        port = sm.getShellPort();
+        break;
+      }
+    }
     String url = "http://" + host + ":" + port + "/killexecutor";
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
