@@ -292,7 +292,7 @@ public class StreamletImplTest {
         .setContainerResources(nonDefaultResources)
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setNumContainers(8)
-        .setSerializer(Config.Serializer.JAVA)
+        .setTopologySerializer(Config.Serializer.JAVA)
         .setUserConfig("key", "value")
         .build();
     assertEquals(nonDefaultConfig.getNumContainers(), 8);
@@ -303,8 +303,8 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
 
     Config multiSetConfig = new Config.Builder()
-        .setSerializer(Config.Serializer.JAVA)
-        .setSerializer(Config.Serializer.KRYO)
+        .setTopologySerializer(Config.Serializer.JAVA)
+        .setTopologySerializer(Config.Serializer.KRYO)
         .build();
     assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
   }

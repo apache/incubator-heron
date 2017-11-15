@@ -46,7 +46,7 @@ public final class Config implements Serializable {
   private Config(Builder builder) {
     numContainers = builder.numContainers;
     deliverySemantics = builder.deliverySemantics;
-    serializer = builder.serializer;
+    serializer = builder.topologySerializer;
     resources = builder.resources;
     heronConfig = builder.config;
   }
@@ -93,12 +93,12 @@ public final class Config implements Serializable {
   public static class Builder {
     private com.twitter.heron.api.Config config;
     private int numContainers;
-    private Serializer serializer;
+    private Serializer topologySerializer;
     private DeliverySemantics deliverySemantics;
     private Resources resources;
 
     public Builder() {
-      serializer = Serializer.KRYO;
+      topologySerializer = Serializer.KRYO;
       numContainers = 1;
       deliverySemantics = DeliverySemantics.ATMOST_ONCE;
       resources = Resources.defaultResources();
@@ -151,23 +151,23 @@ public final class Config implements Serializable {
         try {
           config.setSerializationClassName(KryoSerializer.class.getName());
         } catch (NoClassDefFoundError e) {
-          throw new RuntimeException("Linking with Kryo is needed because setSerializer is used");
+          throw new RuntimeException("Linking with Kryo is needed because setTopologySerializer is used");
         }
       }
     }
 
     /**
-     * Sets the topology to use the specified serializer for serializing
+     * Sets the topology to use the specified topologySerializer for serializing
      * streamlet elements
-     * @param topologySerializer The serializer to be used in this topology
+     * @param topologySerializer The topologySerializer to be used in this topology
      */
-    public Builder setSerializer(Serializer topologySerializer) {
-      serializer = topologySerializer;
+    public Builder setTopologySerializer(Serializer topologySerializer) {
+      this.topologySerializer = topologySerializer;
       return this;
     }
 
     public Config build() {
-      applySerializer(serializer);
+      applySerializer(topologySerializer);
       return new Config(this);
     }
   }
