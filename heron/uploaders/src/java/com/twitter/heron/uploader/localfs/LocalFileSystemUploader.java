@@ -43,7 +43,7 @@ public class LocalFileSystemUploader implements IUploader {
   public void initialize(Config ipconfig) {
     this.config = ipconfig;
 
-    this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
+    this.destTopologyDirectory = LocalFileSystemContext.getFileSystemDirectory(config);
 
     // name of the destination file is the same as the base name of the topology package file
     String fileName =
