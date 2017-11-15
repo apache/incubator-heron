@@ -166,7 +166,7 @@ public final class Config implements Serializable {
       return this;
     }
 
-    public Config build() {      
+    public Config build() {
       applySerializer(serializer);
       return new Config(this);
     }
