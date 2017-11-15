@@ -146,8 +146,8 @@ public final class Config implements Serializable {
       return this;
     }
 
-    private void applySerializer(Serializer serializer) {
-      if (serializer == Serializer.KRYO) {
+    private void applySerializer(Serializer topologySerializer) {
+      if (topologySerializer == Serializer.KRYO) {
         try {
           config.setSerializationClassName(KryoSerializer.class.getName());
         } catch (NoClassDefFoundError e) {
