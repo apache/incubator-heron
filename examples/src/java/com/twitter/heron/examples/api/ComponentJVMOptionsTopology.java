@@ -67,6 +67,11 @@ public final class ComponentJVMOptionsTopology {
     conf.setContainerRamRequested(ByteAmount.fromGigabytes(2));
     conf.setContainerCpuRequested(2);
 
+    // Specify the size of ram padding to per container.
+    // Notice, this config will be considered as a hint,
+    // and it's up to the packing algorithm to determine whether to apply this hint
+    conf.setContainerRamPadding(ByteAmount.fromGigabytes(2));
+
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(2);
       HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
