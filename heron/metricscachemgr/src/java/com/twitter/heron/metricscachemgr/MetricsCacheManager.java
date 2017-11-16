@@ -350,7 +350,7 @@ public class MetricsCacheManager {
   }
 
   /**
-   * start zk_client, metricscache_server, http_server
+   * start statemgr_client, metricscache_server, http_server
    * @throws Exception
    */
   public void start() throws Exception {
@@ -369,7 +369,7 @@ public class MetricsCacheManager {
 
     // Put it in a try block so that we can always clean resources
     try {
-      // initialize the statemgr: zk_client.start()
+      // initialize the statemgr
       statemgr.initialize(config);
 
       Boolean b = statemgr.setMetricsCacheLocation(metricsCacheLocation, topologyName)
