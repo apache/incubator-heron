@@ -406,7 +406,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void log() {
     LogStreamlet<R> logger = new LogStreamlet<>(this);
     addChild(logger);
-    return;
   }
 
   /**
@@ -417,7 +416,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void consume(SerializableConsumer<R> consumer) {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
-    return;
   }
 
   /**
@@ -428,7 +426,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void toSink(Sink<R> sink) {
     SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
-    return;
   }
 
   /**
