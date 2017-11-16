@@ -23,6 +23,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 import static org.junit.Assert.*;
@@ -48,8 +49,8 @@ public class WaterMarkEventGeneratorTest {
       }
     };
     // set watermark interval to a high value and trigger manually to fix timing issues
-    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5, Collections
-        .singleton(streamId("s1")));
+    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5L, 5, Collections
+        .singleton(streamId("s1")), new Config());
     waterMarkEventGenerator.start();
   }
 
@@ -77,7 +78,8 @@ public class WaterMarkEventGeneratorTest {
     Set<TopologyAPI.StreamId> streams = new HashSet<>();
     streams.add(streamId("s1"));
     streams.add(streamId("s2"));
-    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5, streams);
+    waterMarkEventGenerator = new WaterMarkEventGenerator<>(windowManager, 5L,
+        5, streams, new Config());
     waterMarkEventGenerator.start();
 
     waterMarkEventGenerator.track(streamId("s1"), 100);
