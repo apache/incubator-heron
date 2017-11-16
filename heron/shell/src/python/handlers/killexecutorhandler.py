@@ -47,15 +47,17 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       status_finish(403)
       return
 
-    processName = data.get('process')
-    if processName:
-      filepath = processName + '.pid'
+    instanceId = data.get('instance_id_to_restart')
+    if instanceId:
+      filepath = instanceId + '.pid'
       if os.path.isfile(filepath): # process found
-        if processName.startswith('heron-executor-'): # kill heron-executor
+        if instanceId.startswith('heron-executor-'): # kill heron-executor
           kill_parent()
         else: # kill other normal process
-          firstLine = int(open(filepath).readline())
-          logger.info("Killing process " + processName + " " + str(firstLine))
+          fh = open(filepath)
+          firstLine = int(fh.readline())
+          fh.close()
+          logger.info("Killing process " + instanceId + " " + str(firstLine))
           os.kill(firstLine, signal.SIGTERM)
           status_finish(200)
       else: # process not found
