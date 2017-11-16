@@ -43,7 +43,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.toLocalMode(getDefaultConfig());
 
     Assert.assertEquals(
-        LocalFileSystemContext.fileSystemDirectory(config),
+        LocalFileSystemContext.getFileSystemDirectory(config),
         TokenSub.substitute(config, LocalFileSystemKey.FILE_SYSTEM_DIRECTORY.getDefaultString())
     );
   }
@@ -59,7 +59,7 @@ public class LocalFileSystemConfigTest {
             .build());
 
     Assert.assertEquals(
-        LocalFileSystemContext.fileSystemDirectory(config),
+        LocalFileSystemContext.getFileSystemDirectory(config),
         overrideDirectory
     );
   }
@@ -84,7 +84,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         Paths.get(uploader.getTopologyFile()).getParent().toString(),
-        LocalFileSystemContext.fileSystemDirectory(config)
+        LocalFileSystemContext.getFileSystemDirectory(config)
     );
   }
 
