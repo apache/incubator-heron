@@ -60,11 +60,6 @@ public class EventImpl<T extends Serializable> implements Event<T> {
   }
 
   @Override
-  public boolean isTimer() {
-    return false;
-  }
-
-  @Override
   public String toString() {
     return "EventImpl{" + "event=" + event + ", ts=" + ts + '}';
   }
