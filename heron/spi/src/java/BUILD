@@ -27,7 +27,7 @@ java_library(
     ]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/java:classification",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
@@ -58,7 +58,7 @@ utils_deps_files = \
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "@com_google_guava_guava//jar",
     ]
 
@@ -78,7 +78,7 @@ statefulstorage_deps_files = \
     ]
 
 packing_deps_files = [
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
     ":common-spi-java",
     "//heron/api/src/java:classification",
     "//heron/common/src/java:basics-java",

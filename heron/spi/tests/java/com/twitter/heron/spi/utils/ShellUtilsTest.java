@@ -23,14 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ShellUtilsTest {
-
-  private static final Logger LOG = Logger.getLogger(ShellUtilsTest.class.getName());
 
   private static String generateRandomLongString(int size) {
     StringBuilder builder = new StringBuilder();

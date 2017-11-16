@@ -18,11 +18,13 @@
 
 package backtype.storm.topology;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import backtype.storm.grouping.CustomStreamGrouping;
 import backtype.storm.grouping.CustomStreamGroupingDelegate;
 import backtype.storm.tuple.Fields;
+import backtype.storm.utils.ConfigUtils;
 import backtype.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
@@ -35,13 +37,18 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   @Override
   @SuppressWarnings({"rawtypes", "unchecked"})
   public BoltDeclarer addConfigurations(Map conf) {
-    delegate.addConfigurations((Map<String, Object>) conf);
+    // Translate config to heron config and then apply.
+    Map<String, Object> heronConf = ConfigUtils.translateComponentConfig(conf);
+    delegate.addConfigurations(heronConf);
     return this;
   }
 
   @Override
   public BoltDeclarer addConfiguration(String config, Object value) {
-    delegate.addConfiguration(config, value);
+    Map<String, Object> configMap = new HashMap<String, Object>();
+    configMap.put(config, value);
+
+    addConfigurations(configMap);
     return this;
   }
 

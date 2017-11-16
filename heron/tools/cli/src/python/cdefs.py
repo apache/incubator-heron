@@ -14,7 +14,6 @@
 ''' cdefs.py '''
 import os
 
-import heron.common.src.python.utils.log as Log
 import heron.tools.cli.src.python.cliconfig as cliconfig
 import heron.tools.common.src.python.utils.config as config
 
@@ -50,6 +49,5 @@ def check_direct_mode_cluster_definition(cluster, config_path):
   '''
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Cluster config directory \'%s\' does not exist", config_path)
     return False
   return True

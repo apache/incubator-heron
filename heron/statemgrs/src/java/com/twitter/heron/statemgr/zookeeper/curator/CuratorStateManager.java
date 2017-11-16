@@ -426,6 +426,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     Config config = Config.newBuilder()
         .put(Key.STATEMGR_ROOT_PATH, "/storm/heron/states")
         .put(Key.STATEMGR_CONNECTION_STRING, zookeeperHostname)
+        .put(Key.SCHEDULER_IS_SERVICE, false)
         .build();
     CuratorStateManager stateManager = new CuratorStateManager();
     stateManager.doMain(args, config);

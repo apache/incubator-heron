@@ -119,6 +119,16 @@ public abstract class WakeableLooper {
     timers.add(new TimerTask(expiration, task));
   }
 
+  public void registerPeriodicEvent(Duration frequency, Runnable task) {
+    registerTimerEvent(frequency, new Runnable() {
+      @Override
+      public void run() {
+        task.run();
+        registerPeriodicEvent(frequency, task);
+      }
+    });
+  }
+
   public void exitLoop() {
     exitLoop = true;
     wakeUp();

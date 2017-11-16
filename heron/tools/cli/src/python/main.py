@@ -221,6 +221,7 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
 
   # check if the cluster config directory exists
   if not cdefs.check_direct_mode_cluster_definition(cluster, config_path):
+    Log.error("Cluster config directory \'%s\' does not exist", config_path)
     return dict()
 
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
