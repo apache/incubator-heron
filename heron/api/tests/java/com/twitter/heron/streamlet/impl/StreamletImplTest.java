@@ -265,7 +265,7 @@ public class StreamletImplTest {
   public void testResourcesBuilder() {
     Resources defaultResources = Resources.defaultResources();
     assertEquals(0, Float.compare(defaultResources.getCpu(), 1.0f));
-    assertEquals(defaultResources.getRam(), 104857600);
+    assertEquals(defaultResources.getRam(), ByteAmount.fromMegabytes(100));
 
     Resources nonDefaultResources = new Resources.Builder()
         .setCpu(5.1f)
