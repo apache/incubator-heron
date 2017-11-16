@@ -35,8 +35,8 @@ public final class IntegerProcessingTopology {
   }
 
   // Heron resources to be applied to the topology
-  private static final float CPU = 2.0f;
-  private static final long GIGABYTES_OF_RAM = 6;
+  private static final float CPU = 1.5f;
+  private static final int GIGABYTES_OF_RAM = 8;
   private static final int NUM_CONTAINERS = 2;
 
   /**
@@ -49,7 +49,6 @@ public final class IntegerProcessingTopology {
     Streamlet<Integer> zeroes = builder.newSource(() -> 0);
 
     builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .setNumPartitions(2)
         .setName("random-ints")
         .map(i -> i + 1)
         .setName("add-one")

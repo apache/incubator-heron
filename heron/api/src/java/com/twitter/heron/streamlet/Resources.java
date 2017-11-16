@@ -16,6 +16,8 @@ package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
 
+import com.twitter.heron.common.basics.ByteAmount;
+
 /**
  * Resources needed by the topology are encapsulated in this class.
  * Currently we deal with CPU and RAM. Others can be added later.
@@ -23,7 +25,7 @@ import java.io.Serializable;
 public final class Resources implements Serializable {
   private static final long serialVersionUID = 630451253428388496L;
   private float cpu;
-  private long ram;
+  private ByteAmount ram;
 
   private Resources(Builder builder) {
     this.cpu = builder.cpu;
@@ -39,8 +41,20 @@ public final class Resources implements Serializable {
     return cpu;
   }
 
-  public long getRam() {
+  public ByteAmount getRam() {
     return ram;
+  }
+
+  public long getRamBytes() {
+    return ram.asBytes();
+  }
+
+  public long getRamMegabytes() {
+    return ram.asMegabytes();
+  }
+
+  public long getRamGigabytes() {
+    return ram.asGigabytes();
   }
 
   @Override
@@ -50,11 +64,11 @@ public final class Resources implements Serializable {
 
   public static class Builder {
     private float cpu;
-    private long ram;
+    private ByteAmount ram;
 
     public Builder() {
       this.cpu = 1.0f;
-      this.ram = 104857600;
+      this.ram = ByteAmount.fromBytes(104857600);
     }
 
     /**
@@ -62,7 +76,7 @@ public final class Resources implements Serializable {
      * @param nram The number of megabytes of RAM
      */
     public Builder setRamInMB(long nram) {
-      this.ram = nram * 1024;
+      this.ram = ByteAmount.fromMegabytes(nram);
       return this;
     }
 
@@ -71,7 +85,7 @@ public final class Resources implements Serializable {
      * @param nram The number of gigabytes of RAM
      */
     public Builder setRamInGB(long nram) {
-      this.ram = nram * 1024 * 1024;
+      this.ram = ByteAmount.fromGigabytes(nram);
       return this;
     }
 
@@ -89,7 +103,7 @@ public final class Resources implements Serializable {
      * @param containerRam The number of bytes of RAM
      */
     public Builder setRam(long containerRam) {
-      this.ram = containerRam;
+      this.ram = ByteAmount.fromBytes(containerRam);
       return this;
     }
 
