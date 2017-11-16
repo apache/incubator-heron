@@ -24,13 +24,16 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.squareup.okhttp.Response;
 
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.TopologySubmissionException;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -57,6 +60,8 @@ public class AppsV1beta1Controller extends KubernetesController {
   private static final Logger LOG =
       Logger.getLogger(AppsV1beta1Controller.class.getName());
 
+  private static final String ENV_SHARD_ID = "SHARD_ID";
+
   private final AppsV1beta1Api client;
 
   AppsV1beta1Controller(Config configuration, Config runtimeConfiguration) {
@@ -73,7 +78,9 @@ public class AppsV1beta1Controller extends KubernetesController {
     }
 
     final Resource containerResource = getContainerResource(packingPlan);
-    final V1beta1StatefulSet statefulSet = createStatefulSet(containerResource);
+
+    final int numberOfInstances = packingPlan.getInstanceCount();
+    final V1beta1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
       final Response response =
@@ -204,9 +211,11 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   protected List<String> getExecutorCommand(String containerId) {
-    final List<String> ports =
-        KubernetesConstants.CONTAINER_PORTS.stream()
-            .map(value -> Integer.toString(value.second)).collect(Collectors.toList());
+    final Map<ExecutorPort, String> ports =
+        KubernetesConstants.EXECUTOR_PORTS.entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                e -> e.getValue().toString()));
 
     final Config configuration = getConfiguration();
     final Config runtimeConfiguration = getRuntimeConfiguration();
@@ -223,11 +232,11 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   private static String setShardIdEnvironmentVariableCommand() {
-    return "SHARD_ID=${POD_NAME##*-} && echo shardId=${SHARD_ID}";
+    return String.format("%s=${POD_NAME##*-} && echo shardId=${%s}", ENV_SHARD_ID, ENV_SHARD_ID);
   }
 
 
-  private V1beta1StatefulSet createStatefulSet(Resource containerResource) {
+  private V1beta1StatefulSet createStatefulSet(Resource containerResource, int numberOfInstances) {
     final String topologyName = getTopologyName();
     final Config runtimeConfiguration = getRuntimeConfiguration();
 
@@ -257,8 +266,8 @@ public class AppsV1beta1Controller extends KubernetesController {
     templateMetaData.annotations(getPrometheusAnnotations());
     podTemplateSpec.setMetadata(templateMetaData);
 
-    final List<String> command = getExecutorCommand("$SHARD_ID");
-    podTemplateSpec.spec(getPodSpec(command, containerResource));
+    final List<String> command = getExecutorCommand("$" + ENV_SHARD_ID);
+    podTemplateSpec.spec(getPodSpec(command, containerResource, numberOfInstances));
 
     statefulSetSpec.setTemplate(podTemplateSpec);
 
@@ -290,13 +299,16 @@ public class AppsV1beta1Controller extends KubernetesController {
     return labels;
   }
 
-  private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource) {
+  private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource,
+      int numberOfInstances) {
     final V1PodSpec podSpec = new V1PodSpec();
-    podSpec.containers(Collections.singletonList(getContainer(executorCommand, resource)));
+    podSpec.containers(Collections.singletonList(
+        getContainer(executorCommand, resource, numberOfInstances)));
     return podSpec;
   }
 
-  private V1Container getContainer(List<String> executorCommand, Resource resource) {
+  private V1Container getContainer(List<String> executorCommand, Resource resource,
+      int numberOfInstances) {
     final Config configuration = getConfiguration();
     final V1Container container = new V1Container().name("executor");
 
@@ -312,7 +324,7 @@ public class AppsV1beta1Controller extends KubernetesController {
 
     // setup the environment variables for the container
     final V1EnvVar envVarHost = new V1EnvVar();
-    envVarHost.name(KubernetesConstants.HOST)
+    envVarHost.name(KubernetesConstants.ENV_HOST)
         .valueFrom(new V1EnvVarSource()
             .fieldRef(new V1ObjectFieldSelector()
                 .fieldPath(KubernetesConstants.POD_IP)));
@@ -334,19 +346,36 @@ public class AppsV1beta1Controller extends KubernetesController {
     container.setResources(resourceRequirements);
 
     // set container ports
-    container.setPorts(getContainerPorts());
+    final boolean debuggingEnabled =
+        TopologyUtils.getTopologyRemoteDebuggingEnabled(
+            Runtime.topology(getRuntimeConfiguration()));
+    container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
 
     return container;
   }
 
-  private List<V1ContainerPort> getContainerPorts() {
+  private List<V1ContainerPort> getContainerPorts(boolean remoteDebugEnabled,
+      int numberOfInstances) {
     List<V1ContainerPort> ports = new ArrayList<>();
-    KubernetesConstants.CONTAINER_PORTS.forEach(p -> {
+    KubernetesConstants.EXECUTOR_PORTS.forEach((p, v) -> {
       final V1ContainerPort port = new V1ContainerPort();
-      port.setName(p.first);
-      port.setContainerPort(p.second);
+      port.setName(p.getName());
+      port.setContainerPort(v);
       ports.add(port);
     });
+
+
+    if (remoteDebugEnabled) {
+      IntStream.range(0, numberOfInstances).forEach(i -> {
+        final String portName =
+            KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME + "-" + String.valueOf(i);
+        final V1ContainerPort port = new V1ContainerPort();
+        port.setName(portName);
+        port.setContainerPort(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT + i);
+        ports.add(port);
+      });
+    }
+
     return ports;
   }
 }

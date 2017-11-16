@@ -187,6 +187,24 @@ public final class SchedulerUtils {
   public static String[] getExecutorCommand(
       Config config,
       Config runtime,
+      int shardId,
+      Map<ExecutorPort, String> ports) {
+    return getExecutorCommand(config, runtime, Integer.toString(shardId), ports);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static config
+   * @param runtime The runtime config
+   * @param shardId the executor/container index
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] getExecutorCommand(
+      Config config,
+      Config runtime,
       String shardId,
       Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
@@ -463,7 +481,7 @@ public final class SchedulerUtils {
   }
 
   public static boolean extractPackage(String workingDirectory, String packageURI,
-                                       String packageDestination, boolean deletePackage, boolean verbose) {
+      String packageDestination, boolean deletePackage, boolean verbose) {
     return curlAndExtractPackage(workingDirectory, packageURI, packageDestination,
         deletePackage, verbose);
   }

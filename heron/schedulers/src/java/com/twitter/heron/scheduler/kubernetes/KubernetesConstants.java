@@ -21,22 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 
 public final class KubernetesConstants {
   private KubernetesConstants() {
-
   }
 
-  public static final String ID = "id";
-  public static final String NAME = "name";
-  public static final String ENV = "env";
-  public static final String URI = "uri";
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
-  public static final String HOST = "HOST";
 
+  // container env constants
+  public static final String ENV_HOST = "HOST";
   public static final String POD_IP = "status.podIP";
   public static final String ENV_POD_NAME = "POD_NAME";
   public static final String POD_NAME = "metadata.name";
@@ -46,6 +41,7 @@ public final class KubernetesConstants {
   // https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/
   public static final String DELETE_OPTIONS_PROPAGATION_POLICY = "Foreground";
 
+  // metadata labels
   public static final String LABEL_APP = "app";
   public static final String LABEL_APP_VALUE = "heron";
   public static final String LABEL_TOPOLOGY = "topology";
@@ -55,32 +51,21 @@ public final class KubernetesConstants {
   public static final String ANNOTATION_PROMETHEUS_PORT = "prometheus.io/port";
   public static final String PROMETHEUS_PORT = "8080";
 
-  static final List<Pair<String, Integer>> CONTAINER_PORTS = Arrays.asList(
-      Pair.create("master", 6001),
-      Pair.create("tmaster-ctlr", 6002),
-      Pair.create("tmaster-stats", 6003),
-      Pair.create("shell", 6004),
-      Pair.create("metricsmgr", 6005),
-      Pair.create("scheduler", 6006),
-      Pair.create("metrics-cache-m", 6007),
-      Pair.create("metrics-cache-s", 6008),
-      Pair.create("ckptmgr", 6009)
-  );
 
-  public static final String MASTER_PORT = "6001";
-  public static final String TMASTER_CONTROLLER_PORT = "6002";
-  public static final String TMASTER_STATS_PORT = "6003";
-  public static final String SHELL_PORT = "6004";
-  public static final String METRICSMGR_PORT = "6005";
-  public static final String SCHEDULER_PORT = "6006";
-  public static final String METRICS_CACHE_MASTER_PORT = "6007";
-  public static final String METRICS_CACHE_STATS_PORT = "6008";
-  public static final String CHECKPOINT_MGR_PORT = "6009";
+  public static final int MASTER_PORT = 6001;
+  public static final int TMASTER_CONTROLLER_PORT = 6002;
+  public static final int TMASTER_STATS_PORT = 6003;
+  public static final int SHELL_PORT = 6004;
+  public static final int METRICSMGR_PORT = 6005;
+  public static final int SCHEDULER_PORT = 6006;
+  public static final int METRICS_CACHE_MASTER_PORT = 6007;
+  public static final int METRICS_CACHE_STATS_PORT = 6008;
+  public static final int CHECKPOINT_MGR_PORT = 6009;
   // port number the start with when more than one port needed for remote debugging
-  public static final String JVM_REMOTE_DEBUGGER_PORT = "6010";
+  public static final int JVM_REMOTE_DEBUGGER_PORT = 6010;
   public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "remote-debugger";
 
-  public static final Map<ExecutorPort, String> EXECUTOR_PORTS = new HashMap<>();
+  public static final Map<ExecutorPort, Integer> EXECUTOR_PORTS = new HashMap<>();
   static {
     EXECUTOR_PORTS.put(ExecutorPort.MASTER_PORT, MASTER_PORT);
     EXECUTOR_PORTS.put(ExecutorPort.TMASTER_CONTROLLER_PORT, TMASTER_CONTROLLER_PORT);
