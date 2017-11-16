@@ -10,6 +10,15 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
 
+####################################################################
+# Following are Aurora-specific
+####################################################################
+# The maximum retry attempts when trying to kill an Aurora job
+heron.scheduler.job.max.kill.attempts:       5
+
+# The interval in ms between two retry-attempts to kill an Aurora job
+heron.scheduler.job.kill.retry.interval.ms:  2000
+
 # Aurora Controller Class
 # heron.class.scheduler.aurora.controller.cli:     False
 

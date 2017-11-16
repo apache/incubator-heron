@@ -19,7 +19,7 @@ import java.util.Collection;
 
 /**
  * Source is how Streamlet's originate. The get method
- * invokation returns new element that form the tuples of the streamlet.
+ * invocation returns new element that form the tuples of the streamlet.
  * setup/cleanup is where the generator can do any one time setup work, like
  * establishing/closing connection to sources, etc.
  */

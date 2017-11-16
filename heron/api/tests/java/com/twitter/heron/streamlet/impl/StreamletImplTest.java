@@ -18,11 +18,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableTransformer;
@@ -260,15 +263,69 @@ public class StreamletImplTest {
 
   @Test
   public void testResourcesBuilder() {
-    Resources defaultResoures = Resources.defaultResources();
-    assertEquals(0, Float.compare(defaultResoures.getCpu(), 1.0f));
-    assertEquals(defaultResoures.getRam(), 104857600);
+    Resources defaultResources = Resources.defaultResources();
+    assertEquals(0, Float.compare(defaultResources.getCpu(), 1.0f));
+    assertEquals(defaultResources.getRam(), ByteAmount.fromMegabytes(100));
 
-    Resources res2 = new Resources.Builder()
+    Resources nonDefaultResources = new Resources.Builder()
         .setCpu(5.1f)
         .setRamInGB(20)
         .build();
-    assertEquals(0, Float.compare(res2.getCpu(), 5.1f));
-    assertEquals(res2.getRam(), 20 * 1024 * 1024);
+    assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
+    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
   }
+
+  @Test
+  public void testConfigBuilder() {
+    Config defaultConfig = Config.defaultConfig();
+    assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
+    assertEquals(defaultConfig.getNumContainers(), 1);
+    assertEquals(0, Float.compare(defaultConfig.getResources().getCpu(), 1.0f));
+    assertEquals(defaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(100));
+    assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
+
+    Resources nonDefaultResources = new Resources.Builder()
+        .setCpu(3.1f)
+        .setRamInMB(2500)
+        .build();
+
+    Config nonDefaultConfig = new Config.Builder()
+        .setContainerResources(nonDefaultResources)
+        .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
+        .setNumContainers(8)
+        .setTopologySerializer(Config.Serializer.JAVA)
+        .setUserConfig("key", "value")
+        .build();
+    assertEquals(nonDefaultConfig.getNumContainers(), 8);
+    assertEquals(nonDefaultConfig.getDeliverySemantics(),
+        Config.DeliverySemantics.EFFECTIVELY_ONCE);
+    assertEquals(0, Float.compare(nonDefaultConfig.getResources().getCpu(), 3.1f));
+    assertEquals(nonDefaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(2500));
+    assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
+
+    Config multiSetConfig = new Config.Builder()
+        .setTopologySerializer(Config.Serializer.JAVA)
+        .setTopologySerializer(Config.Serializer.KRYO)
+        .build();
+    assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
+  }
+
+  @Test
+  public void testSetNameWithInvalidValues() {
+    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = sample::setName;
+    testByFunction(function, null);
+    testByFunction(function, "");
+    testByFunction(function, "  ");
+  }
+
+  private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {
+    try {
+      function.apply(sName);
+      fail("Should have thrown an IllegalArgumentException because streamlet name is invalid");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Streamlet name cannot be null/blank", e.getMessage());
+    }
+  }
+
 }

@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.windowing.evictors.CountEvictionPolicy;
 import com.twitter.heron.api.windowing.evictors.TimeEvictionPolicy;
 import com.twitter.heron.api.windowing.evictors.WatermarkCountEvictionPolicy;
@@ -225,7 +226,7 @@ public class WindowManagerTest {
          * Set it to a large value and trigger manually.
           */
     TriggerPolicy<Integer, ?> triggerPolicy = new TimeTriggerPolicy<Integer>(Duration.ofDays(1)
-        .toMillis(), windowManager, evictionPolicy);
+        .toMillis(), windowManager, evictionPolicy, new Config());
     triggerPolicy.start();
     windowManager.setTriggerPolicy(triggerPolicy);
     long now = System.currentTimeMillis();

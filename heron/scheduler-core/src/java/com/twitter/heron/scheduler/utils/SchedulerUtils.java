@@ -59,7 +59,8 @@ public final class SchedulerUtils {
     SCHEDULER_PORT("scheduler", true),
     METRICS_CACHE_MASTER_PORT("metrics-cache-m", true),
     METRICS_CACHE_STATS_PORT("metrics-cache-s", true),
-    CHECKPOINT_MANAGER_PORT("ckptmgr", true);
+    CHECKPOINT_MANAGER_PORT("ckptmgr", true),
+    JVM_REMOTE_DEBUGGER_PORTS("jvm-remote-debugger", false);
 
     private final String name;
     private final boolean required;
@@ -230,6 +231,9 @@ public final class SchedulerUtils {
         ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
     String ckptmgrPort = ExecutorPort.getPort(
         ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
+    String remoteDebuggerPorts = ExecutorPort.getPort(
+        ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports
+    );
 
     List<String> commands = new ArrayList<>();
     commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
@@ -310,6 +314,9 @@ public final class SchedulerUtils {
     commands.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
     commands.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
         Context.healthMgrClassPath(config)));
+    if (remoteDebuggerPorts != null) {
+      commands.add(createCommandArg(ExecutorFlag.JvmRemoteDebuggerPorts, remoteDebuggerPorts));
+    }
 
     return commands.toArray(new String[commands.size()]);
   }
