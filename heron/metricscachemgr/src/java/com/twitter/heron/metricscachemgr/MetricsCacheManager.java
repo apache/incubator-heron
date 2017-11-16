@@ -387,7 +387,7 @@ public class MetricsCacheManager {
         metricsCacheManagerServer.start();
         metricsCacheManagerServerLoop.loop();
       } else {
-        throw new RuntimeException("Failed to set metricscahe location. Exiting...");
+        throw new RuntimeException("Failed to set metricscahe location.");
       }
     } finally {
       // 3. Do post work basing on the result

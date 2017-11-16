@@ -344,8 +344,9 @@ public class CuratorStateManager extends FileSystemStateManager {
       public void stateChanged(CuratorFramework arg0, ConnectionState arg1) {
         if (arg1 == ConnectionState.LOST
             || arg1 == ConnectionState.SUSPENDED
-            || arg1 == ConnectionState.READ_ONLY) {
-          throw new RuntimeException();
+            || arg1 == ConnectionState.READ_ONLY
+            || arg1 == ConnectionState.RECONNECTED) {
+          throw new RuntimeException("Unexpected state change to: " + arg1.name());
         }
       }
     });
