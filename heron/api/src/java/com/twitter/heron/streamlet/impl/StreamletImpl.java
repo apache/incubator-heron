@@ -66,7 +66,7 @@ import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
  * Streamlet. One can think of a transformation attaching itself to the stream and processing
  * each tuple as they go by. Thus the parallelism of any operator is implicitly determined
  * by the number of partitions of the stream that it is operating on. If a particular
- * tranformation wants to operate at a different parallelism, one can repartition the
+ * transformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
 public abstract class StreamletImpl<R> implements Streamlet<R> {
@@ -109,8 +109,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setName(String sName) {
-    if (sName == null || sName.isEmpty()) {
-      throw new IllegalArgumentException("Streamlet name cannot be null/empty");
+    if (sName == null || sName.trim().isEmpty()) {
+      throw new IllegalArgumentException("Streamlet name cannot be null/blank");
     }
     this.name = sName;
     return this;

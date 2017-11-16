@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -262,9 +263,9 @@ public class StreamletImplTest {
 
   @Test
   public void testResourcesBuilder() {
-    Resources defaultResoures = Resources.defaultResources();
-    assertEquals(0, Float.compare(defaultResoures.getCpu(), 1.0f));
-    assertEquals(defaultResoures.getRam(), ByteAmount.fromMegabytes(100));
+    Resources defaultResources = Resources.defaultResources();
+    assertEquals(0, Float.compare(defaultResources.getCpu(), 1.0f));
+    assertEquals(defaultResources.getRam(), 104857600);
 
     Resources nonDefaultResources = new Resources.Builder()
         .setCpu(5.1f)
@@ -308,4 +309,23 @@ public class StreamletImplTest {
         .build();
     assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
   }
+
+  @Test
+  public void testSetNameWithInvalidValues() {
+    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = sample::setName;
+    testByFunction(function, null);
+    testByFunction(function, "");
+    testByFunction(function, "  ");
+  }
+
+  private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {
+    try {
+      function.apply(sName);
+      fail("Should have thrown an IllegalArgumentException because streamlet name is invalid");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Streamlet name cannot be null/blank", e.getMessage());
+    }
+  }
+
 }
