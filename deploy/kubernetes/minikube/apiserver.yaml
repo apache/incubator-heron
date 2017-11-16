@@ -48,7 +48,7 @@ spec:
       serviceAccountName: heron-apiserver
       containers:
         - name: heron-apiserver
-          image: heron/heron:lastest
+          image: heron/heron:latest
           command: ["sh", "-c"]
           args:
             - >-
