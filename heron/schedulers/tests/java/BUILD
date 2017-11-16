@@ -65,6 +65,7 @@ marathon_deps_files = [
 kubernetes_deps_files = [
     "//heron/schedulers/src/java:kubernetes-scheduler-java",
     "//heron/schedulers/src/java:scheduler-utils-java",
+    "//third_party/java:kubernetes-java-client",
 ]
 
 java_library(

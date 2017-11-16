@@ -51,6 +51,7 @@ kubernetes_deps_files = \
     scheduler_deps_files + [
         ":scheduler-utils-java",
         "//third_party/java:jackson",
+        "//third_party/java:kubernetes-java-client",
     ]
 
 java_library(
