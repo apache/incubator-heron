@@ -53,7 +53,8 @@ public final class StormSubmitter {
       Map stormConfig,
       StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
-    // First do config translation
+    // First do topology config translation. Bolt and Spout config translation is handled
+    // in their own DeclarerImpl classes.
     com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
 
     // Now submit a heron topology

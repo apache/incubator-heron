@@ -32,7 +32,7 @@ public final class ConfigUtils {
   }
 
   /**
-   * Translate storm config to heron config
+   * Translate storm config to heron config for topology
    * @param stormConfig the storm config
    * @return a heron config
    */
@@ -43,56 +43,25 @@ public final class ConfigUtils {
     doSerializationTranslation(heronConfig);
 
     // Now look at supported apis
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
-      heronConfig.put(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS,
-          heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_WORKERS)) {
-      Integer nWorkers = Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_WORKERS));
-      com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
-      Integer nAckers =
-          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
-      if (nAckers > 0) {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
-      } else {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
-      }
-    } else {
-      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
-      Integer nSecs =
-          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
-      com.twitter.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
-      Integer nPending =
-          Utils.getInt(
-              heronConfig.get(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
-      com.twitter.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
-      Integer tSecs =
-          Utils.getInt(
-              heronConfig.get(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
-      com.twitter.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_DEBUG)) {
-      Boolean dBg =
-          Boolean.parseBoolean(heronConfig.get(org.apache.storm.Config.TOPOLOGY_DEBUG).toString());
-      com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
-    }
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT)) {
-      com.twitter.heron.api.Config.setEnvironment(heronConfig,
-          (Map) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT));
-    }
+    doStormTranslation(heronConfig);
 
     doTaskHooksTranslation(heronConfig);
+
+    doTopologyLevelTranslation(heronConfig);
+
+    return heronConfig;
+  }
+
+  /**
+   * Translate storm config to heron config for components
+   * @param stormConfig the storm config
+   * @return a heron config
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static Config translateComponentConfig(Map stormConfig) {
+    Config heronConfig = new Config((Map<String, Object>) stormConfig);
+
+    doStormTranslation(heronConfig);
 
     return heronConfig;
   }
@@ -142,6 +111,71 @@ public final class ConfigUtils {
       List<String> translationHooks = new LinkedList<String>();
       translationHooks.add(ITaskHookDelegate.class.getName());
       heronConfig.setAutoTaskHooks(translationHooks);
+    }
+  }
+
+  /**
+   * Translate storm config into heron config. This funciton is used by both topology
+   * and component level config translations. Therefore NO config should be generated
+   * when a key does NOT exist if the key is for both topology and component.
+   * Otherwise the component config might overwrite the topolgy config with a wrong value.
+   * @param heron the heron config object to receive the results.
+   */
+  private static void doStormTranslation(Config heronConfig) {
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
+      heronConfig.put(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS,
+          heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_WORKERS)) {
+      Integer nWorkers = Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_WORKERS));
+      com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
+      Integer nSecs =
+          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+      com.twitter.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
+      Integer nPending =
+          Utils.getInt(
+              heronConfig.get(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
+      com.twitter.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
+      Integer tSecs =
+          Utils.getInt(
+              heronConfig.get(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
+      com.twitter.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_DEBUG)) {
+      Boolean dBg =
+          Boolean.parseBoolean(heronConfig.get(org.apache.storm.Config.TOPOLOGY_DEBUG).toString());
+      com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
+    }
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT)) {
+      com.twitter.heron.api.Config.setEnvironment(heronConfig,
+          (Map) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENVIRONMENT));
+    }
+  }
+
+  /**
+   * Translate topology config.
+   * @param heron the heron config object to receive the results.
+   */
+  private static void doTopologyLevelTranslation(Config heronConfig) {
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
+      Integer nAckers =
+          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
+      if (nAckers > 0) {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+      } else {
+        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+      }
+    } else {
+      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
   }
 }

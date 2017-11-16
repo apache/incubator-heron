@@ -179,7 +179,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   private static String getInvalidImagePullPolicyMessage(String policy) {
     return String.format("Invalid image pull policy: \"%s\": image pull polices must be one of "
-        + " %s Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
+            + " %s Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
         policy, KubernetesConstants.VALID_IMAGE_PULL_POLICIES.toString());
   }
 }

@@ -201,15 +201,13 @@ public class HeronInstance {
     stmgrPortOption.setRequired(true);
     options.addOption(stmgrPortOption);
 
-    Option metricsmgrPortOption
-        = new Option(
+    Option metricsmgrPortOption = new Option(
         CommandLineOptions.METRICS_MGR_PORT_OPTION, true, "Metrics Manager Port");
     metricsmgrPortOption.setType(Integer.class);
     metricsmgrPortOption.setRequired(true);
     options.addOption(metricsmgrPortOption);
 
-    Option systemConfigFileOption
-        = new Option(
+    Option systemConfigFileOption = new Option(
         CommandLineOptions.SYSTEM_CONFIG_FILE, true, "Heron Internals Config Filename");
     systemConfigFileOption.setType(String.class);
     systemConfigFileOption.setRequired(true);
@@ -221,6 +219,11 @@ public class HeronInstance {
     overrideConfigFileOption.setType(String.class);
     overrideConfigFileOption.setRequired(true);
     options.addOption(overrideConfigFileOption);
+
+    Option remoteDebuggerPortOption = new Option(
+        CommandLineOptions.REMOTE_DEBUGGER_PORT, true, "Remote Debugger Port");
+    remoteDebuggerPortOption.setType(Integer.class);
+    options.addOption(remoteDebuggerPortOption);
 
     CommandLineParser parser = new DefaultParser();
     HelpFormatter formatter = new HelpFormatter();
@@ -257,6 +260,12 @@ public class HeronInstance {
     String overrideConfigFile
         = commandLine.getOptionValue(CommandLineOptions.OVERRIDE_CONFIG_FILE);
 
+    Integer remoteDebuggerPort = null;
+    if (commandLine.hasOption(CommandLineOptions.REMOTE_DEBUGGER_PORT)) {
+      remoteDebuggerPort = Integer.parseInt(
+          commandLine.getOptionValue(CommandLineOptions.REMOTE_DEBUGGER_PORT));
+    }
+
     SystemConfig systemConfig = SystemConfig.newBuilder(true)
         .putAll(systemConfigFile, true)
         .putAll(overrideConfigFile, true)
@@ -266,8 +275,13 @@ public class HeronInstance {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Create the protobuf Instance
-    PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
-        setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
+    PhysicalPlans.InstanceInfo.Builder instanceInfoBuilder
+        = PhysicalPlans.InstanceInfo.newBuilder().setTaskId(taskId)
+        .setComponentIndex(componentIndex).setComponentName(componentName);
+    if (remoteDebuggerPort != null) {
+      instanceInfoBuilder.setRemoteDebuggerPort(remoteDebuggerPort);
+    }
+    PhysicalPlans.InstanceInfo instanceInfo = instanceInfoBuilder.build();
 
     PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
         setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
@@ -285,11 +299,17 @@ public class HeronInstance {
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
+    String logMsg = "\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName
         + " with taskId " + taskId + " and componentIndex " + componentIndex
         + " and stmgrId " + streamId + " and stmgrPort " + streamPort
-        + " and metricsManagerPort " + metricsPort);
+        + " and metricsManagerPort " + metricsPort;
+
+    if (remoteDebuggerPort != null) {
+      logMsg += " and remoteDebuggerPort " + remoteDebuggerPort;
+    }
+
+    LOG.info(logMsg);
 
     LOG.info("System Config: " + systemConfig);
 

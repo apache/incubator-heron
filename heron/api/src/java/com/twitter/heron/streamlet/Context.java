@@ -16,6 +16,7 @@ package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.twitter.heron.api.state.State;
 
@@ -48,6 +49,14 @@ public interface Context {
    * @return the partition number
    */
   int getStreamPartition();
+
+  /**
+   * Register a metric function. This function will be called
+   * by the system every collectionInterval seconds and the resulting value
+   * will be collected
+   */
+  <T> void registerMetric(String metricName, int collectionInterval,
+                      Supplier<T> metricFn);
 
   /**
    * The state where components can store any of their local state

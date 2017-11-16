@@ -43,19 +43,37 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 Log = log.Log
 
+# pylint: disable=too-many-lines
+
 def print_usage():
   print(
-      "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
-      " <state_manager_connection> <state_manager_root> <tmaster_binary> <stmgr_binary>"
-      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
-      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
-      " <override_config_file> <component_ram_map> <component_jvm_opts_in_base64> <pkg_type>"
-      " <topology_bin_file> <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
-      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
-      " <scheduler_classpath> <scheduler_port> <python_instance_binary>"
-      " <metricscachemgr_classpath> <metricscachemgr_masterport> <metricscachemgr_statsport>"
-      " <is_stateful> <ckptmgr_classpath> <ckptmgr_port> <stateful_config_file> "
-      " <healthmgr_mode> <healthmgr_classpath> <cpp_instance_binary>")
+      "Usage: ./heron-executor --shard=<shardid> --topology-name=<topname>"
+      " --topology-id=<topid> --topology-defn-file=<topdefnfile>"
+      " --state-manager-connection=<state_manager_connection>"
+      " --state-manager-root=<state_manager_root> --tmaster-binary=<tmaster_binary>"
+      " --stmgr-binary=<stmgr_binary> --metrics-manager-classpath=<metricsmgr_classpath>"
+      " --instance-jvm-opts=<instance_jvm_opts_in_base64> --classpath=<classpath>"
+      " --master-port=<master_port> --tmaster-controller-port=<tmaster_controller_port>"
+      " --tmaster-stats-port=<tmaster_stats_port>"
+      " --heron-internals-config-file=<heron_internals_config_file>"
+      " --override-config-file=<override_config_file> --component-ram-map=<component_ram_map>"
+      " --component-jvm-opts=<component_jvm_opts_in_base64> --pkg-type=<pkg_type>"
+      " --topology-binary-file=<topology_bin_file> --heron-java-home=<heron_java_home>"
+      " --shell-port=<shell-port> --heron-shell-binary=<heron_shell_binary>"
+      " --metrics-manager-port=<metricsmgr_port>"
+      " --cluster=<cluster> --role=<role> --environment=<environ>"
+      " --instance-classpath=<instance_classpath>"
+      " --metrics-sinks-config-file=<metrics_sinks_config_file>"
+      " --scheduler-classpath=<scheduler_classpath> --scheduler-port=<scheduler_port>"
+      " --python-instance-binary=<python_instance_binary>"
+      " --metricscache-manager-classpath=<metricscachemgr_classpath>"
+      " --metricscache-manager-master-port=<metricscachemgr_masterport>"
+      " --metricscache-manager-stats-port=<metricscachemgr_statsport>"
+      " --is-stateful=<is_stateful> --checkpoint-manager-classpath=<ckptmgr_classpath>"
+      " --checkpoint-manager-port=<ckptmgr_port> --stateful-config-file=<stateful_config_file>"
+      " --health-manager-mode=<healthmgr_mode> --health-manager-classpath=<healthmgr_classpath>"
+      " --cpp-instance-binary=<cpp_instance_binary>"
+      " --jvm-remote-debugger-ports=<comma_seperated_port_list>")
 
 def id_map(prefix, container_plans, add_zero_id=False):
   ids = {}
@@ -219,7 +237,9 @@ class HeronExecutor(object):
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
-
+    self.jvm_remote_debugger_ports = \
+      parsed_args.jvm_remote_debugger_ports.split(",") \
+        if parsed_args.jvm_remote_debugger_ports else None
 
   def __init__(self, args, shell_env):
     self.init_parsed_args(args)
@@ -293,6 +313,8 @@ class HeronExecutor(object):
     parser.add_argument("--stateful-config-file", required=True)
     parser.add_argument("--health-manager-mode", required=True)
     parser.add_argument("--health-manager-classpath", required=True)
+    parser.add_argument("--jvm-remote-debugger-ports", required=False,
+                        help="ports to be used by a remote debugger for JVM instances")
 
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
@@ -508,6 +530,10 @@ class HeronExecutor(object):
             java_version.startswith("1.5"):
       java_metasize_param = 'PermSize'
 
+    if self.jvm_remote_debugger_ports and \
+            (len(instance_info) > len(self.jvm_remote_debugger_ports)):
+      Log.warn("Not enough remote debugger ports for all instances!")
+
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
@@ -542,6 +568,12 @@ class HeronExecutor(object):
                       '-XX:ParallelGCThreads=4',
                       '-Xloggc:log-files/gc.%s.log' % instance_id]
 
+      remote_debugger_port = None
+      if self.jvm_remote_debugger_ports:
+        remote_debugger_port = self.jvm_remote_debugger_ports.pop()
+        instance_cmd.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
+                            % remote_debugger_port)
+
       instance_args = ['-topology_name', self.topology_name,
                        '-topology_id', self.topology_id,
                        '-instance_id', instance_id,
@@ -553,10 +585,13 @@ class HeronExecutor(object):
                        '-metricsmgr_port', self.metrics_manager_port,
                        '-system_config_file', self.heron_internals_config_file,
                        '-override_config_file', self.override_config_file]
+      if remote_debugger_port:
+        instance_args += ['-remote_debugger_port', remote_debugger_port]
 
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
+
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),

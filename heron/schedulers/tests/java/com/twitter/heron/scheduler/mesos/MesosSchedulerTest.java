@@ -138,7 +138,7 @@ public class MesosSchedulerTest {
     Assert.assertEquals(CPU, container.cpu, 0.01);
     Assert.assertEquals(MEM, ByteAmount.fromMegabytes(((Double) container.memInMB).longValue()));
     Assert.assertEquals(DISK, ByteAmount.fromMegabytes(((Double) container.diskInMB).longValue()));
-    Assert.assertEquals(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR, container.ports);
+    Assert.assertEquals(SchedulerUtils.ExecutorPort.getRequiredPorts().size(), container.ports);
     Assert.assertEquals(2, container.dependencies.size());
     Assert.assertTrue(container.dependencies.contains(CORE_PACKAGE_URI));
     Assert.assertTrue(container.dependencies.contains(TOPOLOGY_PACKAGE_URI));

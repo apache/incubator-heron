@@ -2,7 +2,7 @@ java_library(
     name = "metricsmgr-tests",
     srcs = glob(["**/*.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:network-java",
         "//heron/common/src/java:config-java",
