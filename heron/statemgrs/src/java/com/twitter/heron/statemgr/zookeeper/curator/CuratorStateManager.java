@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -343,20 +342,10 @@ public class CuratorStateManager extends FileSystemStateManager {
     client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
       @Override
       public void stateChanged(CuratorFramework arg0, ConnectionState arg1) {
-        if (arg1 == ConnectionState.RECONNECTED || arg1 == ConnectionState.CONNECTED) {
-          LOG.info("zk session state changed to " + arg1);
-          ListenableFuture<Boolean> result = createNode(
-              StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
-          try {
-            Boolean b = result.get(5000, TimeUnit.MILLISECONDS);
-            if (b != Boolean.TRUE) {
-              LOG.severe("creating zk metricscache node failed, fail fast");
-              throw new RuntimeException();
-            }
-          } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.severe("creating zk metricscache node exception, fail fast");
-            throw new RuntimeException();
-          }
+        if (arg1 == ConnectionState.LOST
+            || arg1 == ConnectionState.SUSPENDED
+            || arg1 == ConnectionState.READ_ONLY) {
+          throw new RuntimeException();
         }
       }
     });

@@ -374,7 +374,7 @@ public class MetricsCacheManager {
 
       Boolean b = statemgr.setMetricsCacheLocation(metricsCacheLocation, topologyName)
           .get(5000, TimeUnit.MILLISECONDS);
-      if (b != null && b == Boolean.TRUE) {
+      if (b != null && b) {
         LOG.info("metricsCacheLocation " + metricsCacheLocation.toString());
         LOG.info("topologyName " + topologyName.toString());
 
@@ -387,7 +387,7 @@ public class MetricsCacheManager {
         metricsCacheManagerServer.start();
         metricsCacheManagerServerLoop.loop();
       } else {
-        LOG.severe("statemgr metricscahe node failure, fail fast");
+        throw new RuntimeException("Failed to set metricscahe location. Exiting...");
       }
     } finally {
       // 3. Do post work basing on the result
