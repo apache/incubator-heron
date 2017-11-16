@@ -125,6 +125,16 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return name;
   }
 
+  protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
+    if (getName() == null) {
+      setName(defaultNameCalculator(prefix, stageNames));
+    }
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException(String.format(
+          "The stage name %s is used multiple times in the same topology", getName()));
+    }
+  }
+
   /**
    * Sets the number of partitions of the streamlet
    * @param numPartitions The user assigned number of partitions

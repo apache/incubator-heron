@@ -36,12 +36,7 @@ public class SupplierStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("supplier", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone("supplier", stageNames);
     stageNames.add(getName());
     bldr.setSpout(getName(), new SupplierSource<R>(supplier), getNumPartitions());
     return true;

@@ -43,12 +43,7 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("remap", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone("remap", stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
         getNumPartitions())

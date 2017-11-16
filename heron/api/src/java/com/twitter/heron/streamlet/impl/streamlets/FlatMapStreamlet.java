@@ -40,12 +40,7 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("flatmap", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone("flatmap", stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
