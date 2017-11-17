@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -35,6 +36,8 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  */
 
 public class PhysicalPlanHelper {
+  private static final Logger LOG = Logger.getLogger(PhysicalPlanHelper.class.getName());
+
   private final PhysicalPlans.PhysicalPlan pplan;
   private final int myTaskId;
   private final String myComponent;
@@ -200,9 +203,14 @@ public class PhysicalPlanHelper {
 
   private Map<String, Object> mergeConfigs(TopologyAPI.Config config,
                                            TopologyAPI.Component acomponent) {
+    LOG.info("Building configs for component: " + myComponent);
+
     Map<String, Object> map = new HashMap<>();
     addConfigsToMap(config, map);
+    LOG.info("Added topology-level configs: " + map.toString());
+
     addConfigsToMap(acomponent.getConfig(), map); // Override any component specific configs
+    LOG.info("Added component-specific configs: " + map.toString());
     return map;
   }
 
