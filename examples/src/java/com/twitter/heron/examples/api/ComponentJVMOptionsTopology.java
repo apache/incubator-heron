@@ -44,7 +44,7 @@ public final class ComponentJVMOptionsTopology {
 
     builder.setSpout("word", new TestWordSpout(), 2);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2)
-        .shuffleGrouping("word");
+        .shuffleGrouping("word").addConfiguration("heron-test-config", "heron-test-key");
 
     Config conf = new Config();
     conf.setDebug(true);
@@ -56,7 +56,7 @@ public final class ComponentJVMOptionsTopology {
     // For each component, both the global and if any the component one will be appended.
     // And the component one will take precedence
     conf.setComponentJvmOptions("word", "-XX:NewSize=300m");
-    conf.setComponentJvmOptions("exclaim1", "-XX:NewSize=800m");
+    conf.setComponentJvmOptions("exclaim1", "-XX:NewSize=300m");
 
     // component resource configuration
     conf.setComponentRam("word", ByteAmount.fromMegabytes(512));
