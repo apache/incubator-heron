@@ -79,7 +79,12 @@ public class AppsV1beta1Controller extends KubernetesController {
 
     final Resource containerResource = getContainerResource(packingPlan);
 
-    final int numberOfInstances = packingPlan.getInstanceCount();
+    // find the max number of instances in a container so we can open
+    // enough ports if remote debugging is enabled.
+    int numberOfInstances = 0;
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      numberOfInstances = Math.max(numberOfInstances, containerPlan.getInstances().size());
+    }
     final V1beta1StatefulSet statefulSet = createStatefulSet(containerResource, numberOfInstances);
 
     try {
