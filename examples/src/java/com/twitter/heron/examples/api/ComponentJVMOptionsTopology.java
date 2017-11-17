@@ -44,7 +44,8 @@ public final class ComponentJVMOptionsTopology {
 
     builder.setSpout("word", new TestWordSpout(), 2);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2)
-        .shuffleGrouping("word").addConfiguration("heron-test-config", "heron-test-key");
+        .shuffleGrouping("word")
+        .addConfiguration("test-config", "test-key"); // Sample adding component-specific config
 
     Config conf = new Config();
     conf.setDebug(true);
