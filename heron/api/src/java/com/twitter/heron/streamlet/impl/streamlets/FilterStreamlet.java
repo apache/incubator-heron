@@ -28,7 +28,7 @@ import com.twitter.heron.streamlet.impl.operators.FilterOperator;
 public class FilterStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializablePredicate<? super R> filterFn;
-  private static final String NAME_PREFIX = "filter";
+  private static final String NAMEPREFIX = "filter";
 
   public FilterStreamlet(StreamletImpl<R> parent, SerializablePredicate<? super R> filterFn) {
     this.parent = parent;
@@ -38,7 +38,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAME_PREFIX, stageNames);
+    setDefaultNameIfNone(NAMEPREFIX, stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new FilterOperator<R>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());

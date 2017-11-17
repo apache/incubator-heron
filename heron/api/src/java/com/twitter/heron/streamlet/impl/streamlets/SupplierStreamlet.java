@@ -28,7 +28,7 @@ import com.twitter.heron.streamlet.impl.sources.SupplierSource;
  */
 public class SupplierStreamlet<R> extends StreamletImpl<R> {
   private SerializableSupplier<R> supplier;
-  private static final String NAME_PREFIX = "supplier";
+  private static final String NAMEPREFIX = "supplier";
 
   public SupplierStreamlet(SerializableSupplier<R> supplier) {
     this.supplier = supplier;
@@ -37,7 +37,7 @@ public class SupplierStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAME_PREFIX, stageNames);
+    setDefaultNameIfNone(NAMEPREFIX, stageNames);
     stageNames.add(getName());
     bldr.setSpout(getName(), new SupplierSource<R>(supplier), getNumPartitions());
     return true;
