@@ -7,6 +7,7 @@ api_deps_files = [
     "//heron/common/src/java:basics-java",
     "//third_party/java:junit4",
     "//third_party/java:powermock",
+    "//third_party/java:kryo",
     "@org_mockito_mockito_all//jar"
 ]
 
