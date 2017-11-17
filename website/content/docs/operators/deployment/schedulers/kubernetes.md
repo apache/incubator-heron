@@ -423,6 +423,8 @@ You can access [Heron UI](../../../heron-ui) in your browser by navigating to ht
 
 ## Heron on Kubernetes configuration
 
+You can configure Heron on Kubernetes using a variety of YAML config files, listed in the sections below.
+
 ### client.yaml
 
 {{< configtable "kubernetes" "client" >}}
