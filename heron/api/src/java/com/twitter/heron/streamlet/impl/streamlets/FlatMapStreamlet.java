@@ -29,6 +29,7 @@ import com.twitter.heron.streamlet.impl.operators.FlatMapOperator;
 public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn;
+  private static final String NAME_PREFIX = "flatmap";
 
   public FlatMapStreamlet(StreamletImpl<R> parent,
                           SerializableFunction<? super R,
@@ -40,7 +41,7 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone("flatmap", stageNames);
+    setDefaultNameIfNone(NAME_PREFIX, stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());

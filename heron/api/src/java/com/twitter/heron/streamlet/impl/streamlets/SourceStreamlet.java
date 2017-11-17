@@ -28,6 +28,7 @@ import com.twitter.heron.streamlet.impl.sources.ComplexSource;
  */
 public class SourceStreamlet<R> extends StreamletImpl<R> {
   private Source<R> generator;
+  private static final String NAME_PREFIX = "generator";
 
   public SourceStreamlet(Source<R> generator) {
     this.generator = generator;
@@ -36,7 +37,7 @@ public class SourceStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone("generator", stageNames);
+    setDefaultNameIfNone(NAME_PREFIX, stageNames);
     stageNames.add(getName());
     bldr.setSpout(getName(), new ComplexSource<R>(generator), getNumPartitions());
     return true;

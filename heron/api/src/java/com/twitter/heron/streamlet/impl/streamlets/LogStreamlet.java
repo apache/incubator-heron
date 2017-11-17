@@ -27,6 +27,7 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
+  private static final String NAME_PREFIX = "logger";
 
   public LogStreamlet(StreamletImpl<R> parent) {
     this.parent = parent;
@@ -35,7 +36,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone("logger", stageNames);
+    setDefaultNameIfNone(NAME_PREFIX, stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());

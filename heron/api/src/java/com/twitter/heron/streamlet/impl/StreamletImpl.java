@@ -15,6 +15,7 @@
 package com.twitter.heron.streamlet.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;

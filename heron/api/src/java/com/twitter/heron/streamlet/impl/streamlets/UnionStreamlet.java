@@ -27,6 +27,7 @@ import com.twitter.heron.streamlet.impl.operators.UnionOperator;
 public class UnionStreamlet<I> extends StreamletImpl<I> {
   private StreamletImpl<I> left;
   private StreamletImpl<? extends I> right;
+  private static final String NAME_PREFIX = "union";
 
   public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<? extends I> right) {
     this.left = left;
@@ -41,7 +42,7 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
       // The system will call us again later
       return false;
     }
-    setDefaultNameIfNone("union", stageNames);
+    setDefaultNameIfNone(NAME_PREFIX, stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new UnionOperator<I>(),
         getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
