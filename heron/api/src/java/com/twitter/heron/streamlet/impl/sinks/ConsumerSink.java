@@ -15,7 +15,6 @@
 package com.twitter.heron.streamlet.impl.sinks;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.TopologyContext;
@@ -28,7 +27,6 @@ import com.twitter.heron.streamlet.impl.operators.StreamletOperator;
  * consume function for every tuple.
  */
 public class ConsumerSink<R> extends StreamletOperator {
-  private static final Logger LOG = Logger.getLogger(ConsumerSink.class.getName());
   private static final long serialVersionUID = 8716140142187667638L;
   private SerializableConsumer<R> consumer;
   private OutputCollector collector;
