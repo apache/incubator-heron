@@ -311,7 +311,7 @@ public class HeronInstance {
 
     LOG.info(logMsg);
 
-    LOG.info("System Config: " + systemConfig);
+    LOG.info("System Config: " + systemConfig.toString());
 
     HeronInstance heronInstance =
         new HeronInstance(topologyName, topologyId, instance, streamPort, metricsPort);
