@@ -32,6 +32,11 @@
 
 package com.twitter.heron.api.windowing.triggers;
 
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.Map;
+
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
@@ -41,29 +46,30 @@ import com.twitter.heron.api.windowing.TriggerPolicy;
 /**
  * Invokes {@link TriggerHandler#onTrigger()} after the duration.
  */
-public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
+
+public class TimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Void> {
 
   private long duration;
   private final TriggerHandler handler;
-  private final EvictionPolicy<T> evictionPolicy;
-  private boolean started = false;
+  private final EvictionPolicy<T, ?> evictionPolicy;
+  private Map<String, Object> topoConf;
+
 
   public TimeTriggerPolicy(long millis, TriggerHandler handler) {
-    this(millis, handler, null);
+    this(millis, handler, null, new Config());
   }
 
-  public TimeTriggerPolicy(long millis, TriggerHandler handler, EvictionPolicy<T>
-      evictionPolicy) {
+  public TimeTriggerPolicy(long millis, TriggerHandler handler, EvictionPolicy<T, ?>
+      evictionPolicy, Map<String, Object> topoConf) {
     this.duration = millis;
     this.handler = handler;
     this.evictionPolicy = evictionPolicy;
+    this.topoConf = topoConf;
   }
 
   @Override
   public void track(Event<T> event) {
-    if (started && event.isTimer()) {
-      triggerTask();
-    }
+
   }
 
   @Override
@@ -73,7 +79,8 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
 
   @Override
   public void start() {
-    started = true;
+    Config.registerTopologyTimerEvents(this.topoConf, "TimeTriggerPolicyTimer",
+        Duration.ofMillis(this.duration), () -> triggerTask());
   }
 
   @Override
@@ -96,5 +103,15 @@ public class TimeTriggerPolicy<T> implements TriggerPolicy<T> {
      */
     evictionPolicy.setContext(new DefaultEvictionContext(now, null, null, duration));
     handler.onTrigger();
+  }
+
+  @Override
+  public Void getState() {
+    return null;
+  }
+
+  @Override
+  public void restoreState(Void state) {
+
   }
 }

@@ -44,6 +44,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -264,6 +265,8 @@ public class SpoutInstance implements IInstance {
     if (enableMessageTimeouts) {
       lookForTimeouts();
     }
+
+    InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
   /**

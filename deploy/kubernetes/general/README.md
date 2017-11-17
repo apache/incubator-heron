@@ -32,7 +32,7 @@ In some environments like K8S on DC/OS, `hostPort` is not well supported. You ca
 a `StatefulSet` with `Persistent Volumes` as below. Please see [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for more details.
 
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.stateful.yaml
+$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.statefulset.yaml
 ```
 
 3. Start heron tools:
@@ -69,15 +69,20 @@ $ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apis
 }
 ```
 
-3. Submit an example topology:
+3. Set service_url:
 ```shell
-$ heron submit kubernetes \
---service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
-~/.heron/examples/heron-api-examples.jar \
+$ heron config kubernetes \
+set service_url http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
 com.twitter.heron.examples.api.AckingTopology acking
 ```
 
-4. View heron ui:
+4. Submit an example topology:
+```shell
+$ heron submit kubernetes ~/.heron/examples/heron-api-examples.jar \
+com.twitter.heron.examples.api.AckingTopology acking
+```
+
+5. View heron ui:
 ```
 http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889
 ```

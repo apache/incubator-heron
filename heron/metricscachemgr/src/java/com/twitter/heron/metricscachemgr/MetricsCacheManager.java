@@ -17,6 +17,7 @@ package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -348,6 +349,10 @@ public class MetricsCacheManager {
     LOG.info("Loops terminated. MetricsCache Manager exits.");
   }
 
+  /**
+   * start statemgr_client, metricscache_server, http_server
+   * @throws Exception
+   */
   public void start() throws Exception {
     // 1. Do prepare work
     // create an instance of state manager
@@ -367,18 +372,23 @@ public class MetricsCacheManager {
       // initialize the statemgr
       statemgr.initialize(config);
 
-      statemgr.setMetricsCacheLocation(metricsCacheLocation, topologyName);
-      LOG.info("metricsCacheLocation " + metricsCacheLocation.toString());
-      LOG.info("topologyName " + topologyName.toString());
+      Boolean b = statemgr.setMetricsCacheLocation(metricsCacheLocation, topologyName)
+          .get(5000, TimeUnit.MILLISECONDS);
+      if (b != null && b) {
+        LOG.info("metricsCacheLocation " + metricsCacheLocation.toString());
+        LOG.info("topologyName " + topologyName.toString());
 
-      LOG.info("Starting Metrics Cache HTTP Server");
-      metricsCacheManagerHttpServer.start();
+        LOG.info("Starting Metrics Cache HTTP Server");
+        metricsCacheManagerHttpServer.start();
 
-      // 2. The MetricsCacheServer would run in the main thread
-      // We do it in the final step since it would await the main thread
-      LOG.info("Starting Metrics Cache Server");
-      metricsCacheManagerServer.start();
-      metricsCacheManagerServerLoop.loop();
+        // 2. The MetricsCacheServer would run in the main thread
+        // We do it in the final step since it would await the main thread
+        LOG.info("Starting Metrics Cache Server");
+        metricsCacheManagerServer.start();
+        metricsCacheManagerServerLoop.loop();
+      } else {
+        throw new RuntimeException("Failed to set metricscahe location.");
+      }
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here

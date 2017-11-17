@@ -32,6 +32,7 @@
 
 package com.twitter.heron.api.bolt;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -43,15 +44,16 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.state.HashMapState;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.TupleUtils;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
-import com.twitter.heron.api.windowing.TimerEvent;
 import com.twitter.heron.api.windowing.TimestampExtractor;
 import com.twitter.heron.api.windowing.TriggerPolicy;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
@@ -74,7 +76,8 @@ import static com.twitter.heron.api.bolt.BaseWindowedBolt.Count;
 /**
  * An {@link IWindowedBolt} wrapper that does the windowing of tuples.
  */
-public class WindowedBoltExecutor implements IRichBolt {
+public class WindowedBoltExecutor implements IRichBolt,
+    IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = -9204275913034895392L;
 
   private static final Logger LOG = Logger.getLogger(WindowedBoltExecutor.class.getName());
@@ -88,9 +91,11 @@ public class WindowedBoltExecutor implements IRichBolt {
   private transient int maxLagMs;
   private TimestampExtractor timestampExtractor;
   private transient String lateTupleStream;
-  private transient TriggerPolicy<Tuple> triggerPolicy;
-  private transient EvictionPolicy<Tuple> evictionPolicy;
+  private transient TriggerPolicy<Tuple, ?> triggerPolicy;
+  private transient EvictionPolicy<Tuple, ?> evictionPolicy;
   private transient Long windowLengthDurationMs;
+  private State<Serializable, Serializable> state;
+  private static final String WINDOWING_INTERNAL_STATE = "windowing.internal.state";
   // package level for unit tests
   protected transient WaterMarkEventGenerator<Tuple> waterMarkEventGenerator;
 
@@ -167,6 +172,7 @@ public class WindowedBoltExecutor implements IRichBolt {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private WindowManager<Tuple> initWindowManager(WindowLifecycleListener<Tuple>
                                                      lifecycleListener, Map<String, Object>
       topoConf, TopologyContext context, Collection<Event<Tuple>> queue) {
@@ -213,17 +219,15 @@ public class WindowedBoltExecutor implements IRichBolt {
         maxLagMs = DEFAULT_MAX_LAG_MS;
       }
       // watermark interval
-      int watermarkInterval;
+      long watermarkIntervalMs;
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)) {
-        watermarkInterval = ((Number) topoConf.get(WindowingConfigs
+        watermarkIntervalMs = ((Number) topoConf.get(WindowingConfigs
             .TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)).intValue();
       } else {
-        watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
+        watermarkIntervalMs = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
-      // Use tick tuple to perodically generate watermarks
-      Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
-      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager,
-          maxLagMs, getComponentStreams(context));
+      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager, watermarkIntervalMs,
+          maxLagMs, getComponentStreams(context), topoConf);
     } else {
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM)) {
         throw new IllegalArgumentException(
@@ -238,7 +242,22 @@ public class WindowedBoltExecutor implements IRichBolt {
         evictionPolicy, topoConf);
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
+    // restore state if there is existing state
+    if (this.state != null
+        && this.state.get(WINDOWING_INTERNAL_STATE) != null
+        && !((HashMapState) this.state.get(WINDOWING_INTERNAL_STATE)).isEmpty()) {
+      restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
+    }
     return manager;
+  }
+
+  @SuppressWarnings("HiddenField")
+  protected void restoreState(Map<String, Serializable> state) {
+    windowManager.restoreState(state);
+  }
+
+  protected Map<String, Serializable> getState() {
+    return windowManager.getState();
   }
 
   private Set<TopologyAPI.StreamId> getComponentStreams(TopologyContext context) {
@@ -266,8 +285,8 @@ public class WindowedBoltExecutor implements IRichBolt {
   }
 
   @SuppressWarnings("HiddenField")
-  private TriggerPolicy<Tuple> getTriggerPolicy(Count slidingIntervalCount, Long
-      slidingIntervalDurationMs, WindowManager<Tuple> manager, EvictionPolicy<Tuple>
+  private TriggerPolicy<Tuple, ?> getTriggerPolicy(Count slidingIntervalCount, Long
+      slidingIntervalDurationMs, WindowManager<Tuple> manager, EvictionPolicy<Tuple, ?>
       evictionPolicy, Map<String, Object> topoConf) {
     if (slidingIntervalCount != null) {
       if (isTupleTs()) {
@@ -281,15 +300,14 @@ public class WindowedBoltExecutor implements IRichBolt {
         return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
             evictionPolicy, manager);
       } else {
-        // set tick tuple frequency in milliseconds for timer in TimeTriggerPolicy
-        Config.setTickTupleFrequencyMs(topoConf, slidingIntervalDurationMs);
-        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager, evictionPolicy);
+        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
+            evictionPolicy, topoConf);
       }
     }
   }
 
   @SuppressWarnings("HiddenField")
-  private EvictionPolicy<Tuple> getEvictionPolicy(Count windowLengthCount, Long
+  private EvictionPolicy<Tuple, ?> getEvictionPolicy(Count windowLengthCount, Long
       windowLengthDurationMs) {
     if (windowLengthCount != null) {
       if (isTupleTs()) {
@@ -329,36 +347,30 @@ public class WindowedBoltExecutor implements IRichBolt {
 
   @Override
   public void execute(Tuple input) {
-    if (TupleUtils.isTick(input)) {
-      long currTime = System.currentTimeMillis();
-      windowManager.add(new TimerEvent<>(input, currTime));
-      if (isTupleTs()) {
-        waterMarkEventGenerator.run();
+    if (isTupleTs()) {
+      long ts = timestampExtractor.extractTimestamp(input);
+      if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
+        windowManager.add(input, ts);
+      } else {
+        if (lateTupleStream != null) {
+          windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
+        } else {
+          LOG.info(String.format(
+              "Received a late tuple %s with ts %d. This will not be " + "processed"
+                  + ".", input, ts));
+        }
+        windowedOutputCollector.ack(input);
       }
     } else {
-      if (isTupleTs()) {
-        long ts = timestampExtractor.extractTimestamp(input);
-        if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
-          windowManager.add(input, ts);
-        } else {
-          if (lateTupleStream != null) {
-            windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
-          } else {
-            LOG.info(String.format(
-                "Received a late tuple %s with ts %d. This will not be " + "processed"
-                    + ".", input, ts));
-          }
-          windowedOutputCollector.ack(input);
-        }
-      } else {
-        windowManager.add(input);
-      }
+      windowManager.add(input);
     }
   }
 
   @Override
   public void cleanup() {
-    windowManager.shutdown();
+    if (windowManager != null) {
+      windowManager.shutdown();
+    }
     bolt.cleanup();
   }
 
@@ -415,6 +427,29 @@ public class WindowedBoltExecutor implements IRichBolt {
       res = endTs - windowLengthDurationMs;
     }
     return res;
+  }
+
+  @Override
+  @SuppressWarnings("HiddenField")
+  public void initState(State<Serializable, Serializable> state) {
+    // if effectively once is enabled
+    if (state != null) {
+      this.state = state;
+      // if already contains state then that indicates that a rollback has happened
+      if (!this.state.containsKey(WINDOWING_INTERNAL_STATE)) {
+        this.state.put(WINDOWING_INTERNAL_STATE, new HashMapState<>());
+      }
+    }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void preSave(String checkpointId) {
+    if (this.state != null) {
+      // getting current state from window manager to be included in checkpoint
+      ((HashMapState<Serializable, Serializable>) this.state.get(WINDOWING_INTERNAL_STATE))
+          .putAll(this.getWindowManager().getState());
+    }
   }
 
   /**

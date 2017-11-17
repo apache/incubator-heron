@@ -33,15 +33,17 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.windowing.EvictionPolicy.Action;
@@ -50,15 +52,20 @@ import static com.twitter.heron.api.windowing.EvictionPolicy.Action.EXPIRE;
 import static com.twitter.heron.api.windowing.EvictionPolicy.Action.PROCESS;
 import static com.twitter.heron.api.windowing.EvictionPolicy.Action.STOP;
 
-
 /**
  * Tracks a window of events and fires {@link WindowLifecycleListener} callbacks
  * on expiry of events or activation of the window due to {@link TriggerPolicy}.
  *
  * @param <T> the type of event in the window.
  */
-public class WindowManager<T> implements TriggerHandler {
+public class WindowManager<T extends Serializable> implements TriggerHandler {
   private static final Logger LOG = Logger.getLogger(WindowManager.class.getName());
+  private static final String EVICTION_STATE_KEY = "es";
+  private static final String TRIGGER_STATE_KEY = "ts";
+  private static final String QUEUE = "queue";
+  private static final String EXPIRED_EVENTS = "expired.events";
+  private static final String PRE_WINDOW_EVENTS = "pre.window.events";
+  private static final String EVENTS_SINCE_LAST_EXPIRY = "events.since.last.expiry";
 
   /**
    * Expire old events every EXPIRE_EVENTS_THRESHOLD to
@@ -70,13 +77,12 @@ public class WindowManager<T> implements TriggerHandler {
   public static final int EXPIRE_EVENTS_THRESHOLD = 100;
 
   protected final Collection<Event<T>> queue;
-  protected EvictionPolicy<T> evictionPolicy;
-  protected TriggerPolicy<T> triggerPolicy;
+  protected EvictionPolicy<T, ?> evictionPolicy;
+  protected TriggerPolicy<T, ?> triggerPolicy;
   protected final WindowLifecycleListener<T> windowLifecycleListener;
   private final List<T> expiredEvents;
   private final Set<Event<T>> prevWindowEvents;
   private final AtomicInteger eventsSinceLastExpiry;
-  private final ReentrantLock lock;
 
   /**
    * Constructs a {@link WindowManager}
@@ -92,8 +98,6 @@ public class WindowManager<T> implements TriggerHandler {
     expiredEvents = new ArrayList<>();
     prevWindowEvents = new HashSet<>();
     eventsSinceLastExpiry = new AtomicInteger();
-    lock = new ReentrantLock(true);
-
   }
 
   /**
@@ -105,11 +109,11 @@ public class WindowManager<T> implements TriggerHandler {
     this(lifecycleListener, new ConcurrentLinkedQueue<>());
   }
 
-  public void setEvictionPolicy(EvictionPolicy<T> evictionPolicy) {
+  public void setEvictionPolicy(EvictionPolicy<T, ?> evictionPolicy) {
     this.evictionPolicy = evictionPolicy;
   }
 
-  public void setTriggerPolicy(TriggerPolicy<T> triggerPolicy) {
+  public void setTriggerPolicy(TriggerPolicy<T, ?> triggerPolicy) {
     this.triggerPolicy = triggerPolicy;
   }
 
@@ -142,8 +146,6 @@ public class WindowManager<T> implements TriggerHandler {
     // watermark events are not added to the queue.
     if (windowEvent.isWatermark()) {
       LOG.fine(String.format("Got watermark event with ts %d", windowEvent.getTimestamp()));
-    } else if (windowEvent.isTimer()) {
-      LOG.fine(String.format("Got timer event with ts %d", windowEvent.getTimestamp()));
     } else {
       queue.add(windowEvent);
     }
@@ -158,18 +160,14 @@ public class WindowManager<T> implements TriggerHandler {
   public boolean onTrigger() {
     List<Event<T>> windowEvents = null;
     List<T> expired = null;
-    try {
-      lock.lock();
-            /*
-             * scan the entire window to handle out of order events in
-             * the case of time based windows.
-             */
-      windowEvents = scanEvents(true);
-      expired = new ArrayList<>(expiredEvents);
-      expiredEvents.clear();
-    } finally {
-      lock.unlock();
-    }
+
+    /*
+     * scan the entire window to handle out of order events in
+     * the case of time based windows.
+     */
+    windowEvents = scanEvents(true);
+    expired = new ArrayList<>(expiredEvents);
+    expiredEvents.clear();
     List<T> events = new ArrayList<>();
     List<T> newEvents = new ArrayList<>();
     for (Event<T> event : windowEvents) {
@@ -231,25 +229,22 @@ public class WindowManager<T> implements TriggerHandler {
     LOG.fine(String.format("Scan events, eviction policy %s", evictionPolicy));
     List<T> eventsToExpire = new ArrayList<>();
     List<Event<T>> eventsToProcess = new ArrayList<>();
-    try {
-      lock.lock();
-      Iterator<Event<T>> it = queue.iterator();
-      while (it.hasNext()) {
-        Event<T> windowEvent = it.next();
-        Action action = evictionPolicy.evict(windowEvent);
-        if (action == EXPIRE) {
-          eventsToExpire.add(windowEvent.get());
-          it.remove();
-        } else if (!fullScan || action == STOP) {
-          break;
-        } else if (action == PROCESS) {
-          eventsToProcess.add(windowEvent);
-        }
+
+    Iterator<Event<T>> it = queue.iterator();
+    while (it.hasNext()) {
+      Event<T> windowEvent = it.next();
+      Action action = evictionPolicy.evict(windowEvent);
+      if (action == EXPIRE) {
+        eventsToExpire.add(windowEvent.get());
+        it.remove();
+      } else if (!fullScan || action == STOP) {
+        break;
+      } else if (action == PROCESS) {
+        eventsToProcess.add(windowEvent);
       }
-      expiredEvents.addAll(eventsToExpire);
-    } finally {
-      lock.unlock();
     }
+    expiredEvents.addAll(eventsToExpire);
+
     eventsSinceLastExpiry.set(0);
     LOG.fine(String.format("[%d] events expired from window.", eventsToExpire.size()));
     if (!eventsToExpire.isEmpty()) {
@@ -325,5 +320,57 @@ public class WindowManager<T> implements TriggerHandler {
   public String toString() {
     return "WindowManager{" + "evictionPolicy=" + evictionPolicy + ", triggerPolicy="
         + triggerPolicy + '}';
+  }
+
+  /**
+   * Restore state associated with the window manager
+   * @param state
+   */
+  @SuppressWarnings("unchecked")
+  public void restoreState(Map<String, Serializable> state) {
+    LOG.info("Restoring window manager state");
+
+    //restore eviction policy state
+    if (state.get(EVICTION_STATE_KEY) != null) {
+      ((EvictionPolicy) evictionPolicy).restoreState(state.get(EVICTION_STATE_KEY));
+    }
+
+    // restore trigger policy state
+    if (state.get(TRIGGER_STATE_KEY) != null) {
+      ((TriggerPolicy) triggerPolicy).restoreState(state.get(TRIGGER_STATE_KEY));
+    }
+
+    // restore all pending events to the queue
+    this.queue.addAll((Collection<Event<T>>) state.get(QUEUE));
+
+    // restore all expired events
+    this.expiredEvents.addAll((List<T>) state.get(EXPIRED_EVENTS));
+
+    // restore all prevWindowEvents
+    this.prevWindowEvents.addAll((Set<Event<T>>) state.get(PRE_WINDOW_EVENTS));
+
+    // restore the count of the number events since last expiry
+    this.eventsSinceLastExpiry.set((int) state.get(EVENTS_SINCE_LAST_EXPIRY));
+  }
+
+  /**
+   * Get the state of the window manager
+   * @return a Map representing the state of the window manager
+   */
+  public Map<String, Serializable> getState() {
+    Map<String, Serializable> ret = new HashMap<>();
+    // get potential eviction policy state
+    if (evictionPolicy.getState() != null) {
+      ret.put(EVICTION_STATE_KEY, (Serializable) evictionPolicy.getState());
+    }
+    // get potential trigger policy state
+    if (triggerPolicy.getState() != null) {
+      ret.put(TRIGGER_STATE_KEY, (Serializable) triggerPolicy.getState());
+    }
+    ret.put(QUEUE, (Serializable) this.queue);
+    ret.put(EXPIRED_EVENTS, (Serializable) this.expiredEvents);
+    ret.put(PRE_WINDOW_EVENTS, (Serializable) this.prevWindowEvents);
+    ret.put(EVENTS_SINCE_LAST_EXPIRY, this.eventsSinceLastExpiry.get());
+    return ret;
   }
 }

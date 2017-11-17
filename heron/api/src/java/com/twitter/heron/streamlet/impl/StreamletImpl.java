@@ -15,11 +15,15 @@
 package com.twitter.heron.streamlet.impl;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import com.twitter.heron.streamlet.KVStreamlet;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.JoinType;
 import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
 import com.twitter.heron.streamlet.SerializableBinaryOperator;
 import com.twitter.heron.streamlet.SerializableConsumer;
@@ -30,15 +34,15 @@ import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Sink;
 import com.twitter.heron.streamlet.Source;
 import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.streamlet.Window;
 import com.twitter.heron.streamlet.WindowConfig;
 import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.LogStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.MapStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.MapToKVStreamlet;
-import com.twitter.heron.streamlet.impl.streamlets.ReduceByWindowStreamlet;
+import com.twitter.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.RemapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet;
@@ -62,16 +66,130 @@ import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
  * Streamlet. One can think of a transformation attaching itself to the stream and processing
  * each tuple as they go by. Thus the parallelism of any operator is implicitly determined
  * by the number of partitions of the stream that it is operating on. If a particular
- * tranformation wants to operate at a different parallelism, one can repartition the
+ * transformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
-public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
-    implements Streamlet<R> {
+public abstract class StreamletImpl<R> implements Streamlet<R> {
   private static final Logger LOG = Logger.getLogger(StreamletImpl.class.getName());
+  protected String name;
+  protected int nPartitions;
+  private List<StreamletImpl<?>> children;
+  private boolean built;
 
+  public boolean isBuilt() {
+    return built;
+  }
+
+  public boolean allBuilt() {
+    if (!built) {
+      return false;
+    }
+    for (StreamletImpl<?> child : children) {
+      if (!child.allBuilt()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Gets all the children of this streamlet.
+   * Children of a streamlet are streamlets that are resulting from transformations of elements of
+   * this and potentially other streamlets.
+   * @return The kid streamlets
+   */
+  public List<StreamletImpl<?>> getChildren() {
+    return children;
+  }
+
+  /**
+   * Sets the name of the Streamlet.
+   * @param sName The name given by the user for this streamlet
+   * @return Returns back the Streamlet with changed name
+   */
   @Override
-  protected StreamletImpl<R> returnThis() {
+  public Streamlet<R> setName(String sName) {
+    if (sName == null || sName.trim().isEmpty()) {
+      throw new IllegalArgumentException("Streamlet name cannot be null/blank");
+    }
+    this.name = sName;
     return this;
+  }
+
+  /**
+   * Gets the name of the Streamlet.
+   * @return Returns the name of the Streamlet
+   */
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Sets the number of partitions of the streamlet
+   * @param numPartitions The user assigned number of partitions
+   * @return Returns back the Streamlet with changed number of partitions
+   */
+  @Override
+  public Streamlet<R> setNumPartitions(int numPartitions) {
+    if (numPartitions < 1) {
+      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
+    }
+    this.nPartitions = numPartitions;
+    return this;
+  }
+
+  /**
+   * Gets the number of partitions of this Streamlet.
+   * @return the number of partitions of this Streamlet
+   */
+  @Override
+  public int getNumPartitions() {
+    return nPartitions;
+  }
+
+  /**
+   * Only used by the implementors
+   */
+  protected StreamletImpl() {
+    this.nPartitions = -1;
+    this.children = new LinkedList<>();
+    this.built = false;
+  }
+
+  public void build(TopologyBuilder bldr, Set<String> stageNames) {
+    if (built) {
+      throw new RuntimeException("Logic Error While building " + getName());
+    }
+    if (doBuild(bldr, stageNames)) {
+      built = true;
+      for (StreamletImpl<?> streamlet : children) {
+        streamlet.build(bldr, stageNames);
+      }
+    }
+  }
+
+  // This is the main interface that every Streamlet implementation should implement
+  // The main tasks are generally to make sure that appropriate names/partitions are
+  // computed and add a spout/bolt to the TopologyBuilder
+  protected abstract boolean doBuild(TopologyBuilder bldr, Set<String> stageNames);
+
+  public <T> void addChild(StreamletImpl<T> child) {
+    children.add(child);
+  }
+
+  protected String defaultNameCalculator(String prefix, Set<String> stageNames) {
+    int index = 1;
+    String calculatedName;
+    while (true) {
+      calculatedName = new StringBuilder(prefix).append(index).toString();
+      if (!stageNames.contains(calculatedName)) {
+        break;
+      }
+      index++;
+    }
+    LOG.info("Calculated stage Name as " + calculatedName);
+    return calculatedName;
   }
 
   /**
@@ -95,22 +213,8 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param mapFn The Map Function that should be applied to each element
   */
   @Override
-  public <T> Streamlet<T> map(SerializableFunction<? super R, ? extends T> mapFn) {
+  public <T> Streamlet<T> map(SerializableFunction<R, ? extends T> mapFn) {
     MapStreamlet<R, T> retval = new MapStreamlet<>(this, mapFn);
-    addChild(retval);
-    return retval;
-  }
-
-  /**
-   * Return a new KVStreamlet by applying mapFn to each element of this Streamlet.
-   * This differs from the above map transformation in that it returns a KVStreamlet
-   * instead of a plain Streamlet.
-   * @param mapFn The Map function that should be applied to each element
-   */
-  @Override
-  public <K, V> KVStreamlet<K, V> mapToKV(SerializableFunction<? super R,
-      ? extends KeyValue<K, V>> mapFn) {
-    MapToKVStreamlet<R, K, V> retval = new MapToKVStreamlet<>(this, mapFn);
     addChild(retval);
     return retval;
   }
@@ -122,7 +226,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> flatMap(
-      SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
+      SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
     addChild(retval);
     return retval;
@@ -134,7 +238,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    * @param filterFn The filter Function that should be applied to each element
   */
   @Override
-  public Streamlet<R> filter(SerializablePredicate<? super R> filterFn) {
+  public Streamlet<R> filter(SerializablePredicate<R> filterFn) {
     FilterStreamlet<R> retval = new FilterStreamlet<>(this, filterFn);
     addChild(retval);
     return retval;
@@ -154,7 +258,7 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public Streamlet<R> repartition(int numPartitions,
-                           SerializableBiFunction<? super R, Integer, List<Integer>> partitionFn) {
+                           SerializableBiFunction<R, Integer, List<Integer>> partitionFn) {
     RemapStreamlet<R> retval = new RemapStreamlet<>(this, partitionFn);
     retval.setNumPartitions(numPartitions);
     addChild(retval);
@@ -176,17 +280,96 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
   }
 
   /**
-   * Returns a new Streamlet by accumulating tuples of this streamlet over a WindowConfig
-   * windowConfig and applying reduceFn on those tuples
-   * @param windowConfig This is a specification of what kind of windowing strategy you like
-   * to have. Typical windowing strategies are sliding windows and tumbling windows
-   * @param reduceFn The reduceFn to apply over the tuples accumulated on a window
+   * Return a new Streamlet by inner joining 'this streamlet with ‘other’ streamlet.
+   * The join is done over elements accumulated over a time window defined by windowCfg.
+   * The elements are compared using the thisKeyExtractor for this streamlet with the
+   * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
+   * @param other The Streamlet that we are joining with.
+   * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to
+   * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public KVStreamlet<Window, R> reduceByWindow(WindowConfig windowConfig,
-                                               SerializableBinaryOperator<R> reduceFn) {
-    ReduceByWindowStreamlet<R> retval = new ReduceByWindowStreamlet<>(this,
-                                                                      windowConfig, reduceFn);
+  public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             SerializableBiFunction<R, S, ? extends T> joinFunction) {
+    return join(other, thisKeyExtractor, otherKeyExtractor,
+        windowCfg, JoinType.INNER, joinFunction);
+  }
+
+  /**
+   * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
+   * is declared by the joinType parameter.
+   * The join is done over elements accumulated over a time window defined by windowCfg.
+   * The elements are compared using the thisKeyExtractor for this streamlet with the
+   * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
+   * Types of joins {@link JoinType}
+   * @param other The Streamlet that we are joining with.
+   * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to
+   * have. Typical windowing strategies are sliding windows and tumbling windows
+   * @param joinType Type of Join. Options {@link JoinType}
+   * @param joinFunction The join function that needs to be applied
+   */
+  @Override
+  public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+             SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
+             JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction) {
+
+    StreamletImpl<S> joinee = (StreamletImpl<S>) other;
+    JoinStreamlet<K, R, S, T> retval = JoinStreamlet.createJoinStreamlet(
+        this, joinee, thisKeyExtractor, otherKeyExtractor, windowCfg, joinType, joinFunction);
+    addChild(retval);
+    joinee.addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
+   * windowCfg and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   * to be reduced on
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  @Override
+  public <K, V> Streamlet<KeyValue<KeyedWindow<K>, V>> reduceByKeyAndWindow(
+      SerializableFunction<R, K> keyExtractor, SerializableFunction<R, V> valueExtractor,
+      WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
+    ReduceByKeyAndWindowStreamlet<K, V, R> retval =
+        new ReduceByKeyAndWindowStreamlet<>(this, keyExtractor, valueExtractor,
+            windowCfg, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
+   * windowCfg and applying reduceFn on those tuples. For each window, the value identity is used
+   * as a initial value. All the matching tuples are reduced using reduceFn startin from this
+   * initial value.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * @param identity The identity element is both the initial value inside the reduction window
+   * and the default result if there are no elements in the window
+   * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
+   * and the next element of the stream. It returns a new partial result.
+   */
+  @Override
+  public <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+      SerializableFunction<R, K> keyExtractor, WindowConfig windowCfg,
+      T identity, SerializableBiFunction<T, R, ? extends T> reduceFn) {
+    GeneralReduceByKeyAndWindowStreamlet<K, R, T> retval =
+        new GeneralReduceByKeyAndWindowStreamlet<>(this, keyExtractor, windowCfg,
+            identity, reduceFn);
     addChild(retval);
     return retval;
   }
@@ -248,17 +431,10 @@ public abstract class StreamletImpl<R> extends BaseStreamletImpl<Streamlet<R>>
    */
   @Override
   public <T> Streamlet<T> transform(
-      SerializableTransformer<? super R, ? extends T> serializableTransformer) {
+      SerializableTransformer<R, ? extends T> serializableTransformer) {
     TransformStreamlet<R, T> transformStreamlet =
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
-  }
-
-  /**
-   * Only used by the implementors
-   */
-  protected StreamletImpl() {
-    super();
   }
 }

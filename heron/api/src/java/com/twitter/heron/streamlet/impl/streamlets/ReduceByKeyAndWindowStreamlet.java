@@ -17,10 +17,12 @@ package com.twitter.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBinaryOperator;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.KVStreamletImpl;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
@@ -32,15 +34,22 @@ import com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo<K> type and the value is of type V.
  */
-public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWindow<K>, V> {
-  private KVStreamletImpl<K, V> parent;
+public class ReduceByKeyAndWindowStreamlet<K, V, R>
+    extends StreamletImpl<KeyValue<KeyedWindow<K>, V>> {
+  private StreamletImpl<R> parent;
+  private SerializableFunction<R, K> keyExtractor;
+  private SerializableFunction<R, V> valueExtractor;
   private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
 
-  public ReduceByKeyAndWindowStreamlet(KVStreamletImpl<K, V> parent,
+  public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
+                       SerializableFunction<R, K> keyExtractor,
+                       SerializableFunction<R, V> valueExtractor,
                        WindowConfig windowCfg,
                        SerializableBinaryOperator<V> reduceFn) {
     this.parent = parent;
+    this.keyExtractor = keyExtractor;
+    this.valueExtractor = valueExtractor;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
@@ -55,10 +64,12 @@ public class ReduceByKeyAndWindowStreamlet<K, V> extends KVStreamletImpl<KeyedWi
       throw new RuntimeException("Duplicate Names");
     }
     stageNames.add(getName());
-    ReduceByKeyAndWindowOperator<K, V> bolt = new ReduceByKeyAndWindowOperator<>(reduceFn);
+    ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
+        valueExtractor, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), new ReduceByKeyAndWindowCustomGrouping<K, V>());
+        .customGrouping(parent.getName(),
+            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
     return true;
   }
 }

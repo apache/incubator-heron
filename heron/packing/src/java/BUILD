@@ -15,7 +15,7 @@ packing_deps_files = [
 roundrobin_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files + [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:utils-spi-java",
     ]
@@ -23,7 +23,7 @@ roundrobin_deps_files = \
 binpacking_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files + [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:utils-spi-java",
     ]
@@ -37,7 +37,7 @@ java_library(
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:packing-spi-java",
         "//heron/spi/src/java:utils-spi-java",
-        "//heron/api/src/java:api-java"
+        "//heron/api/src/java:api-java-low-level"
     ],
 )
 

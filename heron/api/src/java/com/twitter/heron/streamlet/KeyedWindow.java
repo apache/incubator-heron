@@ -25,10 +25,16 @@ public class KeyedWindow<T> implements Serializable {
   private static final long serialVersionUID = 4193319775040181971L;
   private T key;
   private Window window;
+
+  KeyedWindow() {
+    // nothing really
+  }
+
   public KeyedWindow(T key, Window window) {
     this.key = key;
     this.window = window;
   }
+
   public T getKey() {
     return key;
   }

@@ -32,12 +32,14 @@
 
 package com.twitter.heron.api.windowing;
 
+import java.io.Serializable;
+
 /**
  * An event is a wrapper object that gets stored in the window.
  *
  * @param <T> the type of the object thats wrapped. E.g Tuple
  */
-public interface Event<T> {
+public interface Event<T extends Serializable> extends Serializable {
   /**
    * The event timestamp in millis. This could be the time
    * when the source generated the tuple or the time
@@ -61,10 +63,4 @@ public interface Event<T> {
    * @return true if this is a watermark event
    */
   boolean isWatermark();
-
-  /**
-   * If this is a timer event or not.  Timer events use Tick Tuples to trigger
-   * @return true if this a timer event
-   */
-  boolean isTimer();
 }
