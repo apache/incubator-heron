@@ -140,17 +140,13 @@ public class MetricsCacheManager {
      * Handler for uncaughtException
      */
     public void uncaughtException(Thread thread, Throwable exception) {
-      // Add try and catch block to prevent new exceptions stop the handling thread
+      // Add try and finally block to prevent new exceptions stop the handling thread
       try {
         LOG.log(Level.SEVERE,
             "Exception caught in thread: " + thread.getName()
             + " with thread id: " + thread.getId(),
             exception);
-        Runtime.getRuntime().halt(1);
-
-        // SUPPRESS CHECKSTYLE IllegalCatch
-      } catch (Throwable t) {
-        LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
+      } finally {
         Runtime.getRuntime().halt(1);
       }
     }
