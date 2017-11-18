@@ -209,67 +209,77 @@ public class RuntimeManagerRunner {
 
   /**
    * Clean all states of a heron topology
+   * pre-condition: all containers are gone
    * 1. Topology def and ExecutionState are required to exist to delete
    * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
+   * post-condition: best effort all states are gone, otherwise then exception
    */
   protected void cleanState(
       String topologyName,
       SchedulerStateManagerAdaptor statemgr) throws TopologyRuntimeManagementException {
     LOG.fine("Cleaning up topology state");
 
-    Boolean result;
-
     // It is possible that TMasterLocation, MetricsCacheLocation, PackingPlan, PhysicalPlan and
     // SchedulerLocation are not set. Just log but don't consider it a failure and don't return
     // false
-    result = statemgr.deleteTMasterLocation(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear TMaster location. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deleteMetricsCacheLocation(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear MetricsCache location. Check whether MetricsCache set it correctly.");
-    }
-
-    result = statemgr.deletePackingPlan(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear packing plan. Check whether Launcher set it correctly.");
-    }
-
-    result = statemgr.deletePhysicalPlan(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear physical plan. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deleteSchedulerLocation(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear scheduler location. Check whether Scheduler set it correctly.");
-    }
-
-    result = statemgr.deleteLocks(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to delete locks. It's possible that the topology never created any.");
-    }
-
-    result = statemgr.deleteExecutionState(topologyName);
-    if (result == null || !result) {
-      throw new TopologyRuntimeManagementException(
-          "Failed to clear execution state");
-    }
-
+    Boolean result1 = statemgr.deleteTMasterLocation(topologyName);
+    Boolean result2 = statemgr.deleteMetricsCacheLocation(topologyName);
+    Boolean result3 = statemgr.deletePackingPlan(topologyName);
+    Boolean result4 = statemgr.deletePhysicalPlan(topologyName);
+    Boolean result5 = statemgr.deleteSchedulerLocation(topologyName);
+    Boolean result6 = statemgr.deleteLocks(topologyName);
+    Boolean result7 = statemgr.deleteExecutionState(topologyName);
     // Set topology def at last since we determine whether a topology is running
     // by checking the existence of topology def
-    result = statemgr.deleteTopology(topologyName);
-    if (result == null || !result) {
+    Boolean result8 = statemgr.deleteTopology(topologyName);
+
+    if (result1 == null || !result1) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear TMaster location. Check whether TMaster set it correctly.");
+    } else {
+      LOG.info("Deleted TMaster location in state mgr.");
+    }
+    if (result2 == null || !result2) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear MetricsCache location. Check whether MetricsCache set it correctly.");
+    } else {
+      LOG.info("Deleted MetricsCache location in state mgr.");
+    }
+    if (result3 == null || !result3) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear packing plan. Check whether Launcher set it correctly.");
+    } else {
+      LOG.info("Deleted PackingPlan in state mgr.");
+    }
+    if (result4 == null || !result4) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear physical plan. Check whether TMaster set it correctly.");
+    } else {
+      LOG.info("Deleted PhysicalPlan in state mgr.");
+    }
+    if (result5 == null || !result5) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear scheduler location. Check whether Scheduler set it correctly.");
+    } else {
+      LOG.info("Deleted Scheduler location in state mgr.");
+    }
+    if (result6 == null || !result6) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to delete locks. It's possible that the topology never created any.");
+    } else {
+      LOG.info("Deleted Locks in state mgr.");
+    }
+    if (result7 == null || !result7) {
+      throw new TopologyRuntimeManagementException(
+          "Failed to clear execution state");
+    } else {
+      LOG.info("Deleted ExecutionState in state mgr.");
+    }
+    if (result8 == null || !result8) {
       throw new TopologyRuntimeManagementException(
           "Failed to clear topology definition");
+    } else {
+      LOG.info("Deleted Topology in state mgr.");
     }
 
     LOG.fine("Cleaned up topology state");
