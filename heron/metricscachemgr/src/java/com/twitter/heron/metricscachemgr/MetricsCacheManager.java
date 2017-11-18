@@ -18,6 +18,7 @@ package com.twitter.heron.metricscachemgr;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,6 +76,8 @@ public class MetricsCacheManager {
 
   private TopologyMaster.MetricsCacheLocation metricsCacheLocation;
 
+  private final long mainThreadId;
+
   /**
    * Constructor: MetricsCacheManager needs 4 type information:
    * 1. Servers: host and 2 ports
@@ -126,6 +129,61 @@ public class MetricsCacheManager {
 
     // Construct the server to respond to query request
     metricsCacheManagerHttpServer = new MetricsCacheManagerHttpServer(metricsCache, statsPort);
+
+    this.mainThreadId = Thread.currentThread().getId();
+    // Add exception handler for any uncaught exception here.
+    Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
+  }
+
+  /**
+   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
+   * infrastructure). When one IMetricsSink throws uncaught exceptions, we would try to restart this
+   * sink unless we have hit the # of retry attempts. When Metrics Manager internal exceptions are
+   * caught or we have restart IMetricsSink with too many attempts, Metrics Manager would flush any
+   * remain logs and exit.
+   */
+  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    /**
+     * Handler for uncaughtException
+     */
+    public void uncaughtException(Thread thread, Throwable exception) {
+      // Add try and catch block to prevent new exceptions stop the handling thread
+      try {
+        // Delegate to the actual one
+        handleException(thread, exception);
+
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Throwable t) {
+        LOG.log(Level.SEVERE, "Failed to handle exception. Process halting", t);
+        Runtime.getRuntime().halt(1);
+      }
+    }
+
+    // The actual uncaught exceptions handing logic
+    private void handleException(Thread thread, Throwable exception) {
+      // We would fail fast when errors occur
+      if (exception instanceof Error) {
+        LOG.log(Level.SEVERE, "Error caught in thread: " + thread.getName() + " with thread id: "
+            + thread.getId() + ". Process halting...", exception);
+        Runtime.getRuntime().halt(1);
+      }
+
+      // We would fail fast when exceptions happen in main thread
+      if (thread.getId() == mainThreadId) {
+        LOG.log(Level.SEVERE, "Exception caught in main thread. Process halting...", exception);
+        Runtime.getRuntime().halt(1);
+      }
+
+      LOG.log(Level.SEVERE,
+          "Exception caught in thread: " + thread.getName() + " with thread id: " + thread.getId(),
+          exception);
+
+      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
+        handler.close();
+      }
+      Runtime.getRuntime().halt(1);
+    }
   }
 
   // Construct all required command line options
