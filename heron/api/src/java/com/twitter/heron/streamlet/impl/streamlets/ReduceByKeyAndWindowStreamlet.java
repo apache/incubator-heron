@@ -41,6 +41,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   private SerializableFunction<R, V> valueExtractor;
   private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
+  private static final String NAMEPREFIX = "reduceByKeyAndWindow";
 
   public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
                        SerializableFunction<R, K> keyExtractor,
@@ -57,12 +58,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("reduceByKeyAndWindow", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone(NAMEPREFIX, stageNames);
     stageNames.add(getName());
     ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
         valueExtractor, reduceFn);

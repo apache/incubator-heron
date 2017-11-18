@@ -37,7 +37,6 @@ public class TransformOperator<R, T> extends StreamletOperator {
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
   private OutputCollector collector;
-  private Context context;
   private State<Serializable, Serializable> state;
 
   public TransformOperator(
@@ -60,7 +59,7 @@ public class TransformOperator<R, T> extends StreamletOperator {
   public void prepare(Map<String, Object> map, TopologyContext topologyContext,
                       OutputCollector outputCollector) {
     collector = outputCollector;
-    context = new ContextImpl(topologyContext, map, state);
+    Context context = new ContextImpl(topologyContext, map, state);
     serializableTransformer.setup(context);
   }
 
