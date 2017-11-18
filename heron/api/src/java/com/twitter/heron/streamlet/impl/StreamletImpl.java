@@ -50,6 +50,8 @@ import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
 
+import static com.twitter.heron.streamlet.impl.utils.StreamletUtils.require;
+
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
  * Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from
@@ -109,9 +111,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setName(String sName) {
-    if (sName == null || sName.trim().isEmpty()) {
-      throw new IllegalArgumentException("Streamlet name cannot be null/blank");
-    }
+    require(sName != null && !sName.trim().isEmpty(),
+        "Streamlet name cannot be null/blank");
     this.name = sName;
     return this;
   }
@@ -142,9 +143,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setNumPartitions(int numPartitions) {
-    if (numPartitions < 1) {
-      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
-    }
+    require(numPartitions > 0,
+        "Streamlet's partitions number should be > 0");
     this.nPartitions = numPartitions;
     return this;
   }
@@ -363,7 +363,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   /**
    * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
    * windowCfg and applying reduceFn on those tuples. For each window, the value identity is used
-   * as a initial value. All the matching tuples are reduced using reduceFn startin from this
+   * as a initial value. All the matching tuples are reduced using reduceFn starting from this
    * initial value.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
@@ -385,7 +385,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
+   * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   @Override

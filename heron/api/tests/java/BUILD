@@ -33,6 +33,7 @@ java_tests(
     "com.twitter.heron.streamlet.impl.operators.JoinOperatorTest",
     "com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
+    "com.twitter.heron.streamlet.impl.utils.StreamletUtilsTest",
     "com.twitter.heron.api.ConfigTest",
     "com.twitter.heron.api.HeronSubmitterTest"
   ],

@@ -11,18 +11,17 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
+package com.twitter.heron.streamlet.impl.utils;
 
-package com.twitter.heron.streamlet;
+public final class StreamletUtils {
 
-import java.io.Serializable;
-import java.util.function.Supplier;
+  private StreamletUtils() {
+  }
 
-/**
- * All user supplied transformation functions have to be serializable.
- * Thus all Streamlet transformation definitions take Serializable
- * Functions as their input. We simply decorate java.util. function
- * definitions with a Serializable tag to ensure that any supplied
- * lambda functions automatically become serializable.
- */
-public interface SerializableSupplier<T> extends Supplier<T>, Serializable {
+  public static void require(Boolean requirement, String errorMessage) {
+    if (!requirement) {
+      throw new IllegalArgumentException(errorMessage);
+    }
+  }
+
 }
