@@ -17,8 +17,9 @@ import org.junit.Test;
 
 public class StreamletUtilsTest {
 
-  private static final String ERROR_MESSAGE = "0 is not bigger than 1";
+  private static final String ERROR_MESSAGE = "name should not be empty";
   private static final String NAME = "test_name";
+
   @Test
   public void testRequire() {
     StreamletUtils.require(!NAME.isEmpty(), ERROR_MESSAGE);
