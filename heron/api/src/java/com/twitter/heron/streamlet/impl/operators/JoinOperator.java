@@ -40,8 +40,8 @@ import com.twitter.heron.streamlet.Window;
  */
 public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   private static final long serialVersionUID = 4875450390444745407L;
-  public static final String LEFT_COMPONENT_NAME = "_streamlet_joinbolt_left_component_name_";
-  public static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";
+  private static final String LEFT_COMPONENT_NAME = "_streamlet_joinbolt_left_component_name_";
+  private static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";
 
   private JoinType joinType;
   // The source component that represent the left join component

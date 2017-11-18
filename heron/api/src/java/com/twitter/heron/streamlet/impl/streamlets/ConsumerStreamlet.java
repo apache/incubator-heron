@@ -29,6 +29,7 @@ import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
 public class ConsumerStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableConsumer<R> consumer;
+  private static final String NAMEPREFIX = "consumer";
 
   public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
     this.parent = parent;
@@ -38,13 +39,7 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("consumer", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
+    setDefaultNameIfNone(NAMEPREFIX, stageNames);
     bldr.setBolt(getName(), new ConsumerSink<>(consumer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

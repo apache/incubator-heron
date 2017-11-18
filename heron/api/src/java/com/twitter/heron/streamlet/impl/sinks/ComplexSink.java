@@ -16,7 +16,6 @@ package com.twitter.heron.streamlet.impl.sinks;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.state.State;
@@ -32,11 +31,9 @@ import com.twitter.heron.streamlet.impl.operators.StreamletOperator;
  * consume function for every tuple.
  */
 public class ComplexSink<R> extends StreamletOperator {
-  private static final Logger LOG = Logger.getLogger(ComplexSink.class.getName());
   private static final long serialVersionUID = 8717991188885786658L;
   private Sink<R> sink;
   private OutputCollector collector;
-  private Context context;
   private State<Serializable, Serializable> state;
 
   public ComplexSink(Sink<R> sink) {
@@ -53,7 +50,7 @@ public class ComplexSink<R> extends StreamletOperator {
   public void prepare(Map<String, Object> map, TopologyContext topologyContext,
                       OutputCollector outputCollector) {
     this.collector = outputCollector;
-    context = new ContextImpl(topologyContext, map, state);
+    Context context = new ContextImpl(topologyContext, map, state);
     sink.setup(context);
   }
 

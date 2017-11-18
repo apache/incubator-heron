@@ -125,6 +125,16 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return name;
   }
 
+  protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
+    if (getName() == null) {
+      setName(defaultNameCalculator(prefix, stageNames));
+    }
+    if (stageNames.contains(getName())) {
+      throw new RuntimeException(String.format(
+          "The stage name %s is used multiple times in the same topology", getName()));
+    }
+  }
+
   /**
    * Sets the number of partitions of the streamlet
    * @param numPartitions The user assigned number of partitions
@@ -396,7 +406,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void log() {
     LogStreamlet<R> logger = new LogStreamlet<>(this);
     addChild(logger);
-    return;
   }
 
   /**
@@ -407,7 +416,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void consume(SerializableConsumer<R> consumer) {
     ConsumerStreamlet<R> consumerStreamlet = new ConsumerStreamlet<>(this, consumer);
     addChild(consumerStreamlet);
-    return;
   }
 
   /**
@@ -418,7 +426,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public void toSink(Sink<R> sink) {
     SinkStreamlet<R> sinkStreamlet = new SinkStreamlet<>(this, sink);
     addChild(sinkStreamlet);
-    return;
   }
 
   /**
