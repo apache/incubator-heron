@@ -132,11 +132,7 @@ public class MetricsCacheManager {
   }
 
   /**
-   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
-   * infrastructure). When one IMetricsSink throws uncaught exceptions, we would try to restart this
-   * sink unless we have hit the # of retry attempts. When Metrics Manager internal exceptions are
-   * caught or we have restart IMetricsSink with too many attempts, Metrics Manager would flush any
-   * remain logs and exit.
+   * Handler for catching exceptions thrown by any threads.
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
 
