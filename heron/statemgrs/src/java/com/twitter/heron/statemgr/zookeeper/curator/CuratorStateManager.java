@@ -273,6 +273,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     } catch (KeeperException e) {
       if (KeeperException.Code.NONODE.equals(e.code())) {
+        LOG.info("Node does not exist, delete success " + path);
         safeSetFuture(result, true);
       } else {
         safeSetException(result, new RuntimeException("Could not deleteNode", e));
