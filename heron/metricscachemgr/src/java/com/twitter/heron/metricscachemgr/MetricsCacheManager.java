@@ -126,6 +126,30 @@ public class MetricsCacheManager {
 
     // Construct the server to respond to query request
     metricsCacheManagerHttpServer = new MetricsCacheManagerHttpServer(metricsCache, statsPort);
+
+    // Add exception handler for any uncaught exception here.
+    Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
+  }
+
+  /**
+   * Handler for catching exceptions thrown by any threads.
+   */
+  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    /**
+     * Handler for uncaughtException
+     */
+    public void uncaughtException(Thread thread, Throwable exception) {
+      // Add try and finally block to prevent new exceptions stop the handling thread
+      try {
+        LOG.log(Level.SEVERE,
+            "Exception caught in thread: " + thread.getName()
+            + " with thread id: " + thread.getId(),
+            exception);
+      } finally {
+        Runtime.getRuntime().halt(1);
+      }
+    }
   }
 
   // Construct all required command line options
