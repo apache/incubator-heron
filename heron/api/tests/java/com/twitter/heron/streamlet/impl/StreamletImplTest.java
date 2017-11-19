@@ -28,9 +28,11 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
 import com.twitter.heron.streamlet.Resources;
+import com.twitter.heron.streamlet.SerializableConsumer;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
@@ -260,6 +262,42 @@ public class StreamletImplTest {
         (JoinStreamlet<String, String, String, String>) fStreamlet.getChildren().get(0);
     assertEquals(jStreamlet.getChildren().size(), 0);
   }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCalculatedDefaultStageNames() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 0);
+
+    // apply the consumer function
+    baseStreamlet.consume((SerializableConsumer<String>) s -> { });
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
+
+    // verify SupplierStreamlet
+    assertTrue(supplierStreamlet.allBuilt());
+    assertEquals(1, supplierStreamlet.getChildren().size());
+    assertTrue(supplierStreamlet.getChildren().get(0) instanceof ConsumerStreamlet);
+    assertEquals("consumer1", supplierStreamlet.getChildren().get(0).getName());
+
+    // verify stageNames
+    assertEquals(2, stageNames.size());
+    List<String> expectedStageNames = Arrays.asList("consumer1", "supplier1");
+    assertTrue(stageNames.containsAll(expectedStageNames));
+
+    // verify ConsumerStreamlet
+    ConsumerStreamlet<String> consumerStreamlet =
+        (ConsumerStreamlet<String>) supplierStreamlet.getChildren().get(0);
+    assertEquals(0, consumerStreamlet.getChildren().size());
+  }
+
 
   @Test
   public void testResourcesBuilder() {
