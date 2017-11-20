@@ -50,8 +50,6 @@ import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.TransformStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet;
 
-import static com.twitter.heron.streamlet.impl.utils.StreamletUtils.require;
-
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
  * Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from
@@ -429,7 +427,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
+   * Returns a new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
@@ -443,5 +441,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
+  }
+
+  /**
+   * Verifies the requirement as the utility function.
+   * @param requirement The requirement to verify
+   * @param errorMessage The error message
+   * @throws IllegalArgumentException if the requirement fails
+   */
+  private void require(Boolean requirement, String errorMessage) {
+    if (!requirement) {
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 }
