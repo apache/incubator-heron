@@ -267,7 +267,6 @@ public class StreamletImplTest {
     assertEquals(0, Float.compare(defaultConfig.getPerContainerCpu(), 1.0f));
     assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100));
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
-    
     Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setSerializer(Config.Serializer.JAVA)
