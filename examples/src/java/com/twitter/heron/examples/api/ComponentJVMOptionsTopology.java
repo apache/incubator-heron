@@ -44,7 +44,8 @@ public final class ComponentJVMOptionsTopology {
 
     builder.setSpout("word", new TestWordSpout(), 2);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2)
-        .shuffleGrouping("word");
+        .shuffleGrouping("word")
+        .addConfiguration("test-config", "test-key"); // Sample adding component-specific config
 
     Config conf = new Config();
     conf.setDebug(true);
@@ -56,7 +57,7 @@ public final class ComponentJVMOptionsTopology {
     // For each component, both the global and if any the component one will be appended.
     // And the component one will take precedence
     conf.setComponentJvmOptions("word", "-XX:NewSize=300m");
-    conf.setComponentJvmOptions("exclaim1", "-XX:NewSize=800m");
+    conf.setComponentJvmOptions("exclaim1", "-XX:NewSize=300m");
 
     // component resource configuration
     conf.setComponentRam("word", ByteAmount.fromMegabytes(512));
@@ -66,6 +67,11 @@ public final class ComponentJVMOptionsTopology {
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(2));
     conf.setContainerRamRequested(ByteAmount.fromGigabytes(2));
     conf.setContainerCpuRequested(2);
+
+    // Specify the size of ram padding to per container.
+    // Notice, this config will be considered as a hint,
+    // and it's up to the packing algorithm to determine whether to apply this hint
+    conf.setContainerRamPadding(ByteAmount.fromGigabytes(2));
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(2);

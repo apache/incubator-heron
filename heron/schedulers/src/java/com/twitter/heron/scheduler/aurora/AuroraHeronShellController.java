@@ -69,12 +69,22 @@ class AuroraHeronShellController implements AuroraController {
     return cliController.killJob();
   }
 
+  private StMgr searchContainer(Integer id) {
+    String prefix = "stmgr-" + id;
+    for (StMgr sm : stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrsList()) {
+      if (sm.getId().equals(prefix)) {
+        return sm;
+      }
+    }
+    return null;
+  }
+
   // Restart an aurora container
   @Override
   public boolean restart(Integer containerId) {
     // there is no backpressure for container 0, delegate to aurora client
     if (containerId == null || containerId == 0) {
-      cliController.restart(containerId);
+      return cliController.restart(containerId);
     }
 
     if (stateMgrAdaptor == null) {
@@ -82,18 +92,24 @@ class AuroraHeronShellController implements AuroraController {
       return false;
     }
 
-    int index = containerId - 1; // stmgr container starts from 1
-    StMgr contaienrInfo = stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrs(index);
-    String host = contaienrInfo.getHostName();
-    int port = contaienrInfo.getShellPort();
-    String url = "http://" + host + ":" + port + "/killexecutor";
+    StMgr sm = searchContainer(containerId);
+    if (sm == null) {
+      LOG.warning("container not found in pplan " + containerId);
+      return false;
+    }
+
+    String url = "http://" + sm.getHostName() + ":" + sm.getShellPort() + "/killexecutor";
     String payload = "secret=" + stateMgrAdaptor.getExecutionState(topologyName).getTopologyId();
     LOG.info("sending `kill container` to " + url + "; payload: " + payload);
 
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
     try {
-      NetworkUtils.sendHttpPostRequest(con, "X", payload.getBytes());
-      return NetworkUtils.checkHttpResponseCode(con, 200);
+      if (NetworkUtils.sendHttpPostRequest(con, "X", payload.getBytes())) {
+        return NetworkUtils.checkHttpResponseCode(con, 200);
+      } else { // if heron-shell command fails, delegate to aurora client
+        LOG.info("heron-shell killexecutor failed; try aurora client ..");
+        return cliController.restart(containerId);
+      }
     } finally {
       con.disconnect();
     }

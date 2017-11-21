@@ -16,7 +16,9 @@ package com.twitter.heron.streamlet.impl;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.function.Supplier;
 
+import com.twitter.heron.api.metric.IMetric;
 import com.twitter.heron.api.state.State;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.streamlet.Context;
@@ -59,7 +61,26 @@ public class ContextImpl implements Context {
   }
 
   @Override
+  public <T> void registerMetric(String metricName, int collectionInterval,
+                             Supplier<T> metricFn) {
+    topologyContext.registerMetric(metricName, new StreamletMetric<T>(metricFn),
+        collectionInterval);
+  }
+
+  @Override
   public State<Serializable, Serializable> getState() {
     return state;
+  }
+
+  private class StreamletMetric<T> implements IMetric<T> {
+    private Supplier<T> metricFn;
+    StreamletMetric(Supplier<T> metricFn) {
+      this.metricFn = metricFn;
+    }
+
+    @Override
+    public T getValueAndReset() {
+      return metricFn.get();
+    }
   }
 }

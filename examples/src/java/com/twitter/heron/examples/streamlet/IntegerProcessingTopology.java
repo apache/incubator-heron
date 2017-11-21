@@ -16,7 +16,6 @@ package com.twitter.heron.examples.streamlet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -36,8 +35,8 @@ public final class IntegerProcessingTopology {
   }
 
   // Heron resources to be applied to the topology
-  private static final float CPU = 2.0f;
-  private static final long GIGABYTES_OF_RAM = 6;
+  private static final float CPU = 1.5f;
+  private static final int GIGABYTES_OF_RAM = 8;
   private static final int NUM_CONTAINERS = 2;
 
   /**
@@ -50,7 +49,6 @@ public final class IntegerProcessingTopology {
     Streamlet<Integer> zeroes = builder.newSource(() -> 0);
 
     builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .setNumPartitions(2)
         .setName("random-ints")
         .map(i -> i + 1)
         .setName("add-one")
@@ -60,19 +58,21 @@ public final class IntegerProcessingTopology {
         .setName("remove-twos")
         .log();
 
-    Config conf = new Config();
-    conf.setNumContainers(NUM_CONTAINERS);
+    Resources resources = new Resources.Builder()
+        .setCpu(CPU)
+        .setRamInGB(GIGABYTES_OF_RAM)
+        .build();
 
-    Resources resources = new Resources();
-    resources.withCpu(CPU);
-    resources.withRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM).asBytes());
-    conf.setContainerResources(resources);
+    Config config = new Config.Builder()
+        .setNumContainers(NUM_CONTAINERS)
+        .setContainerResources(resources)
+        .build();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
 
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
-    new Runner().run(topologyName, conf, builder);
+    new Runner().run(topologyName, config, builder);
   }
 }

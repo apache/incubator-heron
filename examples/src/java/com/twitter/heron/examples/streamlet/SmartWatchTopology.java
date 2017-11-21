@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -55,7 +54,7 @@ public final class SmartWatchTopology {
     private final int feetRun;
 
     SmartWatchReading() {
-      Utils.sleep(1000);
+      StreamletUtils.sleep(1000);
       this.joggerId = StreamletUtils.randomFromList(JOGGERS);
       this.feetRun = ThreadLocalRandom.current().nextInt(200, 400);
     }
@@ -112,7 +111,7 @@ public final class SmartWatchTopology {
           LOG.info(logMessage);
         });
 
-    Config config = new Config();
+    Config config = Config.defaultConfig();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);

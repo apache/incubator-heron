@@ -52,10 +52,8 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.TupleUtils;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
-import com.twitter.heron.api.windowing.TimerEvent;
 import com.twitter.heron.api.windowing.TimestampExtractor;
 import com.twitter.heron.api.windowing.TriggerPolicy;
 import com.twitter.heron.api.windowing.TupleWindowImpl;
@@ -221,17 +219,15 @@ public class WindowedBoltExecutor implements IRichBolt,
         maxLagMs = DEFAULT_MAX_LAG_MS;
       }
       // watermark interval
-      int watermarkInterval;
+      long watermarkIntervalMs;
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)) {
-        watermarkInterval = ((Number) topoConf.get(WindowingConfigs
+        watermarkIntervalMs = ((Number) topoConf.get(WindowingConfigs
             .TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS)).intValue();
       } else {
-        watermarkInterval = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
+        watermarkIntervalMs = DEFAULT_WATERMARK_EVENT_INTERVAL_MS;
       }
-      // Use tick tuple to perodically generate watermarks
-      Config.setTickTupleFrequencyMs(topoConf, watermarkInterval);
-      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager,
-          maxLagMs, getComponentStreams(context));
+      waterMarkEventGenerator = new WaterMarkEventGenerator<>(manager, watermarkIntervalMs,
+          maxLagMs, getComponentStreams(context), topoConf);
     } else {
       if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_LATE_TUPLE_STREAM)) {
         throw new IllegalArgumentException(
@@ -304,9 +300,8 @@ public class WindowedBoltExecutor implements IRichBolt,
         return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
             evictionPolicy, manager);
       } else {
-        // set tick tuple frequency in milliseconds for timer in TimeTriggerPolicy
-        Config.setTickTupleFrequencyMs(topoConf, slidingIntervalDurationMs);
-        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager, evictionPolicy);
+        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
+            evictionPolicy, topoConf);
       }
     }
   }
@@ -352,30 +347,22 @@ public class WindowedBoltExecutor implements IRichBolt,
 
   @Override
   public void execute(Tuple input) {
-    if (TupleUtils.isTick(input)) {
-      long currTime = System.currentTimeMillis();
-      windowManager.add(new TimerEvent<>(input, currTime));
-      if (isTupleTs()) {
-        waterMarkEventGenerator.run();
+    if (isTupleTs()) {
+      long ts = timestampExtractor.extractTimestamp(input);
+      if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
+        windowManager.add(input, ts);
+      } else {
+        if (lateTupleStream != null) {
+          windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
+        } else {
+          LOG.info(String.format(
+              "Received a late tuple %s with ts %d. This will not be " + "processed"
+                  + ".", input, ts));
+        }
+        windowedOutputCollector.ack(input);
       }
     } else {
-      if (isTupleTs()) {
-        long ts = timestampExtractor.extractTimestamp(input);
-        if (waterMarkEventGenerator.track(input.getSourceGlobalStreamId(), ts)) {
-          windowManager.add(input, ts);
-        } else {
-          if (lateTupleStream != null) {
-            windowedOutputCollector.emit(lateTupleStream, input, new Values(input));
-          } else {
-            LOG.info(String.format(
-                "Received a late tuple %s with ts %d. This will not be " + "processed"
-                    + ".", input, ts));
-          }
-          windowedOutputCollector.ack(input);
-        }
-      } else {
-        windowManager.add(input);
-      }
+      windowManager.add(input);
     }
   }
 

@@ -15,6 +15,8 @@
 package com.twitter.heron.examples.streamlet;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import org.apache.pulsar.client.api.Consumer;
@@ -73,9 +75,10 @@ public final class SimplePulsarSourceTopology {
      * "gotten." In this case, the Pulsar consumer for the specified topic
      * listens for incoming messages.
      */
-    public String get() {
+    public Collection<String> get() {
       try {
-        return new String(consumer.receive().getData(), "utf-8");
+        String retval = new String(consumer.receive().getData(), "utf-8");
+        return Collections.singletonList(retval);
       } catch (PulsarClientException | UnsupportedEncodingException e) {
         throw new RuntimeException(e);
       }
@@ -111,7 +114,7 @@ public final class SimplePulsarSourceTopology {
         .setName("incoming-pulsar-messages")
         .consume(s -> LOG.info(String.format("Message received from Pulsar: \"%s\"", s)));
 
-    Config config = new Config();
+    Config config = Config.defaultConfig();
 
     // Fetches the topology name from the first command-line argument
     String topologyName = StreamletUtils.getTopologyName(args);
