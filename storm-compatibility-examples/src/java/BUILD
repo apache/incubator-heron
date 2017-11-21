@@ -4,7 +4,7 @@ java_binary(
     name='heron-storm-compatibility-examples-unshaded',
     srcs = glob(["**/*.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//storm-compatibility/src/java:storm-compatibility-java",
     ],

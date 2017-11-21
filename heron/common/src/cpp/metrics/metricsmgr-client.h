@@ -36,8 +36,9 @@ namespace common {
 
 class MetricsMgrClient : public Client {
  public:
-  MetricsMgrClient(const sp_string& _hostname, sp_int32 _port, const sp_string& _component_id,
-                   const sp_string& _task_id, EventLoop* eventLoop, const NetworkOptions& options);
+  MetricsMgrClient(const sp_string& _hostname, sp_int32 _port, const sp_string& _component_name,
+                   const sp_string& _instance_id, int instance_index,
+                   EventLoop* eventLoop, const NetworkOptions& options);
   ~MetricsMgrClient();
 
   void SendMetrics(proto::system::MetricPublisherPublishMessage* _message);
@@ -58,8 +59,9 @@ class MetricsMgrClient : public Client {
 
   sp_string hostname_;
   sp_int32 port_;
-  sp_string component_id_;
-  sp_string task_id_;
+  sp_string component_name_;
+  sp_string instance_id_;
+  int instance_index_;
   proto::tmaster::TMasterLocation* tmaster_location_;
   proto::tmaster::MetricsCacheLocation* metricscache_location_;
   // Tells if we have registered to metrics manager or not

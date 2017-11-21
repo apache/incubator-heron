@@ -112,5 +112,29 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_L
     "heron.streammgr.network.backpressure.lowwatermark.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB =
     "heron.streammgr.stateful.buffer.size.mb";
+
+// heron.instance.* configs are for the instance
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC =
+    "heron.instance.reconnect.streammgr.interval.sec";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_TIMES =
+    "heron.instance.reconnect.streammgr.times";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY =
+    "heron.instance.internal.bolt.read.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY =
+    "heron.instance.internal.bolt.write.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY =
+    "heron.instance.internal.spout.read.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY =
+    "heron.instance.internal.spout.write.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_TIME_MS =
+    "heron.instance.emit.batch.time.ms";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY =
+    "heron.instance.set.data.tuple.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES =
+    "heron.instance.set.data.tuple.size.bytes";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_CONTROL_TUPLE_CAPACITY =
+    "heron.instance.set.control.tuple.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_ACKNOWLEDGEMENT_NBUCKETS =
+    "heron.instance.acknowledgement.nbuckets";
 }  // namespace config
 }  // namespace heron

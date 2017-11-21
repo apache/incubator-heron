@@ -29,8 +29,9 @@ import javax.xml.bind.DatatypeConverter;
 import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -89,7 +90,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
           Context.role(localConfig),
           Context.environ(localConfig),
           AuroraContext.getHeronAuroraPath(localConfig),
-          Context.verbose(localConfig));
+          Context.verbose(localConfig),
+          localConfig);
     }
   }
 
@@ -140,7 +142,27 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    return controller.killJob();
+    // The aurora service can be unavailable or unstable for a while,
+    // we will try to kill the job with multiple attempts
+    int attempts = AuroraContext.getJobMaxKillAttempts(config);
+    long retryIntervalMs = AuroraContext.getJobKillRetryIntervalMs(config);
+    LOG.info("Will try " + attempts + " attempts at interval: " + retryIntervalMs + " ms");
+
+    // First attempt
+    boolean res = controller.killJob();
+    attempts--;
+
+    // Failure retry
+    while (!res && attempts > 0) {
+      LOG.warning("Failed to kill the topology. Will retry in " + retryIntervalMs + " ms...");
+      Utils.sleep(retryIntervalMs);
+
+      // Retry the killJob()
+      res = controller.killJob();
+      attempts--;
+    }
+
+    return res;
   }
 
   @Override
@@ -210,6 +232,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
 
     auroraProperties.put(AuroraField.SYSTEM_YAML, Context.systemConfigFile(config));
+    auroraProperties.put(AuroraField.OVERRIDE_YAML, Context.overrideFile(config));
     auroraProperties.put(AuroraField.COMPONENT_RAMMAP, Runtime.componentRamMap(runtime));
     auroraProperties.put(AuroraField.COMPONENT_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
@@ -222,6 +245,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
     auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
         Context.pythonInstanceBinary(config));
+    auroraProperties.put(AuroraField.CPP_INSTANCE_BINARY,
+        Context.cppInstanceBinary(config));
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));

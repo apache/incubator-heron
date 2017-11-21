@@ -16,8 +16,12 @@ package com.twitter.heron.scheduler.kubernetes;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 
 public final class KubernetesConstants {
   private KubernetesConstants() {
@@ -43,6 +47,7 @@ public final class KubernetesConstants {
   public static final String API_METADATA = "metadata";
   public static final String API_KIND = "kind";
   public static final String METADATA_LABELS = "labels";
+  public static final String METADATA_ANNOTATIONS = "annotations";
   public static final String MEMORY = "memory";
   public static final String CPU = "cpu";
   public static final String REQUESTS = "requests";
@@ -54,9 +59,10 @@ public final class KubernetesConstants {
   public static final String VALUE_FROM = "valueFrom";
   public static final String POD_IP = "status.podIP";
 
-  public static final String[] PORT_NAMES = new String[]{
-      "master", "tmaster-ctlr", "tmaster-stats", "shell", "metricsmgr", "scheduler",
-      "metrics-cache-m", "metrics-cache-s", "ckptmgr"};
+  // prometheus annotation keys
+  public static final String ANNOTATION_PROMETHEUS_SCRAPE = "prometheus.io/scrape";
+  public static final String ANNOTATION_PROMETHEUS_PORT = "prometheus.io/port";
+  public static final String PROMETHEUS_PORT = "8080";
 
   public static final String MASTER_PORT = "6001";
   public static final String TMASTER_CONTROLLER_PORT = "6002";
@@ -67,11 +73,22 @@ public final class KubernetesConstants {
   public static final String METRICS_CACHE_MASTER_PORT = "6007";
   public static final String METRICS_CACHE_STATS_PORT = "6008";
   public static final String CHECKPOINT_MGR_PORT = "6009";
+  // port number the start with when more than one port needed for remote debugging
+  public static final String JVM_REMOTE_DEBUGGER_PORT = "6010";
+  public static final String JVM_REMOTE_DEBUGGER_PORT_NAME = "remote-debugger";
 
-  public static final String[] PORT_LIST = new String[]{
-      MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
-      SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT, METRICS_CACHE_MASTER_PORT,
-      METRICS_CACHE_STATS_PORT, CHECKPOINT_MGR_PORT };
+  public static final Map<ExecutorPort, String> EXECUTOR_PORTS = new HashMap<>();
+  static {
+    EXECUTOR_PORTS.put(ExecutorPort.MASTER_PORT, MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_CONTROLLER_PORT, TMASTER_CONTROLLER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.TMASTER_STATS_PORT, TMASTER_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.SHELL_PORT, SHELL_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.METRICS_MANAGER_PORT, METRICSMGR_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.SCHEDULER_PORT, SCHEDULER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, METRICS_CACHE_MASTER_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.METRICS_CACHE_STATS_PORT, METRICS_CACHE_STATS_PORT);
+    EXECUTOR_PORTS.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, CHECKPOINT_MGR_PORT);
+  }
 
   public static final String JOB_LINK =
       "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";

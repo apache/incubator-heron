@@ -126,6 +126,7 @@ public class ConfigLoaderTest {
     assertKeyValue(config, Key.TMASTER_BINARY, binPath + "/heron-tmaster");
     assertKeyValue(config, Key.SHELL_BINARY, binPath + "/heron-shell");
     assertKeyValue(config, Key.PYTHON_INSTANCE_BINARY, binPath + "/heron-python-instance");
+    assertKeyValue(config, Key.CPP_INSTANCE_BINARY, binPath + "/heron-cpp-instance");
 
     String libPath = config.getStringValue(Key.HERON_LIB);
     assertKeyValue(config, Key.SCHEDULER_JAR, libPath + "/scheduler/heron-scheduler.jar");

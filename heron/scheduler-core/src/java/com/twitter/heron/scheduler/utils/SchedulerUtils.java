@@ -17,18 +17,21 @@ package com.twitter.heron.scheduler.utils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.scheduler.ExecutorFlag;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -38,11 +41,62 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 public final class SchedulerUtils {
-  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 9;
   public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
   public static final String SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION = "P";
 
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
+
+  /**
+   * Enum that defines the type of ports that an heron executor needs
+   */
+
+  public enum ExecutorPort {
+    MASTER_PORT("master", true),
+    TMASTER_CONTROLLER_PORT("tmaster-ctl", true),
+    TMASTER_STATS_PORT("tmaster-stats", true),
+    SHELL_PORT("shell-port", true),
+    METRICS_MANAGER_PORT("metrics-mgr", true),
+    SCHEDULER_PORT("scheduler", true),
+    METRICS_CACHE_MASTER_PORT("metrics-cache-m", true),
+    METRICS_CACHE_STATS_PORT("metrics-cache-s", true),
+    CHECKPOINT_MANAGER_PORT("ckptmgr", true),
+    JVM_REMOTE_DEBUGGER_PORTS("jvm-remote-debugger", false);
+
+    private final String name;
+    private final boolean required;
+
+    ExecutorPort(String name, boolean required) {
+      this.name = name;
+      this.required = required;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public boolean isRequired() {
+      return required;
+    }
+
+    public static String getPort(ExecutorPort executorPort,
+                                  Map<ExecutorPort, String> portMap) {
+      if (!portMap.containsKey(executorPort) && executorPort.isRequired()) {
+        throw new RuntimeException("Required port " + executorPort.getName() + " not provided");
+      }
+
+      return portMap.get(executorPort);
+    }
+
+    public static Set<ExecutorPort> getRequiredPorts() {
+      Set<ExecutorPort> executorPorts = new HashSet<>();
+      for (ExecutorPort executorPort : ExecutorPort.values()) {
+        if (executorPort.isRequired()) {
+          executorPorts.add(executorPort);
+        }
+      }
+      return executorPorts;
+    }
+  }
 
   private SchedulerUtils() {
   }
@@ -123,53 +177,21 @@ public final class SchedulerUtils {
   /**
    * Utils method to construct the command to start heron-executor
    *
-   * @param config The static Config
-   * @param runtime The runtime Config
-   * @param containerIndex the executor/container index
-   * @param freePorts list of free ports
-   * @return String[] representing the command to start heron-executor
-   */
-  public static String[] executorCommand(
-      Config config,
-      Config runtime,
-      int containerIndex,
-      List<Integer> freePorts) {
-    // First let us have some safe checks
-    if (freePorts.size() < PORTS_REQUIRED_FOR_EXECUTOR) {
-      throw new RuntimeException("Failed to find enough ports for executor");
-    }
-    for (int port : freePorts) {
-      if (port == -1) {
-        throw new RuntimeException("Failed to find available ports for executor");
-      }
-    }
-
-    // Convert port to string
-    List<String> ports = new LinkedList<>();
-    for (int port : freePorts) {
-      ports.add(Integer.toString(port));
-    }
-
-    return getExecutorCommand(config, runtime, containerIndex, ports);
-  }
-
-  /**
-   * Utils method to construct the command to start heron-executor
-   *
    * @param config The static config
    * @param runtime The runtime config
    * @param containerIndex the executor/container index
-   * @param ports list of free ports in String
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
    * @return String[] representing the command to start heron-executor
    */
   public static String[] getExecutorCommand(
       Config config,
       Config runtime,
       int containerIndex,
-      List<String> ports) {
+      Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(Integer.toString(containerIndex));
+    commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));
@@ -183,80 +205,128 @@ public final class SchedulerUtils {
    *
    * @param config The static Config
    * @param runtime The runtime Config
-   * @param freePorts list of free ports
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, List<String> freePorts) {
+      Config config, Config runtime, Map<ExecutorPort, String> ports) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    String masterPort = freePorts.get(0);
-    String tmasterControllerPort = freePorts.get(1);
-    String tmasterStatsPort = freePorts.get(2);
-    String shellPort = freePorts.get(3);
-    String metricsmgrPort = freePorts.get(4);
-    String schedulerPort = freePorts.get(5);
-    String metricsCacheMasterPort = freePorts.get(6);
-    String metricsCacheStatsPort = freePorts.get(7);
-    String ckptmgrPort = freePorts.get(8);
+    String masterPort = ExecutorPort.getPort(
+        ExecutorPort.MASTER_PORT, ports);
+    String tmasterControllerPort = ExecutorPort.getPort(
+        ExecutorPort.TMASTER_CONTROLLER_PORT, ports);
+    String tmasterStatsPort = ExecutorPort.getPort(
+        ExecutorPort.TMASTER_STATS_PORT, ports);
+    String shellPort = ExecutorPort.getPort(
+        ExecutorPort.SHELL_PORT, ports);
+    String metricsmgrPort = ExecutorPort.getPort(
+        ExecutorPort.METRICS_MANAGER_PORT, ports);
+    String schedulerPort = ExecutorPort.getPort(
+        ExecutorPort.SCHEDULER_PORT, ports);
+    String metricsCacheMasterPort =  ExecutorPort.getPort(
+        ExecutorPort.METRICS_CACHE_MASTER_PORT, ports);
+    String metricsCacheStatsPort = ExecutorPort.getPort(
+        ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
+    String ckptmgrPort = ExecutorPort.getPort(
+        ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
+    String remoteDebuggerPorts = ExecutorPort.getPort(
+        ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports
+    );
 
     List<String> commands = new ArrayList<>();
-    commands.add(topology.getName());
-    commands.add(topology.getId());
-    commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    commands.add(Context.stateManagerConnectionString(config));
-    commands.add(Context.stateManagerRootPath(config));
-    commands.add(Context.tmasterBinary(config));
-    commands.add(Context.stmgrBinary(config));
-    commands.add(Context.metricsManagerClassPath(config));
-    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
-    commands.add(masterPort);
-    commands.add(tmasterControllerPort);
-    commands.add(tmasterStatsPort);
-    commands.add(Context.systemConfigFile(config));
-    commands.add(Runtime.componentRamMap(runtime));
-    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    commands.add(Context.topologyPackageType(config).name().toLowerCase());
-    commands.add(Context.topologyBinaryFile(config));
-    commands.add(Context.clusterJavaHome(config));
-    commands.add(shellPort);
-    commands.add(Context.shellBinary(config));
-    commands.add(metricsmgrPort);
-    commands.add(Context.cluster(config));
-    commands.add(Context.role(config));
-    commands.add(Context.environ(config));
-    commands.add(Context.instanceClassPath(config));
-    commands.add(Context.metricsSinksFile(config));
+    commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
+    commands.add(createCommandArg(ExecutorFlag.TopologyId, topology.getId()));
+    commands.add(createCommandArg(ExecutorFlag.TopologyDefinitionFile,
+        FileUtils.getBaseName(Context.topologyDefinitionFile(config))));
+    commands.add(createCommandArg(ExecutorFlag.StateManagerConnection,
+        Context.stateManagerConnectionString(config)));
+    commands.add(createCommandArg(ExecutorFlag.StateManagerRoot,
+        Context.stateManagerRootPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,
+        Context.metricsManagerClassPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.InstanceJvmOpts,
+        SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology))));
+    commands.add(createCommandArg(ExecutorFlag.Classpath,
+        TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config))));
+    commands.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
+    commands.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
+    commands.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
+    commands.add(createCommandArg(ExecutorFlag.HeronInternalsConfigFile,
+        Context.systemConfigFile(config)));
+    commands.add(createCommandArg(ExecutorFlag.OverrideConfigFile, Context.overrideFile(config)));
+    commands.add(createCommandArg(ExecutorFlag.ComponentRamMap, Runtime.componentRamMap(runtime)));
+    commands.add(createCommandArg(ExecutorFlag.ComponentJvmOpts,
+        SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology))));
+    commands.add(createCommandArg(ExecutorFlag.PkgType,
+        Context.topologyPackageType(config).name().toLowerCase()));
+    commands.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
+        Context.topologyBinaryFile(config)));
+    commands.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
+    commands.add(createCommandArg(ExecutorFlag.ShellPort, shellPort));
+    commands.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsManagerPort, metricsmgrPort));
+    commands.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
+    commands.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
+    commands.add(createCommandArg(ExecutorFlag.Environment, Context.environ(config)));
+    commands.add(createCommandArg(ExecutorFlag.InstanceClasspath,
+        Context.instanceClassPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsSinksConfigFile,
+        Context.metricsSinksFile(config)));
 
     String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
         Context.schedulerClassPath(config),
         Context.packingClassPath(config),
         Context.stateManagerClassPath(config));
 
-    commands.add(completeSchedulerProcessClassPath);
-    commands.add(schedulerPort);
-    commands.add(Context.pythonInstanceBinary(config));
-    commands.add(Context.metricsCacheManagerClassPath(config));
-    commands.add(metricsCacheMasterPort);
-    commands.add(metricsCacheStatsPort);
+    commands.add(createCommandArg(ExecutorFlag.SchedulerClasspath,
+        completeSchedulerProcessClassPath));
+    commands.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
+    commands.add(createCommandArg(ExecutorFlag.PythonInstanceBinary,
+        Context.pythonInstanceBinary(config)));
+    commands.add(createCommandArg(ExecutorFlag.CppInstanceBinary,
+        Context.cppInstanceBinary(config)));
+
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
+        Context.metricsCacheManagerClassPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort,
+        metricsCacheMasterPort));
+    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerStatsPort,
+        metricsCacheStatsPort));
 
     Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
-    commands.add(Boolean.toString(ckptMgrEnabled));
+    commands.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),
         Context.statefulStorageCustomClassPath(config));
-    commands.add(completeCkptmgrProcessClassPath);
-    commands.add(ckptmgrPort);
-    commands.add(Context.statefulConfigFile(config));
+    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerClasspath,
+        completeCkptmgrProcessClassPath));
+    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerPort, ckptmgrPort));
+    commands.add(createCommandArg(ExecutorFlag.StatefulConfigFile,
+        Context.statefulConfigFile(config)));
 
     String healthMgrMode =
         Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
-    commands.add(healthMgrMode);
-    commands.add(Context.healthMgrClassPath(config));
+    commands.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
+    commands.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
+        Context.healthMgrClassPath(config)));
+    if (remoteDebuggerPorts != null) {
+      commands.add(createCommandArg(ExecutorFlag.JvmRemoteDebuggerPorts, remoteDebuggerPorts));
+    }
 
     return commands.toArray(new String[commands.size()]);
+  }
+
+  public static String createCommandArg(ExecutorFlag flag, String value) {
+    return String.format("%s=%s", flag.getFlag(), value);
+  }
+
+  public static String[] splitCommandArg(String command) {
+    return command.split("=");
   }
 
   /**
@@ -368,51 +438,34 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Setup the working directory:
-   * <br> 1. Download heron core and the topology packages into topology working directory,
-   * <br> 2. Extract heron core and the topology packages
-   * <br> 3. Remove the downloaded heron core and the topology packages
+   * Create the directory if it does not exist otherwise clean the directory.
    *
-   * @param workingDirectory the working directory to setup
-   * @param coreReleasePackageURL the URL of core release package
-   * @param coreReleaseDestination the destination of the core release package fetched
-   * @param topologyPackageURL the URL of heron topology release package
-   * @param topologyPackageDestination the destination of heron topology release package fetched
-   * @param isVerbose display verbose output or not
+   * @param directory the working directory to setup
    * @return true if successful
    */
-  public static boolean setupWorkingDirectory(
-      String workingDirectory,
-      String coreReleasePackageURL,
-      String coreReleaseDestination,
-      String topologyPackageURL,
-      String topologyPackageDestination,
-      boolean isVerbose) {
-    // if the working directory does not exist, create it.
-    if (!FileUtils.isDirectoryExists(workingDirectory)) {
-      LOG.fine("The working directory does not exist; creating it.");
-      if (!FileUtils.createDirectory(workingDirectory)) {
-        LOG.severe("Failed to create directory: " + workingDirectory);
+  public static boolean createOrCleanDirectory(String directory) {
+    // if the directory does not exist, create it.
+    if (!FileUtils.isDirectoryExists(directory)) {
+      LOG.fine("The directory does not exist; creating it.");
+      if (!FileUtils.createDirectory(directory)) {
+        LOG.severe("Failed to create directory: " + directory);
         return false;
       }
     }
 
     // Cleanup the directory
-    if (!FileUtils.cleanDir(workingDirectory)) {
-      LOG.severe("Failed to clean directory: " + workingDirectory);
+    if (!FileUtils.cleanDir(directory)) {
+      LOG.severe("Failed to clean directory: " + directory);
       return false;
     }
 
-    // Curl and extract heron core release package and topology package
-    // And then delete the downloaded release package
-    boolean ret =
-        curlAndExtractPackage(
-            workingDirectory, coreReleasePackageURL, coreReleaseDestination, true, isVerbose)
-            &&
-            curlAndExtractPackage(
-                workingDirectory, topologyPackageURL, topologyPackageDestination, true, isVerbose);
+    return true;
+  }
 
-    return ret;
+  public static boolean extractPackage(String workingDirectory, String packageURI,
+      String packageDestination, boolean deletePackage, boolean verbose) {
+    return curlAndExtractPackage(workingDirectory, packageURI, packageDestination,
+        deletePackage, verbose);
   }
 
   /**

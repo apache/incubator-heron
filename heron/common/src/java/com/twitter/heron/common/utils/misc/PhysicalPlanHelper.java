@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.utils.Utils;
@@ -34,6 +36,8 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  */
 
 public class PhysicalPlanHelper {
+  private static final Logger LOG = Logger.getLogger(PhysicalPlanHelper.class.getName());
+
   private final PhysicalPlans.PhysicalPlan pplan;
   private final int myTaskId;
   private final String myComponent;
@@ -199,9 +203,14 @@ public class PhysicalPlanHelper {
 
   private Map<String, Object> mergeConfigs(TopologyAPI.Config config,
                                            TopologyAPI.Component acomponent) {
+    LOG.info("Building configs for component: " + myComponent);
+
     Map<String, Object> map = new HashMap<>();
     addConfigsToMap(config, map);
+    LOG.info("Added topology-level configs: " + map.toString());
+
     addConfigsToMap(acomponent.getConfig(), map); // Override any component specific configs
+    LOG.info("Added component-specific configs: " + map.toString());
     return map;
   }
 
@@ -300,6 +309,22 @@ public class PhysicalPlanHelper {
 
   public boolean isCustomGroupingEmpty() {
     return customGrouper.isCustomGroupingEmpty();
+  }
+
+  public boolean isTopologyStateful() {
+    Map<String, Object> config = topologyContext.getTopologyConfig();
+    if (config.get(Config.TOPOLOGY_RELIABILITY_MODE) == null) {
+      return false;
+    }
+    Config.TopologyReliabilityMode mode =
+        Config.TopologyReliabilityMode.valueOf(
+            String.valueOf(config.get(Config.TOPOLOGY_RELIABILITY_MODE)));
+
+    return Config.TopologyReliabilityMode.EFFECTIVELY_ONCE.equals(mode);
+  }
+
+  public boolean isTopologyRunning() {
+    return getTopologyState().equals(TopologyAPI.TopologyState.RUNNING);
   }
 }
 

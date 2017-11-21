@@ -21,9 +21,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.utils.topology.TopologyTests;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.packing.AssertPacking;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingException;
@@ -142,6 +142,62 @@ public class RoundRobinPackingTest {
       int instancesCount = containerPlan.getInstances().size();
       Assert.assertEquals(containerRam
           .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
+          resources.iterator().next().getRam());
+    }
+  }
+
+  /**
+   * Test the scenario container level resource config are set
+   */
+  @Test
+  public void testContainerRequestedResourcesWhenRamPaddingSet() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
+    // Set up the topology and its config
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    // Explicit set resources for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
+    ByteAmount containerRamPadding = ByteAmount.fromMegabytes(512);
+    float containerCpu = 30;
+
+    topologyConfig.setContainerRamRequested(containerRam);
+    topologyConfig.setContainerDiskRequested(containerDisk);
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setContainerRamPadding(containerRamPadding);
+    TopologyAPI.Topology topologyExplicitResourcesConfig =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitResourcesConfig =
+        getRoundRobinPackingPlan(topologyExplicitResourcesConfig);
+
+    Assert.assertEquals(numContainers,
+        packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      Assert.assertEquals(containerCpu, containerPlan.getRequiredResource().getCpu(), DELTA);
+      Assert.assertTrue(String.format(// due to round-off when using divide()
+          "expected: %s but was: %s", containerRam, containerPlan.getRequiredResource().getRam()),
+          Math.abs(
+              containerRam.minus(containerPlan.getRequiredResource().getRam()).asBytes()) <= 1);
+      Assert.assertEquals(containerDisk, containerPlan.getRequiredResource().getDisk());
+
+      // All instances' resource requirement should be equal
+      // So the size of set should be 1
+      Set<Resource> resources = new HashSet<>();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        resources.add(instancePlan.getResource());
+      }
+
+      Assert.assertEquals(1, resources.size());
+      int instancesCount = containerPlan.getInstances().size();
+      Assert.assertEquals(containerRam
+              .minus(containerRamPadding).divide(instancesCount),
           resources.iterator().next().getRam());
     }
   }

@@ -13,13 +13,12 @@
 # limitations under the License.
 ''' cdefs.py '''
 import os
-import yaml
 
-import heron.common.src.python.utils.log as Log
+import heron.tools.cli.src.python.cliconfig as cliconfig
 import heron.tools.common.src.python.utils.config as config
 
 ################################################################################
-def read_server_mode_cluster_definition(cluster, cl_args, config_file):
+def read_server_mode_cluster_definition(cluster, cl_args):
   '''
   Read the cluster definition for server mode
   :param cluster:
@@ -29,18 +28,10 @@ def read_server_mode_cluster_definition(cluster, cl_args, config_file):
   '''
 
   client_confs = dict()
-
-  # check if the config file exists, if it does, read it
-  if os.path.isfile(config_file):
-    with open(config_file, 'r') as conf_file:
-      client_confs = yaml.load(conf_file)
-
-  if not client_confs:
-    client_confs = dict()
-    client_confs[cluster] = dict()
+  client_confs[cluster] = cliconfig.cluster_config(cluster)
 
   # now check if the service-url from command line is set, if so override it
-  if cl_args['service_url']:
+  if cl_args.get('service_url', None):
     client_confs[cluster]['service_url'] = cl_args['service_url']
 
   # the return value of yaml.load can be None if conf_file is an empty file
@@ -58,6 +49,5 @@ def check_direct_mode_cluster_definition(cluster, config_path):
   '''
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Cluster config directory \'%s\' does not exist", config_path)
     return False
   return True

@@ -11,6 +11,7 @@ def heron_core_bin_files():
         "//heron/stmgr/src/cpp:heron-stmgr",
         "//heron/tmaster/src/cpp:heron-tmaster",
         "//heron/instance/src/python:heron-python-instance",
+        "//heron/instance/src/cpp:heron-cpp-instance",
         "//heron/downloaders/src/shell:heron-downloader"
     ]
 
@@ -82,6 +83,7 @@ def heron_core_lib_statefulstorage_files():
     return [
         "//heron/statefulstorages/src/java:heron-localfs-statefulstorage",
         "//heron/statefulstorages/src/java:heron-hdfs-statefulstorage",
+        "//heron/statefulstorages/src/java:heron-dlog-statefulstorage",
     ]
 
 def heron_core_lib_downloader_files():

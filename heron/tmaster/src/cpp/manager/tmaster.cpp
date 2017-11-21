@@ -71,6 +71,9 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   stats_port_ = _stats_port;
   myhost_name_ = _myhost_name;
   eventLoop_ = eventLoop;
+  dns_ = new AsyncDNS(eventLoop_);
+  http_client_ = new HTTPClient(eventLoop_, dns_);
+
   metrics_collector_ =
       new TMetricsCollector(config::HeronInternalsConfigReader::Instance()
                                     ->GetHeronTmasterMetricsCollectorMaximumIntervalMin() *
@@ -240,6 +243,8 @@ TMaster::~TMaster() {
   delete tmasterProcessMetrics;
   delete stateful_controller_;
   delete ckptmgr_client_;
+  delete http_client_;
+  delete dns_;
 }
 
 void TMaster::UpdateProcessMetrics(EventLoop::Status) {
@@ -595,22 +600,51 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
   tmaster_controller_->HandleCleanStatefulCheckpointResponse(_status);
 }
 
+void TMaster::KillContainer(const std::string& host_name,
+    sp_int32 shell_port, sp_string stmgr_id) {
+  LOG(INFO) << "Start killing " << stmgr_id << " on " <<
+    host_name << ":" << shell_port;
+  HTTPKeyValuePairs kvs;
+  kvs.push_back(make_pair("secret", GetTopologyId()));
+  OutgoingHTTPRequest* request =
+    new OutgoingHTTPRequest(host_name, shell_port,
+        "/killexecutor", BaseHTTPRequest::POST, kvs);
+  auto cb = [host_name, shell_port, stmgr_id](IncomingHTTPResponse* response) {
+    LOG(INFO) << "Response code of HTTP request of killing " << stmgr_id
+      << " on " << host_name << ":" << shell_port << ": "
+      << response->response_code();
+  };
+  if (http_client_->SendRequest(request, std::move(cb)) != SP_OK) {
+    LOG(ERROR) << "Failed to kill " << stmgr_id << " on "
+      << host_name << ":" << shell_port;
+  }
+  LOG(INFO) << "Finish killing " << stmgr_id << " on " <<
+    host_name << ":" << shell_port;
+  return;
+}
+
 proto::system::Status* TMaster::RegisterStMgr(
     const proto::system::StMgr& _stmgr, const std::vector<proto::system::Instance*>& _instances,
     Connection* _conn, proto::system::PhysicalPlan*& _pplan) {
   const std::string& stmgr_id = _stmgr.id();
-  LOG(INFO) << "Got a register stmgr request from " << stmgr_id << std::endl;
+  LOG(INFO) << "Got a register stream manager request from " << stmgr_id;
 
   // First check if there are any other stream manager present with the same id
   if (stmgrs_.find(stmgr_id) != stmgrs_.end()) {
     // Some other dude is already present with us.
     // First check to see if that other guy has timed out
     if (!stmgrs_[stmgr_id]->TimedOut()) {
-      // we reject the new guy
-      LOG(ERROR) << "Another stmgr exists at "
+      LOG(ERROR) << "Another stream manager " << stmgr_id << " exists at "
                  << stmgrs_[stmgr_id]->get_connection()->getIPAddress() << ":"
                  << stmgrs_[stmgr_id]->get_connection()->getPort()
                  << " with the same id and it hasn't timed out";
+      LOG(INFO) << "Potential zombie host exists. Start killing both containers";
+      sp_string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
+      sp_int32 zombie_port = stmgrs_[stmgr_id]->get_stmgr()->shell_port();
+      sp_string new_host_name = _stmgr.host_name();
+      sp_int32 new_port = _stmgr.shell_port();
+      KillContainer(zombie_host_name, zombie_port, stmgr_id);
+      KillContainer(new_host_name, new_port, stmgr_id);
       proto::system::Status* status = new proto::system::Status();
       status->set_status(proto::system::DUPLICATE_STRMGR);
       status->set_message("Duplicate StreamManager");
@@ -630,7 +664,7 @@ proto::system::Status* TMaster::RegisterStMgr(
     }
   } else if (absent_stmgrs_.find(stmgr_id) == absent_stmgrs_.end()) {
     // Check to see if we were expecting this guy
-    LOG(ERROR) << "We were not expecting this stmgr" << std::endl;
+    LOG(ERROR) << "We were not expecting stream manager " << stmgr_id;
     proto::system::Status* status = new proto::system::Status();
     status->set_status(proto::system::INVALID_STMGR);
     status->set_message("Invalid StreamManager");
@@ -647,7 +681,7 @@ proto::system::Status* TMaster::RegisterStMgr(
       do_reassign_ = true;
     } else {
       assignment_in_progress_ = true;
-      LOG(INFO) << "All stmgrs have connected with us" << std::endl;
+      LOG(INFO) << "All stream managers have connected with us";
       auto cb = [this](EventLoop::Status status) { this->DoPhysicalPlan(status); };
       CHECK_GE(eventLoop_->registerTimer(std::move(cb), false, 0), 0);
     }

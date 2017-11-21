@@ -28,6 +28,7 @@
 #include <map>
 #include <unordered_set>
 #include <string>
+#include <utility>
 #include "basics/basics.h"
 #include "proto/messages.h"
 #include "config/topology-config-vars.h"
@@ -39,6 +40,9 @@ class TopologyConfigHelper {
  public:
   static TopologyConfigVars::TopologyReliabilityMode
           GetReliabilityMode(const proto::api::Topology& _topology);
+
+  // Are message timeouts enabled for this topology
+  static bool EnableMessageTimeouts(const proto::api::Topology& _topology);
 
   // This returns the value of TOPOLOGY_STMGRS from the config
   static sp_int32 GetNumStMgrs(const proto::api::Topology& _topology);
@@ -77,6 +81,44 @@ class TopologyConfigHelper {
 
   // Gets the per container ram requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
+
+  // Get all the streams emitted by a component
+  static void GetComponentStreams(const proto::api::Topology& _topology,
+                                  const std::string& component,
+                                  std::unordered_set<std::string>& retval);
+
+  // Get the schema of the stream of a component
+  static proto::api::StreamSchema* GetStreamSchema(proto::api::Topology& _topology,
+                                                   const std::string& _component,
+                                                   const std::string& _stream);
+
+  // Get the sources for this component. The return value is a map of <componentName, streamId> to
+  // Grouping map
+  static void GetComponentSources(const proto::api::Topology& _topology,
+                                  const std::string& _component,
+                                  std::map<std::pair<std::string, std::string>,
+                                           proto::api::Grouping>& retval);
+
+  // Get the targets for this component. The return value is a map of <componentName, streamId> to
+  // Grouping map
+  static void GetComponentTargets(const proto::api::Topology& _topology,
+                                  const std::string& _component,
+                                  std::map<std::string,
+                                           std::map<std::string, proto::api::Grouping>>& retval);
+
+  // Get all the component names
+  static void GetAllComponentNames(const proto::api::Topology& _topology,
+                                   std::unordered_set<std::string>& retval);
+
+  // Is this a spout
+  static bool IsComponentSpout(const proto::api::Topology& _topology,
+                               const std::string& _component);
+
+  // Log this topology
+  static void LogTopology(const proto::api::Topology& _topology);
+
+  // Log this config
+  static void LogConfig(const proto::api::Config& _config);
 
   // Should this stateful topology start from clean state
   static bool StatefulTopologyStartClean(const proto::api::Topology& _topology);

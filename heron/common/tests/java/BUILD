@@ -3,7 +3,7 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps = [
         "//heron/proto:proto_topology_java",
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",

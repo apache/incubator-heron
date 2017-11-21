@@ -93,14 +93,8 @@ public class KubernetesController {
    * @param deployConf, the json body as a string
    */
   protected void deployContainer(String deployConf) throws IOException {
-
     HttpJsonClient jsonAPIClient = new HttpJsonClient(this.baseUriPath);
-    try {
-      jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
-    } catch (IOException ioe) {
-      throw ioe;
-    }
-
+    jsonAPIClient.post(deployConf, HttpURLConnection.HTTP_CREATED);
   }
 
   /**
@@ -133,7 +127,6 @@ public class KubernetesController {
    * Submit a topology to kubernetes based on a set of pod configurations
    */
   protected boolean submitTopology(String[] appConfs) {
-
     if (!this.topologyName.equals(this.topologyName.toLowerCase())) {
       throw new TopologySubmissionException("K8S scheduler does not allow upper case topologies.");
     }
@@ -142,11 +135,12 @@ public class KubernetesController {
       try {
         deployContainer(appConf);
       } catch (IOException ioe) {
-        LOG.log(Level.SEVERE, "Problem deploying container with config: " + appConf);
-        return false;
+        final String message = ioe.getMessage();
+        LOG.log(Level.SEVERE, "Problem deploying container: " + ioe.getMessage(), ioe);
+        LOG.log(Level.SEVERE, "Container config: " + appConf);
+        throw new TopologySubmissionException(message);
       }
     }
     return true;
   }
-
 }

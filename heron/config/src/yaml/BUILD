@@ -14,12 +14,17 @@ filegroup(
 
 filegroup(
     name = "conf-yaml",
-    srcs = glob(["conf/**/*.yaml"]),
+    srcs = glob(["conf/**/*.yaml"] + ["conf/**/*.aurora"]),
 )
 
 filegroup(
     name = "conf-local-yaml",
     srcs = glob(["conf/local/*.yaml"]),
+)
+
+filegroup(
+    name = "conf-sandbox-yaml",
+    srcs = glob(["conf/sandbox/*.yaml"]),
 )
 
 filegroup(

@@ -519,7 +519,7 @@ void StMgr::StartTMasterClient() {
   } else {
     std::vector<proto::system::Instance*> all_instance_info;
     instance_server_->GetInstanceInfo(all_instance_info);
-    tmaster_client_->SetStmgrRegisterRequest(all_instance_info);
+    tmaster_client_->SetInstanceInfo(all_instance_info);
     if (!tmaster_client_->IsConnected()) {
       LOG(INFO) << "Connecting to the TMaster as all the instances have connected to us";
       tmaster_client_->Start();
@@ -549,8 +549,8 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   if (!pplan_) {
     LOG(INFO) << "This is the first time we received the physical plan";
   } else if (_pplan->topology().state() != pplan_->topology().state()) {
-    LOG(INFO) << "Topology state changed from " << _pplan->topology().state() << " to "
-              << pplan_->topology().state();
+    LOG(INFO) << "Topology state changed from " << pplan_->topology().state() << " to "
+              << _pplan->topology().state();
   }
   proto::api::TopologyState st = _pplan->topology().state();
   _pplan->clear_topology();

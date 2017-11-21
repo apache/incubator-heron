@@ -247,12 +247,8 @@ def get_heron_cluster(cluster_role_env):
   """Get the cluster to which topology is submitted"""
   return cluster_role_env.split('/')[0]
 
-def heron_rc_file():
-  """Get the full path name of the .heronrc file"""
-  return os.path.join(os.path.expanduser('~'), '.heronrc')
-
 ################################################################################
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,superfluous-parens
 def parse_cluster_role_env(cluster_role_env, config_path):
   """Parse cluster/[role]/[environ], supply default, if not provided, not required"""
   parts = cluster_role_env.split('/')[:3]
@@ -279,7 +275,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if tmp_confs is not None:
           cli_confs = tmp_confs
         else:
-          print "Failed to read: %s due to it is empty" % (CLIENT_YAML)
+          print("Failed to read: %s due to it is empty" % (CLIENT_YAML))
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
@@ -299,7 +295,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
-    print "Failed to parse"
+    print("Failed to parse")
     sys.exit(1)
 
   return (parts[0], parts[1], parts[2])
@@ -353,7 +349,7 @@ def direct_mode_cluster_role_env(cluster_role_env, config_path):
   return True
 
 ################################################################################
-def server_mode_cluster_role_env(cluster_role_env, config_map, config_file):
+def server_mode_cluster_role_env(cluster_role_env, config_map):
   """Check cluster/[role]/[environ], if they are required"""
 
   cmap = config_map[cluster_role_env[0]]
@@ -361,14 +357,14 @@ def server_mode_cluster_role_env(cluster_role_env, config_map, config_file):
   # if role is required but not provided, raise exception
   role_present = True if len(cluster_role_env[1]) > 0 else False
   if ROLE_KEY in cmap and cmap[ROLE_KEY] and not role_present:
-    raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
-                    % (cluster_role_env, ROLE_KEY, config_file))
+    raise Exception("role required but not provided (cluster/role/env = %s)."\
+        % (cluster_role_env))
 
   # if environ is required but not provided, raise exception
   environ_present = True if len(cluster_role_env[2]) > 0 else False
   if ENVIRON_KEY in cmap and cmap[ENVIRON_KEY] and not environ_present:
-    raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
-                    % (cluster_role_env, ENVIRON_KEY, config_file))
+    raise Exception("environ required but not provided (cluster/role/env = %s)."\
+        % (cluster_role_env))
 
   return True
 
@@ -447,7 +443,7 @@ def print_build_info(zipped_pex=False):
     release_map = yaml.load(release_info)
     release_items = sorted(release_map.items(), key=lambda tup: tup[0])
     for key, value in release_items:
-      print "%s : %s" % (key, value)
+      print("%s : %s" % (key, value))
 
 def get_version_number(zipped_pex=False):
   """Print version from release.yaml

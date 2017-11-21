@@ -7,10 +7,16 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
-  - name: Topology Writers
+  - name: The Heron Streamlet API
     sublinks:
-      - name: Java Topologies
+    - name: The Heron Streamlet API for Java
+      url: /docs/developers/java/streamlet-api
+  - name: The Heron Topology API
+    sublinks:
+      - name: The Heron Topology API for Java
         url: /docs/developers/java/topologies
+      - name: Effectively-once Java topologies
+        url: /docs/developers/java/effectively-once
       - name: Python Topologies
         url: /docs/developers/python/topologies
       - name: Heron Data Model
@@ -41,12 +47,16 @@ sections:
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
+      - name: Heron Delivery Semantics
+        url: /docs/concepts/delivery-semantics
   - name: Deployment
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
       - name: Configuration
         url: /docs/operators/deployment/configuration
+      - name: The Heron API server
+        url: /docs/operators/heron-api-server
   - name: State Managers
     sublinks:
       - name: Zookeeper
@@ -65,6 +75,8 @@ sections:
         url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
+      - name: Kubernetes
+        url: /docs/operators/deployment/schedulers/kubernetes
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
       - name: Local Cluster
@@ -93,12 +105,18 @@ sections:
         url: /docs/operators/configuration/tmaster
   - name: Observability
     sublinks:
-      - name: Graphite
-        url: /docs/operators/observability/graphite
+    - name: Prometheus
+      url: /docs/operators/observability/prometheus
+    - name: Graphite
+      url: /docs/operators/observability/graphite
+    - name: Scribe
+      url: /docs/operators/observability/scribe
   - name: User Manuals
     sublinks:
       - name: Heron Client
         url: /docs/operators/heron-cli
+      - name: Heron Explorer
+        url: /docs/operators/heron-explorer
       - name: Heron Tracker REST API
         url: /docs/operators/heron-tracker-api
       - name: Heron Tracker Runbook

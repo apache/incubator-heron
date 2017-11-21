@@ -1,0 +1,81 @@
+##
+## Heron API server deployment
+##
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: heron-apiserver
+  name: heron-apiserver
+  namespace: default
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: heron-apiserver
+  labels:
+    app: heron-apiserver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: heron-apiserver
+  namespace: default
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: heron-apiserver
+  labels:
+    app: heron-apiserver
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: heron-apiserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: heron-apiserver
+    spec:
+      serviceAccountName: heron-apiserver
+      containers:
+        - name: heron-apiserver
+          image: heron/heron:latest
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-apiserver
+              --base-template kubernetes
+              --cluster kubernetes
+              -D heron.statemgr.connection.string=zookeeper:2181
+              -D heron.kubernetes.scheduler.uri=http://localhost:8001
+              -D heron.executor.docker.image=heron/heron:latest
+              -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
+              -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://zookeeper:2181/distributedlog
+        - name: kubectl-proxy
+          image: heron/kubectl:latest
+          command: ["sh", "-c"]
+          args:
+            - >
+              kubectl proxy -p 8001
+---    
+apiVersion: v1
+kind: Service
+metadata:
+  name: heron-apiserver
+spec:
+  selector:
+    app: heron-apiserver
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: NodePort

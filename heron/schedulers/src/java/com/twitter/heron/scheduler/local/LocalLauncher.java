@@ -15,6 +15,9 @@
 package com.twitter.heron.scheduler.local;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +30,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.utils.ShellUtils;
@@ -66,7 +70,7 @@ public class LocalLauncher implements ILauncher {
 
     // setup the working directory
     // mainly it downloads and extracts the heron-core-release and topology package
-    if (!setupWorkingDirectory()) {
+    if (!setupWorkingDirectoryAndExtractPackages()) {
       LOG.severe("Failed to setup working directory");
       return false;
     }
@@ -99,9 +103,11 @@ public class LocalLauncher implements ILauncher {
     return SchedulerUtils.schedulerCommand(config, runtime, freePorts);
   }
 
-  protected boolean setupWorkingDirectory() {
+  protected boolean setupWorkingDirectoryAndExtractPackages() {
     // get the path of core release URI
     String coreReleasePackageURI = LocalContext.corePackageUri(config);
+
+    LOG.info("core release package uri: " + coreReleasePackageURI);
 
     // form the target dest core release file name
     String coreReleaseFileDestination = Paths.get(
@@ -114,13 +120,36 @@ public class LocalLauncher implements ILauncher {
     String topologyPackageDestination = Paths.get(
         topologyWorkingDirectory, "topology.tar.gz").toString();
 
-    return SchedulerUtils.setupWorkingDirectory(
-        topologyWorkingDirectory,
-        coreReleasePackageURI,
-        coreReleaseFileDestination,
-        topologyPackageURI,
-        topologyPackageDestination,
-        Context.verbose(config));
+    if (!SchedulerUtils.createOrCleanDirectory(topologyWorkingDirectory)) {
+      return false;
+    }
+
+    final boolean isVerbose =  Context.verbose(config);
+
+    // Check if the config is set to use the heron core uri (this is the default behavior)
+    // If set to false we will try to create a symlink to the install heron-core. This is used
+    // in the sandbox config to avoid installing the heron client on the docker image.
+    if (config.getBooleanValue(LocalKey.USE_HERON_CORE_URI.value(),
+        LocalKey.USE_HERON_CORE_URI.getDefaultBoolean())) {
+      if (!SchedulerUtils.extractPackage(topologyWorkingDirectory, coreReleasePackageURI,
+          coreReleaseFileDestination, true, isVerbose)) {
+        return false;
+      }
+    } else {
+      Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME), "heron-core");
+      Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
+      try {
+        Files.createSymbolicLink(heronCoreLink, heronCore);
+      } catch (IOException ioe) {
+        LOG.log(Level.SEVERE, "Unable to create heron core link from "
+            + heronCoreLink + " to " + heronCore, ioe);
+        return false;
+      }
+    }
+
+    // extract the topology package and then delete the downloaded release package
+    return SchedulerUtils.extractPackage(topologyWorkingDirectory, topologyPackageURI,
+        topologyPackageDestination, true, isVerbose);
   }
 
   protected Process startScheduler(String[] schedulerCmd) {

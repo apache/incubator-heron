@@ -44,6 +44,7 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -142,22 +143,22 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
     if (spout instanceof IStatefulComponent) {
-      LOG.info("Starting checkpoint");
       ((IStatefulComponent) spout).preSave(checkpointId);
-    } else {
-      LOG.info("Trying to checkponit a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
   }
 
   @SuppressWarnings("unchecked")
-  public void start() {
+  @Override
+  public void init(State<Serializable, Serializable> state) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
@@ -167,6 +168,7 @@ public class SpoutInstance implements IInstance {
 
     // Initialize the instanceState if the spout is stateful
     if (spout instanceof IStatefulComponent) {
+      this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
     }
 
@@ -178,21 +180,18 @@ public class SpoutInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+  }
 
-    // Tasks happen in every time looper is waken up
+  @Override
+  public void start() {
+    // Add spout tasks for execution
     addSpoutsTasks();
 
     topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
-  public void start(State<Serializable, Serializable> state) {
-    this.instanceState = state;
-    start();
-  }
-
-  @Override
-  public void stop() {
+  public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
 
@@ -200,9 +199,14 @@ public class SpoutInstance implements IInstance {
     spout.close();
 
     // Clean the resources we own
-    looper.exitLoop();
     streamInQueue.clear();
     collector.clear();
+  }
+
+  @Override
+  public void shutdown() {
+    clean();
+    looper.exitLoop();
   }
 
   @Override
@@ -239,9 +243,10 @@ public class SpoutInstance implements IInstance {
           spoutMetrics.updateOutQueueFullCount();
         }
 
-        if (ackEnabled) {
-          readTuplesAndExecute(streamInQueue);
+        // Check if we have any message to process anyway
+        readTuplesAndExecute(streamInQueue);
 
+        if (ackEnabled) {
           // Update the pending-to-be-acked tuples counts
           spoutMetrics.updatePendingTuplesCount(collector.numInFlight());
         } else {
@@ -260,6 +265,8 @@ public class SpoutInstance implements IInstance {
     if (enableMessageTimeouts) {
       lookForTimeouts();
     }
+
+    InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
   /**
@@ -396,11 +403,8 @@ public class SpoutInstance implements IInstance {
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpintId = ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Persisting state for checkpoint: " + checkpintId);
         persistState(checkpintId);
-      }
-
-      if (msg instanceof HeronTuples.HeronTupleSet) {
+      } else if (msg instanceof HeronTuples.HeronTupleSet) {
         HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
         // For spout, it should read only control tuples(ack&fail)
         if (tuples.hasData()) {
@@ -420,6 +424,9 @@ public class SpoutInstance implements IInstance {
         if (System.nanoTime() - startOfCycle - spoutAckBatchTime.toNanos() > 0) {
           break;
         }
+      } else {
+        // Spout instance should not receive any other messages except the above ones
+        throw new RuntimeException("Invalid data sent to spout instance");
       }
     }
   }

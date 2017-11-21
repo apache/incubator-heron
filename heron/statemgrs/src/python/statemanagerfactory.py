@@ -19,7 +19,6 @@ Returns these state managers.
 '''
 
 import os
-import traceback
 
 
 from heron.statemgrs.src.python.filestatemanager import FileStateManager
@@ -43,8 +42,8 @@ def get_all_state_managers(conf):
 
 def get_all_zk_state_managers(conf):
   """
-  Connects to all the zookeeper state_managers and returns
-  the connected state_managers instances.
+  Creates all the zookeeper state_managers and returns
+  them in a list
   """
   state_managers = []
   state_locations = conf.get_state_locations_of_type("zookeeper")
@@ -67,12 +66,6 @@ def get_all_zk_state_managers(conf):
     rootpath = location['rootpath']
     LOG.info("Connecting to zk hostports: " + str(hostportlist) + " rootpath: " + rootpath)
     state_manager = ZkStateManager(name, hostportlist, rootpath, tunnelhost)
-    try:
-      state_manager.start()
-    except Exception as ex:
-      LOG.error("Exception while connecting to state_manager.")
-      LOG.debug(traceback.format_exc())
-      raise ex
     state_managers.append(state_manager)
 
   return state_managers
@@ -88,12 +81,6 @@ def get_all_file_state_managers(conf):
     rootpath = os.path.expanduser(location['rootpath'])
     LOG.info("Connecting to file state with rootpath: " + rootpath)
     state_manager = FileStateManager(name, rootpath)
-    try:
-      state_manager.start()
-    except Exception as ex:
-      LOG.error("Exception while connecting to state_manager.")
-      traceback.print_exc()
-      raise ex
     state_managers.append(state_manager)
 
   return state_managers

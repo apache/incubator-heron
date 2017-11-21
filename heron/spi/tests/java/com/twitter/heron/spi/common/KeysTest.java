@@ -154,6 +154,10 @@ public class KeysTest {
         Key.PYTHON_INSTANCE_BINARY
     );
     assertEquals(
+        "heron.binaries.cpp.instance",
+        Key.CPP_INSTANCE_BINARY
+    );
+    assertEquals(
         "heron.jars.scheduler",
         Key.SCHEDULER_JAR
     );

@@ -21,7 +21,9 @@ import com.twitter.heron.spi.common.Key;
 public enum LocalKey {
   // config key for specifying the working directory of a topology
   WORKING_DIRECTORY("heron.scheduler.local.working.directory",
-      "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}");
+      "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}"),
+
+  USE_HERON_CORE_URI("heron.scheduler.local.use_core_uri", true);
 
   private final String value;
   private final Key.Type type;
@@ -33,12 +35,26 @@ public enum LocalKey {
     this.defaultValue = defaultValue;
   }
 
+  LocalKey(String value, boolean defaultValue) {
+    this.value = value;
+    this.type = Key.Type.BOOLEAN;
+    this.defaultValue = defaultValue;
+  }
+
   public String value() {
     return value;
   }
 
   public Object getDefault() {
     return defaultValue;
+  }
+
+  public Boolean getDefaultBoolean() {
+    if (type != Key.Type.BOOLEAN) {
+      throw new IllegalAccessError(String.format(
+          "Config Key %s is type %s, getDefaultBoolean() not supported", this.name(), this.type));
+    }
+    return (Boolean) this.defaultValue;
   }
 
   public String getDefaultString() {

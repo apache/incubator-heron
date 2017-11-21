@@ -57,7 +57,7 @@ class OutgoingTupleHelper(object):
     # read the config values
     self.data_tuple_set_capacity = self.sys_config[constants.INSTANCE_SET_DATA_TUPLE_CAPACITY]
     self.max_data_tuple_size_in_bytes =\
-      self.sys_config.get(constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES, sys.maxint)
+      self.sys_config.get(constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES, sys.maxsize)
     self.control_tuple_set_capacity = self.sys_config[constants.INSTANCE_SET_CONTROL_TUPLE_CAPACITY]
 
   def send_out_tuples(self):

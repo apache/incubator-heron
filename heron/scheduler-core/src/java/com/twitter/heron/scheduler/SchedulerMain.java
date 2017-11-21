@@ -27,12 +27,13 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
@@ -232,7 +233,7 @@ public class SchedulerMain {
                                              String topologyName,
                                              int httpPort,
                                              Boolean verbose
-                                             ) throws IOException {
+                                             ) throws IOException, InvalidTopologyException {
     return createInstance(
         cluster, role, env, topologyJar, topologyName, httpPort, verbose, new Properties());
   }
@@ -244,7 +245,8 @@ public class SchedulerMain {
                                              String topologyName,
                                              int httpPort,
                                              Boolean verbose,
-                                             Properties schedulerProperties) throws IOException {
+                                             Properties schedulerProperties)
+      throws IOException, InvalidTopologyException {
     // Look up the topology def file location
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
 

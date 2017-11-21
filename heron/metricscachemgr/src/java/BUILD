@@ -10,7 +10,7 @@ metricscachemgr_deps_files = heron_java_proto_files() + [
            "//heron/spi/src/java:utils-spi-java",
            "//heron/spi/src/java:statemgr-spi-java",
            "//heron/spi/src/java:packing-spi-java",
-           "//heron/api/src/java:api-java",
+           "//heron/api/src/java:api-java-low-level",
            "//heron/common/src/java:basics-java",
            "//heron/common/src/java:config-java",
            "//heron/common/src/java:network-java",

@@ -1,5 +1,4 @@
 @import "variables";
-@import "pygments";
 @import "bootstrap";
 @import "typography";
 
@@ -149,47 +148,24 @@ aside.hn-sidebar {
   }
 }
 
-// Hide sidebar for mobile, show later
-@media (min-width: 768px) {
-  .hn-sidebar {
-    position: fixed;
-    top: $navbar-height;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    display: block;
-    padding: 20px;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: white;/*#f5f5f5;*/
-    border-right: 1px solid #eee;
-  }
+.hn-sidebar {
+  position: fixed;
+  top: $navbar-height;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  background-color: white;/*#f5f5f5;*/
+  border-right: 1px solid #eee;
 }
 
 // Main content on docs pages
 section.hn-docs-main {
+  max-width: 100%;
   margin-bottom: $docs-main-bottom-margin;
-  header.hn-docs-header {
-    .hn-docs-description {
-      font-weight: bolder;
-    }
-  }
-}
-
-@media (min-width: 768px) {
-  .hn-docs-main {
-    max-width: 70%;
-    padding-right: 40px;
-    padding-left: 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hn-docs-main {
-    padding: 40px;
-    max-width: 100%;
-    margin-left: 0;
-  }
 }
 
 // Footer on the index page

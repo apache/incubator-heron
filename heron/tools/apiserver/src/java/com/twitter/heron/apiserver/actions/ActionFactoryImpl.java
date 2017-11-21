@@ -13,9 +13,10 @@
 //  limitations under the License.
 package com.twitter.heron.apiserver.actions;
 
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
-import com.twitter.heron.common.utils.topology.TopologyUtils;
 import com.twitter.heron.spi.common.Config;
 
 public class ActionFactoryImpl implements ActionFactory {
@@ -23,7 +24,12 @@ public class ActionFactoryImpl implements ActionFactory {
   @Override
   public Action createSubmitAction(Config config, String topologyPackagePath,
         String topologyBinaryFileName, String topologyDefinitionPath) {
-    final TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefinitionPath);
+    final TopologyAPI.Topology topology;
+    try {
+      topology = TopologyUtils.getTopology(topologyDefinitionPath);
+    } catch (InvalidTopologyException e) {
+      throw new RuntimeException(e);
+    }
     final Config topologyConfig =
         ConfigUtils.getTopologyConfig(topologyPackagePath, topologyBinaryFileName,
             topologyDefinitionPath, topology);

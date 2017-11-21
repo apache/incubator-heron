@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.twitter.heron.api;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,10 +70,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts";
   /**
-   * How often a tick tuple from the "__system" component and "__tick" stream should be sent
+   * How often (in milliseconds) a tick tuple from the "__system" component and "__tick" stream should be sent
    * to tasks. Meant to be used as a component-specific configuration.
    */
-  public static final String TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+  public static final String TOPOLOGY_TICK_TUPLE_FREQ_MS = "topology.tick.tuple.freq.ms";
   /**
    * True if Heron should timeout messages or not. Defaults to true. This is meant to be used
    * in unit tests to prevent tuples from being accidentally timed out during the test.
@@ -181,6 +201,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
   /**
+   * Amount of ram to pad each container.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+  /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
@@ -235,6 +260,26 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
       "topology.update.reactivate.wait.secs";
 
+  /**
+   * Topology-specific environment properties to be added to an Heron instance.
+   * This is added to the existing environment (that of the Heron instance).
+   * This variable contains Map<String, String>
+   */
+  public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
+  /**
+   * Timer events registered for a topology.
+   * This is a Map<String, Pair<Duration, Runnable>>.
+   * Where the key is the name and the value contains the frequency of the event
+   * and the task to run.
+   */
+  public static final String TOPOLOGY_TIMER_EVENTS = "topology.timer.events";
+
+  /**
+   * Enable Remote debugging for java heron instances
+   */
+  public static final String TOPOLOGY_REMOTE_DEBUGGING_ENABLE = "topology.remote.debugging.enable";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -248,7 +293,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_WORKER_CHILDOPTS);
     apiVars.add(TOPOLOGY_COMPONENT_JVMOPTS);
     apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
-    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_MS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
     apiVars.add(TOPOLOGY_CONTAINER_CPU_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_DISK_REQUESTED);
@@ -257,6 +302,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_DISK_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
+    apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
@@ -269,6 +315,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
     apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
+    apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
   }
 
   public Config() {
@@ -333,7 +380,11 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+    setTickTupleFrequencyMs(conf, (long) (seconds * 1000));
+  }
+
+  public static void setTickTupleFrequencyMs(Map<String, Object> conf, long millis) {
+    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, millis);
   }
 
   public static void setTopologyReliabilityMode(Map<String, Object> conf,
@@ -387,6 +438,10 @@ public class Config extends HashMap<String, Object> {
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
     conf.put(Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, Integer.toString(percentage));
+  }
+
+  public static void setContainerRamPadding(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
   }
 
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
@@ -461,6 +516,11 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static void setEnvironment(Map<String, Object> conf, Map env) {
+    conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
   public void setDebug(boolean isOn) {
@@ -550,6 +610,10 @@ public class Config extends HashMap<String, Object> {
     setContainerPaddingPercentage(this, percentage);
   }
 
+  public void setContainerRamPadding(ByteAmount nbytes) {
+    setContainerRamPadding(this, nbytes);
+  }
+
   public void setComponentRamMap(String ramMap) {
     setComponentRamMap(this, ramMap);
   }
@@ -602,5 +666,36 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  /**
+   * Registers a timer event that executes periodically
+   * @param conf the map with the existing topology configs
+   * @param name the name of the timer
+   * @param interval the frequency in which to run the task
+   * @param task the task to run
+   */
+  @SuppressWarnings("unchecked")
+  public static void registerTopologyTimerEvents(Map<String, Object> conf,
+                                                 String name, Duration interval,
+                                                 Runnable task) {
+    if (interval.isZero() || interval.isNegative()) {
+      throw new IllegalArgumentException("Timer duration needs to be positive");
+    }
+    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
+      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
+    }
+
+    Map<String, Pair<Duration, Runnable>> timers
+        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timers.containsKey(name)) {
+      throw new IllegalArgumentException("Timer with name " + name + " already exists");
+    }
+    timers.put(name, Pair.of(interval, task));
+  }
+
+  public void setTopologyRemoteDebugging(boolean isOn) {
+    this.put(Config.TOPOLOGY_REMOTE_DEBUGGING_ENABLE, String.valueOf(isOn));
   }
 }

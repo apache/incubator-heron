@@ -98,7 +98,6 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   topology_jar = os.path.basename(topology_tar).replace(".tar.gz", "").replace(".tar", "") + ".jar"
 
   extra_jars = [
-      os.path.join(tmpdir, "heron-instance.jar"),
       os.path.join(tmpdir, topology_jar),
       os.path.join(tmpdir, "*"),
       os.path.join(tmpdir, "libs/*")
@@ -143,3 +142,20 @@ def heron_pex(topology_pex, topology_class_name, args=None):
       err_context = "Topology %s failed to be loaded from the given pex: %s" %\
                 (topology_class_name, ex)
       return SimpleResult(Status.HeronError, err_context)
+
+# pylint: disable=superfluous-parens
+def heron_cpp(topology_binary, args=None):
+  Log.debug("Executing %s", topology_binary)
+  heron_env = os.environ.copy()
+  heron_env['HERON_OPTIONS'] = opts.get_heron_config()
+  cmd = [topology_binary]
+  if args is not None:
+    cmd.extend(args)
+  Log.debug("Invoking binary using command: ``%s''", ' '.join(cmd))
+  Log.debug('Heron options: {%s}', str(heron_env['HERON_OPTIONS']))
+  print("Invoking class using command: ``%s''" % ' '.join(cmd))
+  print('Heron options: {%s}' % str(heron_env['HERON_OPTIONS']))
+  # invoke the command with subprocess and print error message, if any
+  proc = subprocess.Popen(cmd, env=heron_env, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, bufsize=1)
+  return ProcessResult(proc)

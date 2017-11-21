@@ -187,8 +187,8 @@ public class MetricsCacheSink implements IMetricsSink {
     LOG.info("metricscache sink processRecord");
     // Format it into TopologyMaster.PublishMetrics
 
-    // The format of source is "host:port/componentName/instanceId"
-    // So source.split("/") would be an array with 3 elements:
+    // The format of record is "host:port/componentName/instanceId"
+    // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
     // ["host:port", componentName, instanceId]
     String[] sources = MetricsUtil.splitRecordSource(record);
     String hostPort = sources[0];

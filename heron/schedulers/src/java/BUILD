@@ -18,7 +18,7 @@ spi_deps_files = [
 ]
 
 api_deps_files = [
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
 ]
 
 scheduler_deps_files = \

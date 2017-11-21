@@ -9,7 +9,7 @@ java_library(
         exclude = ["**/MetricManager.java"],
     ),
     deps = [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",
@@ -33,7 +33,7 @@ java_binary(
     srcs = glob(["**/MetricsManager.java"]),
     deps = [
         ":metricsmgr-java",
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:network-java",

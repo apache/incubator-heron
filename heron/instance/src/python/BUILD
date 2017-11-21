@@ -8,7 +8,7 @@ pex_library(
     deps = [
         '//heronpy/proto:proto-py',
         '//heronpy/api:heron-python-py',
-        '//heronpy/dsl:heron-pythondsl-py',
+        '//heronpy/streamlet:heron-python-streamlet-py',
         '//heronpy/connectors:heron-pythonconnectors-py',
         '//heron/common/src/python:common-py',
     ],
@@ -21,7 +21,6 @@ pex_binary(
     deps = [":instance-py"],
     reqs = [
         'colorlog==2.6.1',
-        'psutil==4.3.1',
         'PyYAML==3.10'
     ]
 )

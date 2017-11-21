@@ -47,6 +47,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
 import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
 import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -123,29 +124,32 @@ public class BoltInstance implements IInstance {
 
     // Re-prepare the CustomStreamGrouping since the downstream tasks can change
     physicalPlanHelper.prepareForCustomStreamGrouping();
+    // transfer potentially changed variables by topology code
+    physicalPlanHelper.getTopologyContext().getTopologyConfig()
+        .putAll(helper.getTopologyContext().getTopologyConfig());
     // Reset the helper
     helper = physicalPlanHelper;
   }
 
   @Override
   public void persistState(String checkpointId) {
+    LOG.info("Persisting state for checkpoint: " + checkpointId);
+
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
     // Checkpoint
     if (bolt instanceof IStatefulComponent) {
-      LOG.info("Starting checkpoint");
       ((IStatefulComponent) bolt).preSave(checkpointId);
-    } else {
-      LOG.info("Trying to checkponit a non stateful component. Send empty state");
     }
 
     collector.sendOutState(instanceState, checkpointId);
   }
 
   @SuppressWarnings("unchecked")
-  public void start() {
+  @Override
+  public void init(State<Serializable, Serializable> state) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
 
     // Initialize the GlobalMetrics
@@ -155,6 +159,7 @@ public class BoltInstance implements IInstance {
 
     // Initialize the instanceState if the bolt is stateful
     if (bolt instanceof IStatefulComponent) {
+      this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) bolt).initState(instanceState);
     }
 
@@ -167,18 +172,15 @@ public class BoltInstance implements IInstance {
 
     // Init the CustomStreamGrouping
     helper.prepareForCustomStreamGrouping();
+  }
 
+  @Override
+  public void start() {
     addBoltTasks();
   }
 
   @Override
-  public void start(State<Serializable, Serializable> state) {
-    this.instanceState = state;
-    start();
-  }
-
-  @Override
-  public void stop() {
+  public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
 
@@ -186,9 +188,14 @@ public class BoltInstance implements IInstance {
     bolt.cleanup();
 
     // Clean the resources we own
-    looper.exitLoop();
     streamInQueue.clear();
     collector.clear();
+  }
+
+  @Override
+  public void shutdown() {
+    clean();
+    looper.exitLoop();
   }
 
   private void addBoltTasks() {
@@ -217,6 +224,7 @@ public class BoltInstance implements IInstance {
     looper.addTasksOnWakeup(boltTasks);
 
     PrepareTickTupleTimer();
+    InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
   @Override
@@ -232,7 +240,6 @@ public class BoltInstance implements IInstance {
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
         String checkpointId =
             ((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId();
-        LOG.info("Start checkpoint for: " + checkpointId);
         persistState(checkpointId);
       }
 
@@ -294,19 +301,15 @@ public class BoltInstance implements IInstance {
   }
 
   private void PrepareTickTupleTimer() {
-    Object tickTupleFreqSecs =
-        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    Object tickTupleFreqMs =
+        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS);
 
-    if (tickTupleFreqSecs != null) {
-      Duration freq = TypeUtils.getDuration(tickTupleFreqSecs, ChronoUnit.SECONDS);
+    if (tickTupleFreqMs != null) {
+      Duration freq = TypeUtils.getDuration(tickTupleFreqMs, ChronoUnit.MILLIS);
 
-      Runnable r = new Runnable() {
-        public void run() {
-          SendTickTuple();
-        }
-      };
+      Runnable r = () -> SendTickTuple();
 
-      looper.registerTimerEvent(freq, r);
+      looper.registerPeriodicEvent(freq, r);
     }
   }
 
@@ -318,7 +321,5 @@ public class BoltInstance implements IInstance {
     boltMetrics.executeTuple(t.getSourceStreamId(), t.getSourceComponent(), latency);
 
     collector.sendOutTuples();
-    // reschedule ourselves again
-    PrepareTickTupleTimer();
   }
 }

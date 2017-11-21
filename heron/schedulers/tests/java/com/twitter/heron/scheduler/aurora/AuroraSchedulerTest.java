@@ -322,6 +322,9 @@ public class AuroraSchedulerTest {
         case PYTHON_INSTANCE_BINARY:
           expected = expectedBin + "/heron-python-instance";
           break;
+        case CPP_INSTANCE_BINARY:
+          expected = expectedBin + "/heron-cpp-instance";
+          break;
         case SCHEDULER_CLASSPATH:
           expected =
               expectedLib + "/scheduler/*:./heron-core/lib/packing/*:./heron-core/lib/statemgr/*";
@@ -337,6 +340,9 @@ public class AuroraSchedulerTest {
           break;
         case SYSTEM_YAML:
           expected = expectedConf + "/heron_internals.yaml";
+          break;
+        case OVERRIDE_YAML:
+          expected = expectedConf + "/override.yaml";
           break;
         case TOPOLOGY_BINARY_FILE:
         case TOPOLOGY_CLASSPATH:

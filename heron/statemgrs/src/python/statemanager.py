@@ -35,6 +35,8 @@ class StateManager:
 
   __metaclass__ = abc.ABCMeta
 
+  TIMEOUT_SECONDS = 5
+
   @property
   def name(self):
     return self.__name
@@ -81,7 +83,7 @@ class StateManager:
     """
     for hostport in self.hostportlist:
       try:
-        socket.create_connection(hostport, 2)
+        socket.create_connection(hostport, StateManager.TIMEOUT_SECONDS)
         return True
       except:
         LOG.info("StateManager %s Unable to connect to host: %s port %i"

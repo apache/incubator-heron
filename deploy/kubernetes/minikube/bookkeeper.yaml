@@ -1,0 +1,130 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookie-config
+data:
+  BK_BOOKIE_EXTRA_OPTS: "\"-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
+  BK_bookiePort: "3181"
+  BK_journalDirectory: "/bookkeeper/data/journal"
+  BK_ledgerDirectories: "/bookkeeper/data/ledgers"
+  BK_indexDirectories: "/bookkeeper/data/ledgers" 
+  BK_zkServers: zookeeper
+  # the default manager is flat, which is not good for supporting large number of ledgers
+  BK_ledgerManagerType: "hierarchical"
+---
+
+## BookKeeper servers need to access the local disks and the pods
+## cannot be moved across different nodes.
+## For this reason, we run BK as a daemon set, one for each node in the
+## cluster, unless restricted by label selectors
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: bookie
+  labels:
+    app: bookkeeper
+    component: bookie
+spec:
+  template:
+    metadata:
+      labels:
+        app: bookkeeper
+        component: bookie
+        cluster: bookkeeper
+    spec:
+      initContainers:
+        # The first time, initialize BK to wipe data for minikube
+        - name: bookie-format
+          image: apachedistributedlog/distributedlog:0.5.0
+          args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
+          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          envFrom:
+            - configMapRef:
+                name: bookie-config
+      containers:
+        - name: bookie
+          image: apachedistributedlog/distributedlog:0.5.0
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
+          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          args: ["/opt/bookkeeper/bin/bookkeeper", "bookie"]
+          ports:
+            - name: client
+              containerPort: 3181
+              # we are using `status.hostIP` for the bookie's advertised address. export 3181 as the hostPort,
+              # so that the containers are able to access the host port
+              hostPort: 3181
+          envFrom:
+            - configMapRef:
+                name: bookie-config
+          env:
+            - name: BK_advertisedAddress
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+    
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: ledgers-disk
+              mountPath: /bookkeeper/data/ledgers
+
+      volumes:
+          # Mount local disks
+        - name: journal-disk
+          hostPath:
+            path: /mnt/disks/ssd0
+        - name: ledgers-disk
+          hostPath:
+            path: /mnt/disks/ssd1
+
+---
+
+##
+## Define the Bookie headless service
+## In practice, in this case, it is only useful to have a view of
+## all the bookie pods that are present
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookie
+  labels:
+    app: bookkeeper
+    component: bookie
+spec:
+  ports:
+  - port: 3181
+    name: server
+  clusterIP: None
+  selector:
+    app: bookkeeper
+    component: bookie
+
