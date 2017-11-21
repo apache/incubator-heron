@@ -38,12 +38,7 @@ public class SinkStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("sink", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone(StreamletNamePrefixes.SINK.toString(), stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new ComplexSink<>(sink),
         getNumPartitions()).shuffleGrouping(parent.getName());

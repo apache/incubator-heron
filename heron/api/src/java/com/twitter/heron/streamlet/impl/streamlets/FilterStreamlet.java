@@ -37,12 +37,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("filter", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone(StreamletNamePrefixes.FILTER.toString(), stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new FilterOperator<R>(filterFn),
         getNumPartitions()).shuffleGrouping(parent.getName());

@@ -35,12 +35,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("logger", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone(StreamletNamePrefixes.LOGGER.toString(), stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
