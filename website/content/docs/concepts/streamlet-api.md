@@ -6,15 +6,24 @@ new: true
 
 {{< alert "streamlet-api-beta" >}}
 
-Heron initially offered a **Topology API**---heavily indebted to the [Storm API](http://storm.apache.org/about/simple-api.html)---for developing topology logic. In the original Topology API, developers creating topologies were required to explicitly define the behavior of every [spout](../topologies/spouts) and [bolt](../topologies/bolts) in each topology and then specify how those spouts and bolts are meant to be interconnected. Although the Storm API provided a powerful low-level API for creating topologies, this spouts-and-bolts model presented a variety of drawbacks for Heron developers:
+When it was first released, Heron offered a **Topology API**---heavily indebted to the [Storm API](http://storm.apache.org/about/simple-api.html)---for developing topology logic. In the original Topology API, developers creating topologies were required to explicitly:
+
+* define the behavior of every [spout](../topologies/spouts) and [bolt](../topologies/bolts) in the topology 
+* specify how those spouts and bolts are meant to be interconnected
+
+### Problems with the Topology API
+
+Although the Storm-inspired API provided a powerful low-level interface for creating topologies, the spouts-and-bolts model also presented a variety of drawbacks for Heron developers:
 
 Drawback | Description
 :--------|:-----------
-Verbosity | In the original Topology API for both Java and Python, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts.
-Difficult debugging | When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
-Tuple-based data model | In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
+Verbosity | In the original Topology API for both Java and Python, creating spouts and bolts required substantial boilerplate and forced developers to both provide implementations for spout and bolt classes and also to specify the connections between those spouts and bolts.
+Difficult debugging | When spouts, bolts, and the connections between them need to be created "by hand," it can be challenging to trace the origin of problems in the topology's processing chain
+Tuple-based data model | In the older topology API, spouts and bolts passed [tuples](https://en.wikipedia.org/wiki/Tuple) and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to implement their own serialization/deserialization logic.
 
-In contrast with the topology API, the Heron Streamlet API offers:
+### Advantages of the Streamlet API
+
+In contrast with the Topology API, the Heron Streamlet API offers:
 
 Advantage | Description
 :---------|:-----------
@@ -22,15 +31,23 @@ Boilerplate-free code | Instead of needing to implement spout and bolt classes o
 Easy debugging | With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
 Completely flexible, type-safe data model | Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.<br /><br />In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than at runtime.
 
-## Supported languages
+## Streamlet API topology model
 
-The Heron Streamlet API is currently available for:
+Instead of spouts and bolts, as with the Topology API, the Streamlet API enables you to create **processing graphs** that are then automatically converted to spouts and bolts under the hood. Processing graphs consist of the following components:
 
-* [Java](/docs/developers/java/streamlet-api)
+* **Sources** supply the processing graph with data from random generators, databases, web service APIs, filesystems, pub-sub messaging systems, or anything that implements the [source](#source-operations) interface.
+* **Operators** supply the graph's processing logic, operating on data 
+* **Sinks**
+
+The diagram below illustrates both the general model (with a single source, three operators, and one sink), and a more concrete example that includes two sources (an [Apache Pulsar](https://pulsar.incubator.apache.org) topic and the [Twitter API](https://developer.twitter.com/en/docs)), three operators (a [join](#join-operations), [flatMap](#flatmap-operations), and [reduce](#reduce-operations) operation), and two [sinks](#sink-operations) (an [Apache Cassandra](http://cassandra.apache.org/) table and an [Apache Spark](https://spark.apache.org/) job).
+
+{{< diagram
+    width="80"
+    url="https://www.lucidchart.com/publicSegments/view/d84026a1-d12e-4878-b8d5-5aa274ec0415/image.png" >}}
 
 ## Streamlets
 
-The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is an unbounded, ordered collection of **elements** of some data type (from simple types like integers and strings to application-specific data types).
+The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is an unbounded, ordered collection of **elements** of some data type (streamlets can consist of simple types like integers and strings or more complex, application-specific data types).
 
 **Source streamlets** supply a Heron processing graph with data inputs. These inputs can come from a wide variety of sources, such as pub-sub messaging systems like [Apache
 Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org) (incubating), random generators, or static files like CSV or [Apache Parquet](https://parquet.apache.org/) files.
@@ -43,6 +60,12 @@ Source streamlets can then be manipulated in a wide variety of ways. You can, fo
 * send data to [sinks](#sink-operations) (store elements)
 
 A complete graph of source streamlets and streamlet operations is called a **processing graph**.
+
+### Supported languages
+
+The Heron Streamlet API is currently available for:
+
+* [Java](/docs/developers/java/streamlet-api)
 
 ### Heron Streamlet API topologies
 
