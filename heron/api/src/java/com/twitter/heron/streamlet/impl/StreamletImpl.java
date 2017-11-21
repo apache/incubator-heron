@@ -92,6 +92,33 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return true;
   }
 
+  protected enum StreamletNamePrefixes {
+    CONSUMER("consumer"),
+    FILTER("filter"),
+    FLATMAP("flatmap"),
+    REDUCE("reduceByKeyAndWindow"),
+    JOIN("join"),
+    LOGGER("logger"),
+    MAP("map"),
+    REMAP("remap"),
+    SINK("sink"),
+    SOURCE("generator"),
+    SUPPLIER("supplier"),
+    TRANSFORM("transform"),
+    UNION("union");
+
+    private final String prefix;
+
+    StreamletNamePrefixes(final String prefix) {
+      this.prefix = prefix;
+    }
+
+    @Override
+    public String toString() {
+      return prefix;
+    }
+  }
+
   /**
    * Gets all the children of this streamlet.
    * Children of a streamlet are streamlets that are resulting from transformations of elements of
