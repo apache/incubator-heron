@@ -408,7 +408,7 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
-  LOG(INFO) << "pplan state: " << _pplan.DebugString();
+  LOG(INFO) << "pplan state: " << _pplan.topology().state();
   for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
     LOG(INFO) << "Sending new physical plan to instance with task_id: " << iter->second;
     LOG(INFO) << "Sending new physical plan to : "
@@ -420,6 +420,7 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
 void InstanceServer::ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan) {
   std::unordered_set<sp_int32> local_spouts;
   config::PhysicalPlanHelper::GetLocalSpouts(_pplan, stmgr_id_, local_spouts);
+  LOG(INFO) << "local_spouts: " << local_spouts.size();
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
     if (local_spouts.find(iter->first) != local_spouts.end()) {
       iter->second->set_local_spout();
