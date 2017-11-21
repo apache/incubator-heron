@@ -30,6 +30,7 @@ import com.twitter.heron.streamlet.impl.operators.TransformOperator;
 public class TransformStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
+  private static final String NAMEPREFIX = "transform";
 
   public TransformStreamlet(StreamletImpl<R> parent,
                        SerializableTransformer<? super R, ? extends T> serializableTransformer) {

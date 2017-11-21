@@ -34,7 +34,7 @@ import com.twitter.heron.classification.InterfaceStability;
  * Streamlet. One can think of a transformation attaching itself to the stream and processing
  * each tuple as they go by. Thus the parallelism of any operator is implicitly determined
  * by the number of partitions of the stream that it is operating on. If a particular
- * tranformation wants to operate at a different parallelism, one can repartition the
+ * transformation wants to operate at a different parallelism, one can repartition the
  * Streamlet before doing the transformation.
  */
 @InterfaceStability.Evolving
@@ -180,7 +180,7 @@ public interface Streamlet<R> {
       T identity, SerializableBiFunction<T, R, ? extends T> reduceFn);
 
   /**
-   * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
+   * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   Streamlet<R> union(Streamlet<? extends R> other);

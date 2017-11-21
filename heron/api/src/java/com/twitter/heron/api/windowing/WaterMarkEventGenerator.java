@@ -34,10 +34,12 @@
 package com.twitter.heron.api.windowing;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 /**
@@ -47,28 +49,35 @@ import com.twitter.heron.api.generated.TopologyAPI;
  * any tuple coming with an earlier timestamp can be considered as late events.
  */
 public class WaterMarkEventGenerator<T extends Serializable> {
+  private final Map<TopologyAPI.StreamId, Long> streamToTs;
   private final WindowManager<T> windowManager;
+  private long watermarkIntervalMs;
   private final int eventTsLag;
   private final Set<TopologyAPI.StreamId> inputStreams;
-  private final Map<TopologyAPI.StreamId, Long> streamToTs;
+  private  Map<String, Object> topoConf;
   private volatile long lastWaterMarkTs;
-  private boolean started = false;
 
   /**
    * Creates a new WatermarkEventGenerator.
    *
    * @param windowManager The window manager this generator will submit watermark events to
    * interval
+   * @param watermarkIntervalMs the interval at which watermarks should be emitted
    * @param eventTsLagMs The max allowed lag behind the last watermark event before an event is
    * considered late
    * @param inputStreams The input streams this generator is expected to handle
+   * @param topoConf topology configurations
    */
-  public WaterMarkEventGenerator(WindowManager<T> windowManager, int eventTsLagMs,
-                                 Set<TopologyAPI.StreamId> inputStreams) {
-    this.windowManager = windowManager;
+  public WaterMarkEventGenerator(WindowManager<T> windowManager, long watermarkIntervalMs,
+                                 int eventTsLagMs,
+                                 Set<TopologyAPI.StreamId> inputStreams,
+                                 Map<String, Object> topoConf) {
     streamToTs = new ConcurrentHashMap<>();
+    this.windowManager = windowManager;
+    this.watermarkIntervalMs = watermarkIntervalMs;
     this.eventTsLag = eventTsLagMs;
     this.inputStreams = inputStreams;
+    this.topoConf = topoConf;
   }
 
   /**
@@ -85,12 +94,10 @@ public class WaterMarkEventGenerator<T extends Serializable> {
   }
 
   public void run() {
-    if (started) {
-      long waterMarkTs = computeWaterMarkTs();
-      if (waterMarkTs > lastWaterMarkTs) {
-        this.windowManager.add(new WaterMarkEvent<>(waterMarkTs));
-        lastWaterMarkTs = waterMarkTs;
-      }
+    long waterMarkTs = computeWaterMarkTs();
+    if (waterMarkTs > lastWaterMarkTs) {
+      this.windowManager.add(new WaterMarkEvent<>(waterMarkTs));
+      lastWaterMarkTs = waterMarkTs;
     }
   }
 
@@ -110,6 +117,11 @@ public class WaterMarkEventGenerator<T extends Serializable> {
   }
 
   public void start() {
-    started = true;
+    Config.registerTopologyTimerEvents(
+        topoConf,
+        "WaterMarkEventGeneratorTimer",
+        Duration.ofMillis(watermarkIntervalMs),
+        () -> run()
+    );
   }
 }

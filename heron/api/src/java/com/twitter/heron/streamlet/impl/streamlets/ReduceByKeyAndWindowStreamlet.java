@@ -41,6 +41,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   private SerializableFunction<R, V> valueExtractor;
   private WindowConfigImpl windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
+  private static final String NAMEPREFIX = "reduceByKeyAndWindow";
 
   public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
                        SerializableFunction<R, K> keyExtractor,

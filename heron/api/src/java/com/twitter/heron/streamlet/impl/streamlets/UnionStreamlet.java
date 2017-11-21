@@ -27,6 +27,7 @@ import com.twitter.heron.streamlet.impl.operators.UnionOperator;
 public class UnionStreamlet<I> extends StreamletImpl<I> {
   private StreamletImpl<I> left;
   private StreamletImpl<? extends I> right;
+  private static final String NAMEPREFIX = "union";
 
   public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<? extends I> right) {
     this.left = left;

@@ -31,7 +31,6 @@ public final class Config implements Serializable {
   private final ByteAmount ram;
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
-
   private com.twitter.heron.api.Config heronConfig;
 
   public enum DeliverySemantics {
@@ -175,15 +174,20 @@ public final class Config implements Serializable {
       }
     }
 
+    /**
+     * Sets the {@link Serializer} to be used by the topology (current options are {@link
+     * KryoSerializer} and the native Java serializer.
+     * @param serializer The data serializer to use for streamlet elements in the topology.
+     */
     public Builder setSerializer(Serializer serializer) {
       this.serializer = serializer;
-      if (serializer.equals(Serializer.KRYO)) {
-        useKryo();
-      }
       return this;
     }
 
     public Config build() {
+      if (serializer.equals(Serializer.KRYO)) {
+        useKryo();
+      }
       return new Config(this);
     }
   }

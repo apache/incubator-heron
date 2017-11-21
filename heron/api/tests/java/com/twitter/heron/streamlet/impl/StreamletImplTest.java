@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -280,4 +281,23 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getPerContainerRam().asMegabytes(), 1024 * 10);
     assertEquals(0, Float.compare(nonDefaultConfig.getPerContainerCpu(), 3.5f));
   }
+
+  @Test
+  public void testSetNameWithInvalidValues() {
+    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = sample::setName;
+    testByFunction(function, null);
+    testByFunction(function, "");
+    testByFunction(function, "  ");
+  }
+
+  private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {
+    try {
+      function.apply(sName);
+      fail("Should have thrown an IllegalArgumentException because streamlet name is invalid");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Streamlet name cannot be null/blank", e.getMessage());
+    }
+  }
+
 }

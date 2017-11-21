@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 /**
  * Sink is how Streamlet's end. The put method
- * invokation consumes the tuple into say external database/cache, etc.
+ * invocation consumes the tuple into say external database/cache, etc.
  * setup/cleanup is where the sink can do any one time setup work, like
  * establishing/closing connection to sources, etc.
  */

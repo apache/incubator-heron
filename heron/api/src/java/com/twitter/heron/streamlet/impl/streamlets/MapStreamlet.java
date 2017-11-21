@@ -28,6 +28,7 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
 public class MapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private SerializableFunction<? super R, ? extends T> mapFn;
+  private static final String NAMEPREFIX = "map";
 
   public MapStreamlet(StreamletImpl<R> parent, SerializableFunction<? super R, ? extends T> mapFn) {
     this.parent = parent;

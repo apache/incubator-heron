@@ -33,6 +33,7 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
 public class RemapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
+  private static final String NAMEPREFIX = "remap";
 
   public RemapStreamlet(StreamletImpl<R> parent,
                         SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {

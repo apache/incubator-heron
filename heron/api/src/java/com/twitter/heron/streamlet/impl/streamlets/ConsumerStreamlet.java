@@ -29,6 +29,7 @@ import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
 public class ConsumerStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableConsumer<R> consumer;
+  private static final String NAMEPREFIX = "consumer";
 
   public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
     this.parent = parent;

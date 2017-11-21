@@ -28,6 +28,7 @@ import com.twitter.heron.streamlet.impl.sources.ComplexSource;
  */
 public class SourceStreamlet<R> extends StreamletImpl<R> {
   private Source<R> generator;
+  private static final String NAMEPREFIX = "generator";
 
   public SourceStreamlet(Source<R> generator) {
     this.generator = generator;

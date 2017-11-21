@@ -29,6 +29,7 @@ import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
 public class SinkStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private Sink<R> sink;
+  private static final String NAMEPREFIX = "sink";
 
   public SinkStreamlet(StreamletImpl<R> parent, Sink<R> sink) {
     this.parent = parent;

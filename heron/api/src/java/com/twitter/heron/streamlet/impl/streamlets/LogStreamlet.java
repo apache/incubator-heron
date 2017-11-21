@@ -27,6 +27,7 @@ import com.twitter.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
+  private static final String NAMEPREFIX = "logger";
 
   public LogStreamlet(StreamletImpl<R> parent) {
     this.parent = parent;
