@@ -408,8 +408,11 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
+  LOG(INFO) << "pplan state: " << _pplan.DebugString();
   for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
     LOG(INFO) << "Sending new physical plan to instance with task_id: " << iter->second;
+    LOG(INFO) << "Sending new physical plan to : "
+        << iter->first->getIPAddress() << ":" << iter->first->getPort();
     SendMessage(iter->first, new_assignment);
   }
 }

@@ -547,7 +547,8 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   // Its possible that the topology's state might have changed.
   // So we need to handle it seperately.
   if (!pplan_) {
-    LOG(INFO) << "This is the first time we received the physical plan";
+    LOG(INFO) << "This is the first time we received the physical plan "
+        << _pplan->topology().state();
   } else if (_pplan->topology().state() != pplan_->topology().state()) {
     LOG(INFO) << "Topology state changed from " << pplan_->topology().state() << " to "
               << _pplan->topology().state();
