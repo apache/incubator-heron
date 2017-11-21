@@ -348,7 +348,8 @@ public class StreamManagerClient extends HeronClient {
     }
 
     if (helper == null) {
-      LOG.info("We received a new Physical Plan.");
+      LOG.info(String.format("We received a new Physical Plan with state %s",
+          newHelper.getTopologyState()));
     } else {
       LOG.info("We received a new Physical Plan with same assignment. Should be state changes.");
       LOG.info(String.format("Old state: %s; new sate: %s.",
