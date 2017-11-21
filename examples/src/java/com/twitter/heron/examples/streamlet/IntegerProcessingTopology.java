@@ -16,6 +16,7 @@ package com.twitter.heron.examples.streamlet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -43,7 +44,7 @@ public final class IntegerProcessingTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder builder = Builder.createBuilder();
+    Builder builder = Builder.newBuilder();
 
     Streamlet<Integer> zeroes = builder.newSource(() -> 0);
 
@@ -58,14 +59,10 @@ public final class IntegerProcessingTopology {
         .setName("remove-twos")
         .log();
 
-    Resources resources = new Resources.Builder()
-        .setCpu(CPU)
-        .setRamInGB(GIGABYTES_OF_RAM)
-        .build();
-
-    Config config = new Config.Builder()
+    Config config = Config.newBuilder()
         .setNumContainers(NUM_CONTAINERS)
-        .setContainerResources(resources)
+        .setPerContainerRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM))
+        .setPerContainerCpu(CPU)
         .build();
 
     // Fetches the topology name from the first command-line argument

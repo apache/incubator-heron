@@ -77,7 +77,7 @@ public final class RepartitionTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     Streamlet<Integer> randomIntegers = processingGraphBuilder
         .newSource(() -> {
