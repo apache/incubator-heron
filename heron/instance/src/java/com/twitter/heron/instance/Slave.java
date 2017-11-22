@@ -192,11 +192,6 @@ public class Slave implements Runnable, AutoCloseable {
       return;
     }
 
-//    if (!helper.isTopologyRunning()) {
-//      LOG.info("Topology is not in RUNNING state. Instance is not started");
-//      return;
-//    }
-
     // Setting topology environment properties
     Map<String, Object> topoConf = helper.getTopologyContext().getTopologyConfig();
     if (topoConf.containsKey(Config.TOPOLOGY_ENVIRONMENT)) {
