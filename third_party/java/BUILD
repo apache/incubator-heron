@@ -233,6 +233,43 @@ java_library(
 )
 
 java_library(
+    name = "kubernetes-java-client",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@kubernetes_java_client//jar",
+        "@kubernetes_java_client_api//jar",
+        "@swagger_annotations//jar",
+        "@squareup_okhttp//jar",
+        "@squareup_okio//jar",
+        "@squareup_okhttp_logging_interceptor//jar",
+        "@squareup_okhttp_ws//jar",
+        "@google_gson//jar",
+        "//third_party/java:joda_time",
+        "@kubernetes_java_client_proto//jar",
+        "@org_yaml_snakeyaml//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_codec//jar",
+        "@log4j_log4j//jar",
+    ],
+    deps = [
+        "@kubernetes_java_client//jar",
+        "@kubernetes_java_client_api//jar",
+        "@swagger_annotations//jar",
+        "@squareup_okhttp//jar",
+        "@squareup_okio//jar",
+        "@squareup_okhttp_logging_interceptor//jar",
+        "@squareup_okhttp_ws//jar",
+        "@google_gson//jar",
+        "//third_party/java:joda_time",
+        "@kubernetes_java_client_proto//jar",
+        "@org_yaml_snakeyaml//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_codec//jar",
+        "@log4j_log4j//jar",
+    ],
+)
+
+java_library(
   name = "commons-compress",
   srcs = [ "Empty.java" ],
   exports = [
