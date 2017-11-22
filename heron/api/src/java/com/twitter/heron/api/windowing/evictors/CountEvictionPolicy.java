@@ -76,7 +76,7 @@ public class CountEvictionPolicy<T extends Serializable> implements EvictionPoli
 
   @Override
   public void track(Event<T> event) {
-    if (!event.isWatermark() && !event.isTimer()) {
+    if (!event.isWatermark()) {
       currentCount.incrementAndGet();
     }
   }

@@ -18,7 +18,7 @@ spi_deps_files = [
 ]
 
 api_deps_files = [
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
 ]
 
 scheduler_deps_files = \
@@ -51,6 +51,7 @@ kubernetes_deps_files = \
     scheduler_deps_files + [
         ":scheduler-utils-java",
         "//third_party/java:jackson",
+        "//third_party/java:kubernetes-java-client",
     ]
 
 java_library(

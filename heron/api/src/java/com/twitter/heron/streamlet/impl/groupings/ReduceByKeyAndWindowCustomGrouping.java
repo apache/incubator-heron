@@ -19,7 +19,7 @@ import java.util.List;
 
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.streamlet.KeyValue;
+import com.twitter.heron.streamlet.SerializableFunction;
 
 /**
  * ReduceByKeyAndWindowCustomGrouping is the class that routes the incoming tuples
@@ -30,9 +30,11 @@ import com.twitter.heron.streamlet.KeyValue;
  */
 public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGrouping {
   private static final long serialVersionUID = -7630948017550637716L;
+  private SerializableFunction<V, K> keyExtractor;
   private List<Integer> taskIds;
 
-  public ReduceByKeyAndWindowCustomGrouping() {
+  public ReduceByKeyAndWindowCustomGrouping(SerializableFunction<V, K> keyExtractor) {
+    this.keyExtractor = keyExtractor;
   }
 
   @Override
@@ -45,8 +47,8 @@ public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGro
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
-    KeyValue<K, V> obj = (KeyValue<K, V>) values.get(0);
-    int index = obj.getKey().hashCode() % taskIds.size();
+    V obj = (V) values.get(0);
+    int index = keyExtractor.apply(obj).hashCode() % taskIds.size();
     ret.add(taskIds.get(index));
     return ret;
   }

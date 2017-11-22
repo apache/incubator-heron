@@ -46,7 +46,7 @@ java_library(
     deps = heron_java_proto_files() + [
         ":basics-java",
         ":config-java",
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/java:classification",
     ]
 )

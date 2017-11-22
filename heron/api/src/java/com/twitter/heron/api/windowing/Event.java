@@ -63,10 +63,4 @@ public interface Event<T extends Serializable> extends Serializable {
    * @return true if this is a watermark event
    */
   boolean isWatermark();
-
-  /**
-   * If this is a timer event or not.  Timer events use Tick Tuples to trigger
-   * @return true if this a timer event
-   */
-  boolean isTimer();
 }

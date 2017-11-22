@@ -25,6 +25,7 @@ import com.twitter.heron.api.windowing.TupleWindow;
 import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.Window;
 
 /**
@@ -35,12 +36,14 @@ import com.twitter.heron.streamlet.Window;
  */
 public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator {
   private static final long serialVersionUID = 2833576046687752396L;
+  private SerializableFunction<V, K> keyExtractor;
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
   private OutputCollector collector;
 
-  public GeneralReduceByKeyAndWindowOperator(VR identity,
+  public GeneralReduceByKeyAndWindowOperator(SerializableFunction<V, K> keyExtractor, VR identity,
                             SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
+    this.keyExtractor = keyExtractor;
     this.identity = identity;
     this.reduceFn = reduceFn;
   }
@@ -57,7 +60,7 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
     Map<K, VR> reduceMap = new HashMap<>();
     Map<K, Integer> windowCountMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
-      KeyValue<K, V> tup = (KeyValue<K, V>) tuple.getValue(0);
+      V tup = (V) tuple.getValue(0);
       addMap(reduceMap, windowCountMap, tup);
     }
     long startWindow;
@@ -79,12 +82,13 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
     }
   }
 
-  private void addMap(Map<K, VR> reduceMap, Map<K, Integer> windowCountMap, KeyValue<K, V> tup) {
-    if (!reduceMap.containsKey(tup.getKey())) {
-      reduceMap.put(tup.getKey(), identity);
-      windowCountMap.put(tup.getKey(), 0);
+  private void addMap(Map<K, VR> reduceMap, Map<K, Integer> windowCountMap, V tup) {
+    K key = keyExtractor.apply(tup);
+    if (!reduceMap.containsKey(key)) {
+      reduceMap.put(key, identity);
+      windowCountMap.put(key, 0);
     }
-    reduceMap.put(tup.getKey(), reduceFn.apply(reduceMap.get(tup.getKey()), tup.getValue()));
-    windowCountMap.put(tup.getKey(), windowCountMap.get(tup.getKey()) + 1);
+    reduceMap.put(key, reduceFn.apply(reduceMap.get(key), tup));
+    windowCountMap.put(key, windowCountMap.get(key) + 1);
   }
 }

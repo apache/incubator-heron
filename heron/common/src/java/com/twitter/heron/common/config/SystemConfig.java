@@ -43,6 +43,11 @@ public final class SystemConfig {
     return Builder.create(loadDefaults);
   }
 
+  @Override
+  public String toString() {
+    return this.config.toString();
+  }
+
   public ByteAmount getInstanceNetworkOptionsMaximumPacketSize() {
     return getByteAmount(
         SystemConfigKey.INSTANCE_NETWORK_OPTIONS_MAXIMUM_PACKETSIZE_BYTES);
@@ -325,7 +330,7 @@ public final class SystemConfig {
     private static void convertAndAdd(Map<String, Object> config,
                                       SystemConfigKey key, Object value) {
       if (key != null) { // sometimes config have non-java configs without an enum SystemConfigKey
-        switch(key.getType()) {
+        switch (key.getType()) {
           case BOOLEAN:
             config.put(key.value(), TypeUtils.getBoolean(value));
             break;

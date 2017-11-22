@@ -56,7 +56,8 @@ public enum ExecutorFlag {
   CheckpointManagerPort("checkpoint-manager-port"),
   StatefulConfigFile("stateful-config-file"),
   HealthManagerMode("health-manager-mode"),
-  HealthManagerClasspath("health-manager-classpath");
+  HealthManagerClasspath("health-manager-classpath"),
+  JvmRemoteDebuggerPorts("jvm-remote-debugger-ports");
 
   private final String name;
 

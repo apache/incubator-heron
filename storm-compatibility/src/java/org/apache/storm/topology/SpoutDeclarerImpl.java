@@ -18,7 +18,10 @@
 
 package org.apache.storm.topology;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.storm.utils.ConfigUtils;
 
 public class SpoutDeclarerImpl implements SpoutDeclarer {
   private com.twitter.heron.api.topology.SpoutDeclarer delegate;
@@ -30,13 +33,18 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
   @Override
   @SuppressWarnings({"rawtypes", "unchecked"})
   public SpoutDeclarer addConfigurations(Map conf) {
-    delegate.addConfigurations((Map<String, Object>) conf);
+    // Translate config to heron config and then apply.
+    Map<String, Object> heronConf = ConfigUtils.translateComponentConfig(conf);
+    delegate.addConfigurations(heronConf);
     return this;
   }
 
   @Override
   public SpoutDeclarer addConfiguration(String config, Object value) {
-    delegate.addConfiguration(config, value);
+    Map<String, Object> configMap = new HashMap<String, Object>();
+    configMap.put(config, value);
+
+    addConfigurations(configMap);
     return this;
   }
 

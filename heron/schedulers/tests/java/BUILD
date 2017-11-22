@@ -3,7 +3,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 common_deps_files = [
     "@com_google_guava_guava//jar",
     "//third_party/java:powermock",
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
     "//heron/scheduler-core/src/java:scheduler-java",
@@ -65,6 +65,7 @@ marathon_deps_files = [
 kubernetes_deps_files = [
     "//heron/schedulers/src/java:kubernetes-scheduler-java",
     "//heron/schedulers/src/java:scheduler-utils-java",
+    "//third_party/java:kubernetes-java-client",
 ]
 
 java_library(

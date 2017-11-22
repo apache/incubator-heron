@@ -33,7 +33,10 @@
 package com.twitter.heron.api.windowing.triggers;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.util.Map;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
 import com.twitter.heron.api.windowing.EvictionPolicy;
@@ -49,25 +52,24 @@ public class TimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<
   private long duration;
   private final TriggerHandler handler;
   private final EvictionPolicy<T, ?> evictionPolicy;
-  private boolean started = false;
+  private Map<String, Object> topoConf;
 
 
   public TimeTriggerPolicy(long millis, TriggerHandler handler) {
-    this(millis, handler, null);
+    this(millis, handler, null, new Config());
   }
 
   public TimeTriggerPolicy(long millis, TriggerHandler handler, EvictionPolicy<T, ?>
-      evictionPolicy) {
+      evictionPolicy, Map<String, Object> topoConf) {
     this.duration = millis;
     this.handler = handler;
     this.evictionPolicy = evictionPolicy;
+    this.topoConf = topoConf;
   }
 
   @Override
   public void track(Event<T> event) {
-    if (started && event.isTimer()) {
-      triggerTask();
-    }
+
   }
 
   @Override
@@ -77,7 +79,8 @@ public class TimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<
 
   @Override
   public void start() {
-    started = true;
+    Config.registerTopologyTimerEvents(this.topoConf, "TimeTriggerPolicyTimer",
+        Duration.ofMillis(this.duration), () -> triggerTask());
   }
 
   @Override

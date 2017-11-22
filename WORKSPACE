@@ -285,6 +285,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_objectweb_asm",
+  artifact = "org.ow2.asm:asm:5.0.4",
+)
+
+maven_jar(
   name = "org_apache_mesos_mesos",
   artifact = "org.apache.mesos:mesos:0.22.0",
 )
@@ -484,6 +489,54 @@ maven_jar(
 )
 # end Pulsar Client
 
+# Kubernetes java client
+kubernetes_client_version = "1.0.0-beta1"
+squareup_okhttp_version = "2.7.5"
+
+maven_jar(
+  name = "kubernetes_java_client",
+  artifact = "io.kubernetes:client-java:" + kubernetes_client_version
+)
+
+maven_jar(
+  name = "kubernetes_java_client_api",
+  artifact = "io.kubernetes:client-java-api:" + kubernetes_client_version
+)
+
+maven_jar(
+  name = "swagger_annotations",
+  artifact = "io.swagger:swagger-annotations:1.5.12"
+)
+
+maven_jar(
+  name = "squareup_okhttp",
+  artifact = "com.squareup.okhttp:okhttp:" + squareup_okhttp_version
+)
+maven_jar(
+  name = "squareup_okio",
+  artifact = "com.squareup.okio:okio:1.6.0"
+)
+maven_jar(
+  name = "squareup_okhttp_logging_interceptor",
+  artifact = "com.squareup.okhttp:logging-interceptor:" + squareup_okhttp_version
+)
+
+maven_jar(
+  name = "squareup_okhttp_ws",
+  artifact = "com.squareup.okhttp:okhttp-ws:" + squareup_okhttp_version
+)
+
+maven_jar(
+  name = "google_gson",
+  artifact = "com.google.code.gson:gson:2.6.2"
+)
+
+maven_jar(
+  name = "kubernetes_java_client_proto",
+  artifact = "io.kubernetes:client-java-proto:" + kubernetes_client_version
+)
+
+# end Kubernetes java client
 
 # heron api server
 # jetty

@@ -18,10 +18,12 @@ import java.util.Set;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.streamlet.JoinType;
+import com.twitter.heron.streamlet.KeyValue;
 import com.twitter.heron.streamlet.KeyedWindow;
 import com.twitter.heron.streamlet.SerializableBiFunction;
+import com.twitter.heron.streamlet.SerializableFunction;
 import com.twitter.heron.streamlet.WindowConfig;
-import com.twitter.heron.streamlet.impl.KVStreamletImpl;
+import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 import com.twitter.heron.streamlet.impl.groupings.JoinCustomGrouping;
 import com.twitter.heron.streamlet.impl.operators.JoinOperator;
@@ -33,30 +35,39 @@ import com.twitter.heron.streamlet.impl.operators.JoinOperator;
  * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo<K> type
  * and the value is of type VR.
  */
-public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<KeyedWindow<K>, VR> {
+public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
   private JoinType joinType;
-  private KVStreamletImpl<K, V1> left;
-  private KVStreamletImpl<K, V2> right;
+  private StreamletImpl<R> left;
+  private StreamletImpl<S> right;
+  private SerializableFunction<R, K> leftKeyExtractor;
+  private SerializableFunction<S, K> rightKeyExtractor;
   private WindowConfigImpl windowCfg;
-  private SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn;
+  private SerializableBiFunction<R, S, ? extends T> joinFn;
+  private static final String NAMEPREFIX = "join";
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
-      createJoinStreamlet(KVStreamletImpl<A, B> left,
-                          KVStreamletImpl<A, C> right,
+      createJoinStreamlet(StreamletImpl<B> left,
+                          StreamletImpl<C> right,
+                          SerializableFunction<B, A> leftKeyExtractor,
+                          SerializableFunction<C, A> rightKeyExtractor,
                           WindowConfig windowCfg,
                           JoinType joinType,
-                          SerializableBiFunction<? super B, ? super C, ? extends D> joinFn) {
+                          SerializableBiFunction<B, C, ? extends D> joinFn) {
     return new JoinStreamlet<>(joinType, left,
-        right, windowCfg, joinFn);
+        right, leftKeyExtractor, rightKeyExtractor, windowCfg, joinFn);
   }
 
-  private JoinStreamlet(JoinType joinType, KVStreamletImpl<K, V1> left,
-                        KVStreamletImpl<K, V2> right,
+  private JoinStreamlet(JoinType joinType, StreamletImpl<R> left,
+                        StreamletImpl<S> right,
+                        SerializableFunction<R, K> leftKeyExtractor,
+                        SerializableFunction<S, K> rightKeyExtractor,
                         WindowConfig windowCfg,
-                        SerializableBiFunction<? super V1, ? super V2, ? extends VR> joinFn) {
+                        SerializableBiFunction<R, S, ? extends T> joinFn) {
     this.joinType = joinType;
     this.left = left;
     this.right = right;
+    this.leftKeyExtractor = leftKeyExtractor;
+    this.rightKeyExtractor = rightKeyExtractor;
     this.windowCfg = (WindowConfigImpl) windowCfg;
     this.joinFn = joinFn;
     setNumPartitions(left.getNumPartitions());
@@ -71,19 +82,14 @@ public final class JoinStreamlet<K, V1, V2, VR> extends KVStreamletImpl<KeyedWin
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }
-    if (getName() == null) {
-      setName(defaultNameCalculator("join", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
+    setDefaultNameIfNone(NAMEPREFIX, stageNames);
     stageNames.add(getName());
-    JoinOperator<K, V1, V2, VR> bolt = new JoinOperator<>(joinType, left.getName(),
-        right.getName(), joinFn);
+    JoinOperator<K, R, S, T> bolt = new JoinOperator<>(joinType, left.getName(),
+        right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(left.getName(), new JoinCustomGrouping<K, V1>())
-        .customGrouping(right.getName(), new JoinCustomGrouping<K, V2>());
+        .customGrouping(left.getName(), new JoinCustomGrouping<K, R>(leftKeyExtractor))
+        .customGrouping(right.getName(), new JoinCustomGrouping<K, S>(rightKeyExtractor));
     return true;
   }
 }

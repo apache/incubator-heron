@@ -409,6 +409,7 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
   for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
+    LOG(INFO) << "Sending new physical plan to instance with task_id: " << iter->second;
     SendMessage(iter->first, new_assignment);
   }
 }
