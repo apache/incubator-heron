@@ -101,6 +101,8 @@ class AuroraCLIController implements AuroraController {
     //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
         "aurora", "job", "kill", jobSpec + "/" + instancesToKill));
+
+    appendAuroraCommandOptions(auroraCmd, isVerbose);
     LOG.info(String.format(
         "Killing %s aurora containers: %s", containersToRemove.size(), auroraCmd));
     if (!runProcess(auroraCmd)) {
