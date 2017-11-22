@@ -14,18 +14,14 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,14 +36,13 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 public class KubernetesSchedulerTest {
-  private static final String[] TOPOLOGY_CONF = {"topology_conf"};
   private static final String TOPOLOGY_NAME = "topology-name";
   private static final int CONTAINER_INDEX = 1;
   private static final String PACKING_PLAN_ID = "packing_plan_id";
-  private static final String[] EXECUTOR_CMD = {"executor_cmd"};
 
-  private static KubernetesScheduler scheduler;
+  private KubernetesScheduler scheduler;
 
+  private Config config;
   private Config mockRuntime;
 
   @Rule
@@ -55,35 +50,19 @@ public class KubernetesSchedulerTest {
 
   @Before
   public void setUp() throws Exception {
+    scheduler = Mockito.spy(KubernetesScheduler.class);
+
+    config = Config.newBuilder().build();
     mockRuntime = Mockito.mock(Config.class);
     Mockito.when(mockRuntime.getStringValue(Key.TOPOLOGY_NAME))
         .thenReturn(TOPOLOGY_NAME);
-    System.out.println("mock: " + mockRuntime);
-  }
-
-  @After
-  public void after() throws Exception {
-  }
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    scheduler = Mockito.spy(KubernetesScheduler.class);
-    Mockito.doReturn(EXECUTOR_CMD).when(scheduler)
-        .getExecutorCommand(Mockito.anyInt(), Mockito.anyInt());
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-    scheduler.close();
   }
 
   @Test
   public void testOnSchedule() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    Mockito.doReturn(TOPOLOGY_CONF)
-        .when(scheduler).getTopologyConf(Mockito.any(PackingPlan.class));
-    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
+    scheduler.initialize(config, mockRuntime);
 
     // Fail to schedule due to null PackingPlan
     Assert.assertFalse(scheduler.onSchedule(null));
@@ -91,7 +70,7 @@ public class KubernetesSchedulerTest {
     PackingPlan pplan  =
         new PackingPlan(
             PACKING_PLAN_ID,
-            new HashSet<PackingPlan.ContainerPlan>()
+            new HashSet<>()
         );
     Assert.assertTrue(pplan.getContainers().isEmpty());
     // Fail to schedule due to PackingPlan is empty
@@ -103,21 +82,21 @@ public class KubernetesSchedulerTest {
         new PackingPlan(PACKING_PLAN_ID, containers);
 
     // Failed to submit topology due to controller failure
-    Mockito.doReturn(false).when(controller).submitTopology(Mockito.any(String[].class));
+    Mockito.doReturn(false).when(controller).submit(Mockito.any(PackingPlan.class));
     Assert.assertFalse(scheduler.onSchedule(validPlan));
-    Mockito.verify(controller).submitTopology(Mockito.any(String[].class));
+    Mockito.verify(controller).submit(Mockito.any(PackingPlan.class));
 
     // Succeed to submit topology
-    Mockito.doReturn(true).when(controller).submitTopology(Mockito.any(String[].class));
+    Mockito.doReturn(true).when(controller).submit(Mockito.any(PackingPlan.class));
     Assert.assertTrue(scheduler.onSchedule(validPlan));
-    Mockito.verify(controller, Mockito.times(2)).submitTopology(Mockito.any(String[].class));
+    Mockito.verify(controller, Mockito.times(2)).submit(Mockito.any(PackingPlan.class));
   }
 
   @Test
   public void testOnRestart() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
+    scheduler.initialize(config, mockRuntime);
 
     // Construct RestartTopologyRequest
     Scheduler.RestartTopologyRequest restartTopologyRequest =
@@ -127,21 +106,21 @@ public class KubernetesSchedulerTest {
             .build();
 
     // Fail to restart
-    Mockito.doReturn(false).when(controller).restartApp(Mockito.anyInt());
+    Mockito.doReturn(false).when(controller).restart(Mockito.anyInt());
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
-    Mockito.verify(controller).restartApp(Matchers.anyInt());
+    Mockito.verify(controller).restart(Matchers.anyInt());
 
     // Succeed to restart
-    Mockito.doReturn(true).when(controller).restartApp(Mockito.anyInt());
+    Mockito.doReturn(true).when(controller).restart(Mockito.anyInt());
     Assert.assertTrue(scheduler.onRestart(restartTopologyRequest));
-    Mockito.verify(controller, Mockito.times(2)).restartApp(Matchers.anyInt());
+    Mockito.verify(controller, Mockito.times(2)).restart(Matchers.anyInt());
   }
 
   @Test
   public void testOnKill() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
+    scheduler.initialize(config, mockRuntime);
 
     // Fail to kill topology
     Mockito.doReturn(false).when(controller).killTopology();
@@ -158,23 +137,18 @@ public class KubernetesSchedulerTest {
   public void testAddContainers() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
+    scheduler.initialize(config, mockRuntime);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
 
-    // Fail to retrieve base pod
-    Mockito.doThrow(new IOException()).when(controller).getBasePod(Mockito.anyString());
-    expectedException.expect(TopologyRuntimeManagementException.class);
-    scheduler.addContainers(containers);
-
     // Failure to deploy a container
-    Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
-    Mockito.doThrow(new IOException()).when(controller).deployContainer(Mockito.anyString());
+    Mockito.doThrow(new TopologyRuntimeManagementException("")).when(controller)
+        .addContainers(Mockito.anySetOf(PackingPlan.ContainerPlan.class));
     expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.addContainers(containers);
 
     // Successful deployment
-    Mockito.doReturn(Mockito.anyString()).when(controller).getBasePod(Mockito.anyString());
-    Mockito.doNothing().when(controller).deployContainer(Mockito.anyString());
+    Mockito.doNothing().when(controller)
+        .addContainers(Mockito.anySetOf(PackingPlan.ContainerPlan.class));
     scheduler.addContainers(containers);
   }
 
@@ -182,17 +156,19 @@ public class KubernetesSchedulerTest {
   public void testRemoveContainers() throws Exception {
     KubernetesController controller = Mockito.mock(KubernetesController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), mockRuntime);
+    scheduler.initialize(config, mockRuntime);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(PackingTestUtils.testContainerPlan(0));
 
     // Failure to remove container
-    Mockito.doThrow(new IOException()).when(controller).removeContainer(Mockito.anyString());
+    Mockito.doThrow(new TopologyRuntimeManagementException("")).when(controller)
+      .removeContainers(Mockito.anySetOf(PackingPlan.ContainerPlan.class));
     expectedException.expect(TopologyRuntimeManagementException.class);
     scheduler.removeContainers(containers);
 
     // Successful removal
-    Mockito.doNothing().when(controller).removeContainer(Mockito.anyString());
+    Mockito.doNothing().when(controller)
+        .removeContainers(Mockito.anySetOf(PackingPlan.ContainerPlan.class));
     scheduler.removeContainers(containers);
   }
 
@@ -201,11 +177,11 @@ public class KubernetesSchedulerTest {
     final String SCHEDULER_URI = "http://k8s.uri";
     final String JOB_LINK = SCHEDULER_URI + KubernetesConstants.JOB_LINK;
 
-    Config mockConfig = Mockito.mock(Config.class);
-    Mockito.when(mockConfig.getStringValue(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI))
-        .thenReturn(SCHEDULER_URI);
+    Config c = Config.newBuilder()
+        .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI, SCHEDULER_URI)
+        .build();
 
-    scheduler.initialize(mockConfig, mockRuntime);
+    scheduler.initialize(c, mockRuntime);
 
     List<String> links = scheduler.getJobLinks();
     Assert.assertEquals(1, links.size());
@@ -219,16 +195,16 @@ public class KubernetesSchedulerTest {
     final String expectedFetchCommand =
         "/opt/heron/heron-core/bin/heron-downloader https://heron/topology.tar.gz .";
 
-    Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(Key.DOWNLOADER_BINARY))
+    Config mockConfig = Mockito.mock(Config.class);
+    Mockito.when(mockConfig.getStringValue(Key.DOWNLOADER_BINARY))
         .thenReturn("/opt/heron/heron-core/bin/heron-downloader");
 
-    Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.get(Key.TOPOLOGY_PACKAGE_URI))
+    Config mockRuntimeConfig = Mockito.mock(Config.class);
+    Mockito.when(mockRuntimeConfig.get(Key.TOPOLOGY_PACKAGE_URI))
         .thenReturn(new URI("https://heron/topology.tar.gz"));
 
     Assert.assertEquals(expectedFetchCommand,
-        KubernetesScheduler.getFetchCommand(config, runtime));
+        KubernetesUtils.getFetchCommand(mockConfig, mockRuntimeConfig));
   }
 
   @Test
