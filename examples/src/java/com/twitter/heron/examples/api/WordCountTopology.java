@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.Config.TopologyReliabilityMode;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
@@ -99,7 +98,6 @@ public final class WordCountTopology {
     private final String[] words = new String[ARRAY_LENGTH];
 
     private final Random rnd = new Random(31);
-    private final Random rnd2 = new Random();
 
     private SpoutOutputCollector collector;
 
@@ -124,7 +122,7 @@ public final class WordCountTopology {
     @Override
     public void nextTuple() {
       int nextInt = rnd.nextInt(ARRAY_LENGTH);
-      collector.emit(new Values(words[nextInt]), rnd2.nextLong());
+      collector.emit(new Values(words[nextInt]));
     }
   }
 
@@ -145,19 +143,13 @@ public final class WordCountTopology {
 
     @Override
     public void execute(Tuple tuple) {
-      int id = tuple.fieldIndex("word");
-      if (id == 0) {
-        String key = tuple.getString(id);
-        if (countMap.get(key) == null) {
-          countMap.put(key, 1);
-        } else {
-          Integer val = countMap.get(key);
-          countMap.put(key, ++val);
-        }
+      String key = tuple.getString(0);
+      if (countMap.get(key) == null) {
+        countMap.put(key, 1);
       } else {
-        // this is a tick tuple
+        Integer val = countMap.get(key);
+        countMap.put(key, ++val);
       }
-      collector.ack(tuple);
     }
 
     @Override
@@ -177,28 +169,25 @@ public final class WordCountTopology {
     if (args.length > 1) {
       parallelism = Integer.parseInt(args[1]);
     }
-
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("word", new WordSpout(), parallelism);
     builder.setBolt("consumer", new ConsumerBolt(), parallelism)
-    .fieldsGrouping("word", new Fields("word"));
-    builder.setBolt("consumer2", new ConsumerBolt(), parallelism/7)
-    .fieldsGrouping("word", new Fields("word"))
-    .addConfiguration(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, 30 * 1000);
-
+        .fieldsGrouping("word", new Fields("word"));
     Config conf = new Config();
     conf.setNumStmgrs(parallelism);
-    conf.setTopologyReliabilityMode(TopologyReliabilityMode.ATLEAST_ONCE);
 
     // configure component resources
-    conf.setComponentRam("word", ByteAmount.fromGigabytes(1));
-    conf.setComponentRam("consumer", ByteAmount.fromGigabytes(1));
-    conf.setComponentRam("consumer2", ByteAmount.fromGigabytes(1));
+    conf.setComponentRam("word",
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
+    conf.setComponentRam("consumer",
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
 
     // configure container resources
-    conf.setContainerDiskRequested(ByteAmount.fromGigabytes(10));
-    conf.setContainerRamRequested(ByteAmount.fromGigabytes(5));
-    conf.setContainerCpuRequested(5);
+    conf.setContainerDiskRequested(
+        ExampleResources.getContainerDisk(2 * parallelism, parallelism));
+    conf.setContainerRamRequested(
+        ExampleResources.getContainerRam(2 * parallelism, parallelism));
+    conf.setContainerCpuRequested(2);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
