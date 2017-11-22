@@ -5,6 +5,7 @@ RUN apt-get -y update && apt-get -y install \
     python \
     unzip \
     curl \
+    vim \
     supervisor && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
