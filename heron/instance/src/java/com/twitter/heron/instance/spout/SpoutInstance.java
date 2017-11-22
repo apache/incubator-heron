@@ -187,7 +187,7 @@ public class SpoutInstance implements IInstance {
     // Add spout tasks for execution
     addSpoutsTasks();
 
-    topologyState = TopologyAPI.TopologyState.RUNNING;
+//    topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
