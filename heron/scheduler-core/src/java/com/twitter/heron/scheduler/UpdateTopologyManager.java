@@ -157,11 +157,30 @@ public class UpdateTopologyManager implements Closeable {
       updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
     }
 
+    Set<PackingPlan.ContainerPlan> updatedContainers = proposedPackingPlan.getContainers();
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
     if (newContainerCount > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
+      Map<Integer, PackingPlan.ContainerPlan> remapping =
+          scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
+      // Update the PackingPlan with new mapped container-ids
+      if (remapping != null) {
+        LOG.info("Doing remapping. ");
+        for (PackingPlan.ContainerPlan cp : proposedPackingPlan.getContainers()) {
+          if (remapping.containsKey(cp.getId())) {
+            // Replace with the actual mapping one
+            updatedContainers.remove(cp);
+            updatedContainers.add(remapping.get(cp.getId()));
+          }
+        }
+      }
     }
+    
+    PackingPlan updatedPackingPlan =
+        new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
+    LOG.info("The updated Packing Plan: " + updatedProtoPackingPlan);
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
@@ -169,7 +188,7 @@ public class UpdateTopologyManager implements Closeable {
 
     // update packing plan to trigger the scaling event
     logFine("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
+        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
 
     // reactivate topology
     if (initiallyRunning) {

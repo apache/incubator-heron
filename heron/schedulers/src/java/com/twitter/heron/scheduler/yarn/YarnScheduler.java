@@ -15,7 +15,9 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -108,12 +110,14 @@ public class YarnScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Map<Integer, PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     try {
       HeronMasterDriverProvider.getInstance().scheduleHeronWorkers(containersToAdd);
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       throw new RuntimeException("Failed to launch new yarn containers", e);
     }
+    return new HashMap<>();
   }
 
   @Override

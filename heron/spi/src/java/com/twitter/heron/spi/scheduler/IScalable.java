@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.spi.scheduler;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.twitter.heron.classification.InterfaceAudience;
@@ -30,8 +31,10 @@ public interface IScalable {
    * Requests new containers for scaling a topology
    *
    * @param containersToAdd Set of containers to be added by the scheduler
+   * @return Map from container-id assigned by packing algorithm, to the actual deployed container-id
    */
-  void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
+  Map<Integer, PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
 
   /**
    * Requests containers to be released for down-scaling a topology.

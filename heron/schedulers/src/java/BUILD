@@ -54,6 +54,11 @@ kubernetes_deps_files = \
         "//third_party/java:kubernetes-java-client",
     ]
 
+aurora_deps_files = \
+    scheduler_deps_files + [
+        "//third_party/java:jackson",
+    ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -76,14 +81,14 @@ genrule(
 java_library(
     name='aurora-scheduler-java',
     srcs = glob(["**/aurora/*.java"]),
-    deps = scheduler_deps_files,
+    deps = aurora_deps_files,
     resources = glob(["**/aurora/*.aurora"]),
 )
 
 java_binary(
     name='aurora-scheduler-unshaded',
     srcs = glob(["**/aurora/*.java"]),
-    deps = scheduler_deps_files,
+    deps = aurora_deps_files,
     resources = glob(["**/aurora/*.aurora"]),
 )
 

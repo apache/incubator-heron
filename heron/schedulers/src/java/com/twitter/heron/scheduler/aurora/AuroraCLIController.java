@@ -110,6 +110,15 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
+  public String status() {
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status"));
+    auroraCmd.add(jobSpec);
+    auroraCmd.add("--write-json");
+    StringBuilder sb = new StringBuilder();
+    int rc = ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), sb);
+    return rc == 0 ? sb.toString() : null;
+  }
+
   @Override
   public void addContainers(Integer count) {
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>

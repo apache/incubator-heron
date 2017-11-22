@@ -187,8 +187,65 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Map<Integer, PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
+    // TODO(mfu): Get current one
+    String beforeJson = controller.status();
+    // TODO(mfu): Add a method in AuroraCLIController
+    Set<Integer> beforeIds = getActiveContainerIds(beforeJson);
+    // Do the actual containers adding
     controller.addContainers(containersToAdd.size());
+    LOG.info("Containers added for Aurora");
+    // TODO(mfu): Get the after one
+    String afterJson = controller.status();
+    Set<Integer> afterIds = getActiveContainerIds(afterJson);
+    // TODO(mfu): Do the diff
+    List<Integer> diffs = getDiffs(beforeIds, afterIds);
+    LOG.info("The diffs: " + diffs);
+    Map<Integer, PackingPlan.ContainerPlan> remapping = new HashMap<>();
+    // Do the remapping
+    for (PackingPlan.ContainerPlan cp : containersToAdd) {
+      PackingPlan.ContainerPlan newContainerPlan =
+          new PackingPlan.ContainerPlan(
+              diffs.remove(0), cp.getInstances(),
+              cp.getRequiredResource(), cp.getScheduledResource().get());
+      remapping.put(cp.getId(), newContainerPlan);
+    }
+    LOG.info("The remapping structure: " + remapping);
+    return remapping;
+  }
+
+  protected Set<Integer> getActiveContainerIds(String json) {
+    LOG.info("The JSON to parse: " + json);
+    Set<Integer> ids = new HashSet<>();
+    // TODO(mfu): parse the json
+    // TODO(mfu): Fancy. Need Clean!!!!
+    final ObjectMapper mapper = new ObjectMapper();
+    Object[] array = new Object[0];
+    try {
+      array = mapper.readValue(json, Object[].class);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to parse the return value: " + e);
+    }
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> instances =
+        (List<Map<String, Object>>) (((Map<String, Object>) array[0]).get("active"));
+    for (Map<String, Object> i : instances) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> assignedTask = (Map<String, Object>) i.get("assignedTask");
+      ids.add((Integer) assignedTask.get("instanceId"));
+    }
+    LOG.info("The active container-ids: " + ids);
+    return ids;
+  }
+  protected List<Integer> getDiffs(Set<Integer> before, Set<Integer> after) {
+    List<Integer> ids = new LinkedList<>();
+    for (Integer id : after) {
+      if (!before.contains(id)) {
+        ids.add(id);
+      }
+    }
+    return ids;
   }
 
   @Override
