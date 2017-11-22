@@ -79,7 +79,7 @@ public final class SchedulerUtils {
     }
 
     public static String getPort(ExecutorPort executorPort,
-                                  Map<ExecutorPort, String> portMap) {
+                                 Map<ExecutorPort, String> portMap) {
       if (!portMap.containsKey(executorPort) && executorPort.isRequired()) {
         throw new RuntimeException("Required port " + executorPort.getName() + " not provided");
       }
@@ -179,7 +179,7 @@ public final class SchedulerUtils {
    *
    * @param config The static config
    * @param runtime The runtime config
-   * @param containerIndex the executor/container index
+   * @param shardId the executor/container index
    * @param ports a map of ports to use where the key indicate the port type and the
    * value is the port
    * @return String[] representing the command to start heron-executor
@@ -187,11 +187,29 @@ public final class SchedulerUtils {
   public static String[] getExecutorCommand(
       Config config,
       Config runtime,
-      int containerIndex,
+      int shardId,
+      Map<ExecutorPort, String> ports) {
+    return getExecutorCommand(config, runtime, Integer.toString(shardId), ports);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static config
+   * @param runtime The runtime config
+   * @param shardId the executor/container index
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] getExecutorCommand(
+      Config config,
+      Config runtime,
+      String shardId,
       Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
+    commands.add(createCommandArg(ExecutorFlag.Shard, shardId));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));

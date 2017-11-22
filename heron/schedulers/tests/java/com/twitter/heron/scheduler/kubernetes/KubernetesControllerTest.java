@@ -14,143 +14,72 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.io.IOException;
+import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.scheduler.TopologySubmissionException;
-import com.twitter.heron.scheduler.utils.HttpJsonClient;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.packing.PackingPlan;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(KubernetesController.class)
 public class KubernetesControllerTest {
 
   private static final String K8S_URI = "http://k8s.uri:8080";
-  private static final String NAMESPACE = "default";
-  private static final String TOPOLOGY_NAME = "topology_name";
-  private static final boolean IS_VERBOSE = true;
-  private static final String[] DEPLOY_CONFS = {"test1", "test2"};
+  private static final String NAMESPACE = "ns1";
+  private static final String TOPOLOGY_NAME = "topology-name";
 
-  private static KubernetesController controller;
+  private Config config = Config.newBuilder()
+      .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_URI, K8S_URI).build();
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private Config configWithNamespace = Config.newBuilder().putAll(config)
+      .put(KubernetesContext.HERON_KUBERNETES_SCHEDULER_NAMESPACE, NAMESPACE).build();
 
-  @Before
-  public void setUp() throws Exception {
-    controller = Mockito.spy(new KubernetesController(K8S_URI,
-        NAMESPACE,
-        TOPOLOGY_NAME,
-        IS_VERBOSE));
-  }
+  private Config runtime = Config.newBuilder()
+      .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME).build();
 
-  @After
-  public void after() throws Exception {
-  }
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-  }
-
-  /***
-   * Test KubernetesController's killTopology method
-   * @throws Exception
-   */
   @Test
-  public void testKillTopology() throws Exception {
-
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
-
-    // Test a bad DELETE
-    PowerMockito.doThrow(new IOException()).when(httpJsonClient,  "delete", Mockito.anyInt());
-    Assert.assertFalse(controller.killTopology());
-
-    // Test a good path
-    PowerMockito.doNothing().when(httpJsonClient).delete(Mockito.anyInt());
-    Assert.assertTrue(controller.killTopology());
+  public void testControllerSetup() {
+    final KubernetesController controller = create(config, runtime);
+    Assert.assertEquals(K8S_URI, controller.getKubernetesUri());
+    Assert.assertEquals("default", controller.getNamespace());
+    Assert.assertEquals(TOPOLOGY_NAME, controller.getTopologyName());
   }
 
   @Test
-  public void testGetBasePod() throws Exception {
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
-
-    // Test a bad GET
-    PowerMockito.doThrow(new IOException()).when(httpJsonClient).get(Mockito.anyInt());
-    exception.expect(IOException.class);
-    controller.getBasePod(Mockito.anyString());
-
+  public void testControllerSetupWithNamespace() {
+    final KubernetesController controller = create(configWithNamespace, runtime);
+    Assert.assertEquals(K8S_URI, controller.getKubernetesUri());
+    Assert.assertEquals(NAMESPACE, controller.getNamespace());
+    Assert.assertEquals(TOPOLOGY_NAME, controller.getTopologyName());
   }
 
-  @Test
-  public void testDeployContainer() throws Exception {
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+  private KubernetesController create(Config c, Config r) {
+    return new KubernetesController(c, r) {
+      @Override
+      boolean submit(PackingPlan packingPlan) {
+        return false;
+      }
 
-    // Test a bad POST
-    PowerMockito.doThrow(new IOException()).when(httpJsonClient).post(Mockito.anyString(),
-        Mockito.anyInt());
-    exception.expect(IOException.class);
-    controller.deployContainer(Mockito.anyString());
+      @Override
+      boolean killTopology() {
+        return false;
+      }
 
-  }
+      @Override
+      boolean restart(int shardId) {
+        return false;
+      }
 
-  @Test
-  public void testRemoveContainer() throws Exception {
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
+      @Override
+      public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
 
-    // Test a bad DELETE
-    PowerMockito.doThrow(new IOException()).when(httpJsonClient).delete(Mockito.anyInt());
-    exception.expect(IOException.class);
-    controller.removeContainer(Mockito.anyString());
-  }
+      }
 
+      @Override
+      public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
 
-  /***
-   * Test KubernetesController's submitTopology method succeeded
-   * @throws Exception
-   */
-  @Test
-  public void testSubmitTopologySuccess() throws Exception {
-
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
-
-    // Test a good path
-    PowerMockito.doNothing().when(httpJsonClient).post(Mockito.anyString(), Mockito.anyInt());
-    Assert.assertTrue(controller.submitTopology(DEPLOY_CONFS));
-  }
-
-  /***
-   * Test KubernetesController's submitTopology method failed
-   * @throws Exception
-   */
-  @Test(expected = TopologySubmissionException.class)
-  public void testSubmitTopologyFailure() throws Exception {
-    HttpJsonClient httpJsonClient = PowerMockito.spy(new HttpJsonClient(""));
-    PowerMockito.whenNew(HttpJsonClient.class).withAnyArguments().thenReturn(httpJsonClient);
-
-    // Test a bad POST
-    PowerMockito.doThrow(new IOException()).when(httpJsonClient).post(Mockito.anyString(),
-        Mockito.anyInt());
-    controller.submitTopology(DEPLOY_CONFS);
+      }
+    };
   }
 }
