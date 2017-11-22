@@ -99,6 +99,7 @@ public final class WordCountTopology {
     private final String[] words = new String[ARRAY_LENGTH];
 
     private final Random rnd = new Random(31);
+    private final Random rnd2 = new Random();
 
     private SpoutOutputCollector collector;
 
@@ -123,7 +124,7 @@ public final class WordCountTopology {
     @Override
     public void nextTuple() {
       int nextInt = rnd.nextInt(ARRAY_LENGTH);
-      collector.emit(new Values(words[nextInt]));
+      collector.emit(new Values(words[nextInt]), rnd2.nextLong());
     }
   }
 
