@@ -124,7 +124,8 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   @Override
-  public Map<Integer, PackingPlan.ContainerPlan> addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Map<Integer, PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     final V1beta1StatefulSet statefulSet;
     try {
       statefulSet = getStatefulSet();

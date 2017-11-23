@@ -74,7 +74,8 @@ public class KubernetesControllerTest {
       }
 
       @Override
-      public Map<Integer, PackingPlan.ContainerPlan> addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+      public Map<Integer, PackingPlan.ContainerPlan>
+          addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
         return new HashMap<>();
       }
 
