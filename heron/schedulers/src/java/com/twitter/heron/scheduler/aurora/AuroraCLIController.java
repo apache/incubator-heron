@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,14 +112,17 @@ class AuroraCLIController implements AuroraController {
   }
 
   public String status() {
-    String cmd = "'aurora job status " + jobSpec + " --write-json 2>/dev/null'";
-    List<String> auroraCmd = new ArrayList<>(Arrays.asList("bash", "-c", cmd));
-    // List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status"));
-//    auroraCmd.add(jobSpec);
-//    auroraCmd.add("--write-json");
-//    auroraCmd.add("2>/dev/null");
+    //String cmd = "'aurora job status " + jobSpec + " --write-json 2>/dev/null'";
+    //List<String> auroraCmd = new ArrayList<>(Arrays.asList("bash", "-c", cmd));
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status"));
+    auroraCmd.add(jobSpec);
+    auroraCmd.add("--write-json");
+ //   auroraCmd.add("2>/dev/null");
     StringBuilder sb = new StringBuilder();
-    int rc = ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), sb);
+    int rc = ShellUtils.runSyncProcess(false, false,
+        auroraCmd.toArray(new String[auroraCmd.size()]),
+        sb, null, new HashMap<String, String>(), false);
+
     return rc == 0 ? sb.toString() : null;
   }
 

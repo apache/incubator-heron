@@ -127,9 +127,10 @@ public final class ShellUtils {
   /**
    * run sync process
    */
-  private static int runSyncProcess(
+  public static int runSyncProcess(
       boolean isVerbose, boolean isInheritIO, String[] cmdline,
-      StringBuilder outputBuilder, File workingDirectory, Map<String, String> envs) {
+      StringBuilder outputBuilder, File workingDirectory,
+      Map<String, String> envs, boolean isMergeStdErr) {
     final StringBuilder builder = outputBuilder == null ? new StringBuilder() : outputBuilder;
 
     // Log the command for debugging
@@ -141,7 +142,7 @@ public final class ShellUtils {
        3. follow one basic pattern of the design of Python<~>Java I/O redirection:
           stdout contains useful messages Java program needs to propagate back, stderr
           contains all other information */
-    pb.redirectErrorStream(true);
+    pb.redirectErrorStream(isMergeStdErr);
 
     Process process;
     try {
@@ -173,6 +174,13 @@ public final class ShellUtils {
       Thread.currentThread().interrupt();
       return -1;
     }
+  }
+  private static int runSyncProcess(
+      boolean isVerbose, boolean isInheritIO, String[] cmdline,
+      StringBuilder outputBuilder, File workingDirectory, Map<String, String> envs) {
+    return runSyncProcess(
+         isVerbose,  isInheritIO, cmdline,
+         outputBuilder,  workingDirectory, envs, true);
   }
 
   public static Process runASyncProcess(
