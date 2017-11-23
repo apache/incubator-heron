@@ -111,7 +111,7 @@ class AuroraCLIController implements AuroraController {
   }
 
   public String status() {
-    String cmd = "aurora job status " + jobSpec + " --write-json 2>/dev/null";
+    String cmd = "'aurora job status " + jobSpec + " --write-json 2>/dev/null'";
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("bash", "-c", cmd));
     // List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status"));
 //    auroraCmd.add(jobSpec);
