@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -240,6 +241,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     LOG.info("The active container-ids: " + ids);
     return ids;
   }
+
   protected List<Integer> getDiffs(Set<Integer> before, Set<Integer> after) {
     List<Integer> ids = new LinkedList<>();
     for (Integer id : after) {
