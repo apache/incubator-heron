@@ -212,7 +212,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
       PackingPlan.ContainerPlan newContainerPlan =
           new PackingPlan.ContainerPlan(
               diffs.remove(0), cp.getInstances(),
-              cp.getRequiredResource(), cp.getScheduledResource().get());
+              cp.getRequiredResource(), cp.getScheduledResource().orNull());
       remapping.put(cp.getId(), newContainerPlan);
     }
     LOG.info("The remapping structure: " + remapping);
