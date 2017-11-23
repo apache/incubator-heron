@@ -73,7 +73,7 @@ class AuroraHeronShellController implements AuroraController {
   public String status() {
     return cliController.status();
   }
-  
+
   private StMgr searchContainer(Integer id) {
     String prefix = "stmgr-" + id;
     for (StMgr sm : stateMgrAdaptor.getPhysicalPlan(topologyName).getStmgrsList()) {
