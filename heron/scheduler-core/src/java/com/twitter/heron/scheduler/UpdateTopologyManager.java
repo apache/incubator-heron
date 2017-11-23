@@ -176,7 +176,7 @@ public class UpdateTopologyManager implements Closeable {
         }
       }
     }
-    
+
     PackingPlan updatedPackingPlan =
         new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
