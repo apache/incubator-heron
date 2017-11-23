@@ -127,7 +127,7 @@ public class MarathonScheduler implements IScheduler {
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
-      instance.put(MarathonConstants.ID, "/"+Runtime.topologyName(runtime)+"/"+Integer.toString(i));
+      instance.put(MarathonConstants.ID, "/" + Runtime.topologyName(runtime) + "/" + Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
       instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
@@ -142,7 +142,7 @@ public class MarathonScheduler implements IScheduler {
 
     // Create marathon group for a topology
     ObjectNode appConf = mapper.createObjectNode();
-    appConf.put(MarathonConstants.ID, "/"+Runtime.topologyName(runtime));
+    appConf.put(MarathonConstants.ID, "/" + Runtime.topologyName(runtime));
     appConf.set(MarathonConstants.APPS, instances);
 
     return appConf.toString();
