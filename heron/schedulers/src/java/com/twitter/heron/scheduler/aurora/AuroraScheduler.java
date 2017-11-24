@@ -204,6 +204,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
     String afterJson = controller.status();
     Set<Integer> afterIds = getActiveContainerIds(afterJson);
     // TODO(mfu): Do the diff
+    LOG.info("before: " + beforeIds.toArray());
+    LOG.info("after: " + afterIds.toArray());
     List<Integer> diffs = getDiffs(beforeIds, afterIds);
     LOG.info("The diffs: " + diffs);
     Map<Integer, PackingPlan.ContainerPlan> remapping = new HashMap<>();
