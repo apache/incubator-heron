@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -48,10 +47,6 @@ import static org.junit.Assert.*;
  * Unit tests for {@link StreamletImpl}
  */
 public class StreamletImplTest {
-
-  @Before
-  public void setUp() {
-  }
 
   @Test
   public void testBasicParams() throws Exception {
@@ -350,11 +345,17 @@ public class StreamletImplTest {
 
   @Test
   public void testSetNameWithInvalidValues() {
-    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Function<String, Streamlet<Double>> function = sample::setName;
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = streamlet::setName;
     testByFunction(function, null);
     testByFunction(function, "");
     testByFunction(function, "  ");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSetNumPartitionsWithInvalidValue() {
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    streamlet.setNumPartitions(0);
   }
 
   private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {
