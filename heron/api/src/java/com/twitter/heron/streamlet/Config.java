@@ -104,7 +104,7 @@ public final class Config implements Serializable {
     }
   }
 
-  public static class Builder {
+  public final static class Builder {
     private com.twitter.heron.api.Config config;
     private float cpu;
     private ByteAmount ram;
@@ -123,8 +123,8 @@ public final class Config implements Serializable {
      * Sets the per-container (per-instance) CPU to be used by this topology
      * @param cpu Per-container (per-instance) CPU as a float
      */
-    public Builder setPerContainerCpu(float cpu) {
-      this.cpu = cpu;
+    public Builder setPerContainerCpu(float perContainerCpu) {
+      this.cpu = perContainerCpu;
       return this;
     }
 
@@ -132,8 +132,8 @@ public final class Config implements Serializable {
      * Sets the per-container (per-instance) RAM to be used by this topology
      * @param ram Per-container (per-instance) RAM expressed as a {@link ByteAmount}
      */
-    public Builder setPerContainerRam(ByteAmount ram) {
-      this.ram = ram;
+    public Builder setPerContainerRam(ByteAmount perContainerRam) {
+      this.ram = perContainerRam;
       return this;
     }
 
@@ -179,8 +179,8 @@ public final class Config implements Serializable {
      * KryoSerializer} and the native Java serializer.
      * @param serializer The data serializer to use for streamlet elements in the topology.
      */
-    public Builder setSerializer(Serializer serializer) {
-      this.serializer = serializer;
+    public Builder setSerializer(Serializer topologySerializer) {
+      this.serializer = topologySerializer;
       return this;
     }
 
