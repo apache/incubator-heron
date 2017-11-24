@@ -121,7 +121,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets the per-container (per-instance) CPU to be used by this topology
-     * @param cpu Per-container (per-instance) CPU as a float
+     * @param perContainerCpu Per-container (per-instance) CPU as a float
      */
     public Builder setPerContainerCpu(float perContainerCpu) {
       this.cpu = perContainerCpu;
@@ -130,7 +130,7 @@ public final class Config implements Serializable {
 
     /**
      * Sets the per-container (per-instance) RAM to be used by this topology
-     * @param ram Per-container (per-instance) RAM expressed as a {@link ByteAmount}
+     * @param perContainerRam Per-container (per-instance) RAM expressed as a {@link ByteAmount}
      */
     public Builder setPerContainerRam(ByteAmount perContainerRam) {
       this.ram = perContainerRam;
@@ -177,7 +177,7 @@ public final class Config implements Serializable {
     /**
      * Sets the {@link Serializer} to be used by the topology (current options are {@link
      * KryoSerializer} and the native Java serializer.
-     * @param serializer The data serializer to use for streamlet elements in the topology.
+     * @param topologySerializer The data serializer to use for streamlet elements in the topology.
      */
     public Builder setSerializer(Serializer topologySerializer) {
       this.serializer = topologySerializer;
