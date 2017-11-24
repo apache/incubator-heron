@@ -20,16 +20,17 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.SerializableConsumer;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
@@ -45,10 +46,6 @@ import static org.junit.Assert.*;
  * Unit tests for {@link StreamletImpl}
  */
 public class StreamletImplTest {
-
-  @Before
-  public void setUp() {
-  }
 
   @Test
   public void testBasicParams() throws Exception {
@@ -261,6 +258,41 @@ public class StreamletImplTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
+  public void testCalculatedDefaultStageNames() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 0);
+
+    // apply the consumer function
+    baseStreamlet.consume((SerializableConsumer<String>) s -> { });
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
+
+    // verify SupplierStreamlet
+    assertTrue(supplierStreamlet.allBuilt());
+    assertEquals(1, supplierStreamlet.getChildren().size());
+    assertTrue(supplierStreamlet.getChildren().get(0) instanceof ConsumerStreamlet);
+    assertEquals("consumer1", supplierStreamlet.getChildren().get(0).getName());
+
+    // verify stageNames
+    assertEquals(2, stageNames.size());
+    List<String> expectedStageNames = Arrays.asList("consumer1", "supplier1");
+    assertTrue(stageNames.containsAll(expectedStageNames));
+
+    // verify ConsumerStreamlet
+    ConsumerStreamlet<String> consumerStreamlet =
+        (ConsumerStreamlet<String>) supplierStreamlet.getChildren().get(0);
+    assertEquals(0, consumerStreamlet.getChildren().size());
+  }
+
+
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
@@ -283,11 +315,17 @@ public class StreamletImplTest {
 
   @Test
   public void testSetNameWithInvalidValues() {
-    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Function<String, Streamlet<Double>> function = sample::setName;
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = streamlet::setName;
     testByFunction(function, null);
     testByFunction(function, "");
     testByFunction(function, "  ");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSetNumPartitionsWithInvalidValue() {
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    streamlet.setNumPartitions(0);
   }
 
   private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {

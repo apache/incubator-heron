@@ -20,7 +20,13 @@ html lang={{.Site.LanguageCode}}
             section.hn-docs-main.col-xs-12.col-sm-12.col-md-8.col-lg-10.col-md-offset-4.col-lg-offset-2
               {{partial "docs/main.html" .}}
     script src=https://code.jquery.com/jquery-2.2.1.min.js
+    script src=/js/bootstrap.js
+    script src=/js/jquery.scrollTo.js
+    {{- if .Site.BuildDrafts }}
+    script src=/js/{{ index .Site.Data.assets.js.hash "app.js" }}
+    {{- else }}
     script src=/js/app.min.js
+    {{- end }}
     = javascript
       $('pre code').each(function() {
         console.log(this);

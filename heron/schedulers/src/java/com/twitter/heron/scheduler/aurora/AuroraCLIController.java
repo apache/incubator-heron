@@ -101,6 +101,8 @@ class AuroraCLIController implements AuroraController {
     //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
         "aurora", "job", "kill", jobSpec + "/" + instancesToKill));
+
+    appendAuroraCommandOptions(auroraCmd, isVerbose);
     LOG.info(String.format(
         "Killing %s aurora containers: %s", containersToRemove.size(), auroraCmd));
     if (!runProcess(auroraCmd)) {
@@ -114,6 +116,11 @@ class AuroraCLIController implements AuroraController {
     //clone instance 0
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
         "aurora", "job", "add", "--wait-until", "RUNNING", jobSpec + "/0", count.toString()));
+
+    if (isVerbose) {
+      auroraCmd.add("--verbose");
+    }
+
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
     if (!runProcess(auroraCmd)) {
       throw new RuntimeException("Failed to create " + count + " new aurora instances");

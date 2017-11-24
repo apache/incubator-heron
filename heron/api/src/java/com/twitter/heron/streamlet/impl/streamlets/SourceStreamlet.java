@@ -22,8 +22,8 @@ import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sources.ComplexSource;
 
 /**
- * SupplierStreamlet is a very quick and flexible way of creating a Streamlet
- * from a user supplied Supplier Function. The supplier function is the
+ * SourceStreamlet is a very quick and flexible way of creating a Streamlet
+ * from a user supplied Generator Function. The Generator function is the
  * source of all tuples for this Streamlet.
  */
 public class SourceStreamlet<R> extends StreamletImpl<R> {

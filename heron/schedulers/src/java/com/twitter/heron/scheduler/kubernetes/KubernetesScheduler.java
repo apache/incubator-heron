@@ -14,41 +14,27 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.primitives.Ints;
 
-import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.TopologyRuntimeManagementException;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
-import com.twitter.heron.scheduler.utils.SchedulerUtils;
-import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
+
 
 public class KubernetesScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(KubernetesScheduler.class.getName());
@@ -59,11 +45,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   private UpdateTopologyManager updateTopologyManager;
 
   protected KubernetesController getController() {
-    return new KubernetesController(
-        KubernetesContext.getSchedulerURI(configuration),
-        KubernetesContext.getKubernetesNamespace(configuration),
-        Runtime.topologyName(runtimeConfiguration),
-        Context.verbose(configuration));
+    return new AppsV1beta1Controller(configuration, runtimeConfiguration);
   }
 
   @Override
@@ -80,7 +62,14 @@ public class KubernetesScheduler implements IScheduler, IScalable {
       );
     }
 
-    this.configuration = config;
+    final Config.Builder builder = Config.newBuilder()
+        .putAll(config);
+    if (config.containsKey(Key.TOPOLOGY_BINARY_FILE)) {
+      builder.put(Key.TOPOLOGY_BINARY_FILE,
+          FileUtils.getBaseName(Context.topologyBinaryFile(config)));
+    }
+
+    this.configuration = builder.build();
     this.runtimeConfiguration = runtime;
     this.controller = getController();
     this.updateTopologyManager =
@@ -102,9 +91,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
     LOG.info("Submitting topology to Kubernetes");
 
-    String[] topologyConf = getTopologyConf(packing);
-
-    return controller.submitTopology(topologyConf);
+    return controller.submit(packing);
   }
 
   @Override
@@ -123,8 +110,8 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    int appId = request.getContainerIndex();
-    return controller.restartApp(appId);
+    final int appId = request.getContainerIndex();
+    return controller.restart(appId);
   }
 
   @Override
@@ -140,374 +127,6 @@ public class KubernetesScheduler implements IScheduler, IScalable {
   }
 
   /**
-   * Build all the pod specifications so we can deploy the Heron topology. This will be a list of
-   * JSON strings that contain all the necessary pod specifications we'll need to pass to the
-   * K8S API
-   *
-   * @param packing - PackingPlan of the topology
-   */
-  protected String[] getTopologyConf(PackingPlan packing) {
-
-    configuration = Config.newBuilder()
-        .putAll(configuration)
-        .put(Key.TOPOLOGY_BINARY_FILE,
-            FileUtils.getBaseName(Context.topologyBinaryFile(configuration)))
-        .build();
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    // Align resources to maximal requested resource
-    PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
-    SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtimeConfiguration),
-        updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(runtimeConfiguration));
-
-    Resource containerResource = updatedPackingPlan.getContainers()
-        .iterator().next().getScheduledResource().get();
-
-    // Create app conf list for each container
-
-    String[] deploymentConfs =
-        new String[Ints.checkedCast(Runtime.numContainers(runtimeConfiguration))];
-
-    for (int i = 0; i < Runtime.numContainers(runtimeConfiguration); i++) {
-      Optional<PackingPlan.ContainerPlan> container = packing.getContainer(i);
-      Set<PackingPlan.InstancePlan> instancePlans;
-      if (container.isPresent()) {
-        instancePlans = container.get().getInstances();
-      } else {
-        instancePlans = new HashSet<>();
-      }
-      deploymentConfs[i] = buildKubernetesPodSpec(mapper, i, containerResource, instancePlans);
-    }
-    return deploymentConfs;
-  }
-
-  /**
-   * Build a specification object for a K8S Pod, which will house the Docker image and necessary
-   * setup information about the Pod so we can run a Heron container
-   *
-   * @param mapper - ObjectMapper instance we can use to create new JSON nodes
-   * @param containerIndex - The index of the container
-   * @param containerResource - The Resource object for the new container
-   */
-  protected String buildKubernetesPodSpec(ObjectMapper mapper,
-                                          Integer containerIndex,
-                                          Resource containerResource,
-                                          Set<PackingPlan.InstancePlan> instancePlans) {
-    ObjectNode instance = mapper.createObjectNode();
-
-    instance.put(KubernetesConstants.API_VERSION, KubernetesConstants.API_VERSION_1);
-    instance.put(KubernetesConstants.API_KIND, KubernetesConstants.API_POD);
-    instance.set(KubernetesConstants.API_METADATA, getMetadata(mapper, containerIndex));
-
-    instance.set(KubernetesConstants.API_SPEC, getContainerSpec(mapper,
-        containerIndex,
-        containerResource,
-        instancePlans));
-
-    return instance.toString();
-  }
-
-  /**
-   * Build a new container spec based of an existing spec. This is used when we want to copy
-   * an existing spec so we can easily create a new one, while replacing necessary information like
-   * the container index
-   *
-   * @param podSpec - Existing pod specification JSON object
-   * @param mapper - ObjectMapper instance we can use to create new JSON nodes
-   * @param containerPlan - The ContainerPlan for the new container
-   * @param oldContainerIndex - The index of the existing container
-   */
-  protected String rebuildKubernetesPodSpec(JsonNode podSpec,
-                                            ObjectMapper mapper,
-                                            PackingPlan.ContainerPlan containerPlan,
-                                            Integer oldContainerIndex) {
-
-    ObjectNode newContainer = mapper.createObjectNode();
-
-    newContainer.put(KubernetesConstants.API_VERSION,
-        podSpec.get(KubernetesConstants.API_VERSION).asText());
-    newContainer.put(KubernetesConstants.API_KIND,
-        podSpec.get(KubernetesConstants.API_KIND).asText());
-    newContainer.set(KubernetesConstants.API_METADATA, getMetadata(mapper, containerPlan.getId()));
-
-    newContainer.set(KubernetesConstants.API_SPEC, rebuildContainerSpec(
-        podSpec.get(KubernetesConstants.API_SPEC),
-        mapper,
-        containerPlan,
-        oldContainerIndex));
-
-    return newContainer.toString();
-  }
-
-  /**
-   * Build the metadata that we're going to attach to our Pod specification. This metadata
-   * will allow us to query the set of pods that belong to a certain topology so we can easily
-   * retrieve or delete all of them at once.
-   *
-   * @param mapper - ObjectMapper instance we can use to create other JSON nodes
-   * @param containerIndex - Index of the container
-   */
-  protected ObjectNode getMetadata(ObjectMapper mapper, int containerIndex) {
-    ObjectNode metadataNode = mapper.createObjectNode();
-    metadataNode.put(KubernetesConstants.NAME,
-        Joiner.on("-").join(Runtime.topologyName(runtimeConfiguration), containerIndex));
-
-    ObjectNode labels = mapper.createObjectNode();
-    labels.put(KubernetesConstants.TOPOLOGY_LABEL, Runtime.topologyName(runtimeConfiguration));
-
-    metadataNode.set(KubernetesConstants.METADATA_LABELS, labels);
-
-    ObjectNode annotations = mapper.createObjectNode();
-    applyPrometheusAnnotations(annotations);
-    metadataNode.set(KubernetesConstants.METADATA_ANNOTATIONS, annotations);
-
-    return metadataNode;
-  }
-
-  private void applyPrometheusAnnotations(ObjectNode node) {
-    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_SCRAPE, "true");
-    node.put(KubernetesConstants.ANNOTATION_PROMETHEUS_PORT, KubernetesConstants.PROMETHEUS_PORT);
-  }
-
-  /**
-   * Based on an existing container spec, rebuild it and replace necessary information for building
-   * a new container (primarily the container index)
-   *
-   * @param existingSpec - Existing container spec
-   * @param mapper - ObjectMapper instance to use for creating new JSON nodes
-   * @param containerPlan - New container's ContainerPlan
-   * @param oldContainerIndex - The index of the old container
-   */
-  protected ObjectNode rebuildContainerSpec(JsonNode existingSpec,
-                                            ObjectMapper mapper,
-                                            PackingPlan.ContainerPlan containerPlan,
-                                            int oldContainerIndex) {
-
-    ObjectNode containerSpec = mapper.createObjectNode();
-    ArrayNode containerList = mapper.createArrayNode();
-
-    for (JsonNode existingContainer : existingSpec.get("containers")) {
-      ObjectNode containerInfo = mapper.createObjectNode();
-      containerInfo.put(KubernetesConstants.NAME, Joiner.on("-").join("executor",
-          Integer.toString(containerPlan.getId())));
-
-      // set the host for this container
-      ArrayNode envList = mapper.createArrayNode();
-      ObjectNode envVar = mapper.createObjectNode();
-      envVar.put(KubernetesConstants.NAME, KubernetesConstants.HOST);
-
-      // build the JSON to attach the Pod IP as the "HOST" environment variable
-      ObjectNode fieldRef = mapper.createObjectNode();
-      ObjectNode fieldPath = mapper.createObjectNode();
-      fieldPath.put(KubernetesConstants.FIELD_PATH, KubernetesConstants.POD_IP);
-      fieldRef.set(KubernetesConstants.FIELD_REF, fieldPath);
-      envVar.set(KubernetesConstants.VALUE_FROM, fieldRef);
-      envList.add(envVar);
-
-      containerInfo.set(KubernetesConstants.ENV, envList);
-
-      // set the docker image to the same image as the existing container
-      containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
-          existingContainer.get(KubernetesConstants.DOCKER_IMAGE).asText());
-
-      // Set the image pull policy for this container
-      setImagePullPolicyIfPresent(containerInfo);
-
-      // Port info -- all the same
-      containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper, containerPlan.getInstances()));
-
-      // In order for the container to run with the correct index, we're copying the base
-      // configuration for container with index 0, and replacing the container index with
-      // the index for the new container we're going to deploy
-      // Example: " 0 exclamationTopology" will be replaced w/ " <new_cntr_idx> exclamationTopology"
-      // The rest of the command will stay the same
-      ArrayNode commandsArray = mapper.createArrayNode();
-      for (JsonNode cmd : existingContainer.get("command")) {
-        String oldPattern = " " + oldContainerIndex + " "
-            + Runtime.topologyName(runtimeConfiguration);
-        commandsArray.add(cmd.asText().replaceAll(oldPattern,
-            " " + containerPlan.getId() + " "
-                + Runtime.topologyName(runtimeConfiguration)));
-      }
-      containerInfo.set(KubernetesConstants.COMMAND, commandsArray);
-
-      // Requested resource info
-      ObjectNode requestedResourceInfo = mapper.createObjectNode();
-      requestedResourceInfo.put(KubernetesConstants.MEMORY,
-          containerPlan.getRequiredResource().getRam().asMegabytes());
-      requestedResourceInfo.put(KubernetesConstants.CPU,
-          containerPlan.getRequiredResource().getCpu());
-
-      // Wrap it up into a resources dictionary
-      ObjectNode resourceInfo = mapper.createObjectNode();
-      resourceInfo.set(KubernetesConstants.REQUESTS, requestedResourceInfo);
-
-      containerInfo.set(KubernetesConstants.RESOURCES, resourceInfo);
-
-      containerList.add(containerInfo);
-
-      containerSpec.set(KubernetesConstants.CONTAINERS, containerList);
-    }
-    return containerSpec;
-  }
-
-  /**
-   * Get the JSON-based specification for the K8S Pod
-   *
-   * @param mapper - An ObjectMapper instance which can be used to create JSON nodes
-   * @param containerIndex - Index of the container
-   * @param containerResource - The containers Resource object
-   */
-  protected ObjectNode getContainerSpec(ObjectMapper mapper,
-                                        int containerIndex,
-                                        Resource containerResource,
-                                        Set<PackingPlan.InstancePlan> instancePlans) {
-
-    ObjectNode containerSpec = mapper.createObjectNode();
-    ArrayNode containerList = mapper.createArrayNode();
-
-    ObjectNode containerInfo = mapper.createObjectNode();
-    containerInfo.put(KubernetesConstants.NAME, Joiner.on("-").join("executor",
-        Integer.toString(containerIndex)));
-
-    // set the host for this container
-    ArrayNode envList = mapper.createArrayNode();
-    ObjectNode envVar = mapper.createObjectNode();
-    envVar.put(KubernetesConstants.NAME, KubernetesConstants.HOST);
-
-    // build the JSON to attach the Pod IP as the "HOST" environment variable
-    ObjectNode fieldRef = mapper.createObjectNode();
-    ObjectNode fieldPath = mapper.createObjectNode();
-    fieldPath.put(KubernetesConstants.FIELD_PATH, KubernetesConstants.POD_IP);
-    fieldRef.set(KubernetesConstants.FIELD_REF, fieldPath);
-    envVar.set(KubernetesConstants.VALUE_FROM, fieldRef);
-    envList.add(envVar);
-
-    containerInfo.set(KubernetesConstants.ENV, envList);
-
-    // Image information for this container
-    containerInfo.put(KubernetesConstants.DOCKER_IMAGE,
-        KubernetesContext.getExecutorDockerImage(configuration));
-
-    // Set the image pull policy for this container
-    setImagePullPolicyIfPresent(containerInfo);
-
-    // Port information for this container
-    containerInfo.set(KubernetesConstants.PORTS, getPorts(mapper, instancePlans));
-
-    // Heron command for the container
-    String[] command = getExecutorCommand(containerIndex, instancePlans.size());
-    ArrayNode commandsArray = mapper.createArrayNode();
-    for (int i = 0; i < command.length; i++) {
-      commandsArray.add(command[i]);
-    }
-    containerInfo.set(KubernetesConstants.COMMAND, commandsArray);
-
-    // Requested resource info
-    ObjectNode requestedResourceInfo = mapper.createObjectNode();
-    requestedResourceInfo.put(KubernetesConstants.MEMORY, containerResource.getRam().asMegabytes());
-    requestedResourceInfo.put(KubernetesConstants.CPU, containerResource.getCpu());
-
-    // Wrap it up into a resources dictionary
-    ObjectNode resourceInfo = mapper.createObjectNode();
-    resourceInfo.set(KubernetesConstants.REQUESTS, requestedResourceInfo);
-
-    containerInfo.set(KubernetesConstants.RESOURCES, resourceInfo);
-
-    containerList.add(containerInfo);
-
-    containerSpec.set(KubernetesConstants.CONTAINERS, containerList);
-
-    return containerSpec;
-  }
-
-  private List<Integer> getRemoteDebuggerPorts(int numberOfInstances) {
-    List<Integer> ports = new LinkedList<>();
-    for (int i = 0; i < numberOfInstances; i++) {
-      ports.add(Integer.parseInt(KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT, 10) + i);
-    }
-
-    return ports;
-  }
-
-  /**
-   * Get the ports the container will need to expose so other containers can access its services
-   *
-   * @param mapper
-   */
-  protected ArrayNode getPorts(ObjectMapper mapper,
-                               Set<PackingPlan.InstancePlan> instancePlans) {
-    ArrayNode ports = mapper.createArrayNode();
-
-    for (Map.Entry<ExecutorPort, String> entry
-        : KubernetesConstants.EXECUTOR_PORTS.entrySet()) {
-      ObjectNode port = mapper.createObjectNode();
-      ExecutorPort portName = entry.getKey();
-      port.put(KubernetesConstants.DOCKER_CONTAINER_PORT,
-          Integer.parseInt(entry.getValue(), 10));
-      port.put(KubernetesConstants.PORT_NAME, portName.getName());
-      ports.add(port);
-    }
-
-    // if remote debugger enabled
-    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtimeConfiguration))) {
-      List<Integer> portsForRemoteDebugging = getRemoteDebuggerPorts(instancePlans.size());
-
-      for (int i = 0; i < portsForRemoteDebugging.size(); i++) {
-        ObjectNode port = mapper.createObjectNode();
-        port.put(KubernetesConstants.DOCKER_CONTAINER_PORT, portsForRemoteDebugging.get(i));
-        port.put(KubernetesConstants.PORT_NAME, KubernetesConstants.JVM_REMOTE_DEBUGGER_PORT_NAME
-            + "-" + String.valueOf(i));
-      }
-    }
-
-    return ports;
-  }
-
-  private void setImagePullPolicyIfPresent(ObjectNode containerInfo) {
-    if (KubernetesContext.hasImagePullPolicy(configuration)) {
-      containerInfo.put(KubernetesConstants.IMAGE_PULL_POLICY,
-          KubernetesContext.getKubernetesImagePullPolicy(configuration));
-    }
-  }
-
-
-  /**
-   * Get the command that will be used to retrieve the topology JAR
-   */
-  static String getFetchCommand(Config config, Config runtime) {
-    return String.format("%s %s .", Context.downloaderBinary(config),
-        Runtime.topologyPackageUri(runtime).toString());
-  }
-
-  /**
-   * Get the command string needed to start the container
-   *
-   * @param containerIndex
-   */
-  protected String[] getExecutorCommand(int containerIndex, int numInstances) {
-    if (TopologyUtils.getTopologyRemoteDebuggingEnabled(Runtime.topology(runtimeConfiguration))) {
-      KubernetesConstants.EXECUTOR_PORTS.put(ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS,
-          String.join(",", getRemoteDebuggerPorts(numInstances)
-              .stream().map(Object::toString)
-              .collect(Collectors.toList())));
-    }
-    String[] executorCommand =
-        SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
-        containerIndex, KubernetesConstants.EXECUTOR_PORTS);
-
-    String[] command = {
-        "sh",
-        "-c",
-        getFetchCommand(configuration, runtimeConfiguration)
-        + " && " + Joiner.on(" ").join(executorCommand)
-    };
-
-    return command;
-  }
-
-  /**
    * Add containers for a scale-up event from an update command
    *
    * @param containersToAdd the list of containers that need to be added
@@ -520,34 +139,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    */
   @Override
   public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    // grab the base pod so we can copy and modify some stuff
-    String basePodName = Runtime.topologyName(runtimeConfiguration) + "-0";
-    JsonNode podConfig;
-    try {
-      podConfig = controller.getBasePod(basePodName);
-    } catch (IOException ioe) {
-      throw new TopologyRuntimeManagementException("Unable to retrieve base pod configuration from "
-          + basePodName, ioe);
-    }
-
-    // iterate over the containers we need to add and rebuild the spec based on the new plan
-    ObjectMapper mapper = new ObjectMapper();
-    int totalNewContainerCount = containersToAdd.size();
-    int deployedContainerCount = 0;
-    for (PackingPlan.ContainerPlan containerPlan : containersToAdd) {
-      String newContainer = rebuildKubernetesPodSpec(podConfig, mapper, containerPlan, 0);
-
-      // deploy this new container
-      try {
-        controller.deployContainer(newContainer);
-        LOG.log(Level.INFO, "New container " + ++deployedContainerCount + "/"
-            + totalNewContainerCount + " deployed");
-      } catch (IOException ioe) {
-        throw new TopologyRuntimeManagementException("Problem adding container with id "
-            + containerPlan.getId() + ". Deployed " + deployedContainerCount + " out of "
-            + totalNewContainerCount + " containers", ioe);
-      }
-    }
+    controller.addContainers(containersToAdd);
   }
 
   /**
@@ -563,15 +155,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    */
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
-    for (PackingPlan.ContainerPlan container : containersToRemove) {
-      String podName = Runtime.topologyName(runtimeConfiguration) + "-" + container.getId();
-      try {
-        controller.removeContainer(podName);
-      } catch (IOException ioe) {
-        throw new TopologyRuntimeManagementException("Problem removing container with id "
-            + container.getId(), ioe);
-      }
-    }
+    controller.removeContainers(containersToRemove);
   }
 
   static boolean topologyNameIsValid(String topologyName) {
@@ -595,7 +179,7 @@ public class KubernetesScheduler implements IScheduler, IScalable {
 
   private static String getInvalidImagePullPolicyMessage(String policy) {
     return String.format("Invalid image pull policy: \"%s\": image pull polices must be one of "
-        + " %s Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
+            + " %s Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.",
         policy, KubernetesConstants.VALID_IMAGE_PULL_POLICIES.toString());
   }
 }

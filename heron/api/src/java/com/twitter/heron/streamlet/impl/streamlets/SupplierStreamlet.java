@@ -23,7 +23,7 @@ import com.twitter.heron.streamlet.impl.sources.SupplierSource;
 
 /**
  * SupplierStreamlet is a very quick and flexible way of creating a Streamlet
- * from a user supplied Supplier Function. The supplier function is the
+ * from an user supplied Supplier Function. The supplier function is the
  * source of all tuples for this Streamlet.
  */
 public class SupplierStreamlet<R> extends StreamletImpl<R> {

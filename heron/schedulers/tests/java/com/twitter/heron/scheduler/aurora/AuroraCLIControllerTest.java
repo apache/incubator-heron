@@ -71,7 +71,7 @@ public class AuroraCLIControllerTest {
   public void testCreateJob() throws Exception {
     Map<AuroraField, String> bindings = new HashMap<>();
     List<String> expectedCommand = asList("aurora job create --wait-until RUNNING %s %s %s",
-            JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
+        JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
@@ -129,7 +129,8 @@ public class AuroraCLIControllerTest {
     containers.add(PackingTestUtils.testContainerPlan(3));
     containers.add(PackingTestUtils.testContainerPlan(5));
 
-    List<String> expectedCommand = asList("aurora job kill %s/3,5", JOB_SPEC);
+    List<String> expectedCommand = asList("aurora job kill %s/3,5 %s %s %d",
+        JOB_SPEC, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     controller.removeContainers(containers);
@@ -140,7 +141,8 @@ public class AuroraCLIControllerTest {
   public void testAddContainers() {
     Integer containersToAdd = 3;
     List<String> expectedCommand = asList(
-        "aurora job add --wait-until RUNNING %s/0 %s", JOB_SPEC, containersToAdd.toString());
+        "aurora job add --wait-until RUNNING %s/0 %s %s",
+        JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
 
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     controller.addContainers(containersToAdd);
