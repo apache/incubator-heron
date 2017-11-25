@@ -14,18 +14,21 @@
 
 package com.twitter.heron.examples.streamlet;
 
+import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
+import com.twitter.heron.streamlet.Builder;
+import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Runner;
+import com.twitter.heron.streamlet.Sink;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
-
-import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
-import com.twitter.heron.streamlet.*;
 
 /**
  * This topology demonstrates how sinks work in the Heron Streamlet API for Java.
