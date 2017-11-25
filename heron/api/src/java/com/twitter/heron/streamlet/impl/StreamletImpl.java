@@ -151,6 +151,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return name;
   }
 
+  /**
+   * Sets a default unique name to the Streamlet by type if it is not set.
+   * If it is already set, just checks its uniqueness.
+   * @param prefix The name prefix type of this streamlet
+   * @param stageNames The collections of created streamlet/stage names
+   */
   protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
     if (getName() == null) {
       setName(defaultNameCalculator(prefix, stageNames));
@@ -159,6 +165,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
       throw new RuntimeException(String.format(
           "The stage name %s is used multiple times in the same topology", getName()));
     }
+    stageNames.add(getName());
   }
 
   /**
@@ -213,7 +220,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     children.add(child);
   }
 
-  protected String defaultNameCalculator(String prefix, Set<String> stageNames) {
+  private String defaultNameCalculator(String prefix, Set<String> stageNames) {
     int index = 1;
     String calculatedName;
     while (true) {
