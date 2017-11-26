@@ -314,6 +314,62 @@ public class StreamletImplTest {
   }
 
   @Test
+  public void testDefaultStreamletNameIfNotSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefixes.SUPPLIER.toString(), stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList("supplier1")));
+  }
+
+  @Test
+  public void testStreamletNameIfAlreadySet() {
+    String supplierName = "MyStringSupplier";
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    supplierStreamlet.setName(supplierName);
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefixes.SUPPLIER.toString(), stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList(supplierName)));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testStreamletNameIfDuplicateNameIsSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+
+    // set duplicate streamlet name and expect thrown exception
+    supplierStreamlet
+        .map((content) -> content.toUpperCase()).setName("MyMapStreamlet")
+        .map((content) -> content + "_test_suffix").setName("MyMapStreamlet");
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
+  }
+
+  @Test
   public void testSetNameWithInvalidValues() {
     Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Function<String, Streamlet<Double>> function = streamlet::setName;
