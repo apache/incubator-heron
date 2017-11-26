@@ -104,7 +104,7 @@ public final class Config implements Serializable {
     }
   }
 
-  public final static class Builder {
+  public static final class Builder {
     private com.twitter.heron.api.Config config;
     private float cpu;
     private ByteAmount ram;
