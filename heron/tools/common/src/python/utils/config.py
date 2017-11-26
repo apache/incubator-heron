@@ -384,7 +384,7 @@ def defaults_cluster_role_env(cluster_role_env):
 ################################################################################
 def parse_override_config_and_write_file(namespace):
   """
-  Parse the command line for overriding the defaults and 
+  Parse the command line for overriding the defaults and
   create an override file.
   """
   overrides = parse_override_config(namespace)

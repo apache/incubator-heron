@@ -94,5 +94,5 @@ public final class KubernetesConstants {
       )
   );
 
-  static final String HOST_PATH_VOLUME = "hostPort";
+  static final String HOST_PATH_VOLUME = "hostPath";
 }

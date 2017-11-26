@@ -26,7 +26,7 @@ final class Volumes {
   private final Map<String, VolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
-    volumes.put("hostPath", new HostPathVolumeFactory());
+    volumes.put(KubernetesConstants.HOST_PATH_VOLUME, new HostPathVolumeFactory());
   }
 
   static Volumes get() {
