@@ -406,7 +406,7 @@ def parse_override_config(namespace):
   for config in namespace:
     kv = config.split("=")
     if len(kv) != 2:
-      raise Exception("Invalid config property format (%s) expected key=value" % kv)
+      raise Exception("Invalid config property format (%s) expected key=value" % config)
     overrides[kv[0]] = kv[1]
   return overrides
 
