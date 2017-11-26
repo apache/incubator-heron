@@ -382,18 +382,33 @@ def defaults_cluster_role_env(cluster_role_env):
 ################################################################################
 # Parse the command line for overriding the defaults
 ################################################################################
-def parse_override_config(namespace):
-  """Parse the command line for overriding the defaults"""
+def parse_override_config_and_write_file(namespace):
+  """
+  Parse the command line for overriding the defaults and 
+  create an override file.
+  """
+  overrides = parse_override_config(namespace)
   try:
     tmp_dir = tempfile.mkdtemp()
     override_config_file = os.path.join(tmp_dir, OVERRIDE_YAML)
     with open(override_config_file, 'w') as f:
-      for config in namespace:
-        f.write("%s\n" % config.replace('=', ': '))
+      for k, v in overrides.items():
+        f.write("%s:%s\n" % (k, v))
 
     return override_config_file
   except Exception as e:
     raise Exception("Failed to parse override config: %s" % str(e))
+
+
+def parse_override_config(namespace):
+  """Parse the command line for overriding the defaults"""
+  overrides = dict()
+  for config in namespace:
+    kv = config.split("=")
+    if len(kv) != 2:
+      raise Exception("Invalid config property format (%s) expected key=value" % kv)
+    overrides[kv[0]] = kv[1]
+  return overrides
 
 
 def get_java_path():

@@ -166,7 +166,7 @@ public class TopologyResource extends HeronResource {
       final File topologyBinaryFile = Forms.uploadFile(topologyFilePart, topologyDirectory);
 
       final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
-      final Config config = configWithKeyValues(
+      final Config config = createConfig(
           Arrays.asList(
               Pair.create(Key.CLUSTER.value(), cluster),
               Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
@@ -174,7 +174,8 @@ public class TopologyResource extends HeronResource {
               Pair.create(Key.ENVIRON.value(), environment),
               Pair.create(Key.SUBMIT_USER.value(), user),
               Pair.create(Key.DRY_RUN.value(), isDryRun)
-          )
+          ),
+          submitOverrides
       );
 
       // copy configuration files to the sandbox config location
@@ -304,7 +305,7 @@ public class TopologyResource extends HeronResource {
           )
       );
 
-      final Config config = configWithKeyValues(keyValues);
+      final Config config = createConfig(keyValues);
       getActionFactory().createRuntimeAction(config, ActionType.RESTART).execute();
 
       return Response.ok()
@@ -361,7 +362,7 @@ public class TopologyResource extends HeronResource {
         keyValues.addAll(overrides);
       }
 
-      final Config config = configWithKeyValues(keyValues);
+      final Config config = createConfig(keyValues);
       getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
 
       return Response.ok()
@@ -430,7 +431,7 @@ public class TopologyResource extends HeronResource {
   }
 
   private Config getConfig(String cluster, String role, String environment, String topologyName) {
-    return configWithKeyValues(
+    return createConfig(
         Arrays.asList(
             Pair.create(Key.CLUSTER.value(), cluster),
             Pair.create(Key.ROLE.value(), role),
@@ -439,11 +440,18 @@ public class TopologyResource extends HeronResource {
         ));
   }
 
-  private Config configWithKeyValues(Collection<Pair<String, Object>> keyValues) {
+  private Config createConfig(Collection<Pair<String, Object>> keyValues) {
+    return createConfig(keyValues, Collections.emptyMap());
+  }
+
+  private Config createConfig(Collection<Pair<String, Object>> keyValues,
+      Map<String, String> overrides) {
     final Config.Builder builder = Config.newBuilder().putAll(getBaseConfiguration());
     for (Pair<String, Object> keyValue : keyValues) {
       builder.put(keyValue.first, keyValue.second);
     }
+    overrides.forEach(builder::put);
+
     builder.put(Key.VERBOSE, Logging.isVerbose());
     return Config.toLocalMode(builder.build());
   }
