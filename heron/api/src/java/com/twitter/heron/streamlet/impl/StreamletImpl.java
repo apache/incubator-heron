@@ -154,7 +154,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   /**
    * Sets a default unique name to the Streamlet by type if it is not set.
    * Otherwise, just checks its uniqueness.
-   * @param prefix The name prefix type of this streamlet
+   * @param prefix The name prefix of this streamlet
    * @param stageNames The collections of created streamlet/stage names
    */
   protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
