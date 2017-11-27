@@ -192,11 +192,6 @@ public class Slave implements Runnable, AutoCloseable {
       return;
     }
 
-    if (!helper.isTopologyRunning()) {
-      LOG.info("Topology is not in RUNNING state. Instance is not started");
-      return;
-    }
-
     // Setting topology environment properties
     Map<String, Object> topoConf = helper.getTopologyContext().getTopologyConfig();
     if (topoConf.containsKey(Config.TOPOLOGY_ENVIRONMENT)) {
@@ -211,6 +206,10 @@ public class Slave implements Runnable, AutoCloseable {
       // when a RestoreInstanceStateRequest is received
       if (isStatefulProcessingStarted) {
         instance.init(instanceState);
+        // Deactivate the instance if start with deactivated mode
+        if (TopologyAPI.TopologyState.PAUSED.equals(helper.getTopologyState())) {
+          instance.deactivate();
+        }
         instance.start();
         isInstanceStarted = true;
         LOG.info("Instance is started for stateful topology");
@@ -221,6 +220,10 @@ public class Slave implements Runnable, AutoCloseable {
       // For non-stateful topology, any provided state will be ignored
       // by the instance
       instance.init(null);
+      // Deactivate the instance if start with deactivated mode
+      if (TopologyAPI.TopologyState.PAUSED.equals(helper.getTopologyState())) {
+        instance.deactivate();
+      }
       instance.start();
       isInstanceStarted = true;
       LOG.info("Instance is started for non-stateful topology");
