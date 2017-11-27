@@ -23,7 +23,7 @@ RUN /heron/heron-tools-install.sh && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-slurm-scheduler.jar
 
-ENV HERON_HOME /opt/heron/heron-core/
+ENV HERON_HOME /heron/heron-core/
 
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.10

@@ -21,8 +21,6 @@ RUN apt-get update && apt-get -y install \
       unzip \
       wget
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh

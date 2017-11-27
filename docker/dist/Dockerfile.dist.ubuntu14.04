@@ -28,7 +28,6 @@ RUN rm -f /heron/heron-tools-install.sh && \
     rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /heron/heron-core/
-RUN export HERON_HOME
 
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.10
