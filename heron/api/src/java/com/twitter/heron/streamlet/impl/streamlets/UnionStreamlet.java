@@ -42,7 +42,7 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
       // The system will call us again later
       return false;
     }
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.UNION.toString(), stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new UnionOperator<I>(),
         getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
