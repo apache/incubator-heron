@@ -60,7 +60,7 @@ public final class IntegerProcessingTopology {
 
     Config config = Config.newBuilder()
         .setNumContainers(NUM_CONTAINERS)
-        .setPerContainerRam(ByteAmount.fromGigabytes(GIGABYTES_OF_RAM))
+        .setPerContainerRamInGB(GIGABYTES_OF_RAM)
         .setPerContainerCpu(CPU)
         .build();
 
