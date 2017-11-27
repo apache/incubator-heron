@@ -124,7 +124,7 @@ public final class StreamletCloneTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     /**
      * A supplier streamlet of random GameScore objects is cloned into two

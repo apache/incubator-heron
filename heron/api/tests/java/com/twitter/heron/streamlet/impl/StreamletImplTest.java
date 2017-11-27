@@ -26,7 +26,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.SerializableConsumer;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
@@ -294,53 +293,24 @@ public class StreamletImplTest {
   }
 
 
-  @Test
-  public void testResourcesBuilder() {
-    Resources defaultResources = Resources.defaultResources();
-    assertEquals(0, Float.compare(defaultResources.getCpu(), 1.0f));
-    assertEquals(defaultResources.getRam(), ByteAmount.fromMegabytes(100));
-
-    Resources nonDefaultResources = new Resources.Builder()
-        .setCpu(5.1f)
-        .setRamInGB(20)
-        .build();
-    assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
-    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
-  }
-
-  @Test
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
-    assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
-    assertEquals(defaultConfig.getNumContainers(), 1);
-    assertEquals(0, Float.compare(defaultConfig.getResources().getCpu(), 1.0f));
-    assertEquals(defaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(100));
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
-
-    Resources nonDefaultResources = new Resources.Builder()
-        .setCpu(3.1f)
-        .setRamInMB(2500)
-        .build();
-
-    Config nonDefaultConfig = new Config.Builder()
-        .setContainerResources(nonDefaultResources)
+    assertEquals(0, Float.compare(defaultConfig.getPerContainerCpu(), 1.0f));
+    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100));
+    assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
+    Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
-        .setNumContainers(8)
-        .setTopologySerializer(Config.Serializer.JAVA)
-        .setUserConfig("key", "value")
+        .setSerializer(Config.Serializer.JAVA)
+        .setPerContainerCpu(3.5f)
+        .setPerContainerRamInGigabytes(10)
         .build();
-    assertEquals(nonDefaultConfig.getNumContainers(), 8);
     assertEquals(nonDefaultConfig.getDeliverySemantics(),
         Config.DeliverySemantics.EFFECTIVELY_ONCE);
-    assertEquals(0, Float.compare(nonDefaultConfig.getResources().getCpu(), 3.1f));
-    assertEquals(nonDefaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(2500));
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
-
-    Config multiSetConfig = new Config.Builder()
-        .setTopologySerializer(Config.Serializer.JAVA)
-        .setTopologySerializer(Config.Serializer.KRYO)
-        .build();
-    assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
+    assertEquals(nonDefaultConfig.getPerContainerRamAsGigabytes(), 10);
+    assertEquals(nonDefaultConfig.getPerContainerRamAsMegabytes(), 1024 * 10);
+    assertEquals(0, Float.compare(nonDefaultConfig.getPerContainerCpu(), 3.5f));
   }
 
   @Test

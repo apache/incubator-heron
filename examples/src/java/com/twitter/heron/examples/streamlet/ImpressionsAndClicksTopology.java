@@ -133,7 +133,7 @@ public final class ImpressionsAndClicksTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     // A KVStreamlet is produced. Each element is a KeyValue object where the key
     // is the impression ID and the user ID is the value.

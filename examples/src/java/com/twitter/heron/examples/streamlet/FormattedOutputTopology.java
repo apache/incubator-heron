@@ -84,7 +84,7 @@ public final class FormattedOutputTopology {
   }
 
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     processingGraphBuilder
         // The source streamlet is an indefinite series of sensor readings

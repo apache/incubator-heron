@@ -22,7 +22,7 @@ import com.twitter.heron.streamlet.impl.BuilderImpl;
  * information to build the topology
  */
 public interface Builder {
-  static Builder createBuilder() {
+  static Builder newBuilder() {
     return new BuilderImpl();
   }
 

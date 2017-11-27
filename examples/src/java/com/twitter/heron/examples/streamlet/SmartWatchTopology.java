@@ -69,7 +69,7 @@ public final class SmartWatchTopology {
   }
 
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     processingGraphBuilder.newSource(SmartWatchReading::new)
         .setName("incoming-watch-readings")
