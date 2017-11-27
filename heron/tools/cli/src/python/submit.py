@@ -162,6 +162,14 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       user=cl_args['submit_user'],
   )
 
+  Log.info("" + str(cl_args))
+  overrides = dict()
+  if 'config_property' in cl_args:
+    overrides = config.parse_override_config(cl_args['config_property'])
+
+  if overrides:
+    data.update(overrides)
+
   if cl_args['dry_run']:
     data["dry_run"] = True
 

@@ -178,7 +178,8 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
     "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
-    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest"
+    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest",
+    "com.twitter.heron.scheduler.kubernetes.VolumesTests",
   ],
   runtime_deps = [ ":kubernetes-tests" ],
   size = "small",
