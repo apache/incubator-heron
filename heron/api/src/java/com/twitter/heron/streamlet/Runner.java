@@ -30,7 +30,7 @@ public final class Runner {
   /**
    * Runs the computation
    * @param name The name of the topology
-   * @param config Any config thats passed to the topology
+   * @param config Any config that is passed to the topology
    * @param builder The builder used to keep track of the sources.
    */
   public void run(String name, Config config, Builder builder) {

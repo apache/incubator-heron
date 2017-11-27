@@ -178,6 +178,10 @@ def server_deployment_mode(command, parser, cluster, cl_args):
     Log.error('No service url for %s cluster in %s', cluster, config_file)
     sys.exit(1)
 
+  # get overrides
+  if 'config_property' in cl_args:
+    pass
+
   try:
     cluster_role_env = (cl_args['cluster'], cl_args['role'], cl_args['environ'])
     config.server_mode_cluster_role_env(cluster_role_env, client_confs)
@@ -212,7 +216,7 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
   cluster = cl_args['cluster']
   try:
     config_path = cl_args['config_path']
-    override_config_file = config.parse_override_config(cl_args['config_property'])
+    override_config_file = config.parse_override_config_and_write_file(cl_args['config_property'])
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
