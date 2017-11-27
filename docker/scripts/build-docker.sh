@@ -48,13 +48,12 @@ run_build() {
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
 
   cp $TOOLS_FILE $TOOLS_OUT_FILE
-  cp $CLIENT_FILE $CLIENT_OUT_FILE
   cp $CORE_FILE $CORE_OUT_FILE
 
   export HERON_VERSION
 
   echo "Building docker image with tag:$DOCKER_TAG"
-  docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
 
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
@@ -77,7 +76,7 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <artifact-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu14.04, ubuntu15.10, ubuntu16.04, centos7"
+    echo "Platforms Supported: ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7 debian8"
     echo "  "
     echo "Example:"
     echo "  ./build-docker.sh ubuntu14.04 0.12.0 ~/ubuntu"
