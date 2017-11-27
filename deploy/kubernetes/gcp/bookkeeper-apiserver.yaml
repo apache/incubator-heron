@@ -33,8 +33,8 @@ kind: Deployment
 metadata:
   name: heron-apiserver
   labels:
-      app: heron-apiserver
-    namespace: default
+    app: heron-apiserver
+  namespace: default
 spec:
   selector:
     matchLabels:
