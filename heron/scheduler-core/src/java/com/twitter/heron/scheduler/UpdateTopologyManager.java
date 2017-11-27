@@ -185,11 +185,11 @@ public class UpdateTopologyManager implements Closeable {
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
-    logFine("Update new Topology: %s", stateManager.updateTopology(updatedTopology, topologyName));
+    logInfo("Update new Topology: %s", stateManager.updateTopology(updatedTopology, topologyName));
 
     // update packing plan to trigger the scaling event
-    logFine("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
+    logInfo("Update new PackingPlan: %s",
+        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
     // reactivate topology
     if (initiallyRunning) {

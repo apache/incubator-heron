@@ -142,7 +142,7 @@ public final class WireRequestsTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder builder = Builder.createBuilder();
+    Builder builder = Builder.newBuilder();
 
     // Requests from the "quiet" bank branch (high throttling).
     Streamlet<WireRequest> quietBranch = builder.newSource(() -> new WireRequest(20))
@@ -178,7 +178,7 @@ public final class WireRequestsTopology {
         .setName("all-branches-fraud-detect")
         .log();
 
-    Config config = new Config.Builder()
+    Config config = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setNumContainers(2)
         .build();

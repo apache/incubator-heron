@@ -38,7 +38,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.MAP.toString(), stageNames);
     stageNames.add(getName());
     bldr.setBolt(getName(), new MapOperator<R, T>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());

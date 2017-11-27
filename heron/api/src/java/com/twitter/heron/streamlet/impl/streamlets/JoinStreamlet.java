@@ -82,7 +82,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.JOIN.toString(), stageNames);
     stageNames.add(getName());
     JoinOperator<K, R, S, T> bolt = new JoinOperator<>(joinType, left.getName(),
         right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);

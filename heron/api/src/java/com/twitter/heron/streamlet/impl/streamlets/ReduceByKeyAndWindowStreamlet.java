@@ -58,7 +58,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.REDUCE.toString(), stageNames);
     stageNames.add(getName());
     ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
         valueExtractor, reduceFn);
