@@ -52,6 +52,8 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1ResourceRequirements;
+import io.kubernetes.client.models.V1Volume;
+import io.kubernetes.client.models.V1VolumeMount;
 import io.kubernetes.client.models.V1beta1StatefulSet;
 import io.kubernetes.client.models.V1beta1StatefulSetSpec;
 
@@ -309,7 +311,21 @@ public class AppsV1beta1Controller extends KubernetesController {
     final V1PodSpec podSpec = new V1PodSpec();
     podSpec.containers(Collections.singletonList(
         getContainer(executorCommand, resource, numberOfInstances)));
+
+    addVolumesIfPresent(podSpec);
+
     return podSpec;
+  }
+
+  private void addVolumesIfPresent(V1PodSpec spec) {
+    final Config config = getConfiguration();
+    if (KubernetesContext.hasVolume(config)) {
+      final V1Volume volume = Volumes.get().create(config);
+      if (volume != null) {
+        LOG.fine("Adding volume: " + volume.toString());
+        spec.volumes(Collections.singletonList(volume));
+      }
+    }
   }
 
   private V1Container getContainer(List<String> executorCommand, Resource resource,
@@ -356,6 +372,9 @@ public class AppsV1beta1Controller extends KubernetesController {
             Runtime.topology(getRuntimeConfiguration()));
     container.setPorts(getContainerPorts(debuggingEnabled, numberOfInstances));
 
+    // setup volume mounts
+    mountVolumeIfPresent(container);
+
     return container;
   }
 
@@ -382,5 +401,16 @@ public class AppsV1beta1Controller extends KubernetesController {
     }
 
     return ports;
+  }
+
+  private void mountVolumeIfPresent(V1Container container) {
+    final Config config = getConfiguration();
+    if (KubernetesContext.hasContainerVolume(config)) {
+      final V1VolumeMount mount =
+          new V1VolumeMount()
+              .name(KubernetesContext.getContainerVolumeName(config))
+              .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
+      container.volumeMounts(Collections.singletonList(mount));
+    }
   }
 }
