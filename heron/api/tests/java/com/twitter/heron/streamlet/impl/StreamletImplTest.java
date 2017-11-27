@@ -303,7 +303,7 @@ public class StreamletImplTest {
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setSerializer(Config.Serializer.JAVA)
         .setPerContainerCpu(3.5f)
-        .setPerContainerRamInGB(10)
+        .setPerContainerRamInGigabytes(10)
         .build();
     assertEquals(nonDefaultConfig.getDeliverySemantics(),
         Config.DeliverySemantics.EFFECTIVELY_ONCE);

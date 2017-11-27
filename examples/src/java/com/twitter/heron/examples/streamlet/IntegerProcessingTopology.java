@@ -16,7 +16,6 @@ package com.twitter.heron.examples.streamlet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
@@ -60,7 +59,7 @@ public final class IntegerProcessingTopology {
 
     Config config = Config.newBuilder()
         .setNumContainers(NUM_CONTAINERS)
-        .setPerContainerRamInGB(GIGABYTES_OF_RAM)
+        .setPerContainerRamInGigabytes(GIGABYTES_OF_RAM)
         .setPerContainerCpu(CPU)
         .build();
 

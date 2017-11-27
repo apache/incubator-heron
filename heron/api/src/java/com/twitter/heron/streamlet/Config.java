@@ -34,12 +34,20 @@ public final class Config implements Serializable {
   private static final long MB = 1024 * 1024;
   private static final long GB = 1024 * MB;
 
+  /**
+   * An enum encapsulating the delivery semantics that can be applied to Heron topologies. The
+   * options are currently: at most once, at least once, or effectively once.
+   */
   public enum DeliverySemantics {
     ATMOST_ONCE,
     ATLEAST_ONCE,
     EFFECTIVELY_ONCE
   }
 
+  /**
+   * An enum encapsulating the serializers that can be used for data in the topology. The options
+   * are currently: the Kryo serializer or the native Java serializer.
+   */
   public enum Serializer {
     JAVA,
     KRYO
@@ -62,11 +70,19 @@ public final class Config implements Serializable {
     deliverySemantics = builder.deliverySemantics;
   }
 
+  /**
+   * Sets the topology to use the default configuration: 100 megabytes of RAM per container, 1.0
+   * CPUs per container, at-most-once delivery semantics, and the Kryo serializer.
+   */
   public static Config defaultConfig() {
     return new Builder()
         .build();
   }
 
+  /**
+   * Returns a new {@link Builder} that can be used to create a configuration object for Streamlet
+   * API topologies
+   */
   public static Builder newBuilder() {
     return new Builder();
   }
@@ -75,30 +91,58 @@ public final class Config implements Serializable {
     return heronConfig;
   }
 
+  /**
+   * Gets the CPU used per topology container
+   * @return the per-container CPU as a float
+   */
   public float getPerContainerCpu() {
     return cpu;
   }
 
+  /**
+   * Gets the RAM used per topology container as a number of bytes
+   * @return the per-container RAM in bytes
+   */
   public long getPerContainerRam() {
     return ram;
   }
 
+  /**
+   * Gets the RAM used per topology container as a number of gigabytes
+   * @return the per-container RAM in gigabytes
+   */
   public long getPerContainerRamAsGigabytes() {
     return Math.round((double) ram / GB);
   }
 
+  /**
+   * Gets the RAM used per topology container as a number of megabytes
+   * @return the per-container RAM in megabytes
+   */
   public long getPerContainerRamAsMegabytes() {
     return Math.round((double) ram / MB);
   }
 
+  /**
+   * Gets the RAM used per topology container as a number of bytes
+   * @return the per-container RAM in bytes
+   */
   public long getPerContainerRamAsBytes() {
     return getPerContainerRam();
   }
 
+  /**
+   * Gets the delivery semantics applied to the topology
+   * @return the delivery semantics as an enum
+   */
   public DeliverySemantics getDeliverySemantics() {
     return deliverySemantics;
   }
 
+  /**
+   * Gets the serializer used by the topology
+   * @return the serializer as an enum
+   */
   public Serializer getSerializer() {
     return serializer;
   }
@@ -163,7 +207,7 @@ public final class Config implements Serializable {
      * Sets the per-container (per-instance) RAM to be used by this topology in megabytes
      * @param perContainerRamMB Per-container (per-instance) RAM expressed as a Long.
      */
-    public Builder setPerContainerRamInMB(long perContainerRamMB) {
+    public Builder setPerContainerRamInMegabytes(long perContainerRamMB) {
       this.ram = perContainerRamMB * MB;
       return this;
     }
@@ -172,7 +216,7 @@ public final class Config implements Serializable {
      * Sets the per-container (per-instance) RAM to be used by this topology in gigabytes
      * @param perContainerRamGB Per-container (per-instance) RAM expressed as a Long.
      */
-    public Builder setPerContainerRamInGB(long perContainerRamGB) {
+    public Builder setPerContainerRamInGigabytes(long perContainerRamGB) {
       this.ram = perContainerRamGB * GB;
       return this;
     }
