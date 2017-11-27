@@ -16,7 +16,6 @@ package com.twitter.heron.streamlet;
 
 import java.io.Serializable;
 
-import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.impl.KryoSerializer;
 
 /**
@@ -28,10 +27,12 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
   private final float cpu;
-  private final ByteAmount ram;
+  private final long ram;
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
   private com.twitter.heron.api.Config heronConfig;
+  private static final long MB = 1024 * 1024;
+  private static final long GB = 1024 * MB;
 
   public enum DeliverySemantics {
     ATMOST_ONCE,
@@ -48,7 +49,7 @@ public final class Config implements Serializable {
     static final boolean USE_KRYO = true;
     static final com.twitter.heron.api.Config CONFIG = new com.twitter.heron.api.Config();
     static final float CPU = 1.0f;
-    static final ByteAmount RAM = ByteAmount.fromMegabytes(100);
+    static final long RAM = 100 * MB;
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
     static final Serializer SERIALIZER = Serializer.KRYO;
   }
@@ -78,8 +79,20 @@ public final class Config implements Serializable {
     return cpu;
   }
 
-  public ByteAmount getPerContainerRam() {
+  public long getPerContainerRam() {
     return ram;
+  }
+
+  public long getPerContainerRamAsGigabytes() {
+    return Math.round((double) ram / GB);
+  }
+
+  public long getPerContainerRamAsMegabytes() {
+    return Math.round((double) ram / MB);
+  }
+
+  public long getPerContainerRamAsBytes() {
+    return getPerContainerRam();
   }
 
   public DeliverySemantics getDeliverySemantics() {
@@ -107,7 +120,7 @@ public final class Config implements Serializable {
   public static final class Builder {
     private com.twitter.heron.api.Config config;
     private float cpu;
-    private ByteAmount ram;
+    private long ram;
     private DeliverySemantics deliverySemantics;
     private Serializer serializer;
 
@@ -130,10 +143,37 @@ public final class Config implements Serializable {
 
     /**
      * Sets the per-container (per-instance) RAM to be used by this topology
-     * @param perContainerRam Per-container (per-instance) RAM expressed as a {@link ByteAmount}
+     * @param perContainerRam Per-container (per-instance) RAM expressed as a Long.
      */
-    public Builder setPerContainerRam(ByteAmount perContainerRam) {
+    public Builder setPerContainerRam(long perContainerRam) {
       this.ram = perContainerRam;
+      return this;
+    }
+
+    /**
+     * Sets the per-container (per-instance) RAM to be used by this topology as a number of bytes
+     * @param perContainerRam Per-container (per-instance) RAM expressed as a Long.
+     */
+    public Builder setPerContainerRamInBytes(long perContainerRam) {
+      this.ram = perContainerRam;
+      return this;
+    }
+
+    /**
+     * Sets the per-container (per-instance) RAM to be used by this topology in megabytes
+     * @param perContainerRamMB Per-container (per-instance) RAM expressed as a Long.
+     */
+    public Builder setPerContainerRamInMB(long perContainerRamMB) {
+      this.ram = perContainerRamMB * MB;
+      return this;
+    }
+
+    /**
+     * Sets the per-container (per-instance) RAM to be used by this topology in gigabytes
+     * @param perContainerRamGB Per-container (per-instance) RAM expressed as a Long.
+     */
+    public Builder setPerContainerRamInGB(long perContainerRamGB) {
+      this.ram = perContainerRamGB * GB;
       return this;
     }
 
