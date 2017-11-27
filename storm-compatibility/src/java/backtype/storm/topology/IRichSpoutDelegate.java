@@ -26,6 +26,7 @@ import com.twitter.heron.api.topology.IUpdatable;
 
 import backtype.storm.spout.SpoutOutputCollectorImpl;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.utils.ConfigUtils;
 
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
@@ -90,7 +91,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    return delegate.getComponentConfiguration();
+    Map<String, Object> config = delegate.getComponentConfiguration();
+    return ConfigUtils.translateComponentConfig(config);
   }
 
   @Override

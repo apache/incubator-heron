@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.storm.task.OutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.TupleImpl;
+import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.windowing.TupleWindowImpl;
 
 public class IWindowedBoltDelegate implements com.twitter.heron.api.bolt.IWindowedBolt {
@@ -43,7 +44,8 @@ public class IWindowedBoltDelegate implements com.twitter.heron.api.bolt.IWindow
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    return this.delegate.getComponentConfiguration();
+    Map<String, Object> config = delegate.getComponentConfiguration();
+    return ConfigUtils.translateComponentConfig(config);
   }
 
   @Override
