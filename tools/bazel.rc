@@ -20,6 +20,21 @@ build:centos --python2_path /usr/bin/python2.7
 build:centos --spawn_strategy=standalone
 build:centos --workspace_status_command scripts/release/status.sh
 
+# For debian
+# To use it: bazel build --config=debian
+build:debian --experimental_action_listener=tools/cpp:compile_cpp
+build:debian --experimental_action_listener=tools/java:compile_java
+build:debian --experimental_action_listener=tools/python:compile_python
+build:debian --genrule_strategy=standalone
+build:debian --ignore_unsupported_sandboxing
+build:debian --java_toolchain=//tools/java:heron_java_toolchain
+build:debian --linkopt -lm
+build:debian --linkopt -lpthread
+build:debian --linkopt -lrt
+build:debian --python2_path /usr/bin/python2.7
+build:debian --spawn_strategy=standalone
+build:debian --workspace_status_command scripts/release/status.sh
+
 # For Mac
 # To use it: bazel build --config=darwin
 build:darwin --experimental_action_listener=tools/cpp:compile_cpp
