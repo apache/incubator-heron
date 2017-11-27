@@ -1,0 +1,34 @@
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+namespace: default
+image:
+  repository: heron
+  tag: heron:0.17.1
+  pullPolicy: IfNotPresent
+
+zookeeper:
+  Enabled: true
+  Servers: 3
+  Resources: {}
+  Heap: "1G"
+  Storage: "2Gi"
+  # StorageClass: default
+  ServerPort: 2888
+  LeaderElectionPort: 3888
+  ClientPort: 2181
+  ImagePullPolicy: "IfNotPresent"
+  TickTimeMs: 2000
+  InitTicks: 10
+  SyncTicks: 5
+  ClientCnxns: 60
+  SnapRetain: 3
+  PurgeHours: 1
+  ProbeInitialDelaySeconds: 15
+  ProbeTimeoutSeconds: 5
+  AntiAffinity: "hard"
+  LogLevel: "INFO"
+  # If the Zookeeper Chart is disabled a URL and port are required to connect
+  Url: ""
+  Port: 2181
+

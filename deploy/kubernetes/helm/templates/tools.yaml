@@ -1,0 +1,72 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "heron.fullname" . }}-tools
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "heron.fullname" . }}-tools
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        # Wait until the zookeeper pods are up and running
+        - name: {{ template "heron.fullname" . }}-init-container
+          image: {{ .Values.image.repository }}/{{ .Values.image.tag }}
+          command: ['sh', '-c', 'while true; do status=$(echo ruok | nc {{ .Release.Name }}-zookeeper 2181); if [ "$status" = "imok" ]; then break;  fi;  sleep 20;  done']
+      containers:
+        - name: {{ template "heron.fullname" . }}-tracker
+          image: {{ .Values.image.repository }}/{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8888
+              name: api-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-tracker
+              --type=zookeeper
+              --name={{ .Release.Name }}-zookeeper
+              --hostport={{ .Release.Name }}-zookeeper:2181
+              --rootpath="/heron" 
+
+        - name: {{ template "heron.fullname" . }}-ui
+          image: {{ .Values.image.repository }}/{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8889
+              name: app-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-ui
+              --port=8889
+              --base_url=/api/v1/proxy/namespaces/{{ .Values.namespace }}/services/{{ template "heron.fullname" . }}-ui:8889
+---
+
+##
+## Service to expose the heron-ui
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "heron.fullname" . }}-ui
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 8889
+      targetPort: 8889
+      protocol: TCP
+  selector:
+    app: {{ template "heron.fullname" . }}-tools
+    release: {{ .Release.Name }}
