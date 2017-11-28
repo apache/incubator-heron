@@ -41,7 +41,6 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
   private WindowConfigImpl windowCfg;
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
-  private static final String NAMEPREFIX = "reduceByKeyAndWindow";
 
   public GeneralReduceByKeyAndWindowStreamlet(StreamletImpl<V> parent,
                             SerializableFunction<V, K> keyExtractor,
@@ -59,7 +58,6 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefixes.REDUCE.toString(), stageNames);
-    stageNames.add(getName());
     GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
         new GeneralReduceByKeyAndWindowOperator<K, V, VR>(keyExtractor, identity, reduceFn);
     windowCfg.attachWindowConfig(bolt);
