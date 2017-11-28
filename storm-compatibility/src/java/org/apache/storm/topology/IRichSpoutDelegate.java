@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
+import org.apache.storm.utils.ConfigUtils;
 
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.IUpdatable;
@@ -90,7 +91,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    return delegate.getComponentConfiguration();
+    Map<String, Object> config = delegate.getComponentConfiguration();
+    return ConfigUtils.translateComponentConfig(config);
   }
 
   @Override
