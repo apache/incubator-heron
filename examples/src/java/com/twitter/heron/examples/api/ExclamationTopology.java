@@ -54,6 +54,7 @@ public final class ExclamationTopology {
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.setMessageTimeoutSecs(600);
+    conf.setTopologyDropTuplesUponBackpressure(true);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // resources configuration
@@ -103,6 +104,7 @@ public final class ExclamationTopology {
         System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
       }
+      Utils.sleep(1000);
     }
 
     @Override

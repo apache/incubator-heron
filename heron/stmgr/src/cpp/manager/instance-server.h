@@ -49,7 +49,8 @@ class InstanceServer : public Server {
                  const sp_string& _topology_name, const sp_string& _topology_id,
                  const sp_string& _stmgr_id, const std::vector<sp_string>& _expected_instances,
                  StMgr* _stmgr, heron::common::MetricsMgrSt* _metrics_manager_client,
-                 NeighbourCalculator* _neighbour_calculator);
+                 NeighbourCalculator* _neighbour_calculator,
+                 bool _droptuples_upon_backpressure);
   virtual ~InstanceServer();
 
   // We own the message
@@ -173,6 +174,8 @@ class InstanceServer : public Server {
   // Stateful processing related member variables
   NeighbourCalculator* neighbour_calculator_;
   CheckpointGateway* stateful_gateway_;
+
+  bool droptuples_upon_backpressure_;
 
   sp_string heron_tuple_set_2_ = "heron.proto.system.HeronTupleSet2";
 };

@@ -38,7 +38,8 @@ class StMgrClient : public Client {
   StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _topology_name,
               const sp_string& _topology_id, const sp_string& _our_id, const sp_string& _other_id,
               StMgrClientMgr* _client_manager,
-              heron::common::MetricsMgrSt* _metrics_manager_client);
+              heron::common::MetricsMgrSt* _metrics_manager_client,
+              bool _droptuples_upon_backpressure);
   virtual ~StMgrClient();
 
   void Quit();
@@ -86,6 +87,8 @@ class StMgrClient : public Client {
 
   // Have we registered ourselves
   bool is_registered_;
+  // Do we drop tuples upon backpressure
+  bool droptuples_upon_backpressure_;
 };
 
 }  // namespace stmgr

@@ -218,3 +218,8 @@ void Client::StartBackPressureConnectionCb(Connection* conn) {
 void Client::StopBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }
+
+bool Client::HasCausedBackPressure() const {
+  Connection* conn = static_cast<Connection*>(conn_);
+  return conn->hasCausedBackPressure();
+}

@@ -54,7 +54,8 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
                          const sp_string& _our_id, const sp_string& _other_id,
                          StMgrClientMgr* _client_manager,
-                         heron::common::MetricsMgrSt* _metrics_manager_client)
+                         heron::common::MetricsMgrSt* _metrics_manager_client,
+                         bool _droptuples_upon_backpressure)
     : Client(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -65,7 +66,8 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
       metrics_manager_client_(_metrics_manager_client),
       ndropped_messages_(0),
       reconnect_attempts_(0),
-      is_registered_(false) {
+      is_registered_(false),
+      droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
   reconnect_other_streammgrs_interval_sec_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
   reconnect_other_streammgrs_max_attempt_ =
@@ -192,6 +194,12 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
   if (IsConnected()) {
     SendMessage(_msg);
     return true;
+  } else if (droptuples_upon_backpressure_ && HasCausedBackPressure()) {
+    if (++ndropped_messages_ % 100 == 0) {
+      LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
+                << other_stmgr_id_ << " because it is causing backpressure";
+    }
+    return false;
   } else {
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
@@ -211,13 +219,17 @@ void StMgrClient::StartBackPressureConnectionCb(Connection* _connection) {
   // Ask the StMgrServer to stop consuming. The client does
   // not consume anything
 
-  client_manager_->StartBackPressureOnServer(other_stmgr_id_);
+  if (!droptuples_upon_backpressure_) {
+    client_manager_->StartBackPressureOnServer(other_stmgr_id_);
+  }
 }
 
 void StMgrClient::StopBackPressureConnectionCb(Connection* _connection) {
   _connection->unsetCausedBackPressure();
   // Call the StMgrServers removeBackPressure method
-  client_manager_->StopBackPressureOnServer(other_stmgr_id_);
+  if (!droptuples_upon_backpressure_) {
+    client_manager_->StopBackPressureOnServer(other_stmgr_id_);
+  }
 }
 
 void StMgrClient::SendStartBackPressureMessage() {
