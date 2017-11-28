@@ -43,7 +43,6 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
   private SerializableFunction<S, K> rightKeyExtractor;
   private WindowConfigImpl windowCfg;
   private SerializableBiFunction<R, S, ? extends T> joinFn;
-  private static final String NAMEPREFIX = "join";
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
       createJoinStreamlet(StreamletImpl<B> left,
@@ -83,7 +82,6 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
       return false;
     }
     setDefaultNameIfNone(StreamletNamePrefixes.JOIN.toString(), stageNames);
-    stageNames.add(getName());
     JoinOperator<K, R, S, T> bolt = new JoinOperator<>(joinType, left.getName(),
         right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);
     windowCfg.attachWindowConfig(bolt);
