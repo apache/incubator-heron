@@ -140,12 +140,12 @@ class AuroraCLIController implements AuroraController {
 //    }
 
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
-    StringBuilder stdout = new StringBuilder();
-    if (!runProcess(auroraCmd, stdout, null)) {
+    StringBuilder stderr = new StringBuilder();
+    if (!runProcess(auroraCmd, null, stderr)) {
       throw new RuntimeException("Failed to create " + count + " new aurora instances");
     }
 
-    String stdoutstr = stdout.toString();
+    String stdoutstr = stderr.toString();
     String pattern = "Querying instance statuses: [";
     int idx1 = stdoutstr.indexOf(pattern) + pattern.length();
     int idx2 = stdoutstr.indexOf("]", idx1);
@@ -157,13 +157,12 @@ class AuroraCLIController implements AuroraController {
 
   boolean runProcess(List<String> auroraCmd, StringBuilder stdout, StringBuilder stderr) {
     int status =
-        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), stderr);
+        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]),
+            stderr != null ? stderr : new StringBuilder());
 
     if (status != 0) {
       LOG.severe(String.format(
-          "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s", auroraCmd,
-          stdout != null ? stdout : new StringBuilder(),
-          stderr != null ? stderr : new StringBuilder()));
+          "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s", auroraCmd, stdout, stderr));
     }
     return status == 0;
   }
@@ -171,9 +170,7 @@ class AuroraCLIController implements AuroraController {
   // Utils method for unit tests
   @VisibleForTesting
   boolean runProcess(List<String> auroraCmd) {
-    StringBuilder stdout = new StringBuilder();
-    StringBuilder stderr = new StringBuilder();
-    return runProcess(auroraCmd, stdout, stderr);
+    return runProcess(auroraCmd, null, null);
   }
 
   private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {
