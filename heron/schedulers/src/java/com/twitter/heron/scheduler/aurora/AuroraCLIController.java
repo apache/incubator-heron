@@ -16,7 +16,6 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,21 +111,6 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
-  public String status() {
-    //String cmd = "'aurora job status " + jobSpec + " --write-json 2>/dev/null'";
-    //List<String> auroraCmd = new ArrayList<>(Arrays.asList("bash", "-c", cmd));
-    List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status"));
-    auroraCmd.add(jobSpec);
-    auroraCmd.add("--write-json");
- //   auroraCmd.add("2>/dev/null");
-    StringBuilder sb = new StringBuilder();
-    int rc = ShellUtils.runSyncProcess(false, false,
-        auroraCmd.toArray(new String[auroraCmd.size()]),
-        sb, null, new HashMap<String, String>(), false);
-
-    return rc == 0 ? sb.toString() : null;
-  }
-
   @Override
   public Set<Integer> addContainers(Integer count) {
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
@@ -135,23 +119,19 @@ class AuroraCLIController implements AuroraController {
         "aurora", "job", "add", "--wait-until", "RUNNING",
         jobSpec + "/0", count.toString(), "--verbose"));
 
-//    if (isVerbose) {
-//      auroraCmd.add("--verbose");
-//    }
-
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
     StringBuilder stderr = new StringBuilder();
     if (!runProcess(auroraCmd, null, stderr)) {
       throw new RuntimeException("Failed to create " + count + " new aurora instances");
     }
 
-    String stdoutstr = stderr.toString();
+    String stdoutStr = stderr.toString();
     String pattern = "Querying instance statuses: [";
-    int idx1 = stdoutstr.indexOf(pattern) + pattern.length();
-    int idx2 = stdoutstr.indexOf("]", idx1);
-    LOG.info("char at idx1 " + idx1 + ":" + stdoutstr.charAt(idx1));
-    LOG.info("char at idx2 " + idx2 + ":" + stdoutstr.charAt(idx2));
-    return Arrays.asList(stdoutstr.substring(idx1, idx2).split(", "))
+    int idx1 = stdoutStr.indexOf(pattern) + pattern.length();
+    int idx2 = stdoutStr.indexOf("]", idx1);
+    String containerIdStr = stdoutStr.substring(idx1, idx2);
+    LOG.info("container IDs returned by Aurora " + containerIdStr);
+    return Arrays.asList(containerIdStr.split(", "))
         .stream().map(x->Integer.valueOf(x)).collect(Collectors.toSet());
   }
 

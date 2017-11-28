@@ -34,6 +34,4 @@ public interface AuroraController {
 
   void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
   Set<Integer> addContainers(Integer count);
-
-  String status();
 }

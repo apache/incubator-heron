@@ -175,6 +175,7 @@ public final class ShellUtils {
       return -1;
     }
   }
+
   private static int runSyncProcess(
       boolean isVerbose, boolean isInheritIO, String[] cmdline,
       StringBuilder outputBuilder, File workingDirectory, Map<String, String> envs) {
