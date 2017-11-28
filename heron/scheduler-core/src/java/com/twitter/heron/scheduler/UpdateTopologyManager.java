@@ -190,7 +190,7 @@ public class UpdateTopologyManager implements Closeable {
 
     // update packing plan to trigger the scaling event
     logInfo("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
+        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
 
     // reactivate topology
     if (initiallyRunning) {
