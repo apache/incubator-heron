@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -125,9 +126,17 @@ class AuroraCLIController implements AuroraController {
       throw new RuntimeException("Failed to create " + count + " new aurora instances");
     }
 
+    if (stderr.length() <= 0) { // no container was added
+      LOG.info("empty output by Aurora");
+      return new HashSet<Integer>();
+    }
     String stdoutStr = stderr.toString();
     String pattern = "Querying instance statuses: [";
     int idx1 = stdoutStr.indexOf(pattern) + pattern.length();
+    if (idx1 < 0) { // no container was added
+      LOG.info("stdout & stderr by Aurora " + stderr);
+      return new HashSet<Integer>();
+    }
     int idx2 = stdoutStr.indexOf("]", idx1);
     String containerIdStr = stdoutStr.substring(idx1, idx2);
     LOG.info("container IDs returned by Aurora " + containerIdStr);
@@ -135,6 +144,8 @@ class AuroraCLIController implements AuroraController {
         .stream().map(x->Integer.valueOf(x)).collect(Collectors.toSet());
   }
 
+  // Utils method for unit tests
+  @VisibleForTesting
   boolean runProcess(List<String> auroraCmd, StringBuilder stdout, StringBuilder stderr) {
     int status =
         ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]),

@@ -31,7 +31,9 @@ public interface IScalable {
    * Requests new containers for scaling a topology
    *
    * @param containersToAdd Set of containers to be added by the scheduler
-   * @return Map from container-id assigned by packing algorithm, to the actual deployed container-id
+   * @return Map from container-id assigned by packing algorithm, 
+   *             to ContainerPlan with the actual deployed container-id.
+   *         if the mapping is not needed, then return empty Set.
    */
   Map<Integer, PackingPlan.ContainerPlan>
       addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);

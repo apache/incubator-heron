@@ -144,9 +144,13 @@ public class AuroraCLIControllerTest {
         "aurora job add --wait-until RUNNING %s/0 %s %s",
         JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
 
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
+    Mockito.doReturn(true).when(controller)
+        .runProcess(Matchers.anyListOf(String.class),
+                    Matchers.any(StringBuilder.class),
+                    Matchers.any(StringBuilder.class));
     controller.addContainers(containersToAdd);
-    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+    Mockito.verify(controller)
+        .runProcess(Matchers.eq(expectedCommand), Matchers.any(), Matchers.any());
   }
 
   private static List<String> asList(String command, Object... values) {
