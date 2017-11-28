@@ -193,27 +193,28 @@ public class AuroraScheduler implements IScheduler, IScalable {
   @Override
   public Map<Integer, PackingPlan.ContainerPlan> addContainers(
       Set<PackingPlan.ContainerPlan> containersToAdd) {
-    // TODO(mfu): Get current one
-    String beforeJson = controller.status();
-    // TODO(mfu): Add a method in AuroraCLIController
-    Set<Integer> beforeIds = getActiveContainerIds(beforeJson);
+//    // TODO(mfu): Get current one
+//    String beforeJson = controller.status();
+//    // TODO(mfu): Add a method in AuroraCLIController
+//    Set<Integer> beforeIds = getActiveContainerIds(beforeJson);
     // Do the actual containers adding
-    controller.addContainers(containersToAdd.size());
-    LOG.info("Containers added for Aurora");
-    // TODO(mfu): Get the after one
-    String afterJson = controller.status();
-    Set<Integer> afterIds = getActiveContainerIds(afterJson);
-    // TODO(mfu): Do the diff
-    LOG.info("before: " + beforeIds);
-    LOG.info("after: " + afterIds);
-    List<Integer> diffs = getDiffs(beforeIds, afterIds);
-    LOG.info("The diffs: " + diffs);
+    LinkedList<Integer> diffs = new LinkedList<>(
+        controller.addContainers(containersToAdd.size()));
+//    LOG.info("Containers added for Aurora");
+//    // TODO(mfu): Get the after one
+//    String afterJson = controller.status();
+//    Set<Integer> afterIds = getActiveContainerIds(afterJson);
+//    // TODO(mfu): Do the diff
+//    LOG.info("before: " + beforeIds);
+//    LOG.info("after: " + afterIds);
+//    List<Integer> diffs = getDiffs(beforeIds, afterIds);
+//    LOG.info("The diffs: " + diffs);
     Map<Integer, PackingPlan.ContainerPlan> remapping = new HashMap<>();
     // Do the remapping
     for (PackingPlan.ContainerPlan cp : containersToAdd) {
       PackingPlan.ContainerPlan newContainerPlan =
           new PackingPlan.ContainerPlan(
-              diffs.remove(0), cp.getInstances(),
+              diffs.pop(), cp.getInstances(),
               cp.getRequiredResource(), cp.getScheduledResource().orNull());
       remapping.put(cp.getId(), newContainerPlan);
     }

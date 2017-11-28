@@ -126,7 +126,7 @@ class AuroraHeronShellController implements AuroraController {
   }
 
   @Override
-  public void addContainers(Integer count) {
-    cliController.addContainers(count);
+  public Set<Integer> addContainers(Integer count) {
+    return cliController.addContainers(count);
   }
 }

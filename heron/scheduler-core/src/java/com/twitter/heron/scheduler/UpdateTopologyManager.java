@@ -158,7 +158,8 @@ public class UpdateTopologyManager implements Closeable {
       updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
     }
 
-    Set<PackingPlan.ContainerPlan> updatedContainers = proposedPackingPlan.getContainers();
+    Set<PackingPlan.ContainerPlan> updatedContainers =
+        new HashSet<>(proposedPackingPlan.getContainers());
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
     if (newContainerCount > 0 && scalableScheduler.isPresent()) {
