@@ -93,6 +93,4 @@ public final class KubernetesConstants {
           "Never"
       )
   );
-
-  static final String HOST_PATH_VOLUME = "hostPath";
 }
