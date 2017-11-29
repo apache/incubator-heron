@@ -38,7 +38,12 @@ public final class ConfigUtils {
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static Config translateConfig(Map stormConfig) {
-    Config heronConfig = new Config((Map<String, Object>) stormConfig);
+    Config heronConfig;
+    if (stormConfig != null) {
+      heronConfig = new Config((Map<String, Object>) stormConfig);
+    } else {
+      heronConfig = new Config();
+    }
 
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);
@@ -60,7 +65,12 @@ public final class ConfigUtils {
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static Config translateComponentConfig(Map stormConfig) {
-    Config heronConfig = new Config((Map<String, Object>) stormConfig);
+    Config heronConfig;
+    if (stormConfig != null) {
+      heronConfig = new Config((Map<String, Object>) stormConfig);
+    } else {
+      heronConfig = new Config();
+    }
 
     doStormTranslation(heronConfig);
 
