@@ -191,21 +191,22 @@ void StMgrClient::SendHelloRequest() {
 }
 
 bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg) {
-  if (IsConnected()) {
-    SendMessage(_msg);
-    return true;
-  } else if (droptuples_upon_backpressure_ && HasCausedBackPressure()) {
-    if (++ndropped_messages_ % 100 == 0) {
-      LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
-                << other_stmgr_id_ << " because it is causing backpressure";
-    }
-    return false;
-  } else {
+  if (!IsConnected()) {
     if (++ndropped_messages_ % 100 == 0) {
       LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
                 << other_stmgr_id_ << " because it is not connected";
+      }
+    return false;
+  } else if (droptuples_upon_backpressure_ && HasCausedBackPressure()) {
+    if (++ndropped_messages_ % 100 == 0) {
+      LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
+                << other_stmgr_id_ << " because it is causing backpressure and "
+                << "droptuples_upon_backpressure is set";
     }
     return false;
+  } else {
+    SendMessage(_msg);
+    return true;
   }
 }
 
@@ -221,6 +222,9 @@ void StMgrClient::StartBackPressureConnectionCb(Connection* _connection) {
 
   if (!droptuples_upon_backpressure_) {
     client_manager_->StartBackPressureOnServer(other_stmgr_id_);
+  } else {
+    LOG(WARNING) << "Stmgr " << other_stmgr_id_ << " is not keeping up but backpressure "
+                 << "mechanism not initiated since droptuples_upon_backpressure is set true";
   }
 }
 

@@ -221,5 +221,5 @@ void Client::StopBackPressureConnectionCb(Connection* conn) {
 
 bool Client::HasCausedBackPressure() const {
   Connection* conn = static_cast<Connection*>(conn_);
-  return conn->hasCausedBackPressure();
+  return conn && conn->hasCausedBackPressure();
 }

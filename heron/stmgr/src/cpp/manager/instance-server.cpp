@@ -357,9 +357,11 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
   sp_int32 task_id = _message->task_id();
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << task_id << " has not yet connected to us. Dropping...";
+    LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " has not yet connected to us. Dropping...";
   } else if (droptuples_upon_backpressure_ && iter->second->conn_->hasCausedBackPressure()) {
-    LOG(ERROR) << "task_id " << task_id << " is causing backpressure, so Dropping tuples to him";
+    LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " is causing backpressure, so dropping "
+                            << "tuples stream worth " << _message->set().size() << " to it since "
+                            << "droptuples_upon_backpressure is set to true";
     // Ideally we would have counted the numbers lost, but we cannot since the tuples are in
     // encoded form. Not worth deser them just to count
   } else {
@@ -379,8 +381,9 @@ void InstanceServer::DrainTupleSet(sp_int32 _task_id,
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL
       || (droptuples_upon_backpressure_ && iter->second->conn_->hasCausedBackPressure())) {
-    LOG(ERROR) << "task_id " << _task_id
-               << " has not yet connected to us or is not keeping up, Dropping...";
+    LOG_EVERY_N(ERROR, 100) << "task_id " << _task_id << " has not yet connected to us or is not "
+                            << "keeping up and droptuples_upon_backpressure is set to true. "
+                            << "Dropping...";
     if (_message->has_data()) {
       instance_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message->data().tuples_size());
@@ -457,10 +460,12 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   sp_string instance_name = GetInstanceName(_connection);
   CHECK_NE(instance_name, "");
 
-  LOG(INFO) << "We observe back pressure on sending data to instance " << instance_name;
+  LOG(WARNING) << "We observe back pressure on sending data to instance " << instance_name;
 
   if (droptuples_upon_backpressure_) {
     // We will drop further tuples to this instance until the backpressure lets off
+    LOG(WARNING) << "Backpressure mechanism not initiated since droptuples_upon_backpressure "
+                 << "is set";
     return;
   }
 
@@ -483,10 +488,13 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   sp_string instance_name = GetInstanceName(_connection);
   CHECK_NE(instance_name, "");
 
-  LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
+  LOG(WARNING) << "We don't observe back pressure now on sending data to instance "
+               << instance_name;
 
   if (droptuples_upon_backpressure_) {
     // We had not initiated any kind of backpressure mechanism in this mode.
+    LOG(WARNING) << "Backpressure mechanism not initiated since droptuples_upon_backpressure "
+                     << "is set";
     return;
   }
 
