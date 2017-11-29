@@ -167,7 +167,7 @@ public class UpdateTopologyManager implements Closeable {
           scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
       // Update the PackingPlan with new mapped container-ids
       if (remapping != null) {
-        LOG.info("Doing remapping. ");
+        LOG.fine("Doing remapping. ");
         for (PackingPlan.ContainerPlan cp : proposedPackingPlan.getContainers()) {
           if (remapping.containsKey(cp.getId())) {
             // Replace with the actual mapping one
@@ -182,7 +182,7 @@ public class UpdateTopologyManager implements Closeable {
         new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
-    LOG.info("The updated Packing Plan: " + updatedProtoPackingPlan);
+    LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)

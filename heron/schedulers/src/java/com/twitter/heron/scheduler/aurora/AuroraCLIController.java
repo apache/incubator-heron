@@ -127,18 +127,20 @@ class AuroraCLIController implements AuroraController {
     }
 
     if (stderr.length() <= 0) { // no container was added
-      LOG.info("empty output by Aurora");
-      return new HashSet<Integer>();
+      throw new RuntimeException("empty output by Aurora");
     }
-    String stdoutStr = stderr.toString();
+    return extractContainerIds(stderr.toString());
+  }
+
+  private Set<Integer> extractContainerIds(String auroraStdoutStr) {
     String pattern = "Querying instance statuses: [";
-    int idx1 = stdoutStr.indexOf(pattern) + pattern.length();
+    int idx1 = auroraStdoutStr.indexOf(pattern) + pattern.length();
     if (idx1 < 0) { // no container was added
-      LOG.info("stdout & stderr by Aurora " + stderr);
+      LOG.info("stdout & stderr by Aurora " + auroraStdoutStr);
       return new HashSet<Integer>();
     }
-    int idx2 = stdoutStr.indexOf("]", idx1);
-    String containerIdStr = stdoutStr.substring(idx1, idx2);
+    int idx2 = auroraStdoutStr.indexOf("]", idx1);
+    String containerIdStr = auroraStdoutStr.substring(idx1, idx2);
     LOG.info("container IDs returned by Aurora " + containerIdStr);
     return Arrays.asList(containerIdStr.split(", "))
         .stream().map(x->Integer.valueOf(x)).collect(Collectors.toSet());

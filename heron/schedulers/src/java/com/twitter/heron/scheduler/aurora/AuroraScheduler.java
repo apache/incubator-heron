@@ -191,14 +191,15 @@ public class AuroraScheduler implements IScheduler, IScalable {
   public Map<Integer, PackingPlan.ContainerPlan> addContainers(
       Set<PackingPlan.ContainerPlan> containersToAdd) {
     // Do the actual containers adding
-    LinkedList<Integer> diffs = new LinkedList<>(
+    LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
         controller.addContainers(containersToAdd.size()));
     Map<Integer, PackingPlan.ContainerPlan> remapping = new HashMap<>();
-    // Do the remapping
+    // Do the remapping:
+    // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
     for (PackingPlan.ContainerPlan cp : containersToAdd) {
       PackingPlan.ContainerPlan newContainerPlan =
           new PackingPlan.ContainerPlan(
-              diffs.pop(), cp.getInstances(),
+              newAddedContainerIds.pop(), cp.getInstances(),
               cp.getRequiredResource(), cp.getScheduledResource().orNull());
       remapping.put(cp.getId(), newContainerPlan);
     }
