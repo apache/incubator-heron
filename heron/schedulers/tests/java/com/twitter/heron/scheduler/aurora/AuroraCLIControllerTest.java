@@ -31,6 +31,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
@@ -144,8 +146,15 @@ public class AuroraCLIControllerTest {
         "aurora job add --wait-until RUNNING %s/0 %s %s",
         JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
 
-    Mockito.doReturn(true).when(controller)
-        .runProcess(Matchers.anyListOf(String.class),
+    Mockito.doAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock arg0) throws Throwable {
+        final StringBuilder originalArgument = (StringBuilder) (arg0.getArguments())[2];
+        originalArgument.append("Querying instance statuses: [1, 2, 3]");
+        return true;
+      }
+    }).when(controller).runProcess(
+                    Matchers.anyListOf(String.class),
                     Matchers.any(StringBuilder.class),
                     Matchers.any(StringBuilder.class));
     controller.addContainers(containersToAdd);
