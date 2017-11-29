@@ -392,8 +392,7 @@ def parse_override_config_and_write_file(namespace):
     tmp_dir = tempfile.mkdtemp()
     override_config_file = os.path.join(tmp_dir, OVERRIDE_YAML)
     with open(override_config_file, 'w') as f:
-      for k, v in overrides.items():
-        f.write("%s:%s\n" % (k, v))
+      f.write(yaml.dump(overrides))
 
     return override_config_file
   except Exception as e:
