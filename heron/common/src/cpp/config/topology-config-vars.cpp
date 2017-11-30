@@ -44,6 +44,8 @@ const sp_string TopologyConfigVars::TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
                             "topology.stateful.checkpoint.interval.seconds";
 const sp_string TopologyConfigVars::TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean";
+const sp_string TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE =
+    "topology.droptuples.upon.backpressure";
 const sp_string TopologyConfigVars::TOPOLOGY_NAME = "topology.name";
 const sp_string TopologyConfigVars::TOPOLOGY_TEAM_NAME = "topology.team.name";
 const sp_string TopologyConfigVars::TOPOLOGY_TEAM_EMAIL = "topology.team.email";
