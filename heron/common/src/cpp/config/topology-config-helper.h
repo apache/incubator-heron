@@ -131,6 +131,9 @@ class TopologyConfigHelper {
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,
                                      std::unordered_set<std::string> spouts);
 
+  // Do we want to drop tuples upon backpressure detection
+  static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
+
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
                                     const std::string& _config_name,

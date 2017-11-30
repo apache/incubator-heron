@@ -29,7 +29,7 @@ class DummyStMgrClientMgr : public heron::stmgr::StMgrClientMgr {
                       heron::proto::system::PhysicalPlan* _pplan)
   : heron::stmgr::StMgrClientMgr(_eventLoop, _pplan->topology().name(),
                                  _pplan->topology().id(), _stmgr,
-                                 NULL, _metrics, 1024, 2048),
+                                 NULL, _metrics, 1024, 2048, false),
     close_connections_called_(false), start_connections_called_(false),
     all_stmgrclients_registered_(false) {
   }

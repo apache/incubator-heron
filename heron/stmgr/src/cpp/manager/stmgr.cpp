@@ -132,7 +132,8 @@ void StMgr::Init() {
 
   // Create the client manager
   clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
-                                  metrics_manager_client_, high_watermark_, low_watermark_);
+                   metrics_manager_client_, high_watermark_, low_watermark_,
+                   config::TopologyConfigHelper::DropTuplesUponBackpressure(*hydrated_topology_));
 
   // Create and Register Tuple cache
   CreateTupleCache();
@@ -314,7 +315,9 @@ void StMgr::StartInstanceServer() {
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
   instance_server_ = new InstanceServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
-                                  instances_, this, metrics_manager_client_, neighbour_calculator_);
+                     instances_, this, metrics_manager_client_,
+                     neighbour_calculator_,
+                     config::TopologyConfigHelper::DropTuplesUponBackpressure(*hydrated_topology_));
 
   // start the server
   CHECK_EQ(instance_server_->Start(), 0);
