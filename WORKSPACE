@@ -650,7 +650,7 @@ maven_jar(
 # end heron api server
 
 # for pex repos
-PEX_SRC = "https://pypi.python.org/packages/9f/fa/374a621ed7cad3cb9ae90f2c612f527d403de8acbb7e9ba14717526433e8/pex-1.2.11.tar.gz"
+PEX_SRC = "https://storage.googleapis.com/streamlio/pex/pex-1.2.20.tar.gz"
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
