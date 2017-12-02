@@ -111,10 +111,10 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     int numContainer = TopologyUtils.getNumContainers(topology);
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
 
-    return pack(numContainer, parallelismMap);
+    return packInternal(numContainer, parallelismMap);
   }
 
-  public PackingPlan pack(int numContainer, Map<String, Integer> parallelismMap) {
+  private PackingPlan packInternal(int numContainer, Map<String, Integer> parallelismMap) {
     // Get the instances' round-robin allocation
     Map<Integer, List<InstanceId>> roundRobinAllocation =
         getRoundRobinAllocation(numContainer, parallelismMap);
@@ -379,6 +379,6 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     int newNumContainer = (int) Math.ceil(newNumInstance / initialNumInstancePerContainer);
 
-    return pack(newNumContainer, newComponentParallelism);
+    return packInternal(newNumContainer, newComponentParallelism);
   }
 }
