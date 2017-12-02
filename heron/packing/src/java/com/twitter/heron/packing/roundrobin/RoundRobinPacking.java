@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,39 +39,42 @@ import com.twitter.heron.spi.packing.Resource;
 /**
  * Round-robin packing algorithm
  * <p>
- * This IPacking implementation generates PackingPlan: instances of the component are assigned to
- * each container one by one in circular order, without any priority. Each container is expected to
- * take equal number of instances if # of instances is multiple of # of containers.
+ * This IPacking implementation generates PackingPlan: instances of the component are assigned
+ * to each container one by one in circular order, without any priority. Each container is expected
+ * to take equal number of instances if # of instances is multiple of # of containers.
  * <p>
- * Following semantics are guaranteed: 1. Every container requires same size of resource, i.e. same
- * cpu, ram and disk. Consider that instances in different containers can be different, the value of
- * size will be aligned to the max one.
+ * Following semantics are guaranteed:
+ * 1. Every container requires same size of resource, i.e. same cpu, ram and disk.
+ * Consider that instances in different containers can be different, the value of size
+ * will be aligned to the max one.
  * <p>
- * 2. The size of resource required by the whole topology is equal to ((# of container specified in
- * config) + 1) * (size of resource required for a single container). The extra 1 is considered for
- * Heron internal container, i.e. the one containing Scheduler and TMaster.
+ * 2. The size of resource required by the whole topology is equal to
+ * ((# of container specified in config) + 1) * (size of resource required for a single container).
+ * The extra 1 is considered for Heron internal container,
+ * i.e. the one containing Scheduler and TMaster.
  * <p>
- * 3. The disk required for a container is calculated as: value for
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise, (disk for
- * instances in container) + (disk padding for heron internal process)
+ * 3. The disk required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
+ * (disk for instances in container) + (disk padding for heron internal process)
  * <p>
- * 4. The cpu required for a container is calculated as: value for
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise, (cpu for
- * instances in container) + (cpu padding for heron internal process)
+ * 4. The cpu required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
+ * (cpu for instances in container) + (cpu padding for heron internal process)
  * <p>
- * 5. The ram required for a container is calculated as: value for
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise, (ram for
- * instances in container) + (ram padding for heron internal process)
+ * 5. The ram required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
+ * (ram for instances in container) + (ram padding for heron internal process)
  * <p>
- * 6. The ram required for one instance is calculated as: value in
- * com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise, - if
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists: the default ram value
- * for one instance - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
- * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (ram padding for heron internal process) - (ram used by
- * instances within TOPOLOGY_COMPONENT_RAMMAP config))) / (the # of instances in container not
- * specified in TOPOLOGY_COMPONENT_RAMMAP config) 7. The pack() return null if PackingPlan fails to
- * pass the safe check, for instance, the size of ram for an instance is less than the minimal
- * required value.
+ * 6. The ram required for one instance is calculated as:
+ * value in com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
+ * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists:
+ * the default ram value for one instance
+ * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
+ * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (ram padding for heron internal process)
+ * - (ram used by instances within TOPOLOGY_COMPONENT_RAMMAP config))) /
+ * (the # of instances in container not specified in TOPOLOGY_COMPONENT_RAMMAP config)
+ * 7. The pack() return null if PackingPlan fails to pass the safe check, for instance,
+ * the size of ram for an instance is less than the minimal required value.
  */
 public class RoundRobinPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
@@ -215,7 +218,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         // If container ram is specified
         if (!containerRamHint.equals(NOT_SPECIFIED_NUMBER_VALUE)) {
           // remove ram for heron internal process
-          ByteAmount remainingRam = containerRamHint.minus(containerRamPadding).minus(usedRam);
+          ByteAmount remainingRam =
+              containerRamHint.minus(containerRamPadding).minus(usedRam);
 
           // Split remaining ram evenly
           individualInstanceRam = remainingRam.divide(instancesToAllocate);
@@ -292,8 +296,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     double defaultContainerCpu =
         DEFAULT_CPU_PADDING_PER_CONTAINER + getLargestContainerSize(allocation);
 
-    String cpuHint = TopologyUtils.getConfigWithDefault(topologyConfig,
-        com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
+    String cpuHint = TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
         Double.toString(defaultContainerCpu));
 
     return Double.parseDouble(cpuHint);
@@ -307,12 +311,14 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    */
   private ByteAmount getContainerDiskHint(Map<Integer, List<InstanceId>> allocation) {
     ByteAmount defaultContainerDisk = instanceDiskDefault
-        .multiply(getLargestContainerSize(allocation)).plus(DEFAULT_DISK_PADDING_PER_CONTAINER);
+        .multiply(getLargestContainerSize(allocation))
+        .plus(DEFAULT_DISK_PADDING_PER_CONTAINER);
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     return TopologyUtils.getConfigWithDefault(topologyConfig,
-        com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, defaultContainerDisk);
+        com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED,
+        defaultContainerDisk);
   }
 
   /**
@@ -324,8 +330,9 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   private ByteAmount getContainerRamHint(Map<Integer, List<InstanceId>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    return TopologyUtils.getConfigWithDefault(topologyConfig,
-        com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, NOT_SPECIFIED_NUMBER_VALUE);
+    return TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
+        NOT_SPECIFIED_NUMBER_VALUE);
   }
 
   /**
@@ -339,8 +346,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check
         if (instancePlan.getResource().getRam().lessThan(MIN_RAM_PER_INSTANCE)) {
-          throw new PackingException(String.format(
-              "Invalid packing plan generated. A minimum of "
+          throw new PackingException(String.format("Invalid packing plan generated. A minimum of "
                   + "%s ram is required, but InstancePlan for component '%s' has %s",
               MIN_RAM_PER_INSTANCE, instancePlan.getComponentName(),
               instancePlan.getResource().getRam()));
