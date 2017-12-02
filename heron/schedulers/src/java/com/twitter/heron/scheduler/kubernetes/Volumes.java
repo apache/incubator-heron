@@ -19,14 +19,19 @@ import java.util.Map;
 import com.twitter.heron.spi.common.Config;
 
 import io.kubernetes.client.models.V1HostPathVolumeSource;
+import io.kubernetes.client.models.V1NFSVolumeSource;
 import io.kubernetes.client.models.V1Volume;
 
 final class Volumes {
 
+  static final String HOST_PATH = "hostPath";
+  static final String NFS = "nfs";
+
   private final Map<String, VolumeFactory> volumes = new HashMap<>();
 
   private Volumes() {
-    volumes.put(KubernetesConstants.HOST_PATH_VOLUME, new HostPathVolumeFactory());
+    volumes.put(HOST_PATH, new HostPathVolumeFactory());
+    volumes.put(NFS, new NfsVolumeFactory());
   }
 
   static Volumes get() {
@@ -57,6 +62,24 @@ final class Volumes {
           new V1HostPathVolumeSource()
               .path(path);
       volume.hostPath(hostPathVolume);
+
+      return volume;
+    }
+  }
+
+  static class NfsVolumeFactory implements VolumeFactory {
+    @Override
+    public V1Volume create(Config config) {
+      final String volumeName = KubernetesContext.getVolumeName(config);
+      final V1Volume volume = new V1Volume().name(volumeName);
+
+      final String path = KubernetesContext.getNfsVolumePath(config);
+      final String server = KubernetesContext.getNfsServer(config);
+      V1NFSVolumeSource nfsVolumeSource =
+          new V1NFSVolumeSource()
+              .path(path)
+              .server(server);
+      volume.setNfs(nfsVolumeSource);
 
       return volume;
     }

@@ -31,9 +31,21 @@ public final class KubernetesContext extends Context {
 
   public static final String HERON_KUBERNETES_VOLUME_NAME = "heron.kubernetes.volume.name";
   public static final String HERON_KUBERNETES_VOLUME_TYPE = "heron.kubernetes.volume.type";
+
+
+  // HostPath volume keys
+  // https://kubernetes.io/docs/concepts/storage/volumes/#hostpath
   public static final String HERON_KUBERNETES_VOLUME_HOSTPATH_PATH =
       "heron.kubernetes.volume.hostPath.path";
 
+  // nfs volume keys
+  // https://kubernetes.io/docs/concepts/storage/volumes/#nfs
+  public static final String HERON_KUBERNETES_VOLUME_NFS_PATH =
+      "heron.kubernetes.volume.nfs.path";
+  public static final String HERON_KUBERNETES_VOLUME_NFS_SERVER =
+      "heron.kubernetes.volume.nfs.server";
+
+  // container mount volume mount keys
   public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
       "heron.kubernetes.container.volumeMount.name";
   public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_PATH =
@@ -73,6 +85,14 @@ public final class KubernetesContext extends Context {
 
   static String getHostPathVolumePath(Config config) {
     return config.getStringValue(HERON_KUBERNETES_VOLUME_HOSTPATH_PATH);
+  }
+
+  static String getNfsVolumePath(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_VOLUME_NFS_PATH);
+  }
+
+  static String getNfsServer(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_VOLUME_NFS_SERVER);
   }
 
   static boolean hasVolume(Config config) {
