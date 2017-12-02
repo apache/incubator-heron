@@ -242,8 +242,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    *
    * @return containerId -&gt; list of InstanceId belonging to this container
    */
-  private Map<Integer, List<InstanceId>> getRoundRobinAllocation(int numContainer,
-      Map<String, Integer> parallelismMap) {
+  private Map<Integer, List<InstanceId>> getRoundRobinAllocation(
+      int numContainer, Map<String, Integer> parallelismMap) {
     Map<Integer, List<InstanceId>> allocation = new HashMap<>();
     int totalInstance =
         parallelismMap.values().stream().collect(Collectors.summingInt(Integer::intValue));
