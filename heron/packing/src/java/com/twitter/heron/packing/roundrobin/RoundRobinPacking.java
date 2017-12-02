@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -149,8 +150,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       }
 
       Resource resource = new Resource(containerCpu, containerRam, containerDiskInBytes);
-      PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(containerId,
-          new HashSet<>(instancePlanMap.values()), resource);
+      PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
+          containerId, new HashSet<>(instancePlanMap.values()), resource);
 
       containerPlans.add(containerPlan);
     }
@@ -244,10 +245,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   private Map<Integer, List<InstanceId>> getRoundRobinAllocation(int numContainer,
       Map<String, Integer> parallelismMap) {
     Map<Integer, List<InstanceId>> allocation = new HashMap<>();
-    int totalInstance = 0;
-    for (int parallelism : parallelismMap.values()) {
-      totalInstance += parallelism;
-    }
+    int totalInstance =
+        parallelismMap.values().stream().collect(Collectors.summingInt(Integer::intValue));
     if (numContainer > totalInstance) {
       throw new RuntimeException("More containers allocated than instance.");
     }
