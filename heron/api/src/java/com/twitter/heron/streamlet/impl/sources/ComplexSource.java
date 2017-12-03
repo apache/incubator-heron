@@ -36,7 +36,6 @@ public class ComplexSource<R> extends StreamletSource {
   private Source<R> generator;
 
   private SpoutOutputCollector collector;
-  private Context context;
   private State<Serializable, Serializable> state;
 
   public ComplexSource(Source<R> generator) {
@@ -53,7 +52,7 @@ public class ComplexSource<R> extends StreamletSource {
   public void open(Map<String, Object> map, TopologyContext topologyContext,
                    SpoutOutputCollector outputCollector) {
     collector = outputCollector;
-    context = new ContextImpl(topologyContext, map, state);
+    Context context = new ContextImpl(topologyContext, map, state);
     generator.setup(context);
   }
 

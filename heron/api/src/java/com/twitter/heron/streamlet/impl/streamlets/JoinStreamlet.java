@@ -81,13 +81,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     if (!left.isBuilt() || !right.isBuilt()) {
       return false;
     }
-    if (getName() == null) {
-      setName(defaultNameCalculator("join", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefixes.JOIN.toString(), stageNames);
     JoinOperator<K, R, S, T> bolt = new JoinOperator<>(joinType, left.getName(),
         right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);
     windowCfg.attachWindowConfig(bolt);

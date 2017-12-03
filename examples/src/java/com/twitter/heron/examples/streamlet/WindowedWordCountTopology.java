@@ -48,7 +48,7 @@ public final class WindowedWordCountTopology {
   );
 
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     processingGraphBuilder
         // The origin of the processing graph: an indefinite series of sentences chosen
@@ -82,9 +82,8 @@ public final class WindowedWordCountTopology {
     // argument (or else the default of 2 will be used).
     int topologyParallelism = StreamletUtils.getParallelism(args, 2);
 
-    Config config = new Config.Builder()
+    Config config = Config.newBuilder()
         .setNumContainers(topologyParallelism)
-        .useKryoSerializer()
         .build();
 
     // Fetches the topology name from the first command-line argument

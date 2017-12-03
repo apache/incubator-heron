@@ -26,6 +26,8 @@ elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
   CONFIG_PLATFORM=centos
 elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
   CONFIG_PLATFORM=darwin
+elif [[ "$TARGET_PLATFORM" =~ "debian" ]]; then
+  CONFIG_PLATFORM=debian
 else 
   echo "Unknown platform: $TARGET_PLATFORM"
   exit 1

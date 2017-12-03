@@ -22,7 +22,7 @@ import com.twitter.heron.streamlet.impl.StreamletImpl;
 import com.twitter.heron.streamlet.impl.sinks.ConsumerSink;
 
 /**
- * ConsumerStreamlet represents en empty Streamlet that is made up of elements from the parent
+ * ConsumerStreamlet represents an empty Streamlet that is made up of elements from the parent
  * streamlet after consuming every element. Since elements of the parents are just consumed
  * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
  */
@@ -38,13 +38,7 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("consumer", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefixes.CONSUMER.toString(), stageNames);
     bldr.setBolt(getName(), new ConsumerSink<>(consumer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

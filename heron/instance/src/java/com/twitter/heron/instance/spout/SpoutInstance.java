@@ -72,8 +72,6 @@ public class SpoutInstance implements IInstance {
 
   private PhysicalPlanHelper helper;
 
-  private TopologyAPI.TopologyState topologyState;
-
   /**
    * Construct a SpoutInstance basing on given arguments
    */
@@ -186,8 +184,6 @@ public class SpoutInstance implements IInstance {
   public void start() {
     // Add spout tasks for execution
     addSpoutsTasks();
-
-    topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
@@ -213,14 +209,12 @@ public class SpoutInstance implements IInstance {
   public void activate() {
     LOG.info("Spout is activated");
     spout.activate();
-    topologyState = TopologyAPI.TopologyState.RUNNING;
   }
 
   @Override
   public void deactivate() {
     LOG.info("Spout is deactivated");
     spout.deactivate();
-    topologyState = TopologyAPI.TopologyState.PAUSED;
   }
 
   // Tasks happen in every time looper is waken up
@@ -284,7 +278,7 @@ public class SpoutInstance implements IInstance {
    */
   private boolean isContinueWork() {
     long maxSpoutPending = TypeUtils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
-    return topologyState.equals(TopologyAPI.TopologyState.RUNNING)
+    return helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
         &&
         ((!ackEnabled && collector.isOutQueuesAvailable())
             ||
@@ -305,7 +299,7 @@ public class SpoutInstance implements IInstance {
    */
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
-        && topologyState.equals(TopologyAPI.TopologyState.RUNNING);
+        && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING);
   }
 
   protected void produceTuple() {

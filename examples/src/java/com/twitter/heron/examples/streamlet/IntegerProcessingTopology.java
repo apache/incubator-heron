@@ -19,7 +19,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.twitter.heron.examples.streamlet.utils.StreamletUtils;
 import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Resources;
 import com.twitter.heron.streamlet.Runner;
 import com.twitter.heron.streamlet.Streamlet;
 
@@ -35,8 +34,8 @@ public final class IntegerProcessingTopology {
   }
 
   // Heron resources to be applied to the topology
-  private static final float CPU = 2.0f;
-  private static final long GIGABYTES_OF_RAM = 6;
+  private static final float CPU = 1.5f;
+  private static final int GIGABYTES_OF_RAM = 8;
   private static final int NUM_CONTAINERS = 2;
 
   /**
@@ -44,12 +43,11 @@ public final class IntegerProcessingTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder builder = Builder.createBuilder();
+    Builder builder = Builder.newBuilder();
 
     Streamlet<Integer> zeroes = builder.newSource(() -> 0);
 
     builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .setNumPartitions(2)
         .setName("random-ints")
         .map(i -> i + 1)
         .setName("add-one")
@@ -59,14 +57,10 @@ public final class IntegerProcessingTopology {
         .setName("remove-twos")
         .log();
 
-    Resources resources = new Resources.Builder()
-        .setCpu(CPU)
-        .setRamInGB(GIGABYTES_OF_RAM)
-        .build();
-
-    Config config = new Config.Builder()
+    Config config = Config.newBuilder()
         .setNumContainers(NUM_CONTAINERS)
-        .setContainerResources(resources)
+        .setPerContainerRamInGigabytes(GIGABYTES_OF_RAM)
+        .setPerContainerCpu(CPU)
         .build();
 
     // Fetches the topology name from the first command-line argument

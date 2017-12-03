@@ -65,6 +65,7 @@ marathon_deps_files = [
 kubernetes_deps_files = [
     "//heron/schedulers/src/java:kubernetes-scheduler-java",
     "//heron/schedulers/src/java:scheduler-utils-java",
+    "//third_party/java:kubernetes-java-client",
 ]
 
 java_library(
@@ -177,7 +178,8 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
     "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
-    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest"
+    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest",
+    "com.twitter.heron.scheduler.kubernetes.VolumesTests",
   ],
   runtime_deps = [ ":kubernetes-tests" ],
   size = "small",

@@ -41,13 +41,7 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
       // The system will call us again later
       return false;
     }
-    if (getName() == null) {
-      setName(defaultNameCalculator("union", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefixes.UNION.toString(), stageNames);
     bldr.setBolt(getName(), new UnionOperator<I>(),
         getNumPartitions()).shuffleGrouping(left.getName()).shuffleGrouping(right.getName());
     return true;

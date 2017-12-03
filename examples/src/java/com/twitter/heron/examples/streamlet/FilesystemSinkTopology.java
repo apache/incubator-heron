@@ -99,7 +99,7 @@ public final class FilesystemSinkTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder processingGraphBuilder = Builder.createBuilder();
+    Builder processingGraphBuilder = Builder.newBuilder();
 
     // Creates a temporary file to write output into.
     File file = File.createTempFile("filesystem-sink-example", ".tmp");
@@ -127,7 +127,7 @@ public final class FilesystemSinkTopology {
     // argument (or else the default of 2 will be used).
     int topologyParallelism = StreamletUtils.getParallelism(args, 2);
 
-    Config config = new Config.Builder()
+    Config config = Config.newBuilder()
         .setNumContainers(topologyParallelism)
         .build();
 

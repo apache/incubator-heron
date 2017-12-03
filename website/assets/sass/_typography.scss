@@ -41,6 +41,11 @@ article.hn-docs-content {
     margin-bottom: $base-margin;
   }
 
+  h5 {
+    font-size: $base-font-size * 1.2;
+    margin-bottom: $base-margin;
+  }
+
   img {
     display: block;
     max-width: 100%;
@@ -134,12 +139,11 @@ article.hn-docs-content {
     }
   }
 
-  ul {
+  ol, ul {
     margin: $base-margin 0;
-
+    
     li {
       font-size: $base-font-size;
-      list-style-type: square;
       padding-bottom: 0;
 
       ul {
@@ -149,6 +153,12 @@ article.hn-docs-content {
       & + li {
         margin-top: $base-margin * .15;
       }
+    }
+  }
+
+  ul {
+    li {
+      list-style-type: square;
     }
   }
 

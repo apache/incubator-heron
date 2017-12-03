@@ -24,7 +24,7 @@ import com.twitter.heron.api.tuple.Fields;
  */
 public abstract class StreamletWindowOperator extends BaseWindowedBolt {
   private static final long serialVersionUID = -4836560876041237959L;
-  private static final String OUTPUTFIELDNAME = "output";
+  private static final String OUTPUT_FIELD_NAME = "output";
 
   /**
    * The operators implementing streamlet functionality have some properties.
@@ -34,6 +34,6 @@ public abstract class StreamletWindowOperator extends BaseWindowedBolt {
    */
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields(OUTPUTFIELDNAME));
+    outputFieldsDeclarer.declare(new Fields(OUTPUT_FIELD_NAME));
   }
 }

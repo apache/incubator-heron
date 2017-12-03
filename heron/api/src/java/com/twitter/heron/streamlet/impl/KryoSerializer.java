@@ -39,6 +39,14 @@ public class KryoSerializer implements IPluggableSerializer {
   private Output kryoOut;
   private Input kryoIn;
 
+  /**
+   * A quick utility function that determines whether kryo has been linked
+   * with the streamlet binary
+   */
+  public static void checkForKryo() {
+    Kryo k = new Kryo();
+  }
+
   @Override
   public void initialize(Map<String, Object> config) {
     kryo = getKryo();

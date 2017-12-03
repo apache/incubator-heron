@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
@@ -141,7 +142,27 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    return controller.killJob();
+    // The aurora service can be unavailable or unstable for a while,
+    // we will try to kill the job with multiple attempts
+    int attempts = AuroraContext.getJobMaxKillAttempts(config);
+    long retryIntervalMs = AuroraContext.getJobKillRetryIntervalMs(config);
+    LOG.info("Will try " + attempts + " attempts at interval: " + retryIntervalMs + " ms");
+
+    // First attempt
+    boolean res = controller.killJob();
+    attempts--;
+
+    // Failure retry
+    while (!res && attempts > 0) {
+      LOG.warning("Failed to kill the topology. Will retry in " + retryIntervalMs + " ms...");
+      Utils.sleep(retryIntervalMs);
+
+      // Retry the killJob()
+      res = controller.killJob();
+      attempts--;
+    }
+
+    return res;
   }
 
   @Override

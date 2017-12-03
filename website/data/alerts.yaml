@@ -17,3 +17,10 @@ spouts-and-bolts:
   type: success
   content: |
     If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](../streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.
+new-streamlet-api:
+  title: New Streamlet API for Heron
+  type: success
+  content: |
+    As of version 0.16.0, Heron offers a new **Streamlet API** that you can use to write topologies in a more declarative, functional manner, without needing to specify spout and bolt logic directly. The Streamlet API is **currently in beta** and available for [Java](../../developers/java/streamlet-api). The Streamlet API for Python will be available soon.
+
+    More information on the Streamlet API can be found [below](#the-heron-streamlet-api).

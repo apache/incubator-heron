@@ -59,7 +59,8 @@ public final class SchedulerUtils {
     SCHEDULER_PORT("scheduler", true),
     METRICS_CACHE_MASTER_PORT("metrics-cache-m", true),
     METRICS_CACHE_STATS_PORT("metrics-cache-s", true),
-    CHECKPOINT_MANAGER_PORT("ckptmgr", true);
+    CHECKPOINT_MANAGER_PORT("ckptmgr", true),
+    JVM_REMOTE_DEBUGGER_PORTS("jvm-remote-debugger", false);
 
     private final String name;
     private final boolean required;
@@ -78,7 +79,7 @@ public final class SchedulerUtils {
     }
 
     public static String getPort(ExecutorPort executorPort,
-                                  Map<ExecutorPort, String> portMap) {
+                                 Map<ExecutorPort, String> portMap) {
       if (!portMap.containsKey(executorPort) && executorPort.isRequired()) {
         throw new RuntimeException("Required port " + executorPort.getName() + " not provided");
       }
@@ -178,7 +179,7 @@ public final class SchedulerUtils {
    *
    * @param config The static config
    * @param runtime The runtime config
-   * @param containerIndex the executor/container index
+   * @param shardId the executor/container index
    * @param ports a map of ports to use where the key indicate the port type and the
    * value is the port
    * @return String[] representing the command to start heron-executor
@@ -186,11 +187,29 @@ public final class SchedulerUtils {
   public static String[] getExecutorCommand(
       Config config,
       Config runtime,
-      int containerIndex,
+      int shardId,
+      Map<ExecutorPort, String> ports) {
+    return getExecutorCommand(config, runtime, Integer.toString(shardId), ports);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static config
+   * @param runtime The runtime config
+   * @param shardId the executor/container index
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] getExecutorCommand(
+      Config config,
+      Config runtime,
+      String shardId,
       Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
+    commands.add(createCommandArg(ExecutorFlag.Shard, shardId));
 
     String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));
@@ -230,6 +249,9 @@ public final class SchedulerUtils {
         ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
     String ckptmgrPort = ExecutorPort.getPort(
         ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
+    String remoteDebuggerPorts = ExecutorPort.getPort(
+        ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports
+    );
 
     List<String> commands = new ArrayList<>();
     commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
@@ -310,6 +332,9 @@ public final class SchedulerUtils {
     commands.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
     commands.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
         Context.healthMgrClassPath(config)));
+    if (remoteDebuggerPorts != null) {
+      commands.add(createCommandArg(ExecutorFlag.JvmRemoteDebuggerPorts, remoteDebuggerPorts));
+    }
 
     return commands.toArray(new String[commands.size()]);
   }
