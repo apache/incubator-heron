@@ -275,7 +275,8 @@ public class NomadScheduler implements IScheduler {
     envVars.put(NomadConstants.HERON_NOMAD_WORKING_DIR,
         NomadContext.workingDirectory(this.clusterConfig) + "/container-"
             + String.valueOf(containerIndex));
-    envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI, NomadContext.corePackageUri(this.localConfig));
+    envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI,
+        NomadContext.corePackageUri(this.localConfig));
     envVars.put(NomadConstants.HERON_TOPOLOGY_DOWNLOAD_CMD, topologyDownloadCmd);
     envVars.put(NomadConstants.HERON_EXECUTOR_CMD, executorCmd);
     task.setEnv(envVars);

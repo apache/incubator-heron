@@ -19,6 +19,8 @@ import re
 import sys
 import yaml
 
+# pylint: disable=dangerous-default-value
+
 def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/statemgr.yaml',
                                  overrides={}):
   """ Reads configs to determine which state manager to use and converts them to state manager
@@ -40,7 +42,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
 
   # merge with overrides
   if overrides:
-      config.update(overrides)
+    config.update(overrides)
 
   # need to convert from the format in statemgr.yaml to the format that the python state managers
   # takes. first, set reasonable defaults to local

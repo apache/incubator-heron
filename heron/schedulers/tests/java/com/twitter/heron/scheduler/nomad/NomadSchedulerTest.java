@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.hashicorp.nomad.apimodel.Job;
 import com.hashicorp.nomad.apimodel.Task;
 import com.hashicorp.nomad.apimodel.TaskGroup;
-import com.hashicorp.nomad.apimodel.Template;
 import com.hashicorp.nomad.javasdk.NomadApiClient;
 
 import org.junit.After;
@@ -34,8 +33,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -118,7 +115,8 @@ public class NomadSchedulerTest {
   public void testOnSchedule() throws Exception {
     PowerMockito.mockStatic(NomadScheduler.class);
 
-    Mockito.doReturn(new LinkedList<>()).when(scheduler).getJobs(Mockito.any(PackingPlan.class));
+    Mockito.doReturn(new LinkedList<>()).when(scheduler)
+        .getJobs(Mockito.any(PackingPlan.class));
 
     scheduler.initialize(this.mockConfig, this.mockRuntime);
 
@@ -169,14 +167,17 @@ public class NomadSchedulerTest {
     scheduler.initialize(this.mockConfig, this.mockRuntime);
 
     // Fail to restart
-    PowerMockito.when(NomadScheduler.getTopologyContainerJob(Mockito.any(NomadApiClient.class),
+    PowerMockito.when(NomadScheduler.getTopologyContainerJob(
+        Mockito.any(NomadApiClient.class),
         Mockito.anyString(), Mockito.anyInt())).thenReturn(new Job());
-    PowerMockito.doThrow(new RuntimeException()).when(NomadScheduler.class, "restartJobs",
+    PowerMockito.doThrow(new RuntimeException()).when(
+        NomadScheduler.class, "restartJobs",
         Mockito.any(NomadApiClient.class), Mockito.any(Job.class));
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
 
     // succeed to restart
-    PowerMockito.when(NomadScheduler.getTopologyContainerJob(Mockito.any(NomadApiClient.class),
+    PowerMockito.when(NomadScheduler.getTopologyContainerJob(
+        Mockito.any(NomadApiClient.class),
         Mockito.anyString(), Mockito.anyInt())).thenReturn(new Job());
     PowerMockito.doNothing().when(NomadScheduler.class, "restartJobs",
         Mockito.any(NomadApiClient.class), Mockito.any(Job.class));
@@ -214,7 +215,8 @@ public class NomadSchedulerTest {
     PowerMockito.mockStatic(NomadScheduler.class);
 
 
-    Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
+    Scheduler.KillTopologyRequest killTopologyRequest
+        = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(TOPOLOGY_NAME)
         .build();
 
@@ -254,16 +256,18 @@ public class NomadSchedulerTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
 
-    PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
-    Optional<PackingPlan.ContainerPlan> plan =  Optional.of(containerPlan);
+    PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
+        CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
+    Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
 
     scheduler.initialize(this.mockConfig, this.mockRuntime);
-    Mockito.doReturn(new TaskGroup()).when(scheduler).getTaskGroup(Mockito.anyString(), Mockito.anyInt(), Mockito.any());
+    Mockito.doReturn(new TaskGroup()).when(scheduler).getTaskGroup(
+        Mockito.anyString(), Mockito.anyInt(), Mockito.any());
 
     Job job = scheduler.getJob(CONTAINER_INDEX, plan);
     LOG.info("job: " + job);
 
-    Assert.assertEquals(TOPOLOGY_ID + "-" + CONTAINER_INDEX, job.getId() );
+    Assert.assertEquals(TOPOLOGY_ID + "-" + CONTAINER_INDEX, job.getId());
     Assert.assertEquals(TOPOLOGY_NAME + "-" + CONTAINER_INDEX, job.getName());
     Assert.assertArrayEquals(Arrays.asList(NomadConstants.NOMAD_DEFAULT_DATACENTER).toArray(),
         job.getDatacenters().toArray());
@@ -276,11 +280,13 @@ public class NomadSchedulerTest {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
 
-    PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
-    Optional<PackingPlan.ContainerPlan> plan =  Optional.of(containerPlan);
+    PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
+        CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
+    Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
 
     scheduler.initialize(this.mockConfig, this.mockRuntime);
-    Mockito.doReturn(new Task()).when(scheduler).getTask(Mockito.anyString(), Mockito.anyInt(), Mockito.any());
+    Mockito.doReturn(new Task()).when(scheduler).getTask(
+        Mockito.anyString(), Mockito.anyInt(), Mockito.any());
 
     TaskGroup taskGroup = scheduler.getTaskGroup(GROUP_NAME, CONTAINER_INDEX, plan);
     LOG.info("taskGroup: " + taskGroup);
@@ -300,13 +306,13 @@ public class NomadSchedulerTest {
 
     PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(CONTAINER_INDEX,
         new HashSet<>(), new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE));
-    Optional<PackingPlan.ContainerPlan> plan =  Optional.of(containerPlan);
+    Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
 
     PowerMockito.mockStatic(SchedulerUtils.class);
 
     PowerMockito.when(SchedulerUtils.executorCommandArgs(
-    Mockito.any(),  Mockito.any(), Mockito.anyMap(), Mockito.anyInt()))
-    .thenReturn(EXECUTOR_CMD_ARGS);
+        Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyInt()))
+        .thenReturn(EXECUTOR_CMD_ARGS);
 
     PowerMockito.mockStatic(NomadScheduler.class);
     PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any()))
@@ -336,8 +342,8 @@ public class NomadSchedulerTest {
     Assert.assertEquals(NomadConstants.NOMAD_HERON_SCRIPT_NAME,
         task.getTemplates().get(0).getDestPath());
 
-    Assert.assertEquals((int) CPU_RESOURCE * HERON_NOMAD_CORE_FREQ_MAPPING
-        , task.getResources().getCpu().intValue());
+    Assert.assertEquals((int) CPU_RESOURCE * HERON_NOMAD_CORE_FREQ_MAPPING,
+        task.getResources().getCpu().intValue());
     Assert.assertEquals((int) MEMORY_RESOURCE.asMegabytes(),
         task.getResources().getMemoryMb().intValue());
     Assert.assertEquals((int) DISK_RESOURCE.asMegabytes(),
@@ -348,7 +354,7 @@ public class NomadSchedulerTest {
     Assert.assertTrue(task.getEnv().containsKey(NomadConstants.HERON_EXECUTOR_CMD));
 
     Assert.assertEquals(NomadKey.WORKING_DIRECTORY.getDefaultString() + "/container-"
-        + String.valueOf(CONTAINER_INDEX),
+            + String.valueOf(CONTAINER_INDEX),
         task.getEnv().get(NomadConstants.HERON_NOMAD_WORKING_DIR));
     Assert.assertEquals(CORE_PACKAGE_URI,
         task.getEnv().get(NomadConstants.HERON_CORE_PACKAGE_URI));
