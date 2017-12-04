@@ -68,6 +68,11 @@ kubernetes_deps_files = [
     "//third_party/java:kubernetes-java-client",
 ]
 
+nomad_deps_files = [
+    "//heron/schedulers/src/java:nomad-scheduler-java",
+    "//heron/schedulers/src/java:scheduler-utils-java",
+]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
@@ -182,5 +187,19 @@ java_tests(
     "com.twitter.heron.scheduler.kubernetes.VolumesTests",
   ],
   runtime_deps = [ ":kubernetes-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "nomad-tests",
+  srcs = glob(["**/nomad/*.java"]),
+  deps = scheduler_deps_files + nomad_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.nomad.NomadSchedulerTest",
+  ],
+  runtime_deps = [ ":nomad-tests" ],
   size = "small",
 )

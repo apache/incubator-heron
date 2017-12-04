@@ -1,0 +1,21 @@
+# indicate the type of storage for checkpoint is local file system
+heron.statefulstorage.classname: "com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorage"
+
+heron.statefulstorage.config:
+  heron.statefulstorage.classpath: ""
+  heron.statefulstorage.localfs.root.path: "./checkpoints"
+
+# Following are configs for socket between ckptmgr and stateful storage
+heron.ckptmgr.network.write.batch.size.bytes: 32768
+
+heron.ckptmgr.network.write.batch.time.ms: 16
+
+heron.ckptmgr.network.read.batch.size.bytes: 32768
+
+heron.ckptmgr.network.read.batch.time.ms: 16
+
+heron.ckptmgr.network.options.socket.send.buffer.size.bytes: 655360
+
+heron.ckptmgr.network.options.socket.receive.buffer.size.bytes: 655360
+
+heron.ckptmgr.network.options.maximum.packetsize.bytes: 10485760

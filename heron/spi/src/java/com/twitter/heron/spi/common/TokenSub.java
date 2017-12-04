@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,7 +90,7 @@ public final class TokenSub {
             }
             list.set(i, value);
           } catch (IllegalArgumentException e) {
-            LOG.warning(String.format("Config value %s contains substitution token %s which is "
+            LOG.fine(String.format("Config value %s contains substitution token %s which is "
                     + "not defined in the Key enum, which is required for token substitution",
                 pathString, elem));
           }

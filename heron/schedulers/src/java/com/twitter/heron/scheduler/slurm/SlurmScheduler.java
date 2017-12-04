@@ -138,7 +138,7 @@ public class SlurmScheduler implements IScheduler {
     }
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime,
-        ports);
+        ports, 0);
 
     LOG.log(Level.FINE, "Executor command line: ", Arrays.toString(executorCmd));
     return executorCmd;

@@ -228,7 +228,7 @@ public class AppsV1beta1Controller extends KubernetesController {
     final Config runtimeConfiguration = getRuntimeConfiguration();
     final String[] executorCommand =
         SchedulerUtils.getExecutorCommand(configuration, runtimeConfiguration,
-            containerId, ports);
+            Integer.valueOf(containerId), ports);
     return Arrays.asList(
         "sh",
         "-c",
