@@ -77,10 +77,14 @@ public class NomadScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
+    if (packing == null || packing.getContainers().isEmpty()) {
+      LOG.severe("No container requested. Can't schedule");
+      return false;
+    }
 
     NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.clusterConfig));
-    List<Job> jobs = getJobs(packing);
     try {
+      List<Job> jobs = getJobs(packing);
       startJobs(apiClient, jobs.toArray(new Job[jobs.size()]));
     } catch (RuntimeException e) {
       LOG.log(Level.SEVERE, "Failed to deploy topology "
@@ -89,7 +93,6 @@ public class NomadScheduler implements IScheduler {
     } finally {
       closeClient(apiClient);
     }
-
     return true;
   }
 
@@ -269,12 +272,12 @@ public class NomadScheduler implements IScheduler {
 
     // set enviroment variables used int the heron nomad start up script
     Map<String, String> envVars = new HashMap<>();
-    envVars.put("HERON_NOMAD_WORKING_DIR",
+    envVars.put(NomadConstants.HERON_NOMAD_WORKING_DIR,
         NomadContext.workingDirectory(this.clusterConfig) + "/container-"
             + String.valueOf(containerIndex));
-    envVars.put("HERON_CORE_PACKAGE_URI", NomadContext.corePackageUri(this.localConfig));
-    envVars.put("HERON_TOPOLOGY_DOWNLOAD_CMD", topologyDownloadCmd);
-    envVars.put("HERON_EXECUTOR_CMD", executorCmd);
+    envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI, NomadContext.corePackageUri(this.localConfig));
+    envVars.put(NomadConstants.HERON_TOPOLOGY_DOWNLOAD_CMD, topologyDownloadCmd);
+    envVars.put(NomadConstants.HERON_EXECUTOR_CMD, executorCmd);
     task.setEnv(envVars);
 
     return task;

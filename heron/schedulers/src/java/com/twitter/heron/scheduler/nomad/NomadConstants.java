@@ -36,6 +36,11 @@ public final class NomadConstants {
   public static final String NOMAD_DEFAULT_DATACENTER = "dc1";
   public static final String SHELL_CMD = "/bin/sh";
   public static final String NOMAD_HERON_SCRIPT_NAME = "run_heron_executor.sh";
+
+  public static final String HERON_NOMAD_WORKING_DIR = "HERON_NOMAD_WORKING_DIR";
+  public static final String HERON_CORE_PACKAGE_URI = "HERON_CORE_PACKAGE_URI";
+  public static final String HERON_TOPOLOGY_DOWNLOAD_CMD = "HERON_TOPOLOGY_DOWNLOAD_CMD";
+  public static final String HERON_EXECUTOR_CMD = "HERON_EXECUTOR_CMD";
   //Ports
   public static final String MASTER_PORT = String.format("${NOMAD_PORT_%s}",
       SchedulerUtils.ExecutorPort.MASTER_PORT.getName());

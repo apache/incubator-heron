@@ -247,7 +247,7 @@ public class CuratorStateManager extends FileSystemStateManager {
       client.create().
           withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
           .forPath(path, data);
-      LOG.info("Created node for path: " + path + " with data: " +  new String(data));
+      LOG.info("Created node for path: " + path);
       safeSetFuture(result, true);
 
       // Suppress it since forPath() throws Exception
