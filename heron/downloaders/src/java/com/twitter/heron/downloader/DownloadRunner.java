@@ -34,7 +34,6 @@ public final class DownloadRunner {
     final Path topologyDestination = Paths.get(destination);
 
     final File file = topologyDestination.toFile();
-
     if (!file.exists()) {
       file.mkdirs();
     }

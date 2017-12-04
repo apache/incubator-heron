@@ -311,7 +311,7 @@ public class NomadSchedulerTest {
     PowerMockito.mockStatic(SchedulerUtils.class);
 
     PowerMockito.when(SchedulerUtils.executorCommandArgs(
-        Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyInt()))
+        Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyString()))
         .thenReturn(EXECUTOR_CMD_ARGS);
 
     PowerMockito.mockStatic(NomadScheduler.class);

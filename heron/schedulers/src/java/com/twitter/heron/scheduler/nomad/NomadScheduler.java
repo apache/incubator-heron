@@ -222,7 +222,8 @@ public class NomadScheduler implements IScheduler {
     String executorBinary = Context.executorBinary(this.clusterConfig);
     // get arguments for heron executor command
     String[] executorArgs = SchedulerUtils.executorCommandArgs(
-        this.clusterConfig, this.runtimeConfig, NomadConstants.EXECUTOR_PORTS, containerIndex);
+        this.clusterConfig, this.runtimeConfig, NomadConstants.EXECUTOR_PORTS,
+        String.valueOf(containerIndex));
     // get complete heron executor command
     String executorCmd = executorBinary + " " + String.join(" ", executorArgs);
     // get heron_downloader command for downloading topology package

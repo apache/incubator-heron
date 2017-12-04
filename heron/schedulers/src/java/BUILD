@@ -6,7 +6,7 @@ common_deps_files = [
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:utils-java",
     "@commons_io_commons_io//jar",
-    "@com_google_guava_guava//jar"
+    "@com_google_guava_guava//jar",
 ]
 
 spi_deps_files = [
@@ -69,7 +69,7 @@ nomad_sdk_deps = [
       ]
     
 nomad_deps_files = \
-    scheduler_deps_files + nomad_sdk_deps +[
+    scheduler_deps_files + nomad_sdk_deps + [
         ":scheduler-utils-java",
     ]
 
