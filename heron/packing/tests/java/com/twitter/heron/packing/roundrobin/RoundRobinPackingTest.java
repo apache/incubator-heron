@@ -375,7 +375,7 @@ public class RoundRobinPackingTest {
         if (SPOUT_NAME.equals(instancePlan.getComponentName())) {
           spoutCount++;
         } else if (BOLT_NAME.equals(instancePlan.getComponentName())) {
-          boltCount ++;
+          boltCount++;
         }
       }
     }
