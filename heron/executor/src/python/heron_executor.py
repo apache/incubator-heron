@@ -50,7 +50,9 @@ def print_usage():
       "Usage: ./heron-executor --shard=<shardid> --topology-name=<topname>"
       " --topology-id=<topid> --topology-defn-file=<topdefnfile>"
       " --state-manager-connection=<state_manager_connection>"
-      " --state-manager-root=<state_manager_root> --tmaster-binary=<tmaster_binary>"
+      " --state-manager-root=<state_manager_root>"
+      " --state-manager-config-file=<state_manager_config_file>"
+      " --tmaster-binary=<tmaster_binary>"
       " --stmgr-binary=<stmgr_binary> --metrics-manager-classpath=<metricsmgr_classpath>"
       " --instance-jvm-opts=<instance_jvm_opts_in_base64> --classpath=<classpath>"
       " --master-port=<master_port> --tmaster-controller-port=<tmaster_controller_port>"
@@ -173,6 +175,7 @@ class HeronExecutor(object):
     self.topology_defn_file = parsed_args.topology_defn_file
     self.state_manager_connection = parsed_args.state_manager_connection
     self.state_manager_root = parsed_args.state_manager_root
+    self.state_manager_config_file = parsed_args.state_manager_config_file
     self.tmaster_binary = parsed_args.tmaster_binary
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
@@ -277,6 +280,7 @@ class HeronExecutor(object):
     parser.add_argument("--topology-defn-file", required=True)
     parser.add_argument("--state-manager-connection", required=True)
     parser.add_argument("--state-manager-root", required=True)
+    parser.add_argument("--state-manager-config-file", required=True)
     parser.add_argument("--tmaster-binary", required=True)
     parser.add_argument("--stmgr-binary", required=True)
     parser.add_argument("--metrics-manager-classpath", required=True)
@@ -978,7 +982,9 @@ class HeronExecutor(object):
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
     statemgr_config = StateMgrConfig()
-    statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
+    statemgr_config.set_state_locations(configloader.load_state_manager_locations(
+        self.cluster, state_manager_config_file=self.state_manager_config_file,
+        overrides={"heron.statemgr.connection.string": self.state_manager_connection}))
     try:
       self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
       for state_manager in self.state_managers:
