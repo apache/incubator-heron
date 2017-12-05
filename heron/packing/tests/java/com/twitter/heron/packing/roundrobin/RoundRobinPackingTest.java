@@ -14,7 +14,9 @@
 
 package com.twitter.heron.packing.roundrobin;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -49,6 +51,16 @@ public class RoundRobinPackingTest {
     RoundRobinPacking packing = new RoundRobinPacking();
     packing.initialize(config, topology);
     return packing.pack();
+  }
+
+  private PackingPlan getRoundRobinRePackingPlan(
+      TopologyAPI.Topology topology, Map<String, Integer> componentChanges) {
+    Config config = PackingTestUtils.newTestConfig(topology);
+
+    RoundRobinPacking packing = new RoundRobinPacking();
+    packing.initialize(config, topology);
+    PackingPlan pp = packing.pack();
+    return packing.repack(pp, componentChanges);
   }
 
   @Test(expected = PackingException.class)
@@ -325,6 +337,50 @@ public class RoundRobinPackingTest {
       assertComponentCount(container, "spout", 2);
       assertComponentCount(container, "bolt", 2);
     }
+  }
+
+
+  /**
+   * test re-packing of instances
+   */
+  @Test
+  public void testRePacking() throws Exception {
+    int numContainers = 2;
+    int componentParallelism = 4;
+
+    // Set up the topology and its config
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    TopologyAPI.Topology topology =
+        getTopology(componentParallelism, componentParallelism, topologyConfig);
+
+    int numInstance = TopologyUtils.getTotalInstance(topology);
+    // Two components
+    Assert.assertEquals(2 * componentParallelism, numInstance);
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, componentParallelism - 1);
+    componentChanges.put(BOLT_NAME, componentParallelism + 1);
+    PackingPlan output = getRoundRobinRePackingPlan(topology, componentChanges);
+    Assert.assertEquals(numContainers, output.getContainers().size());
+    Assert.assertEquals((Integer) numInstance, output.getInstanceCount());
+
+    int spoutCount = 0;
+    int boltCount = 0;
+    for (PackingPlan.ContainerPlan container : output.getContainers()) {
+      Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
+
+      for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
+        if (SPOUT_NAME.equals(instancePlan.getComponentName())) {
+          spoutCount++;
+        } else if (BOLT_NAME.equals(instancePlan.getComponentName())) {
+          boltCount ++;
+        }
+      }
+    }
+    Assert.assertEquals(componentParallelism - 1, spoutCount);
+    Assert.assertEquals(componentParallelism + 1, boltCount);
   }
 
   private static void assertComponentCount(
