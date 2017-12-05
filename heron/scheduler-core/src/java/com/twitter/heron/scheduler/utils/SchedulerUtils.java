@@ -209,9 +209,8 @@ public final class SchedulerUtils {
       Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(createCommandArg(ExecutorFlag.Shard, shardId));
 
-    String[] commandArgs = executorCommandArgs(config, runtime, ports);
+    String[] commandArgs = executorCommandArgs(config, runtime, ports, shardId);
     commands.addAll(Arrays.asList(commandArgs));
 
     return commands.toArray(new String[0]);
@@ -228,7 +227,7 @@ public final class SchedulerUtils {
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, Map<ExecutorPort, String> ports) {
+      Config config, Config runtime, Map<ExecutorPort, String> ports, String containerIndex) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     String masterPort = ExecutorPort.getPort(
@@ -254,6 +253,7 @@ public final class SchedulerUtils {
     );
 
     List<String> commands = new ArrayList<>();
+    commands.add(createCommandArg(ExecutorFlag.Shard, containerIndex));
     commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
     commands.add(createCommandArg(ExecutorFlag.TopologyId, topology.getId()));
     commands.add(createCommandArg(ExecutorFlag.TopologyDefinitionFile,
@@ -262,6 +262,8 @@ public final class SchedulerUtils {
         Context.stateManagerConnectionString(config)));
     commands.add(createCommandArg(ExecutorFlag.StateManagerRoot,
         Context.stateManagerRootPath(config)));
+    commands.add(createCommandArg(ExecutorFlag.StateManagerConfigFile,
+        Context.stateManagerFile(config)));
     commands.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
     commands.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
     commands.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,

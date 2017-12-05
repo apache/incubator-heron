@@ -2,7 +2,7 @@
 aws_version = "1.11.58"
 curator_version = "2.9.0"
 google_client_version = "1.22.0"
-jackson_version = "2.6.6"
+jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
@@ -696,6 +696,37 @@ maven_jar(
 # end bookkeeper & distributedlog dependencies
 
 # end heron api server
+
+# Nomad dependencies
+maven_jar(
+  name = "com_hashicorp_nomad",
+  artifact = "com.hashicorp.nomad:nomad-sdk:0.7.0"
+)
+
+# Nomad transitive dependencies
+maven_jar(
+      name = "com_google_code_findbugs_jsr305",
+      artifact = "com.google.code.findbugs:jsr305:3.0.2",
+)
+
+maven_jar(
+      name = "org_bouncycastle_bcprov_jdk15on",
+      artifact = "org.bouncycastle:bcprov-jdk15on:1.56",
+)
+
+maven_jar(
+      name = "org_bouncycastle_bcpkix_jdk15on",
+      artifact = "org.bouncycastle:bcpkix-jdk15on:1.56",
+)
+
+maven_jar(
+      name = "commons_codec_commons_codec",
+      artifact = "commons-codec:commons-codec:1.9",
+      repository = "http://central.maven.org/maven2/",
+      sha1 = "9ce04e34240f674bc72680f8b843b1457383161a",
+  )
+
+# End Nomand dependencies
 
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/9f/fa/374a621ed7cad3cb9ae90f2c612f527d403de8acbb7e9ba14717526433e8/pex-1.2.11.tar.gz"

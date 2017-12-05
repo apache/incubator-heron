@@ -89,7 +89,7 @@ public final class TokenSub {
             }
             list.set(i, value);
           } catch (IllegalArgumentException e) {
-            LOG.warning(String.format("Config value %s contains substitution token %s which is "
+            LOG.fine(String.format("Config value %s contains substitution token %s which is "
                     + "not defined in the Key enum, which is required for token substitution",
                 pathString, elem));
           }
