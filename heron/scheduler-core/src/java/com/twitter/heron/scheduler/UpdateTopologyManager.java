@@ -148,6 +148,7 @@ public class UpdateTopologyManager implements Closeable {
     // deactivate and sleep
     if (initiallyRunning) {
       // Update the topology since the state should have changed from RUNNING to PAUSED
+      // Will throw exceptions internally if tmaster fails to deactivate
       deactivateTopology(stateManager, topology, proposedPackingPlan);
     }
 
@@ -167,6 +168,7 @@ public class UpdateTopologyManager implements Closeable {
       // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
       // and/or possibly even update the packing plan directly
       SysUtils.sleep(Duration.ofSeconds(10));
+      // Will throw exceptions internally if tmaster fails to deactivate
       reactivateTopology(stateManager, topology, removableContainerCount);
     }
 
