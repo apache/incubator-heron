@@ -245,8 +245,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   private Map<Integer, List<InstanceId>> getRoundRobinAllocation(
       int numContainer, Map<String, Integer> parallelismMap) {
     Map<Integer, List<InstanceId>> allocation = new HashMap<>();
-    int totalInstance =
-        parallelismMap.values().stream().collect(Collectors.summingInt(Integer::intValue));
+    int totalInstance = TopologyUtils.getTotalInstance(parallelismMap);
     if (numContainer > totalInstance) {
       throw new RuntimeException("More containers allocated than instance.");
     }
@@ -354,6 +353,11 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     }
   }
 
+  /*
+   * read the current packing plan with update parallelism to calculate a new packing plan
+   * the packing algorithm packInternal() is shared with pack()
+   * delegate to packInternal() with the new container count and component parallelism
+   */
   @Override
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges)
       throws PackingException {
