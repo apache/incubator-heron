@@ -373,7 +373,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       Integer count = e.getValue();
 
       if (componentChanges.containsKey(componentName)) {
-        count += componentChanges.get(componentName);
+        count = componentChanges.get(componentName);
       }
 
       newComponentParallelism.put(componentName, count);
