@@ -69,18 +69,18 @@ kubernetes_deps_files = [
 ]
 
 nomad_sdk_deps = [
-          "@com_hashicorp_nomad//jar",
-          "@com_fasterxml_jackson_core_jackson_annotations//jar",
-          "@com_fasterxml_jackson_core_jackson_core//jar",
-          "@com_fasterxml_jackson_core_jackson_databind//jar",
-          "@com_google_code_findbugs_jsr305//jar",
-          "@commons_codec_commons_codec//jar",
-          "@commons_logging_commons_logging//jar",
-          "@org_apache_httpcomponents_http_client//jar",
-          "@org_apache_httpcomponents_http_core//jar",
-          "@org_bouncycastle_bcpkix_jdk15on//jar",
-          "@org_bouncycastle_bcprov_jdk15on//jar",
-      ]
+    "@com_hashicorp_nomad//jar",
+    "@com_fasterxml_jackson_core_jackson_annotations//jar",
+    "@com_fasterxml_jackson_core_jackson_core//jar",
+    "@com_fasterxml_jackson_core_jackson_databind//jar",
+    "@com_google_code_findbugs_jsr305//jar",
+    "@commons_codec_commons_codec//jar",
+    "@commons_logging_commons_logging//jar",
+    "@org_apache_httpcomponents_http_client//jar",
+    "@org_apache_httpcomponents_http_core//jar",
+    "@org_bouncycastle_bcpkix_jdk15on//jar",
+    "@org_bouncycastle_bcprov_jdk15on//jar",
+]
     
 nomad_deps_files = \
     nomad_sdk_deps +[

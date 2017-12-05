@@ -103,12 +103,10 @@ public class NomadSchedulerTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-
   }
 
   @AfterClass
   public static void afterClass() throws Exception {
-
   }
 
   @Test
@@ -146,7 +144,7 @@ public class NomadSchedulerTest {
         "startJobs", Mockito.any(NomadApiClient.class), anyVararg());
     Assert.assertFalse(scheduler.onSchedule(validPlan));
 
-    // succeed
+    // Succeed
     Mockito.doReturn(jobList).when(scheduler).getJobs(validPlan);
     PowerMockito.doNothing().when(NomadScheduler.class, "startJobs",
         Mockito.any(NomadApiClient.class), anyVararg());
@@ -175,7 +173,7 @@ public class NomadSchedulerTest {
         Mockito.any(NomadApiClient.class), Mockito.any(Job.class));
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
 
-    // succeed to restart
+    // Succeed to restart
     PowerMockito.when(NomadScheduler.getTopologyContainerJob(
         Mockito.any(NomadApiClient.class),
         Mockito.anyString(), Mockito.anyInt())).thenReturn(new Job());
@@ -202,7 +200,7 @@ public class NomadSchedulerTest {
         "restartJobs", Mockito.any(), anyVararg());
     Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
 
-    // succeed to restart
+    // Succeed to restart
     PowerMockito.when(NomadScheduler.getTopologyJobs(Mockito.any(NomadApiClient.class),
         Mockito.anyString())).thenReturn(jobList);
     PowerMockito.doNothing().when(NomadScheduler.class, "restartJobs",
@@ -225,14 +223,14 @@ public class NomadSchedulerTest {
     Job[] jobs = {new Job(), new Job(), new Job()};
     List<Job> jobList = Arrays.asList(jobs);
 
-    // fail to kill
+    // Fail to kill
     PowerMockito.when(NomadScheduler.getTopologyJobs(Mockito.any(NomadApiClient.class),
         Mockito.anyString())).thenReturn(jobList);
     PowerMockito.doThrow(new RuntimeException()).when(NomadScheduler.class, "killJobs",
         Mockito.any(NomadApiClient.class), anyVararg());
     Assert.assertFalse(scheduler.onKill(killTopologyRequest));
 
-    // succeed to kill
+    // Succeed to kill
     PowerMockito.when(NomadScheduler.getTopologyJobs(Mockito.any(NomadApiClient.class),
         Mockito.anyString())).thenReturn(jobList);
     PowerMockito.doNothing().when(NomadScheduler.class, "killJobs",
