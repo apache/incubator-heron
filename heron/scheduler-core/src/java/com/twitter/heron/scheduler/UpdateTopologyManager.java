@@ -147,37 +147,26 @@ public class UpdateTopologyManager implements Closeable {
     TopologyAPI.Topology topology = getTopology(stateManager, topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
-    System.out.println("debug - getUpdatedTopology");
     // fetch the topology, which will need to be updated
     TopologyAPI.Topology updatedTopology =
         getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
 
-    System.out.println("debug - deactivateTopology");
     // deactivate and sleep
     if (initiallyRunning) {
       // Update the topology since the state should have changed from RUNNING to PAUSED
       updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
     }
 
-    System.out.println("debug - addContainers");
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
     if (newContainerCount > 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
     }
 
-    // update parallelism in updatedTopology since TMaster checks that
-    // Sum(parallelism) == Sum(instances)
-    // debug: check if topo defn update needed
-// logInfo("Update new Topology: %s",
-//stateManager.updateTopology(updatedTopology, topologyName));
-
-    System.out.println("debug - updatePackingPlan");
     // update packing plan to trigger the scaling event
     logInfo("Update new PackingPlan: %s",
         stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
 
-    System.out.println("debug - reactivateTopology");
     // reactivate topology
     if (initiallyRunning) {
       // wait before reactivating to give the tmaster a chance to receive the packing update and
@@ -187,7 +176,6 @@ public class UpdateTopologyManager implements Closeable {
       reactivateTopology(stateManager, updatedTopology, removableContainerCount);
     }
 
-    System.out.println("debug - removeContainers");
     if (removableContainerCount > 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().removeContainers(containerDelta.getContainersToRemove());
     }
