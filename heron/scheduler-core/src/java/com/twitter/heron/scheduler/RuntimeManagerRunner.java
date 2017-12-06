@@ -337,7 +337,11 @@ public class RuntimeManagerRunner {
           continue;
         }
         String[] kvp = componentValuePair.split(":", 2);
-        changes.put(kvp[0], Integer.parseInt(kvp[1]));
+        int val = Integer.parseInt(kvp[1]);
+        if (val <=0 ) {
+          throw new IllegalArgumentException("parallelism should be positive, Found: " + val);
+        }
+        changes.put(kvp[0], val);
       }
     } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException("Invalid parallelism parameter found. Expected: "
