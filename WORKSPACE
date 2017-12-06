@@ -284,9 +284,9 @@ maven_jar(
   artifact = "com.esotericsoftware:reflectasm:1.11.3",
 )
 
-maven_jar(
-  name = "org_objectweb_asm",
-  artifact = "org.ow2.asm:asm:5.0.4",
+maven_jar(		
+  name = "org_objectweb_asm",		
+  artifact = "org.ow2.asm:asm:5.0.4",		
 )
 
 maven_jar(
@@ -782,3 +782,28 @@ new_http_archive(
     ])
 )
 # end pex repos
+
+# for docker image building
+git_repository(
+    name = "io_bazel_rules_docker",
+    remote = "https://github.com/bazelbuild/rules_docker.git",
+    tag = "v0.3.0",
+)
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_pull",
+    container_repositories = "repositories",
+)
+
+# This is NOT needed when going through the language lang_image
+# "repositories" function(s).
+container_repositories()
+
+container_pull(
+    name = "heron-base",
+    registry = "index.docker.io",
+    repository = "heron/base",
+    tag = "latest",
+)
+# end docker image building
