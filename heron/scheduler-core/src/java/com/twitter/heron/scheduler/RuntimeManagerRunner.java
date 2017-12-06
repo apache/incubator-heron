@@ -338,7 +338,7 @@ public class RuntimeManagerRunner {
         }
         String[] kvp = componentValuePair.split(":", 2);
         int val = Integer.parseInt(kvp[1]);
-        if (val <=0 ) {
+        if (val <= 0) {
           throw new IllegalArgumentException("parallelism should be positive, Found: " + val);
         }
         changes.put(kvp[0], val);
