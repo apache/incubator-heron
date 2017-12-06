@@ -10,3 +10,8 @@ load(
     "@//tools/rules:java_tests.bzl",
     "java_tests",
 )
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+)
