@@ -365,23 +365,14 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     double initialNumInstancePerContainer = (double) initialNumInstance / initialNumContainer;
 
     Map<String, Integer> currentComponentParallelism = currentPackingPlan.getComponentCounts();
-    Map<String, Integer> newComponentParallelism = new HashMap<>();
-    int newNumInstance = 0;
 
-    for (Map.Entry<String, Integer> e : currentComponentParallelism.entrySet()) {
-      String componentName = e.getKey();
-      Integer count = e.getValue();
-
-      if (componentChanges.containsKey(componentName)) {
-        count = componentChanges.get(componentName);
-      }
-
-      newComponentParallelism.put(componentName, count);
-      newNumInstance += count;
+    for (Map.Entry<String, Integer> e : componentChanges.entrySet()) {
+      currentComponentParallelism.put(e.getKey(), e.getValue());
     }
 
+    int newNumInstance = TopologyUtils.getTotalInstance(currentComponentParallelism);
     int newNumContainer = (int) Math.ceil(newNumInstance / initialNumInstancePerContainer);
 
-    return packInternal(newNumContainer, newComponentParallelism);
+    return packInternal(newNumContainer, currentComponentParallelism);
   }
 }
