@@ -22,10 +22,14 @@ from heronpy.streamlet.impl.generatorspout import GeneratorStreamlet
 class Builder(object):
   """A Builder object is used to build the functional api dag in Heron.
   """
-  def __init__(self):
+  def __init__(self, source=None):
     """
     """
     self._sources = []
+
+    if source is not None:
+      self.new_source(source)
+      
 
   def new_source(self, source):
     """Adds a new source to the computation dag"""

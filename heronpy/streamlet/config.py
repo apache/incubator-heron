@@ -14,7 +14,9 @@
 '''config.py: module for defining config'''
 
 import heronpy.api.api_constants as api_constants
-from heronpy.streamlet.resources import Resources
+
+MB = 1024 * 1024
+GB = MB * 1024
 
 class Config(object):
   """Config is the way users configure the execution of the topology.
@@ -26,14 +28,36 @@ class Config(object):
   ATLEAST_ONCE = 2
   EFFECTIVELY_ONCE = 3
 
-  def __init__(self, config=None):
+  def __init__(
+      self,
+      num_containers=2,
+      container_ram=104857600,
+      container_ram_mb=100,
+      container_ram_gb=0.1,
+      container_cpu=1.0,
+      delivery_semantics=Config.ATMOST_ONCE,
+      user_config={}):
     if config is not None and not isinstance(config, dict):
       raise RuntimeError("Config has to be of type dict")
-    self._api_config = config
-    if self._api_config is None:
-      self._api_config = {}
+    self._api_config = {}
+    __set_num_containers(num_containers)
 
-  def set_delivery_semantics(self, semantics):
+    for param in [container_ram, container_ram_mb, container_ram_gb]:
+      if not isinstance(param, int):
+        raise RuntimeError('All per-container RAM values must be ints')
+
+    if container_ram is not None:
+      __set_container_ram(container_ram)
+    elif container_ram_mb is not None:
+      __set_container_ram(container_ram_mb * MB)
+    elif container_ram_gb is not None:
+      __set_container_ram(ccontainer_ram_gb * GB)
+
+    __set_container_cpu(container_cpu)
+    __set_delivery_semantics(delivery_semantics)
+    __set_user_config(user_config)
+
+  def __set_delivery_semantics(self, semantics):
     if semantics == Config.ATMOST_ONCE:
       self._api_config[api_constants.TOPOLOGY_RELIABILITY_MODE] =\
                api_constants.TopologyReliabilityMode.ATMOST_ONCE
@@ -46,14 +70,17 @@ class Config(object):
     else:
       raise RuntimeError("Unknown Topology delivery semantics %s" % str(semantics))
 
-  def set_num_containers(self, ncontainers):
+  def __set_num_containers(self, ncontainers):
     self._api_config[api_constants.TOPOLOGY_STMGRS] = int(ncontainers)
 
-  def set_container_resources(self, resources):
-    if not isinstance(resources, Resources):
-      raise RuntimeError("container resources have to be of type Resources")
-    self._api_config[api_constants.TOPOLOGY_CONTAINER_CPU_REQUESTED] = resources.get_cpu()
-    self._api_config[api_constants.TOPOLOGY_CONTAINER_RAM_REQUESTED] = resources.get_ram()
+  def __set_container_ram(self, ram):
+    self._api_config[api_constants.TOPOLOGY_CONTAINER_RAM_REQUESTED] = int(ram)
+  
+  def __set_container_cpu(self, cpu):
+    self._api_config[api_constants.TOPOLOGY_CONTAINER_CPU_REQUESTED] = cpu
 
-  def set_user_config(self, key, value):
-    self._api_config[key] = value
+  def __set_user_config(self, user_config):
+    if not isinstance(user_config_dict, dict):
+      raise RuntimeError('User-specified topology config must be a dict')
+    for k, v in user_config.iteritems():
+      self._api_config[k] = v

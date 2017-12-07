@@ -11,29 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''arraylooper.py: module for defining a simple Generator'''
+'''random_int.py: module for creating a simple random integer Generator'''
 
-import collections
-import itertools
+from random import randint
 import time
 
 from heronpy.streamlet.generator import Generator
 
-class ArrayLooper(Generator):
-  """An ArrayLooper loops the contents of the a user supplied array forever
+class RandomIntGenerator(Generator):
+  """A RandomIntGenerator generates an indefinite series of random numbers
+  within user-specified bounds
   """
-  def __init__(self, user_iterable, sleep=None):
-    super(ArrayLooper, self).__init__()
-    if not isinstance(user_iterable, collections.Iterable):
-      raise RuntimeError("ArrayLooper must be passed an iterable")
-    self._user_iterable = user_iterable
+
+  def __init__(self, min_int, max_int, sleep=None):
+    super(RandomIntGenerator, self).__init__()
+    self._min = min_int
+    self._max = max_int
     self._sleep = sleep
 
-  # pylint: disable=unused-argument, attribute-defined-outside-init
   def setup(self, context):
-    self._curiter = itertools.cycle(self._user_iterable)
-
+    pass
+  
   def get(self):
     if self._sleep is not None:
       time.sleep(self._sleep)
-    return next(self._curiter)
+    return randint(self._min_int, self._max_int)

@@ -16,3 +16,11 @@ pex_binary(
         "//heronpy/streamlet:heron-python-streamlet-py"
     ],
 )
+
+pex_binary(
+    name = "streamlet_filesystem_sink",
+    srcs = ["filesystem_sink_topology.py"],
+    deps = [
+        "//heronpy/streamlet:heron-python-streamlet-py"
+    ],
+)
