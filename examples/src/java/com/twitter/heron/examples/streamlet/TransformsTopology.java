@@ -94,7 +94,7 @@ public final class TransformsTopology {
    * at runtime
    */
   public static void main(String[] args) throws Exception {
-    Builder builder = Builder.createBuilder();
+    Builder builder = Builder.newBuilder();
 
     /**
      * The processing graph consists of a supplier streamlet that emits

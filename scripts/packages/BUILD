@@ -173,26 +173,26 @@ pkg_tar(
 ################################################################################
 pkg_tar(
     name = "heron-tools-bin",
-    package_dir = "bin",
+    package_dir = "heron-tools/bin",
     srcs = heron_tools_bin_files(),
 )
 
 pkg_tar(
     name = "heron-tools-lib",
-    package_dir = "lib",
+    package_dir = "heron-tools/lib",
     srcs = heron_tools_lib_files(),
 )
 
 pkg_tar(
     name = "heron-tools-conf",
-    package_dir = "conf",
+    package_dir = "heron-tools/conf",
     srcs = heron_tools_conf_files()
 )
 
 pkg_tar(
     name = "heron-tools-cluster-conf",
     strip_prefix = "/heron/config/src/yaml/conf",
-    package_dir = "conf",
+    package_dir = "heron-tools/conf",
     srcs = [
       "//heron/config/src/yaml:conf-yaml"
     ],

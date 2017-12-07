@@ -76,7 +76,6 @@ genrule(
         "include/google/protobuf/compiler/python/python_generator.h",
 
         "include/google/protobuf/io/coded_stream.h",
-        "include/google/protobuf/io/gzip_stream.h",
         "include/google/protobuf/io/printer.h",
         "include/google/protobuf/io/tokenizer.h",
         "include/google/protobuf/io/zero_copy_stream.h",

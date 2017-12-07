@@ -40,13 +40,7 @@ public class TransformStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    if (getName() == null) {
-      setName(defaultNameCalculator("transform", stageNames));
-    }
-    if (stageNames.contains(getName())) {
-      throw new RuntimeException("Duplicate Names");
-    }
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefixes.TRANSFORM.toString(), stageNames);
     bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

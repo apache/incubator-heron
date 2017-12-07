@@ -38,7 +38,8 @@ StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_
                                const sp_string& _topology_id, const sp_string& _stmgr_id,
                                StMgr* _stream_manager,
                                heron::common::MetricsMgrSt* _metrics_manager_client,
-                               sp_int64 _high_watermark, sp_int64 _low_watermark)
+                               sp_int64 _high_watermark, sp_int64 _low_watermark,
+                               bool _droptuples_upon_backpressure)
     : topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
@@ -46,7 +47,8 @@ StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_
       stream_manager_(_stream_manager),
       metrics_manager_client_(_metrics_manager_client),
       high_watermark_(_high_watermark),
-      low_watermark_(_low_watermark) {
+      low_watermark_(_low_watermark),
+      droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
   stmgr_clientmgr_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__clientmgr", stmgr_clientmgr_metrics_);
 }
@@ -120,7 +122,8 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
   StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
-                                        stmgr_id_, _other_stmgr_id, this, metrics_manager_client_);
+                                        stmgr_id_, _other_stmgr_id, this, metrics_manager_client_,
+                                        droptuples_upon_backpressure_);
   client->Start();
   return client;
 }

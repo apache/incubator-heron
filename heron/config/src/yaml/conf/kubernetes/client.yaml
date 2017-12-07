@@ -1,6 +1,3 @@
-# location of the core package
-heron.package.core.uri:        "file:///vagrant/.herondata/dist/heron-core-release.tar.gz"
-
-# Whether role/env is required to submit a topology. The default value is False.
-heron.config.is.role.required: False
-heron.config.is.env.required:  False
+# Whether role/env is required to submit a topology. Default value is False.
+heron.config.is.role.required:               False
+heron.config.is.env.required:                False

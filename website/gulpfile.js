@@ -33,8 +33,20 @@ gulp.task('js', function(done) {
   done();
 });
 
+gulp.task('js-dev', function(done) {
+  del(['static/js/app*.js']);
+
+  gulp.src(SRC.js)
+    .pipe(hash())
+    .pipe($.uglify().on('error', function(err) { console.log(err); }))
+    .pipe(gulp.dest(DIST.js))
+    .pipe(hash.manifest('hash.json'))
+    .pipe(gulp.dest('data/assets/js'));
+  done();
+});
+
 gulp.task('js:watch', function() {
-  gulp.watch(SRC.js, gulp.series('js'));
+  gulp.watch(SRC.js, gulp.series('js-dev'));
 });
 
 // Sass assets (dev mode)
@@ -83,7 +95,7 @@ gulp.task('sass:watch', function() {
 gulp.task('build', gulp.series('js', 'sass'));
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
+gulp.task('dev', gulp.series('js-dev', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
 
 // Help => list tasks
 gulp.task('help', function(done) {

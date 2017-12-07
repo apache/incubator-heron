@@ -45,6 +45,8 @@ sections:
         url: /docs/concepts/design-goals
       - name: Heron Topologies
         url: /docs/concepts/topologies
+      - name: Heron Streamlet API
+        url: /docs/concepts/streamlet-api
       - name: Heron Architecture
         url: /docs/concepts/architecture
       - name: Heron Delivery Semantics

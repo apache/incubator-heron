@@ -51,6 +51,26 @@ kubernetes_deps_files = \
     scheduler_deps_files + [
         ":scheduler-utils-java",
         "//third_party/java:jackson",
+        "//third_party/java:kubernetes-java-client",
+    ]
+    
+nomad_sdk_deps = [
+          "@com_hashicorp_nomad//jar",
+          "@com_fasterxml_jackson_core_jackson_annotations//jar",
+          "@com_fasterxml_jackson_core_jackson_core//jar",
+          "@com_fasterxml_jackson_core_jackson_databind//jar",
+          "@com_google_code_findbugs_jsr305//jar",
+          "@commons_codec_commons_codec//jar",
+          "@commons_logging_commons_logging//jar",
+          "@org_apache_httpcomponents_http_client//jar",
+          "@org_apache_httpcomponents_http_core//jar",
+          "@org_bouncycastle_bcpkix_jdk15on//jar",
+          "@org_bouncycastle_bcprov_jdk15on//jar",
+      ]
+    
+nomad_deps_files = \
+    scheduler_deps_files + nomad_sdk_deps + [
+        ":scheduler-utils-java",
     ]
 
 java_library(
@@ -212,6 +232,25 @@ genrule(
     srcs = [":kubernetes-scheduler-unshaded_deploy.jar"],
     outs = ["heron-kubernetes-scheduler.jar"],
     cmd  = "cp $< $@",
+)
+
+java_library(
+    name='nomad-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/nomad/**/*.java"]),
+    deps = nomad_deps_files,
+)
+
+java_binary(
+    name='nomad-scheduler-unshaded',
+    srcs = glob(["com/twitter/heron/scheduler/nomad/**/*.java"]),
+    deps = nomad_deps_files,
+)
+
+genrule(
+    name = "heron-nomad-scheduler",
+    srcs = [":nomad-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-nomad-scheduler.jar"],
+    cmd  = "cp $< $@"
 )
 
 java_library(

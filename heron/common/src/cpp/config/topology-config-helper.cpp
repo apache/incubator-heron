@@ -394,6 +394,11 @@ void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _t
   }
 }
 
+bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology& _topology) {
+  return GetBooleanConfigValue(_topology,
+                               TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, false);
+}
+
 bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
                                                  const std::string& _config_name,
                                                  bool _default_value) {

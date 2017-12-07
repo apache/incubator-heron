@@ -228,6 +228,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--topology-defn-file", "topdefnfile"),
       ("--state-manager-connection", "zknode"),
       ("--state-manager-root", "zkroot"),
+      ("--state-manager-config-file", "state_manager_config_file"),
       ("--tmaster-binary", "tmaster_binary"),
       ("--stmgr-binary", "stmgr_binary"),
       ("--metrics-manager-classpath", "metricsmgr_classpath"),

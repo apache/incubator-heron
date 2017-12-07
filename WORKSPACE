@@ -2,7 +2,7 @@
 aws_version = "1.11.58"
 curator_version = "2.9.0"
 google_client_version = "1.22.0"
-jackson_version = "2.6.6"
+jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
@@ -284,9 +284,9 @@ maven_jar(
   artifact = "com.esotericsoftware:reflectasm:1.11.3",
 )
 
-maven_jar(
-  name = "org_objectweb_asm",
-  artifact = "org.ow2.asm:asm:5.0.4",
+maven_jar(		
+  name = "org_objectweb_asm",		
+  artifact = "org.ow2.asm:asm:5.0.4",		
 )
 
 maven_jar(
@@ -489,6 +489,54 @@ maven_jar(
 )
 # end Pulsar Client
 
+# Kubernetes java client
+kubernetes_client_version = "1.0.0-beta1"
+squareup_okhttp_version = "2.7.5"
+
+maven_jar(
+  name = "kubernetes_java_client",
+  artifact = "io.kubernetes:client-java:" + kubernetes_client_version
+)
+
+maven_jar(
+  name = "kubernetes_java_client_api",
+  artifact = "io.kubernetes:client-java-api:" + kubernetes_client_version
+)
+
+maven_jar(
+  name = "swagger_annotations",
+  artifact = "io.swagger:swagger-annotations:1.5.12"
+)
+
+maven_jar(
+  name = "squareup_okhttp",
+  artifact = "com.squareup.okhttp:okhttp:" + squareup_okhttp_version
+)
+maven_jar(
+  name = "squareup_okio",
+  artifact = "com.squareup.okio:okio:1.6.0"
+)
+maven_jar(
+  name = "squareup_okhttp_logging_interceptor",
+  artifact = "com.squareup.okhttp:logging-interceptor:" + squareup_okhttp_version
+)
+
+maven_jar(
+  name = "squareup_okhttp_ws",
+  artifact = "com.squareup.okhttp:okhttp-ws:" + squareup_okhttp_version
+)
+
+maven_jar(
+  name = "google_gson",
+  artifact = "com.google.code.gson:gson:2.6.2"
+)
+
+maven_jar(
+  name = "kubernetes_java_client_proto",
+  artifact = "io.kubernetes:client-java-proto:" + kubernetes_client_version
+)
+
+# end Kubernetes java client
 
 # heron api server
 # jetty
@@ -649,6 +697,37 @@ maven_jar(
 
 # end heron api server
 
+# Nomad dependencies
+maven_jar(
+  name = "com_hashicorp_nomad",
+  artifact = "com.hashicorp.nomad:nomad-sdk:0.7.0"
+)
+
+# Nomad transitive dependencies
+maven_jar(
+      name = "com_google_code_findbugs_jsr305",
+      artifact = "com.google.code.findbugs:jsr305:3.0.2",
+)
+
+maven_jar(
+      name = "org_bouncycastle_bcprov_jdk15on",
+      artifact = "org.bouncycastle:bcprov-jdk15on:1.56",
+)
+
+maven_jar(
+      name = "org_bouncycastle_bcpkix_jdk15on",
+      artifact = "org.bouncycastle:bcpkix-jdk15on:1.56",
+)
+
+maven_jar(
+      name = "commons_codec_commons_codec",
+      artifact = "commons-codec:commons-codec:1.9",
+      repository = "http://central.maven.org/maven2/",
+      sha1 = "9ce04e34240f674bc72680f8b843b1457383161a",
+  )
+
+# End Nomand dependencies
+
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/9f/fa/374a621ed7cad3cb9ae90f2c612f527d403de8acbb7e9ba14717526433e8/pex-1.2.11.tar.gz"
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
@@ -703,3 +782,28 @@ new_http_archive(
     ])
 )
 # end pex repos
+
+# for docker image building
+git_repository(
+    name = "io_bazel_rules_docker",
+    remote = "https://github.com/bazelbuild/rules_docker.git",
+    tag = "v0.3.0",
+)
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_pull",
+    container_repositories = "repositories",
+)
+
+# This is NOT needed when going through the language lang_image
+# "repositories" function(s).
+container_repositories()
+
+container_pull(
+    name = "heron-base",
+    registry = "index.docker.io",
+    repository = "heron/base",
+    tag = "latest",
+)
+# end docker image building
