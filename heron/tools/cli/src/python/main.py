@@ -310,7 +310,7 @@ def execute(handlers, local_commands):
   check_environment()
 
   # create the argument parser
-  parser = create_parser(command_handlers)
+  parser = create_parser(handlers)
 
   # if no argument is provided, print help and exit
   if len(sys.argv[1:]) == 0:
