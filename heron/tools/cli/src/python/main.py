@@ -298,17 +298,9 @@ def extract_common_args(command, parser, cl_args):
   cl_args.update(new_cl_args)
   return cl_args
 
-################################################################################
-def command_needs_cluster_arg(command):
-  '''
-  True if the command needs a cluster arg
-  :return:
-  '''
-  return command not in ('help', 'version', 'config')
-
 
 ################################################################################
-def execute(command_handlers):
+def execute(command_handlers, local_commands):
   '''
   Run the command
   :return:
@@ -340,12 +332,13 @@ def execute(command_handlers):
   # command to be execute
   handlers = dict(command_handlers)
   command = command_line_args['subcommand']
+  is_local_command = command in local_commands
 
   if command == 'version':
     results = run(handlers, command, parser, command_line_args, unknown_args)
     return 0 if result.is_successful(results) else 1
 
-  if command_needs_cluster_arg(command):
+  if not is_local_command:
     log.set_logging_level(command_line_args)
     Log.debug("Input Command Line Args: %s", command_line_args)
 
@@ -367,11 +360,11 @@ def execute(command_handlers):
 
   start = time.time()
   results = run(handlers, command, parser, command_line_args, unknown_args)
-  if command_needs_cluster_arg(command):
+  if not is_local_command:
     result.render(results)
   end = time.time()
 
-  if command_needs_cluster_arg(command):
+  if not is_local_command:
     sys.stdout.flush()
     Log.debug('Elapsed time: %.3fs.', (end - start))
 
@@ -381,7 +374,8 @@ def main():
   # Create a list of supported commands
   command_handlers = get_command_handlers()
   # Execute
-  return execute(command_handlers)
+  local_commands = ('help', 'version', 'config')
+  return execute(command_handlers, local_commands)
 
 
 if __name__ == "__main__":
