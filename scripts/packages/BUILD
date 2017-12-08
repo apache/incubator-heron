@@ -75,7 +75,7 @@ filegroup(
 )
 
 ################################################################################
-# Heron core packaging
+# Heron core packaging - used for docker images
 ################################################################################
 pkg_tar(
     name = "heron-core",
@@ -163,6 +163,47 @@ pkg_tar(
 )
 
 ################################################################################
+# Heron tools packaging - used for docker images
+################################################################################
+pkg_tar(
+    name = "heron-tools-bin",
+    package_dir = "heron-tools/bin",
+    srcs = heron_tools_bin_files(),
+)
+
+pkg_tar(
+    name = "heron-tools-lib",
+    package_dir = "heron-tools/lib/api",
+    srcs = heron_tools_lib_files(),
+)
+
+pkg_tar(
+    name = "heron-tools-conf",
+    package_dir = "heron-tools/conf",
+    srcs = heron_tools_conf_files()
+)
+
+pkg_tar(
+    name = "heron-tools-cluster-conf",
+    strip_prefix = "/heron/config/src/yaml/conf",
+    package_dir = "heron-tools/conf",
+    srcs = [
+      "//heron/config/src/yaml:conf-yaml"
+    ],
+)
+
+pkg_tar(
+    name = "heron-tools",
+    extension = "tar.gz",
+    deps = [
+        ":heron-tools-bin",
+        ":heron-tools-lib",
+        ":heron-tools-conf",
+        ":heron-tools-cluster-conf",
+    ],
+)
+
+################################################################################
 # Heron packaging
 ################################################################################
 pkg_tar(
@@ -237,7 +278,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-conf-tracker",
     strip_prefix = "/heron/tools/config/src/yaml/tracker",
-    package_dir = "conf/tracker",
+    package_dir = "conf",
     srcs = heron_tools_conf_files(),
 )
 
