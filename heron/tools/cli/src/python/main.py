@@ -37,6 +37,7 @@ import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
 import heron.tools.cli.src.python.config as hconfig
+import heron.tools.cli.src.python.standalone as standalone
 
 from heron.tools.cli.src.python.opts import cleaned_up_files
 
@@ -82,7 +83,8 @@ def get_command_handlers():
       'restart': restart,
       'submit': submit,
       'update': update,
-      'version': version
+      'version': version,
+      'standalone': standalone
   }
 
 ################################################################################
@@ -299,7 +301,6 @@ def extract_common_args(command, parser, cl_args):
   cl_args.update(new_cl_args)
   return cl_args
 
-
 ################################################################################
 def execute(handlers, local_commands):
   '''
@@ -330,7 +331,11 @@ def execute(handlers, local_commands):
 
   command_line_args = vars(args)
 
-  # command to be execute
+  # set log level
+  log.set_logging_level(command_line_args)
+  Log.debug("Input Command Line Args: %s", command_line_args)
+
+# command to be execute
   command = command_line_args['subcommand']
   is_local_command = command in local_commands
 

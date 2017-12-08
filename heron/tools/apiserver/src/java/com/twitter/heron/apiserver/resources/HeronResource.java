@@ -16,6 +16,9 @@ package com.twitter.heron.apiserver.resources;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.heron.spi.common.Config;
 
 public class HeronResource {
@@ -24,6 +27,7 @@ public class HeronResource {
   public static final String ATTRIBUTE_CONFIGURATION = "configuration";
   public static final String ATTRIBUTE_CONFIGURATION_DIRECTORY = "configuration_directory";
   public static final String ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH = "configuration_override";
+  public static final String ATTRIBUTE_PORT = "port";
 
   @Context
   protected ServletContext servletContext;
@@ -32,6 +36,7 @@ public class HeronResource {
   private String configurationDirectory;
   private String configurationOverridePath;
   private String cluster;
+  private String port;
 
   Config getBaseConfiguration() {
     if (baseConfiguration == null) {
@@ -63,5 +68,13 @@ public class HeronResource {
     }
 
     return cluster;
+  }
+
+  String getPort() {
+    if (port == null) {
+      port = (String) servletContext.getAttribute(ATTRIBUTE_PORT);
+    }
+
+    return port;
   }
 }
