@@ -20,7 +20,7 @@ set -e
 # building tar packages
 DIR=`dirname $0`
 source ${DIR}/detect_os_type.sh
-bazel run --config=`platform` -- scripts/packages:heron-client-install.sh --user
+bazel run --config=`platform` -- scripts/packages:heron-install.sh --user
 bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration_test/src/...}
 
 # run the simple http server

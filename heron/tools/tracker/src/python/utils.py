@@ -25,6 +25,7 @@ import yaml
 # directories for heron tools distribution
 BIN_DIR = "bin"
 CONF_DIR = "conf"
+CONF_TRACKER_DIR = "tracker"
 LIB_DIR = "lib"
 
 def hex_escape(bin_str):
@@ -148,7 +149,7 @@ def get_heron_tracker_conf_dir():
   This will provide heron tracker conf directory from .pex file.
   :return: absolute path of heron conf directory
   """
-  conf_path = os.path.join(get_heron_tracker_dir(), CONF_DIR)
+  conf_path = os.path.join(get_heron_tracker_dir(), CONF_DIR, CONF_TRACKER_DIR)
   return conf_path
 
 def parse_config_file(config_file):

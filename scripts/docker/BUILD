@@ -4,8 +4,7 @@ container_image(
     name = "heron",
     base = "@heron-base//image",
     tars = [
-        "//scripts/packages:heron-core",
-        "//scripts/packages:heron-tools",
+        "//scripts/packages:heron",
     ],
     directory = "/heron",
     workdir = "/heron",

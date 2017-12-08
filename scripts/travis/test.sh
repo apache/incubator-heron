@@ -22,16 +22,10 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM integration_test/src/...
 end_timer "$T"
 
-# install client
-T="heron client install"
+# install heron 
+T="heron install"
 start_timer "$T"
-python ${UTILS}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-client-install.sh --user
-end_timer "$T"
-
-# install tools
-T="heron tools install"
-start_timer "$T"
-python ${UTILS}/save-logs.py "heron_tools_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-tools-install.sh --user
+python ${UTILS}/save-logs.py "heron_install.txt" bazel --bazelrc=tools/travis/bazel.rc run --config=$PLATFORM -- scripts/packages:heron-install.sh --user
 end_timer "$T"
 
 # install tests
