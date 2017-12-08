@@ -71,19 +71,19 @@ class _HelpAction(argparse._HelpAction):
 ################################################################################
 def get_command_handlers():
   '''
-  Create a list of command names and handlers
+  Create a map of command names and handlers
   '''
-  return [
-      ('submit', submit),
-      ('update', update),
-      ('config', hconfig),
-      ('activate', activate),
-      ('deactivate', deactivate),
-      ('kill', kill),
-      ('restart', restart),
-      ('help', cli_help),
-      ('version', version)
-  ]
+  return {
+      'activate': activate,
+      'config': hconfig,
+      'deactivate': deactivate,
+      'help': cli_help,
+      'kill': kill,
+      'restart': restart,
+      'submit': submit,
+      'update': update,
+      'version': version
+  }
 
 ################################################################################
 def create_parser(command_handlers):
@@ -101,7 +101,8 @@ def create_parser(command_handlers):
       title="Available commands",
       metavar='<command> <options>')
 
-  for command in command_handlers:
+  command_list = sorted(command_handlers.items())
+  for command in command_list:
     command[1].create_parser(subparsers)
 
   return parser
@@ -300,7 +301,7 @@ def extract_common_args(command, parser, cl_args):
 
 
 ################################################################################
-def execute(command_handlers, local_commands):
+def execute(handlers, local_commands):
   '''
   Run the command
   :return:
@@ -330,7 +331,6 @@ def execute(command_handlers, local_commands):
   command_line_args = vars(args)
 
   # command to be execute
-  handlers = dict(command_handlers)
   command = command_line_args['subcommand']
   is_local_command = command in local_commands
 
@@ -371,7 +371,7 @@ def execute(command_handlers, local_commands):
   return 0 if result.is_successful(results) else 1
 
 def main():
-  # Create a list of supported commands
+  # Create a map of supported commands and handlers
   command_handlers = get_command_handlers()
   # Execute
   local_commands = ('help', 'version', 'config')
