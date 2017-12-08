@@ -76,8 +76,16 @@ if [ -L "${bin}/heron-explorer" ]; then
   rm -f "${bin}/heron-explorer"
 fi
 
-if [ -L "${bin}/heron-cli3" ]; then
-  rm -f "${bin}/heron-cli3"
+if [ -L "${bin}/heron-tracker" ]; then
+  rm -f "${bin}/heron-tracker"
+fi
+
+if [ -L "${bin}/heron-ui" ]; then
+  rm -f "${bin}/heron-ui"
+fi
+
+if [ -L "${bin}/heron-apiserver" ]; then
+  rm -f "${bin}/heron-apiserver"
 fi
 
 if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
@@ -88,9 +96,13 @@ mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-untar ${base}/heron-client.tar.gz ${base}
+untar ${base}/heron.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron
+chmod 0755 ${base}/bin/heron-explorer
+chmod 0755 ${base}/bin/heron-tracker
+chmod 0755 ${base}/bin/heron-ui
+chmod 0755 ${base}/bin/heron-apiserver
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
@@ -98,11 +110,13 @@ chmod -R u+rwX "${base}"
 echo -n .
 
 ln -s "${base}/bin/heron" "${bin}/heron"
-ln -s "${base}/bin/heron" "${bin}/heron-cli3"
 ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
+ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
+ln -s "${base}/bin/heron-ui" "${bin}/heron-ui"
+ln -s "${base}/bin/heron-apiserver" "${bin}/heron-apiserver"
 echo -n .
 
-rm "${base}/heron-client.tar.gz"
+rm "${base}/heron.tar.gz"
 
 cat <<EOF
 

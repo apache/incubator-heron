@@ -2,8 +2,6 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar", "pkg_deb")
 
-load("/tools/rules/heron_api", "heron_api_files")
-
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
 load("/tools/rules/heron_client", "heron_client_lib_third_party_files")
@@ -50,19 +48,15 @@ filegroup(
 filegroup(
     name = "tarpkgs",
     srcs = [
-        ":heron-api",
         ":heron-core",
-        ":heron-tools",
-        ":heron-client",
+        ":heron",
     ],
 )
 
 filegroup(
     name = "binpkgs",
     srcs = [
-        ":heron-api-install.sh",
-        ":heron-client-install.sh",
-        ":heron-tools-install.sh",
+        ":heron-install.sh",
     ],
 )
 
@@ -81,7 +75,7 @@ filegroup(
 )
 
 ################################################################################
-# Heron core packaging
+# Heron core packaging - used for docker images
 ################################################################################
 pkg_tar(
     name = "heron-core",
@@ -169,7 +163,7 @@ pkg_tar(
 )
 
 ################################################################################
-# Heron tools packaging
+# Heron tools packaging - used for docker images
 ################################################################################
 pkg_tar(
     name = "heron-tools-bin",
@@ -179,7 +173,7 @@ pkg_tar(
 
 pkg_tar(
     name = "heron-tools-lib",
-    package_dir = "heron-tools/lib",
+    package_dir = "heron-tools/lib/api",
     srcs = heron_tools_lib_files(),
 )
 
@@ -201,7 +195,6 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
-    srcs = generated_release_files,
     deps = [
         ":heron-tools-bin",
         ":heron-tools-lib",
@@ -211,92 +204,107 @@ pkg_tar(
 )
 
 ################################################################################
-# Heron client packaging
+# Heron packaging
 ################################################################################
 pkg_tar(
-    name = "heron-client-bin",
+    name = "heron-bin",
     package_dir = "bin",
-    srcs = heron_client_bin_files(),
+    srcs = heron_client_bin_files() + heron_tools_bin_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-scheduler",
+    name = "heron-lib-scheduler",
     package_dir = "lib/scheduler",
     srcs = heron_client_lib_scheduler_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-metricscachemgr",
+    name = "heron-lib-metricscachemgr",
     package_dir = "lib/metricscachemgr",
     srcs = heron_client_lib_metricscachemgr_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-packing",
+    name = "heron-lib-packing",
     package_dir = "lib/packing",
     srcs = heron_client_lib_packing_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-statemgr",
+    name = "heron-lib-statemgr",
     package_dir = "lib/statemgr",
     srcs = heron_client_lib_statemgr_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-uploader",
+    name = "heron-lib-uploader",
     package_dir = "lib/uploader",
     srcs = heron_client_lib_uploader_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-healthmgr",
+    name = "heron-lib-healthmgr",
     package_dir = "lib/healthmgr",
     srcs = heron_client_lib_healthmgr_files(),
 )
 
 pkg_tar(
-    name = "heron-client-lib-third_party",
+    name = "heron-lib-third_party",
     package_dir = "lib/third_party",
     srcs = heron_client_lib_third_party_files(),
 )
 
 pkg_tar(
-    name = "heron-client-examples",
+    name = "heron-lib-api",
+    package_dir = "lib/api",
+    srcs = heron_tools_lib_files(),
+)
+
+pkg_tar(
+    name = "heron-examples",
     package_dir = "examples",
     srcs = heron_examples_files(),
 )
 
 pkg_tar(
-    name = "heron-client-conf",
+    name = "heron-conf",
     strip_prefix = "/heron/config/src/yaml/conf",
     package_dir = "conf",
     srcs = [
         "//heron/config/src/yaml:conf-yaml",
-    ]
+    ],
 )
 
 pkg_tar(
-    name = "heron-client-dist",
+    name = "heron-conf-tracker",
+    strip_prefix = "/heron/tools/config/src/yaml/tracker",
+    package_dir = "conf",
+    srcs = heron_tools_conf_files(),
+)
+
+pkg_tar(
+    name = "heron-dist",
     package_dir = "dist",
     srcs = [":heron-core"],
 )
 
 pkg_tar(
-    name = "heron-client",
+    name = "heron",
     extension = "tar.gz",
     srcs = generated_release_files,
     deps = [
-        ":heron-client-bin",
-        ":heron-client-conf",
-        ":heron-client-dist",
-        ":heron-client-examples",
-        ":heron-client-lib-third_party",
-        ":heron-client-lib-scheduler",
-        ":heron-client-lib-packing",
-        ":heron-client-lib-statemgr",
-        ":heron-client-lib-metricscachemgr",
-        ":heron-client-lib-uploader",
+        ":heron-bin",
+        ":heron-conf",
+        ":heron-conf-tracker",
+        ":heron-dist",
+        ":heron-examples",
+        ":heron-lib-api",
+        ":heron-lib-third_party",
+        ":heron-lib-scheduler",
+        ":heron-lib-packing",
+        ":heron-lib-statemgr",
+        ":heron-lib-metricscachemgr",
+        ":heron-lib-uploader",
     ],
 )
 
@@ -349,15 +357,6 @@ pkg_tar(
         ":heron-tests-data-python",
         ":heron-tests-lib",
     ],
-)
-
-################################################################################
-# Heron API packaging
-################################################################################
-pkg_tar(
-    name = "heron-api",
-    extension = "tar.gz",
-    srcs = generated_release_files + heron_api_files(),
 )
 
 ################################################################################
@@ -459,37 +458,13 @@ genrule(
 )
 
 genrule(
-    name = "generate-client-launcher",
-    srcs = ["client_template_bin.sh", "bin_common.sh"] + generated_release_files,
-    outs = ["client_launcher_bin.sh"],
+    name = "generate-launcher",
+    srcs = ["template_bin.sh", "bin_common.sh"] + generated_release_files,
+    outs = ["launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
         bin_common="$$(cat $(location bin_common.sh))"
-        template="$$(cat $(location client_template_bin.sh))"
-        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
-        """,
-)
-
-genrule(
-    name = "generate-tools-launcher",
-    srcs = ["tools_template_bin.sh", "bin_common.sh"] + generated_release_files,
-    outs = ["tools_launcher_bin.sh"],
-    cmd = """
-        release_info="$$(cat $(location :release.yaml))"
-        bin_common="$$(cat $(location bin_common.sh))"
-        template="$$(cat $(location tools_template_bin.sh))"
-        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
-        """,
-)
-
-genrule(
-    name = "generate-api-launcher",
-    srcs = ["api_template_bin.sh", "bin_common.sh"] + generated_release_files,
-    outs = ["api_launcher_bin.sh"],
-    cmd = """
-        release_info="$$(cat $(location :release.yaml))"
-        bin_common="$$(cat $(location bin_common.sh))"
-        template="$$(cat $(location api_template_bin.sh))"
+        template="$$(cat $(location template_bin.sh))"
         echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
@@ -509,27 +484,11 @@ genrule(
 load("self_extract_binary", "self_extract_binary")
 
 self_extract_binary(
-    name = "heron-api-install.sh",
+    name = "heron-install.sh",
     flatten_resources = [
-        ":heron-api",
+        ":heron",
     ],
-    launcher = ":api_launcher_bin.sh",
-)
-
-self_extract_binary(
-    name = "heron-client-install.sh",
-    flatten_resources = [
-        ":heron-client",
-    ],
-    launcher = ":client_launcher_bin.sh",
-)
-
-self_extract_binary(
-    name = "heron-tools-install.sh",
-    flatten_resources = [
-        ":heron-tools",
-    ],
-    launcher = ":tools_launcher_bin.sh",
+    launcher = ":launcher_bin.sh",
 )
 
 self_extract_binary(
@@ -541,18 +500,8 @@ self_extract_binary(
 )
 
 filegroup(
-    name = "api-template-bin.sh",
-    srcs = ["api_template_bin.sh"],
-)
-
-filegroup(
-    name = "client-template-bin.sh",
-    srcs = ["client_template_bin.sh"],
-)
-
-filegroup(
-    name = "tools-template-bin.sh",
-    srcs = ["tools_template_bin.sh"],
+    name = "template-bin.sh",
+    srcs = ["template_bin.sh"],
 )
 
 filegroup(
