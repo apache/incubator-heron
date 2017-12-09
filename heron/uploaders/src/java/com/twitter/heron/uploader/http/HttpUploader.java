@@ -37,26 +37,14 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 
-public class HttpUploader implements IUploader{
+public class HttpUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HttpUploader.class.getName());
 
   private Config config;
   private String topologyPackageLocation;
 
-  static {
-    java.util.logging.Logger.getLogger("org.apache.http.wire")
-        .setLevel(java.util.logging.Level.FINEST);
-    java.util.logging.Logger.getLogger("org.apache.http.headers")
-        .setLevel(java.util.logging.Level.FINEST);
-    System.setProperty("org.apache.commons.logging.Log",
-        "org.apache.commons.logging.impl.SimpleLog");
-    System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
-    System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire", "ERROR");
-    System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http", "ERROR");
-    System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.headers", "ERROR");
-  }
-
   @Override
+  @SuppressWarnings("HiddenField")
   public void initialize(Config config) {
     this.config = config;
     this.topologyPackageLocation = Context.topologyPackageFile(config);

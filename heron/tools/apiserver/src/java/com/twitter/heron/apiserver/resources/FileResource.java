@@ -92,7 +92,7 @@ public class FileResource extends HeronResource {
     writeToFile(uploadedInputStream, uploadedFileLocation);
 
     String uri = String.format("http://%s:%s/api/v1/file/download/%s",
-        ((hostname != null) ? hostname : ip), getPort(), fileName);
+        (hostname != null) ? hostname : ip, getPort(), fileName);
 
     return Response.status(Response.Status.OK).entity(uri).build();
   }

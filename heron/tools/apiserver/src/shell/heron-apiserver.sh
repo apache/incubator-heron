@@ -5,8 +5,8 @@ if [ -z "$LINK" ]; then
    LINK=$0
 fi
 BINDIR=$(dirname ${LINK})
-HERON_TOOLS_HOME=$(dirname ${BINDIR})
-HERON_APISERVER_JAR=${HERON_TOOLS_HOME}/lib/heron-apiserver.jar
+HERON_HOME=$(dirname ${BINDIR})
+HERON_APISERVER_JAR=${HERON_HOME}/lib/api/heron-apiserver.jar
 RELEASE_FILE=${HERON_TOOLS_HOME}/release.yaml
 
 # Check for the java to use

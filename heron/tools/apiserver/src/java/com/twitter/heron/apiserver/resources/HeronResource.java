@@ -16,9 +16,6 @@ package com.twitter.heron.apiserver.resources;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.twitter.heron.spi.common.Config;
 
 public class HeronResource {

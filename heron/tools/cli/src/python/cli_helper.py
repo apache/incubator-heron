@@ -126,6 +126,8 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
   lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
   lib_jars += extra_lib_jars
 
+  Log.info("Log.getEffectiveLevel(): %s" % Log.getEffectiveLevel())
+
   if Log.getEffectiveLevel() == logging.DEBUG:
     new_args.append("--verbose")
 
