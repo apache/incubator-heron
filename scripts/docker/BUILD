@@ -16,3 +16,13 @@ container_image(
     workdir = "/heron",
     cmd = ["supervisord", "-n"]
 )
+
+container_push(
+    name = "publish",
+    format = "Docker",
+    image = ":heron",
+    registry = "index.docker.io",
+    repository = "tmpscratch/heron",
+    tag = '{BUILD_USER}',
+    stamp = True,
+)
