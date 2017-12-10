@@ -18,7 +18,7 @@ container_image(
 )
 
 container_push(
-    name = "publish",
+    name = "publish-dev",
     format = "Docker",
     image = ":heron",
     registry = "index.docker.io",
