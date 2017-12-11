@@ -1,0 +1,173 @@
+{{- $platform := .Values.platform }}
+{{- $zkReplicas := index (index .Values $platform) "zkReplicas" }}
+
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-zookeeper
+  labels:
+    app: {{ .Release.Name }}-zookeeper
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-zookeeper
+      release: {{ .Release.Name | quote }}
+  {{- if .Values.minAvailable }}
+  minAvailable: {{ .Values.zookeeper.minAvailable }}
+  {{- else }}
+  minAvailable: 1
+  {{- end }}
+
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-zookeeper
+  labels:
+    app: {{ .Release.Name }}-zookeeper
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  serviceName: {{ .Release.Name }}-zookeeper-headless
+  replicas: {{ $zkReplicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-zookeeper
+        release: {{ .Release.Name | quote }}
+    spec:
+      {{- if eq .Values.zookeeper.antiAffinity "hard" }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: {{ template "heron.fullname" . }}
+                  release: {{ .Release.Name | quote }}
+      {{- else if eq .Values.zookeeper.antiAffinity "soft" }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: "kubernetes.io/hostname"
+                labelSelector:
+                  matchLabels:
+                    app: {{ .Release.Name }}-zookeeper
+                    release: {{ .Release.Name | quote }}
+      {{- end }}
+      containers:
+      - name: zookeeper-server
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+{{ toYaml .Values.zookeeper.resources | indent 10 }}
+        ports:
+        - containerPort: {{ .Values.zookeeper.clientPort }}
+          name: client
+        - containerPort: {{ .Values.zookeeper.serverPort }}
+          name: server
+        - containerPort: {{ .Values.zookeeper.leaderElectionPort }}
+          name: leader-election
+        env:
+        - name : ZK_REPLICAS
+          value: "{{ $zkReplicas }}"
+        - name : ZK_HEAP_SIZE
+          value: "{{ .Values.zookeeper.heap }}"
+        - name : ZK_TICK_TIME
+          value: "{{ .Values.zookeeper.tickTimeMs }}"
+        - name : ZK_INIT_LIMIT
+          value: "{{ .Values.zookeeper.initTicks }}"
+        - name : ZK_SYNC_LIMIT
+          value: "{{ .Values.zookeeper.syncTicks }}"
+        - name : ZK_MAX_CLIENT_CNXNS
+          value: "{{ .Values.zookeeper.clientCnxns }}"
+        - name: ZK_SNAP_RETAIN_COUNT
+          value: "{{ .Values.zookeeper.snapRetain }}"
+        - name: ZK_PURGE_INTERVAL
+          value: "{{ .Values.zookeeper.purgeHours }}"
+        - name: ZK_LOG_LEVEL
+          value: {{ .Values.zookeeper.logLevel }}
+        - name: ZK_CLIENT_PORT
+          value: "{{ .Values.zookeeper.clientPort }}"
+        - name: ZK_SERVER_PORT
+          value: "{{ .Values.zookeeper.serverPort }}"
+        - name: ZK_ELECTION_PORT
+          value: "{{ .Values.zookeeper.leaderElectionPort }}"
+        command:
+        - sh
+        - -c
+        - /opt/zookeeper/scripts/start-zookeeper.sh 
+        readinessProbe:
+          exec:
+            command:
+            - "/opt/zookeeper/scripts/zookeeper-ruok.sh"
+          initialDelaySeconds: {{ .Values.zookeeper.probeInitialDelaySeconds }}
+          timeoutSeconds: {{ .Values.zookeeper.probeTimeoutSeconds }}
+        livenessProbe:
+          exec:
+            command:
+            - "/opt/zookeeper/scripts/zookeeper-ruok.sh"
+          initialDelaySeconds: {{ .Values.zookeeper.probeInitialDelaySeconds }}
+          timeoutSeconds: {{ .Values.zookeeper.probeTimeoutSeconds }}
+        volumeMounts:
+        - name: datadir
+          mountPath: /var/lib/zookeeper
+          subPath: data
+      {{- if eq .Values.zookeeper.security.enabled true }}
+      securityContext:
+        runAsUser: {{ .Values.zookeeper.security.runAsUser }}
+        fsGroup: {{ .Values.zookeeper.security.fsGroup }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.zookeeper.storage }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-zookeeper-headless
+  labels:
+    app: {{ .Release.Name }}-zookeeper
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  ports:
+  - port: {{ .Values.zookeeper.serverPort }}
+    name: server
+  - port: {{ .Values.zookeeper.leaderElectionPort }}
+    name: leader-election
+  clusterIP: None
+  selector:
+    app: {{ .Release.Name }}-zookeeper
+    release: {{ .Release.Name | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-zookeeper
+  labels:
+    app: {{ .Release.Name }}-zookeeper
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  ports:
+  - port: {{ .Values.zookeeper.clientPort }}
+    name: client
+  selector:
+    app: {{ .Release.Name }}-zookeeper
+    release: {{ .Release.Name | quote }}
