@@ -2,6 +2,8 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar", "pkg_deb")
 
+load("/tools/rules/heron_api", "heron_api_files")
+
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
 load("/tools/rules/heron_client", "heron_client_lib_third_party_files")
@@ -357,6 +359,15 @@ pkg_tar(
         ":heron-tests-data-python",
         ":heron-tests-lib",
     ],
+)
+
+################################################################################
+# Heron API packaging
+################################################################################
+pkg_tar(
+    name = "heron-api",
+    extension = "tar.gz",
+    srcs = generated_release_files + heron_api_files(),
 )
 
 ################################################################################
