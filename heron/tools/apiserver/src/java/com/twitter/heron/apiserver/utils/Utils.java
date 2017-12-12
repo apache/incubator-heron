@@ -19,8 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class Utils {
-  private static ObjectNode createBaseMessage(String message) {
+public final class Utils {
+
+  private Utils() {
+
+  }
+
+  public static ObjectNode createBaseMessage(String message) {
     final ObjectMapper mapper = new ObjectMapper();
     return mapper.createObjectNode().put("message", message);
   }
