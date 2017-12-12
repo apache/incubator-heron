@@ -783,6 +783,22 @@ new_http_archive(
 )
 # end pex repos
 
+# for helm
+new_http_archive(
+    name = "helm_mac",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "darwin-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+
+new_http_archive(
+    name = "helm_linux",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "linux-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+# end helm
+
 # for docker image building
 http_archive(
     name = "io_bazel_rules_docker",
