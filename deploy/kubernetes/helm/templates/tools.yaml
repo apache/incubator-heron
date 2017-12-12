@@ -27,15 +27,7 @@ spec:
           command:
             - sh
             - -c
-            - >-
-              while true; do
-                status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
-                if [ "$status" = "imok" ]; then
-                  break;
-                fi;
-                echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
-                sleep 4;
-              done
+            - /opt/zookeeper/scripts/wait-for-zookeeper.sh {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}
       containers:
         - name: heron-tracker
           image: {{ .Values.image }}

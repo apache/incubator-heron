@@ -804,6 +804,6 @@ container_pull(
     name = "heron-base",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "0.2.0",
+    tag = "0.3.0",
 )
 # end docker image building
