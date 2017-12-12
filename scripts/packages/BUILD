@@ -82,7 +82,6 @@ pkg_tar(
     extension = "tar.gz",
     srcs = generated_release_files,
     deps = [
-        ":heron-core-release",
         ":heron-core-bin",
         ":heron-core-lib-scheduler",
         ":heron-core-lib-packing",
