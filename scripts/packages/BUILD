@@ -166,6 +166,12 @@ pkg_tar(
 # Heron tools packaging - used for docker images
 ################################################################################
 pkg_tar(
+    name = "heron-tools-release",
+    package_dir = "heron-tools",
+    srcs = generated_release_files,
+)
+
+pkg_tar(
     name = "heron-tools-bin",
     package_dir = "heron-tools/bin",
     srcs = heron_tools_bin_files(),
@@ -196,6 +202,7 @@ pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
     deps = [
+        ":heron-tools-release",
         ":heron-tools-bin",
         ":heron-tools-lib",
         ":heron-tools-conf",
