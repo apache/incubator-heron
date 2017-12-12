@@ -431,7 +431,7 @@ genrule(
         'rm -rf $$HERONPYSTREAMLET_UNZIP/heron/streamlet',
         'rm -rf $$HERONPYCONNECTORS_UNZIP/heron/connectors',
         'rm -rf $$HERONPYPROTO_UNZIP/heron/proto',
-        'cp $(SRCS) $$HERONPY_DIR',
+        'cp -R $(SRCS) $$HERONPY_DIR',
         'echo "Heron Python toplevel directory: $$HERONPY_DIR"',
         'cd $$HERONPY_DIR',
         'sed "s/VERSION/$$HERON_VERSION/" setup.py.template > setup.py',
@@ -448,6 +448,46 @@ genrule(
     ]),
 )
 
+################################################################################
+# Heron helm chart packaging
+################################################################################
+genrule(
+    name = "generate-helm-charts",
+    srcs = [
+        "//deploy/kubernetes/helm:chart"
+    ] + generated_release_files,
+    outs = ['index.yaml'],
+    tools = [
+        "//third_party/helm:helm",
+    ],
+    stamp = 1,
+    cmd = "\n".join([
+        'export OUTPUT_DIR=$$(pwd)/$(@D)',
+        'export RELEASE_FILE_DIR=$$(pwd)',
+        'export TMP_DIR=$$(mktemp -d -t helm.XXXXX)',
+        'export HELM_DIR=$$TMP_DIR/heron',
+        'export HERON_VERSION=$$(grep version $$RELEASE_FILE_DIR/$(location :release.yaml) | awk \'{print $$3}\')',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | sed -e "s/^\'//" -e "s/\'$$//")',
+        'export HERON_VERSION=$$(echo $$HERON_VERSION | grep "[0-9]*\.[0-9]*\.[0-9]*")',
+        'export HERON_VERSION=$$([[ -z $$HERON_VERSION ]] && echo "0.0.0" || echo $$HERON_VERSION)',
+        'mkdir -p $$TMP_DIR $$HELM_DIR heron-charts',
+        'cp $(SRCS) $$HELM_DIR',
+        'sed "s/VERSION/$$HERON_VERSION/" $$HELM_DIR/Chart.yaml.template > $$HELM_DIR/Chart.yaml',
+        'mkdir $$HELM_DIR/charts $$HELM_DIR/templates',
+        'mv $$HELM_DIR/bookkeeper.yaml $$HELM_DIR/tools.yaml $$HELM_DIR/templates',
+        'mv $$HELM_DIR/zookeeper.yaml $$HELM_DIR/templates',
+        'mv $$HELM_DIR/*.txt $$HELM_DIR/*.tpl $$HELM_DIR/templates',
+        'rm $$HELM_DIR/Chart.yaml.template $$HELM_DIR/release.yaml',
+        'tree $$HELM_DIR',
+        '$(location //third_party/helm:helm) init --client-only',
+        '$(location //third_party/helm:helm) package $$HELM_DIR',
+        'mv *.tgz heron-charts',
+        '$(location //third_party/helm:helm) repo index heron-charts --url https://storage.googleapis.com/heron-charts',
+        'cp heron-charts/* $$OUTPUT_DIR',
+    ]),
+)
+
+# '$(location //third_party/helm:helm) init -c',
 ################################################################################
 # Heron self installed binaries
 ################################################################################
