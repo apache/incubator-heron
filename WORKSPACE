@@ -783,11 +783,29 @@ new_http_archive(
 )
 # end pex repos
 
+# 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
     urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
     strip_prefix = "gflags-2.2.1",
 )
+# end 3rdparty C++ dependencies
+
+# for helm
+new_http_archive(
+    name = "helm_mac",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "darwin-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+
+new_http_archive(
+    name = "helm_linux",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "linux-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+# end helm
 
 # for docker image building
 http_archive(

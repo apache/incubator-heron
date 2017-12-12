@@ -1,8 +1,8 @@
 apiVersion: v1
 description: Heron is a fast distributed streaming engine for processing large data volumes with velocity
 name: heron
-version: 0.17.0
-appVersion: 0.17.0
+version: VERSION
+appVersion: VERSION
 icon: https://twitter.github.io/heron/img/HeronTextLogo-small.png
 home: http://heron.io
 sources:
