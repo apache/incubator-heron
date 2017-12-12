@@ -69,7 +69,24 @@ class _HelpAction(argparse._HelpAction):
         return
 
 ################################################################################
-def create_parser():
+def get_command_handlers():
+  '''
+  Create a map of command names and handlers
+  '''
+  return {
+      'activate': activate,
+      'config': hconfig,
+      'deactivate': deactivate,
+      'help': cli_help,
+      'kill': kill,
+      'restart': restart,
+      'submit': submit,
+      'update': update,
+      'version': version
+  }
+
+################################################################################
+def create_parser(command_handlers):
   '''
   Main parser
   :return:
@@ -84,21 +101,15 @@ def create_parser():
       title="Available commands",
       metavar='<command> <options>')
 
-  activate.create_parser(subparsers)
-  deactivate.create_parser(subparsers)
-  cli_help.create_parser(subparsers)
-  kill.create_parser(subparsers)
-  restart.create_parser(subparsers)
-  submit.create_parser(subparsers)
-  update.create_parser(subparsers)
-  version.create_parser(subparsers)
-  hconfig.create_parser(subparsers)
+  command_list = sorted(command_handlers.items())
+  for command in command_list:
+    command[1].create_parser(subparsers)
 
   return parser
 
 
 ################################################################################
-def run(command, parser, command_args, unknown_args):
+def run(handlers, command, parser, command_args, unknown_args):
   '''
   Run the command
   :param command:
@@ -107,20 +118,9 @@ def run(command, parser, command_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  runners = {
-      'activate':activate,
-      'deactivate':deactivate,
-      'kill':kill,
-      'restart':restart,
-      'submit':submit,
-      'update':update,
-      'help':cli_help,
-      'version':version,
-      'config':hconfig
-  }
 
-  if command in runners:
-    return runners[command].run(command, parser, command_args, unknown_args)
+  if command in handlers:
+    return handlers[command].run(command, parser, command_args, unknown_args)
   else:
     err_context = 'Unknown subcommand: %s' % command
     return result.SimpleResult(result.Status.InvocationError, err_context)
@@ -295,17 +295,9 @@ def extract_common_args(command, parser, cl_args):
   cl_args.update(new_cl_args)
   return cl_args
 
-################################################################################
-def command_needs_cluster_arg(command):
-  '''
-  True if the command needs a cluster arg
-  :return:
-  '''
-  return command not in ('help', 'version', 'config')
-
 
 ################################################################################
-def main():
+def execute(handlers, local_commands):
   '''
   Run the command
   :return:
@@ -314,7 +306,7 @@ def main():
   check_environment()
 
   # create the argument parser
-  parser = create_parser()
+  parser = create_parser(handlers)
 
   # if no argument is provided, print help and exit
   if len(sys.argv[1:]) == 0:
@@ -336,12 +328,13 @@ def main():
 
   # command to be execute
   command = command_line_args['subcommand']
+  is_local_command = command in local_commands
 
   if command == 'version':
-    results = run(command, parser, command_line_args, unknown_args)
+    results = run(handlers, command, parser, command_line_args, unknown_args)
     return 0 if result.is_successful(results) else 1
 
-  if command_needs_cluster_arg(command):
+  if not is_local_command:
     log.set_logging_level(command_line_args)
     Log.debug("Input Command Line Args: %s", command_line_args)
 
@@ -362,16 +355,24 @@ def main():
   Log.debug("Processed Command Line Args: %s", command_line_args)
 
   start = time.time()
-  results = run(command, parser, command_line_args, unknown_args)
-  if command_needs_cluster_arg(command):
+  results = run(handlers, command, parser, command_line_args, unknown_args)
+  if not is_local_command:
     result.render(results)
   end = time.time()
 
-  if command_needs_cluster_arg(command):
+  if not is_local_command:
     sys.stdout.flush()
     Log.debug('Elapsed time: %.3fs.', (end - start))
 
   return 0 if result.is_successful(results) else 1
+
+def main():
+  # Create a map of supported commands and handlers
+  command_handlers = get_command_handlers()
+  # Execute
+  local_commands = ('help', 'version', 'config')
+  return execute(command_handlers, local_commands)
+
 
 if __name__ == "__main__":
   sys.exit(main())
