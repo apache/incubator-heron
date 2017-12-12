@@ -310,7 +310,7 @@ public class NomadScheduler implements IScheduler {
         throw new RuntimeException(msg, e);
       }
       Map<String, String> metaData = jobActual.getMeta();
-      if (metaData != null) {
+      if (metaData != null && metaData.containsKey(NomadConstants.NOMAD_TOPOLOGY_NAME)) {
         if (metaData.get(NomadConstants.NOMAD_TOPOLOGY_NAME).equals(topologyName)) {
           ret.add(jobActual);
         }
