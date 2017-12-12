@@ -453,7 +453,12 @@ public class TopologyResource extends HeronResource {
     overrides.forEach(builder::put);
 
     builder.put(Key.VERBOSE, Logging.isVerbose());
-    return Config.toLocalMode(builder.build());
+    return isLocalMode()
+        ? Config.toLocalMode(builder.build()) : Config.toClusterMode(builder.build());
+  }
+
+  private boolean isLocalMode() {
+    return "local".equalsIgnoreCase(getCluster());
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {
