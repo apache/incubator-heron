@@ -783,6 +783,12 @@ new_http_archive(
 )
 # end pex repos
 
+http_archive(
+    name = "com_github_gflags_gflags",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    strip_prefix = "gflags-2.2.1",
+)
+
 # for docker image building
 http_archive(
     name = "io_bazel_rules_docker",

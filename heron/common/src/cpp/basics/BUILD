@@ -47,6 +47,7 @@ cc_library(
     deps = [
         "//config:config-cxx",
         "//third_party/glog:glog-cxx",
+        "@com_github_gflags_gflags//:gflags",
         "//third_party/gperftools:tcmalloc-cxx",
         "//third_party/kashmir:kashmir-cxx",
         "//third_party/protobuf:protobuf-cxx",
