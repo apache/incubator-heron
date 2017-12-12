@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -107,6 +108,23 @@ public final class FileHelper {
           addFileToArchive(archiveOutputStream, f, entryName + "/");
         }
       }
+    }
+  }
+
+  // save uploaded file to new location
+  public static void writeToFile(InputStream uploadedInputStream,
+                           String uploadedFileLocation) throws IOException {
+    File file = new File(uploadedFileLocation);
+    file.getParentFile().mkdirs();
+
+    int read = 0;
+    byte[] bytes = new byte[1024];
+
+    try (OutputStream out = new FileOutputStream(file)) {
+      while ((read = uploadedInputStream.read(bytes)) != -1) {
+        out.write(bytes, 0, read);
+      }
+      out.flush();
     }
   }
 

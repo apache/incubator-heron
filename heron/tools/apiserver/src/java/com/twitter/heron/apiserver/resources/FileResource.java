@@ -14,10 +14,8 @@
 package com.twitter.heron.apiserver.resources;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -38,7 +36,9 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.twitter.heron.apiserver.utils.FileHelper;
 import com.twitter.heron.apiserver.utils.Logging;
+import com.twitter.heron.apiserver.utils.Utils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 
@@ -74,11 +74,18 @@ public class FileResource extends HeronResource {
     Config config = createConfig();
 
     if (uploadedInputStream == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
-
+      String msg = "input stream is null";
+      LOG.error(msg);
+      return Response.status(Response.Status.BAD_REQUEST)
+          .type(MediaType.APPLICATION_JSON)
+          .entity(Utils.createMessage(msg)).build();
     }
     if (fileDetail == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      String msg = "form data content disposition is null";
+      LOG.error(msg);
+      return Response.status(Response.Status.BAD_REQUEST)
+          .type(MediaType.APPLICATION_JSON)
+          .entity(Utils.createMessage(msg)).build();
     }
 
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
@@ -89,7 +96,15 @@ public class FileResource extends HeronResource {
         = uploadDir + "/" + fileName;
 
     // save it
-    writeToFile(uploadedInputStream, uploadedFileLocation);
+    try {
+      FileHelper.writeToFile(uploadedInputStream, uploadedFileLocation);
+    } catch (IOException e) {
+      LOG.error("error uploading file {}", fileDetail.getFileName(), e);
+      return Response.serverError()
+          .type(MediaType.APPLICATION_JSON)
+          .entity(Utils.createMessage(e.getMessage()))
+          .build();
+    }
 
     String uri = String.format("http://%s:%s/api/v1/file/download/%s",
         (hostname != null) ? hostname : ip, getPort(), fileName);
@@ -128,26 +143,4 @@ public class FileResource extends HeronResource {
     return Config.toLocalMode(builder.build());
   }
 
-  // save uploaded file to new location
-  private void writeToFile(InputStream uploadedInputStream,
-                           String uploadedFileLocation) {
-    File file = new File(uploadedFileLocation);
-    file.getParentFile().mkdirs();
-
-    try {
-      int read = 0;
-      byte[] bytes = new byte[1024];
-
-      OutputStream out = new FileOutputStream(file);
-      while ((read = uploadedInputStream.read(bytes)) != -1) {
-        out.write(bytes, 0, read);
-      }
-      out.flush();
-      out.close();
-    } catch (IOException e) {
-
-      e.printStackTrace();
-    }
-
-  }
 }
