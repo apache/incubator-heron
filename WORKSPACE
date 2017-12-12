@@ -800,10 +800,10 @@ new_http_archive(
 # end helm
 
 # for docker image building
-git_repository(
+http_archive(
     name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    tag = "v0.3.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.3.0.tar.gz"],
+    strip_prefix = "rules_docker-0.3.0",
 )
 
 load(
@@ -820,6 +820,6 @@ container_pull(
     name = "heron-base",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "latest",
+    tag = "0.4.0",
 )
 # end docker image building

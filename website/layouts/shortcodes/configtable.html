@@ -1,0 +1,59 @@
+{{ $scheduler := .Get 0 }}
+{{ $configFile := .Get 1 }}
+
+{{ $schedulerConfigs := index .Site.Data.configs $scheduler }}
+{{ $fileConfigs := index $schedulerConfigs "configfiles" }}
+
+{{ range $fileConfigs }}
+{{ if eq $configFile .file }}
+{{ if isset $.Site.Data.configs.descriptions $configFile }}
+<p>{{ index $.Site.Data.configs.descriptions $configFile | markdownify }}</p>
+{{ end }}
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .configs }}
+    {{ if not .subconfigs }}
+    <tr>
+      <td><code>{{ .name }}</code></td>
+      <td>{{ if .description }}{{ .description | markdownify }}{{ end }}</td>
+      <td>{{ if .default }}<code>{{ .default }}</code>{{ end }}</td>
+    </tr>
+    {{ else }}
+    <tr>
+        <td><code>{{ .name }}</code></td>
+        <td>
+          <p>The <code>{{ .name }}</code> parameter has multiple sub-parameters:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+                <th>Default</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{ range .subconfigs }}
+              <tr>
+                <td><code>{{ .name }}</code></td>
+                <td>{{ if .description }}{{ .description | markdownify }}{{ end }}</td>
+                <td>{{ if .default }}<code>{{ .default }}</code>{{ end }}</td>
+              </tr>
+              {{ end }}
+            </tbody>
+          </table>
+        </td>
+        <td>{{ if .default }}<code>{{ .default }}</code>{{ end }}</td>
+      </tr>
+    {{ end }}
+    {{ end }}
+  </tbody>
+</table>
+{{ end }} <!-- if eq $configFile .file -->
+{{ end }} <!-- range $fileConfigs -->
