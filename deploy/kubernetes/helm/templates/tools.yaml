@@ -137,11 +137,17 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "heron.fullname" . }}-apiserver
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  selector:
-    app: {{ template "heron.fullname" . }}-apiserver
   ports:
-    - protocol: TCP
-      port: 9000
+    - port: 9000
       targetPort: 9000
+      protocol: TCP
   type: NodePort
+  selector:
+    app: {{ template "heron.fullname" . }}-tools
+    release: {{ .Release.Name }}
