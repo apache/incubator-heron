@@ -13,6 +13,6 @@ while true; do
   if [ "$status" = "imok" ]; then
     break;
   fi;
-  echo 'Zookeeper $WAIT_ZK_HOST:$WAIT_ZK_PORT not ready';
+  echo "Zookeeper $WAIT_ZK_HOST:$WAIT_ZK_PORT not ready";
   sleep 4;
 done
