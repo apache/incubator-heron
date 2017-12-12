@@ -40,7 +40,7 @@ spec:
             - >-
               heron-tracker
               --type=zookeeper
-              --name={{ .Release.Name }}-zookeeper
+              --name={{ .Release.Name }}
               --hostport={{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
               --rootpath="/heron" 
         - name: heron-ui
