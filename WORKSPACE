@@ -789,6 +789,13 @@ http_archive(
     urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
     strip_prefix = "gflags-2.2.1",
 )
+
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+
 # end 3rdparty C++ dependencies
 
 # for helm

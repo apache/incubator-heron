@@ -50,7 +50,7 @@ cc_library(
         "@com_github_gflags_gflags//:gflags",
         "//third_party/gperftools:tcmalloc-cxx",
         "//third_party/kashmir:kashmir-cxx",
-        "//third_party/protobuf:protobuf-cxx",
+        "@com_google_protobuf//:protobuf",
     ] + select({
         "//tools/platform:darwin": [], 
         "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
