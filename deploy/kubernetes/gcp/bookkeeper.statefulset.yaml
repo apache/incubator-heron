@@ -142,7 +142,6 @@ metadata:
     component: bookie
 spec:
   ports:
-  ports:
     - name: bookie
       port: 3181
       protocol: TCP

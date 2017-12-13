@@ -20,7 +20,7 @@
 ## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
 
 {{- $platform := .Values.platform }}
-{{- $bookkeeperReplicas := index (index .Values $platform) "bookkeeperReplicas" }}
+{{- $bkReplicas := index (index .Values $platform) "bkReplicas" }}
 {{- $cpuMin := index (index .Values $platform) "cpuMin" }}
 {{- $cpuMax := index (index .Values $platform) "cpuMax" }}
 {{- $memoryMin := index (index .Values $platform) "memoryMin" }}
@@ -29,7 +29,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "heron.fullname" . }}-bookie-config
+  name: {{ .Release.Name }}-bookie-config
 data:
   BK_BOOKIE_EXTRA_OPTS: "\"-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
   BK_bookiePort: "3181"
@@ -51,21 +51,21 @@ data:
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: {{ template "heron.fullname" . }}-bookie
+  name: {{ .Release.Name }}-bookie
   labels:
-    app: {{ template "heron.fullname" . }}-bookkeeper
-    component: {{ template "heron.fullname" . }}-bookie
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie
 spec:
-  serviceName: {{ template "heron.fullname" . }}-bookkeeper
-  replicas: {{ $bookkeeperReplicas }}
+  serviceName: {{ .Release.Name }}-bookkeeper
+  replicas: {{ $bkReplicas }}
   template:
     metadata:
       labels:
-        app: {{ template "heron.fullname" . }}-bookkeeper
-        component: {{ template "heron.fullname" . }}-bookie
+        app: {{ .Release.Name }}-bookkeeper
+        component: {{ .Release.Name }}-bookie
         # Specify cluster to allow aggregation by cluster in
         # the metrics
-        cluster: {{ template "heron.fullname" . }}-bookkeeper
+        cluster: {{ .Release.Name }}-bookkeeper
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
@@ -83,12 +83,12 @@ spec:
                     - key: "app"
                       operator: In
                       values:
-                        - {{ template "heron.fullname" . }}-bookkeeper
+                        - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 0
       initContainers:
         # Wait until the zookeeper pods are up and running
-        - name: {{ template "heron.fullname" . }}-bookie-init-container
+        - name: bookie-init-container
           image: {{ .Values.bookkeeper.image }}
           command: 
             - sh
@@ -103,7 +103,7 @@ spec:
                 sleep 4;
               done
       containers:
-        - name: {{ template "heron.fullname" . }}-bookie
+        - name: bookie
           image: {{ .Values.bookkeeper.image }}
           resources:
             requests:
@@ -123,7 +123,7 @@ spec:
               hostPort: 3181
           envFrom:
             - configMapRef:
-                name: {{ template "heron.fullname" . }}-bookie-config
+                name: {{ .Release.Name }}-bookie-config
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
@@ -136,7 +136,7 @@ spec:
         annotations:
           volume.alpha.kubernetes.io/storage-class: default
         labels:
-          component: {{ template "heron.fullname" . }}-bookkeeper
+          component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
@@ -147,7 +147,7 @@ spec:
         annotations:
           volume.alpha.kubernetes.io/storage-class: default
         labels:
-          component: {{ template "heron.fullname" . }}-bookkeeper
+          component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
@@ -164,15 +164,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "heron.fullname" . }}-bookie
+  name: {{ .Release.Name }}-bookie
   labels:
-    app: {{ template "heron.fullname" . }}-bookkeeper
-    component: {{ template "heron.fullname" . }}-bookie
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie
 spec:
   ports:
   - port: 3181
     name: server
   clusterIP: None
   selector:
-    app: {{ template "heron.fullname" . }}-bookkeeper
-    component: {{ template "heron.fullname" . }}-bookie
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie

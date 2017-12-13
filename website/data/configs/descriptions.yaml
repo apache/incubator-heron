@@ -1,0 +1,2 @@
+client: Configuration for the `heron` CLI tool.
+heron_internals: Configuration for a wide variety of Heron components, including logging, each topology's stream manager and topology master, and more.

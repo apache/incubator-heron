@@ -783,11 +783,48 @@ new_http_archive(
 )
 # end pex repos
 
+# 3rdparty C++ dependencies
+http_archive(
+    name = "com_github_gflags_gflags",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    strip_prefix = "gflags-2.2.1",
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+
+new_http_archive(
+    name = "com_github_cereal",
+    urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
+    strip_prefix = "cereal-1.2.2",
+    build_file = "third_party/cereal/cereal.BUILD",
+)
+# end 3rdparty C++ dependencies
+
+# for helm
+new_http_archive(
+    name = "helm_mac",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "darwin-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+
+new_http_archive(
+    name = "helm_linux",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "linux-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+# end helm
+
 # for docker image building
-git_repository(
+http_archive(
     name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    tag = "v0.3.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.3.0.tar.gz"],
+    strip_prefix = "rules_docker-0.3.0",
 )
 
 load(
@@ -804,6 +841,6 @@ container_pull(
     name = "heron-base",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "latest",
+    tag = "0.4.0",
 )
 # end docker image building

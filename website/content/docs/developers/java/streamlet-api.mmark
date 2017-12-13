@@ -85,8 +85,8 @@ If you're running a [local Heron cluster](../../../getting-started), you can sub
 
 ```bash
 $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.streamlet.IntegerProcessingTopology \
-  IntegerProcessingTopology
+  io.streaml.heron.streamlet.WordCountStreamletTopology \
+  WordCountStreamletTopology
 ```
 
 #### Selecting delivery semantics
@@ -95,8 +95,8 @@ Heron enables you to apply one of three [delivery semantics](../../../concepts/d
 
 ```bash
 $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
-  io.streaml.heron.streamlet.IntegerProcessingTopology \
-  IntegerProcessingTopology \
+  io.streaml.heron.streamlet.WordCountStreamletTopology \
+  WordCountStreamletTopology \
   effectively-once
 ```
 
@@ -104,21 +104,41 @@ The other options are `at-most-once` and `at-least-once`. If you don't explicitl
 
 ## Streamlet API topology configuration
 
-Every Streamlet API topology needs to be configured using a `Config` object. Here's an example baseline configuration:
+Every Streamlet API topology needs to be configured using a `Config` object. Here's an example default configuration:
 
 ```java
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 
-Config topologyConfig = new Config();
+Config topologyConfig = Config.defaultConfig();
 
 // Apply topology configuration using the topologyConfig object
-
 Runner topologyRunner = new Runner();
 topologyRunner.run("name-for-topology", conf, topologyBuilder);
 ```
 
-You can set the following in the configuration: the topology's [delivery semantics](#delivery-semantics), the number of [containers](#containers-and-resources) to be used by the topology, and the total CPU and RAM resources for the topology.
+The table below shows the configurable parameters for Heron topologies:
+
+Parameter | Default
+:---------|:-------
+[Delivery semantics](#delivery-semantics) | At most once
+Serializer | [Kryo](https://github.com/EsotericSoftware/kryo)
+Number of total container topologies | 2
+Per-container CPU | 1.0
+Per-container RAM | 100 MB
+
+Here's an example non-default configuration:
+
+```java
+Config topologyConfig = Config.newBuilder()
+        .setNumContainers(5)
+        .setPerContainerRamInGigabytes(10)
+        .setPerContainerCpu(3.5f)
+        .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
+        .setSerializer(Config.Serializer.JAVA)
+        .setUserConfig("some-key", "some-value")
+        .build();
+```
 
 ### Delivery semantics
 
@@ -129,37 +149,7 @@ topologyConfig
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE);
 ```
 
-The other available options are `ATMOST_ONCE` and `ATLEAST_ONCE`.
-
-### Containers and resources
-
-You can set the number of containers to be used by a Streamlet API topology (as an integer) like so:
-
-```java
-topologyConfig.setNumContainers(2);
-```
-
-You can set the CPU per container (as a `float`) and RAM per container (as a `long` expressing the number of bytes) like this:
-
-```java
-import com.twitter.heron.streamlet.Resources;
-
-Resources resources = new Resources();
-resources.withCpu(2.0f);
-resources.withRam(104857600);
-
-topologyConfig.setContainerResources(resources);
-```
-
-> The default CPU is `1.0f` while the default RAM is `104857600` (100 megabytes).
-
-There's also a `ByteAmount` helper class that you can use to convert byte formats:
-
-```java
-import com.twitter.heron.common.basics.ByteAmount;
-
-resources.withRam(ByteAmount.fromMegabytes(192).asMegabytes());
-```
+The other available options in the `DeliverySemantics` enum are `ATMOST_ONCE` and `ATLEAST_ONCE`.
 
 ## Streamlets
 
@@ -172,12 +162,15 @@ Operation | Description | Example
 [`map`](#map-operations) | Create a new streamlet by applying the supplied mapping function to each element in the original streamlet | Add 1 to each element in a streamlet of integers
 [`flatMap`](#flatmap-operations) | Like a map operation but with the important difference that each element of the streamlet is flattened | Flatten a sentence into individual words
 [`filter`](#filter-operations) | Create a new streamlet containing only the elements that satisfy the supplied filtering function | Remove all inappropriate words from a streamlet of strings
-[`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
-[`mapToKV`](#map-to-kv-operations) | Create a new key-value streamlet by converting each element in the original streamlet into a `KeyValue` object | Convert each element of a string streamlet into a `KeyValue` object where the current time is the key and the original string is the value
-`log` | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
+[`union`](#union-operations) | Unifies two streamlets into one, without modifying the elements of the two streamlets | Unite two different `Streamlet<String>`s into a single streamlet
+[`clone`](#clone-operations) | Creates any number of identical copies of a streamlet | Create three separate streamlets from the same source
+[`transform`](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations) |
 [`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
-
-<!-- [`union`](#union-operations) | Create a new streamlet by combining two separate non-key-value streamlets into one | Combine two integer streamlets into one -->
+[`reduceByKeyAndWindow`](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a time window, and in accordance with a reduce function that you apply to all the accumulated values | Count the number of times a value has been encountered within a specified time window
+[`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
+[`toSink`](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc. | Store processing graph results in an AWS Redshift table
+[`log`](#log-operations) | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
+[`consume`](#consume-operations) | Consume operations are like sink operations except they don't require implementing a full sink interface (consume operations are thus suited for simple operations like logging) | Log processing graph results using a custom formatting function
 
 ### Map operations
 
@@ -192,7 +185,7 @@ In this example, a supplier streamlet emits an indefinite series of 1s. The `map
 
 ### FlatMap operations
 
-FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into another type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
+FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into a collection type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
 
 ```java
 builder.newSource(() -> "I have nothing to declare but my genius")
@@ -214,7 +207,105 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
 
 In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
 
+### Union operations
+
+Union operations combine two streamlets of the same type into a single streamlet without modifying the elements. Here's an example:
+
+```java
+Streamlet<String> oohs = builder.newSource(() -> "ooh");
+Streamlet<String> aahs = builder.newSource(() -> "aah");
+
+Streamlet<String> combined = oohs
+        .union(aahs);
+```
+
+Here, one streamlet is an endless series of "ooh"s while the other is an endless series of "aah"s. The `union` operation combines them into a single streamlet of alternating "ooh"s and "aah"s.
+
+### Clone operations
+
+Clone operations enable you to create any number of "copies" of a streamlet. Each of the "copy" streamlets contains all the elements of the original and can be manipulated just like the original streamlet. Here's an example:
+
+```java
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+Streamlet<Integer> integers = builder.newSource(() -> ThreadLocalRandom.current().nextInt(100));
+
+List<Streamlet<Integer>> copies = integers.clone(5);
+Streamlet<Integer> ints1 = copies.get(0);
+Streamlet<Integer> ints2 = copies.get(1);
+Streamlet<Integer> ints3 = copies.get(2);
+// and so on...
+```
+
+In this example, a streamlet of random integers between 1 and 100 is split into 5 identical streamlets.
+
+### Transform operations
+
+Transform operations are highly flexible operations that are most useful for:
+
+* operations involving state in [stateful topologies](../../concepts/delivery-semantics#stateful-topologies)
+* operations that don't neatly fit into the other categories or into a lambda-based logic
+
+Transform operations require you to implement three different methods:
+
+* A `setup` method that enables you to pass a context object to the operation and to specify what happens prior to the `transform` step
+* A `transform` operation that performs the desired transformation
+* A `cleanup` method that allows you to specify what happens after the `transform` step
+
+The context object available to a transform operation provides access to:
+
+* the current state of the topology
+* the topology's configuration
+* the name of the stream
+* the stream partition
+* the current task ID
+
+Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
+
+```java
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.SerializableTransformer;
+
+import java.util.function.Consumer;
+
+public class CountNumberOfItems implements SerializableTransformer<String, String> {
+    private int numberOfItems;
+
+    public void setup(Context context) {
+        numberOfItems = (int) context.getState("number-of-items");
+        context.getState().put("number-of-items", numberOfItems + 1);
+    }
+
+    public void transform(String in, Consumer<String> consumer) {
+        String transformedString = // Apply some operation to the incoming value
+        consumer.accept(transformedString);
+    }
+
+    public void cleanup() {
+        System.out.println(
+                String.format("Successfully processed new state: %d", numberOfItems));
+    }
+}
+```
+
+This operation does a few things:
+
+* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
+* In the `cleanup` step, the current count of items processed is logged.
+
+Here's that operation within the context of a streamlet processing graph:
+
+```java
+builder.newSource(() -> "Some string over and over");
+        .transform(new CountNumberOfItems())
+        .log();
+```
+
 ### Join operations
+
+> For a more in-depth conceptual discussion of joins, see the [Heron Streamlet API](../../../concepts/streamlet-api#join-operations) doc.
 
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
@@ -234,6 +325,40 @@ In this case, the resulting streamlet would consist of an indefinite stream with
 
 > The effect of a join operation is to create a new streamlet *for each key*.
 
+### Reduce by key and window operations
+
+You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/streams/reduction.html) operations to streamlets by specifying:
+
+* a key extractor that determines what counts as the key for the streamlet
+* a value extractor that determines which final value is chosen for each element of the streamlet
+* a [time window](../../../concepts/topologies#window-operations) across which the operation will take place
+* a reduce function that produces a single value for each key in the streamlet
+
+Reduce by key and window operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value, as well as information about the window in which the operation took place). Here's an example:
+
+```java
+import java.util.Arrays;
+
+import com.twitter.heron.streamlet.WindowConfig;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .reduceByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (each word appears only once, hence the value is always 1)
+        word -> 1,
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+        // Reduce operation (a running sum)
+        (x, y) -> x + y
+    )
+    // The result is logged
+    .log();
+```
+
 ### Repartition operations
 
 When you assign a number of [partitions](#partitioning-and-parallelism) to a processing step, each step that comes after it inherits that number of partitions. Thus, if you assign 5 partitions to a `map` operation, then any `mapToKV`, `flatMap`, `filter`, etc. operations that come after it will also be assigned 5 partitions. But you can also change the number of partitions for a processing step (as well as the number of partitions for downstream operations) using `repartition`. Here's an example:
@@ -247,22 +372,67 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .setNumPartitions(5)
         .map(i -> i + 1)
         .repartition(2)
-        .filter(i -> i > 7)
-        .filter(i -> i < 2)
+        .filter(i -> i > 7 && i < 2)
         .log();
 ```
 
 In this example, the supplier streamlet emits random integers between one and ten. That operation is assigned 5 partitions. After the `map` operation, the `repartition` function is used to assign 2 partitions to all downstream operations.
 
-### Map-to-KV operations
+### Sink operations
 
-Map-to-KV operations enable you to transform a streamlet into a KV streamlet, for example a `Streamlet<String>` into a `Streamlet<KeyValue<String, Boolean>>`, using a mapping function. Here's an example:
+In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
 
 ```java
-Builder builder = Builder.CreateBuilder();
+import com.twitter.heron.streamlet.Context;
+import com.twitter.heron.streamlet.Sink;
 
-builder.newSource(() -> randomIntGenerator(1, 100))
-        .mapToKV((num) -> new KeyValue<>(num, num > 50));
+public class FormattedLogSink implements Sink<T> {
+    private String streamletName;
+
+    public void setup(Context context) {
+        streamletName = context.getStreamletName();
+    }
+
+    public void put(T element) {
+        String message = String.format("Streamlet %s has produced an element with a value of: '%s'",
+                streamletName,
+                element.toString());
+        System.out.println(message);
+    }
+
+    public void cleanup() {}
+}
 ```
 
-In this example processing graph, the supplier streamlet is a function that continuously emits random integers between 1 and 100. The `mapToKV` operation then returns a `KeyValue<Integer, Boolean>` object, for each integer in the streamlet, in which the key is the number and the value is whether the integer is even.
+In this example, the sink fetches the name of the enclosing streamlet from the context passed in the `setup` method. The `put` method specifies how the sink handles each element that is received (in this case, a formatted message is logged to stdout). The `cleanup` method enables you to specify what happens after the element has been processed by the sink.
+
+Here is the `FormattedLogSink` at work in an example processing graph:
+
+```java
+Builder builder = Builder.newBuilder();
+
+builder.newSource(() -> "Here is a string to be passed to the sink")
+        .toSink(new FormattedLogSink());
+```
+
+> [Log operations](#log-operations) rely on a log sink that is provided out of the box. You'll need to implement other sinks yourself.
+
+### Log operations
+
+Log operations are special cases of consume operations that log streamlet elements to stdout.
+
+> Streamlet elements will be using their `toString` representations and at the `INFO` level.
+
+### Consume operations
+
+Consume operations are like [sink operations](#sink-operations) except they don't require implementing a full sink interface. Consume operations are thus suited for simple operations like formatted logging. Here's an example:
+
+```java
+Builder builder = Builder.newBuilder()
+        .newSource(() -> generateRandomInteger())
+        .filter(i -> i % 2 == 0)
+        .consume(i -> {
+            String message = String.format("Even number found: %d", i);
+            System.out.println(message);
+        });
+```

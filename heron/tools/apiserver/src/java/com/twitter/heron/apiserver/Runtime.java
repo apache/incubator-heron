@@ -193,7 +193,7 @@ public final class Runtime {
   private static String getToolsHome() throws URISyntaxException {
     final String jarLocation =
         Runtime.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-    return Paths.get(jarLocation).getParent().getParent().toFile().getAbsolutePath();
+    return Paths.get(jarLocation).getParent().getParent().getParent().toFile().getAbsolutePath();
   }
 
   private static Boolean isVerbose(CommandLine cmd) {
