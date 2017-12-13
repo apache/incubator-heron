@@ -65,9 +65,6 @@ genrule(
 cc_library(
     name = "glog-cxx",
     srcs = ["empty.cc"] + lib_files,
-    deps = [
-      "//third_party/gflags:gflags-cxx",
-    ],
     hdrs = include_files,
     includes = [
         "include",

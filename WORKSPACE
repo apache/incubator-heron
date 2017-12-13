@@ -783,6 +783,14 @@ new_http_archive(
 )
 # end pex repos
 
+# 3rdparty C++ dependencies
+http_archive(
+    name = "com_github_gflags_gflags",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    strip_prefix = "gflags-2.2.1",
+)
+# end 3rdparty C++ dependencies
+
 # for helm
 new_http_archive(
     name = "helm_mac",
