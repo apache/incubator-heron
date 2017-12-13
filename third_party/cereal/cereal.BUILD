@@ -5,8 +5,6 @@ package(default_visibility = ["//visibility:public"])
 pkg_name = "cereal"
 pkg_version = "1.2.2"
 
-package_file = pkg_name + "-" + pkg_version + ".tar.gz"
-package_dir = pkg_name + "-" + pkg_version
 package_patch = pkg_name + "-" + pkg_version + ".patch"
 
 file_list = [
@@ -90,39 +88,24 @@ file_list = [
     "include/cereal/types/vector.hpp",
 ]
 
-genrule(
-    name = "cereal-srcs",
-    srcs = [
-        package_file,
-        package_patch,
-    ],
-    outs = file_list,
-    cmd = "\n".join([
-        "export WORKSPACE_ROOT=$$(pwd)",
-        "export INSTALL_DIR=$$(pwd)/$(@D)",
-        "export TMP_DIR=$$(mktemp -d -t cereal.XXXXX)",
-        "mkdir -p $$TMP_DIR",
-        "cp -R $(SRCS) $$TMP_DIR",
-        "cd $$TMP_DIR",
-        "tar xfz " + package_file,
-        "patch -d " + package_dir + " -p1 < " + package_patch,
-        "cd " + package_dir,
-        "rm -f include/cereal/types/boost_variant.hpp",
-        "rm -f unittests/boost_variant.cpp",
-        "rm -f unittests/boost_variant.hpp",
-        "cmake -Wno-dev -DSKIP_PORTABILITY_TEST=1 -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
-        "make install",
-        "rm -rf $$TMP_DIR",
-    ]),
-)
+#genrule(
+#    name = "cereal-srcs",
+#    srcs = [package_patch],
+#    outs = ["empty.cc"],
+#    cmd = "\n".join([
+#        "export WORKSPACE_ROOT=$$(pwd)",
+#        "export INSTALL_DIR=$$(pwd)/$(@D)",
+#        "patch -d  -p1 < " + "$$WORKSPACE_ROOT/third_party/cereal/" + package_patch,
+#        "rm -f include/cereal/types/boost_variant.hpp",
+#        "rm -f unittests/boost_variant.cpp",
+#        "rm -f unittests/boost_variant.hpp",
+#        "touch empty.cc",
+#    ]),
+#)
 
 cc_library(
     name = "cereal-cxx",
-    srcs = [
-        "empty.cc",
-    ] + file_list,
-    includes = [
-        "include",
-    ],
+    hdrs = glob(["include/cereal/**/*.hpp"]) + glob(["include/cereal/**/*.h"]),
+    includes = ["include"],
     linkstatic = 1,
 )

@@ -796,6 +796,12 @@ http_archive(
     strip_prefix = "protobuf-3.4.1",
 )
 
+new_http_archive(
+    name = "com_github_cereal",
+    urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
+    strip_prefix = "cereal-1.2.2",
+    build_file = "third_party/cereal/cereal.BUILD",
+)
 # end 3rdparty C++ dependencies
 
 # for helm
