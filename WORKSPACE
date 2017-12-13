@@ -790,6 +790,12 @@ http_archive(
     strip_prefix = "gflags-2.2.1",
 )
 
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+
 new_http_archive(
     name = "com_github_cereal",
     urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
