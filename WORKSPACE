@@ -797,6 +797,13 @@ http_archive(
 )
 
 new_http_archive(
+    name = "com_google_googletest",
+    urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
+    strip_prefix = "googletest-release-1.8.0",
+    build_file = "third_party/gtest/gtest.BUILD",
+)
+
+new_http_archive(
     name = "com_github_cereal",
     urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
     strip_prefix = "cereal-1.2.2",
