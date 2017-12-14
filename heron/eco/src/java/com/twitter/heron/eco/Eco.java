@@ -14,23 +14,71 @@
 package com.twitter.heron.eco;
 
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 
 
 public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
+    Options options = constructOptions();
+
+    CommandLineParser parser = new DefaultParser();
 
     LOG.info("ECO ARGS: " + Arrays.toString(args));
 
     Eco eco = new Eco(args[0]);
+    CommandLine cmd;
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      throw new RuntimeException("Error parsing command line options: ", e);
+    }
 
+
+    String ecoFile = cmd.getOptionValue("eco-config-file");
+
+    LOG.info("Eco config file: " + ecoFile);
+
+  }
+
+  private static Options constructOptions() {
+    Options options = new Options();
+    Option ecoConfig = Option.builder("eco")
+        .desc("Yaml config file for specifying topology definitions")
+        .longOpt("eco-config-file")
+        .hasArgs()
+        .argName("eco-config-file")
+        .required()
+        .build();
+    options.addOption(ecoConfig);
+    return options;
   }
 
   public Eco(String yamlFile) {
 
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
   }
 }
