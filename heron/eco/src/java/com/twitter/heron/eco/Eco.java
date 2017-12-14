@@ -13,9 +13,10 @@
 //  limitations under the License.
 package com.twitter.heron.eco;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
-import com.esotericsoftware.minlog.Log;
+
 
 public class Eco {
 
@@ -23,7 +24,13 @@ public class Eco {
 
   public static void main(String[] args) {
 
-    Log.info("ECO ARGS: " + args);
+    LOG.info("ECO ARGS: " + Arrays.toString(args));
+
+    Eco eco = new Eco(args[0]);
+
+  }
+
+  public Eco(String yamlFile) {
 
   }
 }
