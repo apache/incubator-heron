@@ -11,7 +11,7 @@ cc_test(
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     data = [
         "//heron/config/src/yaml:test-config-internals-yaml",
@@ -39,7 +39,7 @@ cc_test(
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",
@@ -67,7 +67,7 @@ cc_test(
     ],
     deps = [
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",
