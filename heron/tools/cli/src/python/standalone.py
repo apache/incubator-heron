@@ -520,7 +520,6 @@ def start_slave_nodes(slaves, cl_args):
     Log.info("Starting slave on %s" % slave)
     cmd = "%s agent -config %s >> /tmp/nomad_client.log 2>&1 &" \
           % (get_nomad_path(cl_args), get_nomad_slave_config_file(cl_args))
-    Log.info("Starting slave on %s" % slave)
     if not is_self(slave):
       cmd = ssh_remote_execute(cmd, slave, cl_args)
     Log.debug(cmd)
