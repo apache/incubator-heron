@@ -423,3 +423,35 @@ That would enable you to manage topologies without setting the `--service-url` f
 The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in your GKE cluster.
 
 You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+
+## Heron on Kubernetes configuration
+
+You can configure Heron on Kubernetes using a variety of YAML config files, listed in the sections below.
+
+### client.yaml
+
+{{< configtable "kubernetes" "client" >}}
+
+### heron_internals.yaml
+
+{{< configtable "kubernetes" "heron_internals" >}}
+
+### packing.yaml
+
+{{< configtable "kubernetes" "packing" >}}
+
+### scheduler.yaml
+
+{{< configtable "kubernetes" "scheduler" >}}
+
+### stateful.yaml
+
+{{< configtable "kubernetes" "stateful" >}}
+
+### statemgr.yaml
+
+{{< configtable "kubernetes" "statemgr" >}}
+
+### uploader.yaml
+
+{{< configtable "kubernetes" "uploader" >}}

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 BINDIR=$(dirname $(readlink $0))
-HERON_TOOLS_HOME=$(dirname ${BINDIR})
-HERON_APISERVER_JAR=${HERON_TOOLS_HOME}/lib/heron-apiserver.jar
-RELEASE_FILE=${HERON_TOOLS_HOME}/release.yaml
+HERON_HOME=$(dirname ${BINDIR})
+HERON_APISERVER_JAR=${HERON_HOME}/lib/api/heron-apiserver.jar
+RELEASE_FILE=${HERON_HOME}/release.yaml
 
 # Check for the java to use
 if [[ -z $JAVA_HOME ]]; then

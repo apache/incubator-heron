@@ -74,6 +74,7 @@ public class TopologyResourceTests {
     factory = spy(createFactory(action));
     doReturn(factory).when(resource).getActionFactory();
     doReturn(Config.newBuilder().build()).when(resource).getBaseConfiguration();
+    doReturn(cluster).when(resource).getCluster();
   }
 
   @Test

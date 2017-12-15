@@ -24,7 +24,10 @@ minikube:
   jobReplicas: 1
 
   # Number of replicas for bookkeeper
-  bookkeeperReplicas: 1
+  bkReplicas: 1
+
+  # Number of replicas for zookeeper
+  zkReplicas: 1
 
   # cpu mininum and maximum
   cpuMin: 1000m
@@ -39,7 +42,10 @@ aws:
   jobReplicas: 3
 
   # Number of replicas for bookkeeper
-  bookkeeperReplicas: 3
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
 
   # cpu mininum and maximum
   cpuMin: 1000m
@@ -54,7 +60,10 @@ gke:
   jobReplicas: 3
 
   # Number of replicas for bookkeeper
-  bookkeeperReplicas: 3
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
 
   # cpu mininum and maximum
   cpuMin: 1000m
@@ -69,7 +78,10 @@ baremetal:
   jobReplicas: 3
 
   # Number of replicas for bookkeeper
-  bookkeeperReplicas: 3
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
 
   # cpu mininum and maximum
   cpuMin: 1000m
@@ -85,15 +97,19 @@ bookkeeper:
 
 zookeeper:
   enabled: true
-  servers: 1
-  resources: {}
-  heap: "1G"
-  storage: "2Gi"
-  # storageClass: default
+  minAvailable: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1
+      memory: 4Gi
+  heap: 1G
+  storage: 2Gi
   serverPort: 2888
   leaderElectionPort: 3888
   clientPort: 2181
-  imagePullPolicy: "IfNotPresent"
   tickTimeMs: 2000
   initTicks: 10
   syncTicks: 5
@@ -104,6 +120,7 @@ zookeeper:
   probeTimeoutSeconds: 5
   antiAffinity: "hard"
   logLevel: "INFO"
-  # If the Zookeeper Chart is disabled a URL and port are required to connect
-  url: ""
-  port: 2181
+  security:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000

@@ -5,6 +5,8 @@ Heron processing topologies can be written using an API called the **Heron Strea
 
 > Although this document covers the new Heron Streamlet API, topologies created using the original [topology API](../../../concepts/topologies) can still be used with Heron (which means that all of your older topologies will still run).
 
+For a more in-depth conceptual guide to the new API, see [The Heron Streamlet API](../../../concepts/streamlet-api). A high-level overview can also be found in the section immediately [below](#the-heron-streamlet-api-vs-the-topology-api).
+
 ## The Heron Streamlet API vs. the topology API
 
 When Heron was first released, all Heron topologies needed to be written using an API based on the [Storm topology API](../topologies). Although this API is quite powerful (and can still be used), the **Heron Streamlet API** enables you to create topologies without needing to implement spouts and bolts directly or to connect spouts and bolts together.
