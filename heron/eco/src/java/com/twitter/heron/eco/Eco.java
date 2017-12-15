@@ -14,7 +14,6 @@
 package com.twitter.heron.eco;
 
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -23,8 +22,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import com.twitter.heron.common.utils.logging.LoggingHelper;
 
 
 public class Eco {
@@ -66,7 +63,10 @@ public class Eco {
     return options;
   }
 
+  private String yamlFile;
+
   public Eco(String yamlFile) {
+    this.yamlFile = yamlFile;
 
   }
 
