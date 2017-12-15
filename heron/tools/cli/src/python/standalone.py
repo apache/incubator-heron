@@ -22,6 +22,7 @@ import argparse
 import socket
 import requests
 import time
+import netifaces
 
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result import SimpleResult, Status
@@ -703,4 +704,11 @@ def is_self(addr):
   '''
   check if this host is this addr
   '''
-  return addr == get_self_ip() or addr == get_self_hostname()
+  ips = []
+  for i in netifaces.interfaces():
+    entry = netifaces.ifaddresses(i)
+    if netifaces.AF_INET in entry:
+      for ipv4 in entry[netifaces.AF_INET]:
+        if "addr" in ipv4:
+          ips.append(ipv4["addr"])
+  return addr in ips or addr == get_self_hostname()

@@ -1,7 +1,1 @@
 # Please provide a list of slave servers. Please provide at least one server.
-# For example:
-# 10.7.1.5
-# 10.7.1.6
-# 10.8.1.7
-
-127.0.0.1

@@ -1,7 +1,1 @@
 # Please provide a list of Master servers. Please provide at least one server.
-# For example:
-# 10.7.1.2
-# 10.7.1.3
-# 10.8.1.4
-
-127.0.0.1
