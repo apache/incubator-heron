@@ -86,7 +86,10 @@ Platform | Tag
 [Install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 
 ```bash
-$ minikube start
+$ minikube start \
+  --memory=7168 \
+  --cpus=5 \
+  --disk-size=20g
 ```
 
 ### Google Kubernetes Engine
