@@ -13,6 +13,7 @@ ORIGINAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     make site && \
         cd $ROOT_DIR/website/public && \
         git commit -am "new build" && \
+        git push && \
         cd $ROOT_DIR && \
         rm -rf $ROOT_DIR/website/public && \
         git submodule update --init
