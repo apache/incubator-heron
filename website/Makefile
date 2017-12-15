@@ -34,6 +34,9 @@ site:
 	@make python-docs
 	@make pages
 
+publish:
+	@scripts/publish.sh
+
 travis-site:
 	@make clean
 	@make build-static-assets
