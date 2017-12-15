@@ -2,12 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Environment where Heron will be running
-# Valid values are as follows
-# "aws" - Amazon Cloud
-# "gke" - Google Container Enginer
-# "minikube" - Kubernetes in a single node
-# "baremetal" - On premise machines
+# The environment where Heron will be running
+# The following values are valid:
+# "aws" - Amazon Web Services
+# "gke" - Google Kubernetes Engine
+# "minikube" - Kubernetes on a single local node
+# "baremetal" - On-premise cluster
 platform: minikube
 
 # Heron image to use

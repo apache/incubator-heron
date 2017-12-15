@@ -50,6 +50,62 @@ Once you've installed the Helm client on your machine, you need to make your cli
 $ helm repo add streamlio https://storage.googleapis.com/streamlio/charts
 ```
 
+To install the Heron package:
+
 ```bash
-$ 
+$ helm install streamlio/heron
+```
+
+This will install Heron and provide the installation with a random name like `jazzy-anaconda`. To provide the installation with a name, such as `heron-kubernetes`:
+
+```bash
+$ helm install streamlio/heron \
+  --name heron-kubernetes
+```
+
+### Specifying a platform
+
+The default platform is [Minikube](#minikube). To specify a different platform, you can use the `--set platform=PLATFORM` flag. Here's an example:
+
+```bash
+$ helm install streamlio/heron \
+  --set platform=gke
+```
+
+The available platforms are:
+
+Platform | Tag
+:--------|:---
+[Minikube](#minikube) | `minikube`
+[Google Kubernetes Engine](#google-kubernetes-engine) | `gke`
+[Amazon Web Services](#amazone-web-services) | `aws`
+[Bare metal](#bare-metal) | `baremetal`
+
+### Minikube
+
+[Install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+
+```bash
+$ minikube start
+```
+
+### Google Kubernetes Engine
+
+```bash
+$ helm install streamlio/heron \
+  --set platform=gke
+```
+
+### Amazon Web Services
+
+```bash
+$ helm install streamlio/heron \
+  --set platform=aws
+```
+
+### Bare metal
+
+```bash
+$ helm install streamlio/heron \
+  --set platform=baremetal
 ```
