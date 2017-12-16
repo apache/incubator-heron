@@ -16,7 +16,6 @@ package com.twitter.heron.eco;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -29,6 +28,8 @@ import org.apache.commons.cli.ParseException;
 import org.yaml.snakeyaml.Yaml;
 
 import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.eco.topology.EcoTopologyDef;
+import com.twitter.heron.eco.topology.parser.EcoParser;
 
 
 public class Eco {
@@ -67,26 +68,13 @@ public class Eco {
     return options;
   }
 
-  private String fileName;
-  private Map<Object, Object> ecoProperties;
-
   @SuppressWarnings("unchecked")
   public Eco(String fileName) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(fileName));
-    try {
-      this.fileName = fileName;
-      Yaml yaml = new Yaml();
-      Map<Object, Object> ecoProperties = (Map<Object, Object>) yaml.load(fin);
-      if (ecoProperties == null) {
-        throw new RuntimeException("Could not open eco config file");
-      } else {
-        LOG.info("YAML FILE: " + ecoProperties.toString());
-        this.ecoProperties = ecoProperties;
-      }
-    } finally {
-      SysUtils.closeIgnoringExceptions(fin);
-    }
+    
+    EcoTopologyDef topologyDef = EcoParser.parseFromInputStream(fin);
 
+    LOG.info("Printing topology config to String: " + topologyDef.toString());
   }
 
   // construct command line help options
