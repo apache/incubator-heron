@@ -13,7 +13,11 @@
 //  limitations under the License.
 package com.twitter.heron.eco;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -22,6 +26,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.yaml.snakeyaml.Yaml;
+
+import com.twitter.heron.common.basics.SysUtils;
 
 
 public class Eco {
@@ -33,9 +40,8 @@ public class Eco {
 
     CommandLineParser parser = new DefaultParser();
 
-    LOG.info("ECO ARGS: " + Arrays.toString(args));
 
-    Eco eco = new Eco(args[0]);
+
     CommandLine cmd;
     try {
       cmd = parser.parse(options, args);
@@ -43,10 +49,8 @@ public class Eco {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
+    Eco eco = new Eco(cmd.getOptionValue("eco-config-file"));
 
-    String ecoFile = cmd.getOptionValue("eco-config-file");
-
-    LOG.info("Eco config file: " + ecoFile);
 
   }
 
@@ -63,10 +67,25 @@ public class Eco {
     return options;
   }
 
-  private String yamlFile;
+  private String fileName;
+  private Map<Object, Object> ecoProperties;
 
-  public Eco(String yamlFile) {
-    this.yamlFile = yamlFile;
+  @SuppressWarnings("unchecked")
+  public Eco(String fileName) throws FileNotFoundException {
+    FileInputStream fin = new FileInputStream(new File(fileName));
+    try {
+      this.fileName = fileName;
+      Yaml yaml = new Yaml();
+      Map<Object, Object> ecoProperties = (Map<Object, Object>) yaml.load(fin);
+      if (ecoProperties == null) {
+        throw new RuntimeException("Could not open eco config file");
+      } else {
+        LOG.info("YAML FILE: " + ecoProperties.toString());
+        this.ecoProperties = ecoProperties;
+      }
+    } finally {
+      SysUtils.closeIgnoringExceptions(fin);
+    }
 
   }
 

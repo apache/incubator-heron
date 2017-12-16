@@ -8,7 +8,10 @@ java_binary(
     srcs = glob(["com/twitter/heron/eco/**/*.java"]),
     deps = [
      "@commons_cli_commons_cli//jar",
+     "@org_yaml_snakeyaml//jar",
      "//heron/common/src/java:utils-java",
+     "//heron/common/src/java:basics-java",
+     
     ],
     create_executable = 0,
     
