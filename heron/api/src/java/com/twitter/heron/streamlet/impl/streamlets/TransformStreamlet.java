@@ -40,7 +40,7 @@ public class TransformStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.TRANSFORM.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.TRANSFORM, stageNames);
     bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

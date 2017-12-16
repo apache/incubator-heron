@@ -36,7 +36,7 @@ public class SupplierStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.SUPPLIER.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.SUPPLIER, stageNames);
     bldr.setSpout(getName(), new SupplierSource<R>(supplier), getNumPartitions());
     return true;
   }

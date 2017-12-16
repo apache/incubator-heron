@@ -43,7 +43,7 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.REMAP.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.REMAP, stageNames);
     bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
         getNumPartitions())
         .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));

@@ -40,7 +40,7 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.FLATMAP.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.FLATMAP, stageNames);
     bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

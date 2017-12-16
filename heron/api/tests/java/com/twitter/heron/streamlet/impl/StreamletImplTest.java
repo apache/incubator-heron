@@ -323,7 +323,7 @@ public class StreamletImplTest {
 
     // set default name by streamlet name prefix
     supplierStreamlet.setDefaultNameIfNone(
-        StreamletImpl.StreamletNamePrefixes.SUPPLIER.toString(), stageNames);
+        StreamletImpl.StreamletNamePrefixes.SUPPLIER, stageNames);
 
     // verify stageNames
     assertEquals(1, stageNames.size());
@@ -342,7 +342,7 @@ public class StreamletImplTest {
 
     // set default name by streamlet name prefix
     supplierStreamlet.setDefaultNameIfNone(
-        StreamletImpl.StreamletNamePrefixes.SUPPLIER.toString(), stageNames);
+        StreamletImpl.StreamletNamePrefixes.SUPPLIER, stageNames);
 
     // verify stageNames
     assertEquals(1, stageNames.size());

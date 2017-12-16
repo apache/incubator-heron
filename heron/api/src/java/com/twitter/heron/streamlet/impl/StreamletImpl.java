@@ -157,7 +157,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param prefix The name prefix of this streamlet
    * @param stageNames The collections of created streamlet/stage names
    */
-  protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
+  protected void setDefaultNameIfNone(StreamletNamePrefixes prefix, Set<String> stageNames) {
     if (getName() == null) {
       setName(defaultNameCalculator(prefix, stageNames));
     }
@@ -220,11 +220,11 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     children.add(child);
   }
 
-  private String defaultNameCalculator(String prefix, Set<String> stageNames) {
+  private String defaultNameCalculator(StreamletNamePrefixes prefix, Set<String> stageNames) {
     int index = 1;
     String calculatedName;
     while (true) {
-      calculatedName = new StringBuilder(prefix).append(index).toString();
+      calculatedName = new StringBuilder(prefix.toString()).append(index).toString();
       if (!stageNames.contains(calculatedName)) {
         break;
       }

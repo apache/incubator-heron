@@ -38,7 +38,7 @@ public class SinkStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.SINK.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.SINK, stageNames);
     bldr.setBolt(getName(), new ComplexSink<>(sink),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

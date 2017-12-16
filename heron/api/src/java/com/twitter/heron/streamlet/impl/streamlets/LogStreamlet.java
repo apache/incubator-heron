@@ -35,7 +35,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.LOGGER.toString(), stageNames);
+    setDefaultNameIfNone(StreamletNamePrefixes.LOGGER, stageNames);
     bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
