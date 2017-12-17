@@ -24,9 +24,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.helper.EcoBuilder;
 import com.twitter.heron.eco.helper.EcoConfigBuilder;
 import com.twitter.heron.eco.helper.EcoParser;
+import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 
 
@@ -49,13 +52,19 @@ public class Eco {
 
     FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
-    EcoTopologyDefinition topologyDef = EcoParser.parseFromInputStream(fin);
+    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
 
-    Config topologyConfig = EcoConfigBuilder.buildConfig(topologyDef);
+    Config topologyConfig = EcoConfigBuilder.buildConfig(topologyDefinition);
 
-    LOG.info("Eco Topology def to String: " + topologyDef.toString());
+    EcoExecutionContext executionContext = new EcoExecutionContext(topologyDefinition, topologyConfig);
+
+    Builder builder = EcoBuilder.buildBuilder(executionContext);
+
+    LOG.info("Eco Topology def to String: " + topologyDefinition.toString());
 
     LOG.info(String.format("Eco Config: Semantics: %s", topologyConfig.getDeliverySemantics()));
+
+    LOG.info("Eco Builder: " + builder.toString());
 
   }
 
