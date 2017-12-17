@@ -13,12 +13,11 @@
 //  limitations under the License.
 package com.twitter.heron.eco.topology.definition;
 
-
-public abstract class ComponentDefinition {
+public class StreamDefinition {
 
   private String name;
-  private String className;
-  private int partitions = 1;
+  private String to;
+  private String from;
 
   public String getName() {
     return name;
@@ -28,19 +27,19 @@ public abstract class ComponentDefinition {
     this.name = name;
   }
 
-  public String getClassName() {
-    return className;
+  public String getTo() {
+    return to;
   }
 
-  public void setClassName(String className) {
-    this.className = className;
+  public void setTo(String to) {
+    this.to = to;
   }
 
-  public int getPartitions() {
-    return partitions;
+  public String getFrom() {
+    return from;
   }
 
-  public void setPartitions(int partitions) {
-    this.partitions = partitions;
+  public void setFrom(String from) {
+    this.from = from;
   }
 }

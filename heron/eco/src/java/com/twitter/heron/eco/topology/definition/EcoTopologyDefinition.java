@@ -13,15 +13,49 @@
 //  limitations under the License.
 package com.twitter.heron.eco.topology.definition;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class EcoTopologyDefinition {
-  private static final Logger LOG = Logger.getLogger(EcoTopologyDefinition.class.getName());
 
   private String name;
   private Map<String, Object> config = new HashMap<>();
+  private Map<String, SourceDefinition> sources =  new LinkedHashMap<>();
+  private Map<String, ChildDefinition> children = new LinkedHashMap<>();
+  private List<StreamDefinition> streams = new ArrayList<>();
+
+  public List<SourceDefinition> getSources() {
+    return new ArrayList<>(this.sources.values());
+  }
+
+  public void setSources(List<SourceDefinition> sources) {
+    this.sources = new LinkedHashMap<>();
+    for (SourceDefinition source: sources) {
+      this.sources.put(source.getName(), source);
+    }
+  }
+
+  public List<ChildDefinition> getChildren() {
+    return new ArrayList<>(this.children.values());
+  }
+
+  public void setChildren(List<ChildDefinition> children) {
+    this.children = new LinkedHashMap<>();
+    for (ChildDefinition child: children) {
+      this.children.put(child.getName(), child);
+    }
+  }
+
+  public List<StreamDefinition> getStreams() {
+    return streams;
+  }
+
+  public void setStreams(List<StreamDefinition> streams) {
+    this.streams = streams;
+  }
 
   public Map<String, Object> getConfig() {
     return config;
@@ -45,6 +79,9 @@ public class EcoTopologyDefinition {
     return "EcoTopologyDefinition{" +
         "name='" + name + '\'' +
         ", config=" + config +
+        ", sources=" + sources +
+        ", children=" + children +
+        ", streams=" + streams +
         '}';
   }
 }

@@ -20,7 +20,10 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import com.twitter.heron.eco.topology.definition.ChildDefinition;
 import com.twitter.heron.eco.topology.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.topology.definition.SourceDefinition;
+import com.twitter.heron.eco.topology.definition.StreamDefinition;
 
 public class EcoParser {
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
@@ -45,6 +48,9 @@ public class EcoParser {
 
     TypeDescription topologyDescription = new TypeDescription(EcoTopologyDefinition.class);
 
+    topologyDescription.putListPropertyType("sources", SourceDefinition.class);
+    topologyDescription.putListPropertyType("children", ChildDefinition.class);
+  //  topologyDescription.putListPropertyType("streams", StreamDefinition.class);
     topologyConstructor.addTypeDescription(topologyDescription);
 
     return new Yaml(topologyConstructor);
