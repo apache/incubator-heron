@@ -15,7 +15,6 @@ package com.twitter.heron.eco;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -25,20 +24,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.twitter.heron.eco.topology.definition.EcoTopologyDefinition;
-import com.twitter.heron.eco.topology.parser.EcoParser;
+import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.helper.EcoParser;
 
 
 public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Options options = constructOptions();
 
     CommandLineParser parser = new DefaultParser();
-
-
 
     CommandLine cmd;
     try {
@@ -47,8 +45,11 @@ public class Eco {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    Eco eco = new Eco(cmd.getOptionValue("eco-config-file"));
+    FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
+    EcoTopologyDefinition topologyDef = EcoParser.parseFromInputStream(fin);
+
+    LOG.info("Printing topology config to String: " + topologyDef.toString());
 
   }
 
@@ -63,15 +64,6 @@ public class Eco {
         .build();
     options.addOption(ecoConfig);
     return options;
-  }
-
-  @SuppressWarnings("unchecked")
-  public Eco(String fileName) throws FileNotFoundException {
-    FileInputStream fin = new FileInputStream(new File(fileName));
-
-    EcoTopologyDefinition topologyDef = EcoParser.parseFromInputStream(fin);
-
-    LOG.info("Printing topology config to String: " + topologyDef.toString());
   }
 
   // construct command line help options

@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.topology.parser;
+package com.twitter.heron.eco.helper;
 
 import java.io.InputStream;
 import java.util.logging.Logger;
@@ -20,10 +20,10 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import com.twitter.heron.eco.topology.definition.ChildDefinition;
-import com.twitter.heron.eco.topology.definition.EcoTopologyDefinition;
-import com.twitter.heron.eco.topology.definition.SourceDefinition;
-import com.twitter.heron.eco.topology.definition.StreamDefinition;
+import com.twitter.heron.eco.definition.ChildDefinition;
+import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.SourceDefinition;
+import com.twitter.heron.eco.definition.StreamDefinition;
 
 public class EcoParser {
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());

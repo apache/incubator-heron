@@ -11,36 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.topology.definition;
+package com.twitter.heron.eco.definition;
 
-
-public abstract class ComponentDefinition {
-
-  private String name;
-  private String className;
-  private int partitions = 1;
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getClassName() {
-    return className;
-  }
-
-  public void setClassName(String className) {
-    this.className = className;
-  }
-
-  public int getPartitions() {
-    return partitions;
-  }
-
-  public void setPartitions(int partitions) {
-    this.partitions = partitions;
-  }
+public class ChildDefinition extends ComponentDefinition {
 }
