@@ -16,7 +16,6 @@ package com.twitter.heron.eco;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -25,10 +24,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.yaml.snakeyaml.Yaml;
 
-import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.eco.topology.EcoTopologyDef;
+import com.twitter.heron.eco.topology.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.topology.parser.EcoParser;
 
 
@@ -71,8 +68,8 @@ public class Eco {
   @SuppressWarnings("unchecked")
   public Eco(String fileName) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(fileName));
-    
-    EcoTopologyDef topologyDef = EcoParser.parseFromInputStream(fin);
+
+    EcoTopologyDefinition topologyDef = EcoParser.parseFromInputStream(fin);
 
     LOG.info("Printing topology config to String: " + topologyDef.toString());
   }

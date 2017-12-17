@@ -11,28 +11,35 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.topology;
+package com.twitter.heron.eco.topology.definition;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.List;
 
-public class EcoTopologyDef {
-  private static final Logger LOG = Logger.getLogger(EcoTopologyDef.class.getName());
+public class ComponentDefinition {
 
   private String name;
-  private Map<String, Object> config = new HashMap<>();
+  private String className;
+  private List<Object> constructorArgs;
+  private int nPartitions = 1;
 
-  public Map<String, Object> getConfig() {
-    return config;
+
+  public String getClassName() {
+    return className;
   }
 
-  public void setConfig(Map<String, Object> config) {
-    this.config = config;
+  public void setClassName(String className) {
+    this.className = className;
+  }
+
+  public List<Object> getConstructorArgs() {
+    return constructorArgs;
+  }
+
+  public void setConstructorArgs(List<Object> constructorArgs) {
+    this.constructorArgs = constructorArgs;
   }
 
   public String getName() {
-
     return name;
   }
 
@@ -40,11 +47,11 @@ public class EcoTopologyDef {
     this.name = name;
   }
 
-  @Override
-  public String toString() {
-    return "EcoTopologyDef{" +
-        "name='" + name + '\'' +
-        ", config=" + config +
-        '}';
+  public int getnPartitions() {
+    return nPartitions;
+  }
+
+  public void setnPartitions(int nPartitions) {
+    this.nPartitions = nPartitions;
   }
 }

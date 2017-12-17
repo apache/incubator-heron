@@ -20,12 +20,12 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import com.twitter.heron.eco.topology.EcoTopologyDef;
+import com.twitter.heron.eco.topology.definition.EcoTopologyDefinition;
 
 public class EcoParser {
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
 
-  public static EcoTopologyDef parseFromInputStream(InputStream inputStream ) {
+  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream ) {
 
     Yaml yaml = topologyYaml();
 
@@ -37,13 +37,13 @@ public class EcoParser {
 
   }
 
-  private static EcoTopologyDef loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
-    return (EcoTopologyDef) yaml.load(inputStream);
+  private static EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
+    return (EcoTopologyDefinition) yaml.load(inputStream);
   }
   private static Yaml topologyYaml() {
-    Constructor topologyConstructor = new Constructor(EcoTopologyDef.class);
+    Constructor topologyConstructor = new Constructor(EcoTopologyDefinition.class);
 
-    TypeDescription topologyDescription = new TypeDescription(EcoTopologyDef.class);
+    TypeDescription topologyDescription = new TypeDescription(EcoTopologyDefinition.class);
 
     topologyConstructor.addTypeDescription(topologyDescription);
 
