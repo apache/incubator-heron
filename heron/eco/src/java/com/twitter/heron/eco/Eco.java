@@ -25,7 +25,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.helper.EcoConfigBuilder;
 import com.twitter.heron.eco.helper.EcoParser;
+import com.twitter.heron.streamlet.Config;
 
 
 public class Eco {
@@ -49,7 +51,11 @@ public class Eco {
 
     EcoTopologyDefinition topologyDef = EcoParser.parseFromInputStream(fin);
 
-    LOG.info("Printing topology config to String: " + topologyDef.toString());
+    Config topologyConfig = EcoConfigBuilder.buildConfig(topologyDef);
+
+    LOG.info("Eco Topology def to String: " + topologyDef.toString());
+
+    LOG.info(String.format("Eco Config: Semantics: %s", topologyConfig.getDeliverySemantics()));
 
   }
 
