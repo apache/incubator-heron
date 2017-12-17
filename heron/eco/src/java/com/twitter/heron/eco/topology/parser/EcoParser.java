@@ -50,7 +50,6 @@ public class EcoParser {
 
     topologyDescription.putListPropertyType("sources", SourceDefinition.class);
     topologyDescription.putListPropertyType("children", ChildDefinition.class);
-  //  topologyDescription.putListPropertyType("streams", StreamDefinition.class);
     topologyConstructor.addTypeDescription(topologyDescription);
 
     return new Yaml(topologyConstructor);
