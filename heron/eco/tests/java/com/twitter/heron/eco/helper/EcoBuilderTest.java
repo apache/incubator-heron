@@ -17,26 +17,52 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
 public class EcoBuilderTest {
 
+  private Map<String, Object> configMap;
+
+  private EcoTopologyDefinition ecoTopologyDefinition;
+
+  @Before
+  public void setUpForEachTestCase() {
+    configMap = new HashMap<>();
+    ecoTopologyDefinition = new EcoTopologyDefinition();
+    ecoTopologyDefinition.setConfig(configMap);
+  }
 
   @Test
   public void testBuildEmptyConfigMapReturnsDefaultConfigs() {
-    Map<String, Object> configMap = new HashMap<>();
-    EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();
-    ecoTopologyDefinition.setConfig(configMap);
+    // do nothing with config map on purpose for this test
 
     Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
+
     assertThat(config.get(Config.TOPOLOGY_DEBUG), is(nullValue()));
+  }
+
+  @Test
+  public void testBuildCustomConfigMapReturnsCorrectConfigs() {
+    configMap.put(Config.TOPOLOGY_DEBUG, false);
+    final String environment = "dev";
+    final int spouts = 3;
+    configMap.put(Config.TOPOLOGY_ENVIRONMENT, environment);
+    configMap.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, spouts);
+
+    Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
+
+    assertThat(config.get(Config.TOPOLOGY_DEBUG), is(equalTo(false)));
+    assertThat(config.get(Config.TOPOLOGY_ENVIRONMENT), is(equalTo(environment)));
+    assertThat(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING), is(equalTo(spouts)));
   }
 
 }
