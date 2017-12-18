@@ -25,8 +25,6 @@ Sink | How it works
 [Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
 Local filesystem | [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
 
-More on using those sinks in a Heron cluster can be found in the [Heron metrics overview](../../operators/observability).
-
 ## Java Setup
 
 In order to create a custom metrics sink, you need to import the `heron-spi`
