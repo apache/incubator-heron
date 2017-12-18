@@ -6,17 +6,22 @@ new: true
 
 > If you'd prefer to install Heron on Kubernetes *without* using the [Helm](https://helm.sh) package manager, see the [Heron on Kubernetes by hand](../kubernetes) document.
 
-[Helm](https://helm.sh) is an open source package manager for [Kubernetes](https://kubernetes.io) that enables you to quickly and easily install even the most complex software systems on Kubernetes. Heron has a Helm [chart](https://docs.helm.sh/developing_charts/#charts) that you can use to install Heron on Kubernetes using just a few commands.
+[Helm](https://helm.sh) is an open source package manager for [Kubernetes](https://kubernetes.io) that enables you to quickly and easily install even the most complex software systems on Kubernetes. Heron has a Helm [chart](https://docs.helm.sh/developing_charts/#charts) that you can use to install Heron on Kubernetes using just a few commands. The chart can be used to install Heron on the following platforms:
 
-> You can use the Helm chart for Heron to run Heron on *any* Kubernetes cluster, including local clusters running on [Minikube](https://github.com/kubernetes/minikube).
+* [Minikube](#minikube) (the default)
+* [Google Kubernetes Engine](#google-kubernetes-engine)
+* [Amazon Web Services](#amazon-web-services)
+* [Bare metal](#bare-metal)
 
 ## Requirements
 
-In order to install Heron on Kubernetes using Helm, you need to have an existing Kubernetes cluster
+In order to install Heron on Kubernetes using Helm, you'll need to have:
+
+* An existing Kubernetes cluster on one of the available [platforms](#specifying-a-platform)
 
 ## Installing the Helm client
 
-In order to get started, you need to install Helm on your 
+In order to get started, you need to install Helm on your machine. Installation instructions for [macOS](#helm-for-macos) and [Linux](#helm-for-linux) are below.
 
 ### Helm for macOS
 
@@ -81,7 +86,7 @@ Platform | Tag
 [Amazon Web Services](#amazone-web-services) | `aws`
 [Bare metal](#bare-metal) | `baremetal`
 
-### Minikube
+#### Minikube
 
 [Install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 
@@ -92,21 +97,21 @@ $ minikube start \
   --disk-size=20g
 ```
 
-### Google Kubernetes Engine
+#### Google Kubernetes Engine
 
 ```bash
 $ helm install streamlio/heron \
   --set platform=gke
 ```
 
-### Amazon Web Services
+#### Amazon Web Services
 
 ```bash
 $ helm install streamlio/heron \
   --set platform=aws
 ```
 
-### Bare metal
+#### Bare metal
 
 ```bash
 $ helm install streamlio/heron \
