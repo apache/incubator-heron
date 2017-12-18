@@ -339,7 +339,7 @@ def execute(handlers, local_commands):
   command = command_line_args['subcommand']
   is_local_command = command in local_commands
 
-  if command == 'version':
+  if command == 'version' or command == 'standalone':
     results = run(handlers, command, parser, command_line_args, unknown_args)
     return 0 if result.is_successful(results) else 1
 
