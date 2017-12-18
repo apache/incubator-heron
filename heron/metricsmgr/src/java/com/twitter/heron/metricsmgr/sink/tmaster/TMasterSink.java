@@ -183,6 +183,7 @@ public class TMasterSink implements IMetricsSink {
 
     // First Entry
     tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    LOG.info("TMasterChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
