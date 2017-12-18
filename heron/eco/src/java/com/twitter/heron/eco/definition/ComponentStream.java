@@ -47,10 +47,11 @@ public class ComponentStream {
 
   @Override
   public String toString() {
-    return "ComponentStream{" +
-        "toComponent='" + toComponent + '\'' +
-        ", fromComponent='" + fromComponent + '\'' +
-        ", streamName='" + streamName + '\'' +
-        '}';
+    return "ComponentStream{"
+        + "toComponent='" + toComponent + '\''
+        + ", fromComponent='" + fromComponent
+        + '\''
+        + ", streamName='" + streamName + '\''
+        + '}';
   }
 }

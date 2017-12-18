@@ -24,18 +24,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.helper.EcoBuilder;
-import com.twitter.heron.eco.helper.EcoConfigBuilder;
 import com.twitter.heron.eco.helper.EcoParser;
 import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
 
 
-public class Eco {
+public final class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
+
+  private Eco() { }
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
@@ -54,15 +55,17 @@ public class Eco {
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
 
-    Config topologyConfig = EcoConfigBuilder.buildConfig(topologyDefinition);
+    Config topologyConfig = EcoBuilder
+        .buildConfig(topologyDefinition);
 
-    EcoExecutionContext executionContext = new EcoExecutionContext(topologyDefinition, topologyConfig);
+    EcoExecutionContext executionContext
+        = new EcoExecutionContext(topologyDefinition, topologyConfig);
 
-    Builder builder = EcoBuilder.buildBuilder(executionContext);
+    Builder builder = EcoBuilder
+        .buildBuilder(executionContext);
 
-    LOG.info("Eco Topology def to String: " + topologyDefinition.toString());
-
-    LOG.info(String.format("Eco Config: Semantics: %s", topologyConfig.getDeliverySemantics()));
+    LOG.info("Eco Topology def to String: "
+        + topologyDefinition.toString());
 
     LOG.info("Eco Builder: " + builder.toString());
 

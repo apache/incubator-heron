@@ -15,7 +15,8 @@ package com.twitter.heron.eco.definition;
 
 import java.util.Map;
 
-import com.twitter.heron.streamlet.Config;
+import com.twitter.heron.api.Config;
+
 
 public class EcoExecutionContext {
 

@@ -23,12 +23,13 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import com.twitter.heron.eco.definition.ChildDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.SourceDefinition;
-import com.twitter.heron.eco.definition.StreamDefinition;
 
-public class EcoParser {
+public final class EcoParser {
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
 
-  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream ) {
+  private EcoParser() { }
+
+  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream) {
 
     Yaml yaml = topologyYaml();
 

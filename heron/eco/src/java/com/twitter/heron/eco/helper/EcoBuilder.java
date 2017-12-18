@@ -13,28 +13,24 @@
 //  limitations under the License.
 package com.twitter.heron.eco.helper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.ComponentDefinition;
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.SerializableSupplier;
-import com.twitter.heron.streamlet.Source;
-import com.twitter.heron.streamlet.Streamlet;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
 
-public class EcoBuilder {
+public final class EcoBuilder {
 
+  private EcoBuilder() { }
   private static final Logger LOG = Logger.getLogger(EcoBuilder.class.getName());
-  public static Builder buildBuilder(EcoExecutionContext executionContext) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+  public static Builder buildBuilder(EcoExecutionContext executionContext)
+      throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
     buildSources(executionContext);
     buildChildren(executionContext);
@@ -45,30 +41,8 @@ public class EcoBuilder {
 
   private static Builder build(EcoExecutionContext executionContext) {
     Builder builder = Builder.newBuilder();
-    StreamletImpl
     Map<String, Object> sources = executionContext.getSources();
-    for (Map.Entry<String, Object> entry: sources.entrySet()) {
-      Object value = entry.getValue();
 
-      if (value instanceof SerializableSupplier) {
-        LOG.info("eco sink is instance of serialzableSupplier");
-        SerializableSupplier supplier = (SerializableSupplier) value;
-
-
-      } else if (value instanceof Source) {
-        LOG.info("eco sink is instance of Source");
-        builder.newSource((Source) value);
-
-      } else {
-        LOG.info("eco sink is instance of who knows");
-        LOG.info("KEY: " + value.toString());
-      }
-    }
-
-    Map<String, Object>  children = executionContext.getChildren();
-    for (Map.Entry<String, Object> entry: children.entrySet()) {
-      Object value = entry.getValue();
-    }
 
     return builder;
   }
@@ -90,7 +64,8 @@ public class EcoBuilder {
 
   }
 
-  private static void buildChildren(EcoExecutionContext executionContext) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+  private static void buildChildren(EcoExecutionContext executionContext)
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> children = new HashMap<>();
 
@@ -102,7 +77,8 @@ public class EcoBuilder {
     executionContext.setChildren(children);
   }
 
-  private static void buildSources(EcoExecutionContext executionContext) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+  private static void buildSources(EcoExecutionContext executionContext)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> sources = new HashMap<>();
 
@@ -116,10 +92,21 @@ public class EcoBuilder {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Object buildObject(ComponentDefinition def) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+  private static Object buildObject(ComponentDefinition def)
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     Class clazz = Class.forName(def.getClassName());
     return clazz.newInstance();
 
+  }
+
+  public static Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+    Map<String, Object> configMap = topologyDefinition.getConfig();
+    if (configMap == null) {
+      return new Config();
+    } else {
+      return new Config();
+
+    }
   }
 
 }

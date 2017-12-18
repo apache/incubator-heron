@@ -76,12 +76,12 @@ public class EcoTopologyDefinition {
 
   @Override
   public String toString() {
-    return "EcoTopologyDefinition{" +
-        "name='" + name + '\'' +
-        ", config=" + config +
-        ", sources=" + sources +
-        ", children=" + children +
-        ", streams=" + streams +
-        '}';
+    return "EcoTopologyDefinition{"
+        + "name='" + name + '\''
+        + ", config=" + config
+        + ", sources=" + sources
+        + ", children=" + children
+        + ", streams=" + streams
+        + '}';
   }
 }
