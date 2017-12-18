@@ -32,8 +32,8 @@ public final class EcoBuilder {
   public static Builder buildBuilder(EcoExecutionContext executionContext)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
-    buildSources(executionContext);
-    buildChildren(executionContext);
+    buildSpouts(executionContext);
+    buildBolts(executionContext);
     buildStreams(executionContext);
 
     return build(executionContext);
@@ -64,30 +64,30 @@ public final class EcoBuilder {
 
   }
 
-  private static void buildChildren(EcoExecutionContext executionContext)
+  private static void buildBolts(EcoExecutionContext executionContext)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
-    Map<String, Object> children = new HashMap<>();
+    Map<String, Object> bolts = new HashMap<>();
 
-    for (ComponentDefinition def: topologyDefinition.getChildren()) {
+    for (ComponentDefinition def: topologyDefinition.getBolts()) {
       Object obj = buildObject(def);
-      children.put(def.getName(), obj);
+      bolts.put(def.getName(), obj);
     }
 
-    executionContext.setChildren(children);
+    executionContext.setChildren(bolts);
   }
 
-  private static void buildSources(EcoExecutionContext executionContext)
+  private static void buildSpouts(EcoExecutionContext executionContext)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
-    Map<String, Object> sources = new HashMap<>();
+    Map<String, Object> spouts = new HashMap<>();
 
-    for (ComponentDefinition def: topologyDefinition.getSources()) {
+    for (ComponentDefinition def: topologyDefinition.getSpouts()) {
       Object obj = buildObject(def);
-      sources.put(def.getName(), obj);
+      spouts.put(def.getName(), obj);
     }
 
-    executionContext.setSources(sources);
+    executionContext.setSources(spouts);
 
   }
 

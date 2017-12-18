@@ -14,11 +14,14 @@
 package com.twitter.heron.eco.definition;
 
 
+import java.util.List;
+
 public abstract class ComponentDefinition {
 
   private String name;
   private String className;
-  private int partitions = 1;
+  private int parallelism = 1;
+  private List<Object> constructorArgs;
 
   public String getName() {
     return name;
@@ -36,11 +39,19 @@ public abstract class ComponentDefinition {
     this.className = className;
   }
 
-  public int getPartitions() {
-    return partitions;
+  public int getParallelism() {
+    return parallelism;
   }
 
-  public void setPartitions(int partitions) {
-    this.partitions = partitions;
+  public void setParallelism(int parallelism) {
+    this.parallelism = parallelism;
+  }
+
+  public List<Object> getConstructorArgs() {
+    return constructorArgs;
+  }
+
+  public void setConstructorArgs(List<Object> constructorArgs) {
+    this.constructorArgs = constructorArgs;
   }
 }

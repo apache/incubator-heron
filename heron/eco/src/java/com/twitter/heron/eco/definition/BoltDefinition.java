@@ -13,5 +13,5 @@
 //  limitations under the License.
 package com.twitter.heron.eco.definition;
 
-public class SourceDefinition extends ComponentDefinition {
+public class BoltDefinition extends ComponentDefinition {
 }

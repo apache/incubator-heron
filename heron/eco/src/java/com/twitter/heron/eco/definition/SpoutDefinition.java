@@ -13,5 +13,5 @@
 //  limitations under the License.
 package com.twitter.heron.eco.definition;
 
-public class ChildDefinition extends ComponentDefinition {
+public class SpoutDefinition extends ComponentDefinition {
 }

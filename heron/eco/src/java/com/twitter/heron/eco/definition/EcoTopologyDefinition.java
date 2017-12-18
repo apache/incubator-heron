@@ -23,29 +23,29 @@ public class EcoTopologyDefinition {
 
   private String name;
   private Map<String, Object> config = new HashMap<>();
-  private Map<String, SourceDefinition> sources =  new LinkedHashMap<>();
-  private Map<String, ChildDefinition> children = new LinkedHashMap<>();
+  private Map<String, SpoutDefinition> spouts =  new LinkedHashMap<>();
+  private Map<String, BoltDefinition> bolts = new LinkedHashMap<>();
   private List<StreamDefinition> streams = new ArrayList<>();
 
-  public List<SourceDefinition> getSources() {
-    return new ArrayList<>(this.sources.values());
+  public List<SpoutDefinition> getSpouts() {
+    return new ArrayList<>(this.spouts.values());
   }
 
-  public void setSources(List<SourceDefinition> sources) {
-    this.sources = new LinkedHashMap<>();
-    for (SourceDefinition source: sources) {
-      this.sources.put(source.getName(), source);
+  public void setSpouts(List<SpoutDefinition> sources) {
+    this.spouts = new LinkedHashMap<>();
+    for (SpoutDefinition source: sources) {
+      this.spouts.put(source.getName(), source);
     }
   }
 
-  public List<ChildDefinition> getChildren() {
-    return new ArrayList<>(this.children.values());
+  public List<BoltDefinition> getBolts() {
+    return new ArrayList<>(this.bolts.values());
   }
 
-  public void setChildren(List<ChildDefinition> children) {
-    this.children = new LinkedHashMap<>();
-    for (ChildDefinition child: children) {
-      this.children.put(child.getName(), child);
+  public void setBolts(List<BoltDefinition> children) {
+    this.bolts = new LinkedHashMap<>();
+    for (BoltDefinition child: children) {
+      this.bolts.put(child.getName(), child);
     }
   }
 
@@ -79,8 +79,8 @@ public class EcoTopologyDefinition {
     return "EcoTopologyDefinition{"
         + "name='" + name + '\''
         + ", config=" + config
-        + ", sources=" + sources
-        + ", children=" + children
+        + ", sources=" + spouts
+        + ", children=" + bolts
         + ", streams=" + streams
         + '}';
   }
