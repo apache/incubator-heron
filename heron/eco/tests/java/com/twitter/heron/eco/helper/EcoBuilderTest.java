@@ -22,6 +22,8 @@ import org.junit.Test;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
 public class EcoBuilderTest {
@@ -34,11 +36,7 @@ public class EcoBuilderTest {
     ecoTopologyDefinition.setConfig(configMap);
 
     Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
-
-    System.out.println("SOUT LOG");
-    assertTrue(true);
-
-
+    assertThat(config.get(Config.TOPOLOGY_DEBUG), is(nullValue()));
   }
 
 }

@@ -104,7 +104,11 @@ public final class EcoBuilder {
     if (configMap == null) {
       return new Config();
     } else {
-      return new Config();
+      Config config = new Config();
+      for (Map.Entry<String, Object> entry: topologyDefinition.getConfig().entrySet()) {
+        config.put(entry.getKey(), entry.getValue());
+      }
+      return config;
 
     }
   }
