@@ -25,11 +25,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.helper.EcoBuilder;
 import com.twitter.heron.eco.helper.EcoParser;
-import com.twitter.heron.streamlet.Builder;
 
 
 public final class Eco {
@@ -61,8 +61,8 @@ public final class Eco {
     EcoExecutionContext executionContext
         = new EcoExecutionContext(topologyDefinition, topologyConfig);
 
-    Builder builder = EcoBuilder
-        .buildBuilder(executionContext);
+    TopologyBuilder builder = EcoBuilder
+        .buildTopologyBuilder(executionContext);
 
     LOG.info("Eco Topology def to String: "
         + topologyDefinition.toString());

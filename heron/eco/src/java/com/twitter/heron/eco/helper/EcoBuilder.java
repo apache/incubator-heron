@@ -18,18 +18,19 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.eco.definition.ComponentDefinition;
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
-import com.twitter.heron.streamlet.Builder;
 
 public final class EcoBuilder {
+  private static final Logger LOG = Logger.getLogger(EcoBuilder.class.getName());
 
   private EcoBuilder() { }
-  private static final Logger LOG = Logger.getLogger(EcoBuilder.class.getName());
-  public static Builder buildBuilder(EcoExecutionContext executionContext)
+
+  public static TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
     buildSpouts(executionContext);
@@ -39,8 +40,8 @@ public final class EcoBuilder {
     return build(executionContext);
   }
 
-  private static Builder build(EcoExecutionContext executionContext) {
-    Builder builder = Builder.newBuilder();
+  private static TopologyBuilder build(EcoExecutionContext executionContext) {
+    TopologyBuilder builder = new TopologyBuilder();
     Map<String, Object> sources = executionContext.getSources();
 
 

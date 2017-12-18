@@ -42,7 +42,7 @@ public class EcoBuilderTest {
   }
 
   @Test
-  public void testBuildEmptyConfigMapReturnsDefaultConfigs() {
+  public void testBuild_EmptyConfigMap_ReturnsDefaultConfigs() {
     // do nothing with config map on purpose for this test
 
     Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
@@ -51,7 +51,7 @@ public class EcoBuilderTest {
   }
 
   @Test
-  public void testBuildCustomConfigMapReturnsCorrectConfigs() {
+  public void testBuild_CustomConfigMap_ReturnsCorrectConfigs() {
     configMap.put(Config.TOPOLOGY_DEBUG, false);
     final String environment = "dev";
     final int spouts = 3;
@@ -63,6 +63,14 @@ public class EcoBuilderTest {
     assertThat(config.get(Config.TOPOLOGY_DEBUG), is(equalTo(false)));
     assertThat(config.get(Config.TOPOLOGY_ENVIRONMENT), is(equalTo(environment)));
     assertThat(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING), is(equalTo(spouts)));
+  }
+
+  @Test
+  public void testBuildTopologyBuilder_BuildsAsExpected() {
+
+
+    assertNotNull(EcoBuilder.buildConfig(ecoTopologyDefinition));
+
   }
 
 }
