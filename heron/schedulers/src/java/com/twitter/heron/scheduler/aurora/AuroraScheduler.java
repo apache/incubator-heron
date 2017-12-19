@@ -222,7 +222,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.STATEMGR_CONNECTION_STRING,
         Context.stateManagerConnectionString(config));
     auroraProperties.put(AuroraField.STATEMGR_ROOT_PATH, Context.stateManagerRootPath(config));
-        auroraProperties.put(AuroraField.STATEMGR_YAML, Context.stateManagerFile(config));
+    auroraProperties.put(AuroraField.STATEMGR_YAML, Context.stateManagerFile(config));
     auroraProperties.put(AuroraField.TMASTER_BINARY, Context.tmasterBinary(config));
     auroraProperties.put(AuroraField.STMGR_BINARY, Context.stmgrBinary(config));
     auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH,
