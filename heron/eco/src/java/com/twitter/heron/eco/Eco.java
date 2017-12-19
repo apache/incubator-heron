@@ -27,8 +27,11 @@ import org.apache.commons.cli.ParseException;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.SpoutDefinition;
+import com.twitter.heron.eco.definition.StreamDefinition;
 import com.twitter.heron.eco.helper.EcoBuilder;
 import com.twitter.heron.eco.helper.EcoParser;
 
@@ -62,6 +65,8 @@ public final class Eco {
     EcoExecutionContext executionContext
         = new EcoExecutionContext(topologyDefinition, topologyConfig);
 
+    printTopologyInfo(executionContext);
+
     TopologyBuilder builder = EcoBuilder
         .buildTopologyBuilder(executionContext);
 
@@ -94,5 +99,27 @@ public final class Eco {
 
     options.addOption(help);
     return options;
+  }
+
+  static void printTopologyInfo(EcoExecutionContext ctx){
+    EcoTopologyDefinition t = ctx.getTopologyDefinition();
+
+      LOG.info("---------- TOPOLOGY DETAILS ----------");
+
+    LOG.info(String.format("Topology Name: %s", t.getName()));
+      LOG.info("--------------- SPOUTS ---------------");
+      for (SpoutDefinition s : t.getSpouts()) {
+        LOG.info(String.format("%s [%d] (%s)", s.getId(), s.getParallelism(), s.getClassName()));
+      }
+    LOG.info("---------------- BOLTS ---------------");
+      for (BoltDefinition b : t.getBolts()) {
+        LOG.info(String.format("%s [%d] (%s)", b.getId(), b.getParallelism(), b.getClassName()));
+      }
+
+    LOG.info("--------------- STREAMS ---------------");
+      for (StreamDefinition sd : t.getStreams()) {
+        LOG.info(String.format("%s --%s--> %s", sd.getFrom(), sd.getGrouping().getType(), sd.getTo()));
+      }
+    LOG.info("--------------------------------------");
   }
 }
