@@ -180,6 +180,7 @@ public class MetricsCacheSink implements IMetricsSink {
 
     // First Entry
     tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    LOG.info("MetricsCacheChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
