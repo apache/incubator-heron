@@ -84,4 +84,8 @@ public class EcoTopologyDefinition {
         + ", streams=" + streams
         + '}';
   }
+
+  public Number parallelismForBolt(String to) {
+    return this.bolts.get(to).getParallelism();
+  }
 }

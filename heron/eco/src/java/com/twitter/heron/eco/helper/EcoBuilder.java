@@ -18,7 +18,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.bolt.IBasicBolt;
+import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
@@ -35,20 +42,14 @@ public final class EcoBuilder {
 
     buildSpouts(executionContext);
     buildBolts(executionContext);
-    buildStreams(executionContext);
-
-    return build(executionContext);
-  }
-
-  private static TopologyBuilder build(EcoExecutionContext executionContext) {
     TopologyBuilder builder = new TopologyBuilder();
-    Map<String, Object> sources = executionContext.getSources();
-
+    buildStreams(executionContext, builder);
 
     return builder;
   }
 
-  private static void buildStreams(EcoExecutionContext executionContext) {
+
+  private static void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder) {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 
@@ -59,6 +60,85 @@ public final class EcoBuilder {
       componentStream.setStreamName(def.getName());
       componentStreams.put(def.getName(), componentStream);
       LOG.info("component stream: " + componentStream.toString());
+    }
+
+    HashMap<String, BoltDeclarer> declarers = new HashMap<>();
+    for (StreamDefinition stream : topologyDefinition.getStreams()) {
+      Object boltObj = executionContext.getBolt(stream.getTo());
+      BoltDeclarer declarer = declarers.get(stream.getTo());
+      if (boltObj instanceof IRichBolt) {
+        if(declarer == null) {
+          declarer = builder.setBolt(stream.getTo(),
+              (IRichBolt) boltObj,
+              topologyDefinition.parallelismForBolt(stream.getTo()));
+          declarers.put(stream.getTo(), declarer);
+        }
+      } else if (boltObj instanceof IBasicBolt) {
+        if(declarer == null) {
+          declarer = builder.setBolt(
+              stream.getTo(),
+              (IBasicBolt) boltObj,
+              topologyDefinition.parallelismForBolt(stream.getTo()));
+          declarers.put(stream.getTo(), declarer);
+        }
+      } else if (boltObj instanceof IWindowedBolt) {
+        if(declarer == null) {
+          declarer = builder.setBolt(
+              stream.getTo(),
+              (IWindowedBolt) boltObj,
+              topologyDefinition.parallelismForBolt(stream.getTo()));
+          declarers.put(stream.getTo(), declarer);
+        }
+      }  else {
+        throw new IllegalArgumentException("Class does not appear to be a bolt: " +
+            boltObj.getClass().getName());
+      }
+
+      BoltDefinition boltDef = topologyDefinition.getBoltDef(stream.getTo());
+      if (boltDef.getOnHeapMemoryLoad() > -1) {
+        if (boltDef.getOffHeapMemoryLoad() > -1) {
+          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad(), boltDef.getOffHeapMemoryLoad());
+        } else {
+          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad());
+        }
+      }
+      if (boltDef.getCpuLoad() > -1) {
+        declarer.setCPULoad(boltDef.getCpuLoad());
+      }
+      if (boltDef.getNumTasks() > -1) {
+        declarer.setNumTasks(boltDef.getNumTasks());
+      }
+
+      GroupingDefinition grouping = stream.getGrouping();
+      // if the streamId is defined, use it for the grouping, otherwise assume storm's default stream
+      String streamId = (grouping.getStreamId() == null ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId());
+
+
+      switch (grouping.getType()) {
+        case SHUFFLE:
+          declarer.shuffleGrouping(stream.getFrom(), streamId);
+          break;
+        case FIELDS:
+          //TODO check for null grouping args
+          declarer.fieldsGrouping(stream.getFrom(), streamId, new Fields(grouping.getArgs()));
+          break;
+        case ALL:
+          declarer.allGrouping(stream.getFrom(), streamId);
+          break;
+        case GLOBAL:
+          declarer.globalGrouping(stream.getFrom(), streamId);
+          break;
+
+        case NONE:
+          declarer.noneGrouping(stream.getFrom(), streamId);
+          break;
+//        case CUSTOM:
+//          declarer.customGrouping(stream.getFrom(), streamId,
+//              buildCustomStreamGrouping(stream.getGrouping().getCustomClass(), context));
+//          break;
+        default:
+          throw new UnsupportedOperationException("unsupported grouping type: " + grouping);
+      }
     }
 
     executionContext.setStreams(componentStreams);
@@ -75,7 +155,7 @@ public final class EcoBuilder {
       bolts.put(def.getName(), obj);
     }
 
-    executionContext.setChildren(bolts);
+    executionContext.setBolts(bolts);
   }
 
   private static void buildSpouts(EcoExecutionContext executionContext)
@@ -88,7 +168,7 @@ public final class EcoBuilder {
       spouts.put(def.getName(), obj);
     }
 
-    executionContext.setSources(spouts);
+    executionContext.setSpouts(spouts);
 
   }
 

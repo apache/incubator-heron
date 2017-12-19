@@ -64,9 +64,6 @@ public final class Eco {
     TopologyBuilder builder = EcoBuilder
         .buildTopologyBuilder(executionContext);
 
-    LOG.info("Eco Topology def to String: "
-        + topologyDefinition.toString());
-
     LOG.info("Eco Builder: " + builder.toString());
 
   }

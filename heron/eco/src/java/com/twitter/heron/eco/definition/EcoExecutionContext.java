@@ -24,9 +24,9 @@ public class EcoExecutionContext {
 
   private Config config;
 
-  private Map<String, Object> sources;
+  private Map<String, Object> spouts;
 
-  private Map<String, Object> children;
+  private Map<String, Object> bolts;
 
   private Map<String, ComponentStream> streams;
 
@@ -51,24 +51,28 @@ public class EcoExecutionContext {
     this.config = config;
   }
 
-  public Map<String, Object> getSources() {
-    return sources;
+  public Map<String, Object> getSpouts() {
+    return spouts;
   }
 
-  public void setSources(Map<String, Object> sources) {
-    this.sources = sources;
+  public void setSpouts(Map<String, Object> spouts) {
+    this.spouts = spouts;
   }
 
-  public Map<String, Object> getChildren() {
-    return children;
+  public Map<String, Object> getBolts() {
+    return bolts;
   }
 
-  public void setChildren(Map<String, Object> children) {
-    this.children = children;
+  public Object getBolt(String id) {
+    return this.bolts.get(id);
+  }
+
+  public void setBolts(Map<String, Object> bolts) {
+    this.bolts = bolts;
   }
 
   public Object getChild(String id) {
-    return this.children.get(id);
+    return this.bolts.get(id);
   }
 
   public Map<String, ComponentStream> getStreams() {
