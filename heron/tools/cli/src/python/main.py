@@ -81,10 +81,10 @@ def get_command_handlers():
       'help': cli_help,
       'kill': kill,
       'restart': restart,
+      'standalone': standalone,
       'submit': submit,
       'update': update,
-      'version': version,
-      'standalone': standalone
+      'version': version
   }
 
 ################################################################################
@@ -339,7 +339,7 @@ def execute(handlers, local_commands):
   command = command_line_args['subcommand']
   is_local_command = command in local_commands
 
-  if command == 'version' or command == 'standalone':
+  if command == 'version':
     results = run(handlers, command, parser, command_line_args, unknown_args)
     return 0 if result.is_successful(results) else 1
 
@@ -379,7 +379,7 @@ def main():
   # Create a map of supported commands and handlers
   command_handlers = get_command_handlers()
   # Execute
-  local_commands = ('help', 'version', 'config')
+  local_commands = ('help', 'version', 'config', 'standalone')
   return execute(command_handlers, local_commands)
 
 

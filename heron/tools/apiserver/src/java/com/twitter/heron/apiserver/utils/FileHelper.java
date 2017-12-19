@@ -113,7 +113,7 @@ public final class FileHelper {
 
   // save uploaded file to new location
   public static void writeToFile(InputStream uploadedInputStream,
-                           String uploadedFileLocation) throws IOException {
+                                 String uploadedFileLocation) throws IOException {
     File file = new File(uploadedFileLocation);
     file.getParentFile().mkdirs();
 
