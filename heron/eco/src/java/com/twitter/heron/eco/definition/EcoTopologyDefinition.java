@@ -34,7 +34,7 @@ public class EcoTopologyDefinition {
   public void setSpouts(List<SpoutDefinition> sources) {
     this.spouts = new LinkedHashMap<>();
     for (SpoutDefinition source: sources) {
-      this.spouts.put(source.getName(), source);
+      this.spouts.put(source.getId(), source);
     }
   }
 
@@ -45,7 +45,7 @@ public class EcoTopologyDefinition {
   public void setBolts(List<BoltDefinition> children) {
     this.bolts = new LinkedHashMap<>();
     for (BoltDefinition child: children) {
-      this.bolts.put(child.getName(), child);
+      this.bolts.put(child.getId(), child);
     }
   }
 

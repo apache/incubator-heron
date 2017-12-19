@@ -53,15 +53,6 @@ public final class EcoBuilder {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 
-    for (StreamDefinition def: topologyDefinition.getStreams()) {
-      ComponentStream componentStream = new ComponentStream();
-      componentStream.setFromComponent(def.getFrom());
-      componentStream.setToComponent(def.getTo());
-      componentStream.setStreamName(def.getName());
-      componentStreams.put(def.getName(), componentStream);
-      LOG.info("component stream: " + componentStream.toString());
-    }
-
     HashMap<String, BoltDeclarer> declarers = new HashMap<>();
     for (StreamDefinition stream : topologyDefinition.getStreams()) {
       Object boltObj = executionContext.getBolt(stream.getTo());
@@ -94,20 +85,20 @@ public final class EcoBuilder {
             boltObj.getClass().getName());
       }
 
-      BoltDefinition boltDef = topologyDefinition.getBoltDef(stream.getTo());
-      if (boltDef.getOnHeapMemoryLoad() > -1) {
-        if (boltDef.getOffHeapMemoryLoad() > -1) {
-          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad(), boltDef.getOffHeapMemoryLoad());
-        } else {
-          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad());
-        }
-      }
-      if (boltDef.getCpuLoad() > -1) {
-        declarer.setCPULoad(boltDef.getCpuLoad());
-      }
-      if (boltDef.getNumTasks() > -1) {
-        declarer.setNumTasks(boltDef.getNumTasks());
-      }
+//      BoltDefinition boltDef = topologyDefinition.getBoltDef(stream.getTo());
+//      if (boltDef.getOnHeapMemoryLoad() > -1) {
+//        if (boltDef.getOffHeapMemoryLoad() > -1) {
+//          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad(), boltDef.getOffHeapMemoryLoad());
+//        } else {
+//          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad());
+//        }
+//      }
+//      if (boltDef.getCpuLoad() > -1) {
+//        declarer.setCPULoad(boltDef.getCpuLoad());
+//      }
+//      if (boltDef.getNumTasks() > -1) {
+//        declarer.setNumTasks(boltDef.getNumTasks());
+//      }
 
       GroupingDefinition grouping = stream.getGrouping();
       // if the streamId is defined, use it for the grouping, otherwise assume storm's default stream
@@ -152,7 +143,7 @@ public final class EcoBuilder {
 
     for (ObjectDefinition def: topologyDefinition.getBolts()) {
       Object obj = buildObject(def);
-      bolts.put(def.getName(), obj);
+      bolts.put(def.getId(), obj);
     }
 
     executionContext.setBolts(bolts);
@@ -165,7 +156,7 @@ public final class EcoBuilder {
 
     for (ObjectDefinition def: topologyDefinition.getSpouts()) {
       Object obj = buildObject(def);
-      spouts.put(def.getName(), obj);
+      spouts.put(def.getId(), obj);
     }
 
     executionContext.setSpouts(spouts);

@@ -18,17 +18,17 @@ import java.util.List;
 
 public abstract class ObjectDefinition {
 
-  private String name;
+  private String id;
   private String className;
   private int parallelism = 1;
   private List<Object> constructorArgs;
 
-  public String getName() {
-    return name;
+  public String getId() {
+    return id;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getClassName() {

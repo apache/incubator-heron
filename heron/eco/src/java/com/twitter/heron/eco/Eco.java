@@ -25,6 +25,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -65,6 +66,8 @@ public final class Eco {
         .buildTopologyBuilder(executionContext);
 
     LOG.info("Eco Builder: " + builder.toString());
+
+    HeronSubmitter.submitTopology("ecoTopology", topologyConfig, builder.createTopology());
 
   }
 
