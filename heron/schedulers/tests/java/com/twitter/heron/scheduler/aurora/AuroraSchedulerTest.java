@@ -282,6 +282,9 @@ public class AuroraSchedulerTest {
         case STATEMGR_ROOT_PATH:
           expected = null;
           break;
+        case STATEMGR_YAML:
+          expected = expectedConf + "/statemgr.yaml";
+          break;
         case COMPONENT_JVM_OPTS_IN_BASE64:
         case INSTANCE_JVM_OPTS_IN_BASE64:
           expected = "\"\"";
