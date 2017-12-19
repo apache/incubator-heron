@@ -15,7 +15,7 @@ package com.twitter.heron.eco.definition;
 
 public class BeanDefinition extends ObjectDefinition {
 
-  String id;
+  private String id;
 
   public String getId() {
     return id;

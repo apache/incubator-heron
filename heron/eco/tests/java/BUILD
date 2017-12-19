@@ -21,3 +21,10 @@ java_test(
     deps = eco_test_deps,
     size = "small",
 )
+
+java_test(
+    name = "EcoParserTest",
+    srcs = glob(["com/twitter/heron/eco/helper/EcoParserTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)

@@ -31,6 +31,10 @@ public class EcoTopologyDefinition {
     return new ArrayList<>(this.spouts.values());
   }
 
+  public SpoutDefinition getSpout(String id) {
+    return this.spouts.get(id);
+  }
+
   public void setSpouts(List<SpoutDefinition> sources) {
     this.spouts = new LinkedHashMap<>();
     for (SpoutDefinition source: sources) {
@@ -40,6 +44,10 @@ public class EcoTopologyDefinition {
 
   public List<BoltDefinition> getBolts() {
     return new ArrayList<>(this.bolts.values());
+  }
+
+  public BoltDefinition getBolt(String id) {
+    return this.bolts.get(id);
   }
 
   public void setBolts(List<BoltDefinition> children) {
@@ -56,6 +64,7 @@ public class EcoTopologyDefinition {
   public void setStreams(List<StreamDefinition> streams) {
     this.streams = streams;
   }
+
 
   public Map<String, Object> getConfig() {
     return config;

@@ -25,11 +25,12 @@ import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.eco.definition.GroupingDefinition;
-import com.twitter.heron.eco.definition.ObjectDefinition;
+
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.GroupingDefinition;
+import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
 public final class EcoBuilder {
@@ -58,14 +59,14 @@ public final class EcoBuilder {
       Object boltObj = executionContext.getBolt(stream.getTo());
       BoltDeclarer declarer = declarers.get(stream.getTo());
       if (boltObj instanceof IRichBolt) {
-        if(declarer == null) {
+        if (declarer == null) {
           declarer = builder.setBolt(stream.getTo(),
               (IRichBolt) boltObj,
               topologyDefinition.parallelismForBolt(stream.getTo()));
           declarers.put(stream.getTo(), declarer);
         }
       } else if (boltObj instanceof IBasicBolt) {
-        if(declarer == null) {
+        if (declarer == null) {
           declarer = builder.setBolt(
               stream.getTo(),
               (IBasicBolt) boltObj,
@@ -73,7 +74,7 @@ public final class EcoBuilder {
           declarers.put(stream.getTo(), declarer);
         }
       } else if (boltObj instanceof IWindowedBolt) {
-        if(declarer == null) {
+        if (declarer == null) {
           declarer = builder.setBolt(
               stream.getTo(),
               (IWindowedBolt) boltObj,
@@ -81,8 +82,8 @@ public final class EcoBuilder {
           declarers.put(stream.getTo(), declarer);
         }
       }  else {
-        throw new IllegalArgumentException("Class does not appear to be a bolt: " +
-            boltObj.getClass().getName());
+        throw new IllegalArgumentException("Class does not appear to be a bolt: "
+            + boltObj.getClass().getName());
       }
 
 //      BoltDefinition boltDef = topologyDefinition.getBoltDef(stream.getTo());
@@ -101,8 +102,10 @@ public final class EcoBuilder {
 //      }
 
       GroupingDefinition grouping = stream.getGrouping();
-      // if the streamId is defined, use it for the grouping, otherwise assume storm's default stream
-      String streamId = (grouping.getStreamId() == null ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId());
+      // if the streamId is defined, use it for the grouping,
+      // otherwise assume storm's default stream
+      String streamId = grouping.getStreamId() == null
+          ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId();
 
 
       switch (grouping.getType()) {

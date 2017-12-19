@@ -70,7 +70,6 @@ public final class Eco {
     TopologyBuilder builder = EcoBuilder
         .buildTopologyBuilder(executionContext);
 
-    LOG.info("Eco Builder: " + builder.toString());
 
     HeronSubmitter.submitTopology("ecoTopology", topologyConfig, builder.createTopology());
 
@@ -101,25 +100,28 @@ public final class Eco {
     return options;
   }
 
-  static void printTopologyInfo(EcoExecutionContext ctx){
+  static void printTopologyInfo(EcoExecutionContext ctx) {
     EcoTopologyDefinition t = ctx.getTopologyDefinition();
 
-      LOG.info("---------- TOPOLOGY DETAILS ----------");
+    LOG.info("---------- TOPOLOGY DETAILS ----------");
 
     LOG.info(String.format("Topology Name: %s", t.getName()));
-      LOG.info("--------------- SPOUTS ---------------");
-      for (SpoutDefinition s : t.getSpouts()) {
-        LOG.info(String.format("%s [%d] (%s)", s.getId(), s.getParallelism(), s.getClassName()));
-      }
+    LOG.info("--------------- SPOUTS ---------------");
+    for (SpoutDefinition s : t.getSpouts()) {
+      LOG.info(String.format("%s [%d] (%s)", s.getId(), s.getParallelism(), s.getClassName()));
+    }
     LOG.info("---------------- BOLTS ---------------");
-      for (BoltDefinition b : t.getBolts()) {
-        LOG.info(String.format("%s [%d] (%s)", b.getId(), b.getParallelism(), b.getClassName()));
-      }
+    for (BoltDefinition b : t.getBolts()) {
+      LOG.info(String.format("%s [%d] (%s)", b.getId(), b.getParallelism(), b.getClassName()));
+    }
 
     LOG.info("--------------- STREAMS ---------------");
-      for (StreamDefinition sd : t.getStreams()) {
-        LOG.info(String.format("%s --%s--> %s", sd.getFrom(), sd.getGrouping().getType(), sd.getTo()));
-      }
+    for (StreamDefinition sd : t.getStreams()) {
+      LOG.info(String.format("%s --%s--> %s",
+          sd.getFrom(),
+          sd.getGrouping().getType(),
+          sd.getTo()));
+    }
     LOG.info("--------------------------------------");
   }
 }
