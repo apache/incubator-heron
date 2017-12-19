@@ -38,7 +38,7 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.CONSUMER, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefix.CONSUMER, stageNames);
     bldr.setBolt(getName(), new ConsumerSink<>(consumer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
