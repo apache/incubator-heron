@@ -16,7 +16,7 @@ package com.twitter.heron.eco.definition;
 
 import java.util.List;
 
-public abstract class ComponentDefinition {
+public abstract class ObjectDefinition {
 
   private String name;
   private String className;

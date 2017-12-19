@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.eco.definition.ComponentDefinition;
+import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -70,7 +70,7 @@ public final class EcoBuilder {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> bolts = new HashMap<>();
 
-    for (ComponentDefinition def: topologyDefinition.getBolts()) {
+    for (ObjectDefinition def: topologyDefinition.getBolts()) {
       Object obj = buildObject(def);
       bolts.put(def.getName(), obj);
     }
@@ -83,7 +83,7 @@ public final class EcoBuilder {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> spouts = new HashMap<>();
 
-    for (ComponentDefinition def: topologyDefinition.getSpouts()) {
+    for (ObjectDefinition def: topologyDefinition.getSpouts()) {
       Object obj = buildObject(def);
       spouts.put(def.getName(), obj);
     }
@@ -93,7 +93,7 @@ public final class EcoBuilder {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Object buildObject(ComponentDefinition def)
+  private static Object buildObject(ObjectDefinition def)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     Class clazz = Class.forName(def.getClassName());
     return clazz.newInstance();

@@ -13,5 +13,15 @@
 //  limitations under the License.
 package com.twitter.heron.eco.definition;
 
-public class BoltDefinition extends ObjectDefinition {
+public class BeanDefinition extends ObjectDefinition {
+
+  String id;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
 }

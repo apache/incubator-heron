@@ -18,6 +18,7 @@ public class StreamDefinition {
   private String name;
   private String to;
   private String from;
+  private GroupingDefinition grouping;
 
   public String getName() {
     return name;
@@ -41,5 +42,13 @@ public class StreamDefinition {
 
   public void setFrom(String from) {
     this.from = from;
+  }
+
+  public GroupingDefinition getGrouping() {
+    return grouping;
+  }
+
+  public void setGrouping(GroupingDefinition groupingDefinition) {
+    this.grouping = groupingDefinition;
   }
 }
