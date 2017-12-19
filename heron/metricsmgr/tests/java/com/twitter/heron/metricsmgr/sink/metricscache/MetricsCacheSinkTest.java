@@ -25,11 +25,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.config.SystemConfigKey;
-import com.twitter.heron.metricsmgr.LatchedMultiCountMetric;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
@@ -120,7 +120,7 @@ public class MetricsCacheSinkTest {
     // several times Take other factors into account, we would check whether the MetricsCacheClient
     // has restarted at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL
     assertTrue(metricsCacheSink.getMetricsCacheStartedAttempts()
-        > (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
+        >= (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
     metricsCacheSink.close();
   }
 
@@ -142,8 +142,7 @@ public class MetricsCacheSinkTest {
     // It is null since we have not set it
     Assert.assertNull(metricsCacheSink.getCurrentMetricsCacheLocation());
 
-    LatchedMultiCountMetric multiCountMetric =
-        new LatchedMultiCountMetric("tmaster-location-update-count", 1L, 2L);
+    MultiCountMetric multiCountMetric = new MultiCountMetric();
     SinkContext sinkContext =
         new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", multiCountMetric);
 
@@ -154,7 +153,7 @@ public class MetricsCacheSinkTest {
     TopologyMaster.MetricsCacheLocation oldLoc = getMetricsCacheLocation(0);
     SingletonRegistry.INSTANCE.registerSingleton(METRICSCACHE_LOCATION_BEAN_NAME, oldLoc);
 
-    multiCountMetric.await(RESTART_WAIT_INTERVAL);
+    SysUtils.sleep(RESTART_WAIT_INTERVAL);
 
     // The MetricsCacheService should start
     assertTrue(metricsCacheSink.getMetricsCacheStartedAttempts() > 0);
@@ -167,7 +166,7 @@ public class MetricsCacheSinkTest {
 
     int lastMetricsCacheStartedAttempts = metricsCacheSink.getMetricsCacheStartedAttempts();
 
-    multiCountMetric.await(RESTART_WAIT_INTERVAL);
+    SysUtils.sleep(RESTART_WAIT_INTERVAL);
 
     // The MetricsCacheService should use the new MetricsCacheLocation
     assertTrue(
