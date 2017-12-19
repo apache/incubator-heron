@@ -15,10 +15,14 @@ package com.twitter.heron.eco.helper;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.Test;
 
+import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.GroupingDefinition;
+import com.twitter.heron.eco.definition.StreamDefinition;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +30,10 @@ import static org.junit.Assert.assertEquals;
 
 public class EcoParserTest {
 
+
   private static final String BOLT_1 = "bolt-1";
+  private static final String SPOUT_1 = "spout-1";
+  private static final String STREAM_1_NAME = "spout-1 --> bolt-1";
   private static final String YAML_STR = "# Licensed to the Apache Software Foundation"
       + " (ASF) under one\n"
       + "# or more contributor license agreements.  See the NOTICE file\n"
@@ -97,9 +104,20 @@ public class EcoParserTest {
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
 
-    assertNotNull(topologyDefinition.getBolt(BOLT_1));
-    assertEquals(topologyDefinition.getBolt(BOLT_1).getParallelism(), 2);
+    BoltDefinition bolt1 = topologyDefinition.getBolt(BOLT_1);
+    assertNotNull(bolt1);
+    assertEquals(bolt1.getParallelism(), 2);
 
+    List<StreamDefinition> streamDefinitions = topologyDefinition.getStreams();
+
+    assertEquals(2, streamDefinitions.size());
+    assertEquals(BOLT_1, streamDefinitions.get(0).getTo());
+    assertEquals(SPOUT_1, streamDefinitions.get(0).getFrom());
+    assertEquals(STREAM_1_NAME, streamDefinitions.get(0).getName());
+    assertEquals(STREAM_1_NAME, streamDefinitions.get(0).getGrouping().getStreamId());
+    assertEquals(GroupingDefinition.Type.FIELDS, streamDefinitions.get(0).getGrouping().getType());
+    assertEquals(1, streamDefinitions.get(0).getGrouping().getArgs().size());
+    assertEquals("word", streamDefinitions.get(0).getGrouping().getArgs().get(0));
 
 
 
