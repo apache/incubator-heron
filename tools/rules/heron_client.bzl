@@ -5,6 +5,7 @@ def heron_client_bin_files():
     return [
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
+        "//third_party/nomad:heron-nomad",
     ]
 
 def heron_client_conf_files():
@@ -69,6 +70,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-scp-uploader",
         "//heron/uploaders/src/java:heron-gcs-uploader",
         "//heron/uploaders/src/java:heron-dlog-uploader",
+        "//heron/uploaders/src/java:heron-http-uploader"
     ]
 
 def heron_client_lib_healthmgr_files():
