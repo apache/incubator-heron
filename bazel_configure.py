@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
