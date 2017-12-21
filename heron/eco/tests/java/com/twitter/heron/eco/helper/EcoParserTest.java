@@ -114,10 +114,10 @@ public class EcoParserTest {
     assertEquals(BOLT_1, streamDefinitions.get(0).getTo());
     assertEquals(SPOUT_1, streamDefinitions.get(0).getFrom());
     assertEquals(STREAM_1_NAME, streamDefinitions.get(0).getName());
-    assertEquals(STREAM_1_NAME, streamDefinitions.get(0).getGrouping().getStreamId());
     assertEquals(GroupingDefinition.Type.FIELDS, streamDefinitions.get(0).getGrouping().getType());
     assertEquals(1, streamDefinitions.get(0).getGrouping().getArgs().size());
     assertEquals("word", streamDefinitions.get(0).getGrouping().getArgs().get(0));
+
 
 
 
