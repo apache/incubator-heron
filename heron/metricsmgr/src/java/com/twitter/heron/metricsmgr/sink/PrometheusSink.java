@@ -62,9 +62,6 @@ public class PrometheusSink extends AbstractWebSink {
 
   @Override
   void initialize(Map<String, Object> configuration, SinkContext context) {
-
-    LOG.info("prometheus sink configuration:\n" + configuration);
-
     metricsCache = createCache();
 
     cluster = context.getCluster();
