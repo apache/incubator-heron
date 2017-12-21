@@ -224,6 +224,7 @@ public final class SchedulerUtils {
    * @param runtime The runtime Config
    * @param ports a map of ports to use where the key indicate the port type and the
    * value is the port
+   * @param containerIndex The index of the current container
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
@@ -235,6 +236,13 @@ public final class SchedulerUtils {
     return args.toArray(new String[args.size()]);
   }
 
+  /**
+   * Util method to parse configs and translate them into topology configs to be used by executor
+   *
+   * @param args The list to accept new topology arguments
+   * @param config The static Config
+   * @param runtime The runtime Config
+   */
   public static void addExecutorTopologyArgs(List<String> args, Config config, Config runtime) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     args.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
@@ -296,13 +304,22 @@ public final class SchedulerUtils {
         completeCkptmgrProcessClassPath));
     args.add(createCommandArg(ExecutorFlag.StatefulConfigFile, Context.statefulConfigFile(config)));
 
-    String healthMgrMode = Context.healthMgrMode(config) ==
-        null ? "disabled" : Context.healthMgrMode(config);
+    String healthMgrMode = Context.healthMgrMode(config)
+        == null ? "disabled" : Context.healthMgrMode(config);
     args.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
     args.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
         Context.healthMgrClassPath(config)));
   }
 
+  /**
+   * Util method to parse port map and container id and translate them into arguments to be used
+   * by executor
+   *
+   * @param args The list to accept new topology arguments
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @param containerIndex The index of the current container
+   */
   public static void addExecutorContainerArgs(
       List<String> args,
       Map<ExecutorPort, String> ports,
