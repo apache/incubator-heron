@@ -18,7 +18,6 @@ filegroup(
         ["conf/**/*.aurora"]
         + ["conf/**/*.hcl"]
         + ["conf/**/*.sh"]
-        + ["conf/**/*.txt"]
         + ["conf/**/*.yaml"]),
 )
 

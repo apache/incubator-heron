@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,7 @@ import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.packing.PackingPlan;
 
 @Path("/topologies")
 public class TopologyResource extends HeronResource {
@@ -165,17 +167,6 @@ public class TopologyResource extends HeronResource {
       final File topologyBinaryFile = Forms.uploadFile(topologyFilePart, topologyDirectory);
 
       final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
-      final Config config = createConfig(
-          Arrays.asList(
-              Pair.create(Key.CLUSTER.value(), cluster),
-              Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
-              Pair.create(Key.ROLE.value(), role),
-              Pair.create(Key.ENVIRON.value(), environment),
-              Pair.create(Key.SUBMIT_USER.value(), user),
-              Pair.create(Key.DRY_RUN.value(), isDryRun)
-          ),
-          submitOverrides
-      );
 
       // copy configuration files to the sandbox config location
       // topology-dir/<default-heron-sandbox-config>
@@ -203,6 +194,25 @@ public class TopologyResource extends HeronResource {
       final File topologyPackageFile =
           Paths.get(topologyDirectory, TOPOLOGY_TAR_GZ_FILENAME).toFile();
       FileHelper.createTarGz(topologyPackageFile, FileHelper.getChildren(topologyDirectory));
+
+      //create configs
+      Config topologyConfig = ConfigUtils.getTopologyConfig(
+          topologyPackageFile.getAbsolutePath(),
+          topologyBinaryFile.getName(),
+          topologyDefinitionFile.getAbsolutePath());
+      List<Pair<String, Object>> val = new LinkedList<>();
+      for (Map.Entry<String, Object> entry : topologyConfig.getEntrySet()) {
+        val.add(Pair.create(entry.getKey(), entry.getValue()));
+      }
+      val.addAll(Arrays.asList(
+          Pair.create(Key.CLUSTER.value(), cluster),
+          Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
+          Pair.create(Key.ROLE.value(), role),
+          Pair.create(Key.ENVIRON.value(), environment),
+          Pair.create(Key.SUBMIT_USER.value(), user),
+          Pair.create(Key.DRY_RUN.value(), isDryRun)
+      ));
+      final Config config = createConfig(val, submitOverrides);
 
       // submit the topology
       getActionFactory()
@@ -457,7 +467,7 @@ public class TopologyResource extends HeronResource {
   }
 
   private boolean isLocalMode() {
-    return "local".equalsIgnoreCase(getCluster());
+    return "local".equalsIgnoreCase(getCluster()) || "standalone".equalsIgnoreCase(getCluster());
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {

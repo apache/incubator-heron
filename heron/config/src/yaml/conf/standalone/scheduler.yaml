@@ -11,7 +11,7 @@ heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLU
 heron.directory.sandbox.java.home:           ${JAVA_HOME}
 
 # The URI of Nomad API
-heron.nomad.scheduler.uri:             http://127.0.0.1:4646
+::             http://127.0.0.1:4646
 
 #Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False

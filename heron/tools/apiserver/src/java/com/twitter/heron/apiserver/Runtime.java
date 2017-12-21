@@ -165,8 +165,10 @@ public final class Runtime {
   // working-dir/heron-core
   private static String getHeronDirectory(CommandLine cmd) {
     final String cluster = cmd.getOptionValue(Flag.Cluster.name);
-    return "local".equalsIgnoreCase(cluster)
-        ? Constants.DEFAULT_HERON_LOCAL : Key.HERON_CLUSTER_HOME.getDefaultString();
+    if ("local".equalsIgnoreCase(cluster) || "standalone".equalsIgnoreCase(cluster)) {
+      return Constants.DEFAULT_HERON_LOCAL;
+    }
+    return Key.HERON_CLUSTER_HOME.getDefaultString();
   }
 
   private static String getReleaseFile(String toolsHome, CommandLine cmd) {
@@ -239,11 +241,12 @@ public final class Runtime {
     final String configurationOverrides = loadOverrides(cmd);
     final int port = getPort(cmd);
 
+    LOG.info("load baseConfiguration");
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
-            heronConfigurationDirectory,
-            releaseFile,
-            configurationOverrides);
+        heronConfigurationDirectory,
+        releaseFile,
+        configurationOverrides);
 
     final ResourceConfig config = new ResourceConfig(Resources.get());
     final Server server = new Server(port);
@@ -253,6 +256,7 @@ public final class Runtime {
     contextHandler.setContextPath("/");
 
     LOG.info("using configuration path: {}", heronConfigurationDirectory);
+    LOG.info("baseConfiguration: {}", baseConfiguration);
 
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CLUSTER, cluster);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION, baseConfiguration);

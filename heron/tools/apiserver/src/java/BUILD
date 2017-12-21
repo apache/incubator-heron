@@ -15,6 +15,7 @@ scheduler_deps_files = [
   "//heron/schedulers/src/java:mesos-scheduler-java",
   "//heron/schedulers/src/java:yarn-scheduler-java",
   "//heron/schedulers/src/java:slurm-scheduler-java",
+  "//heron/schedulers/src/java:nomad-scheduler-java"
 ]
 
 packing_deps_files = [
