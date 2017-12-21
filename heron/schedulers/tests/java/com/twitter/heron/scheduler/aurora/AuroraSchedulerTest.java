@@ -293,39 +293,41 @@ public class AuroraSchedulerTest {
           expected = "http://foo/bar";
           break;
         case TOPOLOGY_ARGUMENTS:
-          expected = "--topology-name=topologyName" +
-          " --topology-id=" + topology.getId() +
-          " --topology-defn-file=defnFile.defn" +
-          " --state-manager-connection=null" +
-          " --state-manager-root=null" +
-          " --state-manager-config-file=./heron-conf/statemgr.yaml" +
-          " --tmaster-binary=./heron-core/bin/heron-tmaster" +
-          " --stmgr-binary=./heron-core/bin/heron-stmgr" +
-          " --metrics-manager-classpath=./heron-core/lib/metricsmgr/*" +
-          " --instance-jvm-opts=\"\"" +
-          " --classpath=binaryFile.jar" +
-          " --heron-internals-config-file=./heron-conf/heron_internals.yaml" +
-          " --override-config-file=./heron-conf/override.yaml" +
-          " --component-ram-map=null" +
-          " --component-jvm-opts=\"\"" +
-          " --pkg-type=jar" +
-          " --topology-binary-file=binaryFile.jar" +
-          " --heron-java-home=/usr/lib/jvm/default-java" +
-          " --heron-shell-binary=./heron-core/bin/heron-shell" +
-          " --cluster=some_cluster" +
-          " --role=some_role" +
-          " --environment=some_env" +
-          " --instance-classpath=./heron-core/lib/instance/*" +
-          " --metrics-sinks-config-file=./heron-conf/metrics_sinks.yaml" +
-          " --scheduler-classpath=./heron-core/lib/scheduler/*:./heron-core/lib/packing/*:./heron-core/lib/statemgr/*" +
-          " --python-instance-binary=./heron-core/bin/heron-python-instance" +
-          " --cpp-instance-binary=./heron-core/bin/heron-cpp-instance" +
-          " --metricscache-manager-classpath=./heron-core/lib/metricscachemgr/*" +
-          " --is-stateful=false" +
-          " --checkpoint-manager-classpath=./heron-core/lib/ckptmgr/*:./heron-core/lib/statefulstorage/*:" +
-          " --stateful-config-file=./heron-conf/stateful.yaml" +
-          " --health-manager-mode=disabled" +
-          " --health-manager-classpath=./heron-core/lib/healthmgr/*";
+          expected = "--topology-name=topologyName"
+            + " --topology-id=" + topology.getId()
+            + " --topology-defn-file=defnFile.defn"
+            + " --state-manager-connection=null"
+            + " --state-manager-root=null"
+            + " --state-manager-config-file=./heron-conf/statemgr.yaml"
+            + " --tmaster-binary=./heron-core/bin/heron-tmaster"
+            + " --stmgr-binary=./heron-core/bin/heron-stmgr"
+            + " --metrics-manager-classpath=./heron-core/lib/metricsmgr/*"
+            + " --instance-jvm-opts=\"\""
+            + " --classpath=binaryFile.jar"
+            + " --heron-internals-config-file=./heron-conf/heron_internals.yaml"
+            + " --override-config-file=./heron-conf/override.yaml"
+            + " --component-ram-map=null"
+            + " --component-jvm-opts=\"\""
+            + " --pkg-type=jar"
+            + " --topology-binary-file=binaryFile.jar"
+            + " --heron-java-home=/usr/lib/jvm/default-java"
+            + " --heron-shell-binary=./heron-core/bin/heron-shell"
+            + " --cluster=some_cluster"
+            + " --role=some_role"
+            + " --environment=some_env"
+            + " --instance-classpath=./heron-core/lib/instance/*"
+            + " --metrics-sinks-config-file=./heron-conf/metrics_sinks.yaml"
+            + " --scheduler-classpath=./heron-core/lib/scheduler/*:./heron-core"
+            + "/lib/packing/*:./heron-core/lib/statemgr/*"
+            + " --python-instance-binary=./heron-core/bin/heron-python-instance"
+            + " --cpp-instance-binary=./heron-core/bin/heron-cpp-instance"
+            + " --metricscache-manager-classpath=./heron-core/lib/metricscachemgr/*"
+            + " --is-stateful=false"
+            + " --checkpoint-manager-classpath=./heron-core/lib/ckptmgr/*:"
+            + "./heron-core/lib/statefulstorage/*:"
+            + " --stateful-config-file=./heron-conf/stateful.yaml"
+            + " --health-manager-mode=disabled"
+            + " --health-manager-classpath=./heron-core/lib/healthmgr/*";
           break;
         default:
           fail(String.format(
