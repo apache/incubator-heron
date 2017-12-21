@@ -241,12 +241,11 @@ public final class Runtime {
     final String configurationOverrides = loadOverrides(cmd);
     final int port = getPort(cmd);
 
-    LOG.info("load baseConfiguration");
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
-        heronConfigurationDirectory,
-        releaseFile,
-        configurationOverrides);
+            heronConfigurationDirectory,
+            releaseFile,
+            configurationOverrides);
 
     final ResourceConfig config = new ResourceConfig(Resources.get());
     final Server server = new Server(port);
@@ -256,7 +255,6 @@ public final class Runtime {
     contextHandler.setContextPath("/");
 
     LOG.info("using configuration path: {}", heronConfigurationDirectory);
-    LOG.info("baseConfiguration: {}", baseConfiguration);
 
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CLUSTER, cluster);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION, baseConfiguration);
