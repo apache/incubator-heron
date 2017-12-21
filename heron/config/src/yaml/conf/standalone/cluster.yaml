@@ -1,0 +1,3 @@
+# The Heron API server can be used as a files server to upload and dowload topology packages
+# This is the path the Heron API server will save topology packages on its local filesystem
+heron.apiserver.http.file.system.directory:    ${HOME}/.herondata/repository/topologies/

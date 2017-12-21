@@ -28,6 +28,7 @@ command_to_start_executor = \
   ' --topology-defn-file={{TOPOLOGY_DEFINITION_FILE}}' \
   ' --state-manager-connection={{STATEMGR_CONNECTION_STRING}}' \
   ' --state-manager-root={{STATEMGR_ROOT_PATH}}' \
+  ' --state-manager-config-file={{STATEMGR_YAML}}' \
   ' --tmaster-binary={{TMASTER_BINARY}}' \
   ' --stmgr-binary={{STMGR_BINARY}}' \
   ' --metrics-manager-classpath="{{METRICSMGR_CLASSPATH}}"' \

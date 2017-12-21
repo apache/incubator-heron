@@ -145,6 +145,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_httpcomponents_httpmime",
+  artifact = "org.apache.httpcomponents:httpmime:4.4",
+)
+
+maven_jar(
   name = "org_apache_httpcomponents_http_client",
   artifact = "org.apache.httpcomponents:httpclient:4.5.2",
 )
@@ -851,3 +856,16 @@ container_pull(
     tag = "0.4.0",
 )
 # end docker image building
+
+# for nomad repo
+new_http_archive(
+    name = "nomad_mac",
+    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_darwin_amd64.zip"],
+    build_file = "third_party/nomad/nomad.BUILD",
+)
+
+new_http_archive(
+    name = "nomad_linux",
+    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
+    build_file = "third_party/nomad/nomad.BUILD",
+)

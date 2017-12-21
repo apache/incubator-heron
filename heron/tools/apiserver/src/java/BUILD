@@ -30,6 +30,7 @@ uploader_deps_files = [
   "//heron/uploaders/src/java:gcs-uploader-java",
   "//heron/uploaders/src/java:s3-uploader-java",
   "//heron/uploaders/src/java:dlog-uploader-java",
+  "//heron/uploaders/src/java:http-uploader-java"
 ]
 
 state_manager_deps_files = [
