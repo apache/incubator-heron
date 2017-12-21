@@ -112,18 +112,18 @@ Choices supports the following:
   )
 
   parser_get = parser_action.add_parser(
-    Action.GET,
-    help='Get attributes about the standalone cluster',
-    add_help=True,
-    formatter_class=argparse.RawTextHelpFormatter
+      Action.GET,
+      help='Get attributes about the standalone cluster',
+      add_help=True,
+      formatter_class=argparse.RawTextHelpFormatter
   )
   parser_get.set_defaults(action=Action.GET)
 
   parser_get.add_argument(
-    TYPE,
-    type=str,
-    choices={Get.SERVICE_URL},
-    help= \
+      TYPE,
+      type=str,
+      choices={Get.SERVICE_URL},
+      help= \
       """
       Choices supports the following:
         service-url     - Get service url for standalone cluster
@@ -174,7 +174,6 @@ def update_config_files(cl_args):
   roles = read_and_parse_roles(cl_args)
   Log.debug("roles: %s" % roles)
   masters = list(roles[Role.MASTERS])
-  slaves = list(roles[Role.SLAVES])
   zookeepers = list(roles[Role.ZOOKEEPERS])
 
   template_slave_hcl(cl_args, masters)
@@ -233,13 +232,15 @@ def template_apiserver_hcl(cl_args, masters, zookeepers):
   apiserver_config_actual = "%s/standalone/resources/apiserver.hcl" % cl_args["config_path"]
 
   replacements = {
-    "<heron_apiserver_hostname>": '"%s"' % get_hostname(single_master, cl_args),
-    "<heron_apiserver_executable>": '"%s/heron-apiserver"' % config.get_heron_bin_dir() if is_self(
-      single_master) else '"%s/.heron/bin/heron-apiserver"' % get_remote_home(single_master,
-                                                                              cl_args),
-    "<zookeeper_host:zookeeper_port>": ",".join(
-      ['%s' % zk if ":" in zk else '%s:2181' % zk for zk in zookeepers]),
-    "<scheduler_uri>": "http://%s:4646" % single_master
+      "<heron_apiserver_hostname>": '"%s"' % get_hostname(single_master, cl_args),
+      "<heron_apiserver_executable>": '"%s/heron-apiserver"'
+                                      % config.get_heron_bin_dir()
+                                      if is_self(single_master)
+                                      else '"%s/.heron/bin/heron-apiserver"'
+                                      % get_remote_home(single_master, cl_args),
+      "<zookeeper_host:zookeeper_port>": ",".join(
+          ['%s' % zk if ":" in zk else '%s:2181' % zk for zk in zookeepers]),
+      "<scheduler_uri>": "http://%s:4646" % single_master
   }
 
   template_file(apiserver_config_template, apiserver_config_actual, replacements)
@@ -256,7 +257,7 @@ def template_statemgr_yaml(cl_args, zookeepers):
 
   template_file(statemgr_config_file_template, statemgr_config_file_actual,
                 {"<zookeeper_host:zookeeper_port>": ",".join(
-                  ['"%s"' % zk if ":" in zk else '"%s:2181"' % zk for zk in zookeepers])})
+                    ['"%s"' % zk if ":" in zk else '"%s:2181"' % zk for zk in zookeepers])})
 
 def template_file(src, dest, replacements_dict):
   Log.debug("Templating %s - > %s with %s" % (src, dest, replacements_dict))
@@ -391,8 +392,8 @@ def start_api_server(masters, cl_args):
   # make sure nomad cluster is up
   single_master = list(masters)[0]
 
-  i=0
-  while(True):
+  i = 0
+  while True:
     try:
       r = requests.get("http://%s:4646/v1/status/leader" % single_master)
       if r.status_code == 200:
@@ -405,7 +406,6 @@ def start_api_server(masters, cl_args):
         Log.error("Failed to start Nomad Cluster!")
         sys.exit(-1)
     i = i + 1
-
 
   cmd = "%s run %s >> /tmp/apiserver_start.log 2>&1 &" \
         % (get_nomad_path(cl_args), get_apiserver_job_file(cl_args))
@@ -425,6 +425,23 @@ def start_api_server(masters, cl_args):
   if return_code != 0:
     Log.error("Failed to start apiserver on %s with error:\n%s" % (single_master, output[1]))
     sys.exit(-1)
+
+  i = 0
+  while True:
+    try:
+      r = requests.get("http://%s:4646/v1/job/apiserver" % single_master)
+      if r.status_code == 200 and r.json()["Status"] == "running":
+        break
+      else:
+        raise RuntimeError()
+    except:
+      Log.debug(sys.exc_info()[0])
+      Log.info("Waiting for apiserver to come up... %s" % i)
+      time.sleep(1)
+      if i > 20:
+        Log.error("Failed to start Nomad Cluster!")
+        sys.exit(-1)
+    i = i + 1
 
   Log.info("Done starting Heron API Server")
 

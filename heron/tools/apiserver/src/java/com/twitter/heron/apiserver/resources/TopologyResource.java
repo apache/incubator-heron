@@ -66,7 +66,6 @@ import com.twitter.heron.scheduler.dryrun.UpdateDryRunResponse;
 import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
-import com.twitter.heron.spi.packing.PackingPlan;
 
 @Path("/topologies")
 public class TopologyResource extends HeronResource {
