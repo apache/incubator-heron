@@ -21,6 +21,7 @@ import java.util.Set;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com.twitter.heron.apiserver.resources.ConfigurationResource;
+import com.twitter.heron.apiserver.resources.FileResource;
 import com.twitter.heron.apiserver.resources.NotFoundExceptionHandler;
 import com.twitter.heron.apiserver.resources.TopologyResource;
 
@@ -38,7 +39,8 @@ public final class Resources {
         ConfigurationResource.class,
         TopologyResource.class,
         NotFoundExceptionHandler.class,
-        MultiPartFeature.class
+        MultiPartFeature.class,
+        FileResource.class
     );
   }
 }

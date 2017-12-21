@@ -25,6 +25,13 @@ dlog_deps_files = \
         "@org_apache_distributedlog_core//jar",
         "//heron/io/dlog/src/java:dlog-lib",
     ]
+    
+http_uploader_deps_files = \
+    uploader_spi_files + [
+        "@org_apache_httpcomponents_httpmime//jar",
+        "@org_apache_httpcomponents_http_client//jar",
+        "@org_apache_httpcomponents_http_core//jar"
+    ]
 
 java_library(
     name = 'null-uploader-java',
@@ -153,5 +160,23 @@ genrule(
     name = "heron-gcs-uploader",
     srcs = [":gcs-uploader-unshaded_deploy.jar"],
     outs = ["heron-gcs-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'http-uploader-java',
+    srcs = glob(["**/http/**/*.java"]),
+    deps = http_uploader_deps_files,
+)
+
+java_binary(
+    name = 'http-uploader-unshaded',
+    srcs = glob(["**/http/**/*.java"]),
+    deps = http_uploader_deps_files)
+
+genrule(
+    name = "heron-http-uploader",
+    srcs = [":http-uploader-unshaded_deploy.jar"],
+    outs = ["heron-http-uploader.jar"],
     cmd  = "cp $< $@",
 )
