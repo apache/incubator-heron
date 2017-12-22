@@ -143,7 +143,8 @@ public class TMasterSinkTest {
 
     MultiCountMetric multiCountMetric = new MultiCountMetric();
     SinkContext sinkContext =
-        new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", multiCountMetric);
+        new SinkContextImpl("topology-name", "cluster", "role", "environment",
+            "metricsmgr-id", "sink-id", multiCountMetric);
 
     // Start the TMasterSink
     tMasterSink.init(sinkConfig, sinkContext);

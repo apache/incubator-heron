@@ -399,13 +399,16 @@ class HeronExecutor(object):
                       '-cp',
                       self.metrics_manager_classpath,
                       metricsmgr_main_class,
-                      metricsManagerId,
-                      port,
-                      self.topology_name,
-                      self.topology_id,
-                      self.heron_internals_config_file,
-                      self.override_config_file,
-                      sink_config_file]
+                      '--id=' + metricsManagerId,
+                      '--port=' + str(port),
+                      '--topology=' + self.topology_name,
+                      '--cluster=' + self.cluster,
+                      '--role=' + self.role,
+                      '--environment=' + self.environment,
+                      '--topology-id=' + self.topology_id,
+                      '--system-config-file=' + self.heron_internals_config_file,
+                      '--override-config-file=' + self.override_config_file,
+                      '--sink-config-file=' + sink_config_file]
 
     return metricsmgr_cmd
 
