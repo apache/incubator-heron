@@ -166,7 +166,6 @@ Builder processingGraphBuilder = Builder.newBuilder();
 
 Streamlet<Integer> ones = processingGraphBuilder.newSource(() -> 1);
 Streamlet<Integer> thirteens = ones.map(i -> i + 12);
-thirteens.
 ```
 
 In this example, a supplier streamlet emits an indefinite series of 1s. The `map` operation then adds 12 to each incoming element, producing a streamlet of 13s. The effect of this operation is to transform the `Streamlet<Integer>` into a `Streamlet<Integer>` with different values (map operations can also convert streamlets into streamlets of a different type).
