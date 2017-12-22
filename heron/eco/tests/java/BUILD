@@ -17,14 +17,14 @@ eco_test_deps = heron_local_deps + test_deps_files
 
 java_test(
     name = "EcoBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/helper/EcoBuilderTest.java"]),
+    srcs = glob(["com/twitter/heron/eco/builder/EcoBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small",
 )
 
 java_test(
     name = "EcoParserTest",
-    srcs = glob(["com/twitter/heron/eco/helper/EcoParserTest.java"]),
+    srcs = glob(["com/twitter/heron/eco/parser/EcoParserTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )

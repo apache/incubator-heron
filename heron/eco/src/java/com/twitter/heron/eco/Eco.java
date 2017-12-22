@@ -27,13 +27,14 @@ import org.apache.commons.cli.ParseException;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
+
+import com.twitter.heron.eco.builder.EcoBuilder;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.SpoutDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
-import com.twitter.heron.eco.helper.EcoBuilder;
-import com.twitter.heron.eco.helper.EcoParser;
+import com.twitter.heron.eco.parser.EcoParser;
 
 
 public final class Eco {
