@@ -26,14 +26,14 @@ import com.twitter.heron.eco.definition.StreamDefinition;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class EcoParserTest {
 
 
   private static final String BOLT_1 = "bolt-1";
-  private static final String SPOUT_1 = "spout-1";
-  private static final String STREAM_1_NAME = "spout-1 --> bolt-1";
+  private static final String BOLT_2 = "bolt-2";
   private static final String YAML_STR = "# Licensed to the Apache Software Foundation"
       + " (ASF) under one\n"
       + "# or more contributor license agreements.  See the NOTICE file\n"
@@ -104,30 +104,41 @@ public class EcoParserTest {
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
 
+    assertEquals("yaml-topology", topologyDefinition.getName());
+    assertEquals(1, topologyDefinition.getConfig().size());
+    assertEquals(1, topologyDefinition.getConfig().get("topology.workers"));
+
     BoltDefinition bolt1 = topologyDefinition.getBolt(BOLT_1);
     assertNotNull(bolt1);
-    assertEquals(bolt1.getParallelism(), 2);
+    assertEquals(2, bolt1.getParallelism());
+    assertEquals("com.twitter.heron.sample.TestWordCounter", bolt1.getClassName());
+    assertEquals(BOLT_1, bolt1.getId());
+
+
+    BoltDefinition bolt2 = topologyDefinition.getBolt(BOLT_2);
+    assertEquals(1, bolt2.getParallelism());
+    assertEquals("com.twitter.heron.sample.LogInfoBolt", bolt2.getClassName());
+    assertEquals(BOLT_2, bolt2.getId());
 
     List<StreamDefinition> streamDefinitions = topologyDefinition.getStreams();
-
-    assertEquals(2, streamDefinitions.size());
     StreamDefinition streamDefinitionOne = streamDefinitions.get(0);
-    GroupingDefinition streamOneGrouping = streamDefinitionOne.getGrouping();
-
+    GroupingDefinition groupingDefinitionOne = streamDefinitionOne.getGrouping();
     StreamDefinition streamDefinitionTwo = streamDefinitions.get(1);
     GroupingDefinition groupingDefinitionTwo = streamDefinitionTwo.getGrouping();
 
+    assertEquals(2, streamDefinitions.size());
+
     assertEquals(BOLT_1, streamDefinitionOne.getTo());
-    assertEquals(SPOUT_1, streamDefinitionOne.getFrom());
-    assertEquals(STREAM_1_NAME, streamDefinitionOne.getName());
-    assertEquals(GroupingDefinition.Type.FIELDS, streamOneGrouping.getType());
-    assertEquals(1, streamOneGrouping.getArgs().size());
-    assertEquals("word", streamOneGrouping.getArgs().get(0));
+    assertEquals("spout-1", streamDefinitionOne.getFrom());
+    assertEquals("spout-1 --> bolt-1", streamDefinitionOne.getName());
+    assertEquals(GroupingDefinition.Type.FIELDS, groupingDefinitionOne.getType());
+    assertEquals(1, groupingDefinitionOne.getArgs().size());
+    assertEquals("word", groupingDefinitionOne.getArgs().get(0));
 
-    assertEquals("bolt-2", streamDefinitionTwo.getTo());
-
-
-
-
+    assertEquals(BOLT_2, streamDefinitionTwo.getTo());
+    assertEquals("bolt-1", streamDefinitionTwo.getFrom());
+    assertEquals("bolt-1 --> bolt2", streamDefinitionTwo.getName());
+    assertEquals(GroupingDefinition.Type.SHUFFLE, groupingDefinitionTwo.getType());
+    assertNull(groupingDefinitionTwo.getArgs());
   }
 }
