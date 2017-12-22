@@ -31,12 +31,15 @@ import heron.tools.cli.src.python.args as cli_args
 import heron.tools.common.src.python.utils.config as config
 
 # pylint: disable=anomalous-backslash-in-string
+# pylint: disable=unused-argument
+# pylint: disable=too-many-branches
 
 class Action(object):
   SET = "set"
   CLUSTER = "cluster"
   TEMPLATE = "template"
   GET = "get"
+  INFO = "info"
 
 TYPE = "type"
 
@@ -52,7 +55,11 @@ class Cluster(object):
 
 class Get(object):
   SERVICE_URL = "service-url"
+  HERON_TRACKER_URL = "heron-tracker-url"
+  HERON_UI_URL = "heron-ui-url"
+
 ################################################################################
+
 def create_parser(subparsers):
   '''
   Create a subparser for the standalone command
@@ -122,26 +129,35 @@ Choices supports the following:
   parser_get.add_argument(
       TYPE,
       type=str,
-      choices={Get.SERVICE_URL},
+      choices={Get.SERVICE_URL, Get.HERON_TRACKER_URL, Get.HERON_UI_URL},
       help= \
       """
       Choices supports the following:
-        service-url     - Get service url for standalone cluster
+        service-url         - Get the service url for standalone cluster
+        heron-tracker-url   - Get the url for the heron tracker in standalone cluster
+        heron-ui-url        - Get the url for the heron ui standalone cluster
       """
   )
 
-  add_additional_args([parser_set, parser_cluster, parser_template, parser_get])
+  parser_info = parser_action.add_parser(
+      Action.INFO,
+      help='Get general information about the standalone cluster',
+      add_help=True,
+      formatter_class=argparse.RawTextHelpFormatter
+  )
+  parser_info.set_defaults(action=Action.INFO)
+
+  add_additional_args([parser_set, parser_cluster, parser_template, parser_get, parser_info])
   parser.set_defaults(subcommand='standalone')
   return parser
 
 
 ################################################################################
-# pylint: disable=unused-argument
+
 def run(command, parser, cl_args, unknown_args):
   '''
   runs parser
   '''
-
   action = cl_args["action"]
   if action == Action.SET:
     call_editor(get_inventory_file(cl_args))
@@ -161,7 +177,17 @@ def run(command, parser, cl_args, unknown_args):
   elif action == Action.TEMPLATE:
     update_config_files(cl_args)
   elif action == Action.GET:
-    get_service_url(cl_args)
+    action_type = cl_args["type"]
+    if action_type == Get.HERON_TRACKER_URL:
+      print get_service_url(cl_args)
+    elif action_type == Get.HERON_UI_URL:
+      print get_heron_ui_url(cl_args)
+    elif action_type == Get.HERON_TRACKER_URL:
+      print get_heron_tracker_url(cl_args)
+    else:
+      raise ValueError("Invalid get action %s" % action_type)
+  elif action == Action.INFO:
+    print_cluster_info(cl_args)
   else:
     raise ValueError("Invalid action %s" % action)
 
@@ -181,7 +207,7 @@ def update_config_files(cl_args):
   template_uploader_yaml(cl_args, masters)
   template_apiserver_hcl(cl_args, masters, zookeepers)
   template_statemgr_yaml(cl_args, zookeepers)
-
+  template_heron_tools_hcl(cl_args, masters, zookeepers)
 
 ##################### Templating functions ######################################
 
@@ -189,7 +215,6 @@ def template_slave_hcl(cl_args, masters):
   '''
   Template slave config file
   '''
-
   slave_config_template = "%s/standalone/templates/slave.template.hcl" % cl_args["config_path"]
   slave_config_actual = "%s/standalone/resources/slave.hcl" % cl_args["config_path"]
   masters_in_quotes = ['"%s"' % master for master in masters]
@@ -200,7 +225,6 @@ def template_scheduler_yaml(cl_args, masters):
   '''
   Template scheduler.yaml
   '''
-
   single_master = masters[0]
   scheduler_config_actual = "%s/standalone/scheduler.yaml" % cl_args["config_path"]
 
@@ -213,7 +237,6 @@ def template_uploader_yaml(cl_args, masters):
   '''
   Tempate uploader.yaml
   '''
-
   single_master = masters[0]
   uploader_config_template = "%s/standalone/templates/uploader.template.yaml" \
                              % cl_args["config_path"]
@@ -250,7 +273,6 @@ def template_statemgr_yaml(cl_args, zookeepers):
   '''
   Template statemgr.yaml
   '''
-
   statemgr_config_file_template = "%s/standalone/templates/statemgr.template.yaml" \
                                   % cl_args["config_path"]
   statemgr_config_file_actual = "%s/standalone/statemgr.yaml" % cl_args["config_path"]
@@ -258,6 +280,25 @@ def template_statemgr_yaml(cl_args, zookeepers):
   template_file(statemgr_config_file_template, statemgr_config_file_actual,
                 {"<zookeeper_host:zookeeper_port>": ",".join(
                     ['"%s"' % zk if ":" in zk else '"%s:2181"' % zk for zk in zookeepers])})
+
+def template_heron_tools_hcl(cl_args, masters, zookeepers):
+  '''
+  template heron tools
+  '''
+  heron_tools_hcl_template = "%s/standalone/templates/heron_tools.template.hcl" \
+                             % cl_args["config_path"]
+  heron_tools_hcl_actual = "%s/standalone/resources/heron_tools.hcl" \
+                             % cl_args["config_path"]
+
+  single_master = masters[0]
+  template_file(heron_tools_hcl_template, heron_tools_hcl_actual,
+                {
+                    "<zookeeper_host:zookeeper_port>": ",".join(
+                        ['%s' % zk if ":" in zk else '%s:2181' % zk for zk in zookeepers]),
+                    "<heron_tracker_executable>": '"%s/heron-tracker"' % config.get_heron_bin_dir(),
+                    "<heron_tools_hostname>": '"%s"' % get_hostname(single_master, cl_args),
+                    "<heron_ui_executable>": '"%s/heron-ui"' % config.get_heron_bin_dir()
+                })
 
 def template_file(src, dest, replacements_dict):
   Log.debug("Templating %s - > %s with %s" % (src, dest, replacements_dict))
@@ -279,9 +320,45 @@ def template_file(src, dest, replacements_dict):
 ################################################################################
 
 def get_service_url(cl_args):
+  '''
+  get service url for standalone cluster
+  '''
   roles = read_and_parse_roles(cl_args)
-  service_url = "http://%s:9000" % list(roles[Role.MASTERS])[0]
-  print service_url
+  return "http://%s:9000" % list(roles[Role.MASTERS])[0]
+
+def get_heron_tracker_url(cl_args):
+  '''
+  get service url for standalone cluster
+  '''
+  roles = read_and_parse_roles(cl_args)
+  return "http://%s:8888" % list(roles[Role.MASTERS])[0]
+
+def get_heron_ui_url(cl_args):
+  '''
+  get service url for standalone cluster
+  '''
+  roles = read_and_parse_roles(cl_args)
+  return "http://%s:8889" % list(roles[Role.MASTERS])[0]
+
+def print_cluster_info(cl_args):
+  roles = read_and_parse_roles(cl_args)
+  masters = roles[Role.MASTERS]
+  slaves = roles[Role.SLAVES]
+  zookeepers = roles[Role.ZOOKEEPERS]
+  cluster = roles[Role.CLUSTER]
+  print "Cluster:"
+  print " - Total # of nodes: %s" % len(cluster)
+  print " - Nodes: %s" % cluster
+  print "\n"
+  print "Roles:"
+  print " - Master Servers: %s" % list(masters)
+  print " - Slave Servers: %s" % list(slaves)
+  print " - Zookeeper Servers: %s" % list(zookeepers)
+  print "\n"
+  print "URLs:"
+  print " - Service URL: %s" % get_service_url(cl_args)
+  print " - Heron UI URL: %s" % get_heron_ui_url(cl_args)
+  print " - Heron Tracker URL: %s" % get_heron_tracker_url(cl_args)
 
 def add_additional_args(parsers):
   '''
@@ -383,6 +460,7 @@ def start_cluster(cl_args):
   start_master_nodes(masters, cl_args)
   start_slave_nodes(slaves, cl_args)
   start_api_server(masters, cl_args)
+  start_heron_tools(masters, cl_args)
   Log.info("Heron standalone cluster complete!")
 
 def start_api_server(masters, cl_args):
@@ -391,21 +469,7 @@ def start_api_server(masters, cl_args):
   '''
   # make sure nomad cluster is up
   single_master = list(masters)[0]
-
-  i = 0
-  while True:
-    try:
-      r = requests.get("http://%s:4646/v1/status/leader" % single_master)
-      if r.status_code == 200:
-        break
-    except:
-      Log.debug(sys.exc_info()[0])
-      Log.info("Waiting for cluster to come up... %s" % i)
-      time.sleep(1)
-      if i > 10:
-        Log.error("Failed to start Nomad Cluster!")
-        sys.exit(-1)
-    i = i + 1
+  wait_for_master_to_start(single_master)
 
   cmd = "%s run %s >> /tmp/apiserver_start.log 2>&1 &" \
         % (get_nomad_path(cl_args), get_apiserver_job_file(cl_args))
@@ -426,10 +490,80 @@ def start_api_server(masters, cl_args):
     Log.error("Failed to start apiserver on %s with error:\n%s" % (single_master, output[1]))
     sys.exit(-1)
 
+  wait_for_job_to_start(single_master, "apiserver")
+  Log.info("Done starting Heron API Server")
+
+def start_heron_tools(masters, cl_args):
+  '''
+  Start Heron tracker and UI
+  '''
+  single_master = list(masters)[0]
+  wait_for_master_to_start(single_master)
+
+  cmd = "%s run %s >> /tmp/heron_tools_start.log 2>&1 &" \
+        % (get_nomad_path(cl_args), get_heron_tools_job_file(cl_args))
+  Log.info("Starting Heron Tools on %s" % single_master)
+
+  if not is_self(single_master):
+    cmd = ssh_remote_execute(cmd, single_master, cl_args)
+  Log.debug(cmd)
+  pid = subprocess.Popen(cmd,
+                         shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+
+  return_code = pid.wait()
+  output = pid.communicate()
+  Log.debug("return code: %s output: %s" % (return_code, output))
+  if return_code != 0:
+    Log.error("Failed to start Heron Tools on %s with error:\n%s" % (single_master, output[1]))
+    sys.exit(-1)
+
+  wait_for_job_to_start(single_master, "heron-tools")
+  Log.info("Done starting Heron Tools")
+
+def distribute_package(roles, cl_args):
+  '''
+  distribute Heron packages to all nodes
+  '''
+  Log.info("Distributing heron package to nodes (this might take a while)...")
+  masters = roles[Role.MASTERS]
+  slaves = roles[Role.SLAVES]
+
+  tar_file = tempfile.NamedTemporaryFile(suffix=".tmp").name
+  Log.debug("TAR file %s to %s" % (cl_args["heron_dir"], tar_file))
+  make_tarfile(tar_file, cl_args["heron_dir"])
+  dist_nodes = masters.union(slaves)
+
+  scp_package(tar_file, dist_nodes, cl_args)
+
+def wait_for_master_to_start(single_master):
+  '''
+  Wait for a nomad master to start
+  '''
   i = 0
   while True:
     try:
-      r = requests.get("http://%s:4646/v1/job/apiserver" % single_master)
+      r = requests.get("http://%s:4646/v1/status/leader" % single_master)
+      if r.status_code == 200:
+        break
+    except:
+      Log.debug(sys.exc_info()[0])
+      Log.info("Waiting for cluster to come up... %s" % i)
+      time.sleep(1)
+      if i > 10:
+        Log.error("Failed to start Nomad Cluster!")
+        sys.exit(-1)
+    i = i + 1
+
+def wait_for_job_to_start(single_master, job):
+  '''
+  Wait for a Nomad job to start
+  '''
+  i = 0
+  while True:
+    try:
+      r = requests.get("http://%s:4646/v1/job/%s" % (single_master, job))
       if r.status_code == 200 and r.json()["Status"] == "running":
         break
       else:
@@ -442,24 +576,6 @@ def start_api_server(masters, cl_args):
         Log.error("Failed to start Nomad Cluster!")
         sys.exit(-1)
     i = i + 1
-
-  Log.info("Done starting Heron API Server")
-
-def distribute_package(roles, cl_args):
-  '''
-  distribute Heron packages to all nodes
-  '''
-
-  Log.info("Distributing heron package to nodes (this might take a while)...")
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
-
-  tar_file = tempfile.NamedTemporaryFile(suffix=".tmp").name
-  Log.debug("TAR file %s to %s" % (cl_args["heron_dir"], tar_file))
-  make_tarfile(tar_file, cl_args["heron_dir"])
-  dist_nodes = masters.union(slaves)
-
-  scp_package(tar_file, dist_nodes, cl_args)
 
 def scp_package(package_file, destinations, cl_args):
   '''
@@ -512,7 +628,6 @@ def start_master_nodes(masters, cl_args):
   '''
   Start master nodes
   '''
-
   pids = []
   for master in masters:
     Log.info("Starting master on %s" % master)
@@ -650,25 +765,32 @@ def get_nomad_path(cl_args):
   '''
   get path to nomad binary
   '''
-  return "~/.heron/bin/heron-nomad"
+
+  return "%s/heron-nomad" % config.get_heron_bin_dir()
 
 def get_nomad_master_config_file(cl_args):
   '''
   get path to nomad master config file
   '''
-  return "~/.heron/conf/standalone/resources/master.hcl"
+  return "%s/standalone/resources/master.hcl" % config.get_heron_conf_dir()
 
 def get_nomad_slave_config_file(cl_args):
   '''
   get path to nomad slave config file
   '''
-  return "~/.heron/conf/standalone/resources/slave.hcl"
+  return "%s/standalone/resources/slave.hcl" % config.get_heron_conf_dir()
 
 def get_apiserver_job_file(cl_args):
   '''
   get path to api server job file
   '''
-  return "~/.heron/conf/standalone/resources/apiserver.hcl"
+  return "%s/standalone/resources/apiserver.hcl" % config.get_heron_conf_dir()
+
+def get_heron_tools_job_file(cl_args):
+  '''
+  get path to api server job file
+  '''
+  return "%s/standalone/resources/heron_tools.hcl" % config.get_heron_conf_dir()
 
 def get_remote_home(host, cl_args):
   '''
