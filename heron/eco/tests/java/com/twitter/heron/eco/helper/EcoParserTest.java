@@ -98,7 +98,7 @@ public class EcoParserTest {
       + "      type: SHUFFLE";
 
   @Test
-  public void parseFromInputStream() {
+  public void parseFromInputStream_StreamNotNull_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR.getBytes());
 
@@ -140,5 +140,17 @@ public class EcoParserTest {
     assertEquals("bolt-1 --> bolt2", streamDefinitionTwo.getName());
     assertEquals(GroupingDefinition.Type.SHUFFLE, groupingDefinitionTwo.getType());
     assertNull(groupingDefinitionTwo.getArgs());
+  }
+
+  @Test(expected = Exception.class)
+  public void parseFromInputStream_StreamIsNull_ExpectionThrown() throws Exception {
+    InputStream inputStream = null;
+    EcoTopologyDefinition ecoTopologyDefinition = null;
+
+    try {
+      ecoTopologyDefinition = EcoParser.parseFromInputStream(inputStream);
+    } finally {
+      assertNull(ecoTopologyDefinition);
+    }
   }
 }

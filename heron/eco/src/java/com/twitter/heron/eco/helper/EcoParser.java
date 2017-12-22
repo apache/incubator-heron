@@ -29,12 +29,13 @@ public final class EcoParser {
 
   private EcoParser() { }
 
-  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream) {
+  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream)
+      throws Exception {
 
     Yaml yaml = topologyYaml();
 
     if (inputStream == null) {
-      LOG.info("Unable to load eco input stream");
+      throw new Exception("Unable to load eco input stream");
     }
 
     return loadTopologyFromYaml(yaml, inputStream);
