@@ -35,11 +35,18 @@ public class SinkContextImpl implements SinkContext {
 
   private final String topologyName;
 
-  public SinkContextImpl(String topologyName,
-                         String metricsmgrId,
-                         String sinkId,
-                         MultiCountMetric internalMultiCountMetrics) {
+  private final String cluster;
+
+  private final String role;
+
+  private final String environment;
+
+  public SinkContextImpl(String topologyName, String cluster, String role, String environment,
+      String metricsmgrId, String sinkId, MultiCountMetric internalMultiCountMetrics) {
     this.topologyName = topologyName;
+    this.cluster = cluster;
+    this.role = role;
+    this.environment = environment;
     this.metricsmgrId = metricsmgrId;
     this.sinkId = sinkId;
     this.internalMultiCountMetrics = internalMultiCountMetrics;
@@ -48,6 +55,21 @@ public class SinkContextImpl implements SinkContext {
   @Override
   public String getTopologyName() {
     return topologyName;
+  }
+
+  @Override
+  public String getCluster() {
+    return cluster;
+  }
+
+  @Override
+  public String getRole() {
+    return role;
+  }
+
+  @Override
+  public String getEnvironment() {
+    return environment;
   }
 
   @Override
