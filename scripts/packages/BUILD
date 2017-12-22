@@ -48,6 +48,7 @@ filegroup(
 filegroup(
     name = "tarpkgs",
     srcs = [
+        ":heron-tools",
         ":heron-core",
         ":heron",
     ],
