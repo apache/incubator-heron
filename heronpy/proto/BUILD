@@ -1,7 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto",  "proto_library")
-load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
+load("//tools/rules:genproto.bzl",  "proto_library")
 
 genrule(
     name = "protobuf-srcs",

@@ -7,6 +7,17 @@ load(
 )
 
 load(
+    "@//tools/rules:jarjar_rules.bzl",
+    "jarjar_binary",
+)
+
+load(
+    "@//tools/rules:heron_deps.bzl",
+    "heron_java_proto_files",
+    "heron_java_api_proto_files",
+)
+
+load(
     "@//tools/rules:java_tests.bzl",
     "java_tests",
 )

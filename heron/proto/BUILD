@@ -1,7 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto",  "proto_library")
-load("/tools/rules/pex/pex_rules", "pex_library")
+load("//tools/rules:genproto.bzl",  "proto_library")
 
 filegroup(
     name = "proto-srcs",
