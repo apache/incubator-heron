@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.spout.IRichSpout;
 import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -35,7 +37,6 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
 public final class EcoBuilder {
-  private static final Logger LOG = Logger.getLogger(EcoBuilder.class.getName());
 
   private EcoBuilder() { }
 
@@ -45,14 +46,14 @@ public final class EcoBuilder {
     TopologyBuilder builder = new TopologyBuilder();
     buildSpouts(executionContext, builder);
     buildBolts(executionContext);
-
     buildStreams(executionContext, builder);
 
     return builder;
   }
 
 
-  private static void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder) {
+  private static void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder)
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 
@@ -88,24 +89,10 @@ public final class EcoBuilder {
             + boltObj.getClass().getName());
       }
 
-//      BoltDefinition boltDef = topologyDefinition.getBoltDef(stream.getTo());
-//      if (boltDef.getOnHeapMemoryLoad() > -1) {
-//        if (boltDef.getOffHeapMemoryLoad() > -1) {
-//          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad(), boltDef.getOffHeapMemoryLoad());
-//        } else {
-//          declarer.setMemoryLoad(boltDef.getOnHeapMemoryLoad());
-//        }
-//      }
-//      if (boltDef.getCpuLoad() > -1) {
-//        declarer.setCPULoad(boltDef.getCpuLoad());
-//      }
-//      if (boltDef.getNumTasks() > -1) {
-//        declarer.setNumTasks(boltDef.getNumTasks());
-//      }
-
       GroupingDefinition grouping = stream.getGrouping();
       // if the streamId is defined, use it for the grouping,
-      // otherwise assume storm's default stream
+      // otherwise assume default stream
+      // Todo(joshfischer) Not sure if "default" is still valid
       String streamId = grouping.getStreamId() == null
           ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId();
 
@@ -128,10 +115,10 @@ public final class EcoBuilder {
         case NONE:
           declarer.noneGrouping(stream.getFrom(), streamId);
           break;
-//        case CUSTOM:
-//          declarer.customGrouping(stream.getFrom(), streamId,
-//              buildCustomStreamGrouping(stream.getGrouping().getCustomClass(), context));
-//          break;
+        case CUSTOM:
+          declarer.customGrouping(stream.getFrom(), streamId,
+              buildCustomStreamGrouping(stream.getGrouping().getCustomClass()));
+          break;
         default:
           throw new UnsupportedOperationException("unsupported grouping type: " + grouping);
       }
@@ -139,6 +126,13 @@ public final class EcoBuilder {
 
     executionContext.setStreams(componentStreams);
 
+  }
+
+  private static CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition)
+      throws ClassNotFoundException,
+      IllegalAccessException, InstantiationException {
+    Object grouping = buildObject(objectDefinition);
+    return (CustomStreamGrouping)grouping;
   }
 
   private static void buildBolts(EcoExecutionContext executionContext)
