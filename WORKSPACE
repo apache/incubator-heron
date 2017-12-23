@@ -6,7 +6,6 @@ jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-protobuf_version = "3.4.0"
 distributedlog_version = "0.5.0"
 
 # heron api server
@@ -342,11 +341,6 @@ maven_jar(
 maven_jar(
   name = "org_powermock_powermock_reflect",
   artifact = "org.powermock:powermock-reflect:" + powermock_version,
-)
-
-maven_jar(
-  name = "com_google_protobuf_protobuf_java",
-  artifact = "com.google.protobuf:protobuf-java:" + protobuf_version,
 )
 
 maven_jar(
@@ -788,17 +782,19 @@ new_http_archive(
 )
 # end pex repos
 
+# protobuf dependencies for C++ and Java
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+# end protobuf dependencies for C++ and Java
+
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
     urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
     strip_prefix = "gflags-2.2.1",
-)
-
-http_archive(
-    name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
 )
 
 new_http_archive(

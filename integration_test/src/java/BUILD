@@ -19,7 +19,7 @@ java_library(
         "//heron/proto:proto_topology_java",
         "//third_party/java:jackson",
         "@commons_logging_commons_logging//jar",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",
     ],
