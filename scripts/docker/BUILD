@@ -26,3 +26,13 @@ container_push(
     tag = '{BUILD_USER}',
     stamp = True,
 )
+
+container_push(
+    name = "publish",
+    format = "Docker",
+    image = ":heron",
+    registry = "index.docker.io",
+    repository = "heron/heron",
+    tag = '{BUILD_USER}',
+    stamp = True,
+)

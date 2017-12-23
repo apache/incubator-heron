@@ -1,6 +1,3 @@
-
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 packing_deps_files = [
     ":packing-utils",
     "//heron/spi/src/java:common-spi-java",

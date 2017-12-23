@@ -1,5 +1,3 @@
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = [
     "@com_google_guava_guava//jar",
     "//third_party/java:powermock",

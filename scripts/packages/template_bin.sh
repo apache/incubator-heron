@@ -22,8 +22,8 @@ install_prefix=${1:-"/usr/local/heron"}
 
 progname="$0"
 
-echo "Heron client installer"
-echo "----------------------"
+echo "Heron installer"
+echo "---------------"
 echo
 
 function usage() {
