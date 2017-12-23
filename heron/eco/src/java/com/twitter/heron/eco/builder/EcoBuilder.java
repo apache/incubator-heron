@@ -13,10 +13,8 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBasicBolt;
@@ -111,7 +109,6 @@ public final class EcoBuilder {
         case GLOBAL:
           declarer.globalGrouping(stream.getFrom(), streamId);
           break;
-
         case NONE:
           declarer.noneGrouping(stream.getFrom(), streamId);
           break;
@@ -123,9 +120,7 @@ public final class EcoBuilder {
           throw new UnsupportedOperationException("unsupported grouping type: " + grouping);
       }
     }
-
     executionContext.setStreams(componentStreams);
-
   }
 
   private static CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition)
@@ -144,7 +139,6 @@ public final class EcoBuilder {
       Object obj = buildObject(def);
       bolts.put(def.getId(), obj);
     }
-
     executionContext.setBolts(bolts);
   }
 
@@ -158,9 +152,7 @@ public final class EcoBuilder {
       spouts.put(def.getId(), obj);
       builder.setSpout(def.getId(), (IRichSpout) obj, def.getParallelism());
     }
-
     executionContext.setSpouts(spouts);
-
   }
 
   @SuppressWarnings("rawtypes")
@@ -168,7 +160,6 @@ public final class EcoBuilder {
       throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     Class clazz = Class.forName(def.getClassName());
     return clazz.newInstance();
-
   }
 
   public static Config buildConfig(EcoTopologyDefinition topologyDefinition) {
@@ -181,8 +172,6 @@ public final class EcoBuilder {
         config.put(entry.getKey(), entry.getValue());
       }
       return config;
-
     }
   }
-
 }
