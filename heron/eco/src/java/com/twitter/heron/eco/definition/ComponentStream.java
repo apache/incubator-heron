@@ -15,11 +15,21 @@ package com.twitter.heron.eco.definition;
 
 public class ComponentStream {
 
+  private String id;
+
   private String toComponent;
 
   private String fromComponent;
 
   private String streamName;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public Object getToComponent() {
     return toComponent;

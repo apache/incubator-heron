@@ -84,7 +84,7 @@ public class EcoParserTest {
       + "# note that such connections can be cyclical\n"
       + "streams:\n"
       + "  - name: \"spout-1 --> bolt-1\" # name isn't used (placeholder for logging, UI, etc.)\n"
-      + "#    id: \"connection-1\"\n"
+      + "    id: \"connection-1\"\n"
       + "    from: \"spout-1\"\n"
       + "    to: \"bolt-1\"\n"
       + "    grouping:\n"
@@ -92,6 +92,7 @@ public class EcoParserTest {
       + "      args: [\"word\"]\n"
       + "\n"
       + "  - name: \"bolt-1 --> bolt2\"\n"
+      + "    id: \"connection-2\"\n"
       + "    from: \"bolt-1\"\n"
       + "    to: \"bolt-2\"\n"
       + "    grouping:\n"
@@ -134,12 +135,15 @@ public class EcoParserTest {
     assertEquals(GroupingDefinition.Type.FIELDS, groupingDefinitionOne.getType());
     assertEquals(1, groupingDefinitionOne.getArgs().size());
     assertEquals("word", groupingDefinitionOne.getArgs().get(0));
+    assertEquals("connection-1", streamDefinitionOne.getId());
 
     assertEquals(BOLT_2, streamDefinitionTwo.getTo());
     assertEquals("bolt-1", streamDefinitionTwo.getFrom());
     assertEquals("bolt-1 --> bolt2", streamDefinitionTwo.getName());
     assertEquals(GroupingDefinition.Type.SHUFFLE, groupingDefinitionTwo.getType());
+    assertEquals("connection-2", streamDefinitionTwo.getId());
     assertNull(groupingDefinitionTwo.getArgs());
+
   }
 
   @Test(expected = Exception.class)
