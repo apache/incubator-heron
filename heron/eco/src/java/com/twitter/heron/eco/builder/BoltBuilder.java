@@ -13,33 +13,26 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
-
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.topology.TopologyBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.ObjectDefinition;
 
+public final class BoltBuilder extends BaseBuilder {
 
-public final class EcoBuilder extends BaseBuilder {
+  private BoltBuilder() { }
 
-  private EcoBuilder() { }
+  protected static void buildBolts(EcoExecutionContext executionContext)
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
+    Map<String, Object> bolts = new HashMap<>();
 
-  public static TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
-      throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-
-    TopologyBuilder builder = new TopologyBuilder();
-    SpoutBuilder.addSpoutsToExecutionContext(executionContext, builder);
-    BoltBuilder.buildBolts(executionContext);
-    StreamBuilder.buildStreams(executionContext, builder);
-
-    return builder;
-  }
-
-
-
-
-  public static Config buildConfig(EcoTopologyDefinition topologyDefinition) {
-    return ConfigBuilder.buildConfig(topologyDefinition);
+    for (ObjectDefinition def: topologyDefinition.getBolts()) {
+      Object obj = buildObject(def);
+      bolts.put(def.getId(), obj);
+    }
+    executionContext.setBolts(bolts);
   }
 }
