@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
-
 pex_library(
     name = "tracker-py",
     srcs = glob(
