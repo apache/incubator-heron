@@ -15,6 +15,7 @@
 import json
 import sys
 import traceback
+import collections
 
 from functools import partial
 
@@ -359,6 +360,7 @@ class Tracker(object):
     """
     physicalPlan = {
         "instances": {},
+        "instance_groups": {},
         "stmgrs": {},
         "spouts": {},
         "bolts": {},
@@ -424,6 +426,7 @@ class Tracker(object):
           "instance_ids": []
       }
 
+    instance_groups = collections.OrderedDict()
     for instance in instances:
       instance_id = instance.instance_id
       stmgrId = instance.stmgr_id
@@ -432,6 +435,12 @@ class Tracker(object):
       host = stmgrInfo["host"]
       cwd = stmgrInfo["cwd"]
       shell_port = stmgrInfo["shell_port"]
+
+      index = int(instance.info.component_index) + 1
+      group_name = "container_%d" % index
+      igroup = instance_groups.get(group_name, list())
+      igroup.append(instance_id)
+      instance_groups[group_name] = igroup
 
       physicalPlan["instances"][instance_id] = {
           "id": instance_id,
@@ -444,6 +453,8 @@ class Tracker(object):
         physicalPlan["spouts"][name].append(instance_id)
       else:
         physicalPlan["bolts"][name].append(instance_id)
+
+    physicalPlan["instance_groups"] = instance_groups
 
     return physicalPlan
 
