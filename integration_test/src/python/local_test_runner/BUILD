@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex/pex_rules", "pex_binary")
-
 pex_binary(
     name = "local-test-runner",
     srcs = glob(["*.py"]),

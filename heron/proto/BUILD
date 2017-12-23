@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("//tools/rules:genproto.bzl",  "proto_library")
-
 filegroup(
     name = "proto-srcs",
     srcs = glob(["**/*.proto"]),

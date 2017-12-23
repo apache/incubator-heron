@@ -107,7 +107,7 @@ public class LocalLauncher implements ILauncher {
     // get the path of core release URI
     String coreReleasePackageURI = LocalContext.corePackageUri(config);
 
-    LOG.info("core release package uri: " + coreReleasePackageURI);
+    LOG.log(Level.FINE, "core release package uri: {0}", coreReleasePackageURI);
 
     // form the target dest core release file name
     String coreReleaseFileDestination = Paths.get(
