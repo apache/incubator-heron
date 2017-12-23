@@ -21,6 +21,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.spout.IRichSpout;
 import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.tuple.Fields;
@@ -41,9 +42,10 @@ public final class EcoBuilder {
   public static TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
-    buildSpouts(executionContext);
-    buildBolts(executionContext);
     TopologyBuilder builder = new TopologyBuilder();
+    buildSpouts(executionContext, builder);
+    buildBolts(executionContext);
+
     buildStreams(executionContext, builder);
 
     return builder;
@@ -152,7 +154,7 @@ public final class EcoBuilder {
     executionContext.setBolts(bolts);
   }
 
-  private static void buildSpouts(EcoExecutionContext executionContext)
+  private static void buildSpouts(EcoExecutionContext executionContext, TopologyBuilder builder)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> spouts = new HashMap<>();
@@ -160,6 +162,7 @@ public final class EcoBuilder {
     for (ObjectDefinition def: topologyDefinition.getSpouts()) {
       Object obj = buildObject(def);
       spouts.put(def.getId(), obj);
+      builder.setSpout(def.getId(), (IRichSpout)obj, def.getParallelism());
     }
 
     executionContext.setSpouts(spouts);
