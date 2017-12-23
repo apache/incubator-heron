@@ -76,7 +76,7 @@ physical plan:
 
 ![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
 
-In this example, a Heron topology consists of one [spout](#spouts) and five
+In this example, a Heron topology consists of two [spout](#spouts) and five
 different [bolts](#bolts) (each of which has multiple instances) that have automatically 
 been distributed between five different containers.
 
