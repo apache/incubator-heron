@@ -16,7 +16,7 @@ LINUX_EXECUTE = [
     '# Workaround really long shebang lines breaking on linux:',
     '# Use a /tmp path, but keep the actual venv inside the bazel outdir.',
     '# Avoids having to worry about cleanup, even if sandboxing is off.',
-    'TMPF=$$(mktemp -d -t -p /tmp pex.XXXXX)',
+    'TMPF=$$(mktemp -d -p /tmp pex.XXXXX)',
 ]
 
 POST_EXECUTE = [
