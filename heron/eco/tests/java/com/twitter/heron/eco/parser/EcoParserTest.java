@@ -147,7 +147,7 @@ public class EcoParserTest {
   }
 
   @Test(expected = Exception.class)
-  public void parseFromInputStream_StreamIsNull_ExpectionThrown() throws Exception {
+  public void parseFromInputStream_StreamIsNull_ExceptionThrown() throws Exception {
     InputStream inputStream = null;
     EcoTopologyDefinition ecoTopologyDefinition = null;
 
