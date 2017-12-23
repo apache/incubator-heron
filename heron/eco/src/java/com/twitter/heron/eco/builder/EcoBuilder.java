@@ -162,7 +162,7 @@ public final class EcoBuilder {
     for (ObjectDefinition def: topologyDefinition.getSpouts()) {
       Object obj = buildObject(def);
       spouts.put(def.getId(), obj);
-      builder.setSpout(def.getId(), (IRichSpout)obj, def.getParallelism());
+      builder.setSpout(def.getId(), (IRichSpout) obj, def.getParallelism());
     }
 
     executionContext.setSpouts(spouts);

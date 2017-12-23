@@ -60,6 +60,8 @@ public final class Eco {
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
 
+    String topologyName = topologyDefinition.getName();
+
     Config topologyConfig = EcoBuilder
         .buildConfig(topologyDefinition);
 
@@ -71,8 +73,7 @@ public final class Eco {
     TopologyBuilder builder = EcoBuilder
         .buildTopologyBuilder(executionContext);
 
-
-    HeronSubmitter.submitTopology("ecoTopology", topologyConfig, builder.createTopology());
+    HeronSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
 
   }
 
