@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
 # Copyright 2016 Twitter. All rights reserved.
@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# !/usr/bin/env python2.7
-# -*- encoding: utf-8 -*-
 ''' main.py '''
 import argparse
 import atexit
