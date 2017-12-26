@@ -52,6 +52,10 @@ public class PrometheusSink extends AbstractWebSink {
   // This is the cache that is used to serve the metrics
   private Cache<String, Map<String, Double>> metricsCache;
 
+  private String cluster;
+  private String role;
+  private String environment;
+
   public PrometheusSink() {
     super();
   }
@@ -59,6 +63,10 @@ public class PrometheusSink extends AbstractWebSink {
   @Override
   void initialize(Map<String, Object> configuration, SinkContext context) {
     metricsCache = createCache();
+
+    cluster = context.getCluster();
+    role = context.getRole();
+    environment = context.getEnvironment();
   }
 
   @Override
@@ -75,6 +83,12 @@ public class PrometheusSink extends AbstractWebSink {
 
       final boolean componentIsStreamManger = component.contains("stmgr");
       final String componentType = getComponentType(sourceMetrics);
+
+      String c = this.cluster;
+      String r = this.role;
+      String e = this.environment;
+      final String clusterRoleEnv = hasClusterRoleEnvironment(c, r, e)
+          ? String.format("%s/%s/%s", c, r, e) : null;
 
       sourceMetrics.forEach((String metric, Double value) -> {
 
@@ -111,6 +125,10 @@ public class PrometheusSink extends AbstractWebSink {
             .append("topology=\"").append(topology).append("\",")
             .append("component=\"").append(component).append("\",")
             .append("instance_id=\"").append(instance).append("\"");
+
+        if (clusterRoleEnv != null) {
+          sb.append(",cluster_role_env=\"").append(clusterRoleEnv).append("\"");
+        }
 
         if (componentType != null) {
           sb.append(",component_type=\"").append(componentType).append("\"");
@@ -156,6 +174,14 @@ public class PrometheusSink extends AbstractWebSink {
 
   long currentTimeMillis() {
     return System.currentTimeMillis();
+  }
+
+  static boolean hasClusterRoleEnvironment(String c, String r, String e) {
+    return isNotEmpty(c) && isNotEmpty(r) && isNotEmpty(e);
+  }
+
+  static boolean isNotEmpty(String string) {
+    return string != null && !string.isEmpty();
   }
 
   static String getComponentType(Map<String, Double> sourceMetrics) {

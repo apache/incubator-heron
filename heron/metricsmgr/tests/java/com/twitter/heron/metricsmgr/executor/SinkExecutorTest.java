@@ -73,7 +73,8 @@ public class SinkExecutorTest {
     communicator = new Communicator<>(null, slaveLooper);
 
     SinkContext sinkContext =
-        new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", new MultiCountMetric());
+        new SinkContextImpl("topology-name", "cluster", "role", "environment",
+            "metricsmgr-id", "sink-id", new MultiCountMetric());
 
     sinkExecutor =
         new SinkExecutor("testSinkId", metricsSink, slaveLooper, communicator, sinkContext);

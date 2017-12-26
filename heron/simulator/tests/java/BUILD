@@ -1,5 +1,3 @@
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 java_library(
     name = "simulator-tests",
     srcs = glob(["**/*.java"]),

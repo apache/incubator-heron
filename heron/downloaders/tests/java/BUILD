@@ -1,5 +1,3 @@
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = [
     "//third_party/java:powermock",
     "//third_party/java:mockito",
