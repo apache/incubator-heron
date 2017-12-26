@@ -28,8 +28,10 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
+import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.EcoBuilder;
 import com.twitter.heron.eco.builder.SpoutBuilder;
+import com.twitter.heron.eco.builder.StreamBuilder;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -63,9 +65,13 @@ public final class Eco {
 
     String topologyName = topologyDefinition.getName();
 
-    SpoutBuilder spoutBuilder = new SpoutBuilder()
+    SpoutBuilder spoutBuilder = new SpoutBuilder();
 
-    EcoBuilder ecoBuilder = new EcoBuilder(spoutBuilder);
+    BoltBuilder boltBuilder = new BoltBuilder();
+
+    StreamBuilder streamBuilder = new StreamBuilder();
+
+    EcoBuilder ecoBuilder = new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder);
 
     Config topologyConfig = ecoBuilder
         .buildConfig(topologyDefinition);

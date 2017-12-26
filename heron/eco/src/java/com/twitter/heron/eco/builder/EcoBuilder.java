@@ -25,8 +25,15 @@ public final class EcoBuilder extends BaseBuilder {
 
   private SpoutBuilder spoutBuilder;
 
-  public EcoBuilder(SpoutBuilder spoutBuilder) {
+  private BoltBuilder boltBuilder;
+
+  private StreamBuilder streamBuilder;
+
+  public EcoBuilder(SpoutBuilder spoutBuilder, BoltBuilder boltBuilder,
+                    StreamBuilder streamBuilder) {
     this.spoutBuilder = spoutBuilder;
+    this.boltBuilder = boltBuilder;
+    this.streamBuilder = streamBuilder;
   }
 
   public TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
@@ -34,8 +41,8 @@ public final class EcoBuilder extends BaseBuilder {
 
     TopologyBuilder builder = new TopologyBuilder();
     spoutBuilder.addSpoutsToExecutionContext(executionContext, builder);
-    BoltBuilder.buildBolts(executionContext);
-    StreamBuilder.buildStreams(executionContext, builder);
+    boltBuilder.buildBolts(executionContext);
+    streamBuilder.buildStreams(executionContext, builder);
 
     return builder;
   }

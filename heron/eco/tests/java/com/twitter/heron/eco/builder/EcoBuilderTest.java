@@ -35,7 +35,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,6 +42,10 @@ public class EcoBuilderTest {
 
   @Mock
   private SpoutBuilder mockSpoutBuilder;
+  @Mock
+  private BoltBuilder mockBoltBuilder;
+  @Mock
+  private StreamBuilder mockStreamBuilder;
   @InjectMocks
   private EcoBuilder subject;
 
@@ -89,8 +92,10 @@ public class EcoBuilderTest {
 
     subject.buildTopologyBuilder(context);
 
-    verify(mockSpoutBuilder, times(1)).addSpoutsToExecutionContext(same(context),
+    verify(mockSpoutBuilder).addSpoutsToExecutionContext(same(context),
         any(TopologyBuilder.class));
+    verify(mockBoltBuilder).buildBolts(same(context));
+    verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class));
 
   }
 
