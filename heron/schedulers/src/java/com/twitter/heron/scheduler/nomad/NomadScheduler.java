@@ -310,8 +310,10 @@ public class NomadScheduler implements IScheduler {
         throw new RuntimeException(msg, e);
       }
       Map<String, String> metaData = jobActual.getMeta();
-      if (metaData.get(NomadConstants.NOMAD_TOPOLOGY_NAME).equals(topologyName)) {
-        ret.add(jobActual);
+      if (metaData != null && metaData.containsKey(NomadConstants.NOMAD_TOPOLOGY_NAME)) {
+        if (metaData.get(NomadConstants.NOMAD_TOPOLOGY_NAME).equals(topologyName)) {
+          ret.add(jobActual);
+        }
       }
     }
     return ret;
@@ -356,12 +358,12 @@ public class NomadScheduler implements IScheduler {
       LOG.fine("Starting job " + job.getId());
       try {
         EvaluationResponse response = apiClient.getJobsApi().register(job);
-        LOG.info("response: " + response);
+        LOG.fine("response: " + response);
       } catch (IOException | NomadException e) {
         String msg = "Failed to submit job "
-            + job.getId() + " with error: " + e.getMessage()
-            + " with job spec: " + job.toString();
-        LOG.log(Level.SEVERE, msg, e);
+            + job.getId() + " with error: " + e.getMessage();
+
+        LOG.log(Level.FINE, msg + " with job spec: " + job.toString());
         throw new RuntimeException(msg, e);
       }
     }

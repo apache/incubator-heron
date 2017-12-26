@@ -260,6 +260,8 @@ public final class Runtime {
         heronConfigurationDirectory);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH,
         configurationOverrides);
+    contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
+        String.valueOf(port));
 
     server.setHandler(contextHandler);
 
