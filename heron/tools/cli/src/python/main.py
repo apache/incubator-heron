@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
 # Copyright 2016 Twitter. All rights reserved.
