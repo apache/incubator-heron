@@ -22,11 +22,9 @@ import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 
-public final class SpoutBuilder extends BaseBuilder {
+public class SpoutBuilder extends BaseBuilder {
 
-  private SpoutBuilder() { }
-
-  protected static void addSpoutsToExecutionContext(EcoExecutionContext executionContext,
+  protected void addSpoutsToExecutionContext(EcoExecutionContext executionContext,
                                                     TopologyBuilder builder)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();

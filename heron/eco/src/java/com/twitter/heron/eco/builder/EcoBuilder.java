@@ -23,23 +23,24 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 public final class EcoBuilder extends BaseBuilder {
 
-  private EcoBuilder() { }
+  private SpoutBuilder spoutBuilder;
 
-  public static TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
+  public EcoBuilder(SpoutBuilder spoutBuilder) {
+    this.spoutBuilder = spoutBuilder;
+  }
+
+  public TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 
     TopologyBuilder builder = new TopologyBuilder();
-    SpoutBuilder.addSpoutsToExecutionContext(executionContext, builder);
+    spoutBuilder.addSpoutsToExecutionContext(executionContext, builder);
     BoltBuilder.buildBolts(executionContext);
     StreamBuilder.buildStreams(executionContext, builder);
 
     return builder;
   }
 
-
-
-
-  public static Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+  public Config buildConfig(EcoTopologyDefinition topologyDefinition) {
     return ConfigBuilder.buildConfig(topologyDefinition);
   }
 }

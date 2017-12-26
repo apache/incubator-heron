@@ -19,16 +19,32 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EcoBuilderTest {
+
+  @Mock
+  private SpoutBuilder mockSpoutBuilder;
+  @InjectMocks
+  private EcoBuilder subject;
 
   private Map<String, Object> configMap;
 
@@ -43,9 +59,9 @@ public class EcoBuilderTest {
 
   @Test
   public void testBuild_EmptyConfigMap_ReturnsDefaultConfigs() {
-    // do nothing with config map on purpose for this test
+    // do nothing with config map on purpose
 
-    Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
+    Config config = subject.buildConfig(ecoTopologyDefinition);
 
     assertThat(config.get(Config.TOPOLOGY_DEBUG), is(nullValue()));
   }
@@ -58,7 +74,7 @@ public class EcoBuilderTest {
     configMap.put(Config.TOPOLOGY_ENVIRONMENT, environment);
     configMap.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, spouts);
 
-    Config config = EcoBuilder.buildConfig(ecoTopologyDefinition);
+    Config config = subject.buildConfig(ecoTopologyDefinition);
 
     assertThat(config.get(Config.TOPOLOGY_DEBUG), is(equalTo(false)));
     assertThat(config.get(Config.TOPOLOGY_ENVIRONMENT), is(equalTo(environment)));
@@ -66,10 +82,15 @@ public class EcoBuilderTest {
   }
 
   @Test
-  public void testBuildTopologyBuilder_BuildsAsExpected() {
+  public void testBuildTopologyBuilder_BuildsAsExpected()
+      throws IllegalAccessException, ClassNotFoundException, InstantiationException {
+    Config config = new Config();
+    EcoExecutionContext context = new EcoExecutionContext(ecoTopologyDefinition, config);
 
+    subject.buildTopologyBuilder(context);
 
-    assertNotNull(EcoBuilder.buildConfig(ecoTopologyDefinition));
+    verify(mockSpoutBuilder, times(1)).addSpoutsToExecutionContext(same(context),
+        any(TopologyBuilder.class));
 
   }
 
