@@ -131,8 +131,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
 
 static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgrs_, int num_spouts,
     int num_spout_instances, int num_bolts, int num_bolt_instances) {
-  size_t spouts_size = num_spout_instances;
-  size_t bolts_size = num_bolt_instances;
+  size_t spouts_size = num_spouts * num_spout_instances;
+  size_t bolts_size = num_bolts * num_bolt_instances;
 
   heron::proto::system::Resource* instanceResource = new heron::proto::system::Resource();
   instanceResource->set_ram(1);
