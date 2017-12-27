@@ -62,6 +62,12 @@ public class EcoTopologyDefinition {
     return new ArrayList<>(this.components.values());
   }
 
+  public void setComponents(List<BeanDefinition> components) {
+    for (BeanDefinition bean: components) {
+      this.components.put(bean.getId(), bean);
+    }
+  }
+
   public void addComponent(String key, BeanDefinition value) {
     this.components.put(key, value);
   }
