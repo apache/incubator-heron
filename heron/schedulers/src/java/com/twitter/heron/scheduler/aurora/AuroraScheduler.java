@@ -217,7 +217,13 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     List<String> topologyArgs = new ArrayList<>();
     SchedulerUtils.addExecutorTopologyArgs(topologyArgs, config, runtime);
-    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, String.join(" ", topologyArgs));
+    String args = String.join(" ", topologyArgs).replace("\"", "\\\"");
+    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, String.format("\"%s\"", args));
+
+    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
+    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
+    auroraProperties.put(AuroraField.ROLE, Context.role(config));
+    auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));

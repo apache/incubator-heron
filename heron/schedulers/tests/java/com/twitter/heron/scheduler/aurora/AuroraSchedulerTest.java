@@ -293,7 +293,7 @@ public class AuroraSchedulerTest {
           expected = "http://foo/bar";
           break;
         case TOPOLOGY_ARGUMENTS:
-          expected = "--topology-name=topologyName"
+          expected = "\"--topology-name=topologyName"
             + " --topology-id=" + topology.getId()
             + " --topology-defn-file=defnFile.defn"
             + " --state-manager-connection=null"
@@ -302,12 +302,12 @@ public class AuroraSchedulerTest {
             + " --tmaster-binary=./heron-core/bin/heron-tmaster"
             + " --stmgr-binary=./heron-core/bin/heron-stmgr"
             + " --metrics-manager-classpath=./heron-core/lib/metricsmgr/*"
-            + " --instance-jvm-opts=\"\""
+            + " --instance-jvm-opts=\\\"\\\""
             + " --classpath=binaryFile.jar"
             + " --heron-internals-config-file=./heron-conf/heron_internals.yaml"
             + " --override-config-file=./heron-conf/override.yaml"
             + " --component-ram-map=null"
-            + " --component-jvm-opts=\"\""
+            + " --component-jvm-opts=\\\"\\\""
             + " --pkg-type=jar"
             + " --topology-binary-file=binaryFile.jar"
             + " --heron-java-home=/usr/lib/jvm/default-java"
@@ -327,7 +327,19 @@ public class AuroraSchedulerTest {
             + "./heron-core/lib/statefulstorage/*:"
             + " --stateful-config-file=./heron-conf/stateful.yaml"
             + " --health-manager-mode=disabled"
-            + " --health-manager-classpath=./heron-core/lib/healthmgr/*";
+            + " --health-manager-classpath=./heron-core/lib/healthmgr/*\"";
+          break;
+        case CLUSTER:
+          expected = "some_cluster";
+          break;
+        case ENVIRON:
+          expected = "some_env";
+          break;
+        case ROLE:
+          expected = "some_role";
+          break;
+        case TOPOLOGY_NAME:
+          expected = "topologyName";
           break;
         default:
           fail(String.format(
