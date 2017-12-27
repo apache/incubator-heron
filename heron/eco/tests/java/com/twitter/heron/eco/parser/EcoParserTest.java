@@ -24,6 +24,7 @@ import com.twitter.heron.eco.definition.BeanReference;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
+import com.twitter.heron.eco.definition.PropertyDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -122,7 +123,7 @@ public class EcoParserTest {
       + "  - id: \"zkHosts\"\n"
       + "    className: \"org.apache.storm.kafka.ZkHosts\"\n"
       + "    constructorArgs:\n"
-      + "      - ref: \"localhost:2181\"\n"
+      + "      - \"localhost:2181\"\n"
       + "\n"
       + "# Alternative kafka config\n"
       + "#  - id: \"kafkaConfig\"\n"
@@ -247,27 +248,22 @@ public class EcoParserTest {
     assertEquals("zkHosts", zkHostsComponent.getId());
     assertEquals("org.apache.storm.kafka.ZkHosts", zkHostsComponent.getClassName());
     assertEquals(1, zkHostsComponent.getConstructorArgs().size());
-    BeanReference zkHostsReference = (BeanReference) zkHostsComponent.getConstructorArgs().get(0);
-    assertEquals("localhost:2181", zkHostsReference.getId());
+    assertEquals("localhost:2181", zkHostsComponent.getConstructorArgs().get(0));
 
-
-
-
-
-    /*
-     "\n"
-      + "  - id: \"stringMultiScheme\"\n"
-      + "    className: \"org.apache.storm.spout.SchemeAsMultiScheme\"\n"
-      + "    constructorArgs:\n"
-      + "      - ref: \"stringScheme\"\n"
-      + "\n"
-      + "  - id: \"zkHosts\"\n"
-      + "    className: \"org.apache.storm.kafka.ZkHosts\"\n"
-      + "    constructorArgs:\n"
-     */
-
-
-
+    BeanDefinition spoutConfigComponent = components.get(3);
+    List<Object> spoutConstructArgs = spoutConfigComponent.getConstructorArgs();
+    assertEquals("spoutConfig", spoutConfigComponent.getId());
+    assertEquals("org.apache.storm.kafka.SpoutConfig", spoutConfigComponent.getClassName());
+    BeanReference spoutBrokerHostComponent = (BeanReference) spoutConstructArgs.get(0);
+    assertEquals("zkHosts", spoutBrokerHostComponent.getId());
+    assertEquals("myKafkaTopic", spoutConstructArgs.get(1));
+    assertEquals("/kafkaSpout", spoutConstructArgs.get(2));
+    List<PropertyDefinition> properties = spoutConfigComponent.getProperties();
+    assertEquals("ignoreZkOffsets", properties.get(0).getName());
+    assertEquals(true, properties.get(0).getValue());
+    assertEquals("scheme", properties.get(1).getName());
+    assertEquals(true, properties.get(1).isReference());
+    assertEquals("stringMultiScheme", properties.get(1).getRef());
   }
 
   @Test
