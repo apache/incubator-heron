@@ -33,7 +33,7 @@ public abstract class ObjectDefinition {
     return properties;
   }
 
-  public boolean hasConstructorArgs(){
+  public boolean hasConstructorArgs() {
     return this.constructorArgs != null && this.constructorArgs.size() > 0;
   }
 
@@ -41,7 +41,7 @@ public abstract class ObjectDefinition {
     this.properties = properties;
   }
 
-  public boolean hasReferences(){
+  public boolean hasReferences() {
     return this.hasReferences;
   }
 
@@ -77,10 +77,10 @@ public abstract class ObjectDefinition {
   public void setConstructorArgs(List<Object> constructorArgs) {
 
     List<Object> newVal = new ArrayList<Object>();
-    for(Object obj : constructorArgs){
-      if(obj instanceof LinkedHashMap){
-        Map map = (Map)obj;
-        if(map.containsKey("ref") && map.size() == 1) {
+    for (Object obj : constructorArgs) {
+      if (obj instanceof LinkedHashMap) {
+        Map map = (Map) obj;
+        if (map.containsKey("ref") && map.size() == 1) {
           newVal.add(new BeanReference((String) map.get("ref")));
           this.hasReferences = true;
         } else if (map.containsKey("reflist") && map.size() == 1) {

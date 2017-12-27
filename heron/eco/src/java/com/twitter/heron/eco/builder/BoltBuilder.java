@@ -24,7 +24,8 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 public class BoltBuilder extends BaseBuilder {
 
   protected void buildBolts(EcoExecutionContext executionContext)
-      throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException,
+      NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> bolts = new HashMap<>();
 

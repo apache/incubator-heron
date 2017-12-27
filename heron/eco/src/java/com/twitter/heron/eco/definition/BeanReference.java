@@ -16,9 +16,9 @@ package com.twitter.heron.eco.definition;
 public class BeanReference {
   public String id;
 
-  public BeanReference(){}
+  public BeanReference() { }
 
-  public BeanReference(String id){
+  public BeanReference(String id) {
     this.id = id;
   }
 

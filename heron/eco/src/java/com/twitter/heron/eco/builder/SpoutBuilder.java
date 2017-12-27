@@ -27,7 +27,8 @@ public class SpoutBuilder extends BaseBuilder {
 
   protected void addSpoutsToExecutionContext(EcoExecutionContext executionContext,
                                                     TopologyBuilder builder)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> spouts = new HashMap<>();
 

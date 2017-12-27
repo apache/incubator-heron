@@ -18,15 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
-import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 public class ComponentBuilder extends BaseBuilder {
 
   protected void buildComponents(EcoExecutionContext context) throws ClassNotFoundException,
-      IllegalAccessException, InstantiationException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      IllegalAccessException, InstantiationException,
+      NoSuchFieldException, InvocationTargetException {
     List<BeanDefinition> componentDefinitions = context.getTopologyDefinition().getComponents();
     Map<String, Object> components = new HashMap<>();
 

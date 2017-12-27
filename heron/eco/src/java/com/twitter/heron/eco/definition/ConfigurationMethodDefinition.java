@@ -39,11 +39,11 @@ public class ConfigurationMethodDefinition {
   public void setArgs(List<Object> args) {
 
     List<Object> newVal = new ArrayList<Object>();
-    for(Object obj : args){
-      if(obj instanceof LinkedHashMap){
-        Map map = (Map)obj;
-        if(map.containsKey("ref") && map.size() == 1){
-          newVal.add(new BeanReference((String)map.get("ref")));
+    for (Object obj : args) {
+      if (obj instanceof LinkedHashMap) {
+        Map map = (Map) obj;
+        if (map.containsKey("ref") && map.size() == 1) {
+          newVal.add(new BeanReference((String) map.get("ref")));
           this.hasReferences = true;
         } else if (map.containsKey("reflist") && map.size() == 1) {
           newVal.add(new BeanListReference((List<String>) map.get("reflist")));
@@ -58,7 +58,7 @@ public class ConfigurationMethodDefinition {
     this.args = newVal;
   }
 
-  public boolean hasReferences(){
+  public boolean hasReferences() {
     return this.hasReferences;
   }
 }

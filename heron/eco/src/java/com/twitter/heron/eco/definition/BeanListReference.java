@@ -18,9 +18,9 @@ import java.util.List;
 public class BeanListReference {
   public List<String> ids;
 
-  public BeanListReference(){}
+  public BeanListReference() { }
 
-  public BeanListReference(List<String> ids){
+  public BeanListReference(List<String> ids) {
     this.ids = ids;
   }
 

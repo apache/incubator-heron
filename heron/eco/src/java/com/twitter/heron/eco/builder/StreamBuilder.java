@@ -35,7 +35,8 @@ import com.twitter.heron.eco.definition.StreamDefinition;
 public class StreamBuilder extends BaseBuilder {
 
   protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder)
-      throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException,
+      NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 
@@ -107,9 +108,11 @@ public class StreamBuilder extends BaseBuilder {
     executionContext.setStreams(componentStreams);
   }
 
-  private CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition, EcoExecutionContext executionContext)
+  private CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition,
+                                                         EcoExecutionContext executionContext)
       throws ClassNotFoundException,
-      IllegalAccessException, InstantiationException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      IllegalAccessException, InstantiationException, NoSuchFieldException,
+      InvocationTargetException {
     Object grouping = buildObject(objectDefinition, executionContext);
     return (CustomStreamGrouping) grouping;
   }
