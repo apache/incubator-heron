@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
 # Is so creates scripts/compile/env_exec.sh containing environment used
