@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
@@ -217,18 +218,31 @@ public class EcoParserTest {
       + "      type: SHUFFLE";
 
   @Test
-  public void testParseFromInputStream_WithComponents_MapsAsExpected() throws Exception {
+  public void testParseFromInputStream_VerifyComponents_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR_1.getBytes());
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
+    List<BeanDefinition> components = topologyDefinition.getComponents();
+    BeanDefinition stringSchemeComponent = components.get(0);
+    BeanDefinition stringMultiSchemeComponent = components.get(1);
 
     assertEquals("kafka-topology", topologyDefinition.getName());
+    assertEquals(4, components.size());
+
+    assertEquals("stringScheme", stringSchemeComponent.getId());
+    assertEquals("org.apache.storm.kafka.StringScheme", stringSchemeComponent.getClassName());
+
+    assertEquals("stringMultiScheme", stringMultiSchemeComponent.getId());
+    assertEquals("org.apache.storm.spout.SchemeAsMultiScheme",
+        stringMultiSchemeComponent.getClassName());
+
+
 
   }
 
   @Test
-  public void testParseFromInputStream_NoComponents_MapsAsExpected() throws Exception {
+  public void testParseFromInputStream_VerifyAllButComponents_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR.getBytes());
 
