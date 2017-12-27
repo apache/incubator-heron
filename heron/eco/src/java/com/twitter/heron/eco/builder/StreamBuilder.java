@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ import com.twitter.heron.eco.definition.StreamDefinition;
 public class StreamBuilder extends BaseBuilder {
 
   protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder)
-      throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+      throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 
@@ -97,7 +98,7 @@ public class StreamBuilder extends BaseBuilder {
           break;
         case CUSTOM:
           declarer.customGrouping(stream.getFrom(), streamId,
-              buildCustomStreamGrouping(stream.getGrouping().getCustomClass()));
+              buildCustomStreamGrouping(stream.getGrouping().getCustomClass(), executionContext));
           break;
         default:
           throw new UnsupportedOperationException("unsupported grouping type: " + grouping);
@@ -106,10 +107,10 @@ public class StreamBuilder extends BaseBuilder {
     executionContext.setStreams(componentStreams);
   }
 
-  private CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition)
+  private CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition, EcoExecutionContext executionContext)
       throws ClassNotFoundException,
-      IllegalAccessException, InstantiationException {
-    Object grouping = buildObject(objectDefinition);
+      IllegalAccessException, InstantiationException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+    Object grouping = buildObject(objectDefinition, executionContext);
     return (CustomStreamGrouping) grouping;
   }
 }

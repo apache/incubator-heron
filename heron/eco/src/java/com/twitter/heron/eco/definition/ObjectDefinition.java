@@ -14,7 +14,10 @@
 package com.twitter.heron.eco.definition;
 
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ObjectDefinition {
 
@@ -22,6 +25,25 @@ public abstract class ObjectDefinition {
   private String className;
   private int parallelism = 1;
   private List<Object> constructorArgs;
+  private List<PropertyDefinition> properties;
+  private List<ConfigurationMethodDefinition> configMethods;
+  private boolean hasReferences;
+
+  public List<PropertyDefinition> getProperties() {
+    return properties;
+  }
+
+  public boolean hasConstructorArgs(){
+    return this.constructorArgs != null && this.constructorArgs.size() > 0;
+  }
+
+  public void setProperties(List<PropertyDefinition> properties) {
+    this.properties = properties;
+  }
+
+  public boolean hasReferences(){
+    return this.hasReferences;
+  }
 
   public String getId() {
     return id;
@@ -51,7 +73,34 @@ public abstract class ObjectDefinition {
     return constructorArgs;
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void setConstructorArgs(List<Object> constructorArgs) {
-    this.constructorArgs = constructorArgs;
+
+    List<Object> newVal = new ArrayList<Object>();
+    for(Object obj : constructorArgs){
+      if(obj instanceof LinkedHashMap){
+        Map map = (Map)obj;
+        if(map.containsKey("ref") && map.size() == 1) {
+          newVal.add(new BeanReference((String) map.get("ref")));
+          this.hasReferences = true;
+        } else if (map.containsKey("reflist") && map.size() == 1) {
+          newVal.add(new BeanListReference((List<String>) map.get("reflist")));
+          this.hasReferences = true;
+        } else {
+          newVal.add(obj);
+        }
+      } else {
+        newVal.add(obj);
+      }
+    }
+    this.constructorArgs = newVal;
+  }
+
+  public List<ConfigurationMethodDefinition> getConfigMethods() {
+    return configMethods;
+  }
+
+  public void setConfigMethods(List<ConfigurationMethodDefinition> configMethods) {
+    this.configMethods = configMethods;
   }
 }

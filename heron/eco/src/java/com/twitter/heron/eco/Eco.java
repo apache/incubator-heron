@@ -29,6 +29,7 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
 import com.twitter.heron.eco.builder.BoltBuilder;
+import com.twitter.heron.eco.builder.ComponentBuilder;
 import com.twitter.heron.eco.builder.EcoBuilder;
 import com.twitter.heron.eco.builder.SpoutBuilder;
 import com.twitter.heron.eco.builder.StreamBuilder;
@@ -46,7 +47,6 @@ public final class Eco {
 
   private Eco() { }
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Options options = constructOptions();
 
@@ -65,13 +65,7 @@ public final class Eco {
 
     String topologyName = topologyDefinition.getName();
 
-    SpoutBuilder spoutBuilder = new SpoutBuilder();
-
-    BoltBuilder boltBuilder = new BoltBuilder();
-
-    StreamBuilder streamBuilder = new StreamBuilder();
-
-    EcoBuilder ecoBuilder = new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder);
+    EcoBuilder ecoBuilder = createEcoBuilder();
 
     Config topologyConfig = ecoBuilder
         .buildConfig(topologyDefinition);
@@ -81,12 +75,20 @@ public final class Eco {
 
     printTopologyInfo(executionContext);
 
-
     TopologyBuilder builder = ecoBuilder
         .buildTopologyBuilder(executionContext);
 
     HeronSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
 
+  }
+
+  private static EcoBuilder createEcoBuilder() {
+    SpoutBuilder spoutBuilder = new SpoutBuilder();
+    BoltBuilder boltBuilder = new BoltBuilder();
+    StreamBuilder streamBuilder = new StreamBuilder();
+    ComponentBuilder componentBuilder = new ComponentBuilder();
+
+    return new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder, componentBuilder);
   }
 
   private static Options constructOptions() {

@@ -14,6 +14,8 @@
 package com.twitter.heron.eco.builder;
 
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
@@ -29,17 +31,23 @@ public final class EcoBuilder extends BaseBuilder {
 
   private StreamBuilder streamBuilder;
 
+  private ComponentBuilder componentBuilder;
+
   public EcoBuilder(SpoutBuilder spoutBuilder, BoltBuilder boltBuilder,
-                    StreamBuilder streamBuilder) {
+                    StreamBuilder streamBuilder, ComponentBuilder componentBuilder) {
     this.spoutBuilder = spoutBuilder;
     this.boltBuilder = boltBuilder;
     this.streamBuilder = streamBuilder;
+    this.componentBuilder = componentBuilder;
   }
 
   public TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext)
-      throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+      throws InstantiationException, IllegalAccessException,
+      ClassNotFoundException, NoSuchMethodException,
+      NoSuchFieldException, InvocationTargetException {
 
     TopologyBuilder builder = new TopologyBuilder();
+    componentBuilder.buildComponents(executionContext);
     spoutBuilder.addSpoutsToExecutionContext(executionContext, builder);
     boltBuilder.buildBolts(executionContext);
     streamBuilder.buildStreams(executionContext, builder);

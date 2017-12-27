@@ -18,7 +18,7 @@ import java.util.Map;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
-public final class ConfigBuilder {
+public final  class ConfigBuilder {
 
   private ConfigBuilder() { }
 

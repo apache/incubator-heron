@@ -30,6 +30,8 @@ public class EcoExecutionContext {
 
   private Map<String, ComponentStream> streams;
 
+  private Map<String, Object> components;
+
   public EcoExecutionContext(EcoTopologyDefinition topologyDefinition, Config config) {
     this.topologyDefinition = topologyDefinition;
     this.config = config;
@@ -81,5 +83,17 @@ public class EcoExecutionContext {
 
   public void setStreams(Map<String, ComponentStream> streams) {
     this.streams = streams;
+  }
+
+  public Map<String, Object> getComponents() {
+    return components;
+  }
+
+  public Object getComponent(String id) {
+    return this.components.get(id);
+  }
+
+  public void setComponents(Map<String, Object> components) {
+    this.components = components;
   }
 }

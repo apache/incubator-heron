@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,12 +27,12 @@ public class SpoutBuilder extends BaseBuilder {
 
   protected void addSpoutsToExecutionContext(EcoExecutionContext executionContext,
                                                     TopologyBuilder builder)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> spouts = new HashMap<>();
 
     for (ObjectDefinition def: topologyDefinition.getSpouts()) {
-      Object obj = buildObject(def);
+      Object obj = buildObject(def, executionContext);
       spouts.put(def.getId(), obj);
       builder.setSpout(def.getId(), (IRichSpout) obj, def.getParallelism());
     }

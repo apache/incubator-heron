@@ -26,6 +26,7 @@ public class EcoTopologyDefinition {
   private Map<String, SpoutDefinition> spouts =  new LinkedHashMap<>();
   private Map<String, BoltDefinition> bolts = new LinkedHashMap<>();
   private List<StreamDefinition> streams = new ArrayList<>();
+  private Map<String, BeanDefinition> components = new LinkedHashMap<>();
 
   public List<SpoutDefinition> getSpouts() {
     return new ArrayList<>(this.spouts.values());
@@ -57,6 +58,14 @@ public class EcoTopologyDefinition {
     }
   }
 
+  public List<BeanDefinition> getComponents() {
+    return new ArrayList<>(this.components.values());
+  }
+
+  public void addComponent(String key, BeanDefinition value) {
+    this.components.put(key, value);
+  }
+
   public List<StreamDefinition> getStreams() {
     return streams;
   }
@@ -81,17 +90,6 @@ public class EcoTopologyDefinition {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  @Override
-  public String toString() {
-    return "EcoTopologyDefinition{"
-        + "name='" + name + '\''
-        + ", config=" + config
-        + ", sources=" + spouts
-        + ", children=" + bolts
-        + ", streams=" + streams
-        + '}';
   }
 
   public Number parallelismForBolt(String to) {

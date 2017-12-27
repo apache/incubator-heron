@@ -15,23 +15,27 @@ package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
-import com.twitter.heron.eco.definition.ObjectDefinition;
 
-public class BoltBuilder extends BaseBuilder {
+public class ComponentBuilder extends BaseBuilder {
 
-  protected void buildBolts(EcoExecutionContext executionContext)
-      throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
-    EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
-    Map<String, Object> bolts = new HashMap<>();
+  protected void buildComponents(EcoExecutionContext context) throws ClassNotFoundException,
+      IllegalAccessException, InstantiationException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+    List<BeanDefinition> componentDefinitions = context.getTopologyDefinition().getComponents();
+    Map<String, Object> components = new HashMap<>();
 
-    for (ObjectDefinition def: topologyDefinition.getBolts()) {
-      Object obj = buildObject(def, executionContext);
-      bolts.put(def.getId(), obj);
+    if (componentDefinitions != null) {
+      for (BeanDefinition bean : componentDefinitions) {
+        Object obj = buildObject(bean, context);
+        components.put(bean.getId(), obj);
+      }
     }
-    executionContext.setBolts(bolts);
+    context.setComponents(components);
   }
 }
