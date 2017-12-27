@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EcoBuilderTest {
@@ -47,6 +49,8 @@ public class EcoBuilderTest {
   private BoltBuilder mockBoltBuilder;
   @Mock
   private StreamBuilder mockStreamBuilder;
+  @Mock
+  private ComponentBuilder mockComponentBuilder;
   @InjectMocks
   private EcoBuilder subject;
 
@@ -59,6 +63,14 @@ public class EcoBuilderTest {
     configMap = new HashMap<>();
     ecoTopologyDefinition = new EcoTopologyDefinition();
     ecoTopologyDefinition.setConfig(configMap);
+  }
+
+  @After
+  public void ensureNoUnexpectedMockInteractions() {
+    verifyNoMoreInteractions(mockSpoutBuilder,
+        mockBoltBuilder,
+        mockStreamBuilder,
+        mockComponentBuilder);
   }
 
   @Test
@@ -98,7 +110,7 @@ public class EcoBuilderTest {
         any(TopologyBuilder.class));
     verify(mockBoltBuilder).buildBolts(same(context));
     verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class));
-
+    verify(mockComponentBuilder).buildComponents(same(context));
   }
 
 }
