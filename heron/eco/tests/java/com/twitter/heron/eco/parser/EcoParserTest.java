@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.twitter.heron.eco.definition.BeanDefinition;
+import com.twitter.heron.eco.definition.BeanReference;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
@@ -121,7 +122,7 @@ public class EcoParserTest {
       + "  - id: \"zkHosts\"\n"
       + "    className: \"org.apache.storm.kafka.ZkHosts\"\n"
       + "    constructorArgs:\n"
-      + "      - \"localhost:2181\"\n"
+      + "      - ref: \"localhost:2181\"\n"
       + "\n"
       + "# Alternative kafka config\n"
       + "#  - id: \"kafkaConfig\"\n"
@@ -224,18 +225,46 @@ public class EcoParserTest {
 
     EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
     List<BeanDefinition> components = topologyDefinition.getComponents();
-    BeanDefinition stringSchemeComponent = components.get(0);
-    BeanDefinition stringMultiSchemeComponent = components.get(1);
 
     assertEquals("kafka-topology", topologyDefinition.getName());
     assertEquals(4, components.size());
 
+    BeanDefinition stringSchemeComponent = components.get(0);
     assertEquals("stringScheme", stringSchemeComponent.getId());
     assertEquals("org.apache.storm.kafka.StringScheme", stringSchemeComponent.getClassName());
 
+
+    BeanDefinition stringMultiSchemeComponent = components.get(1);
     assertEquals("stringMultiScheme", stringMultiSchemeComponent.getId());
     assertEquals("org.apache.storm.spout.SchemeAsMultiScheme",
         stringMultiSchemeComponent.getClassName());
+    assertEquals(1, stringMultiSchemeComponent.getConstructorArgs().size());
+    BeanReference multiStringReference =
+        (BeanReference) stringMultiSchemeComponent.getConstructorArgs().get(0);
+    assertEquals("stringScheme", multiStringReference.getId());
+
+    BeanDefinition zkHostsComponent = components.get(2);
+    assertEquals("zkHosts", zkHostsComponent.getId());
+    assertEquals("org.apache.storm.kafka.ZkHosts", zkHostsComponent.getClassName());
+    assertEquals(1, zkHostsComponent.getConstructorArgs().size());
+    BeanReference zkHostsReference = (BeanReference) zkHostsComponent.getConstructorArgs().get(0);
+    assertEquals("localhost:2181", zkHostsReference.getId());
+
+
+
+
+
+    /*
+     "\n"
+      + "  - id: \"stringMultiScheme\"\n"
+      + "    className: \"org.apache.storm.spout.SchemeAsMultiScheme\"\n"
+      + "    constructorArgs:\n"
+      + "      - ref: \"stringScheme\"\n"
+      + "\n"
+      + "  - id: \"zkHosts\"\n"
+      + "    className: \"org.apache.storm.kafka.ZkHosts\"\n"
+      + "    constructorArgs:\n"
+     */
 
 
 

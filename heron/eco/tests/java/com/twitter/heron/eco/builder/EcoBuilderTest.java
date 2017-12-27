@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,7 +87,8 @@ public class EcoBuilderTest {
 
   @Test
   public void testBuildTopologyBuilder_BuildsAsExpected()
-      throws IllegalAccessException, ClassNotFoundException, InstantiationException {
+      throws IllegalAccessException, ClassNotFoundException, InstantiationException,
+      NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
     Config config = new Config();
     EcoExecutionContext context = new EcoExecutionContext(ecoTopologyDefinition, config);
 
