@@ -195,18 +195,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     controller.removeContainers(containersToRemove);
   }
 
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(StandardCharsets.UTF_8));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
   protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
     Map<AuroraField, String> auroraProperties = new HashMap<>();
 
@@ -217,8 +205,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     List<String> topologyArgs = new ArrayList<>();
     SchedulerUtils.addExecutorTopologyArgs(topologyArgs, config, runtime);
-    String args = String.join(" ", topologyArgs).replace("\"", "\\\"");
-    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, String.format("\"%s\"", args));
+    String args = String.join(" ", topologyArgs);
+    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, args);
 
     auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
     auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
@@ -243,11 +231,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     } else {
       auroraProperties.put(AuroraField.TIER, "preemptible");
     }
-
-    String completeSchedulerClassPath = String.format("%s:%s:%s",
-        Context.schedulerClassPath(config),
-        Context.packingClassPath(config),
-        Context.stateManagerClassPath(config));
 
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
