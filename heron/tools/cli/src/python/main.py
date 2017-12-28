@@ -304,6 +304,35 @@ def extract_common_args(command, parser, cl_args):
   return cl_args
 
 ################################################################################
+def check_heron_dirs(cl_args):
+  '''
+  Check and update heron dirs(currently home and config)
+  :return:
+  '''
+  # If heron_home is specified, override the value in config object.
+  # All config.get_*_dir() results from here will be affected.
+  if 'heron_home' in cl_args and cl_args['heron_home']:
+    path = os.path.abspath(cl_args['heron_home'])
+    Log.info("Heron home path is set to %s.", path)
+    if os.path.isdir(path):
+      config.set_heron_dir(path)
+      config.set_zipped_heron_dir(path)
+    else:
+      Log.error("Heron home path %s doesn't exist.", path)
+
+  # If config_path is needed but not specified, provide a default value
+  if 'config_path' in cl_args:
+    if not cl_args['config_path']:
+      default_config_path = config.get_heron_conf_dir()
+      new_cl_args = dict()
+      new_cl_args['config_path'] = os.path.join(config.get_heron_dir(), default_config_path)
+      cl_args.update(new_cl_args)
+      Log.info("Heron config path is set to %s.", cl_args['config_path'])
+
+  return cl_args
+
+
+################################################################################
 def execute(handlers, local_commands):
   '''
   Run the command
@@ -326,12 +355,18 @@ def execute(handlers, local_commands):
   try:
     # parse the args
     args, unknown_args = parser.parse_known_args()
+    # warn user if any unknown argument is found
+    if unknown_args:
+      Log.warn("Found unknown arguments, please double check: %s", unknown_args)
   except ValueError as ex:
     Log.error("Error while parsing arguments: %s", str(ex))
     Log.debug(traceback.format_exc())
     sys.exit(1)
 
   command_line_args = vars(args)
+
+  # check heron dirs. Override heron home if specified
+  command_line_args = check_heron_dirs(command_line_args)
 
   # set log level
   log.set_logging_level(command_line_args)

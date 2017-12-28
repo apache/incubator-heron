@@ -61,9 +61,7 @@ ENV_REQUIRED = "heron.config.is.env.required"
 ROLE_KEY = "role.required"
 ENVIRON_KEY = "env.required"
 
-# global variabls that can be overriden when necessary.
-# Note that overriden has to happen before the first call
-# to get_heron_dir()/get_zipped_heron_dir()
+# global variabls that can be overriden when necessary with --heron-home option
 config_heron_dir = ''
 config_zipped_heron_dir = ''
 
@@ -149,9 +147,17 @@ def get_heron_dir():
     This will return heron_dir. If it is missing, extract from .pex file.
   """
   global config_heron_dir
-  if not config_heron_dir:
+  if not config_heron_dir:  # Fallback to default value if not set
     config_heron_dir = get_heron_dir_internal()
   return config_heron_dir
+
+
+def set_heron_dir(path):
+  """
+    This will set heron_dir. The path parameter cannot be empty
+  """
+  global config_heron_dir
+  config_heron_dir = path
 
 
 def get_heron_dir_internal():
@@ -177,9 +183,17 @@ def get_zipped_heron_dir():
     This will return zipped_heron_dir. If it is missing, extract from .pex file.
   """
   global config_zipped_heron_dir
-  if not config_zipped_heron_dir:
+  if not config_zipped_heron_dir:  # Fallback to default value if not set
     config_zipped_heron_dir = get_zipped_heron_dir_internal()
   return config_zipped_heron_dir
+
+
+def set_zipped_heron_dir(path):
+  """
+    This will set zipped_heron_dir. The path parameter cannot be empty
+  """
+  global config_zipped_heron_dir
+  config_zipped_heron_dir = path
 
 
 def get_zipped_heron_dir_internal():

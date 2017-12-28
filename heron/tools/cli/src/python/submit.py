@@ -66,6 +66,7 @@ def create_parser(subparsers):
   cli_args.add_topology_file(parser)
   cli_args.add_topology_class(parser)
   cli_args.add_config(parser)
+  cli_args.add_heron_home(parser)
   cli_args.add_deactive_deploy(parser)
   cli_args.add_dry_run(parser)
   cli_args.add_extra_launch_classpath(parser)

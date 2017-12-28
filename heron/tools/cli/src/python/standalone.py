@@ -277,6 +277,7 @@ def add_additional_args(parsers):
   for parser in parsers:
     cli_args.add_verbose(parser)
     cli_args.add_config(parser)
+    cli_args.add_heron_home(parser)
     parser.add_argument(
         '--heron-dir',
         default=config.get_heron_dir(),
