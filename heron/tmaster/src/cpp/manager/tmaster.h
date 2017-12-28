@@ -119,7 +119,7 @@ class TMaster {
 
   // Check to see if the topology and stmgrs match
   // in terms of workers
-  bool ValidateStMgrsWithTopology(proto::api::Topology _topology);
+  bool ValidateStMgrsWithPackingPlan();
 
   // Check to see if the stmgrs and pplan match
   // in terms of workers
