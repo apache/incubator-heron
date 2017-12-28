@@ -37,6 +37,7 @@ default_handlers = [
     (r"^/filestats/(.*)", handlers.FileStatsHandler),
     (r"^/download/(.*)", handlers.DownloadHandler),
     (r"^/killexecutor", handlers.KillExecutorHandler),
+    (r"^/stmgrheapprof", handlers.StmgrHeapProfHandler)
 ]
 
 # pylint: disable=dangerous-default-value

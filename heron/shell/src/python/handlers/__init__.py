@@ -6,7 +6,8 @@ from filehandler import FileHandler
 from filestatshandler import FileStatsHandler
 from jmaphandler import JmapHandler
 from jstackhandler import JstackHandler
+from killexecutorhandler import KillExecutorHandler
 from memoryhistogramhandler import MemoryHistogramHandler
 from pmaphandler import PmapHandler
 from pidhandler import PidHandler
-from killexecutorhandler import KillExecutorHandler
+from stmgrheapprofhandler import StmgrHeapProfHandler

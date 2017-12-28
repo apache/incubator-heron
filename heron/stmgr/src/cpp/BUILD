@@ -119,6 +119,7 @@ cc_binary(
         "server/stmgr-main.cpp",
     ],
     copts = [
+        "-Ithird_party",
         "-Iheron",
         "-Iheron/common/src/cpp",
         "-Iheron/statemgrs/src/cpp",
@@ -137,6 +138,7 @@ cc_binary(
         "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//third_party/yaml-cpp:yaml-cxx",
+        "//third_party/gperftools:profiler-cxx",
     ],
     linkstatic = 1,
 )

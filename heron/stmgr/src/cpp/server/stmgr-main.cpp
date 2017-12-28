@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <gperftools/heap-profiler.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -52,6 +53,8 @@ int main(int argc, char* argv[]) {
   }
   std::vector<std::string> instances = StrUtils::split(FLAGS_instance_ids, ",");
 
+  HeapProfilerStart("stmgr");
+
   EventLoopImpl ss;
 
   // Read heron internals config from local file
@@ -82,5 +85,6 @@ int main(int argc, char* argv[]) {
                           high_watermark, low_watermark);
   mgr.Init();
   ss.loop();
+  HeapProfilerStop();
   return 0;
 }
