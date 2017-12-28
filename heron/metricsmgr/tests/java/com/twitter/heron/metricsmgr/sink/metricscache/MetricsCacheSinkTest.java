@@ -120,9 +120,9 @@ public class MetricsCacheSinkTest {
 
     // Then we check whether the MetricsCacheService has restarted the MetricsCacheClient for
     // several times Take other factors into account, we would check whether the MetricsCacheClient
-    // has restarted at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL
+    // at least RESTART_WAIT_INTERVAL - RECONNECT_INTERVAL * 2
     assertTrue(metricsCacheSink.getMetricsCacheStartedAttempts()
-        >= (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
+        >= (RESTART_WAIT_INTERVAL.getSeconds() - 2 * RECONNECT_INTERVAL.getSeconds()));
     metricsCacheSink.close();
   }
 
