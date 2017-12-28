@@ -321,13 +321,12 @@ def check_heron_dirs(cl_args):
       Log.error("Heron home path %s doesn't exist.", path)
 
   # If config_path is needed but not specified, provide a default value
-  if 'config_path' in cl_args:
-    if not cl_args['config_path']:
-      default_config_path = config.get_heron_conf_dir()
-      new_cl_args = dict()
-      new_cl_args['config_path'] = os.path.join(config.get_heron_dir(), default_config_path)
-      cl_args.update(new_cl_args)
-      Log.info("Heron config path is set to %s.", cl_args['config_path'])
+  if 'config_path' in cl_args and not cl_args['config_path']:
+    default_config_path = config.get_heron_conf_dir()
+    new_cl_args = dict()
+    new_cl_args['config_path'] = os.path.join(config.get_heron_dir(), default_config_path)
+    cl_args.update(new_cl_args)
+    Log.info("Heron config path is set to %s.", cl_args['config_path'])
 
   return cl_args
 
