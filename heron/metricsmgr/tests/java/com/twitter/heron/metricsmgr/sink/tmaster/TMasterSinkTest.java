@@ -48,8 +48,9 @@ public class TMasterSinkTest {
       TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
 
   private static final Duration RECONNECT_INTERVAL = Duration.ofSeconds(1);
-  // Restart wait time is set at 3 times of reconnect time. One reconnect time at beginning
-  // and another delay of reconnect time caused by exception handler.
+  // Restart wait time is set at 2 times of reconnect time plus another second. The 2 times factor
+  // is because of localtion checking event interval and the sleep of reconnect interval in
+  // exception handling.
   private static final Duration RESTART_WAIT_INTERVAL = Duration.ofSeconds(3);
   private static final Duration TMASTER_LOCATION_CHECK_INTERVAL = Duration.ofSeconds(1);
 
@@ -119,9 +120,9 @@ public class TMasterSinkTest {
 
     // Then we check whether the TMasterService has restarted the TMasterClient for several times
     // Take other factors into account, we would check whether the TMasterClient has restarted
-    // at least RESTART_WAIT_INTERVAL - RECONNECT_INTERVAL * 2
+    // has restarted at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL
     assertTrue(tMasterSink.getTMasterStartedAttempts()
-        >= (RESTART_WAIT_INTERVAL.getSeconds() - 2 * RECONNECT_INTERVAL.getSeconds()));
+        >= (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
     tMasterSink.close();
   }
 
