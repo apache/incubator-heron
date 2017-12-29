@@ -120,7 +120,7 @@ public class TMasterSinkTest {
 
     // Then we check whether the TMasterService has restarted the TMasterClient for several times
     // Take other factors into account, we would check whether the TMasterClient has restarted
-    // has restarted at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL
+    // at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL
     assertTrue(tMasterSink.getTMasterStartedAttempts()
         >= (RESTART_WAIT_INTERVAL.getSeconds() / RECONNECT_INTERVAL.getSeconds() / 2));
     tMasterSink.close();
