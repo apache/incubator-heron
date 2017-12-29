@@ -26,6 +26,7 @@ import com.twitter.heron.eco.definition.BeanListReference;
 import com.twitter.heron.eco.definition.BeanReference;
 import com.twitter.heron.eco.definition.ConfigurationMethodDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
+import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
@@ -36,17 +37,26 @@ public abstract class BaseBuilder {
   protected static Object buildObject(ObjectDefinition def, EcoExecutionContext context)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException,
       InvocationTargetException, NoSuchFieldException {
+    LOG.info("definition className: " + def.getClassName());
+    LOG.info("definition ID: " + def.getId());
+    LOG.info("definition Constructor Args: " + def.getConstructorArgs());
+    LOG.info("definition parallelism: " + def.getParallelism());
+    LOG.info("definition config methods: " + def.getConfigMethods());
     Class clazz = Class.forName(def.getClassName());
 
 
     Object obj;
     if (def.hasConstructorArgs()) {
-      LOG.fine("Found constructor arguments in definition: "
+      LOG.info("Found constructor arguments in definition: "
           + def.getConstructorArgs().getClass().getName());
       List<Object> cArgs = def.getConstructorArgs();
       if (def.hasReferences()) {
+        LOG.info("The definition has references");
         cArgs = resolveReferences(cArgs, context);
+      } else {
+        LOG.info("The definition does not have references");
       }
+      LOG.info("finding compatible constructor for : " + clazz.getName());
       Constructor con = findCompatibleConstructor(cArgs, clazz);
       if (con != null) {
         LOG.fine("Found something seemingly compatible, attempting invocation...");
@@ -148,7 +158,7 @@ public abstract class BaseBuilder {
       }
       Class paramType = parameterTypes[i];
       Class objectType = obj.getClass();
-      LOG.fine("Comparing parameter class " + paramType + " to object class "
+      LOG.info("Comparing parameter class " + paramType + " to object class "
           + objectType + "to see if assignment is possible.");
       if (paramType.equals(objectType)) {
         LOG.fine("Yes, they are the same class.");
@@ -238,19 +248,19 @@ public abstract class BaseBuilder {
     Constructor retval = null;
     int eligibleCount = 0;
 
-    LOG.fine("Target class: " + target.getName() + ", constructor args: " + args);
+    LOG.info("Target class: " + target.getName() + ", constructor args: " + args);
     Constructor[] cons = target.getDeclaredConstructors();
 
     for (Constructor con : cons) {
       Class[] paramClasses = con.getParameterTypes();
       if (paramClasses.length == args.size()) {
-        LOG.fine("found constructor with same number of args..");
+        LOG.info("found constructor with same number of args..");
         boolean invokable = canInvokeWithArgs(args, con.getParameterTypes());
         if (invokable) {
           retval = con;
           eligibleCount++;
         }
-        LOG.fine("** invokable --> {}" + invokable);
+        LOG.info("** invokable --> {}" + invokable);
       } else {
         LOG.fine("Skipping constructor with wrong number of arguments.");
       }
@@ -266,9 +276,11 @@ public abstract class BaseBuilder {
   private static List<Object> resolveReferences(List<Object> args, EcoExecutionContext context) {
     LOG.fine("Checking arguments for references.");
     List<Object> cArgs = new ArrayList<Object>();
+    EcoTopologyDefinition topologyDefinition = context.getTopologyDefinition();
     // resolve references
     for (Object arg : args) {
       if (arg instanceof BeanReference) {
+        LOG.info("BeanReference: " + ((BeanReference) arg).getId());
         cArgs.add(context.getComponent(((BeanReference) arg).getId()));
       } else if (arg instanceof BeanListReference) {
         List<Object> components = new ArrayList<>();
@@ -277,9 +289,10 @@ public abstract class BaseBuilder {
           components.add(context.getComponent(id));
         }
 
-        LOG.fine("BeanListReference resolved as {}" + components);
+        LOG.info("BeanListReference resolved as {}" + components);
         cArgs.add(components);
       } else {
+        LOG.info("Unknown:" + arg.toString());
         cArgs.add(arg);
       }
     }

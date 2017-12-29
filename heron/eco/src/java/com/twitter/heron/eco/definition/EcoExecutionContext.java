@@ -13,6 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.eco.definition;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
@@ -30,7 +31,7 @@ public class EcoExecutionContext {
 
   private Map<String, ComponentStream> streams;
 
-  private Map<String, Object> components;
+  private Map<String, Object> components = new HashMap<>();
 
   public EcoExecutionContext(EcoTopologyDefinition topologyDefinition, Config config) {
     this.topologyDefinition = topologyDefinition;
@@ -87,6 +88,10 @@ public class EcoExecutionContext {
 
   public Map<String, Object> getComponents() {
     return components;
+  }
+
+  public void addComponent(String key, Object value) {
+    this.components.put(key, value);
   }
 
   public Object getComponent(String id) {

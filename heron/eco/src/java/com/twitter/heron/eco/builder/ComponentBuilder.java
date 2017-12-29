@@ -17,24 +17,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 
 public class ComponentBuilder extends BaseBuilder {
-
+  private static final Logger LOG = Logger.getLogger(ComponentBuilder.class.getName());
   protected void buildComponents(EcoExecutionContext context) throws ClassNotFoundException,
       IllegalAccessException, InstantiationException,
       NoSuchFieldException, InvocationTargetException {
     List<BeanDefinition> componentDefinitions = context.getTopologyDefinition().getComponents();
-    Map<String, Object> components = new HashMap<>();
 
     if (componentDefinitions != null) {
+      LOG.info("Component definitions is not null");
       for (BeanDefinition bean : componentDefinitions) {
         Object obj = buildObject(bean, context);
-        components.put(bean.getId(), obj);
+        context.addComponent(bean.getId(), obj);
       }
     }
-    context.setComponents(components);
+    LOG.info("Components added to context: " + context.getComponents().size());
   }
 }
