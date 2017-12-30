@@ -11,18 +11,16 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.builder;
+package com.twitter.heron.eco.definition.eco.src.java.com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.spout.IRichSpout;
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.eco.definition.EcoExecutionContext;
-import com.twitter.heron.eco.definition.EcoTopologyDefinition;
-import com.twitter.heron.eco.definition.ObjectDefinition;
-
+import com.twitter.heron.eco.definition.eco.src.java.com.twitter.heron.eco.definition.EcoExecutionContext;
+import com.twitter.heron.eco.definition.eco.src.java.com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.definition.eco.src.java.com.twitter.heron.eco.definition.ObjectDefinition;
 
 
 public class SpoutBuilder extends BaseBuilder {
