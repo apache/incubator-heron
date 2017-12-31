@@ -15,7 +15,8 @@ package com.twitter.heron.eco.builder;
 
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import org.apache.storm.Config;
+
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 public final  class ConfigBuilder {

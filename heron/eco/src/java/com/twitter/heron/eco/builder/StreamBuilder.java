@@ -17,14 +17,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.bolt.IBasicBolt;
-import com.twitter.heron.api.bolt.IRichBolt;
-import com.twitter.heron.api.bolt.IWindowedBolt;
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.BoltDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.utils.Utils;
+import org.apache.storm.grouping.CustomStreamGrouping;
+import org.apache.storm.topology.BoltDeclarer;
+import org.apache.storm.topology.IBasicBolt;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.IWindowedBolt;
+import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.Utils;
+
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -36,7 +37,7 @@ public class StreamBuilder extends BaseBuilder {
 
   protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
-      NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, ComponentStream> componentStreams = new HashMap<>();
 

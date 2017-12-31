@@ -16,7 +16,7 @@ package com.twitter.heron.eco.definition;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import org.apache.storm.Config;
 
 
 public class EcoExecutionContext {

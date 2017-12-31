@@ -23,10 +23,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.topology.TopologyBuilder;
+import org.apache.storm.Config;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.topology.TopologyBuilder;
 
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.ComponentBuilder;
@@ -78,7 +77,8 @@ public final class Eco {
     TopologyBuilder builder = ecoBuilder
         .buildTopologyBuilder(executionContext);
 
-    HeronSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
+
+    StormSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
 
   }
 
