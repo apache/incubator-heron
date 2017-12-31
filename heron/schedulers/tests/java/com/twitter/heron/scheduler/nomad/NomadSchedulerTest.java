@@ -358,7 +358,7 @@ public class NomadSchedulerTest {
         task.getEnv().get(NomadConstants.HERON_CORE_PACKAGE_URI));
     Assert.assertEquals(TOPOLOGY_DOWNLOAD_CMD,
         task.getEnv().get(NomadConstants.HERON_TOPOLOGY_DOWNLOAD_CMD));
-    Assert.assertEquals("executor-binary args1 args2",
+    Assert.assertEquals("./heron-core/bin/heron-executor args1 args2",
         task.getEnv().get(NomadConstants.HERON_EXECUTOR_CMD));
   }
 }
