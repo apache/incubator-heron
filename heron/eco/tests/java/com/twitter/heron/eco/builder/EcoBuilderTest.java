@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import org.apache.storm.Config;
+import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.topology.TopologyBuilder;
+
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
