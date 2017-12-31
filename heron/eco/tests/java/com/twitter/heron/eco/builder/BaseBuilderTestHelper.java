@@ -11,7 +11,19 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.definition.eco.src.java.com.twitter.heron.eco.definition;
+package com.twitter.heron.eco.builder;
 
-public class SpoutDefinition extends ObjectDefinition {
+import org.junit.Before;
+
+import com.twitter.heron.eco.definition.EcoExecutionContext;
+
+public abstract class BaseBuilderTestHelper {
+
+  protected EcoExecutionContext context;
+
+  @Before
+  public void setUpForEacTestCase() {
+    
+  }
+
 }
