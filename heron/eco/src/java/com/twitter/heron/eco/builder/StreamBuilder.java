@@ -33,9 +33,10 @@ import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
-public class StreamBuilder extends BaseBuilder {
+public class StreamBuilder {
 
-  protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder)
+  protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder,
+                              ObjectBuilder objectBuilder)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
       NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
@@ -100,7 +101,9 @@ public class StreamBuilder extends BaseBuilder {
           break;
         case CUSTOM:
           declarer.customGrouping(stream.getFrom(), streamId,
-              buildCustomStreamGrouping(stream.getGrouping().getCustomClass(), executionContext));
+              buildCustomStreamGrouping(stream.getGrouping().getCustomClass(),
+                  executionContext,
+                  objectBuilder));
           break;
         default:
           throw new UnsupportedOperationException("unsupported grouping type: " + grouping);
@@ -110,11 +113,12 @@ public class StreamBuilder extends BaseBuilder {
   }
 
   private CustomStreamGrouping buildCustomStreamGrouping(ObjectDefinition objectDefinition,
-                                                         EcoExecutionContext executionContext)
+                                                         EcoExecutionContext executionContext,
+                                                         ObjectBuilder objectBuilder)
       throws ClassNotFoundException,
       IllegalAccessException, InstantiationException, NoSuchFieldException,
       InvocationTargetException {
-    Object grouping = buildObject(objectDefinition, executionContext);
+    Object grouping = objectBuilder.buildObject(objectDefinition, executionContext);
     return (CustomStreamGrouping) grouping;
   }
 }

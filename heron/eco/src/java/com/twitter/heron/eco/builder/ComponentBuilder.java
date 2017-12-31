@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 
-public class ComponentBuilder extends BaseBuilder {
+public class ComponentBuilder extends ObjectBuilder {
   private static final Logger LOG = Logger.getLogger(ComponentBuilder.class.getName());
   protected void buildComponents(EcoExecutionContext context) throws ClassNotFoundException,
       IllegalAccessException, InstantiationException,

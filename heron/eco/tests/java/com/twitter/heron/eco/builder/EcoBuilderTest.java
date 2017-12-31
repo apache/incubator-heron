@@ -100,17 +100,18 @@ public class EcoBuilderTest {
 
   @Test
   public void testBuildTopologyBuilder_BuildsAsExpected()
-      throws IllegalAccessException, ClassNotFoundException, InstantiationException,
-      NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+      throws IllegalAccessException, ClassNotFoundException,
+      InstantiationException, NoSuchFieldException, InvocationTargetException {
     Config config = new Config();
     EcoExecutionContext context = new EcoExecutionContext(ecoTopologyDefinition, config);
-
-    subject.buildTopologyBuilder(context);
+    ObjectBuilder objectBuilder = new ObjectBuilder();
+    subject.buildTopologyBuilder(context, objectBuilder);
 
     verify(mockSpoutBuilder).addSpoutsToExecutionContext(same(context),
-        any(TopologyBuilder.class));
-    verify(mockBoltBuilder).buildBolts(same(context));
-    verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class));
+        any(TopologyBuilder.class), same(objectBuilder));
+    verify(mockBoltBuilder).buildBolts(same(context), same(objectBuilder));
+    verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class),
+        same(objectBuilder));
     verify(mockComponentBuilder).buildComponents(same(context));
   }
 

@@ -30,11 +30,11 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
-public abstract class BaseBuilder {
-  private static final Logger LOG = Logger.getLogger(BaseBuilder.class.getName());
+public class ObjectBuilder {
+  private static final Logger LOG = Logger.getLogger(ObjectBuilder.class.getName());
 
   @SuppressWarnings("rawtypes")
-  protected static Object buildObject(ObjectDefinition def, EcoExecutionContext context)
+  public Object buildObject(ObjectDefinition def, EcoExecutionContext context)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException,
       InvocationTargetException, NoSuchFieldException {
     LOG.info("definition className: " + def.getClassName());

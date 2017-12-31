@@ -26,17 +26,18 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 
 
 
-public class SpoutBuilder extends BaseBuilder {
+public class SpoutBuilder {
 
   protected void addSpoutsToExecutionContext(EcoExecutionContext executionContext,
-                                                    TopologyBuilder builder)
+                                                    TopologyBuilder builder,
+                                             ObjectBuilder objectBuilder)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
     Map<String, Object> spouts = new HashMap<>();
 
     for (ObjectDefinition def: topologyDefinition.getSpouts()) {
-      Object obj = buildObject(def, executionContext);
+      Object obj = objectBuilder.buildObject(def, executionContext);
       spouts.put(def.getId(), obj);
       builder.setSpout(def.getId(), (IRichSpout) obj, def.getParallelism());
     }

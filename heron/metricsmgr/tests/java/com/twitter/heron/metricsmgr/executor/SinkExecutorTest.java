@@ -55,7 +55,7 @@ public class SinkExecutorTest {
   private static final String EXCEPTION_FIRST_TIME = "firstTime";
   private static final String EXCEPTION_LOGGING = "logging";
   private static final String RECORD_SOURCE = "source";
-  private static final String RECORD_CONTEXT = "context";
+  private static final String RECORD_CONTEXT = "ecoExecutionContext";
 
   private volatile int processRecordInvoked = 0;
   private volatile int flushInvoked = 0;

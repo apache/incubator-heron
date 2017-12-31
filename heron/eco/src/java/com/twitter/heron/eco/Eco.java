@@ -30,6 +30,7 @@ import org.apache.storm.topology.TopologyBuilder;
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.ComponentBuilder;
 import com.twitter.heron.eco.builder.EcoBuilder;
+import com.twitter.heron.eco.builder.ObjectBuilder;
 import com.twitter.heron.eco.builder.SpoutBuilder;
 import com.twitter.heron.eco.builder.StreamBuilder;
 import com.twitter.heron.eco.definition.BoltDefinition;
@@ -74,8 +75,9 @@ public final class Eco {
 
     printTopologyInfo(executionContext);
 
+    ObjectBuilder objectBuilder = new ObjectBuilder();
     TopologyBuilder builder = ecoBuilder
-        .buildTopologyBuilder(executionContext);
+        .buildTopologyBuilder(executionContext, objectBuilder);
 
 
     StormSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());

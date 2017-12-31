@@ -12,9 +12,6 @@ heron_local_deps = [
 
 eco_test_deps = heron_local_deps + test_deps_files
 
-
-
-
 java_test(
     name = "EcoBuilderTest",
     srcs = glob(["com/twitter/heron/eco/builder/EcoBuilderTest.java"]),
@@ -28,3 +25,8 @@ java_test(
     deps = eco_test_deps,
     size = "small"
 )
+
+
+
+
+
