@@ -26,6 +26,12 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "ConfigBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/ConfigBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
 
 
 

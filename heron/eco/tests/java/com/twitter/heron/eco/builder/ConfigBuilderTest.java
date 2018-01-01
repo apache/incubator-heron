@@ -1,4 +1,4 @@
-//  Copyright 2017 Twitter. All rights reserved.
+//  Copyright 2018 Twitter. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,20 +13,31 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
-import java.util.Map;
-
 import org.apache.storm.Config;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
-public class ConfigBuilder {
-  protected Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
-    Map<String, Object> configMap = topologyDefinition.getConfig();
-    Config config = new Config();
-    for (Map.Entry<String, Object> entry: configMap.entrySet()) {
-      config.put(entry.getKey(), entry.getValue());
-    }
-    return config;
+public class ConfigBuilderTest {
+
+  private ConfigBuilder subject;
+
+  @Before
+  public void setUpForEachTestCase() {
+    subject = new ConfigBuilder();
+  }
+
+  @Test
+  public void testBuildConfig_ConfigIsNotDefined_ReturnsEmptyConfig() {
+    EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();
+
+    Config config = subject.buildConfig(ecoTopologyDefinition);
+
+    assertThat(0, is(equalTo(config.size())));
   }
 }
