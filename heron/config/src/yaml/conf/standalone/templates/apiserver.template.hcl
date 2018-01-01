@@ -13,7 +13,13 @@ job "apiserver" {
       driver = "raw_exec"
       config {
         command = <heron_apiserver_executable>
-        args = ["--cluster", "standalone"],
+        args = [
+        "--cluster", "standalone",
+        "--base-template", "standalone",
+        "-D", "heron.statemgr.connection.string=<zookeeper_host:zookeeper_port>",
+        "-D", "heron.nomad.scheduler.uri=<scheduler_uri>",
+        "-D", "heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader",
+        "--verbose"]
       }
       resources {
         cpu    = 500 # 500 MHz
