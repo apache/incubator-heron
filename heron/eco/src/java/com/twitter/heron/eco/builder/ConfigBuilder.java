@@ -19,11 +19,9 @@ import org.apache.storm.Config;
 
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
-public final  class ConfigBuilder {
+public class ConfigBuilder {
 
-  private ConfigBuilder() { }
-
-  protected static Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+  protected Config buildConfig(EcoTopologyDefinition topologyDefinition) {
     Map<String, Object> configMap = topologyDefinition.getConfig();
     if (configMap == null) {
       return new Config();

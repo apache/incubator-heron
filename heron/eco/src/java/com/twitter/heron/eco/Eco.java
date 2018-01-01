@@ -29,6 +29,7 @@ import org.apache.storm.topology.TopologyBuilder;
 
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.ComponentBuilder;
+import com.twitter.heron.eco.builder.ConfigBuilder;
 import com.twitter.heron.eco.builder.EcoBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
 import com.twitter.heron.eco.builder.SpoutBuilder;
@@ -89,8 +90,10 @@ public final class Eco {
     BoltBuilder boltBuilder = new BoltBuilder();
     StreamBuilder streamBuilder = new StreamBuilder();
     ComponentBuilder componentBuilder = new ComponentBuilder();
+    ConfigBuilder configBuilder = new ConfigBuilder();
 
-    return new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder, componentBuilder);
+    return new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder,
+        componentBuilder, configBuilder);
   }
 
   private static Options constructOptions() {

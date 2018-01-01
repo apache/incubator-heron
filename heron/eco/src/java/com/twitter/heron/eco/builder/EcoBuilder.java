@@ -34,12 +34,16 @@ public final class EcoBuilder extends ObjectBuilder {
 
   private ComponentBuilder componentBuilder;
 
+  private ConfigBuilder configBuilder;
+
   public EcoBuilder(SpoutBuilder spoutBuilder, BoltBuilder boltBuilder,
-                    StreamBuilder streamBuilder, ComponentBuilder componentBuilder) {
+                    StreamBuilder streamBuilder, ComponentBuilder componentBuilder,
+                    ConfigBuilder configBuilder) {
     this.spoutBuilder = spoutBuilder;
     this.boltBuilder = boltBuilder;
     this.streamBuilder = streamBuilder;
     this.componentBuilder = componentBuilder;
+    this.configBuilder = configBuilder;
   }
 
   public TopologyBuilder buildTopologyBuilder(EcoExecutionContext executionContext,
@@ -58,6 +62,6 @@ public final class EcoBuilder extends ObjectBuilder {
   }
 
   public Config buildConfig(EcoTopologyDefinition topologyDefinition) {
-    return ConfigBuilder.buildConfig(topologyDefinition);
+    return this.configBuilder.buildConfig(topologyDefinition);
   }
 }

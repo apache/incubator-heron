@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
@@ -28,18 +27,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EcoBuilderTest {
@@ -52,6 +53,8 @@ public class EcoBuilderTest {
   private StreamBuilder mockStreamBuilder;
   @Mock
   private ComponentBuilder mockComponentBuilder;
+  @Mock
+  private ConfigBuilder mockConfigBuilder;
   @InjectMocks
   private EcoBuilder subject;
 
@@ -71,16 +74,22 @@ public class EcoBuilderTest {
     verifyNoMoreInteractions(mockSpoutBuilder,
         mockBoltBuilder,
         mockStreamBuilder,
-        mockComponentBuilder);
+        mockComponentBuilder,
+        mockConfigBuilder);
   }
 
   @Test
   public void testBuild_EmptyConfigMap_ReturnsDefaultConfigs() {
-    // do nothing with config map on purpose
 
-    Config config = subject.buildConfig(ecoTopologyDefinition);
+    Config config = new Config();
+    when(mockConfigBuilder.buildConfig(eq(ecoTopologyDefinition))).thenReturn(config);
 
-    assertThat(config.get(Config.TOPOLOGY_DEBUG), is(nullValue()));
+    Config returnedConfig = subject.buildConfig(ecoTopologyDefinition);
+
+    verify(mockConfigBuilder).buildConfig(same(ecoTopologyDefinition));
+
+    assertThat(returnedConfig.get(Config.TOPOLOGY_DEBUG), is(nullValue()));
+    assertThat(config, sameInstance(returnedConfig));
   }
 
   @Test
@@ -91,11 +100,13 @@ public class EcoBuilderTest {
     configMap.put(Config.TOPOLOGY_ENVIRONMENT, environment);
     configMap.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, spouts);
 
-    Config config = subject.buildConfig(ecoTopologyDefinition);
+    Config config = new Config();
 
-    assertThat(config.get(Config.TOPOLOGY_DEBUG), is(equalTo(false)));
-    assertThat(config.get(Config.TOPOLOGY_ENVIRONMENT), is(equalTo(environment)));
-    assertThat(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING), is(equalTo(spouts)));
+    when(mockConfigBuilder.buildConfig(eq(ecoTopologyDefinition))).thenReturn(config);
+
+    assertThat(subject.buildConfig(ecoTopologyDefinition), sameInstance(config));
+
+    verify(mockConfigBuilder).buildConfig(same(ecoTopologyDefinition));
   }
 
   @Test
@@ -114,5 +125,4 @@ public class EcoBuilderTest {
         same(objectBuilder));
     verify(mockComponentBuilder).buildComponents(same(context));
   }
-
 }
