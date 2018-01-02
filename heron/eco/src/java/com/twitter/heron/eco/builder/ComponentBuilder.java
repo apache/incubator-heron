@@ -20,20 +20,17 @@ import java.util.logging.Logger;
 import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 
-public class ComponentBuilder extends ObjectBuilder {
-  private static final Logger LOG = Logger.getLogger(ComponentBuilder.class.getName());
-  protected void buildComponents(EcoExecutionContext context) throws ClassNotFoundException,
+public class ComponentBuilder {
+  protected void buildComponents(EcoExecutionContext context, ObjectBuilder objectBuilder) throws ClassNotFoundException,
       IllegalAccessException, InstantiationException,
       NoSuchFieldException, InvocationTargetException {
     List<BeanDefinition> componentDefinitions = context.getTopologyDefinition().getComponents();
 
     if (componentDefinitions != null) {
-      LOG.info("Component definitions is not null");
       for (BeanDefinition bean : componentDefinitions) {
-        Object obj = buildObject(bean, context);
+        Object obj = objectBuilder.buildObject(bean, context);
         context.addComponent(bean.getId(), obj);
       }
     }
-    LOG.info("Components added to context: " + context.getComponents().size());
   }
 }

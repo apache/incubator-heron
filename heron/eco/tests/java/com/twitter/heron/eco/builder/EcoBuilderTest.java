@@ -123,6 +123,6 @@ public class EcoBuilderTest {
     verify(mockBoltBuilder).buildBolts(same(context), same(objectBuilder));
     verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class),
         same(objectBuilder));
-    verify(mockComponentBuilder).buildComponents(same(context));
+    verify(mockComponentBuilder).buildComponents(same(context), same(objectBuilder));
   }
 }

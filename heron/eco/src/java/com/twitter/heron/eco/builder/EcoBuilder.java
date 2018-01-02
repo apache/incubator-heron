@@ -19,7 +19,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 
-
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
@@ -53,7 +52,7 @@ public final class EcoBuilder extends ObjectBuilder {
       NoSuchFieldException, InvocationTargetException {
 
     TopologyBuilder builder = new TopologyBuilder();
-    componentBuilder.buildComponents(executionContext);
+    componentBuilder.buildComponents(executionContext, objectBuilder);
     spoutBuilder.addSpoutsToExecutionContext(executionContext, builder, objectBuilder);
     boltBuilder.buildBolts(executionContext, objectBuilder);
     streamBuilder.buildStreams(executionContext, builder, objectBuilder);
