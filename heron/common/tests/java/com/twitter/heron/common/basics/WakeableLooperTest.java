@@ -29,7 +29,7 @@ import org.junit.Test;
  * WakeableLooper Tester.
  */
 public class WakeableLooperTest {
-  private volatile static int globalValue;
+  private static volatile int globalValue;
   private WakeableLooper slaveLooper;
 
   @Before
