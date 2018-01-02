@@ -111,7 +111,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    publishNotReadyAddresses: "true"
   name: bookkeeper
   labels:
     app: bookkeeper
