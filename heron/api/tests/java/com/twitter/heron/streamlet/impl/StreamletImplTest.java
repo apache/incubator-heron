@@ -292,12 +292,12 @@ public class StreamletImplTest {
     assertEquals(0, consumerStreamlet.getChildren().size());
   }
 
-
+  @Test
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
     assertEquals(0, Float.compare(defaultConfig.getPerContainerCpu(), 1.0f));
-    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100));
+    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100).asBytes());
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
     Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
@@ -311,6 +311,62 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getPerContainerRamAsGigabytes(), 10);
     assertEquals(nonDefaultConfig.getPerContainerRamAsMegabytes(), 1024 * 10);
     assertEquals(0, Float.compare(nonDefaultConfig.getPerContainerCpu(), 3.5f));
+  }
+
+  @Test
+  public void testDefaultStreamletNameIfNotSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefix.SUPPLIER, stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList("supplier1")));
+  }
+
+  @Test
+  public void testStreamletNameIfAlreadySet() {
+    String supplierName = "MyStringSupplier";
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    supplierStreamlet.setName(supplierName);
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefix.SUPPLIER, stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList(supplierName)));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testStreamletNameIfDuplicateNameIsSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+
+    // set duplicate streamlet name and expect thrown exception
+    supplierStreamlet
+        .map((content) -> content.toUpperCase()).setName("MyMapStreamlet")
+        .map((content) -> content + "_test_suffix").setName("MyMapStreamlet");
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
   }
 
   @Test

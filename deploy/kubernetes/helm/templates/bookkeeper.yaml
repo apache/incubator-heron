@@ -1,0 +1,178 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
+
+{{- $platform := .Values.platform }}
+{{- $bkReplicas := index (index .Values $platform) "bkReplicas" }}
+{{- $cpuMin := index (index .Values $platform) "cpuMin" }}
+{{- $cpuMax := index (index .Values $platform) "cpuMax" }}
+{{- $memoryMin := index (index .Values $platform) "memoryMin" }}
+{{- $memoryMax := index (index .Values $platform) "memoryMax" }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-bookie-config
+data:
+  BK_BOOKIE_EXTRA_OPTS: "\"-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
+  BK_bookiePort: "3181"
+  BK_journalDirectory: "/bookkeeper/data/journal"
+  BK_ledgerDirectories: "/bookkeeper/data/ledgers"
+  BK_indexDirectories: "/bookkeeper/data/ledgers" 
+  BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
+  # the default manager is flat, which is not good for supporting large number of ledgers
+  BK_ledgerManagerType: "hierarchical"
+  BK_autoRecoveryDaemonEnabled: "true"
+  # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
+  #BK_statsProviderClass: org.apache.bookkeeper.stats.PrometheusMetricsProvider
+---
+
+## BookKeeper servers need to access the local disks and the pods
+## cannot be moved across different nodes.
+## For this reason, we run BK as a daemon set, one for each node in the
+## cluster, unless restricted by label selectors
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-bookie
+  labels:
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie
+spec:
+  serviceName: {{ .Release.Name }}-bookkeeper
+  replicas: {{ $bkReplicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-bookkeeper
+        component: {{ .Release.Name }}-bookie
+        # Specify cluster to allow aggregation by cluster in
+        # the metrics
+        cluster: {{ .Release.Name }}-bookkeeper
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+
+    spec:
+      # Make sure multiple pods of bookkeeper don't get scheduled on the
+      # same node, unless there are no other available nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                        - {{ .Release.Name }}-bookkeeper
+                topologyKey: "kubernetes.io/hostname"
+      terminationGracePeriodSeconds: 0
+      initContainers:
+        # Wait until the zookeeper pods are up and running
+        - name: bookie-init-container
+          image: {{ .Values.bookkeeper.image }}
+          command: 
+            - sh
+            - -c
+            - >-
+              while true; do
+                status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
+                if [ "$status" = "imok" ]; then
+                  break;
+                fi;
+                echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
+                sleep 4;
+              done
+      containers:
+        - name: bookie
+          image: {{ .Values.bookkeeper.image }}
+          resources:
+            requests:
+              memory: {{ $memoryMin | quote }}
+              cpu: {{ $cpuMin | quote }}
+            limits:
+              memory: {{ $memoryMax | quote }}
+              cpu: {{ $cpuMax | quote }}
+          # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
+          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          args: ["/opt/bookkeeper/bin/bookkeeper", "bookie"]
+          ports:
+            - name: client
+              containerPort: 3181
+              # we are using `status.hostIP` for the bookie's advertised address. export 3181 as the hostPort,
+              # so that the containers are able to access the host port
+              hostPort: 3181
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-bookie-config
+          volumeMounts:
+            - name: journal-disk
+              mountPath: /bookkeeper/data/journal
+            - name: data-disk
+              mountPath: /bookkeeper/data/ledgers
+
+  volumeClaimTemplates:
+    - metadata:
+        name: journal-disk
+        annotations:
+          volume.alpha.kubernetes.io/storage-class: default
+        labels:
+          component: {{ .Release.Name }}-bookkeeper
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: data-disk
+        annotations:
+          volume.alpha.kubernetes.io/storage-class: default
+        labels:
+          component: {{ .Release.Name }}-bookkeeper
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+
+##
+## Define the Bookie headless service
+## In practice, in this case, it is only useful to have a view of
+## all the bookie pods that are present
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-bookie
+  labels:
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie
+spec:
+  ports:
+  - port: 3181
+    name: server
+  clusterIP: None
+  selector:
+    app: {{ .Release.Name }}-bookkeeper
+    component: {{ .Release.Name }}-bookie

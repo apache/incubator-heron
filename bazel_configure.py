@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
 # Is so creates scripts/compile/env_exec.sh containing environment used
@@ -409,7 +410,7 @@ def main():
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
 
   # write the environment executable file
-  write_env_exec_file(platform, env_map)
+  # write_env_exec_file(platform, env_map)
 
 if __name__ == '__main__':
   main()

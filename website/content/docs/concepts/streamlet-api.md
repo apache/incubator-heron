@@ -1,6 +1,6 @@
 ---
 title: The Heron Streamlet API
-description: Create Heron topologies in Java using a simplified interface inspired by functional programming
+description: Create Heron topologies in using a simplified interface inspired by functional programming
 new: true
 ---
 
@@ -109,7 +109,7 @@ import com.twitter.heron.streamlet.Builder;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Runner;
 
-Builder builder = Builder.createBuilder();
+Builder builder = Builder.newBuilder();
 
 // Function for generating random integers
 int randomInt(int lower, int upper) {
@@ -146,7 +146,7 @@ Operation | Description
 [filter](#filter-operations) | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
 [clone](#clone-operations) | Creates any number of identical copies of a streamlet
-[transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations)
+[transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations) | Modify the elements from an incoming streamlet and update the topology's state
 [reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
 [log](#log-operations) | Logs the final streamlet output of the processing graph to stdout
@@ -162,9 +162,9 @@ Map operations create a new streamlet by applying the supplied mapping function 
 ```java
 import com.twitter.heron.streamlet.Builder;
 
-Builder builder = Builder.createBuilder();
+Builder processingGraphBuilder = Builder.newBuilder();
 
-Streamlet<Integer> ones = builder.newSource(() -> 1);
+Streamlet<Integer> ones = processingGraphBuilder.newSource(() -> 1);
 Streamlet<Integer> thirteens = ones.map(i -> i + 12);
 ```
 
@@ -317,7 +317,7 @@ import java.util.Arrays;
 
 import com.twitter.heron.streamlet.WindowConfig;
 
-Builder builder = Builder.createBuilder();
+Builder builder = Builder.newBuilder();
 
 builder.newSource(() -> "Mary had a little lamb")
     .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
@@ -532,7 +532,9 @@ Included key-values |
 
 ### Sink operations
 
-In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
+In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks.
+
+#### Java example
 
 ```java
 import com.twitter.heron.streamlet.Context;
@@ -561,13 +563,29 @@ In this example, the sink fetches the name of the enclosing streamlet from the c
 Here is the `FormattedLogSink` at work in an example processing graph:
 
 ```java
-Builder builder = Builder.createBuilder();
+Builder builder = Builder.newBuilder();
 
 builder.newSource(() -> "Here is a string to be passed to the sink")
         .toSink(new FormattedLogSink());
 ```
 
 > [Log operations](#log-operations) rely on a log sink that is provided out of the box. You'll need to implement other sinks yourself.
+
+### Consume operations
+
+Consume operations are like [sink operations](#sink-operations) except they don't require implementing a full sink interface. Consume operations are thus suited for simple operations like formatted logging.
+
+#### Java example
+
+```java
+Builder builder = Builder.newBuilder()
+        .newSource(() -> generateRandomInteger())
+        .filter(i -> i % 2 == 0)
+        .consume(i -> {
+            String message = String.format("Even number found: %d", i);
+            System.out.println(message);
+        });
+```
 
 ## Partitioning
 
@@ -586,7 +604,7 @@ The example topology [above](#streamlets), for example, has five steps:
 You could apply varying numbers of partitions to each step in that topology like this:
 
 ```java
-Builder builder = Builder.CreateBuilder();
+Builder builder = Builder.newBuilder();
 
 Streamlet<Integer> zeroes = builder.newSource(() -> 0)
         .setName("zeroes");
@@ -613,7 +631,7 @@ As explained [above](#partitioning), when you set a number of partitions for a s
 ```java
 import java.util.Arrays;
 
-Builder builder = Builder.CreateBuilder();
+Builder builder = Builder.newBuilder();
 
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
     .repartition(4, (element, numPartitions) -> {

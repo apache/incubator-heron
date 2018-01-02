@@ -8,7 +8,7 @@ cc_test(
     deps = [
         "//heron/api/src/cpp:cxx-api",
         "//heron/common/src/cpp/basics:basics-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/api/src/cpp",

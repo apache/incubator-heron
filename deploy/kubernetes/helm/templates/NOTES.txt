@@ -1,0 +1,10 @@
+You can check the status of Heron by doing the following:
+
+1. Start kubectl proxy
+   kubectl proxy -p 8001
+
+2. Verify we can access the api server
+   open http://localhost:8001/api/v1/proxy/namespaces/{{ .Values.namespace }}/services/{{ template "heron.fullname" . }}-apiserver:9000/api/v1/version
+
+3. Verify we can access the heron ui
+   open http://localhost:8001/api/v1/proxy/namespaces/{{ .Values.namespace }}/services/{{ template "heron.fullname" . }}-ui:8889

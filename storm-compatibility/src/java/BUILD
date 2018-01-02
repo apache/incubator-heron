@@ -1,8 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
-load("/tools/rules/javadoc", "java_doc")
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
 
 storm_deps_files = [
     "//heron/api/src/java:api-java-low-level",

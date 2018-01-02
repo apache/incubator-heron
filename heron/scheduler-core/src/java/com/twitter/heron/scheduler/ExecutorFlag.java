@@ -21,6 +21,7 @@ public enum ExecutorFlag {
   TopologyDefinitionFile("topology-defn-file"),
   StateManagerConnection("state-manager-connection"),
   StateManagerRoot("state-manager-root"),
+  StateManagerConfigFile("state-manager-config-file"),
   TMasterBinary("tmaster-binary"),
   StmgrBinary("stmgr-binary"),
   MetricsManagerClasspath("metrics-manager-classpath"),

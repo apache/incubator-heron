@@ -1,0 +1,126 @@
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Environment where Heron will be running
+# Valid values are as follows
+# "aws" - Amazon Cloud
+# "gke" - Google Container Enginer
+# "minikube" - Kubernetes in a single node
+# "baremetal" - On premise machines
+platform: minikube
+
+# Heron image to use
+image: heron/heron:0.17.0
+
+# Heron image pull policy
+imagePullPolicy: IfNotPresent
+
+# Kubernetes namespace to launch
+namespace: default
+
+minikube:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 1
+
+  # Number of replicas for bookkeeper
+  bkReplicas: 1
+
+  # Number of replicas for zookeeper
+  zkReplicas: 1
+
+  # cpu mininum and maximum
+  cpuMin: 1000m
+  cpuMax: 2000m
+
+  # memory mininum and maximum
+  memoryMin: 1Gi
+  memoryMax: 2Gi
+
+aws:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for bookkeeper
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+  # cpu mininum and maximum
+  cpuMin: 1000m
+  cpuMax: 2000m
+
+  # memory mininum and maximum
+  memoryMin: 3Gi
+  memoryMax: 5Gi
+
+gke:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for bookkeeper
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+  # cpu mininum and maximum
+  cpuMin: 1000m
+  cpuMax: 2000m
+
+  # memory mininum and maximum
+  memoryMin: 3Gi
+  memoryMax: 5Gi
+
+baremetal:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for bookkeeper
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+  # cpu mininum and maximum
+  cpuMin: 1000m
+  cpuMax: 2000m
+
+  # memory mininum and maximum
+  memoryMin: 3Gi
+  memoryMax: 5Gi
+
+bookkeeper:
+  image: apachedistributedlog/distributedlog:latest
+  imagePullPolicy: IfNotPresent
+
+zookeeper:
+  enabled: true
+  minAvailable: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1
+      memory: 4Gi
+  heap: 1G
+  storage: 2Gi
+  serverPort: 2888
+  leaderElectionPort: 3888
+  clientPort: 2181
+  tickTimeMs: 2000
+  initTicks: 10
+  syncTicks: 5
+  clientCnxns: 60
+  snapRetain: 3
+  purgeHours: 1
+  probeInitialDelaySeconds: 15
+  probeTimeoutSeconds: 5
+  antiAffinity: "hard"
+  logLevel: "INFO"
+  security:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000

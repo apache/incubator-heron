@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex/pex_rules", "pex_library", "pex_binary")
-
 pex_library(
     name = "cli-py",
     srcs = glob(
@@ -16,6 +14,7 @@ pex_library(
       "PyYAML==3.10",
       "enum34==1.1.6",
       "requests==2.12.3",
+      "netifaces==0.10.6"
     ],
 )
 

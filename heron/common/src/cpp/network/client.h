@@ -121,6 +121,9 @@ class Client : public BaseClient {
   // Tells if we are connected
   inline bool IsConnected() const { return state_ == CONNECTED; }
 
+  // Tells us if we have caused backpressure
+  bool HasCausedBackPressure() const;
+
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
   void InstallResponseHandler(S* _request,

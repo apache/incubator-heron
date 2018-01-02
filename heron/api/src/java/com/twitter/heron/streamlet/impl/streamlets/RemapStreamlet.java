@@ -33,7 +33,6 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
 public class RemapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
-  private static final String NAMEPREFIX = "remap";
 
   public RemapStreamlet(StreamletImpl<R> parent,
                         SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
@@ -44,8 +43,7 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.REMAP.toString(), stageNames);
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefix.REMAP, stageNames);
     bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
         getNumPartitions())
         .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));

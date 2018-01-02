@@ -53,6 +53,7 @@ class TopologyConfigVars {
   static const sp_string TOPOLOGY_CONTAINER_RAM_REQUESTED;
   static const sp_string TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS;
   static const sp_string TOPOLOGY_STATEFUL_START_CLEAN;
+  static const sp_string TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE;
   static const sp_string TOPOLOGY_NAME;
   static const sp_string TOPOLOGY_TEAM_NAME;
   static const sp_string TOPOLOGY_TEAM_EMAIL;

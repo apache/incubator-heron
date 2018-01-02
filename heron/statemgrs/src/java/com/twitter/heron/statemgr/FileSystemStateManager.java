@@ -289,14 +289,42 @@ public abstract class FileSystemStateManager implements IStateManager {
 
     if (isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
-      print("==> Topology %s:", getTopology(null, topologyName).get());
-      print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
-      print("==> SchedulerLocation:\n%s",
-          getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
-      print("==> MetricsCacheLocation:\n%s", getMetricsCacheLocation(null, topologyName).get());
-      print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+      try {
+        print("==> Topology %s:", getTopology(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("Topology node not found %s", e.getMessage());
+      }
+      try {
+        print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("ExecutionState node not found %s", e.getMessage());
+      }
+      try {
+        print("==> SchedulerLocation:\n%s",
+                getSchedulerLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("SchedulerLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("TMasterLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> MetricsCacheLocation:\n%s", getMetricsCacheLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("MetricsCacheLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("PackingPlan node not found %s", e.getMessage());
+      }
+      try {
+        print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("PhysicalPlan node not found %s", e.getMessage());
+      }
     } else {
       print("==> Topology %s not found under %s",
           topologyName, config.getStringValue(Key.STATEMGR_ROOT_PATH));

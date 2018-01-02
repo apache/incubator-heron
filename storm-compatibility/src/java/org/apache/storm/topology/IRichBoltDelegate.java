@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.apache.storm.task.OutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.TupleImpl;
+import org.apache.storm.utils.ConfigUtils;
 
 import com.twitter.heron.api.topology.IUpdatable;
 
@@ -73,7 +74,8 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt, 
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    return delegate.getComponentConfiguration();
+    Map<String, Object> config = delegate.getComponentConfiguration();
+    return ConfigUtils.translateComponentConfig(config);
   }
 
   @Override

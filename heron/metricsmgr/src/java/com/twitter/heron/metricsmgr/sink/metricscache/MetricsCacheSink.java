@@ -180,6 +180,7 @@ public class MetricsCacheSink implements IMetricsSink {
 
     // First Entry
     tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    LOG.info("MetricsCacheChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
@@ -367,8 +368,8 @@ public class MetricsCacheSink implements IMetricsSink {
               metricsCacheClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC),
               ChronoUnit.SECONDS));
 
-      LOG.severe(String.format("Starting metricsCacheClient for the %d time.",
-          startedAttempts.incrementAndGet()));
+      int attempts = startedAttempts.incrementAndGet();
+      LOG.severe(String.format("Starting metricsCacheClient for the %d time.", attempts));
       metricsCacheClientExecutor.execute(metricsCacheClient);
     }
 

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,44 +125,13 @@ class TopologyLogicalPlanJsonHandler(base.BaseHandler):
     start_time = time.time()
     lplan = yield access.get_logical_plan(cluster, environ, topology)
 
-    if not lplan:
-      self.write(dict())
-      return
-
-    if not 'spouts' in lplan or not 'bolts' in lplan:
-      self.write(dict())
-      return
-
-    # format the logical plan as required by the web (because of Ambrose)
-    # first, spouts followed by bolts
-    spouts_map = dict()
-    for name, value in lplan['spouts'].items():
-      spouts_map[name] = dict(
-          outputs=value["outputs"],
-          spout_type=value["type"],
-          spout_source=value["source"],
-      )
-
-    bolts_map = dict()
-    for name, value in lplan['bolts'].items():
-      bolts_map[name] = dict(
-          inputComponents=[i['component_name'] for i in value['inputs']],
-          inputs=value["inputs"],
-          outputs=value["outputs"]
-      )
-
-    diameter = common.graph.TopologyDAG(lplan).diameter()
     # construct the result
     result = dict(
         status="success",
         message="",
         version=common.VERSION,
         executiontime=time.time() - start_time,
-        result=dict(
-            stages=diameter,
-            spouts=spouts_map,
-            bolts=bolts_map
-        )
+        result=lplan
     )
 
     self.write(result)

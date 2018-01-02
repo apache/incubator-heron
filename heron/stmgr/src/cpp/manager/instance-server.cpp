@@ -78,7 +78,8 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
                          const sp_string& _stmgr_id,
                          const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
                          heron::common::MetricsMgrSt* _metrics_manager_client,
-                         NeighbourCalculator* _neighbour_calculator)
+                         NeighbourCalculator* _neighbour_calculator,
+                         bool _droptuples_upon_backpressure)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -86,7 +87,8 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
       expected_instances_(_expected_instances),
       stmgr_(_stmgr),
       metrics_manager_client_(_metrics_manager_client),
-      neighbour_calculator_(_neighbour_calculator) {
+      neighbour_calculator_(_neighbour_calculator),
+      droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
   // instance related handlers
   InstallRequestHandler(&InstanceServer::HandleRegisterInstanceRequest);
   InstallMessageHandler(&InstanceServer::HandleTupleSetMessage);
@@ -355,7 +357,13 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
   sp_int32 task_id = _message->task_id();
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << task_id << " has not yet connected to us. Dropping...";
+    LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " has not yet connected to us. Dropping...";
+  } else if (droptuples_upon_backpressure_ && iter->second->conn_->hasCausedBackPressure()) {
+    LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " is causing backpressure, so dropping "
+                            << "tuples stream worth " << _message->set().size() << " to it since "
+                            << "droptuples_upon_backpressure is set to true";
+    // Ideally we would have counted the numbers lost, but we cannot since the tuples are in
+    // encoded form. Not worth deser them just to count
   } else {
     SendMessage(iter->second->conn_, _message->set().size(),
                 heron_tuple_set_2_, _message->set().c_str());
@@ -371,16 +379,25 @@ void InstanceServer::SendToInstance2(sp_int32 _task_id,
 void InstanceServer::DrainTupleSet(sp_int32 _task_id,
                                 proto::system::HeronTupleSet2* _message) {
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
-  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
-    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
-    if (_message->has_control()) {
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL
+      || (droptuples_upon_backpressure_ && iter->second->conn_->hasCausedBackPressure())) {
+    LOG_EVERY_N(ERROR, 100) << "task_id " << _task_id << " has not yet connected to us or is not "
+                            << "keeping up and droptuples_upon_backpressure is set to true. "
+                            << "Dropping...";
+    if (_message->has_data()) {
+      instance_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message->data().tuples_size());
+    } else if (_message->has_control()) {
       instance_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message->control().acks_size());
       instance_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message->control().fails_size());
     }
   } else {
-    if (_message->has_control()) {
+    if (_message->has_data()) {
+      instance_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
+          ->incr_by(_message->data().tuples_size());
+    } else if (_message->has_control()) {
       instance_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
           ->incr_by(_message->control().acks_size());
       instance_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
@@ -443,6 +460,15 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   sp_string instance_name = GetInstanceName(_connection);
   CHECK_NE(instance_name, "");
 
+  LOG(WARNING) << "We observe back pressure on sending data to instance " << instance_name;
+
+  if (droptuples_upon_backpressure_) {
+    // We will drop further tuples to this instance until the backpressure lets off
+    LOG(WARNING) << "Backpressure mechanism not initiated since droptuples_upon_backpressure "
+                 << "is set";
+    return;
+  }
+
   if (!stmgr_->DidAnnounceBackPressure()) {
     stmgr_->SendStartBackPressureToOtherStMgrs();
   }
@@ -452,7 +478,6 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   instance_metric->Start();
 
   remote_ends_who_caused_back_pressure_.insert(instance_name);
-  LOG(INFO) << "We observe back pressure on sending data to instance " << instance_name;
   StartBackPressureOnSpouts();
 }
 
@@ -462,6 +487,16 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   // Find the instance this connection belongs to
   sp_string instance_name = GetInstanceName(_connection);
   CHECK_NE(instance_name, "");
+
+  LOG(WARNING) << "We don't observe back pressure now on sending data to instance "
+               << instance_name;
+
+  if (droptuples_upon_backpressure_) {
+    // We had not initiated any kind of backpressure mechanism in this mode.
+    LOG(WARNING) << "Backpressure mechanism not initiated since droptuples_upon_backpressure "
+                     << "is set";
+    return;
+  }
 
   CHECK(remote_ends_who_caused_back_pressure_.find(instance_name) !=
         remote_ends_who_caused_back_pressure_.end());
@@ -474,7 +509,6 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   if (!stmgr_->DidAnnounceBackPressure()) {
     stmgr_->SendStopBackPressureToOtherStMgrs();
   }
-  LOG(INFO) << "We don't observe back pressure now on sending data to instance " << instance_name;
   AttemptStopBackPressureFromSpouts();
 }
 

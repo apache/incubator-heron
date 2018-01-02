@@ -28,7 +28,6 @@ import com.twitter.heron.streamlet.impl.operators.MapOperator;
 public class MapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private SerializableFunction<? super R, ? extends T> mapFn;
-  private static final String NAMEPREFIX = "map";
 
   public MapStreamlet(StreamletImpl<R> parent, SerializableFunction<? super R, ? extends T> mapFn) {
     this.parent = parent;
@@ -38,8 +37,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefixes.MAP.toString(), stageNames);
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefix.MAP, stageNames);
     bldr.setBolt(getName(), new MapOperator<R, T>(mapFn),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

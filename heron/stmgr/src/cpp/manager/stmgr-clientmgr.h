@@ -39,7 +39,7 @@ class StMgrClientMgr {
   StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
                  const sp_string& _topology_id, const sp_string& _stmgr_id, StMgr* _stream_manager,
                  heron::common::MetricsMgrSt* _metrics_manager_client, sp_int64 _high_watermark,
-                 sp_int64 _low_watermark);
+                 sp_int64 _low_watermark, bool _droptuples_upon_backpressure);
   virtual ~StMgrClientMgr();
 
   // Start the appropriate clients based on a new physical plan
@@ -90,6 +90,8 @@ class StMgrClientMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  bool droptuples_upon_backpressure_;
 };
 
 }  // namespace stmgr

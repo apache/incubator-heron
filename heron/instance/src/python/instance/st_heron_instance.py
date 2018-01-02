@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -202,6 +205,8 @@ class SingleThreadHeronInstance(object):
 
     if self.my_pplan_helper.get_topology_state() != new_helper.get_topology_state():
       # handle state change
+      # update the pplan_helper
+      self.my_pplan_helper = new_helper
       if new_helper.is_topology_running():
         if not self.is_instance_started:
           self.start_instance_if_possible()
@@ -212,9 +217,6 @@ class SingleThreadHeronInstance(object):
         raise RuntimeError("Unexpected TopologyState update: %s" % new_helper.get_topology_state())
     else:
       Log.info("Topology state remains the same.")
-
-    # update the pplan_helper
-    self.my_pplan_helper = new_helper
 
   def handle_assignment_msg(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives

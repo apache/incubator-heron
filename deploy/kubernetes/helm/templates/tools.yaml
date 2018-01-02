@@ -1,0 +1,145 @@
+{{- $platform := .Values.platform -}}
+{{- $jobReplicas := index (index .Values $platform) "jobReplicas" -}}
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "heron.fullname" . }}-tools
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "heron.fullname" . }}-tools
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "heron.fullname" . }}-apiserver
+      initContainers:
+        # Wait until the zookeeper pods are up and running
+        - name: heron-tools-init-container
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command:
+            - sh
+            - -c
+            - /opt/zookeeper/scripts/wait-for-zookeeper.sh {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}
+      containers:
+        - name: heron-tracker
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 8888
+              name: api-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-tracker
+              --type=zookeeper
+              --name={{ .Release.Name }}
+              --hostport={{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
+              --rootpath="/heron" 
+        - name: heron-ui
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 8889
+              name: app-port
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-ui
+              --port=8889
+              --base_url=/api/v1/proxy/namespaces/{{ .Values.namespace }}/services/{{ template "heron.fullname" . }}-ui:8889
+        - name: heron-apiserver
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-apiserver
+              --base-template kubernetes
+              --cluster {{ .Release.Name }}
+              -D heron.statemgr.connection.string={{ .Release.Name }}-zookeeper:2181
+              -D heron.kubernetes.scheduler.uri=http://localhost:8001
+              -D heron.executor.docker.image={{ .Values.image }}
+              -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
+              -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
+              -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:2181/distributedlog
+        - name: kubectl-proxy
+          image: heron/kubectl:latest
+          command: ["sh", "-c"]
+          args:
+            - >
+              kubectl proxy -p 8001
+---
+
+##
+## Service to expose the heron-ui
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "heron.fullname" . }}-ui
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 8889
+      targetPort: 8889
+      protocol: TCP
+  selector:
+    app: {{ template "heron.fullname" . }}-tools
+    release: {{ .Release.Name }}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "heron.fullname" . }}-apiserver
+  namespace: {{ .Values.namespace }}
+  labels:
+    k8s-app: {{ template "heron.fullname" . }}-apiserver
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "heron.fullname" . }}-apiserver
+  labels:
+    app: {{ template "heron.fullname" . }}-apiserver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects: 
+- kind: ServiceAccount
+  name: {{ template "heron.fullname" . }}-apiserver
+  namespace: {{ .Values.namespace }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "heron.fullname" . }}-apiserver
+  labels:
+    app: {{ template "heron.fullname" . }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: {{ template "heron.fullname" . }}-tools
+    release: {{ .Release.Name }}
