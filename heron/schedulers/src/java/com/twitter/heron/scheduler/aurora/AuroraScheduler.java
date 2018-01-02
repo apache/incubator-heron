@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.xml.bind.DatatypeConverter;
 
 import com.google.common.base.Optional;
 
@@ -195,18 +192,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     controller.removeContainers(containersToRemove);
   }
 
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(StandardCharsets.UTF_8));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
   protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
     Map<AuroraField, String> auroraProperties = new HashMap<>();
 
@@ -217,7 +202,13 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     List<String> topologyArgs = new ArrayList<>();
     SchedulerUtils.addExecutorTopologyArgs(topologyArgs, config, runtime);
-    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, String.join(" ", topologyArgs));
+    String args = String.join(" ", topologyArgs);
+    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, args);
+
+    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
+    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
+    auroraProperties.put(AuroraField.ROLE, Context.role(config));
+    auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));
@@ -237,11 +228,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     } else {
       auroraProperties.put(AuroraField.TIER, "preemptible");
     }
-
-    String completeSchedulerClassPath = String.format("%s:%s:%s",
-        Context.schedulerClassPath(config),
-        Context.packingClassPath(config),
-        Context.stateManagerClassPath(config));
 
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
