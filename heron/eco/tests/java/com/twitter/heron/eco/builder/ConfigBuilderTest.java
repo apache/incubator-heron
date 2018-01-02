@@ -13,6 +13,9 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.storm.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,5 +42,19 @@ public class ConfigBuilderTest {
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
     assertThat(0, is(equalTo(config.size())));
+  }
+
+  @Test
+  public void testBuildConfig_ConfigIsDefined_ReturnsCorrectValues() {
+    EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();
+    Map<String, Object> topologyDefinitionConfig = new HashMap<>();
+    topologyDefinitionConfig.put(Config.STORM_ZOOKEEPER_SERVERS, 2);
+    topologyDefinitionConfig.put(Config.TOPOLOGY_WORKERS, 4);
+    ecoTopologyDefinition.setConfig(topologyDefinitionConfig);
+
+    Config config = subject.buildConfig(ecoTopologyDefinition);
+
+    assertThat(config.get(Config.STORM_ZOOKEEPER_SERVERS), is(equalTo(2)));
+    assertThat(config.get(Config.TOPOLOGY_WORKERS), is(equalTo(4)));
   }
 }
