@@ -25,19 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-class LooperThread extends Thread {
-  private WakeableLooper looper;
-
-  LooperThread(WakeableLooper looper) {
-    super();
-    this.looper = looper;
-  }
-
-  public void run() {
-    looper.loop();
-  }
-}
-
 /**
  * WakeableLooper Tester.
  */
@@ -54,6 +41,19 @@ public class WakeableLooperTest {
   @After
   public void after() {
     slaveLooper = null;
+  }
+
+  class LooperThread extends Thread {
+    private WakeableLooper looper;
+
+    LooperThread(WakeableLooper looper) {
+      super();
+      this.looper = looper;
+    }
+
+    public void run() {
+      looper.loop();
+    }
   }
 
   /**
