@@ -71,6 +71,12 @@ public final class TokenSub {
         if (javaPath != null) {
           list.set(i, javaPath);
         }
+      } else if ("$HERON_HOME".equals(elem)) {
+        // try to expand the heron home env variable
+        final String heronHomePath = System.getenv("HERON_HOME");
+        if (heronHomePath != null) {
+          list.set(i, heronHomePath);
+        }
       } else if (isToken(elem)) {
         Matcher m = TOKEN_PATTERN.matcher(elem);
         if (m.matches()) {

@@ -136,7 +136,7 @@ public class LocalLauncher implements ILauncher {
         return false;
       }
     } else {
-      Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME), "heron-core");
+      Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME));
       Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
       try {
         Files.createSymbolicLink(heronCoreLink, heronCore);
