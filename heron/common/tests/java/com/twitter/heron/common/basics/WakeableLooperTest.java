@@ -16,18 +16,33 @@ package com.twitter.heron.common.basics;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.Thread;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+class LooperThread extends Thread {
+  private WakeableLooper looper;
+
+  LooperThread(WakeableLooper looper) {
+    super();
+    this.looper = looper;
+  }
+
+  public void run() {
+    looper.loop();
+  }
+}
+
 /**
  * WakeableLooper Tester.
  */
 public class WakeableLooperTest {
-  private static int globalValue;
+  private volatile static int globalValue;
   private WakeableLooper slaveLooper;
 
   @Before
@@ -139,6 +154,38 @@ public class WakeableLooperTest {
     };
     slaveLooper.addTasksOnWakeup(r);
     slaveLooper.loop();
+    Assert.assertEquals(10, globalValue);
+  }
+
+
+  /**
+   * Method: waitForExit()
+   */
+  @Test
+  public void testwaitForExit() {
+    int sleepTimeMS = 200;
+    Runnable r = new Runnable() {
+      @Override
+      public void run() {
+        try {
+          slaveLooper.exitLoop();  // Exit after the first wake up
+          Thread.sleep(sleepTimeMS);
+          globalValue = 10;
+        } catch (InterruptedException e) {
+          return;
+        }
+      }
+    };
+    LooperThread looperThread = new LooperThread(slaveLooper);
+    looperThread.start();
+    long startTime = System.nanoTime();
+    slaveLooper.addTasksOnWakeup(r);
+    // Wait for it to finish.
+    boolean ret = slaveLooper.waitForExit(sleepTimeMS * 2, TimeUnit.MILLISECONDS);
+    long endTime = System.nanoTime();
+
+    Assert.assertTrue(ret);
+    Assert.assertTrue(endTime - startTime >= sleepTimeMS * 1000);
     Assert.assertEquals(10, globalValue);
   }
 
