@@ -162,7 +162,7 @@ public class WakeableLooperTest {
    * Method: waitForExit()
    */
   @Test
-  public void testwaitForExit() {
+  public void testWaitForExit() {
     int sleepTimeMS = 200;
     Runnable r = new Runnable() {
       @Override
@@ -187,6 +187,33 @@ public class WakeableLooperTest {
     Assert.assertTrue(ret);
     Assert.assertTrue(endTime - startTime >= sleepTimeMS * 1000);
     Assert.assertEquals(10, globalValue);
+  }
+
+  @Test
+  public void testWaitForExitTimeout() {
+    int sleepTimeMS = 200;
+    Runnable r = new Runnable() {
+      @Override
+      public void run() {
+        try {
+          slaveLooper.exitLoop(); // Exit after the first wake up
+          Thread.sleep(sleepTimeMS);
+          globalValue = 10;
+        } catch (InterruptedException e) {
+          return;
+        }
+      }
+    };
+    LooperThread looperThread = new LooperThread(slaveLooper);
+    looperThread.start();
+    long startTime = System.nanoTime();
+    slaveLooper.addTasksOnWakeup(r);
+    // Wait for it to finish.
+    boolean ret = slaveLooper.waitForExit(sleepTimeMS / 10, TimeUnit.MILLISECONDS);
+    long endTime = System.nanoTime();
+
+    Assert.assertFalse(ret);
+    Assert.assertEquals(6, globalValue);
   }
 
   /**
