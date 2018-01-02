@@ -298,36 +298,48 @@ public class AuroraSchedulerTest {
             + " --topology-defn-file=defnFile.defn"
             + " --state-manager-connection=null"
             + " --state-manager-root=null"
-            + " --state-manager-config-file=./heron-conf/statemgr.yaml"
-            + " --tmaster-binary=./heron-core/bin/heron-tmaster"
-            + " --stmgr-binary=./heron-core/bin/heron-stmgr"
-            + " --metrics-manager-classpath=./heron-core/lib/metricsmgr/*"
+            + " --state-manager-config-file=" + expectedConf + "/statemgr.yaml"
+            + " --tmaster-binary=" + expectedBin + "/heron-tmaster"
+            + " --stmgr-binary=" + expectedBin + "/heron-stmgr"
+            + " --metrics-manager-classpath=" + expectedLib + "/metricsmgr/*"
             + " --instance-jvm-opts=\"\""
             + " --classpath=binaryFile.jar"
-            + " --heron-internals-config-file=./heron-conf/heron_internals.yaml"
-            + " --override-config-file=./heron-conf/override.yaml"
+            + " --heron-internals-config-file=" + expectedConf + "/heron_internals.yaml"
+            + " --override-config-file=" + expectedConf + "/override.yaml"
             + " --component-ram-map=null"
             + " --component-jvm-opts=\"\""
             + " --pkg-type=jar"
             + " --topology-binary-file=binaryFile.jar"
             + " --heron-java-home=/usr/lib/jvm/default-java"
-            + " --heron-shell-binary=./heron-core/bin/heron-shell"
+            + " --heron-shell-binary=" + expectedBin + "/heron-shell"
             + " --cluster=some_cluster"
             + " --role=some_role"
             + " --environment=some_env"
-            + " --instance-classpath=./heron-core/lib/instance/*"
-            + " --metrics-sinks-config-file=./heron-conf/metrics_sinks.yaml"
-            + " --scheduler-classpath=./heron-core/lib/scheduler/*:./heron-core"
-            + "/lib/packing/*:./heron-core/lib/statemgr/*"
-            + " --python-instance-binary=./heron-core/bin/heron-python-instance"
-            + " --cpp-instance-binary=./heron-core/bin/heron-cpp-instance"
-            + " --metricscache-manager-classpath=./heron-core/lib/metricscachemgr/*"
+            + " --instance-classpath=" + expectedLib + "/instance/*"
+            + " --metrics-sinks-config-file=" + expectedConf + "/metrics_sinks.yaml"
+            + " --scheduler-classpath=" + expectedLib + "/scheduler/*:./heron-core"
+            + "/lib/packing/*:" + expectedLib + "/statemgr/*"
+            + " --python-instance-binary=" + expectedBin + "/heron-python-instance"
+            + " --cpp-instance-binary=" + expectedBin + "/heron-cpp-instance"
+            + " --metricscache-manager-classpath=" + expectedLib + "/metricscachemgr/*"
             + " --is-stateful=false"
-            + " --checkpoint-manager-classpath=./heron-core/lib/ckptmgr/*:"
-            + "./heron-core/lib/statefulstorage/*:"
-            + " --stateful-config-file=./heron-conf/stateful.yaml"
+            + " --checkpoint-manager-classpath=" + expectedLib + "/ckptmgr/*:"
+            + expectedLib + "/statefulstorage/*:"
+            + " --stateful-config-file=" + expectedConf + "/stateful.yaml"
             + " --health-manager-mode=disabled"
-            + " --health-manager-classpath=./heron-core/lib/healthmgr/*";
+            + " --health-manager-classpath=" + expectedLib + "/healthmgr/*";
+          break;
+        case CLUSTER:
+          expected = "some_cluster";
+          break;
+        case ENVIRON:
+          expected = "some_env";
+          break;
+        case ROLE:
+          expected = "some_role";
+          break;
+        case TOPOLOGY_NAME:
+          expected = "topologyName";
           break;
         default:
           fail(String.format(
