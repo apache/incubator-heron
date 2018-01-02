@@ -26,6 +26,9 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
+/**
+ * Unit tests for {@link ConfigBuilder}
+ */
 public class ConfigBuilderTest {
 
   private ConfigBuilder subject;
