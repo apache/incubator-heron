@@ -74,6 +74,10 @@ public class EcoExecutionContext {
     this.bolts = bolts;
   }
 
+  public void addBolt(String key, Object value) {
+    this.bolts.put(key, value);
+  }
+
   public Object getChild(String id) {
     return this.bolts.get(id);
   }

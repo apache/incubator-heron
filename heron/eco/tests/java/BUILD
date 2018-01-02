@@ -33,6 +33,14 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "BoltBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/BoltBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
+
+
 
 
 

@@ -28,12 +28,10 @@ public class BoltBuilder {
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
       NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
-    Map<String, Object> bolts = new HashMap<>();
 
     for (ObjectDefinition def: topologyDefinition.getBolts()) {
       Object obj = objectBuilder.buildObject(def, executionContext);
-      bolts.put(def.getId(), obj);
+      executionContext.addBolt(def.getId(), obj);
     }
-    executionContext.setBolts(bolts);
   }
 }
