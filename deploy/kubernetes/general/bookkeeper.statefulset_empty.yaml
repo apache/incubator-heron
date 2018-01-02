@@ -98,12 +98,12 @@ spec:
             - name: ledgersdisk
               mountPath: /bookkeeper/data/ledgers
 
-  volumes:
-    - name: journaldisk
-      emptyDir: {}
+      volumes:
+        - name: journaldisk
+          emptyDir: {}
 
-    - name: ledgersdisk
-      emptyDir: {}
+        - name: ledgersdisk
+          emptyDir: {}
 
 ---
 # A headless service to create DNS records
