@@ -20,7 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.twitter.heron.eco.definition.BeanListReference;
 import com.twitter.heron.eco.definition.BeanReference;
@@ -31,35 +33,30 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
 public class ObjectBuilder {
-  private static final Logger LOG = Logger.getLogger(ObjectBuilder.class.getName());
+  private static final Logger LOG = LoggerFactory.getLogger(ObjectBuilder.class);
 
   @SuppressWarnings("rawtypes")
   public Object buildObject(ObjectDefinition def, EcoExecutionContext context)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException,
       InvocationTargetException, NoSuchFieldException {
-    LOG.info("definition className: " + def.getClassName());
-    LOG.info("definition ID: " + def.getId());
-    LOG.info("definition Constructor Args: " + def.getConstructorArgs());
-    LOG.info("definition parallelism: " + def.getParallelism());
-    LOG.info("definition config methods: " + def.getConfigMethods());
     Class clazz = Class.forName(def.getClassName());
 
 
     Object obj;
     if (def.hasConstructorArgs()) {
-      LOG.info("Found constructor arguments in definition: "
+      LOG.debug("Found constructor arguments in definition: "
           + def.getConstructorArgs().getClass().getName());
       List<Object> cArgs = def.getConstructorArgs();
       if (def.hasReferences()) {
-        LOG.info("The definition has references");
+        LOG.debug("The definition has references");
         cArgs = resolveReferences(cArgs, context);
       } else {
-        LOG.info("The definition does not have references");
+        LOG.debug("The definition does not have references");
       }
       LOG.info("finding compatible constructor for : " + clazz.getName());
       Constructor con = findCompatibleConstructor(cArgs, clazz);
       if (con != null) {
-        LOG.fine("Found something seemingly compatible, attempting invocation...");
+        LOG.debug("Found something seemingly compatible, attempting invocation...");
         obj = con.newInstance(getArgsWithListCoercian(cArgs, con.getParameterTypes()));
       } else {
         String msg = String
@@ -113,14 +110,14 @@ public class ObjectBuilder {
     Method retval = null;
     int eligibleCount = 0;
 
-    LOG.fine("Target class: " + target.getName() + ",  methodName: "
+    LOG.debug("Target class: " + target.getName() + ",  methodName: "
         + methodName + ", args: " + args);
     Method[] methods = target.getMethods();
 
     for (Method method : methods) {
       Class[] paramClasses = method.getParameterTypes();
       if (paramClasses.length == args.size() && method.getName().equals(methodName)) {
-        LOG.fine("found constructor with same number of args..");
+        LOG.debug("found constructor with same number of args..");
         boolean invokable = false;
         if (args.size() == 0) {
           // it's a method with zero args
@@ -132,13 +129,13 @@ public class ObjectBuilder {
           retval = method;
           eligibleCount++;
         }
-        LOG.fine("** invokable --> " + invokable);
+        LOG.debug("** invokable --> " + invokable);
       } else {
-        LOG.fine("Skipping method with wrong number of arguments.");
+        LOG.debug("Skipping method with wrong number of arguments.");
       }
     }
     if (eligibleCount > 1) {
-      LOG.warning("Found multiple invokable methods for class, method, given arguments {} "
+      LOG.warn("Found multiple invokable methods for class, method, given arguments {} "
           + new Object[]{target, methodName, args});
     }
     return retval;
@@ -147,7 +144,7 @@ public class ObjectBuilder {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static boolean canInvokeWithArgs(List<Object> args, Class[] parameterTypes) {
     if (parameterTypes.length != args.size()) {
-      LOG.warning("parameter types were the wrong size");
+      LOG.warn("parameter types were the wrong size");
       return false;
     }
 
@@ -161,19 +158,18 @@ public class ObjectBuilder {
       LOG.info("Comparing parameter class " + paramType + " to object class "
           + objectType + "to see if assignment is possible.");
       if (paramType.equals(objectType)) {
-        LOG.fine("Yes, they are the same class.");
+        LOG.debug("Yes, they are the same class.");
       } else if (paramType.isAssignableFrom(objectType)) {
-        LOG.fine("Yes, assignment is possible.");
+        LOG.debug("Yes, assignment is possible.");
       } else if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
-        LOG.fine("Yes, assignment is possible.");
+        LOG.debug("Yes, assignment is possible.");
       } else if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
-        LOG.fine("Yes, assignment is possible.");
+        LOG.debug("Yes, assignment is possible.");
       } else if (paramType.isEnum() && objectType.equals(String.class)) {
-        LOG.fine("Yes, will convert a String to enum");
+        LOG.debug("Yes, will convert a String to enum");
       } else if (paramType.isArray() && List.class.isAssignableFrom(objectType)) {
-        // TODO more collection content type checking
-        LOG.fine("Assignment is possible if we convert a List to an array.");
-        LOG.fine("Array Type: " + paramType.getComponentType() + ", List type: "
+        LOG.debug("Assignment is possible if we convert a List to an array.");
+        LOG.debug("Array Type: " + paramType.getComponentType() + ", List type: "
             + ((List) obj).get(0).getClass());
       } else {
         return false;
@@ -199,7 +195,7 @@ public class ObjectBuilder {
     Method[] methods = clazz.getMethods();
     for (Method method : methods) {
       if (setterName.equals(method.getName())) {
-        LOG.fine("Found setter method: " + method.getName());
+        LOG.debug("Found setter method: " + method.getName());
         retval = method;
       }
     }
@@ -221,12 +217,12 @@ public class ObjectBuilder {
         Object value = prop.isReference() ? context.getComponent(prop.getRef()) : prop.getValue();
         Method setter = findSetter(clazz, prop.getName());
         if (setter != null) {
-          LOG.fine("found setter, attempting to invoke");
+          LOG.debug("found setter, attempting to invoke");
           // invoke setter
           setter.invoke(instance, new Object[]{value});
         } else {
           // look for a public instance variable
-          LOG.fine("no setter found. Looking for a public instance variable...");
+          LOG.debug("no setter found. Looking for a public instance variable...");
           Field field = findPublicField(clazz, prop.getName());
           if (field != null) {
             field.set(instance, value);
@@ -262,11 +258,11 @@ public class ObjectBuilder {
         }
         LOG.info("** invokable --> {}" + invokable);
       } else {
-        LOG.fine("Skipping constructor with wrong number of arguments.");
+        LOG.debug("Skipping constructor with wrong number of arguments.");
       }
     }
     if (eligibleCount > 1) {
-      LOG.severe("Found multiple invokable constructors for class: "
+      LOG.error("Found multiple invokable constructors for class: "
           + target + ", given arguments " + args + ". Using the last one found.");
     }
     return retval;
@@ -274,7 +270,7 @@ public class ObjectBuilder {
 
   @SuppressWarnings("rawtypes")
   private static List<Object> resolveReferences(List<Object> args, EcoExecutionContext context) {
-    LOG.fine("Checking arguments for references.");
+    LOG.debug("Checking arguments for references.");
     List<Object> cArgs = new ArrayList<Object>();
     EcoTopologyDefinition topologyDefinition = context.getTopologyDefinition();
     // resolve references
@@ -321,26 +317,26 @@ public class ObjectBuilder {
       Object obj = args.get(i);
       Class paramType = parameterTypes[i];
       Class objectType = obj.getClass();
-      LOG.fine("Comparing parameter class " + paramType.getName() + " to object class "
+      LOG.debug("Comparing parameter class " + paramType.getName() + " to object class "
           +  objectType.getName() + " to see if assignment is possible.");
       if (paramType.equals(objectType)) {
-        LOG.fine("They are the same class.");
+        LOG.debug("They are the same class.");
         constructorParams[i] = args.get(i);
         continue;
       }
       if (paramType.isAssignableFrom(objectType)) {
-        LOG.fine("Assignment is possible.");
+        LOG.debug("Assignment is possible.");
         constructorParams[i] = args.get(i);
         continue;
       }
       if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
-        LOG.fine("Its a primitive boolean.");
+        LOG.debug("Its a primitive boolean.");
         Boolean bool = (Boolean) args.get(i);
         constructorParams[i] = bool.booleanValue();
         continue;
       }
       if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
-        LOG.fine("Its a primitive number.");
+        LOG.debug("Its a primitive number.");
         Number num = (Number) args.get(i);
         if (paramType == Float.TYPE) {
           constructorParams[i] = num.floatValue();
@@ -362,17 +358,16 @@ public class ObjectBuilder {
 
       // enum conversion
       if (paramType.isEnum() && objectType.equals(String.class)) {
-        LOG.fine("Yes, will convert a String to enum");
+        LOG.debug("Yes, will convert a String to enum");
         constructorParams[i] = Enum.valueOf(paramType, (String) args.get(i));
         continue;
       }
 
       // List to array conversion
       if (paramType.isArray() && List.class.isAssignableFrom(objectType)) {
-        // TODO more collection content type checking
-        LOG.fine("Conversion appears possible...");
+        LOG.debug("Conversion appears possible...");
         List list = (List) obj;
-        LOG.fine("Array Type: {}, List type: {}" + paramType.getComponentType()
+        LOG.debug("Array Type: {}, List type: {}" + paramType.getComponentType()
             + list.get(0).getClass());
 
         // create an array of the right type
@@ -382,7 +377,7 @@ public class ObjectBuilder {
 
         }
         constructorParams[i] = newArrayObj;
-        LOG.fine("After conversion: {}" + constructorParams[i]);
+        LOG.debug("After conversion: {}" + constructorParams[i]);
       }
     }
     return constructorParams;
