@@ -48,7 +48,10 @@ public class TMasterSinkTest {
       TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
 
   private static final Duration RECONNECT_INTERVAL = Duration.ofSeconds(1);
-  private static final Duration RESTART_WAIT_INTERVAL = Duration.ofSeconds(2);
+  // Restart wait time is set at 2 times of reconnect time plus another second. The 2 times factor
+  // is because of location checking event interval and the sleep of reconnect interval in
+  // exception handling.
+  private static final Duration RESTART_WAIT_INTERVAL = Duration.ofSeconds(3);
   private static final Duration TMASTER_LOCATION_CHECK_INTERVAL = Duration.ofSeconds(1);
 
   // These are config for TMasterClient
