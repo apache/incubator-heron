@@ -44,7 +44,7 @@ cc_library(
         "//config:config-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/proto:proto-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
+        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
     linkstatic = 1,
 )
