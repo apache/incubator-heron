@@ -53,7 +53,7 @@ public final class EcoBuilder extends ObjectBuilder {
 
     TopologyBuilder builder = new TopologyBuilder();
     componentBuilder.buildComponents(executionContext, objectBuilder);
-    spoutBuilder.addSpoutsToExecutionContext(executionContext, builder, objectBuilder);
+    spoutBuilder.buildSpouts(executionContext, builder, objectBuilder);
     boltBuilder.buildBolts(executionContext, objectBuilder);
     streamBuilder.buildStreams(executionContext, builder, objectBuilder);
 

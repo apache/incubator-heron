@@ -47,6 +47,12 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "SpoutBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/SpoutBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
 
 
 

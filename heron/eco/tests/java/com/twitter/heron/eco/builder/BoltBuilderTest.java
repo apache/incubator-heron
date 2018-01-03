@@ -60,7 +60,7 @@ public class BoltBuilderTest {
   }
 
   @Test
-  public void buildBolts_AllGood_BehavesAsExpected() throws ClassNotFoundException,
+  public void testBuildBolts_AllGood_BehavesAsExpected() throws ClassNotFoundException,
       InvocationTargetException, NoSuchFieldException, InstantiationException,
       IllegalAccessException {
     EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();

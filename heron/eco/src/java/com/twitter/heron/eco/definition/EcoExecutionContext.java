@@ -105,4 +105,8 @@ public class EcoExecutionContext {
   public void setComponents(Map<String, Object> components) {
     this.components = components;
   }
+
+  public void addSpout(String key, Object value) {
+    this.spouts.put(key, value);
+  }
 }

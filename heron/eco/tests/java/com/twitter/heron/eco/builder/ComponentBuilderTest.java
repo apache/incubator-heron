@@ -57,7 +57,7 @@ public class ComponentBuilderTest {
   }
 
   @Test
-  public void buildComponents_AllGood_BehavesAsExpected() throws ClassNotFoundException,
+  public void testBuildComponents_AllGood_BehavesAsExpected() throws ClassNotFoundException,
       InvocationTargetException, NoSuchFieldException,
       InstantiationException, IllegalAccessException {
     BeanDefinition beanDefinition = new BeanDefinition();

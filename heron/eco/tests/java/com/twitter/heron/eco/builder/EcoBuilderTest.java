@@ -118,7 +118,7 @@ public class EcoBuilderTest {
     ObjectBuilder objectBuilder = new ObjectBuilder();
     subject.buildTopologyBuilder(context, objectBuilder);
 
-    verify(mockSpoutBuilder).addSpoutsToExecutionContext(same(context),
+    verify(mockSpoutBuilder).buildSpouts(same(context),
         any(TopologyBuilder.class), same(objectBuilder));
     verify(mockBoltBuilder).buildBolts(same(context), same(objectBuilder));
     verify(mockStreamBuilder).buildStreams(same(context), any(TopologyBuilder.class),
