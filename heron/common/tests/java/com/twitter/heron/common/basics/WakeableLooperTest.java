@@ -14,7 +14,6 @@
 
 package com.twitter.heron.common.basics;
 
-import java.lang.Thread;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
