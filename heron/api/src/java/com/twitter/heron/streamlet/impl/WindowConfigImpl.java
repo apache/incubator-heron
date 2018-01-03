@@ -18,18 +18,23 @@ package com.twitter.heron.streamlet.impl;
 import java.time.Duration;
 
 import com.twitter.heron.api.bolt.BaseWindowedBolt;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.windowing.EvictionPolicy;
+import com.twitter.heron.api.windowing.TriggerPolicy;
 import com.twitter.heron.streamlet.WindowConfig;
 
 /**
  * WindowConfigImpl implements the WindowConfig interface.
  */
 public final class WindowConfigImpl implements WindowConfig {
-  private enum WindowType { TIME, COUNT }
+  private enum WindowType { TIME, COUNT, CUSTOM }
   private WindowType windowType;
   private int windowSize;
   private int slideInterval;
   private Duration windowDuration;
   private Duration slidingIntervalDuration;
+  private TriggerPolicy<Tuple, ?> triggerPolicy;
+  private EvictionPolicy<Tuple, ?> evictionPolicy;
 
   public  WindowConfigImpl(Duration windowDuration, Duration slidingIntervalDuration) {
     this.windowType = WindowType.TIME;
@@ -41,6 +46,11 @@ public final class WindowConfigImpl implements WindowConfig {
     this.windowSize = windowSize;
     this.slideInterval = slideInterval;
   }
+  public WindowConfigImpl(TriggerPolicy<Tuple, ?> triggerPolicy, EvictionPolicy<Tuple, ?> evictionPolicy){
+    this.windowType = WindowType.CUSTOM;
+    this.triggerPolicy = triggerPolicy;
+    this.evictionPolicy = evictionPolicy;
+  }
 
   public void attachWindowConfig(BaseWindowedBolt bolt) {
     switch(windowType) {
@@ -50,6 +60,10 @@ public final class WindowConfigImpl implements WindowConfig {
         break;
       case TIME:
         bolt.withWindow(windowDuration, slidingIntervalDuration);
+        break;
+      case CUSTOM:
+        bolt.withCustomEvictor(evictionPolicy);
+        bolt.withCustomTrigger(triggerPolicy);
         break;
       default:
         throw new RuntimeException("Unknown windowType " + String.valueOf(windowType));

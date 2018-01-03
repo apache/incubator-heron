@@ -237,9 +237,21 @@ public class WindowedBoltExecutor implements IRichBolt,
     // validate
     validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
         slidingIntervalDurationMs);
-    evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
-    triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
-        evictionPolicy, topoConf);
+
+    if(topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR)){
+      evictionPolicy = (EvictionPolicy<Tuple, ?>) topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
+    }else{
+      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
+    }
+
+    if(topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER)){
+      triggerPolicy = (TriggerPolicy<Tuple, ?>) topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
+    }else{
+      triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
+              evictionPolicy, topoConf);
+    }
+
+
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
     // restore state if there is existing state
