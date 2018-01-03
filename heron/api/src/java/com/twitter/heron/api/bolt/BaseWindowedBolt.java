@@ -39,7 +39,11 @@ import java.util.Map;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.windowing.*;
+import com.twitter.heron.api.windowing.EvictionPolicy;
+import com.twitter.heron.api.windowing.TimestampExtractor;
+import com.twitter.heron.api.windowing.TriggerPolicy;
+import com.twitter.heron.api.windowing.TupleFieldTimestampExtractor;
+import com.twitter.heron.api.windowing.WindowingConfigs;
 
 public abstract class BaseWindowedBolt implements IWindowedBolt {
   private static final long serialVersionUID = 5688213068448231559L;
@@ -317,7 +321,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    * @param evictionPolicy the eviction policy to use
    * @return this
    */
-  public BaseWindowedBolt withCustomEvictor(EvictionPolicy<Tuple, ?> evictionPolicy){
+  public BaseWindowedBolt withCustomEvictor(EvictionPolicy<Tuple, ?> evictionPolicy) {
     windowConfiguration.setTopologyBoltsWindowCustomEvictor(evictionPolicy);
     return this;
   }
@@ -328,7 +332,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
    * @param triggerPolicy the trigger policy to use
    * @return this
    */
-  public BaseWindowedBolt withCustomTrigger(TriggerPolicy<Tuple, ?> triggerPolicy){
+  public BaseWindowedBolt withCustomTrigger(TriggerPolicy<Tuple, ?> triggerPolicy) {
     windowConfiguration.setTopologyBoltsWindowCustomTrigger(triggerPolicy);
     return this;
   }

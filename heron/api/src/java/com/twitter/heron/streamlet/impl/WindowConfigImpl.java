@@ -46,7 +46,8 @@ public final class WindowConfigImpl implements WindowConfig {
     this.windowSize = windowSize;
     this.slideInterval = slideInterval;
   }
-  public WindowConfigImpl(TriggerPolicy<Tuple, ?> triggerPolicy, EvictionPolicy<Tuple, ?> evictionPolicy){
+  public WindowConfigImpl(TriggerPolicy<Tuple, ?> triggerPolicy,
+                          EvictionPolicy<Tuple, ?> evictionPolicy) {
     this.windowType = WindowType.CUSTOM;
     this.triggerPolicy = triggerPolicy;
     this.evictionPolicy = evictionPolicy;

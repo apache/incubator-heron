@@ -238,15 +238,17 @@ public class WindowedBoltExecutor implements IRichBolt,
     validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
         slidingIntervalDurationMs);
 
-    if(topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR)){
-      evictionPolicy = (EvictionPolicy<Tuple, ?>) topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
-    }else{
+    if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR)) {
+      evictionPolicy = (EvictionPolicy<Tuple, ?>)
+              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
+    } else {
       evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
     }
 
-    if(topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER)){
-      triggerPolicy = (TriggerPolicy<Tuple, ?>) topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
-    }else{
+    if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER)) {
+      triggerPolicy = (TriggerPolicy<Tuple, ?>)
+              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
+    } else {
       triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
               evictionPolicy, topoConf);
     }

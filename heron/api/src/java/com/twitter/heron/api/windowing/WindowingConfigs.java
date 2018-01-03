@@ -32,10 +32,11 @@
 
 package com.twitter.heron.api.windowing;
 
-import com.twitter.heron.api.tuple.Tuple;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.twitter.heron.api.tuple.Tuple;
+
 
 public class WindowingConfigs extends HashMap<String, Object> {
 
@@ -92,9 +93,11 @@ public class WindowingConfigs extends HashMap<String, Object> {
   public static final String TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS = "topology.bolts"
       + ".watermark.event.interval.ms";
 
-  public static final String TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR = "topology.bolts.window.custom.evictor";
+  public static final String TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR =
+          "topology.bolts.window.custom.evictor";
 
-  public static final String TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER = "topology.bolts.window.custom.trigger";
+  public static final String TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER =
+          "topology.bolts.window.custom.trigger";
 
   public void setTopologyBoltsWindowLengthCount(long value) {
     setTopologyBoltsWindowLengthCount(this, value);
@@ -154,19 +157,21 @@ public class WindowingConfigs extends HashMap<String, Object> {
     conf.put(TOPOLOGY_BOLTS_WATERMARK_EVENT_INTERVAL_MS, value);
   }
 
-  public void setTopologyBoltsWindowCustomEvictor(EvictionPolicy<Tuple, ?> value){
+  public void setTopologyBoltsWindowCustomEvictor(EvictionPolicy<Tuple, ?> value) {
     setTopologyBoltsWindowCustomEvictor(this, value);
   }
 
-  public static void setTopologyBoltsWindowCustomEvictor(Map<String, Object> conf, EvictionPolicy<Tuple, ?> value){
+  public static void setTopologyBoltsWindowCustomEvictor(Map<String, Object> conf,
+                                                         EvictionPolicy<Tuple, ?> value) {
     conf.put(TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR, value);
   }
 
-  public void setTopologyBoltsWindowCustomTrigger(TriggerPolicy<Tuple, ?> value){
+  public void setTopologyBoltsWindowCustomTrigger(TriggerPolicy<Tuple, ?> value) {
     setTopologyBoltsWindowCustomTrigger(this, value);
   }
 
-  public static void setTopologyBoltsWindowCustomTrigger(Map<String, Object> conf, TriggerPolicy<Tuple, ?> value){
+  public static void setTopologyBoltsWindowCustomTrigger(Map<String, Object> conf,
+                                                         TriggerPolicy<Tuple, ?> value) {
     conf.put(TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER, value);
   }
 }

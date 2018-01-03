@@ -74,7 +74,8 @@ public interface WindowConfig {
    * @param evictionPolicy The eviction policy to use
    * @return WindowConfig that can be passed to the transformation
    */
-  static WindowConfig CustomWindow(TriggerPolicy<Tuple, ?> triggerPolicy, EvictionPolicy<Tuple, ?> evictionPolicy){
+  static WindowConfig CustomWindow(TriggerPolicy<Tuple, ?> triggerPolicy,
+                                   EvictionPolicy<Tuple, ?> evictionPolicy) {
     return new WindowConfigImpl(triggerPolicy, evictionPolicy);
   }
 }
