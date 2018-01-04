@@ -54,5 +54,11 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "StreamBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/StreamBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
 
 
