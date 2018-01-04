@@ -43,22 +43,33 @@ $ ./install-helm.sh
 
 ## Installing Helm in your Kubernetes cluster
 
+To run Helm on Kubernetes, you need to first make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) is using the right configuration context for your cluster. To check which context is being used:
+
+```bash
+$ kubectl config current-context
+```
+
+If the context is correct, then you can get Helm running using just one command:
+
 ```bash
 $ helm init
 ```
 
+If the output of that command includes `Happy Helming!` then Helm is ready to go.
+
 ## Installing Heron on Kubernetes
 
-Once you've installed the Helm client on your machine, you need to make your client aware of the [Streamlio](https://streaml.io) repository, which houses the Helm chart for Heron:
+Once you've installed the Helm client on your machine and gotten Helm running in your Kubernetes cluster, you need to make your client aware of the `heron-charts` Helm repository, which houses the chart for Heron:
 
 ```bash
-$ helm repo add streamlio https://storage.googleapis.com/streamlio/charts
+$ helm repo add heron-charts https://storage.googleapis.com/heron-charts
+"heron-charts" has been added to your repositories
 ```
 
-To install the Heron package:
+Now you can install the Heron package:
 
 ```bash
-$ helm install streamlio/heron
+$ helm install heron-charts/heron
 ```
 
 This will install Heron and provide the installation with a random name like `jazzy-anaconda`. To provide the installation with a name, such as `heron-kubernetes`:
@@ -70,7 +81,7 @@ $ helm install streamlio/heron \
 
 ### Specifying a platform
 
-The default platform is [Minikube](#minikube). To specify a different platform, you can use the `--set platform=PLATFORM` flag. Here's an example:
+The default platform for running Heron on Kubernetes is [Minikube](#minikube). To specify a different platform, you can use the `--set platform=PLATFORM` flag. Here's an example:
 
 ```bash
 $ helm install streamlio/heron \
@@ -88,7 +99,13 @@ Platform | Tag
 
 #### Minikube
 
-[Install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+To run Heron on Minikube, you need to first [install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/). Once Minikube is installed, you can start it by running `minikube start`. Please note, however, that Heron currently requires the following resources:
+
+* 7 GB of memory
+* 5 CPUs
+* 20 GB of disk space
+
+To start up Minikube with the minimum necessary resources:
 
 ```bash
 $ minikube start \
@@ -97,7 +114,32 @@ $ minikube start \
   --disk-size=20g
 ```
 
+Once Minikube is running, you can then install Heron in one of two ways:
+
+```bash
+# Use the Minikube default
+$ helm install streamlio/heron
+
+# Explicitly select Minikube
+$ helm install streamlio/heron \
+  --set platform=minikube
+```
+
 #### Google Kubernetes Engine
+
+To run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/), you'll need to stand up a GKE cluster with *at least* the following resources:
+
+* TODO
+
+To create a cluster with those resources (assuming you've installed the [gcloud](https://cloud.google.com/sdk/gcloud/) tool), 
+
+```bash
+$ gcloud container clusters create heron-gke-cluster \
+  --zone=us-central1-a \
+  --num-nodes=3
+```
+
+Once, the cluster is running (that could take a few minutes), the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool should be
 
 ```bash
 $ helm install streamlio/heron \
