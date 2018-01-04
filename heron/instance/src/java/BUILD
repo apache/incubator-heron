@@ -2,9 +2,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 instance_deps_files =  \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",

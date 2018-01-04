@@ -2,35 +2,35 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar", "pkg_deb")
 
-load("/tools/rules/heron_client", "heron_client_bin_files")
-load("/tools/rules/heron_client", "heron_client_conf_files")
-load("/tools/rules/heron_client", "heron_client_lib_third_party_files")
-load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
-load("/tools/rules/heron_client", "heron_client_lib_metricscachemgr_files")
-load("/tools/rules/heron_client", "heron_client_lib_packing_files")
-load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
-load("/tools/rules/heron_client", "heron_client_lib_uploader_files")
-load("/tools/rules/heron_client", "heron_client_lib_healthmgr_files")
+load("//tools/rules:heron_client.bzl", "heron_client_bin_files")
+load("//tools/rules:heron_client.bzl", "heron_client_conf_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_third_party_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_scheduler_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_metricscachemgr_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_packing_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_statemgr_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_uploader_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_healthmgr_files")
 
-load("/tools/rules/heron_core", "heron_core_files")
-load("/tools/rules/heron_core", "heron_core_bin_files")
-load("/tools/rules/heron_core", "heron_core_conf_files")
-load("/tools/rules/heron_core", "heron_core_lib_instance_files")
-load("/tools/rules/heron_core", "heron_core_lib_healthmgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_metricscachemgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_packing_files")
-load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
-load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_ckptmgr_files")
-load("/tools/rules/heron_core", "heron_core_lib_statefulstorage_files")
-load("/tools/rules/heron_core", "heron_core_lib_downloader_files")
+load("//tools/rules:heron_core.bzl", "heron_core_files")
+load("//tools/rules:heron_core.bzl", "heron_core_bin_files")
+load("//tools/rules:heron_core.bzl", "heron_core_conf_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_instance_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_healthmgr_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_metricsmgr_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_metricscachemgr_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_packing_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_scheduler_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_statemgr_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_ckptmgr_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_statefulstorage_files")
+load("//tools/rules:heron_core.bzl", "heron_core_lib_downloader_files")
 
-load("/tools/rules/heron_tools", "heron_tools_files")
-load("/tools/rules/heron_tools", "heron_tools_bin_files")
-load("/tools/rules/heron_tools", "heron_tools_conf_files")
-load("/tools/rules/heron_tools", "heron_tools_lib_files")
-load("/tools/rules/heron_examples", "heron_examples_files")
+load("//tools/rules:heron_tools.bzl", "heron_tools_files")
+load("//tools/rules:heron_tools.bzl", "heron_tools_bin_files")
+load("//tools/rules:heron_tools.bzl", "heron_tools_conf_files")
+load("//tools/rules:heron_tools.bzl", "heron_tools_lib_files")
+load("//tools/rules:heron_examples.bzl", "heron_examples_files")
 
 generated_release_files = [
     "release.yaml",
@@ -48,6 +48,7 @@ filegroup(
 filegroup(
     name = "tarpkgs",
     srcs = [
+        ":heron-tools",
         ":heron-core",
         ":heron",
     ],
@@ -487,7 +488,6 @@ genrule(
     ]),
 )
 
-# '$(location //third_party/helm:helm) init -c',
 ################################################################################
 # Heron self installed binaries
 ################################################################################
@@ -528,7 +528,7 @@ genrule(
         """,
 )
 
-load("self_extract_binary", "self_extract_binary")
+load("//scripts/packages:self_extract_binary.bzl", "self_extract_binary")
 
 self_extract_binary(
     name = "heron-install.sh",

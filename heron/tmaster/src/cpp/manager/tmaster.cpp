@@ -710,9 +710,9 @@ void TMaster::DoPhysicalPlan(EventLoop::Status) {
   CHECK_NOTNULL(pplan);
   DCHECK(pplan->IsInitialized());
 
-  if (!ValidateStMgrsWithTopology(pplan->topology())) {
+  if (!ValidateStMgrsWithPackingPlan()) {
     // TODO(kramasamy): Do Something better here
-    LOG(ERROR) << "Topology and StMgr mismatch... Dying\n";
+    LOG(ERROR) << "Packing plan and StMgr mismatch... Dying\n";
     ::exit(1);
   }
 
@@ -915,18 +915,13 @@ bool TMaster::ValidateTopology(proto::api::Topology _topology) {
   return true;
 }
 
-bool TMaster::ValidateStMgrsWithTopology(proto::api::Topology _topology) {
+bool TMaster::ValidateStMgrsWithPackingPlan() {
   // here we check to see if the total number of instances
   // across all stmgrs match up to all the spout/bolt
-  // parallelism the topology has specified
+  // parallelism the packing plan has specified
   sp_int32 ntasks = 0;
-  for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
-    ntasks +=
-        config::TopologyConfigHelper::GetComponentParallelism(_topology.spouts(i).comp().config());
-  }
-  for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
-    ntasks +=
-        config::TopologyConfigHelper::GetComponentParallelism(_topology.bolts(i).comp().config());
+  for (sp_int32 i = 0; i < packing_plan_->container_plans_size(); ++i) {
+    ntasks += packing_plan_->container_plans(i).instance_plans_size();
   }
 
   sp_int32 ninstances = 0;

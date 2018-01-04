@@ -1,0 +1,21 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.nomad.NomadScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.nomad.NomadLauncher
+
+# working directory for the topologies
+heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY_ID}
+
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home:           ${JAVA_HOME}
+
+# The URI of Nomad API
+heron.nomad.scheduler.uri:             http://127.0.0.1:4646
+
+#Invoke the IScheduler as a library directly
+heron.scheduler.is.service:                  False
+
+# The nomad schedules cpu resources in terms of clock frequency (e.g. MHz), while Heron topologies
+# specify cpu requests in term of cores.  This config maps core to clock freqency.
+heron.nomad.core.freq.mapping: 2000

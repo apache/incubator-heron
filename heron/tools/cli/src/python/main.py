@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# !/usr/bin/env python2.7
 ''' main.py '''
 import argparse
 import atexit
@@ -299,7 +301,6 @@ def extract_common_args(command, parser, cl_args):
   cl_args.update(new_cl_args)
   return cl_args
 
-
 ################################################################################
 def execute(handlers, local_commands):
   '''
@@ -330,7 +331,11 @@ def execute(handlers, local_commands):
 
   command_line_args = vars(args)
 
-  # command to be execute
+  # set log level
+  log.set_logging_level(command_line_args)
+  Log.debug("Input Command Line Args: %s", command_line_args)
+
+# command to be execute
   command = command_line_args['subcommand']
   is_local_command = command in local_commands
 

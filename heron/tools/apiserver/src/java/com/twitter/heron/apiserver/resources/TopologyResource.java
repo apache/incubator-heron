@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,8 +42,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -57,6 +56,7 @@ import com.twitter.heron.apiserver.actions.Keys;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.FileHelper;
 import com.twitter.heron.apiserver.utils.Logging;
+import com.twitter.heron.apiserver.utils.Utils;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.Pair;
@@ -130,7 +130,7 @@ public class TopologyResource extends HeronResource {
           missingDataKeys.toString());
       return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
           .type(MediaType.APPLICATION_JSON)
-          .entity(createValidationError(message, missingDataKeys))
+          .entity(Utils.createValidationError(message, missingDataKeys))
           .build();
     }
 
@@ -138,7 +138,7 @@ public class TopologyResource extends HeronResource {
     if (!doesClusterMatch(cluster)) {
       return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("Unknown cluster %s expecting '%s'",
+          .entity(Utils.createMessage(String.format("Unknown cluster %s expecting '%s'",
               cluster, getCluster())))
           .build();
     }
@@ -166,17 +166,6 @@ public class TopologyResource extends HeronResource {
       final File topologyBinaryFile = Forms.uploadFile(topologyFilePart, topologyDirectory);
 
       final boolean isDryRun = form.getFields().containsKey(PARAM_DRY_RUN);
-      final Config config = createConfig(
-          Arrays.asList(
-              Pair.create(Key.CLUSTER.value(), cluster),
-              Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
-              Pair.create(Key.ROLE.value(), role),
-              Pair.create(Key.ENVIRON.value(), environment),
-              Pair.create(Key.SUBMIT_USER.value(), user),
-              Pair.create(Key.DRY_RUN.value(), isDryRun)
-          ),
-          submitOverrides
-      );
 
       // copy configuration files to the sandbox config location
       // topology-dir/<default-heron-sandbox-config>
@@ -205,6 +194,25 @@ public class TopologyResource extends HeronResource {
           Paths.get(topologyDirectory, TOPOLOGY_TAR_GZ_FILENAME).toFile();
       FileHelper.createTarGz(topologyPackageFile, FileHelper.getChildren(topologyDirectory));
 
+      //create configs
+      Config topologyConfig = ConfigUtils.getTopologyConfig(
+          topologyPackageFile.getAbsolutePath(),
+          topologyBinaryFile.getName(),
+          topologyDefinitionFile.getAbsolutePath());
+      List<Pair<String, Object>> val = new LinkedList<>();
+      for (Map.Entry<String, Object> entry : topologyConfig.getEntrySet()) {
+        val.add(Pair.create(entry.getKey(), entry.getValue()));
+      }
+      val.addAll(Arrays.asList(
+          Pair.create(Key.CLUSTER.value(), cluster),
+          Pair.create(Key.TOPOLOGY_NAME.value(), topologyName),
+          Pair.create(Key.ROLE.value(), role),
+          Pair.create(Key.ENVIRON.value(), environment),
+          Pair.create(Key.SUBMIT_USER.value(), user),
+          Pair.create(Key.DRY_RUN.value(), isDryRun)
+      ));
+      final Config config = createConfig(val, submitOverrides);
+
       // submit the topology
       getActionFactory()
           .createSubmitAction(config,
@@ -225,7 +233,7 @@ public class TopologyResource extends HeronResource {
       LOG.error("error submitting topology {}", topologyName, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(Utils.createMessage(ex.getMessage()))
           .build();
     } finally {
       FileUtils.deleteDir(topologyDirectory);
@@ -247,13 +255,13 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("%s activated", name)))
+          .entity(Utils.createMessage(String.format("%s activated", name)))
           .build();
     } catch (Exception ex) {
       LOG.error("error activating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(Utils.createMessage(ex.getMessage()))
           .build();
     }
   }
@@ -273,13 +281,13 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("%s deactivated", name)))
+          .entity(Utils.createMessage(String.format("%s deactivated", name)))
           .build();
     } catch (Exception ex) {
       LOG.error("error deactivating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(Utils.createMessage(ex.getMessage()))
           .build();
     }
   }
@@ -310,13 +318,13 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("%s restarted", name)))
+          .entity(Utils.createMessage(String.format("%s restarted", name)))
           .build();
     } catch (Exception ex) {
       LOG.error("error restarting topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(Utils.createMessage(ex.getMessage()))
           .build();
     }
   }
@@ -335,7 +343,7 @@ public class TopologyResource extends HeronResource {
       if (params == null || !params.containsKey(PARAM_COMPONENT_PARALLELISM)) {
         return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
             .type(MediaType.APPLICATION_JSON)
-            .entity(createMessage("missing component_parallelism param"))
+            .entity(Utils.createMessage("missing component_parallelism param"))
             .build();
       }
 
@@ -367,7 +375,7 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("%s updated", name)))
+          .entity(Utils.createMessage(String.format("%s updated", name)))
           .build();
     } catch (UpdateDryRunResponse response) {
       return createDryRunResponse(response,
@@ -376,7 +384,7 @@ public class TopologyResource extends HeronResource {
       LOG.error("error updating topology {}", name, ex);
       return Response.serverError()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(ex.getMessage()))
+          .entity(Utils.createMessage(ex.getMessage()))
           .build();
     }
   }
@@ -396,7 +404,7 @@ public class TopologyResource extends HeronResource {
 
       return Response.ok()
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(String.format("%s killed", name)))
+          .entity(Utils.createMessage(String.format("%s killed", name)))
           .build();
     } catch (Exception ex) {
       LOG.error("error killing topology {}", name, ex);
@@ -405,7 +413,7 @@ public class TopologyResource extends HeronResource {
           ? Response.Status.NOT_FOUND : Response.Status.INTERNAL_SERVER_ERROR;
       return Response.status(status)
           .type(MediaType.APPLICATION_JSON)
-          .entity(createMessage(message))
+          .entity(Utils.createMessage(message))
           .build();
     }
   }
@@ -458,7 +466,7 @@ public class TopologyResource extends HeronResource {
   }
 
   private boolean isLocalMode() {
-    return "local".equalsIgnoreCase(getCluster());
+    return "local".equalsIgnoreCase(getCluster()) || "standalone".equalsIgnoreCase(getCluster());
   }
 
   private static Map<String, String> getSubmitOverrides(FormDataMultiPart form) {
@@ -524,25 +532,5 @@ public class TopologyResource extends HeronResource {
         .put("role", role)
         .put("environment", environment)
         .toString();
-  }
-
-  private static ObjectNode createBaseMessage(String message) {
-    final ObjectMapper mapper = new ObjectMapper();
-    return mapper.createObjectNode().put("message", message);
-  }
-
-  private static String createMessage(String message) {
-    return createBaseMessage(message).toString();
-  }
-
-  private static String createValidationError(String message, List<String> missing) {
-    ObjectNode node = createBaseMessage(message);
-    ObjectNode errors = node.putObject("errors");
-    ArrayNode missingParameters = errors.putArray("missing_parameters");
-    for (String param : missing) {
-      missingParameters.add(param);
-    }
-
-    return node.toString();
   }
 }
