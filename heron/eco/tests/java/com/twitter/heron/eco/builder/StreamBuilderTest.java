@@ -39,6 +39,7 @@ import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
+import com.twitter.heron.eco.mock.MockIRichBolt;
 
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
@@ -112,35 +113,5 @@ public class StreamBuilderTest {
     verify(mockBoltDeclarer).shuffleGrouping(eq(from), eq(streamId));
     verify(mockContext).setStreams(anyMap());
     verify(mockDefinition).getStreams();
-  }
-
-
-  @SuppressWarnings({"rawtypes", "unchecked", "serial"})
-  private class MockIRichBolt implements IRichBolt {
-
-    @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-
-    }
-
-    @Override
-    public void execute(Tuple input) {
-
-    }
-
-    @Override
-    public void cleanup() {
-
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
-    }
-
-    @Override
-    public Map<String, Object> getComponentConfiguration() {
-      return null;
-    }
   }
 }
