@@ -250,9 +250,9 @@ public class WindowedBoltExecutor implements IRichBolt,
       validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
               slidingIntervalDurationMs);
 
+      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
       triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
               evictionPolicy, topoConf);
-      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
     } else {
       throw new IllegalArgumentException(
               "If either a custom TriggerPolicy or EvictionPolicy is defined, both must be."
