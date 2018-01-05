@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
+import org.apache.storm.task.WorkerTopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.BoltDeclarer;
 import org.apache.storm.topology.IBasicBolt;
@@ -27,6 +30,7 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.IWindowedBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.windowing.TimestampExtractor;
 import org.apache.storm.windowing.TupleWindow;
@@ -41,10 +45,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
+import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -80,7 +84,7 @@ public class StreamBuilderTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void buildStreams_SpoutToIRichBolt() throws ClassNotFoundException,
+  public void buildStreams_SpoutToIRichBolt_ShuffleGrouping() throws ClassNotFoundException,
       InvocationTargetException, NoSuchFieldException,
       InstantiationException, IllegalAccessException {
     final int iRichBoltParallelism = 1;
@@ -119,7 +123,8 @@ public class StreamBuilderTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void buildStreams_SpoutToIBasicBolt() throws ClassNotFoundException,
+  public void buildStreams_SpoutToIBasicBolt_FieldsGroupingWithArgs() throws
+      ClassNotFoundException,
       InvocationTargetException, NoSuchFieldException,
       InstantiationException, IllegalAccessException {
     final int iRichBoltParallelism = 1;
@@ -133,7 +138,10 @@ public class StreamBuilderTest {
     List<StreamDefinition> streams = new ArrayList<>();
     streams.add(streamDefinition);
     GroupingDefinition groupingDefinition = new GroupingDefinition();
-    groupingDefinition.setType(GroupingDefinition.Type.SHUFFLE);
+    groupingDefinition.setType(GroupingDefinition.Type.FIELDS);
+    List<String> args = new ArrayList<>();
+    args.add("arg1");
+    groupingDefinition.setArgs(args);
     groupingDefinition.setStreamId(streamId);
     streamDefinition.setGrouping(groupingDefinition);
     MockIBasicBolt mockIBasicBolt = new MockIBasicBolt();
@@ -151,9 +159,117 @@ public class StreamBuilderTest {
     verify(mockContext).getBolt(eq(to));
     verify(mockDefinition).parallelismForBolt(eq(to));
     verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIBasicBolt), eq(iRichBoltParallelism));
-    verify(mockBoltDeclarer).shuffleGrouping(eq(from), eq(streamId));
+    verify(mockBoltDeclarer).fieldsGrouping(eq(from), eq(streamId), any(Fields.class));
     verify(mockContext).setStreams(anyMap());
     verify(mockDefinition).getStreams();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  @SuppressWarnings("unchecked")
+  public void buildStreams_SpoutToIBasicBolt_FieldsGroupingWithoutArgs_ExceptionThrown() throws
+      ClassNotFoundException,
+      InvocationTargetException, NoSuchFieldException,
+      InstantiationException, IllegalAccessException {
+    final int iRichBoltParallelism = 1;
+    final String to = "to";
+    final String from = "from";
+    final String streamId  = "id";
+    StreamDefinition streamDefinition  = new StreamDefinition();
+    streamDefinition.setFrom(from);
+    streamDefinition.setTo(to);
+    streamDefinition.setId(streamId);
+    List<StreamDefinition> streams = new ArrayList<>();
+    streams.add(streamDefinition);
+    GroupingDefinition groupingDefinition = new GroupingDefinition();
+    groupingDefinition.setType(GroupingDefinition.Type.FIELDS);
+
+    groupingDefinition.setStreamId(streamId);
+    streamDefinition.setGrouping(groupingDefinition);
+    MockIBasicBolt mockIBasicBolt = new MockIBasicBolt();
+    try {
+      when(mockContext.getTopologyDefinition()).thenReturn(mockDefinition);
+      when(mockContext.getBolt(eq(to))).thenReturn(mockIBasicBolt);
+      when(mockDefinition.getStreams()).thenReturn(streams);
+      when(mockDefinition.parallelismForBolt(eq(to))).thenReturn(iRichBoltParallelism);
+      when(mockTopologyBuilder.setBolt(eq(to),
+          eq(mockIBasicBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
+
+      subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder);
+    } finally {
+
+      verify(mockContext).getTopologyDefinition();
+      verify(mockContext).getBolt(eq(to));
+      verify(mockDefinition).parallelismForBolt(eq(to));
+      verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIBasicBolt), eq(iRichBoltParallelism));
+      verify(mockDefinition).getStreams();
+    }
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void buildStreams_SpoutToIWindowedBolt_CustomGrouping() throws ClassNotFoundException,
+      InvocationTargetException, NoSuchFieldException,
+      InstantiationException, IllegalAccessException {
+    final int iRichBoltParallelism = 1;
+    final String to = "to";
+    final String from = "from";
+    final String streamId  = "id";
+    StreamDefinition streamDefinition  = new StreamDefinition();
+    streamDefinition.setFrom(from);
+    streamDefinition.setTo(to);
+    streamDefinition.setId(streamId);
+    List<StreamDefinition> streams = new ArrayList<>();
+    streams.add(streamDefinition);
+    GroupingDefinition groupingDefinition = new GroupingDefinition();
+    groupingDefinition.setType(GroupingDefinition.Type.CUSTOM);
+    MockCustomObjectDefinition mockCustomObjectDefinition = new MockCustomObjectDefinition();
+
+    groupingDefinition.setCustomClass(mockCustomObjectDefinition);
+    List<String> args = new ArrayList<>();
+    args.add("arg1");
+    groupingDefinition.setArgs(args);
+    groupingDefinition.setStreamId(streamId);
+    streamDefinition.setGrouping(groupingDefinition);
+    MockIWindowedBolt mockIWindowedBolt = new MockIWindowedBolt();
+    MockCustomStreamGrouping mockCustomStreamGrouping = new MockCustomStreamGrouping();
+
+    when(mockContext.getTopologyDefinition()).thenReturn(mockDefinition);
+    when(mockContext.getBolt(eq(to))).thenReturn(mockIWindowedBolt);
+    when(mockDefinition.getStreams()).thenReturn(streams);
+    when(mockDefinition.parallelismForBolt(eq(to))).thenReturn(iRichBoltParallelism);
+    when(mockTopologyBuilder.setBolt(eq(to),
+        eq(mockIWindowedBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
+    when(mockObjectBuilder.buildObject(eq(mockCustomObjectDefinition),
+        eq(mockContext))).thenReturn(mockCustomStreamGrouping);
+
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder );
+
+    verify(mockContext).getTopologyDefinition();
+    verify(mockContext).getBolt(eq(to));
+    verify(mockDefinition).parallelismForBolt(eq(to));
+    verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIWindowedBolt), eq(iRichBoltParallelism));
+    verify(mockBoltDeclarer).customGrouping(eq(from), eq(streamId), eq(mockCustomStreamGrouping));
+    verify(mockContext).setStreams(anyMap());
+    verify(mockDefinition).getStreams();
+    verify(mockObjectBuilder).buildObject(same(mockCustomObjectDefinition), same(mockContext));
+  }
+
+  private class MockCustomObjectDefinition extends ObjectDefinition {
+
+  }
+
+  @SuppressWarnings("serial")
+  private class MockCustomStreamGrouping implements CustomStreamGrouping {
+
+    @Override
+    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+
+    }
+
+    @Override
+    public List<Integer> chooseTasks(int taskId, List<Object> values) {
+      return null;
+    }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked", "serial"})

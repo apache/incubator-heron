@@ -15,6 +15,7 @@ package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.storm.grouping.CustomStreamGrouping;
@@ -88,7 +89,11 @@ public class StreamBuilder {
           break;
         case FIELDS:
           //TODO check for null grouping args
-          declarer.fieldsGrouping(stream.getFrom(), streamId, new Fields(grouping.getArgs()));
+          List<String> groupingArgs = grouping.getArgs();
+          if (groupingArgs == null) {
+            throw new IllegalArgumentException("You must supply arguments for Fields grouping");
+          }
+          declarer.fieldsGrouping(stream.getFrom(), streamId, new Fields(groupingArgs));
           break;
         case ALL:
           declarer.allGrouping(stream.getFrom(), streamId);
