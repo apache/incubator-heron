@@ -37,7 +37,6 @@ import java.util.Map;
 
 import com.twitter.heron.api.tuple.Tuple;
 
-
 public class WindowingConfigs extends HashMap<String, Object> {
 
   private static final long serialVersionUID = 1395902349429869055L;

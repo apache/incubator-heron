@@ -234,25 +234,30 @@ public class WindowedBoltExecutor implements IRichBolt,
             "Late tuple stream can be defined only when " + "specifying" + " a timestamp field");
       }
     }
-    // validate
-    validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
-        slidingIntervalDurationMs);
 
-    if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR)) {
-      evictionPolicy = (EvictionPolicy<Tuple, ?>)
-              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
-    } else {
-      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
-    }
+    boolean hasCustomTrigger = topoConf
+            .containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
+    boolean hasCustomEvictor = topoConf
+            .containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
 
-    if (topoConf.containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER)) {
+    if (hasCustomTrigger && hasCustomEvictor) {
       triggerPolicy = (TriggerPolicy<Tuple, ?>)
               topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
-    } else {
+      evictionPolicy = (EvictionPolicy<Tuple, ?>)
+              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
+    } else if (!hasCustomEvictor && !hasCustomTrigger) {
+      // validate
+      validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
+              slidingIntervalDurationMs);
+
       triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
               evictionPolicy, topoConf);
+      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
+    } else {
+      throw new IllegalArgumentException(
+              "If either a custom TriggerPolicy or EvictionPolicy is defined, both must be."
+      );
     }
-
 
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
