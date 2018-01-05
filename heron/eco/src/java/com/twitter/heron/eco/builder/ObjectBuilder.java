@@ -44,8 +44,7 @@ public class ObjectBuilder {
 
     Object obj;
     if (def.hasConstructorArgs()) {
-      LOG.debug("Found constructor arguments in definition: "
-          + def.getConstructorArgs().getClass().getName());
+      LOG.debug("Found constructor arguments in definition ");
       List<Object> cArgs = def.getConstructorArgs();
       if (def.hasReferences()) {
         LOG.debug("The definition has references");
@@ -271,8 +270,7 @@ public class ObjectBuilder {
   @SuppressWarnings("rawtypes")
   private static List<Object> resolveReferences(List<Object> args, EcoExecutionContext context) {
     LOG.debug("Checking arguments for references.");
-    List<Object> cArgs = new ArrayList<Object>();
-    EcoTopologyDefinition topologyDefinition = context.getTopologyDefinition();
+    List<Object> cArgs = new ArrayList<>();
     // resolve references
     for (Object arg : args) {
       if (arg instanceof BeanReference) {

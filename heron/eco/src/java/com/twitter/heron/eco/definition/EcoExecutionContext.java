@@ -25,11 +25,11 @@ public class EcoExecutionContext {
 
   private Config config;
 
-  private Map<String, Object> spouts;
+  private Map<String, Object> spouts = new HashMap<>();
 
-  private Map<String, Object> bolts;
+  private Map<String, Object> bolts = new HashMap<>();
 
-  private Map<String, ComponentStream> streams;
+  private Map<String, ComponentStream> streams = new HashMap<>();
 
   private Map<String, Object> components = new HashMap<>();
 
