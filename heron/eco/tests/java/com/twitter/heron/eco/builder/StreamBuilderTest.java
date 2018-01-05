@@ -18,15 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.BoltDeclarer;
+import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.IWindowedBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.windowing.TimestampExtractor;
+import org.apache.storm.windowing.TupleWindow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +42,6 @@ import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
-import com.twitter.heron.eco.mock.MockIRichBolt;
 
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.eq;
@@ -113,5 +115,135 @@ public class StreamBuilderTest {
     verify(mockBoltDeclarer).shuffleGrouping(eq(from), eq(streamId));
     verify(mockContext).setStreams(anyMap());
     verify(mockDefinition).getStreams();
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void buildStreams_SpoutToIBasicBolt() throws ClassNotFoundException,
+      InvocationTargetException, NoSuchFieldException,
+      InstantiationException, IllegalAccessException {
+    final int iRichBoltParallelism = 1;
+    final String to = "to";
+    final String from = "from";
+    final String streamId  = "id";
+    StreamDefinition streamDefinition  = new StreamDefinition();
+    streamDefinition.setFrom(from);
+    streamDefinition.setTo(to);
+    streamDefinition.setId(streamId);
+    List<StreamDefinition> streams = new ArrayList<>();
+    streams.add(streamDefinition);
+    GroupingDefinition groupingDefinition = new GroupingDefinition();
+    groupingDefinition.setType(GroupingDefinition.Type.SHUFFLE);
+    groupingDefinition.setStreamId(streamId);
+    streamDefinition.setGrouping(groupingDefinition);
+    MockIBasicBolt mockIBasicBolt = new MockIBasicBolt();
+
+    when(mockContext.getTopologyDefinition()).thenReturn(mockDefinition);
+    when(mockContext.getBolt(eq(to))).thenReturn(mockIBasicBolt);
+    when(mockDefinition.getStreams()).thenReturn(streams);
+    when(mockDefinition.parallelismForBolt(eq(to))).thenReturn(iRichBoltParallelism);
+    when(mockTopologyBuilder.setBolt(eq(to),
+        eq(mockIBasicBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
+
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder );
+
+    verify(mockContext).getTopologyDefinition();
+    verify(mockContext).getBolt(eq(to));
+    verify(mockDefinition).parallelismForBolt(eq(to));
+    verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIBasicBolt), eq(iRichBoltParallelism));
+    verify(mockBoltDeclarer).shuffleGrouping(eq(from), eq(streamId));
+    verify(mockContext).setStreams(anyMap());
+    verify(mockDefinition).getStreams();
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked", "serial"})
+  private class MockIRichBolt implements IRichBolt {
+
+    @Override
+    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+
+    }
+
+    @Override
+    public void execute(Tuple input) {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
+    }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+      return null;
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked", "serial"})
+  private class MockIWindowedBolt implements IWindowedBolt {
+    @Override
+    public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector) {
+
+    }
+
+    @Override
+    public void execute(TupleWindow inputWindow) {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+
+    @Override
+    public TimestampExtractor getTimestampExtractor() {
+      return null;
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
+    }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+      return null;
+    }
+  }
+
+
+  @SuppressWarnings({"rawtypes", "unchecked", "serial"})
+  public class MockIBasicBolt implements IBasicBolt {
+    @Override
+    public void prepare(Map stormConf, TopologyContext context) {
+
+    }
+
+    @Override
+    public void execute(Tuple input, BasicOutputCollector collector) {
+
+    }
+
+    @Override
+    public void cleanup() {
+
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
+    }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+      return null;
+    }
   }
 }
