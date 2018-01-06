@@ -23,7 +23,7 @@ import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 
-public final class EcoBuilder extends ObjectBuilder {
+public class EcoBuilder extends ObjectBuilder {
 
   private SpoutBuilder spoutBuilder;
 

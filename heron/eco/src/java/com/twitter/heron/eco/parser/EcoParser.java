@@ -24,12 +24,11 @@ import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.SpoutDefinition;
 
-public final class EcoParser {
+public class EcoParser {
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
 
-  private EcoParser() { }
 
-  public static EcoTopologyDefinition parseFromInputStream(InputStream inputStream)
+  public EcoTopologyDefinition parseFromInputStream(InputStream inputStream)
       throws Exception {
 
     Yaml yaml = topologyYaml();
@@ -42,7 +41,7 @@ public final class EcoParser {
 
   }
 
-  private static EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
+  private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
     return (EcoTopologyDefinition) yaml.load(inputStream);
   }
   private static Yaml topologyYaml() {

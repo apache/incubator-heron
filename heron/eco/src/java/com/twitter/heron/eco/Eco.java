@@ -40,13 +40,46 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.SpoutDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 import com.twitter.heron.eco.parser.EcoParser;
+import com.twitter.heron.eco.submit.EcoSubmitter;
 
 
-public final class Eco {
+public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
 
-  private Eco() { }
+  private EcoBuilder ecoBuilder;
+  private EcoParser ecoParser;
+  private EcoSubmitter ecoSubmitter;
+
+  public Eco(EcoBuilder ecoBuilder, EcoParser ecoParser, EcoSubmitter ecoSubmitter) {
+    this.ecoBuilder = ecoBuilder;
+    this.ecoParser = ecoParser;
+    this.ecoSubmitter = ecoSubmitter;
+  }
+
+  public void submit(FileInputStream fileInputStream) throws Exception {
+    EcoTopologyDefinition topologyDefinition = ecoParser.parseFromInputStream(fileInputStream);
+
+    String topologyName = topologyDefinition.getName();
+
+
+    Config topologyConfig = ecoBuilder
+        .buildConfig(topologyDefinition);
+
+    EcoExecutionContext executionContext
+        = new EcoExecutionContext(topologyDefinition, topologyConfig);
+
+    printTopologyInfo(executionContext);
+
+    ObjectBuilder objectBuilder = new ObjectBuilder();
+    TopologyBuilder builder = ecoBuilder
+        .buildTopologyBuilder(executionContext, objectBuilder);
+
+    ecoSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
+
+
+
+  }
 
   public static void main(String[] args) throws Exception {
     Options options = constructOptions();
@@ -62,38 +95,45 @@ public final class Eco {
 
     FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
-    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
+    Eco eco = new Eco(
+        new EcoBuilder(
+            new SpoutBuilder(),
+            new BoltBuilder(),
+            new StreamBuilder(),
+            new ComponentBuilder(),
+            new ConfigBuilder()),
+        new EcoParser(),
+        new EcoSubmitter());
 
-    String topologyName = topologyDefinition.getName();
+    eco.submit(fin);
 
-    EcoBuilder ecoBuilder = createEcoBuilder();
-
-    Config topologyConfig = ecoBuilder
-        .buildConfig(topologyDefinition);
-
-    EcoExecutionContext executionContext
-        = new EcoExecutionContext(topologyDefinition, topologyConfig);
-
-    printTopologyInfo(executionContext);
-
-    ObjectBuilder objectBuilder = new ObjectBuilder();
-    TopologyBuilder builder = ecoBuilder
-        .buildTopologyBuilder(executionContext, objectBuilder);
-
-
-    StormSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
+//    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
+//
+//    String topologyName = topologyDefinition.getName();
+//
+//    EcoBuilder ecoBuilder = createEcoBuilder();
+//
+//    Config topologyConfig = ecoBuilder
+//        .buildConfig(topologyDefinition);
+//
+//    EcoExecutionContext executionContext
+//        = new EcoExecutionContext(topologyDefinition, topologyConfig);
+//
+//    printTopologyInfo(executionContext);
+//
+//    ObjectBuilder objectBuilder = new ObjectBuilder();
+//    TopologyBuilder builder = ecoBuilder
+//        .buildTopologyBuilder(executionContext, objectBuilder);
+//
+//
+//    StormSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
 
   }
 
   private static EcoBuilder createEcoBuilder() {
-    SpoutBuilder spoutBuilder = new SpoutBuilder();
-    BoltBuilder boltBuilder = new BoltBuilder();
-    StreamBuilder streamBuilder = new StreamBuilder();
-    ComponentBuilder componentBuilder = new ComponentBuilder();
-    ConfigBuilder configBuilder = new ConfigBuilder();
 
-    return new EcoBuilder(spoutBuilder, boltBuilder, streamBuilder,
-        componentBuilder, configBuilder);
+    return new EcoBuilder(new SpoutBuilder(), new BoltBuilder(), new StreamBuilder(),
+        new ComponentBuilder(), new ConfigBuilder());
   }
 
   private static Options constructOptions() {
@@ -110,6 +150,7 @@ public final class Eco {
   }
 
   // construct command line help options
+  //TODO: (joshfischer) integrate with existing system somehow
   private static Options constructHelpOptions() {
     Options options = new Options();
     Option help = Option.builder("h")

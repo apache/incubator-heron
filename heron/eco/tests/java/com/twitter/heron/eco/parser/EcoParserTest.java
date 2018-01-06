@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.eco.definition.BeanDefinition;
@@ -281,13 +282,20 @@ public class EcoParserTest {
       + "    to: \"log\"\n"
       + "    grouping:\n"
       + "      type: SHUFFLE";
+  private EcoParser subject;
+
+  @Before
+  public void setUpBeforeEachTestCase() {
+    subject = new EcoParser();
+  }
+
 
   @Test
   public void testParseFromInputStream_VerifyComponents_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR_1.getBytes());
 
-    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
+    EcoTopologyDefinition topologyDefinition = subject.parseFromInputStream(inputStream);
     List<BeanDefinition> components = topologyDefinition.getComponents();
 
     assertEquals("kafka-topology", topologyDefinition.getName());
@@ -334,7 +342,7 @@ public class EcoParserTest {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR.getBytes());
 
-    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
+    EcoTopologyDefinition topologyDefinition = subject.parseFromInputStream(inputStream);
 
     assertEquals("yaml-topology", topologyDefinition.getName());
     assertEquals(1, topologyDefinition.getConfig().size());
@@ -379,7 +387,7 @@ public class EcoParserTest {
   public void testPartFromInputStream_NoConfigSpecified_ConfigMapIsEmpty() throws Exception {
     InputStream inputStream = new ByteArrayInputStream(YAML_NO_CONFIG_STR.getBytes());
 
-    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(inputStream);
+    EcoTopologyDefinition topologyDefinition = subject.parseFromInputStream(inputStream);
 
     assertNotNull(topologyDefinition.getConfig());
     assertEquals(0, topologyDefinition.getConfig().size());
@@ -391,7 +399,7 @@ public class EcoParserTest {
     EcoTopologyDefinition ecoTopologyDefinition = null;
 
     try {
-      ecoTopologyDefinition = EcoParser.parseFromInputStream(inputStream);
+      ecoTopologyDefinition = subject.parseFromInputStream(inputStream);
     } finally {
       assertNull(ecoTopologyDefinition);
     }
