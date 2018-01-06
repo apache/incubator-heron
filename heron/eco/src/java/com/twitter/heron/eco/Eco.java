@@ -61,8 +61,7 @@ public class Eco {
     EcoTopologyDefinition topologyDefinition = ecoParser.parseFromInputStream(fileInputStream);
 
     String topologyName = topologyDefinition.getName();
-
-
+    
     Config topologyConfig = ecoBuilder
         .buildConfig(topologyDefinition);
 
@@ -76,9 +75,6 @@ public class Eco {
         .buildTopologyBuilder(executionContext, objectBuilder);
 
     ecoSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
-
-
-
   }
 
   public static void main(String[] args) throws Exception {
@@ -106,34 +102,6 @@ public class Eco {
         new EcoSubmitter());
 
     eco.submit(fin);
-
-//    EcoTopologyDefinition topologyDefinition = EcoParser.parseFromInputStream(fin);
-//
-//    String topologyName = topologyDefinition.getName();
-//
-//    EcoBuilder ecoBuilder = createEcoBuilder();
-//
-//    Config topologyConfig = ecoBuilder
-//        .buildConfig(topologyDefinition);
-//
-//    EcoExecutionContext executionContext
-//        = new EcoExecutionContext(topologyDefinition, topologyConfig);
-//
-//    printTopologyInfo(executionContext);
-//
-//    ObjectBuilder objectBuilder = new ObjectBuilder();
-//    TopologyBuilder builder = ecoBuilder
-//        .buildTopologyBuilder(executionContext, objectBuilder);
-//
-//
-//    StormSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
-
-  }
-
-  private static EcoBuilder createEcoBuilder() {
-
-    return new EcoBuilder(new SpoutBuilder(), new BoltBuilder(), new StreamBuilder(),
-        new ComponentBuilder(), new ConfigBuilder());
   }
 
   private static Options constructOptions() {
