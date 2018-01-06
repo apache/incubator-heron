@@ -24,16 +24,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.twitter.heron.eco.definition.BeanListReference;
-import com.twitter.heron.eco.definition.BeanReference;
 import com.twitter.heron.eco.definition.ConfigurationMethodDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
-import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
 public class ObjectBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(ObjectBuilder.class);
+
+  private BuilderUtility builderUtility;
+
+  public void setBuilderUtility(BuilderUtility builderUtility) {
+    this.builderUtility = builderUtility;
+  }
 
   @SuppressWarnings("rawtypes")
   public Object buildObject(ObjectDefinition def, EcoExecutionContext context)
@@ -48,7 +51,7 @@ public class ObjectBuilder {
       List<Object> cArgs = def.getConstructorArgs();
       if (def.hasReferences()) {
         LOG.debug("The definition has references");
-        cArgs = resolveReferences(cArgs, context);
+        cArgs = builderUtility.resolveReferences(cArgs, context);
       } else {
         LOG.debug("The definition does not have references");
       }
@@ -73,7 +76,7 @@ public class ObjectBuilder {
   }
 
   @SuppressWarnings("rawtypes")
-  public static void invokeConfigMethods(ObjectDefinition bean,
+  public void invokeConfigMethods(ObjectDefinition bean,
                                          Object instance, EcoExecutionContext context)
       throws InvocationTargetException, IllegalAccessException {
 
@@ -88,7 +91,7 @@ public class ObjectBuilder {
         args = new ArrayList<Object>();
       }
       if (methodDef.hasReferences()) {
-        args = resolveReferences(args, context);
+        args = builderUtility.resolveReferences(args, context);
       }
       String methodName = methodDef.getName();
       Method method = findCompatibleMethod(args, clazz, methodName);
@@ -105,7 +108,7 @@ public class ObjectBuilder {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Method findCompatibleMethod(List<Object> args, Class target, String methodName) {
+  private Method findCompatibleMethod(List<Object> args, Class target, String methodName) {
     Method retval = null;
     int eligibleCount = 0;
 
@@ -122,7 +125,7 @@ public class ObjectBuilder {
           // it's a method with zero args
           invokable = true;
         } else {
-          invokable = canInvokeWithArgs(args, method.getParameterTypes());
+          invokable = builderUtility.canInvokeWithArgs(args, method.getParameterTypes());
         }
         if (invokable) {
           retval = method;
@@ -140,52 +143,9 @@ public class ObjectBuilder {
     return retval;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private static boolean canInvokeWithArgs(List<Object> args, Class[] parameterTypes) {
-    if (parameterTypes.length != args.size()) {
-      LOG.warn("parameter types were the wrong size");
-      return false;
-    }
 
-    for (int i = 0; i < args.size(); i++) {
-      Object obj = args.get(i);
-      if (obj == null) {
-        throw new IllegalArgumentException("argument shouldn't be null - index: " + i);
-      }
-      Class paramType = parameterTypes[i];
-      Class objectType = obj.getClass();
-      LOG.info("Comparing parameter class " + paramType + " to object class "
-          + objectType + "to see if assignment is possible.");
-      if (paramType.equals(objectType)) {
-        LOG.debug("Yes, they are the same class.");
-      } else if (paramType.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (paramType.isEnum() && objectType.equals(String.class)) {
-        LOG.debug("Yes, will convert a String to enum");
-      } else if (paramType.isArray() && List.class.isAssignableFrom(objectType)) {
-        LOG.debug("Assignment is possible if we convert a List to an array.");
-        LOG.debug("Array Type: " + paramType.getComponentType() + ", List type: "
-            + ((List) obj).get(0).getClass());
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  @SuppressWarnings("rawtypes")
-  public static boolean isPrimitiveNumber(Class clazz) {
-    return clazz.isPrimitive() && !clazz.equals(boolean.class);
-  }
 
-  @SuppressWarnings("rawtypes")
-  public static boolean isPrimitiveBoolean(Class clazz) {
-    return clazz.isPrimitive() && clazz.equals(boolean.class);
-  }
 
   @SuppressWarnings("rawtypes")
   private static Method findSetter(Class clazz, String property) {
@@ -239,7 +199,7 @@ public class ObjectBuilder {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Constructor findCompatibleConstructor(List<Object> args, Class target) {
+  private Constructor findCompatibleConstructor(List<Object> args, Class target) {
     Constructor retval = null;
     int eligibleCount = 0;
 
@@ -250,7 +210,7 @@ public class ObjectBuilder {
       Class[] paramClasses = con.getParameterTypes();
       if (paramClasses.length == args.size()) {
         LOG.info("found constructor with same number of args..");
-        boolean invokable = canInvokeWithArgs(args, con.getParameterTypes());
+        boolean invokable = builderUtility.canInvokeWithArgs(args, con.getParameterTypes());
         if (invokable) {
           retval = con;
           eligibleCount++;
@@ -267,32 +227,6 @@ public class ObjectBuilder {
     return retval;
   }
 
-  @SuppressWarnings("rawtypes")
-  private static List<Object> resolveReferences(List<Object> args, EcoExecutionContext context) {
-    LOG.debug("Checking arguments for references.");
-    List<Object> cArgs = new ArrayList<>();
-    // resolve references
-    for (Object arg : args) {
-      if (arg instanceof BeanReference) {
-        LOG.info("BeanReference: " + ((BeanReference) arg).getId());
-        cArgs.add(context.getComponent(((BeanReference) arg).getId()));
-      } else if (arg instanceof BeanListReference) {
-        List<Object> components = new ArrayList<>();
-        BeanListReference ref = (BeanListReference) arg;
-        for (String id : ref.getIds()) {
-          components.add(context.getComponent(id));
-        }
-
-        LOG.info("BeanListReference resolved as {}" + components);
-        cArgs.add(components);
-      } else {
-        LOG.info("Unknown:" + arg.toString());
-        cArgs.add(arg);
-      }
-    }
-    return cArgs;
-  }
-
   /**
    * Given a java.util.List of contructor/method arguments, and a list of parameter types,
    * attempt to convert the
@@ -301,7 +235,7 @@ public class ObjectBuilder {
    * to be coerced from a List to an Array, do so.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private static Object[] getArgsWithListCoercian(List<Object> args, Class[] parameterTypes) {
+  private Object[] getArgsWithListCoercian(List<Object> args, Class[] parameterTypes) {
 //        Class[] parameterTypes = constructor.getParameterTypes();
     if (parameterTypes.length != args.size()) {
       throw new IllegalArgumentException("Contructor parameter count does not "
@@ -327,13 +261,13 @@ public class ObjectBuilder {
         constructorParams[i] = args.get(i);
         continue;
       }
-      if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
+      if (builderUtility.isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
         LOG.debug("Its a primitive boolean.");
         Boolean bool = (Boolean) args.get(i);
         constructorParams[i] = bool.booleanValue();
         continue;
       }
-      if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
+      if (builderUtility.isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
         LOG.debug("Its a primitive number.");
         Number num = (Number) args.get(i);
         if (paramType == Float.TYPE) {

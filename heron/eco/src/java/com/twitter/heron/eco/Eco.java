@@ -24,10 +24,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.storm.Config;
-import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 
 import com.twitter.heron.eco.builder.BoltBuilder;
+import com.twitter.heron.eco.builder.BuilderUtility;
 import com.twitter.heron.eco.builder.ComponentBuilder;
 import com.twitter.heron.eco.builder.ConfigBuilder;
 import com.twitter.heron.eco.builder.EcoBuilder;
@@ -61,7 +61,7 @@ public class Eco {
     EcoTopologyDefinition topologyDefinition = ecoParser.parseFromInputStream(fileInputStream);
 
     String topologyName = topologyDefinition.getName();
-    
+
     Config topologyConfig = ecoBuilder
         .buildConfig(topologyDefinition);
 
@@ -71,6 +71,7 @@ public class Eco {
     printTopologyInfo(executionContext);
 
     ObjectBuilder objectBuilder = new ObjectBuilder();
+    objectBuilder.setBuilderUtility(new BuilderUtility());
     TopologyBuilder builder = ecoBuilder
         .buildTopologyBuilder(executionContext, objectBuilder);
 
