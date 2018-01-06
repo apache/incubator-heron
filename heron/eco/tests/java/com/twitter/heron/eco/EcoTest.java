@@ -58,7 +58,8 @@ public class EcoTest {
   public void ensureNoUnexpectedMockInteractions() {
     Mockito.verifyNoMoreInteractions(mockEcoBuilder,
         mockEcoParser,
-        mockTopologyBuilder);
+        mockTopologyBuilder,
+        mockEcoSubmitter);
   }
 
   @Test
@@ -81,6 +82,5 @@ public class EcoTest {
     verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class), any(ObjectBuilder.class));
     verify(mockTopologyBuilder).createTopology();
     verify(mockEcoSubmitter).submitTopology(anyString(), any(Config.class), any(StormTopology.class));
-
   }
 }
