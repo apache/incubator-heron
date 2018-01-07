@@ -14,7 +14,6 @@
 package com.twitter.heron.eco.parser;
 
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -25,8 +24,6 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.SpoutDefinition;
 
 public class EcoParser {
-  private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
-
 
   public EcoTopologyDefinition parseFromInputStream(InputStream inputStream)
       throws Exception {
@@ -36,9 +33,7 @@ public class EcoParser {
     if (inputStream == null) {
       throw new Exception("Unable to load eco input stream");
     }
-
     return loadTopologyFromYaml(yaml, inputStream);
-
   }
 
   private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
@@ -54,6 +49,5 @@ public class EcoParser {
     topologyConstructor.addTypeDescription(topologyDescription);
 
     return new Yaml(topologyConstructor);
-
   }
 }

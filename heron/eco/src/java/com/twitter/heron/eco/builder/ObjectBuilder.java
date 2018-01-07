@@ -40,7 +40,6 @@ public class ObjectBuilder {
   public Object buildObject(ObjectDefinition def, EcoExecutionContext context)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException,
       InvocationTargetException, NoSuchFieldException {
-    //Class clazz = Class.forName(def.getClassName());
     Class clazz = builderUtility.classForName(def.getClassName());
 
     Object obj;
