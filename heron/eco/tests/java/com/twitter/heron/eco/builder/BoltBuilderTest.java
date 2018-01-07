@@ -35,14 +35,11 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Unit tests for  {@link BoltBuilder}
- */
 @RunWith(MockitoJUnitRunner.class)
 public class BoltBuilderTest {
 
   @Mock
-  EcoExecutionContext mockContext;
+  private EcoExecutionContext mockContext;
   @Mock
   private ObjectBuilder mockObjectBuilder;
 
