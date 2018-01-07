@@ -20,7 +20,8 @@ import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 
 public class ComponentBuilder {
-  protected void buildComponents(EcoExecutionContext context, ObjectBuilder objectBuilder) throws ClassNotFoundException,
+  protected void buildComponents(EcoExecutionContext context, ObjectBuilder objectBuilder)
+      throws ClassNotFoundException,
       IllegalAccessException, InstantiationException,
       NoSuchFieldException, InvocationTargetException {
     List<BeanDefinition> componentDefinitions = context.getTopologyDefinition().getComponents();
