@@ -42,10 +42,12 @@ public class BuilderUtilityTest {
   @Test
   @SuppressWarnings("rawtypes")
   public void classForName_ReturnsCorrectClass() throws ClassNotFoundException {
+    final String className = TestWordSpout.class.getName();
 
-    Class clazz = subject.classForName(TestWordSpout.class.getName());
+    Class clazz = subject.classForName(className);
 
     assertThat(clazz, notNullValue());
+    assertThat(className, is(equalTo(clazz.getName())));
   }
 
 }
