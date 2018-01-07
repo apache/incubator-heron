@@ -251,13 +251,17 @@ public class WindowedBoltExecutor implements IRichBolt,
               slidingIntervalDurationMs);
 
       evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
-      triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
-              evictionPolicy, topoConf);
+      triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs);
     } else {
       throw new IllegalArgumentException(
               "If either a custom TriggerPolicy or EvictionPolicy is defined, both must be."
       );
     }
+
+    triggerPolicy.setEvictionPolicy(evictionPolicy);
+    triggerPolicy.setTopologyConfig(topoConf);
+    triggerPolicy.setTriggerHandler(manager);
+    triggerPolicy.setWindowManager(manager);
 
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
@@ -305,22 +309,18 @@ public class WindowedBoltExecutor implements IRichBolt,
 
   @SuppressWarnings("HiddenField")
   private TriggerPolicy<Tuple, ?> getTriggerPolicy(Count slidingIntervalCount, Long
-      slidingIntervalDurationMs, WindowManager<Tuple> manager, EvictionPolicy<Tuple, ?>
-      evictionPolicy, Map<String, Object> topoConf) {
+      slidingIntervalDurationMs) {
     if (slidingIntervalCount != null) {
       if (isTupleTs()) {
-        return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value, manager,
-            evictionPolicy, manager);
+        return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value);
       } else {
-        return new CountTriggerPolicy<>(slidingIntervalCount.value, manager, evictionPolicy);
+        return new CountTriggerPolicy<>(slidingIntervalCount.value);
       }
     } else {
       if (isTupleTs()) {
-        return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
-            evictionPolicy, manager);
+        return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs);
       } else {
-        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
-            evictionPolicy, topoConf);
+        return new TimeTriggerPolicy<>(slidingIntervalDurationMs);
       }
     }
   }

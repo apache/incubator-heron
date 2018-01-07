@@ -37,32 +37,20 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
-import com.twitter.heron.api.windowing.EvictionPolicy;
 import com.twitter.heron.api.windowing.TriggerHandler;
-import com.twitter.heron.api.windowing.TriggerPolicy;
-import com.twitter.heron.api.windowing.WindowManager;
 
 /**
  * Handles watermark events and triggers {@link TriggerHandler#onTrigger()} for each window
  * interval that has events to be processed up to the watermark ts.
  */
-public class WatermarkTimeTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Long> {
+public class WatermarkTimeTriggerPolicy<T extends Serializable> extends
+        AbstractBaseTriggerPolicy<T, Long> {
   private static final Logger LOG = Logger.getLogger(WatermarkTimeTriggerPolicy.class.getName());
   private final long slidingIntervalMs;
-  private final TriggerHandler handler;
-  private final EvictionPolicy<T, ?> evictionPolicy;
-  private final WindowManager<T> windowManager;
   private volatile long nextWindowEndTs;
-  private boolean started;
 
-  public WatermarkTimeTriggerPolicy(long slidingIntervalMs, TriggerHandler handler,
-                                    EvictionPolicy<T, ?> evictionPolicy, WindowManager<T>
-                                        windowManager) {
+  public WatermarkTimeTriggerPolicy(long slidingIntervalMs) {
     this.slidingIntervalMs = slidingIntervalMs;
-    this.handler = handler;
-    this.evictionPolicy = evictionPolicy;
-    this.windowManager = windowManager;
-    this.started = false;
   }
 
   @Override
@@ -75,11 +63,6 @@ public class WatermarkTimeTriggerPolicy<T extends Serializable> implements Trigg
   @Override
   public void reset() {
     // NOOP
-  }
-
-  @Override
-  public void start() {
-    started = true;
   }
 
   @Override
