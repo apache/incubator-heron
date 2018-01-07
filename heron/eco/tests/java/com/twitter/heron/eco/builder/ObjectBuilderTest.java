@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.storm.testing.FixedTuple;
+import org.apache.storm.testing.TestWordSpout;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +62,8 @@ public class ObjectBuilderTest {
   }
 
   @Test
-  public void buildObject_WithArgs_BeanReferenceAndOther() throws ClassNotFoundException,
+  public void buildObject_WithArgsBeanReferenceAndOther_BehavesAsExpected()
+      throws ClassNotFoundException,
       InvocationTargetException, NoSuchFieldException,
       InstantiationException, IllegalAccessException {
     final String beanReference1 = "bean1";
@@ -112,6 +114,38 @@ public class ObjectBuilderTest {
     FixedTuple fixedTuple = (FixedTuple) object;
     assertThat(fixedTuple.values, is(equalTo(objects)));
     assertThat(fixedTuple.values.get(0), is(equalTo(firstObject)));
+  }
+
+  @Test
+  public void buildObject_NoArgs_BehavesAsExpected()
+      throws ClassNotFoundException, InvocationTargetException,
+      NoSuchFieldException, InstantiationException, IllegalAccessException {
+
+    final Class fixedTupleClass = TestWordSpout.class;
+    final String className = TestWordSpout.class.getName();
+    List<ConfigurationMethodDefinition> methodDefinitions = new ArrayList<>();
+    final String methodName = "close";
+
+    methodDefinitions.add(mockMethodDefinition);
+
+    when(mockObjectDefinition.getClassName()).thenReturn(className);
+    when(mockObjectDefinition.hasConstructorArgs()).thenReturn(false);
+    when(mockBuilderUtility.classForName(eq(className))).thenReturn(fixedTupleClass);
+    when(mockObjectDefinition.getConfigMethods()).thenReturn(methodDefinitions);
+    when(mockMethodDefinition.hasReferences()).thenReturn(false);
+    when(mockMethodDefinition.getName()).thenReturn(methodName);
+
+    subject.buildObject(mockObjectDefinition, mockContext);
+
+    verify(mockObjectDefinition).getClassName();
+    verify(mockObjectDefinition).hasConstructorArgs();
+    verify(mockBuilderUtility).classForName(same(className));
+    verify(mockBuilderUtility).applyProperties(same(mockObjectDefinition),
+        anyObject(), same(mockContext));
+    verify(mockObjectDefinition).getConfigMethods();
+    verify(mockMethodDefinition).hasReferences();
+    verify(mockMethodDefinition).getName();
+    verify(mockMethodDefinition).getArgs();
   }
 }
 
