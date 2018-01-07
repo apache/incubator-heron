@@ -17,77 +17,101 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.storm.testing.FixedTuple;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.twitter.heron.eco.definition.BeanListReference;
-import com.twitter.heron.eco.definition.BeanReference;
+import com.twitter.heron.eco.definition.ConfigurationMethodDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 
-import static org.hamcrest.CoreMatchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ObjectBuilderTest {
 
   @Mock
   private ObjectDefinition mockObjectDefinition;
   @Mock
   private EcoExecutionContext mockContext;
-
+  @Mock
+  private BuilderUtility mockBuilderUtility;
+  @Mock
+  private ConfigurationMethodDefinition mockMethodDefinition;
+  @InjectMocks
   private ObjectBuilder subject;
-
-  @Before
-  public void setUpForEachTestCase() {
-    subject = new ObjectBuilder();
-  }
 
   @After
   public void ensureNoUnexpectedMockInteractions() {
     Mockito.verifyNoMoreInteractions(mockContext,
-        mockObjectDefinition);
+        mockObjectDefinition,
+        mockBuilderUtility,
+        mockMethodDefinition);
   }
 
   @Test
-  @Ignore //TODO: This class is too much to test.  Need to refactor a bit
-  public void buildObject_WithArgs_BeanReferenceAndOther() throws ClassNotFoundException, InvocationTargetException, NoSuchFieldException, InstantiationException, IllegalAccessException {
+  public void buildObject_WithArgs_BeanReferenceAndOther() throws ClassNotFoundException,
+      InvocationTargetException, NoSuchFieldException,
+      InstantiationException, IllegalAccessException {
     final String beanReference1 = "bean1";
     List<Object> constructorArgs = new ArrayList<>();
-    BeanReference beanReference = new BeanReference(beanReference1);
-    constructorArgs.add(beanReference);
-    constructorArgs.add("otherArg");
+    List<Object> objects = new ArrayList<>();
+    List<Object> firstObject = new ArrayList<>();
+    objects.add(firstObject);
+    constructorArgs.add(objects);
     Object someComponent = new Object();
-    when(mockObjectDefinition.getClassName()).thenReturn("com.twitter.heron.eco.builder.TestClass");
+    final String className = FixedTuple.class.getName();
+    final Class testClass = FixedTuple.class;
+    final String methodName = "toString";
+    List<ConfigurationMethodDefinition> methodDefinitions = new ArrayList<>();
+
+    methodDefinitions.add(mockMethodDefinition);
+
+    when(mockObjectDefinition.getClassName()).thenReturn(className);
     when(mockObjectDefinition.hasConstructorArgs()).thenReturn(true);
     when(mockObjectDefinition.getConstructorArgs()).thenReturn(constructorArgs);
     when(mockObjectDefinition.hasReferences()).thenReturn(true);
     when(mockContext.getComponent(eq(beanReference1))).thenReturn(someComponent);
+    when(mockBuilderUtility.resolveReferences(eq(constructorArgs), eq(mockContext)))
+        .thenCallRealMethod();
+    when(mockBuilderUtility.classForName(eq(className))).thenReturn(testClass);
+    when(mockObjectDefinition.getConfigMethods()).thenReturn(methodDefinitions);
+    when(mockMethodDefinition.hasReferences()).thenReturn(true);
+    when(mockMethodDefinition.getArgs()).thenReturn(null);
+    when(mockMethodDefinition.getName()).thenReturn(methodName);
 
-    subject.buildObject(mockObjectDefinition, mockContext);
+    Object object = subject.buildObject(mockObjectDefinition, mockContext);
 
     verify(mockObjectDefinition).getClassName();
     verify(mockObjectDefinition).hasConstructorArgs();
     verify(mockObjectDefinition).getConstructorArgs();
     verify(mockObjectDefinition).hasReferences();
-    verify(mockContext).getComponent(same(beanReference1));
+    verify(mockBuilderUtility).classForName(same(className));
+    verify(mockBuilderUtility).resolveReferences(same(constructorArgs), same(mockContext));
+    verify(mockBuilderUtility).applyProperties(eq(mockObjectDefinition), any(Object.class),
+        same(mockContext));
+    verify(mockObjectDefinition).getConfigMethods();
+    verify(mockMethodDefinition).hasReferences();
+    verify(mockMethodDefinition).getArgs();
+    verify(mockBuilderUtility, times(2)).resolveReferences(anyListOf(Object.class),
+        same(mockContext));
+    verify(mockMethodDefinition).getName();
 
+    assertThat(object, is(instanceOf(FixedTuple.class)));
+    FixedTuple fixedTuple = (FixedTuple) object;
+    assertThat(fixedTuple.values, is(equalTo(objects)));
+    assertThat(fixedTuple.values.get(0), is(equalTo(firstObject)));
   }
-
-  public class TestClass {
-
-    public TestClass(String str1, String str2){
-
-    }
-  }
-
 }
+

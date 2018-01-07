@@ -15,7 +15,6 @@ package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.twitter.heron.eco.definition.ConfigurationMethodDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.ObjectDefinition;
-import com.twitter.heron.eco.definition.PropertyDefinition;
 
 public class ObjectBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(ObjectBuilder.class);
@@ -42,20 +40,21 @@ public class ObjectBuilder {
   public Object buildObject(ObjectDefinition def, EcoExecutionContext context)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException,
       InvocationTargetException, NoSuchFieldException {
-    Class clazz = Class.forName(def.getClassName());
-
+    //Class clazz = Class.forName(def.getClassName());
+    Class clazz = builderUtility.classForName(def.getClassName());
 
     Object obj;
     if (def.hasConstructorArgs()) {
       LOG.debug("Found constructor arguments in definition ");
       List<Object> cArgs = def.getConstructorArgs();
+
       if (def.hasReferences()) {
         LOG.debug("The definition has references");
         cArgs = builderUtility.resolveReferences(cArgs, context);
       } else {
         LOG.debug("The definition does not have references");
       }
-      LOG.info("finding compatible constructor for : " + clazz.getName());
+      LOG.debug("finding compatible constructor for : " + clazz.getName());
       Constructor con = findCompatibleConstructor(cArgs, clazz);
       if (con != null) {
         LOG.debug("Found something seemingly compatible, attempting invocation...");
@@ -70,9 +69,87 @@ public class ObjectBuilder {
     } else {
       obj = clazz.newInstance();
     }
-    applyProperties(def, obj, context);
+    builderUtility.applyProperties(def, obj, context);
     invokeConfigMethods(def, obj, context);
     return obj;
+  }
+
+  @SuppressWarnings("rawtypes")
+  protected Constructor findCompatibleConstructor(List<Object> args, Class target) {
+    Constructor retval = null;
+    int eligibleCount = 0;
+
+    LOG.debug("Target class: " + target.getName() + ", constructor args: " + args);
+    Constructor[] cons = target.getDeclaredConstructors();
+
+    for (Constructor con : cons) {
+      Class[] paramClasses = con.getParameterTypes();
+
+      if (paramClasses.length == args.size()) {
+        LOG.debug("found constructor with same number of args..");
+        boolean invokable = canInvokeWithArgs(args, con.getParameterTypes());
+        if (invokable) {
+          retval = con;
+          eligibleCount++;
+        }
+        LOG.debug("** invokable --> {}" + invokable);
+      } else {
+        LOG.debug("Skipping constructor with wrong number of arguments.");
+      }
+    }
+    if (eligibleCount > 1) {
+      LOG.error("Found multiple invokable constructors for class: "
+          + target + ", given arguments " + args + ". Using the last one found.");
+    }
+    return retval;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  protected boolean canInvokeWithArgs(List<Object> args, Class[] parameterTypes) {
+    if (parameterTypes.length != args.size()) {
+      LOG.warn("parameter types were the wrong size");
+      return false;
+    }
+
+    for (int i = 0; i < args.size(); i++) {
+      Object obj = args.get(i);
+      if (obj == null) {
+        throw new IllegalArgumentException("argument shouldn't be null - index: " + i);
+      }
+      Class paramType = parameterTypes[i];
+      Class objectType = obj.getClass();
+      LOG.debug("Comparing parameter class " + paramType + " to object class "
+          + objectType + "to see if assignment is possible.");
+      if (paramType.equals(objectType)) {
+        LOG.debug("Yes, they are the same class.");
+      } else if (paramType.isAssignableFrom(objectType)) {
+        LOG.debug("Yes, assignment is possible.");
+      } else if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
+        LOG.debug("Yes, assignment is possible.");
+      } else if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
+        LOG.debug("Yes, assignment is possible.");
+      } else if (paramType.isEnum() && objectType.equals(String.class)) {
+        LOG.debug("Yes, will convert a String to enum");
+      } else if (paramType.isArray() && List.class.isAssignableFrom(objectType)) {
+        LOG.debug("Assignment is possible if we convert a List to an array.");
+        LOG.debug("Array Type: " + paramType.getComponentType() + ", List type: "
+            + ((List) obj).get(0).getClass());
+      } else {
+        LOG.debug("returning false");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @SuppressWarnings("rawtypes")
+  protected boolean isPrimitiveNumber(Class clazz) {
+    return clazz.isPrimitive() && !clazz.equals(boolean.class);
+  }
+
+  @SuppressWarnings("rawtypes")
+  protected boolean isPrimitiveBoolean(Class clazz) {
+    return clazz.isPrimitive() && clazz.equals(boolean.class);
   }
 
   @SuppressWarnings("rawtypes")
@@ -94,6 +171,7 @@ public class ObjectBuilder {
         args = builderUtility.resolveReferences(args, context);
       }
       String methodName = methodDef.getName();
+      LOG.debug("method name: " + methodName);
       Method method = findCompatibleMethod(args, clazz, methodName);
       if (method != null) {
         Object[] methodArgs = getArgsWithListCoercian(args, method.getParameterTypes());
@@ -111,11 +189,10 @@ public class ObjectBuilder {
   private Method findCompatibleMethod(List<Object> args, Class target, String methodName) {
     Method retval = null;
     int eligibleCount = 0;
-
     LOG.debug("Target class: " + target.getName() + ",  methodName: "
         + methodName + ", args: " + args);
     Method[] methods = target.getMethods();
-
+    LOG.debug("methods count: " + methods.length);
     for (Method method : methods) {
       Class[] paramClasses = method.getParameterTypes();
       if (paramClasses.length == args.size() && method.getName().equals(methodName)) {
@@ -125,7 +202,7 @@ public class ObjectBuilder {
           // it's a method with zero args
           invokable = true;
         } else {
-          invokable = builderUtility.canInvokeWithArgs(args, method.getParameterTypes());
+          invokable = canInvokeWithArgs(args, method.getParameterTypes());
         }
         if (invokable) {
           retval = method;
@@ -144,88 +221,6 @@ public class ObjectBuilder {
   }
 
 
-
-
-
-  @SuppressWarnings("rawtypes")
-  private static Method findSetter(Class clazz, String property) {
-    String setterName = toSetterName(property);
-    Method retval = null;
-    Method[] methods = clazz.getMethods();
-    for (Method method : methods) {
-      if (setterName.equals(method.getName())) {
-        LOG.debug("Found setter method: " + method.getName());
-        retval = method;
-      }
-    }
-    return retval;
-  }
-
-  private static String toSetterName(String name) {
-    return "set" + name.substring(0, 1).toUpperCase() + name.substring(1, name.length());
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static void applyProperties(ObjectDefinition bean, Object instance,
-                                      EcoExecutionContext context) throws
-      IllegalAccessException, InvocationTargetException, NoSuchFieldException {
-    List<PropertyDefinition> props = bean.getProperties();
-    Class clazz = instance.getClass();
-    if (props != null) {
-      for (PropertyDefinition prop : props) {
-        Object value = prop.isReference() ? context.getComponent(prop.getRef()) : prop.getValue();
-        Method setter = findSetter(clazz, prop.getName());
-        if (setter != null) {
-          LOG.debug("found setter, attempting to invoke");
-          // invoke setter
-          setter.invoke(instance, new Object[]{value});
-        } else {
-          // look for a public instance variable
-          LOG.debug("no setter found. Looking for a public instance variable...");
-          Field field = findPublicField(clazz, prop.getName());
-          if (field != null) {
-            field.set(instance, value);
-          }
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static Field findPublicField(Class clazz, String property)
-      throws NoSuchFieldException {
-    Field field = clazz.getField(property);
-    return field;
-  }
-
-  @SuppressWarnings("rawtypes")
-  private Constructor findCompatibleConstructor(List<Object> args, Class target) {
-    Constructor retval = null;
-    int eligibleCount = 0;
-
-    LOG.info("Target class: " + target.getName() + ", constructor args: " + args);
-    Constructor[] cons = target.getDeclaredConstructors();
-
-    for (Constructor con : cons) {
-      Class[] paramClasses = con.getParameterTypes();
-      if (paramClasses.length == args.size()) {
-        LOG.info("found constructor with same number of args..");
-        boolean invokable = builderUtility.canInvokeWithArgs(args, con.getParameterTypes());
-        if (invokable) {
-          retval = con;
-          eligibleCount++;
-        }
-        LOG.info("** invokable --> {}" + invokable);
-      } else {
-        LOG.debug("Skipping constructor with wrong number of arguments.");
-      }
-    }
-    if (eligibleCount > 1) {
-      LOG.error("Found multiple invokable constructors for class: "
-          + target + ", given arguments " + args + ". Using the last one found.");
-    }
-    return retval;
-  }
 
   /**
    * Given a java.util.List of contructor/method arguments, and a list of parameter types,
@@ -261,13 +256,13 @@ public class ObjectBuilder {
         constructorParams[i] = args.get(i);
         continue;
       }
-      if (builderUtility.isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
+      if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
         LOG.debug("Its a primitive boolean.");
         Boolean bool = (Boolean) args.get(i);
         constructorParams[i] = bool.booleanValue();
         continue;
       }
-      if (builderUtility.isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
+      if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
         LOG.debug("Its a primitive number.");
         Number num = (Number) args.get(i);
         if (paramType == Float.TYPE) {

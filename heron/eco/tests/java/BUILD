@@ -68,3 +68,10 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "ObjectBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/ObjectBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
+

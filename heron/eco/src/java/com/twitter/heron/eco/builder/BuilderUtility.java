@@ -13,6 +13,9 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.twitter.heron.eco.definition.BeanListReference;
 import com.twitter.heron.eco.definition.BeanReference;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
+import com.twitter.heron.eco.definition.ObjectDefinition;
+import com.twitter.heron.eco.definition.PropertyDefinition;
 
 public class BuilderUtility {
 
@@ -31,10 +36,11 @@ public class BuilderUtility {
   protected List<Object> resolveReferences(List<Object> args, EcoExecutionContext context) {
     LOG.debug("Checking arguments for references.");
     List<Object> cArgs = new ArrayList<>();
+
     // resolve references
     for (Object arg : args) {
       if (arg instanceof BeanReference) {
-        LOG.info("BeanReference: " + ((BeanReference) arg).getId());
+        LOG.debug("BeanReference: " + ((BeanReference) arg).getId());
         cArgs.add(context.getComponent(((BeanReference) arg).getId()));
       } else if (arg instanceof BeanListReference) {
         List<Object> components = new ArrayList<>();
@@ -43,60 +49,74 @@ public class BuilderUtility {
           components.add(context.getComponent(id));
         }
 
-        LOG.info("BeanListReference resolved as {}" + components);
+        LOG.debug("BeanListReference resolved as {}" + components);
         cArgs.add(components);
       } else {
-        LOG.info("Unknown:" + arg.toString());
+        LOG.debug("Unknown:" + arg.toString());
         cArgs.add(arg);
       }
     }
     return cArgs;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  protected boolean canInvokeWithArgs(List<Object> args, Class[] parameterTypes) {
-    if (parameterTypes.length != args.size()) {
-      LOG.warn("parameter types were the wrong size");
-      return false;
-    }
 
-    for (int i = 0; i < args.size(); i++) {
-      Object obj = args.get(i);
-      if (obj == null) {
-        throw new IllegalArgumentException("argument shouldn't be null - index: " + i);
-      }
-      Class paramType = parameterTypes[i];
-      Class objectType = obj.getClass();
-      LOG.info("Comparing parameter class " + paramType + " to object class "
-          + objectType + "to see if assignment is possible.");
-      if (paramType.equals(objectType)) {
-        LOG.debug("Yes, they are the same class.");
-      } else if (paramType.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (isPrimitiveBoolean(paramType) && Boolean.class.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (isPrimitiveNumber(paramType) && Number.class.isAssignableFrom(objectType)) {
-        LOG.debug("Yes, assignment is possible.");
-      } else if (paramType.isEnum() && objectType.equals(String.class)) {
-        LOG.debug("Yes, will convert a String to enum");
-      } else if (paramType.isArray() && List.class.isAssignableFrom(objectType)) {
-        LOG.debug("Assignment is possible if we convert a List to an array.");
-        LOG.debug("Array Type: " + paramType.getComponentType() + ", List type: "
-            + ((List) obj).get(0).getClass());
-      } else {
-        return false;
+
+
+
+  @SuppressWarnings("rawtypes")
+  protected void applyProperties(ObjectDefinition bean, Object instance,
+                                      EcoExecutionContext context) throws
+      IllegalAccessException, InvocationTargetException, NoSuchFieldException {
+    List<PropertyDefinition> props = bean.getProperties();
+    Class clazz = instance.getClass();
+    if (props != null) {
+      for (PropertyDefinition prop : props) {
+        Object value = prop.isReference() ? context.getComponent(prop.getRef()) : prop.getValue();
+        Method setter = findSetter(clazz, prop.getName());
+        if (setter != null) {
+          LOG.debug("found setter, attempting to invoke");
+          // invoke setter
+          setter.invoke(instance, new Object[]{value});
+        } else {
+          // look for a public instance variable
+          LOG.debug("no setter found. Looking for a public instance variable...");
+          Field field = findPublicField(clazz, prop.getName());
+          if (field != null) {
+            field.set(instance, value);
+          }
+        }
       }
     }
-    return true;
+  }
+
+
+
+  @SuppressWarnings("rawtypes")
+  protected Field findPublicField(Class clazz, String property)
+      throws NoSuchFieldException {
+    Field field = clazz.getField(property);
+    return field;
   }
 
   @SuppressWarnings("rawtypes")
-  public boolean isPrimitiveNumber(Class clazz) {
-    return clazz.isPrimitive() && !clazz.equals(boolean.class);
+  private Method findSetter(Class clazz, String property) {
+    String setterName = toSetterName(property);
+    Method retval = null;
+    Method[] methods = clazz.getMethods();
+    for (Method method : methods) {
+      if (setterName.equals(method.getName())) {
+        LOG.debug("Found setter method: " + method.getName());
+        retval = method;
+      }
+    }
+    return retval;
   }
 
-  @SuppressWarnings("rawtypes")
-  public boolean isPrimitiveBoolean(Class clazz) {
-    return clazz.isPrimitive() && clazz.equals(boolean.class);
+  protected String toSetterName(String name) {
+    return "set" + name.substring(0, 1).toUpperCase() + name.substring(1, name.length());
+  }
+
+  protected Class<?> classForName(String className) throws ClassNotFoundException {
+    return Class.forName(className);
   }
 }
