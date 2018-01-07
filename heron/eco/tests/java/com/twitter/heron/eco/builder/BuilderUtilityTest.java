@@ -88,7 +88,7 @@ public class BuilderUtilityTest {
       InvocationTargetException {
     final String id = "id";
     final String ref = "ref";
-    String fakeComponent = "component";
+    final String fakeComponent = "component";
     BeanReference beanReference = new BeanReference(id);
     List<PropertyDefinition> propertyDefinitions = new ArrayList<>();
     PropertyDefinition propertyDefinition = new PropertyDefinition();
@@ -103,6 +103,32 @@ public class BuilderUtilityTest {
 
     verify(mockContext).getComponent(same(ref));
     verify(mockObjectDefinition).getProperties();
+  }
+
+  @Test
+  public void applyProperties_NoSetterFound_BehavesAsExpected()
+      throws IllegalAccessException, NoSuchFieldException,
+      InvocationTargetException {
+    final String ref = "ref";
+    final String fakeComponent = "component";
+    MockComponent mockComponent = new MockComponent();
+    List<PropertyDefinition> propertyDefinitions = new ArrayList<>();
+    PropertyDefinition propertyDefinition = new PropertyDefinition();
+    propertyDefinition.setRef(ref);
+    propertyDefinition.setName("publicStr");
+    propertyDefinitions.add(propertyDefinition);
+
+    when(mockObjectDefinition.getProperties()).thenReturn(propertyDefinitions);
+    when(mockContext.getComponent(eq(ref))).thenReturn(fakeComponent);
+
+    subject.applyProperties(mockObjectDefinition, mockComponent, mockContext );
+
+    verify(mockContext).getComponent(same(ref));
+    verify(mockObjectDefinition).getProperties();
+  }
+
+  public class MockComponent {
+    public String publicStr;
   }
 
 }
