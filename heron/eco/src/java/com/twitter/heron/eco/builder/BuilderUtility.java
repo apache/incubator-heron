@@ -70,7 +70,7 @@ public class BuilderUtility {
         Object value = prop.isReference() ? context.getComponent(prop.getRef()) : prop.getValue();
         Method setter = findSetter(clazz, prop.getName());
         if (setter != null) {
-          LOG.debug("found setter, attempting to invoke");
+          LOG.info("found setter, attempting to invoke with: " + instance.getClass() + "  " + value);
           // invoke setter
           setter.invoke(instance, new Object[]{value});
         } else {
