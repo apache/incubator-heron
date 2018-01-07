@@ -82,3 +82,9 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "EcoSubmitterTest",
+    srcs = glob(["com/twitter/heron/eco/submit/EcoSubmitterTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
