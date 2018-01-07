@@ -75,3 +75,10 @@ java_test(
     size = "small"
 )
 
+java_test(
+    name = "BuilderUtilityTest",
+    srcs = glob(["com/twitter/heron/eco/builder/BuilderUtilityTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
+

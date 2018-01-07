@@ -59,10 +59,6 @@ public class BuilderUtility {
     return cArgs;
   }
 
-
-
-
-
   @SuppressWarnings("rawtypes")
   protected void applyProperties(ObjectDefinition bean, Object instance,
                                       EcoExecutionContext context) throws
@@ -88,8 +84,6 @@ public class BuilderUtility {
       }
     }
   }
-
-
 
   @SuppressWarnings("rawtypes")
   protected Field findPublicField(Class clazz, String property)
