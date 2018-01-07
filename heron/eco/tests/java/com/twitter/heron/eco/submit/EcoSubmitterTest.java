@@ -15,18 +15,14 @@ package com.twitter.heron.eco.submit;
 
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.AlreadyAliveException;
-import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -57,10 +53,3 @@ public class EcoSubmitterTest {
 
   }
 }
-
-/*
-  PowerMockito.spy(TMasterUtils.class);
-    PowerMockito.doNothing().when(TMasterUtils.class, "sendToTMaster",
-        any(String.class), eq(TOPOLOGY_NAME),
-        eq(mockStateMgr), any(NetworkUtils.TunnelConfig.class));
- */

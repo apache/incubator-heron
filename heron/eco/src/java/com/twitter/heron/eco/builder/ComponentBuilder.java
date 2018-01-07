@@ -15,7 +15,6 @@ package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;

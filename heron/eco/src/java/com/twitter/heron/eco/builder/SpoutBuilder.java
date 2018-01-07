@@ -14,8 +14,6 @@
 package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.TopologyBuilder;
@@ -23,7 +21,6 @@ import org.apache.storm.topology.TopologyBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
-
 
 
 public class SpoutBuilder {

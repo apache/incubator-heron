@@ -14,8 +14,6 @@
 package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
