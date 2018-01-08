@@ -88,8 +88,10 @@ public class SpoutBuilderTest {
     MockSpout mockSpout = new MockSpout();
     MockSpout mockSpout1 = new MockSpout();
 
-    when(mockObjectBuilder.buildObject(eq(spoutDefinition), eq(mockContext))).thenReturn(mockSpout);
-    when(mockObjectBuilder.buildObject(eq(spoutDefinition1), eq(mockContext))).thenReturn(mockSpout1);
+    when(mockObjectBuilder.buildObject(eq(spoutDefinition),
+        eq(mockContext))).thenReturn(mockSpout);
+    when(mockObjectBuilder.buildObject(eq(spoutDefinition1),
+        eq(mockContext))).thenReturn(mockSpout1);
     when(mockContext.getTopologyDefinition()).thenReturn(topologyDefinition);
 
     subject.buildSpouts(mockContext, mockTopologyBuilder, mockObjectBuilder);

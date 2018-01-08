@@ -262,7 +262,8 @@ public class StreamBuilderTest {
   private class MockCustomStreamGrouping implements CustomStreamGrouping {
 
     @Override
-    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+    public void prepare(WorkerTopologyContext context, GlobalStreamId stream,
+                        List<Integer> targetTasks) {
 
     }
 
@@ -304,7 +305,8 @@ public class StreamBuilderTest {
   @SuppressWarnings({"rawtypes", "unchecked", "serial"})
   private class MockIWindowedBolt implements IWindowedBolt {
     @Override
-    public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(Map<String, Object> topoConf,
+                        TopologyContext context, OutputCollector collector) {
 
     }
 
