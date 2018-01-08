@@ -34,7 +34,6 @@ package com.twitter.heron.api.windowing.triggers;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.Map;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
@@ -49,6 +48,8 @@ public class TimeTriggerPolicy<T extends Serializable> extends AbstractBaseTrigg
   private long duration;
 
   public TimeTriggerPolicy(long millis) {
+    super(true, false, true);
+
     this.duration = millis;
   }
 

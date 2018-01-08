@@ -50,6 +50,7 @@ public class WatermarkCountTriggerPolicy<T extends Serializable> extends
   private volatile long lastProcessedTs;
 
   public WatermarkCountTriggerPolicy(int count) {
+    super(true, true, false);
     this.count = count;
   }
 

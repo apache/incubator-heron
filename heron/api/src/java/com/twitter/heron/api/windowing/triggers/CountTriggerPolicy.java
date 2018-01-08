@@ -52,6 +52,8 @@ public class CountTriggerPolicy<T extends Serializable> extends
   private boolean started;
 
   public CountTriggerPolicy(int count) {
+    super(true, false, false);
+
     this.count = count;
     this.currentCount = new AtomicInteger();
     this.started = false;
