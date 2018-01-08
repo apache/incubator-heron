@@ -339,7 +339,9 @@ public final class SchedulerUtils {
     String remoteDebuggerPorts = ExecutorPort.getPort(
         ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports);
 
-    args.add(createCommandArg(ExecutorFlag.Shard, containerIndex));
+    if (containerIndex != null) {
+      args.add(createCommandArg(ExecutorFlag.Shard, containerIndex));
+    }
     args.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
     args.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
     args.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
