@@ -48,7 +48,10 @@ import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.same;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
