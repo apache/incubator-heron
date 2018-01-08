@@ -36,7 +36,9 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.parser.EcoParser;
 import com.twitter.heron.eco.submit.EcoSubmitter;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -73,14 +75,17 @@ public class EcoTest {
 
     when(mockEcoParser.parseFromInputStream(eq(mockStream))).thenReturn(topologyDefinition);
     when(mockEcoBuilder.buildConfig(eq(topologyDefinition))).thenReturn(config);
-    when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class), any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
+    when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class),
+        any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
 
     subject.submit(mockStream);
 
     verify(mockEcoParser).parseFromInputStream(same(mockStream));
     verify(mockEcoBuilder).buildConfig(same(topologyDefinition));
-    verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class), any(ObjectBuilder.class));
+    verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
+        any(ObjectBuilder.class));
     verify(mockTopologyBuilder).createTopology();
-    verify(mockEcoSubmitter).submitTopology(anyString(), any(Config.class), any(StormTopology.class));
+    verify(mockEcoSubmitter).submitTopology(any(String.class), any(Config.class),
+        any(StormTopology.class));
   }
 }
