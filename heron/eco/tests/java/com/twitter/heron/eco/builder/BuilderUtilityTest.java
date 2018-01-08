@@ -32,8 +32,8 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 
 import static org.junit.Assert.assertThat;
 
@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BuilderUtilityTest {
+
 
   @Mock
   private ObjectDefinition mockObjectDefinition;
@@ -125,7 +126,7 @@ public class BuilderUtilityTest {
     when(mockObjectDefinition.getProperties()).thenReturn(propertyDefinitions);
     when(mockContext.getComponent(eq(ref))).thenReturn(fakeComponent);
 
-    subject.applyProperties(mockObjectDefinition, mockComponent, mockContext );
+    subject.applyProperties(mockObjectDefinition, mockComponent, mockContext);
 
     verify(mockContext).getComponent(same(ref));
     verify(mockObjectDefinition).getProperties();
