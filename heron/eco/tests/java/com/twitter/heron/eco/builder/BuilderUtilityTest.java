@@ -31,8 +31,12 @@ import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.PropertyDefinition;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.is;
+
 import static org.junit.Assert.assertThat;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
