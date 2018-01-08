@@ -48,10 +48,10 @@ import com.twitter.heron.eco.definition.GroupingDefinition;
 import com.twitter.heron.eco.definition.ObjectDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.same;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -113,7 +113,7 @@ public class StreamBuilderTest {
     when(mockTopologyBuilder.setBolt(eq(to),
         eq(mockIRichBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
 
-    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder );
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder);
 
     verify(mockContext).getTopologyDefinition();
     verify(mockContext).getBolt(eq(to));
@@ -156,7 +156,7 @@ public class StreamBuilderTest {
     when(mockTopologyBuilder.setBolt(eq(to),
         eq(mockIBasicBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
 
-    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder );
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder);
 
     verify(mockContext).getTopologyDefinition();
     verify(mockContext).getBolt(eq(to));
@@ -245,7 +245,7 @@ public class StreamBuilderTest {
     when(mockObjectBuilder.buildObject(eq(mockCustomObjectDefinition),
         eq(mockContext))).thenReturn(mockCustomStreamGrouping);
 
-    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder );
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder);
 
     verify(mockContext).getTopologyDefinition();
     verify(mockContext).getBolt(eq(to));
