@@ -13,29 +13,21 @@
 //  limitations under the License.
 package com.twitter.heron.examples.eco;
 
-
-import java.util.logging.Logger;
-
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
 
-/**
- * Simple bolt that does nothing other than LOG.info() every tuple recieveed.
- *
- */
 @SuppressWarnings("serial")
-public class LogInfoBolt extends BaseBasicBolt {
-    private static final Logger LOG = Logger.getLogger(LogInfoBolt.class.getName());
+public class TestPrintBolt extends BaseBasicBolt {
 
-    @Override
-    public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
-        LOG.info("{}" + tuple);
-    }
+  @Override
+  public void execute(Tuple tuple, BasicOutputCollector collector) {
+    System.out.println(tuple);
+  }
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer ofd) {
+  }
 
-    }
 }
