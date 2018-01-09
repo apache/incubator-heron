@@ -16,7 +16,7 @@
 
 # topology definition
 # name to be used when submitting
-name: "yaml-topology"
+name: "simple-wordcount-topology"
 
 # topology configuration
 # this will be passed to the submitter as a map of config options
@@ -27,17 +27,17 @@ config:
 # spout definitions
 spouts:
   - id: "spout-1"
-    className: "com.twitter.heron.examples.TestNameSpout"
+    className: "com.twitter.heron.examples.eco.TestNameSpout"
     parallelism: 1
 
 # bolt definitions
 bolts:
   - id: "bolt-1"
-    className: "com.twitter.heron.examples.TestNameCounter"
+    className: "com.twitter.heron.examples.eco.TestNameCounter"
     parallelism: 1
 
   - id: "bolt-2"
-    className: "com.twitter.heron.examples.LogInfoBolt"
+    className: "com.twitter.heron.examples.eco.LogInfoBolt"
     parallelism: 1
 
 #stream definitions
