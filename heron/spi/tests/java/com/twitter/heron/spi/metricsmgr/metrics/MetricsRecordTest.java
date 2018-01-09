@@ -25,7 +25,7 @@ import org.junit.Test;
 public class MetricsRecordTest {
   private static final int N = 100;
   private static final String SOURCE = "source";
-  private static final String CONTEXT = "context";
+  private static final String CONTEXT = "ecoExecutionContext";
   private final List<MetricsRecord> records = new ArrayList<MetricsRecord>();
 
   @Before

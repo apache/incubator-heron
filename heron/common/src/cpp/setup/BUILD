@@ -16,7 +16,7 @@ cc_library(
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
+        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
     linkstatic = 1,
 )

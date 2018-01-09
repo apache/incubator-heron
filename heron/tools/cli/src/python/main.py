@@ -39,7 +39,6 @@ import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
 import heron.tools.cli.src.python.config as hconfig
-import heron.tools.cli.src.python.standalone as standalone
 
 from heron.tools.cli.src.python.opts import cleaned_up_files
 
@@ -83,7 +82,6 @@ def get_command_handlers():
       'help': cli_help,
       'kill': kill,
       'restart': restart,
-      'standalone': standalone,
       'submit': submit,
       'update': update,
       'version': version
@@ -415,7 +413,7 @@ def main():
   # Create a map of supported commands and handlers
   command_handlers = get_command_handlers()
   # Execute
-  local_commands = ('help', 'version', 'config', 'standalone')
+  local_commands = ('help', 'version', 'config')
   return execute(command_handlers, local_commands)
 
 

@@ -47,6 +47,7 @@ import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -64,7 +65,12 @@ public class NomadScheduler implements IScheduler {
   @Override
   public void initialize(Config config, Config runtime) {
     this.localConfig = config;
-    this.clusterConfig = Config.toClusterMode(config);
+    this.clusterConfig = Config.toClusterMode(Config.newBuilder()
+        .putAll(config)
+        .putAll(ConfigLoader.loadConfig(
+            Context.heronHome(config), Context.heronConf(config),
+            null, Context.overrideFile(config)))
+        .build());
     this.runtimeConfig = runtime;
     this.updateTopologyManager =
         new UpdateTopologyManager(config, runtime, Optional.absent());
@@ -82,7 +88,7 @@ public class NomadScheduler implements IScheduler {
       return false;
     }
 
-    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.clusterConfig));
+    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.localConfig));
     try {
       List<Job> jobs = getJobs(packing);
       startJobs(apiClient, jobs.toArray(new Job[jobs.size()]));
@@ -99,7 +105,7 @@ public class NomadScheduler implements IScheduler {
   @Override
   public List<String> getJobLinks() {
     List<String> jobLinks = new LinkedList<>();
-    String schedulerUri = NomadContext.getSchedulerURI(this.clusterConfig);
+    String schedulerUri = NomadContext.getSchedulerURI(this.localConfig);
     jobLinks.add(schedulerUri + NomadConstants.JOB_LINK);
     return jobLinks;
   }
@@ -109,7 +115,7 @@ public class NomadScheduler implements IScheduler {
     String topologyName = request.getTopologyName();
 
     LOG.fine("Killing Topology " + topologyName);
-    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.clusterConfig));
+    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.localConfig));
 
     try {
       List<Job> jobs = getTopologyJobs(apiClient, topologyName);
@@ -128,7 +134,7 @@ public class NomadScheduler implements IScheduler {
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
     LOG.fine("Restarting Topology " + request.getTopologyName()
         + " container " + request.getContainerIndex());
-    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.clusterConfig));
+    NomadApiClient apiClient = getApiClient(NomadContext.getSchedulerURI(this.localConfig));
 
     String topologyName = request.getTopologyName();
     int containerIndex = request.getContainerIndex();
@@ -261,7 +267,7 @@ public class NomadScheduler implements IScheduler {
 
       // set cpu requirements
       double coresReq = containerPlan.get().getRequiredResource().getCpu();
-      double coresReqFreq = NomadContext.getCoreFreqMapping(this.clusterConfig) * coresReq;
+      double coresReqFreq = NomadContext.getCoreFreqMapping(this.localConfig) * coresReq;
       resourceReqs.setCpu(Integer.valueOf((int) Math.round(coresReqFreq)));
 
       // set disk requirements
@@ -274,7 +280,7 @@ public class NomadScheduler implements IScheduler {
     // set enviroment variables used int the heron nomad start up script
     Map<String, String> envVars = new HashMap<>();
     envVars.put(NomadConstants.HERON_NOMAD_WORKING_DIR,
-        NomadContext.workingDirectory(this.clusterConfig) + "/container-"
+        NomadContext.workingDirectory(this.localConfig) + "/container-"
             + String.valueOf(containerIndex));
     envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI,
         NomadContext.corePackageUri(this.localConfig));
@@ -356,6 +362,7 @@ public class NomadScheduler implements IScheduler {
 
     for (Job job : jobs) {
       LOG.fine("Starting job " + job.getId());
+      LOG.fine("Job spec: " + job.toString());
       try {
         EvaluationResponse response = apiClient.getJobsApi().register(job);
         LOG.fine("response: " + response);

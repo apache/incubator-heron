@@ -370,6 +370,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_reef_tang",
+  artifact = "org.apache.reef:tang:" + reef_version
+)
+
+maven_jar(
   name = "org_slf4j_slf4j_api",
   artifact = "org.slf4j:slf4j-api:" + slf4j_version
 )
@@ -382,11 +387,6 @@ maven_jar(
 maven_jar(
   name = "org_yaml_snakeyaml",
   artifact = "org.yaml:snakeyaml:1.15",
-)
-
-maven_jar(
-  name = "org_apache_reef_tang",
-  artifact = "org.apache.reef:tang:" + reef_version
 )
 
 maven_jar(
@@ -813,6 +813,13 @@ new_http_archive(
     urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
     strip_prefix = "cereal-1.2.2",
     build_file = "third_party/cereal/cereal.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_jbeder_yaml_cpp",
+    urls = ["https://storage.googleapis.com/heron-packages/yaml-cpp-noboost.tar.gz"],
+    strip_prefix = "yaml-cpp-noboost",
+    build_file = "third_party/yaml-cpp/yaml.BUILD",
 )
 # end 3rdparty C++ dependencies
 
