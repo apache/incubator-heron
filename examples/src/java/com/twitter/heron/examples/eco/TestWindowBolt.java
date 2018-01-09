@@ -23,12 +23,14 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.windowing.TupleWindow;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "HiddenField"})
 public class TestWindowBolt extends BaseWindowedBolt {
   private OutputCollector collector;
 
+
   @Override
-  public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector) {
+  public void prepare(Map<String, Object> topoConf, TopologyContext context,
+                      OutputCollector collector) {
     this.collector = collector;
   }
 

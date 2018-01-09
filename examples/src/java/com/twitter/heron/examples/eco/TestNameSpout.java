@@ -16,7 +16,6 @@ package com.twitter.heron.examples.eco;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
@@ -27,22 +26,22 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "HiddenField"})
 public class TestNameSpout extends BaseRichSpout {
-  public static Logger LOG = Logger.getLogger(TestNameSpout.class.getName());
-  boolean _isDistributed;
-  SpoutOutputCollector _collector;
+  private boolean isdistributed;
+  private SpoutOutputCollector collector;
 
   public TestNameSpout() {
     this(true);
   }
 
   public TestNameSpout(boolean isDistributed) {
-    _isDistributed = isDistributed;
+    isdistributed = isDistributed;
   }
 
-  public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
-    _collector = collector;
+  public void open(Map<String, Object> conf, TopologyContext context,
+                   SpoutOutputCollector collector) {
+    this.collector = collector;
   }
 
   public void close() {
@@ -51,10 +50,10 @@ public class TestNameSpout extends BaseRichSpout {
 
   public void nextTuple() {
     Utils.sleep(100);
-    final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
+    final String[] words = new String[] {"marge", "homer", "bart", "simpson", "lisa"};
     final Random rand = new Random();
     final String word = words[rand.nextInt(words.length)];
-    _collector.emit(new Values(word));
+    collector.emit(new Values(word));
   }
 
   public void ack(Object msgId) {
@@ -71,7 +70,7 @@ public class TestNameSpout extends BaseRichSpout {
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    if(!_isDistributed) {
+    if (!isdistributed) {
       Map<String, Object> ret = new HashMap<String, Object>();
       ret.put(Config.TOPOLOGY_WORKERS, 1);
       return ret;

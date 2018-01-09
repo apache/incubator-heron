@@ -15,7 +15,6 @@ package com.twitter.heron.examples.eco;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
@@ -28,13 +27,11 @@ import static com.twitter.heron.api.utils.Utils.tuple;
 @SuppressWarnings({"serial", "rawtypes"})
 public class TestNameCounter extends BaseBasicBolt {
 
-  public static Logger LOG = Logger.getLogger(TestNameCounter.class.getName());
-
-  Map<String, Integer> _counts;
+  private Map<String, Integer> counts;
 
   @Override
   public void prepare(Map map, TopologyContext topologyContext) {
-    _counts = new HashMap<String, Integer>();
+    counts = new HashMap<>();
   }
 
 
@@ -45,11 +42,11 @@ public class TestNameCounter extends BaseBasicBolt {
   public void execute(Tuple input, BasicOutputCollector collector) {
     String word = getTupleValue(input, 0);
     int count = 0;
-    if(_counts.containsKey(word)) {
-      count = _counts.get(word);
+    if (counts.containsKey(word)) {
+      count = counts.get(word);
     }
     count++;
-    _counts.put(word, count);
+    counts.put(word, count);
     collector.emit(tuple(word, count));
   }
 

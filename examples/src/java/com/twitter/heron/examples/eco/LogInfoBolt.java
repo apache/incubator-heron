@@ -22,20 +22,20 @@ import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
 
 /**
- * Simple bolt that does nothing other than LOG.info() every tuple recieveed.
+ * Simple bolt that does nothing other than LOG.info() every tuple received.
  *
  */
 @SuppressWarnings("serial")
 public class LogInfoBolt extends BaseBasicBolt {
-    private static final Logger LOG = Logger.getLogger(LogInfoBolt.class.getName());
+  private static final Logger LOG = Logger.getLogger(LogInfoBolt.class.getName());
 
-    @Override
-    public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
-        LOG.info("{}" + tuple);
-    }
+  @Override
+  public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
+    LOG.info("{ }" + tuple);
+  }
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
 
-    }
+  }
 }
