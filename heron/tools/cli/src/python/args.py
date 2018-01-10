@@ -16,11 +16,7 @@
 # limitations under the License.
 ''' args.py '''
 import argparse
-import os
 import sys
-
-import heron.tools.common.src.python.utils.config as config
-
 
 def add_titles(parser):
   '''
@@ -105,12 +101,8 @@ def add_config(parser):
   :param parser:
   :return:
   '''
-  # the default config path
-  default_config_path = config.get_heron_conf_dir()
-
   parser.add_argument(
       '--config-path',
-      default=os.path.join(config.get_heron_dir(), default_config_path),
       help='Path to cluster configuration files')
 
   parser.add_argument(
@@ -119,6 +111,18 @@ def add_config(parser):
       action='append',
       default=[],
       help='Configuration properties that overrides default options')
+  return parser
+
+
+def add_heron_home(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--heron-home',
+      help='Path to heron home (to override configs and libs used by cli)')
+
   return parser
 
 

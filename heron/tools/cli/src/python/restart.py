@@ -43,6 +43,7 @@ def create_parser(subparsers):
       help='Identifier of the container to be restarted')
 
   args.add_config(parser)
+  args.add_heron_home(parser)
   args.add_service_url(parser)
   args.add_verbose(parser)
 

@@ -45,6 +45,7 @@ def create_parser(subparsers, action, help_arg):
   args.add_topology(parser)
 
   args.add_config(parser)
+  args.add_heron_home(parser)
   args.add_service_url(parser)
   args.add_verbose(parser)
 

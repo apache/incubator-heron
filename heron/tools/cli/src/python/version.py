@@ -56,6 +56,8 @@ def create_parser(subparsers):
       help='Name of the cluster')
 
   cli_args.add_service_url(parser)
+  cli_args.add_heron_home(parser)
+  cli_args.add_verbose(parser)
 
   parser.set_defaults(subcommand='version')
   return parser

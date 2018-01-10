@@ -61,6 +61,10 @@ ENV_REQUIRED = "heron.config.is.env.required"
 ROLE_KEY = "role.required"
 ENVIRON_KEY = "env.required"
 
+# global variabls that can be overriden when necessary with --heron-home option
+config_heron_dir = ''
+config_zipped_heron_dir = ''
+
 def create_tar(tar_filename, files, config_dir, config_files):
   '''
   Create a tar file with a given set of files
@@ -140,6 +144,24 @@ def get_classpath(jars):
 
 def get_heron_dir():
   """
+    This will return heron_dir. If it is missing, extract from .pex file.
+  """
+  global config_heron_dir
+  if not config_heron_dir:  # Fallback to default value if not set
+    config_heron_dir = get_heron_dir_internal()
+  return config_heron_dir
+
+
+def set_heron_dir(path):
+  """
+    This will set heron_dir. The path parameter cannot be empty
+  """
+  global config_heron_dir
+  config_heron_dir = path
+
+
+def get_heron_dir_internal():
+  """
   This will extract heron directory from .pex file.
 
   For example,
@@ -155,7 +177,26 @@ def get_heron_dir():
   path = "/".join(os.path.realpath(__file__).split('/')[:-go_above_dirs])
   return normalized_class_path(path)
 
+
 def get_zipped_heron_dir():
+  """
+    This will return zipped_heron_dir. If it is missing, extract from .pex file.
+  """
+  global config_zipped_heron_dir
+  if not config_zipped_heron_dir:  # Fallback to default value if not set
+    config_zipped_heron_dir = get_zipped_heron_dir_internal()
+  return config_zipped_heron_dir
+
+
+def set_zipped_heron_dir(path):
+  """
+    This will set zipped_heron_dir. The path parameter cannot be empty
+  """
+  global config_zipped_heron_dir
+  config_zipped_heron_dir = path
+
+
+def get_zipped_heron_dir_internal():
   """
   This will extract heron directory from .pex file,
   with `zip_safe = False' Bazel flag added when building this .pex file
