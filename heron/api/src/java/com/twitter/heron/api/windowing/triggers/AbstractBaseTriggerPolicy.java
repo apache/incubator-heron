@@ -105,6 +105,7 @@ public abstract class AbstractBaseTriggerPolicy<T extends Serializable, S>
   * during recovery to start the triggers after
   * recovery is complete.
   */
+  @Override
   public void start() {
     if (this.evictionPolicy == null && this.requiresEvictionPolicy) {
       throw new RuntimeException("EvictionPolicy of TriggerPolicy was not set.");
