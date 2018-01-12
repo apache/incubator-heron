@@ -127,26 +127,53 @@ $ helm install streamlio/heron \
 
 #### Google Kubernetes Engine
 
-To run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/), you'll need to stand up a GKE cluster with *at least* the following resources:
+The resources required to run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) vary based on your use case. To run a basic Heron cluster intended for experimentation, you'll need:
 
-* TODO
+* 3 nodes
+* n1-standard-2 machines
+* 2 SSDs per machine
 
-To create a cluster with those resources (assuming you've installed the [gcloud](https://cloud.google.com/sdk/gcloud/) tool), 
+To create a cluster with those resources using the [gcloud](https://cloud.google.com/sdk/gcloud/) tool:
 
 ```bash
-$ gcloud container clusters create heron-gke-cluster \
-  --zone=us-central1-a \
-  --num-nodes=3
+$ gcloud container clusters create heron-gke-dev-cluster \
+  --num-nodes=3 \
+  --machine-type=n1-standard-2 \
+  --local-ssd-count=2
 ```
 
-Once, the cluster is running (that could take a few minutes), the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool should be
+For a production-ready cluster you'll want a larger cluster with:
+
+* *at least* 8 nodes
+* n1-standard-4 or n1-standard-8 machines (preferably the latter)
+* 2 SSDs per machine
+
+To create such a cluster:
 
 ```bash
+$ gcloud container clusters create heron-gke-prod-cluster \
+  --num-nodes=8 \
+  --machine-type=n1-standard-8 \
+  --local-ssd-count=2
+```
+
+Once the cluster has been successfully created, you'll need to install that cluster's credentials locally so that they can be used by [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). You can do this in just one command:
+
+```bash
+$ gcloud container clusters get-credentials heron-gke-dev-cluster # or heron-gke-prod-cluster
+```
+
+Once, the cluster is running (that could take a few minutes), you can initialize Helm on the cluster and then install Heron:
+
+```bash
+$ helm init
 $ helm install streamlio/heron \
   --set platform=gke
 ```
 
 #### Amazon Web Services
+
+To run Heron on Kubernetes on Amazon Web Services (AWS), you'll need to 
 
 ```bash
 $ helm install streamlio/heron \
@@ -155,7 +182,27 @@ $ helm install streamlio/heron \
 
 #### Bare metal
 
+To run Heron on a bare metal Kubernetes cluster:
+
 ```bash
 $ helm install streamlio/heron \
   --set platform=baremetal
+```
+
+## Running topologies on Heron on Kubernetes
+
+Get the URL for the [Heron API server](../../../heron-api-server)
+
+```bash
+$ heron config kubernetes set service_url \
+  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-kubernetes-heron-apiserver:9000
+```
+
+Now, you can submit an example topology:
+
+```bash
+$ heron submit kubernetes \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
 ```
