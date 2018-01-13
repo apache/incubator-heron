@@ -13,4 +13,4 @@ Topologies can now be defined through a YAML based format.
 ## What about Storm Flux?  Is it compatible with  Eco?
 
 We built ECO with Flux in mind.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
-Start reading here [Migrate Storm To Heron] (../docs/migrate-storm-to-heron) to migrate your Storm Flux topology then come back.
+Start reading  [Migrate Storm To Heron] (../../docs/migrate-storm-to-heron) to learn how to migrate your Storm Flux topology then come back.
