@@ -6,3 +6,162 @@ description: Create Heron topologies in Java from reusable spouts and bolts
 {{< alert "eco-api-beta" >}}
 
 {{content/snippets/heron-eco-api.md}}
+
+
+## What about Storm Flux?  Is it compatible with Eco?
+
+ECO is an evolution of Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
+Start reading [Migrate Storm Topologies To Heron] (../../../migrate-storm-to-heron) to learn how to migrate your Storm Flux topology then come back.
+
+## Getting started
+
+In order to use the Heron ECO for Java, you'll need to install the `heron-api` and the `heron-storm` library, which is available
+via [Maven Central](http://search.maven.org/).
+
+### Maven setup
+
+To install the `heron-api` library using Maven, add this to the `dependencies` block of your `pom.xml`
+configuration file:
+
+```xml
+<dependency>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-api</artifactId>
+    <version>{{< heronVersion >}}</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-storm</artifactId>
+    <version>{{< heronVersion >}}</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+#### Compiling a JAR with dependencies
+
+In order to run a Java topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
+
+```xml
+<plugin>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <configuration>
+        <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <archive>
+            <manifest>
+                <mainClass></mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+    <executions>
+        <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
+
+```bash
+$ mvn assembly:assembly
+```
+
+By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example ECO topology submission command using a compiled JAR:
+
+```bash
+$ heron submit local \
+  target/my-project-1.2.3-jar-with-dependencies.jar \
+  com.twitter.heron.eco.Eco \
+  --eco-config-file path/to/your/topology-definition.yaml
+```
+
+Notice how the above example submission command is referencing the main class `com.twitter.heron.eco.Eco`.  This part of the command
+needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
+
+## Defining Your ECO Topology File
+
+An ECO topology definition consists of the following:
+
+* A topology name
+* An optional list of topology "components" (named Java objects that will be made available in the environment)
+* A DSL topology definition that contains:
+  - A list of spouts, each identified by a unique ID
+  - A list of bolts, each identified by a unique ID
+  - A list of "stream" objects representing a flow of tuples between spouts and bolts
+
+
+An example of a simple YAML DSL definition is below:
+
+```yaml
+
+# topology definition
+# name to be used when submitting
+name: "simple-wordcount-topology"
+
+# topology configuration
+# this will be passed to the submitter as a map of config options
+#
+config:
+  topology.workers: 1
+
+# spout definitions
+spouts:
+  - id: "spout-1"
+    className: "com.twitter.heron.examples.eco.TestNameSpout"
+    parallelism: 1
+
+# bolt definitions
+bolts:
+  - id: "bolt-1"
+    className: "com.twitter.heron.examples.eco.TestNameCounter"
+    parallelism: 1
+
+  - id: "bolt-2"
+    className: "com.twitter.heron.examples.eco.LogInfoBolt"
+    parallelism: 1
+
+#stream definitions
+# stream definitions define connections between spouts and bolts.
+# note that such connections can be cyclical
+streams:
+  - name: "spout-1 --> bolt-1" # name is only a placeholder for logging at this time
+    id: "connection-1"
+    from: "spout-1"
+    to: "bolt-1"
+    grouping:
+      type: FIELDS
+      args: ["word"]
+
+  - name: "bolt-1 --> bolt2"
+    id: "connection-2"
+    from: "bolt-1"
+    to: "bolt-2"
+    grouping:
+      type: SHUFFLE
+```
+
+If you want to stop here and try to deploy the above topology you can execute
+
+```bash
+$ heron submit local \
+  ~/.heron/examples/heron-eco-examples.jar \
+  com.twitter.heron.eco.Eco \
+  --eco-config-file ~/.heron/examples/simple_wordcount.yaml
+```
+
+##Taking a closer look at the YAML definition specs
+
+Each ECO definition file will be required to have a name defined.
+
+```yaml
+name: "simple-wordcount-topology"
+```
+
+

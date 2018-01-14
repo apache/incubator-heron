@@ -14,18 +14,13 @@
 
 ---
 
-name: "sliding-window-topology"
+# topology definition
+# name to be used when submitting
+name: "simple-wordcount-topology"
 
-components:
-  - id: "windowLength"
-    className: "org.apache.storm.topology.base.BaseWindowedBolt$Count"
-    constructorArgs:
-      - 5
-  - id: "slidingInterval"
-    className: "org.apache.storm.topology.base.BaseWindowedBolt$Count"
-    constructorArgs:
-      - 3
-
+# topology configuration
+# this will be passed to the submitter as a map of config options
+#
 config:
   topology.workers: 1
 
@@ -38,29 +33,25 @@ spouts:
 # bolt definitions
 bolts:
   - id: "bolt-1"
-    className: "com.twitter.heron.examples.eco.TestWindowBolt"
-    configMethods:
-      - name: "withWindow"
-        args: [ref: "windowLength", ref: "slidingInterval"]
-    parallelism: 1
-  - id: "bolt-2"
-    className: "com.twitter.heron.examples.eco.TestPrintBolt"
+    className: "com.twitter.heron.examples.eco.TestNameCounter"
     parallelism: 1
 
+  - id: "bolt-2"
+    className: "com.twitter.heron.examples.eco.LogInfoBolt"
+    parallelism: 1
 
 #stream definitions
 # stream definitions define connections between spouts and bolts.
 # note that such connections can be cyclical
 streams:
   - name: "spout-1 --> bolt-1" # name isn't used (placeholder for logging, UI, etc.)
-#    id: "connection-1"
     from: "spout-1"
     to: "bolt-1"
     grouping:
       type: FIELDS
       args: ["word"]
-  - name: "bolt-1 --> bolt-2" # name isn't used (placeholder for logging, UI, etc.)
-#    id: "connection-1"
+
+  - name: "bolt-1 --> bolt2"
     from: "bolt-1"
     to: "bolt-2"
     grouping:
