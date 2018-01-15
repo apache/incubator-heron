@@ -25,7 +25,6 @@ components:
     constructorArgs:
       - "some argument"
 
-
 spouts:
   - id: "spout-1"
     className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
