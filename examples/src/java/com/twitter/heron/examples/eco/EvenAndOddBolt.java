@@ -23,7 +23,6 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
 
 import static org.apache.storm.utils.Utils.tuple;
 
@@ -43,7 +42,6 @@ public class EvenAndOddBolt implements IBasicBolt {
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
     int number = getTupleValue(input, 0);
-
 
     if (number % 2 == 0) {
       System.out.println("Emitting to evens stream: " + number);
