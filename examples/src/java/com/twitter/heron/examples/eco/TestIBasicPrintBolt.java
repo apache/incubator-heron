@@ -13,20 +13,19 @@
 //  limitations under the License.
 package com.twitter.heron.examples.eco;
 
-
 import java.util.Map;
 
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
-
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 
+import static org.apache.storm.utils.Utils.tuple;
+
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
-public class EvenAndOddBolt implements IBasicBolt {
-
-
+public class TestIBasicPrintBolt implements IBasicBolt {
   @Override
   public void prepare(Map stormConf, TopologyContext context) {
 
@@ -34,8 +33,8 @@ public class EvenAndOddBolt implements IBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    System.out.println("EvensAndOdds: " + input);
-
+    collector.emit(tuple(input.getValues().get(0), 1));
+    System.out.println("IBasic Logger: " + input);
   }
 
   @Override
@@ -45,7 +44,7 @@ public class EvenAndOddBolt implements IBasicBolt {
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
+    declarer.declare(new Fields("fibonacci"));
   }
 
   @Override

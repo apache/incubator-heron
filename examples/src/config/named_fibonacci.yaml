@@ -38,7 +38,7 @@ bolts:
     className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
     parallelism: 1
   - id: "bolt-2"
-    className: "com.twitter.heron.examples.eco.TestPrintBolt"
+    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
 
 streams:
@@ -46,11 +46,16 @@ streams:
     from: "spout-1"
     to: "bolt-1"
     grouping:
-      type: FIELDS
-      args: ["fibonacci"]
+      type: SHUFFLE
 
-  - name: "bolt-1 --> bolt2"
-    from: "bolt-1"
+  - name: "spout-1 --> bolt-2"
+    from: "spout-1"
     to: "bolt-2"
+    grouping:
+      type: SHUFFLE
+
+  - name: "bolt-2 --> bolt1"
+    from: "bolt-2"
+    to: "bolt-1"
     grouping:
       type: SHUFFLE

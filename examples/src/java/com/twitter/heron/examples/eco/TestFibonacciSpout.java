@@ -15,6 +15,7 @@ package com.twitter.heron.examples.eco;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -26,7 +27,7 @@ import org.apache.storm.utils.Utils;
 
 @SuppressWarnings({"serial", "rawtypes"})
 public class TestFibonacciSpout extends BaseRichSpout {
-
+  private static final Logger LOG = Logger.getLogger(TestFibonacciSpout.class.getName());
   private TestPropertyHolder holder;
   private SpoutOutputCollector collector;
 
@@ -45,6 +46,9 @@ public class TestFibonacciSpout extends BaseRichSpout {
     final int[] words = new int[] {0, 1, 2, 3, 5, 8, 13, 21, 34};
     final Random rand = new Random();
     final int number = words[rand.nextInt(words.length)];
+    final String property = holder.getProperty();
+    LOG.info("Emitting: number " + number + " with property: " + property);
+    DataHolder dataHolder = new DataHolder(property, number);
     collector.emit(new Values(number));
   }
 
