@@ -48,12 +48,11 @@ public class TestFibonacciSpout extends BaseRichSpout {
     final int number = words[rand.nextInt(words.length)];
     final String property = holder.getProperty();
     LOG.info("Emitting: number " + number + " with property: " + property);
-    DataHolder dataHolder = new DataHolder(property, number);
     collector.emit(new Values(number));
   }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    declarer.declare(new Fields("fibonacci"));
+    declarer.declare(new Fields("number"));
   }
 }

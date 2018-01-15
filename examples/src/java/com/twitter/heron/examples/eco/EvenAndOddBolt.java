@@ -21,7 +21,11 @@ import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.IBasicBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import static org.apache.storm.utils.Utils.tuple;
 
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
 public class EvenAndOddBolt implements IBasicBolt {
@@ -32,9 +36,27 @@ public class EvenAndOddBolt implements IBasicBolt {
 
   }
 
+  protected int getTupleValue(Tuple t, int idx) {
+    return (int) t.getValues().get(idx);
+  }
+
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    System.out.println("EvensAndOdds: " + input);
+    int number = getTupleValue(input, 0);
+
+
+    if (number % 2 == 0) {
+      System.out.println("Emitting to evens stream: " + number);
+      collector.emit("evens", tuple(input.getValues().get(0)));
+
+    } else {
+      System.out.println("emitting to odds stream: " + number );
+      collector.emit("odds", tuple(input.getValues().get(0)));
+    }
+
+    collector.emit(tuple(input.getValues().get(0)));
+
+
 
   }
 
@@ -45,7 +67,9 @@ public class EvenAndOddBolt implements IBasicBolt {
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
+    declarer.declareStream("evens", new Fields("evens"));
+    declarer.declareStream("odds", new Fields("odds"));
+    declarer.declare(new Fields("number"));
   }
 
   @Override

@@ -33,8 +33,9 @@ public class TestIBasicPrintBolt implements IBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    collector.emit(tuple(input.getValues().get(0), 1));
-    System.out.println("IBasic Logger: " + input);
+    System.out.println("Emitting : " + input);
+    collector.emit(tuple(input.getValues().get(0)));
+
   }
 
   @Override
@@ -44,7 +45,7 @@ public class TestIBasicPrintBolt implements IBasicBolt {
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    declarer.declare(new Fields("fibonacci"));
+    declarer.declare(new Fields("ibasic-print"));
   }
 
   @Override
