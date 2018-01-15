@@ -45,7 +45,7 @@ public class TestFibonacciSpout extends BaseRichSpout {
     final int[] words = new int[] {0, 1, 2, 3, 5, 8, 13, 21, 34};
     final Random rand = new Random();
     final int number = words[rand.nextInt(words.length)];
-    collector.emit(new Values(holder.getName(), number));
+    collector.emit(new Values(number));
   }
 
   @Override

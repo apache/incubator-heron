@@ -13,50 +13,64 @@
 //  limitations under the License.
 package com.twitter.heron.examples.eco;
 
-import java.util.HashMap;
+
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.BasicOutputCollector;
+import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
+
+import static org.apache.storm.utils.Utils.tuple;
 
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
-public class EvenAndOddBolt extends BaseRichBolt {
-
-  private Map<String, Integer> namedSpecificIntegers;
-
-  private OutputCollector collector;
-
-  protected Map<String, Integer> getTupleValue(Tuple t, int idx) {
-
-    return (Map<String, Integer>) t.getValues().get(idx);
-  }
+public class EvenAndOddBolt implements IRichBolt {
 
   @Override
   public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-    namedSpecificIntegers = new HashMap<>();
-    this.collector = collector;
+
   }
 
   @Override
   public void execute(Tuple input) {
-    Map<String, Integer> integerMap = getTupleValue(input, 0);
-    for (Map.Entry entry: integerMap.entrySet()) {
-      if ((Integer) entry.getValue() % 2 == 0) {
-        this.collector.ack(input);
-      } else {
-        this.collector.fail(input);
-      }
-    }
 
   }
 
+  @Override
+  public void cleanup() {
+
+  }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
   }
+
+  @Override
+  public Map<String, Object> getComponentConfiguration() {
+    return null;
+  }
+
+//  protected int getTupleValue(Tuple t, int idx) {
+//
+//    return (int) t.getValues().get(idx);
+//  }
+//
+//
+//  @Override
+//  public void declareOutputFields(OutputFieldsDeclarer declarer) {
+//    declarer.declare(new Fields("number"));
+//  }
+//
+//  @Override
+//  public void execute(Tuple input, BasicOutputCollector collector) {
+//   int passedInteger = getTupleValue(input, 0);
+//    collector.emit(tuple(passedInteger));
+//  }
+//}
 }

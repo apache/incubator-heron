@@ -78,7 +78,6 @@ public class StreamBuilder {
       GroupingDefinition grouping = stream.getGrouping();
       // if the streamId is defined, use it for the grouping,
       // otherwise assume default stream
-      // Todo(joshfischer) Not sure if "default" is still valid
       String streamId = grouping.getStreamId() == null
           ? Utils.DEFAULT_STREAM_ID : grouping.getStreamId();
 
@@ -88,7 +87,6 @@ public class StreamBuilder {
           declarer.shuffleGrouping(stream.getFrom(), streamId);
           break;
         case FIELDS:
-          //TODO check for null grouping args
           List<String> groupingArgs = grouping.getArgs();
           if (groupingArgs == null) {
             throw new IllegalArgumentException("You must supply arguments for Fields grouping");
