@@ -11,6 +11,7 @@ http://incubator.apache.org/projects/heron.html
 
 https://heron.incubator.apache.org (coming soon...)
 
+### Documentation
 http://heronstreaming.io (official until)
 
 #### Heron Requirements:
@@ -22,6 +23,11 @@ http://heronstreaming.io (official until)
 ## Contact
 
 #### Mailing lists
+
+Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
+
+Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
+
 
 | Name                                                                      | Scope                           |                                                                |                                                                    |                                                                           |
 |:--------------------------------------------------------------------------|:--------------------------------|:---------------------------------------------------------------|:-------------------------------------------------------------------|:--------------------------------------------------------------------------|
@@ -35,7 +41,7 @@ heron slack channel at https://heronstreaming.slack.com/
 You can self-register at http://heronstreaming.herokuapp.com/
 
 
-For more information:
+## For more information:
 
 * Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
 * Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](http://twitter.github.io/heron/docs/resources/)
