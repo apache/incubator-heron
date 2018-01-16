@@ -101,50 +101,58 @@ An example of a simple YAML DSL definition is below:
 
 ```yaml
 
-# topology definition
-# name to be used when submitting
-name: "simple-wordcount-topology"
+name: "fibonacci-topology"
 
-# topology configuration
-# this will be passed to the submitter as a map of config options
-#
 config:
   topology.workers: 1
 
-# spout definitions
+components:
+  - id: "property-holder"
+    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    constructorArgs:
+      - "some argument"
+
 spouts:
   - id: "spout-1"
-    className: "com.twitter.heron.examples.eco.TestNameSpout"
+    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    constructorArgs:
+      - ref: "property-holder"
     parallelism: 1
 
-# bolt definitions
 bolts:
-  - id: "bolt-1"
-    className: "com.twitter.heron.examples.eco.TestNameCounter"
+  - id: "even-and-odd-bolt"
+    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
     parallelism: 1
 
-  - id: "bolt-2"
-    className: "com.twitter.heron.examples.eco.LogInfoBolt"
+  - id: "ibasic-print-bolt"
+    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
 
-#stream definitions
-# stream definitions define connections between spouts and bolts.
-# note that such connections can be cyclical
+  - id: "sys-out-bolt"
+    className: "com.twitter.heron.examples.eco.TestPrintBolt"
+    parallelism: 1
+
 streams:
-  - name: "spout-1 --> bolt-1" # name is only a placeholder for logging at this time
-    id: "connection-1"
+  - name: "spout-1 --> even-and-odd-bolt" # name isn't used (placeholder for logging, UI, etc.)
     from: "spout-1"
-    to: "bolt-1"
-    grouping:
-      type: FIELDS
-      args: ["word"]
-
-  - name: "bolt-1 --> bolt2"
-    id: "connection-2"
-    from: "bolt-1"
-    to: "bolt-2"
+    to: "even-and-odd-bolt"
     grouping:
       type: SHUFFLE
+
+  - name: "even-and-odd-bolt --> ibasic-print-bolt"
+    from: "even-and-odd-bolt"
+    to: "ibasic-print-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "odds"
+
+  - name: "even-and-odd-bolt --> sys-out-bolt"
+    from: "even-and-odd-bolt"
+    to: "sys-out-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "evens"
+
 ```
 
 If you want to stop here and try to deploy the above topology you can execute
@@ -153,15 +161,55 @@ If you want to stop here and try to deploy the above topology you can execute
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
   com.twitter.heron.eco.Eco \
-  --eco-config-file ~/.heron/examples/simple_wordcount.yaml
+  --eco-config-file ~/.heron/examples/fibonacci.yaml
 ```
+
+This ECO topology doesn't do anything spectacular, but it's a good starting point to go through some ECO's concepts.
 
 ##Taking a closer look at the YAML definition specs
 
-Each ECO definition file will be required to have a name defined.
+Each ECO definition file will be required to have a `name` defined.
 
 ```yaml
+
 name: "simple-wordcount-topology"
+
+```
+
+`config` the section where you will list your properties to be inserted into a `org.apache.storm.Config` class.
+It will accept any key value pair, but this is where you specify your Storm topology configs. This section is optional.
+
+```yaml
+
+config:
+  topology.workers: 1
+
+```
+
+`components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL
+The properties that are required for each `component` instance are `id` and `className`.  The `id` the field used to identify
+the component for injection in the coming spouts and bolts defined in the topology.  `constructorArgs` is only needed
+if a component has constructor that requires arguments.  We will get into constructor args the in the next section.
+
+```yaml
+
+components:
+  - id: "property-holder"
+    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    constructorArgs:
+      - "some argument"
+
+```
+
+`constructorArgs` can specify any object type.  Above you can see that the only constructor argument specified is a string
+that contained "some argument".  The is also a way to reference other components as arguments by using `ref`.  In the example
+below we are specifying an already defined component to be a constructor argument.  Any instance that is referenced by
+`ref` must have already been defined in the yaml file before it is to be used.
+
+```yaml
+
+constructorArgs:
+      - ref: "property-holder"
 ```
 
 
