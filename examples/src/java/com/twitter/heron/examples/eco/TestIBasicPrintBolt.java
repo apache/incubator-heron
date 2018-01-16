@@ -26,13 +26,22 @@ import static org.apache.storm.utils.Utils.tuple;
 
 @SuppressWarnings({"serial", "rawtypes", "unchecked"})
 public class TestIBasicPrintBolt implements IBasicBolt {
+
+  private String someProperty = "some ";
   @Override
   public void prepare(Map stormConf, TopologyContext context) {
 
   }
 
+  public void sampleConfigurationMethod(String someProperty) {
+    System.out.println("Setting property with configuration method: " + someProperty);
+    this.someProperty += someProperty;
+
+  }
+
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
+    System.out.println("The configuration method has set \"someProperty\" to : " + this.someProperty);
     System.out.println("Emitting : " + input);
     collector.emit(tuple(input.getValues().get(0)));
 

@@ -53,6 +53,7 @@ public class TestFibonacciSpout extends BaseRichSpout {
     LOG.info("Constructor Args: " + property);
     LOG.info("Property set by setter: " + numberProperty);
     LOG.info("Property set by public field: " + publicProperty);
+    LOG.info("Enum set by setter: " + holder.getTestEnum());
     LOG.info("Emitting: number " + number );
     collector.emit(new Values(number));
   }

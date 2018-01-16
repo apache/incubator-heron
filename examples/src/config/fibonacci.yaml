@@ -45,27 +45,28 @@ bolts:
   - id: "ibasic-print-bolt"
     className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
+    configMethods:
+      - name: "sampleConfigurationMethod"
+        args:
+          - "config property"
 
   - id: "sys-out-bolt"
     className: "com.twitter.heron.examples.eco.TestPrintBolt"
     parallelism: 1
 
 streams:
-  - name: "spout-1 --> even-and-odd-bolt" # name isn't used (placeholder for logging, UI, etc.)
-    from: "spout-1"
+  - from: "spout-1"
     to: "even-and-odd-bolt"
     grouping:
       type: SHUFFLE
 
-  - name: "even-and-odd-bolt --> ibasic-print-bolt"
-    from: "even-and-odd-bolt"
+  - from: "even-and-odd-bolt"
     to: "ibasic-print-bolt"
     grouping:
       type: SHUFFLE
       streamId: "odds"
 
-  - name: "even-and-odd-bolt --> sys-out-bolt"
-    from: "even-and-odd-bolt"
+  - from: "even-and-odd-bolt"
     to: "sys-out-bolt"
     grouping:
       type: SHUFFLE

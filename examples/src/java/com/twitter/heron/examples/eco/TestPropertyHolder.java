@@ -24,6 +24,8 @@ public class TestPropertyHolder implements Serializable {
 
   public String publicProperty;
 
+  private TestEnum testEnum;
+
   public TestPropertyHolder(String property) {
     this.property = property;
   }
@@ -42,5 +44,13 @@ public class TestPropertyHolder implements Serializable {
 
   public void setNumberProperty(int numberProperty) {
     this.numberProperty = numberProperty;
+  }
+
+  public TestEnum getTestEnum() {
+    return testEnum;
+  }
+
+  public void setTestEnum(TestEnum testEnum) {
+    this.testEnum = testEnum;
   }
 }

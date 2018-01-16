@@ -111,6 +111,11 @@ components:
     className: "com.twitter.heron.examples.eco.TestPropertyHolder"
     constructorArgs:
       - "some argument"
+    properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
 
 spouts:
   - id: "spout-1"
@@ -127,27 +132,28 @@ bolts:
   - id: "ibasic-print-bolt"
     className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
+    configMethods:
+      - name: "sampleConfigurationMethod"
+        args:
+          - "config property"
 
   - id: "sys-out-bolt"
     className: "com.twitter.heron.examples.eco.TestPrintBolt"
     parallelism: 1
 
 streams:
-  - name: "spout-1 --> even-and-odd-bolt" # name isn't used (placeholder for logging, UI, etc.)
-    from: "spout-1"
+  - from: "spout-1"
     to: "even-and-odd-bolt"
     grouping:
       type: SHUFFLE
 
-  - name: "even-and-odd-bolt --> ibasic-print-bolt"
-    from: "even-and-odd-bolt"
+  - from: "even-and-odd-bolt"
     to: "ibasic-print-bolt"
     grouping:
       type: SHUFFLE
       streamId: "odds"
 
-  - name: "even-and-odd-bolt --> sys-out-bolt"
-    from: "even-and-odd-bolt"
+  - from: "even-and-odd-bolt"
     to: "sys-out-bolt"
     grouping:
       type: SHUFFLE
@@ -164,9 +170,9 @@ $ heron submit local \
   --eco-config-file ~/.heron/examples/fibonacci.yaml
 ```
 
-This ECO topology doesn't do anything spectacular, but it's a good starting point to go through some ECO's concepts.
+This ECO topology doesn't do anything spectacular, but it's a good starting point to go through some of ECO's concepts.
 
-##Taking a closer look at the YAML definition specs
+## Taking a closer look at the YAML definition specs
 
 ### Topology Name
 
@@ -180,8 +186,7 @@ name: "simple-wordcount-topology"
 
 ### Configuration
 
-`config` the section where you will list your properties to be inserted into a `org.apache.storm.Config` class.
-It will accept any key value pair, but this is where you specify your Storm topology configs. This section is optional.
+`config` is the section where you will list your properties to be inserted into a `org.apache.storm.Config` class. This section is optional.
 
 ```yaml
 
@@ -206,9 +211,22 @@ components:
       - "some argument"
 
 ```
+### Property Injection
+
+#### Constructor Injection
 
 `constructorArgs` can specify any object type.  Above you can see that the only constructor argument specified is a string
-that contained "some argument".  The is also a way to reference other components as arguments by using `ref`.  In the example
+that contained "some argument".  If declaring a number, you may omit the parenthesis
+
+```yaml
+
+ constructorArgs:
+      - "some argument"
+      - 123.45
+
+```
+
+The is also a way to reference other components as arguments by using `ref`.  In the example
 below we are specifying an already defined component to be a constructor argument.  Any instance that is referenced by
 `ref` must have already been defined in the ECO definition file before it is to be used.
 
@@ -219,4 +237,51 @@ constructorArgs:
 
 ```
 
+#### Setter and Public Field Injection
+
+Besides constructor injection, you may also use setter methods. In the below example, ECO will take inspect the component
+for setters that match the names and values provided.  If no setter is defined, it will then look for a public field to set the property.
+
+
+```yaml
+
+properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
+
+```
+
+## The Topology Definition
+
+Spouts and Bolts each have their own sections for defining in the ECO file.  They are extensions of `components` so they will
+be allowed the same property injection methods above.  One difference is the `parallelism` property they contain, it sets the `parallelism`
+property for each bolt or spout once the topology has been deployed into Heron.  It should be noted that the `name`
+property is not needed, it is only used once you actually deploy the topolgy
+
+
+### Spouts
+
+```yaml
+
+spouts:
+  - id: "spout-1"
+    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    constructorArgs:
+      - ref: "property-holder"
+    parallelism: 1
+
+```
+
+### Bolts
+
+```yaml
+
+bolts:
+  - id: "even-and-odd-bolt"
+    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
+    parallelism: 1
+
+```
 
