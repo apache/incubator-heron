@@ -20,6 +20,10 @@ public class TestPropertyHolder implements Serializable {
 
   private String property;
 
+  private int numberProperty;
+
+  public String publicProperty;
+
   public TestPropertyHolder(String property) {
     this.property = property;
   }
@@ -30,5 +34,13 @@ public class TestPropertyHolder implements Serializable {
 
   public void setProperty(String property) {
     this.property = property;
+  }
+
+  public int getNumberProperty() {
+    return numberProperty;
+  }
+
+  public void setNumberProperty(int numberProperty) {
+    this.numberProperty = numberProperty;
   }
 }

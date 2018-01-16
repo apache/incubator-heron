@@ -48,7 +48,12 @@ public class TestFibonacciSpout extends BaseRichSpout {
     final Random rand = new Random();
     final int number = words[rand.nextInt(words.length)];
     final String property = holder.getProperty();
-    LOG.info("Emitting: number " + number + " with property: " + property);
+    final int numberProperty = holder.getNumberProperty();
+    final String publicProperty = holder.publicProperty;
+    LOG.info("Constructor Args: " + property);
+    LOG.info("Property set by setter: " + numberProperty);
+    LOG.info("Property set by public field: " + publicProperty);
+    LOG.info("Emitting: number " + number );
     collector.emit(new Values(number));
   }
 

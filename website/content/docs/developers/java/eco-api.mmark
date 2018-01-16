@@ -168,6 +168,8 @@ This ECO topology doesn't do anything spectacular, but it's a good starting poin
 
 ##Taking a closer look at the YAML definition specs
 
+### Topology Name
+
 Each ECO definition file will be required to have a `name` defined.
 
 ```yaml
@@ -175,6 +177,8 @@ Each ECO definition file will be required to have a `name` defined.
 name: "simple-wordcount-topology"
 
 ```
+
+### Configuration
 
 `config` the section where you will list your properties to be inserted into a `org.apache.storm.Config` class.
 It will accept any key value pair, but this is where you specify your Storm topology configs. This section is optional.
@@ -186,10 +190,12 @@ config:
 
 ```
 
+### Components
+
 `components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL
 The properties that are required for each `component` instance are `id` and `className`.  The `id` the field used to identify
 the component for injection in the coming spouts and bolts defined in the topology.  `constructorArgs` is only needed
-if a component has constructor that requires arguments.  We will get into constructor args the in the next section.
+if a component has constructor that requires arguments.  We will get into constructor args the in the next section.  `components` are optional
 
 ```yaml
 
@@ -204,12 +210,13 @@ components:
 `constructorArgs` can specify any object type.  Above you can see that the only constructor argument specified is a string
 that contained "some argument".  The is also a way to reference other components as arguments by using `ref`.  In the example
 below we are specifying an already defined component to be a constructor argument.  Any instance that is referenced by
-`ref` must have already been defined in the yaml file before it is to be used.
+`ref` must have already been defined in the ECO definition file before it is to be used.
 
 ```yaml
 
 constructorArgs:
       - ref: "property-holder"
+
 ```
 
 

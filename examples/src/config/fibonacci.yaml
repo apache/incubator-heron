@@ -24,6 +24,11 @@ components:
     className: "com.twitter.heron.examples.eco.TestPropertyHolder"
     constructorArgs:
       - "some argument"
+    properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
 
 spouts:
   - id: "spout-1"
