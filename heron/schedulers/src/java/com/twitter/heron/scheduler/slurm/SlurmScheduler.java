@@ -54,7 +54,7 @@ public class SlurmScheduler implements IScheduler {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = mConfig;
+    this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     this.controller = getController();
 
@@ -138,7 +138,7 @@ public class SlurmScheduler implements IScheduler {
     }
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime,
-        ports, "0");
+        ports, null);
 
     LOG.log(Level.FINE, "Executor command line: ", Arrays.toString(executorCmd));
     return executorCmd;

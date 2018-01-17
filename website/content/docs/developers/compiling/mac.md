@@ -14,9 +14,10 @@ install it using this one-liner:
 $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-### Step 2 --- Install other required libraries
+### Step 2 --- Install bazel and other required libraries
 
 ```bash
+brew install bazel
 brew install automake
 brew install cmake
 brew install libtool
@@ -30,27 +31,13 @@ $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
 
-#### Step 4 - Install Bazel {{% bazelVersion %}}
-
-```bash
-wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-darwin-x86_64.sh
-chmod +x /tmp/bazel.sh
-/tmp/bazel.sh --user
-```
-
-### Step 5 --- Make sure the Bazel executable is on your `PATH`
-
-```bash
-$ export PATH="$PATH:$HOME/bin"
-```
-
-### Step 6 --- Fetch the latest version of Heron's source code
+### Step 4 --- Fetch the latest version of Heron's source code
 
 ```bash
 $ git clone https://github.com/twitter/heron.git && cd heron
 ```
 
-### Step 7 --- Configure Heron for building with Bazel
+### Step 5 --- Configure Heron for building with Bazel
 
 ```bash
 $ ./bazel_configure.py
@@ -59,13 +46,13 @@ $ ./bazel_configure.py
 If this configure script fails with missing dependencies, Homebrew can be used
 to install those dependencies.
 
-### Step 8 --- Build the project
+### Step 6 --- Build the project
 
 ```bash
 $ bazel build --config=darwin heron/...
 ```
 
-### Step 9 --- Build the packages
+### Step 7 --- Build the packages
 
 ```bash
 $ bazel build --config=darwin scripts/packages:binpkgs
