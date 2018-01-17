@@ -75,7 +75,7 @@ $ helm install heron-charts/heron
 This will install Heron and provide the installation with a random name like `jazzy-anaconda`. To provide the installation with a name, such as `heron-kubernetes`:
 
 ```bash
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --name heron-kubernetes
 ```
 
@@ -84,7 +84,7 @@ $ helm install streamlio/heron \
 The default platform for running Heron on Kubernetes is [Minikube](#minikube). To specify a different platform, you can use the `--set platform=PLATFORM` flag. Here's an example:
 
 ```bash
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --set platform=gke
 ```
 
@@ -118,10 +118,10 @@ Once Minikube is running, you can then install Heron in one of two ways:
 
 ```bash
 # Use the Minikube default
-$ helm install streamlio/heron
+$ helm install heron-charts/heron
 
 # Explicitly select Minikube
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --set platform=minikube
 ```
 
@@ -167,7 +167,7 @@ Once, the cluster is running (that could take a few minutes), you can initialize
 
 ```bash
 $ helm init
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --set platform=gke
 ```
 
@@ -176,7 +176,7 @@ $ helm install streamlio/heron \
 To run Heron on Kubernetes on Amazon Web Services (AWS), you'll need to 
 
 ```bash
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --set platform=aws
 ```
 
@@ -185,7 +185,7 @@ $ helm install streamlio/heron \
 To run Heron on a bare metal Kubernetes cluster:
 
 ```bash
-$ helm install streamlio/heron \
+$ helm install heron-charts/heron \
   --set platform=baremetal
 ```
 
@@ -195,7 +195,7 @@ Get the URL for the [Heron API server](../../../heron-api-server)
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-kubernetes-heron-apiserver:9000
+  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-kubernetes-heron-apiserver:9000/api/v1/version
 ```
 
 Now, you can submit an example topology:
