@@ -17,6 +17,9 @@ package com.twitter.heron.streamlet;
 
 import java.time.Duration;
 
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.windowing.EvictionPolicy;
+import com.twitter.heron.api.windowing.TriggerPolicy;
 import com.twitter.heron.streamlet.impl.WindowConfigImpl;
 
 /**
@@ -63,5 +66,16 @@ public interface WindowConfig {
    */
   static WindowConfig SlidingCountWindow(int windowSize, int slideSize) {
     return new WindowConfigImpl(windowSize, slideSize);
+  }
+
+  /**
+   * Creates a window based on the provided custom trigger and eviction policies
+   * @param triggerPolicy The trigger policy to use
+   * @param evictionPolicy The eviction policy to use
+   * @return WindowConfig that can be passed to the transformation
+   */
+  static WindowConfig CustomWindow(TriggerPolicy<Tuple, ?> triggerPolicy,
+                                   EvictionPolicy<Tuple, ?> evictionPolicy) {
+    return new WindowConfigImpl(triggerPolicy, evictionPolicy);
   }
 }
