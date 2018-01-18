@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "eco-examples-yaml",
+    name = "heron-eco-examples-yaml",
     srcs = glob(["**/*.yaml"]),
 )
 
