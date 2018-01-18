@@ -34,9 +34,11 @@ public abstract class BaseDiagnoser implements IDiagnoser {
     SYMPTOM_UNDER_PROVISIONING("SYMPTOM_UNDER_PROVISIONING"),
     SYMPTOM_DATA_SKEW("SYMPTOM_DATA_SKEW"),
     SYMPTOM_SLOW_INSTANCE("SYMPTOM_SLOW_INSTANCE"),
+    SYMPTOM_BACKPRESSURE_INSTANCE("SYMPTOM_BACKPRESSURE_INSTANCE"),
 
     DIAGNOSIS_UNDER_PROVISIONING(UnderProvisioningDiagnoser.class.getSimpleName()),
     DIAGNOSIS_SLOW_INSTANCE(SlowInstanceDiagnoser.class.getSimpleName()),
+    DIAGNOSIS_BACKPRESSURE_INSTANCE(BackpressureInstanceDiagnoser.class.getSimpleName()),
     DIAGNOSIS_DATA_SKEW(DataSkewDiagnoser.class.getSimpleName());
 
     private String text;

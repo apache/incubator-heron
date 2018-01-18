@@ -33,38 +33,42 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.diagnosers.BackpressureInstanceDiagnoser;
+import com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector;
+import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
+import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.RestartContainerResolver;
 
 import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_BACKPRESSURE_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
 
 /**
  * This Policy class
  * 1. detector: find out the slow container which we believe the container cannot recover.
  * 2. resolver: try to restart the slow container so as to be rescheduled.
  */
-public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
+public class AutoRestartSlowContainerPolicy extends HealthPolicyImpl
     implements EventHandler<ContainerRestart> {
 
   private static final String CONF_WAIT_INTERVAL_MILLIS =
       "AutoRestartSlowContainerPolicy.conf_post_action_wait_interval_ms";
   private static final Logger LOG =
-      Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
+      Logger.getLogger(AutoRestartSlowContainerPolicy.class.getName());
 
   private final HealthPolicyConfig policyConfig;
   private final RestartContainerResolver restartContainerResolver;
 
   @Inject
-  AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
+  AutoRestartSlowContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
       BackPressureDetector backPressureDetector,
-      BackpressureInstanceDiagnoser backpressureInstanceDiagnoser,
+      ProcessingRateSkewDetector processingRateSkewDetector,
+      WaitQueueDisparityDetector waitQueueDisparityDetector,
+      SlowInstanceDiagnoser slowInstanceDiagnoser,
       RestartContainerResolver restartContainerResolver) {
     this.policyConfig = policyConfig;
     this.restartContainerResolver = restartContainerResolver;
 
-    registerDetectors(backPressureDetector);
-    registerDiagnosers(backpressureInstanceDiagnoser);
+    registerDetectors(backPressureDetector, waitQueueDisparityDetector, processingRateSkewDetector);
+    registerDiagnosers(slowInstanceDiagnoser);
 
     setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
         TypeUtils.getInteger(policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
@@ -77,7 +81,7 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
     Map<String, Diagnosis> diagnosisMap =
         diagnosis.stream().collect(Collectors.toMap(Diagnosis::getName, d -> d));
 
-    if (diagnosisMap.containsKey(DIAGNOSIS_BACKPRESSURE_INSTANCE.text())) {
+    if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
       return restartContainerResolver;
     }
 
