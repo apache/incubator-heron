@@ -19,12 +19,23 @@ java_doc(
     title = "Heron Storm Compatibility Api Documentation",
 )
 
+java_library(
+    name='storm-compatibility-java-neverlink',
+    srcs = glob(["**/*.java"]),
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    deps = storm_deps_files, 
+    neverlink = 1,
+)
+
 # Kryo is bundled here for integration test
 java_library(
     name='storm-compatibility-java',
     srcs = glob(["**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    deps = storm_deps_files + ["//third_party/java:kryo"],
+    deps = storm_deps_files + [
+        "//eco/src/java:eco-java",
+        "//third_party/java:kryo"
+    ],
 )
 
 java_binary(
