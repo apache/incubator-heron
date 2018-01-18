@@ -10,12 +10,12 @@ description: Create Heron topologies in Java from reusable spouts and bolts
 
 ## What about Storm Flux?  Is it compatible with Eco?
 
-ECO is an evolution of Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
+ECO is built on top of Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
 Start reading [Migrate Storm Topologies To Heron] (../../../migrate-storm-to-heron) to learn how to migrate your Storm Flux topology then come back.
 
 ## Getting started
 
-In order to use the Heron ECO for Java, you'll need to install the `heron-api` and the `heron-storm` library, which is available
+In order to use the Heron ECO API for Java, you'll need to install the `heron-api` and the `heron-storm` library, which is available
 via [Maven Central](http://search.maven.org/).
 
 ### Maven setup
@@ -90,7 +90,7 @@ needs to stay the same.  Eco is the main class that will assemble your topology 
 An ECO topology definition consists of the following:
 
 * A topology name
-* An optional list of topology "components" (named Java objects that will be made available in the environment)
+* An optional list of topology "components" (named Java objects that will be made available for configuration in the topology)
 * A DSL topology definition that contains:
   - A list of spouts, each identified by a unique ID
   - A list of bolts, each identified by a unique ID
@@ -197,8 +197,8 @@ config:
 
 ### Components
 
-`components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL
-The properties that are required for each `component` instance are `id` and `className`.  The `id` the field used to identify
+`components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL.
+The properties that are required for each `component` instance are `id` and `className`.  `id` can be any name you choose, `className`  is the fully qualified className of the Java class. The `id` field is used to identify
 the component for injection in the coming spouts and bolts defined in the topology.  `constructorArgs` is only needed
 if a component has constructor that requires arguments.  We will get into constructor args the in the next section.  `components` are optional
 
@@ -257,8 +257,7 @@ properties:
 
 Spouts and Bolts each have their own sections for defining in the ECO file.  They are extensions of `components` so they will
 be allowed the same property injection methods above.  One difference is the `parallelism` property they contain, it sets the `parallelism`
-property for each bolt or spout once the topology has been deployed into Heron.  It should be noted that the `name`
-property is not needed, it is only used once you actually deploy the topolgy
+property for each bolt or spout once the topology has been deployed into Heron.
 
 
 ### Spouts
@@ -284,4 +283,51 @@ bolts:
     parallelism: 1
 
 ```
+
+### Streams and Groupings
+
+Streams are what connect your bolts and spouts together.  Stream Groupings are the specific way you are to connect those streams to the spouts and bolts.
+
+##### A Stream can contain the following fields.
+
+* `from` - references the `id` of the component where data is coming from
+* `to` - references the `id` of the component where the data is going
+* `grouping` - This is grouping definition of how this stream will connect the two afore mentioned components together
+
+##### A grouping can contain the following fields
+* `type` - The type of grouping.
+  - `SHUFFLE`
+  - `FIELDS`
+  - `ALL`
+  - `GLOBAL`
+  - `NONE`
+  - `CUSTOM`
+* `args` is specific to the `FIELDS` grouping type. You would specify this as a list like so `["arg1", "arg2"]`
+* `customClass` if you wanted to create a custom grouping, you could specify the fully qualified class name here
+
+In the below example, you can see the first Stream Definition declares that data will flow from `spout-1` to `even-and-odd-bolt` with a grouping type of `SHUFFLE`
+
+
+```yaml
+
+streams:
+  - from: "spout-1"
+    to: "even-and-odd-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - from: "even-and-odd-bolt"
+    to: "ibasic-print-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "odds"
+
+  - from: "even-and-odd-bolt"
+    to: "sys-out-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "evens"
+
+```
+
 

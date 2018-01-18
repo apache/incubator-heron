@@ -2,7 +2,7 @@ Heron processing topologies can be written using an API called the **Heron ECO A
 
 * [Java](../../../developers/java/eco-api)
 
-> Although this document focuses on the ECO API, both the [Streamlet API](../../../concepts/streamlet-api) and [topology API](../../../concepts/topologies) topologies you have built will can still be used with Heron
+> Although this document focuses on the ECO API, both the [Streamlet API](../../../concepts/streamlet-api) and [Topology API](../../../concepts/topologies) topologies you have built can still be used with Heron
 
 ## The Heron ECO API vs. The Streamlet and Topology APIs
 
@@ -13,7 +13,7 @@ Topologies can now be defined through a YAML based format.
 ## Why the name ECO?
 
 /ˈekoʊ/ (Because all software should come with a pronunciation guide these days)
-ECO is an  acronym the stands for:
+ECO is an acronym that stands for:
 * Extensible
 * Component
 * Orchestrator
