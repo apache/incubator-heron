@@ -51,7 +51,7 @@ public class CountTriggerPolicy<T extends Serializable> extends
   private final AtomicInteger currentCount;
 
   public CountTriggerPolicy(int count) {
-    super(true, false, false);
+    super();
 
     this.count = count;
     this.currentCount = new AtomicInteger();

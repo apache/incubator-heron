@@ -50,7 +50,7 @@ public class WatermarkTimeTriggerPolicy<T extends Serializable> extends
   private volatile long nextWindowEndTs;
 
   public WatermarkTimeTriggerPolicy(long slidingIntervalMs) {
-    super(true, true, false);
+    super();
     this.slidingIntervalMs = slidingIntervalMs;
   }
 

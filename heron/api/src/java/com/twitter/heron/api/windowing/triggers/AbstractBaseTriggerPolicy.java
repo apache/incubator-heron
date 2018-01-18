@@ -56,12 +56,7 @@ public abstract class AbstractBaseTriggerPolicy<T extends Serializable, S>
   /**
   * Set the requirements in the constructor
   */
-  public AbstractBaseTriggerPolicy(boolean requiresEvictionPolicy,
-                                   boolean requiresWindowManager,
-                                   boolean requiresTopologyConfig) {
-    this.requiresEvictionPolicy = requiresEvictionPolicy;
-    this.requiresWindowManager = requiresWindowManager;
-    this.requiresTopologyConfig = requiresTopologyConfig;
+  public AbstractBaseTriggerPolicy() {
   }
 
   /**
@@ -107,22 +102,6 @@ public abstract class AbstractBaseTriggerPolicy<T extends Serializable, S>
   */
   @Override
   public void start() {
-    if (this.evictionPolicy == null && this.requiresEvictionPolicy) {
-      throw new RuntimeException("EvictionPolicy of TriggerPolicy was not set.");
-    }
-
-    if (this.handler == null) {
-      throw new RuntimeException("TriggerHandler of TriggerPolicy was not set.");
-    }
-
-    if (this.windowManager == null && this.requiresWindowManager) {
-      throw new RuntimeException("WindowManager of TriggerPolicy was not set.");
-    }
-
-    if (this.topoConf == null && this.requiresTopologyConfig) {
-      throw new RuntimeException("WindowManager of TriggerPolicy was not set.");
-    }
-
     started = true;
   }
 }

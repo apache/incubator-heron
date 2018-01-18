@@ -48,7 +48,7 @@ public class TimeTriggerPolicy<T extends Serializable> extends AbstractBaseTrigg
   private long duration;
 
   public TimeTriggerPolicy(long millis) {
-    super(true, false, true);
+    super();
 
     this.duration = millis;
   }
