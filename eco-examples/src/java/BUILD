@@ -1,5 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "eco-examples-yaml",
+    srcs = glob(["**/*.yaml"]),
+)
+
 java_binary(
     name='eco-examples-unshaded',
     srcs = glob(["com/twitter/heron/examples/eco/**/*.java"]),
