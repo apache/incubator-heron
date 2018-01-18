@@ -4,10 +4,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "heron.fullname" . }}-tools
-  namespace: {{ .Values.namespace }}
+  name: {{ .Release.Name }}-tools
   labels:
-    app: {{ template "heron.fullname" . }}-tools
+    app: {{ .Release.Name }}-tools
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -15,10 +14,11 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "heron.fullname" . }}-tools
+        app: {{ .Release.Name }}-tools
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ template "heron.fullname" . }}-apiserver
+      serviceAccountName: {{ .Release.Name }}-apiserver
+      terminationGracePeriodSeconds: 0
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: heron-tools-init-container
@@ -54,7 +54,7 @@ spec:
             - >-
               heron-ui
               --port=8889
-              --base_url=/api/v1/proxy/namespaces/{{ .Values.namespace }}/services/{{ template "heron.fullname" . }}-ui:8889
+              --base_url=/api/v1/proxy/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889
         - name: heron-apiserver
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -66,6 +66,7 @@ spec:
               --cluster {{ .Release.Name }}
               -D heron.statemgr.connection.string={{ .Release.Name }}-zookeeper:2181
               -D heron.kubernetes.scheduler.uri=http://localhost:8001
+              -D heron.kubernetes.scheduler.namespace={{ .Release.Namespace }}
               -D heron.executor.docker.image={{ .Values.image }}
               -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
               -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
@@ -84,9 +85,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "heron.fullname" . }}-ui
+  name: {{ .Release.Name }}-ui
   labels:
-    app: {{ template "heron.fullname" . }}-tools
+    app: {{ .Release.Name }}-tools
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -96,41 +97,41 @@ spec:
       targetPort: 8889
       protocol: TCP
   selector:
-    app: {{ template "heron.fullname" . }}-tools
+    app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "heron.fullname" . }}-apiserver
-  namespace: {{ .Values.namespace }}
+  name: {{ .Release.Name }}-apiserver
+  namespace: {{ .Release.Namespace }}
   labels:
-    k8s-app: {{ template "heron.fullname" . }}-apiserver
+    k8s-app: {{ .Release.Name }}-apiserver
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "heron.fullname" . }}-apiserver
+  name: {{ .Release.Name }}-apiserver
   labels:
-    app: {{ template "heron.fullname" . }}-apiserver
+    app: {{ .Release.Name }}-apiserver
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects: 
 - kind: ServiceAccount
-  name: {{ template "heron.fullname" . }}-apiserver
-  namespace: {{ .Values.namespace }}
+  name: {{ .Release.Name }}-apiserver
+  namespace: {{ .Release.Namespace }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "heron.fullname" . }}-apiserver
+  name: {{ .Release.Name }}-apiserver
   labels:
-    app: {{ template "heron.fullname" . }}-tools
+    app: {{ .Release.Name }}-tools
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -141,5 +142,5 @@ spec:
       protocol: TCP
   type: NodePort
   selector:
-    app: {{ template "heron.fullname" . }}-tools
+    app: {{ .Release.Name }}-tools
     release: {{ .Release.Name }}

@@ -5,7 +5,7 @@ test_deps_files = [
 ]
 
 heron_local_deps = [
-    "//heron/eco/src/java:eco-java",
+    "//eco/src/java:eco-java",
     "//heron/api/src/java:api-java-low-level",
     "//storm-compatibility/src/java:storm-compatibility-java",
 ]
