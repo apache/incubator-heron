@@ -128,7 +128,7 @@ $ helm install heron-charts/heron \
 The resources required to run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) vary based on your use case. To run a basic Heron cluster intended for development and experimentation, you'll need at least:
 
 * 3 nodes
-* [n1-standard-2](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines
+* [n1-standard-4](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines
 
 To create a cluster with those resources using the [gcloud](https://cloud.google.com/sdk/gcloud/) tool:
 
