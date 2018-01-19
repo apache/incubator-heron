@@ -129,36 +129,41 @@ The resources required to run Heron on [Google Kubernetes Engine](https://cloud.
 
 * 3 nodes
 * [n1-standard-2](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines
-* 2 SSDs per machine
 
 To create a cluster with those resources using the [gcloud](https://cloud.google.com/sdk/gcloud/) tool:
 
 ```bash
 $ gcloud container clusters create heron-gke-dev-cluster \
   --num-nodes=3 \
-  --machine-type=n1-standard-2 \
-  --local-ssd-count=2
+  --machine-type=n1-standard-2
 ```
 
 For a production-ready cluster you'll want a larger cluster with:
 
 * *at least* 8 nodes
 * [n1-standard-4 or n1-standard-8](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines (preferably the latter)
-* 2 SSDs per machine
 
 To create such a cluster:
 
 ```bash
 $ gcloud container clusters create heron-gke-prod-cluster \
   --num-nodes=8 \
-  --machine-type=n1-standard-8 \
-  --local-ssd-count=2
+  --machine-type=n1-standard-8
 ```
 
 Once the cluster has been successfully created, you'll need to install that cluster's credentials locally so that they can be used by [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). You can do this in just one command:
 
 ```bash
 $ gcloud container clusters get-credentials heron-gke-dev-cluster # or heron-gke-prod-cluster
+```
+
+Once
+
+```bash
+$ kubectl create serviceaccount tiller \
+  --namespace kube-system \
+$ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+$ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 ```
 
 Once, the cluster is running (that could take a few minutes), you can initialize Helm on the cluster and then install Heron:
