@@ -124,7 +124,7 @@ public class LocalScheduler implements IScheduler, IScalable {
 
           LOG.log(Level.INFO,
               "Container {0} is completed. Exit status: {1}",
-              new Object[] {container, containerExecutor.exitValue()});
+              new Object[]{container, containerExecutor.exitValue()});
           if (isTopologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
@@ -305,7 +305,7 @@ public class LocalScheduler implements IScheduler, IScalable {
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     LOG.log(Level.INFO,
         "Kill {0} of {1} containers",
-        new Object[] {containersToRemove.size(), processToContainer.size()});
+        new Object[]{containersToRemove.size(), processToContainer.size()});
 
     synchronized (processToContainer) {
       // Create a inverse map to be able to get process instance from container id

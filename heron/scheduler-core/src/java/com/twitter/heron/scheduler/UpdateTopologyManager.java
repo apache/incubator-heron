@@ -207,8 +207,8 @@ public class UpdateTopologyManager implements Closeable {
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     TMasterUtils.transitionTopologyState(
-        topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
-        TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
+            topology.getName(), TMasterUtils.TMasterCommand.DEACTIVATE, stateManager,
+            TopologyAPI.TopologyState.RUNNING, TopologyAPI.TopologyState.PAUSED, tunnelConfig);
     if (deactivateSleepSeconds > 0) {
       logInfo("Deactivated topology %s. Sleeping for %d seconds before handling update request",
           topology.getName(), deactivateSleepSeconds);
@@ -296,7 +296,7 @@ public class UpdateTopologyManager implements Closeable {
           if (removableContainerCount < 1) {
             throw new TopologyRuntimeManagementException(String.format(
                 "Topology reactivation failed for topology %s after topology update",
-                    topologyName), e);
+                topologyName), e);
           } else {
             throw new TopologyRuntimeManagementException(String.format(
                 "Topology reactivation failed for topology %s after topology "
