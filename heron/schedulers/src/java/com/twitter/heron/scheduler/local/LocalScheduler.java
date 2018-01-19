@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -83,8 +83,10 @@ public class LocalScheduler implements IScheduler, IScalable {
    */
   @VisibleForTesting
   protected Process startExecutorProcess(int container, Set<PackingPlan.InstancePlan> instances) {
-    return ShellUtils.runASyncProcess(getExecutorCommand(container, instances),
-        new File(LocalContext.workingDirectory(config)), Integer.toString(container));
+    return ShellUtils.runASyncProcess(
+        getExecutorCommand(container, instances),
+        new File(LocalContext.workingDirectory(config)),
+        Integer.toString(container));
   }
 
   /**
@@ -109,8 +111,9 @@ public class LocalScheduler implements IScheduler, IScalable {
    * Start the monitor of a given executor
    */
   @VisibleForTesting
-  protected void startExecutorMonitor(final int container, final Process containerExecutor,
-      Set<PackingPlan.InstancePlan> instances) {
+  protected void startExecutorMonitor(final int container,
+                                      final Process containerExecutor,
+                                      Set<PackingPlan.InstancePlan> instances) {
     // add the container for monitoring
     Runnable r = new Runnable() {
       @Override
@@ -119,7 +122,8 @@ public class LocalScheduler implements IScheduler, IScalable {
           LOG.info("Waiting for container " + container + " to finish.");
           containerExecutor.waitFor();
 
-          LOG.log(Level.INFO, "Container {0} is completed. Exit status: {1}",
+          LOG.log(Level.INFO,
+              "Container {0} is completed. Exit status: {1}",
               new Object[] {container, containerExecutor.exitValue()});
           if (isTopologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
@@ -143,7 +147,7 @@ public class LocalScheduler implements IScheduler, IScalable {
   }
 
 
-  private String[] getExecutorCommand(int container, Set<PackingPlan.InstancePlan> instances) {
+  private String[] getExecutorCommand(int container,  Set<PackingPlan.InstancePlan> instances) {
     Map<ExecutorPort, String> ports = new HashMap<>();
     for (ExecutorPort executorPort : ExecutorPort.getRequiredPorts()) {
       int port = SysUtils.getFreePort();
@@ -164,7 +168,8 @@ public class LocalScheduler implements IScheduler, IScalable {
         }
         remoteDebuggingPorts.add(String.valueOf(port));
       }
-      ports.put(ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, String.join(",", remoteDebuggingPorts));
+      ports.put(ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS,
+          String.join(",", remoteDebuggingPorts));
     }
 
     String[] executorCmd = SchedulerUtils.getExecutorCommand(config, runtime, container, ports);
@@ -273,8 +278,8 @@ public class LocalScheduler implements IScheduler, IScalable {
   @Override
   public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
     try {
-      updateTopologyManager.updateTopology(request.getCurrentPackingPlan(),
-          request.getProposedPackingPlan());
+      updateTopologyManager.updateTopology(
+          request.getCurrentPackingPlan(), request.getProposedPackingPlan());
     } catch (ExecutionException | InterruptedException e) {
       LOG.log(Level.SEVERE, "Could not update topology for request: " + request, e);
       return false;
@@ -287,9 +292,8 @@ public class LocalScheduler implements IScheduler, IScalable {
     synchronized (processToContainer) {
       for (PackingPlan.ContainerPlan container : containers) {
         if (processToContainer.values().contains(container.getId())) {
-          throw new RuntimeException(String.format(
-              "Found active container for %s, " + "cannot launch a duplicate container.",
-              container.getId()));
+          throw new RuntimeException(String.format("Found active container for %s, "
+              + "cannot launch a duplicate container.", container.getId()));
         }
         startExecutor(container.getId(), container.getInstances());
       }
@@ -299,7 +303,8 @@ public class LocalScheduler implements IScheduler, IScalable {
 
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
-    LOG.log(Level.INFO, "Kill {0} of {1} containers",
+    LOG.log(Level.INFO,
+        "Kill {0} of {1} containers",
         new Object[] {containersToRemove.size(), processToContainer.size()});
 
     synchronized (processToContainer) {
