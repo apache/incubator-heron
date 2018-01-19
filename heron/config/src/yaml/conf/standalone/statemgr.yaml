@@ -2,7 +2,7 @@
 heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:  localhost:2181
+heron.statemgr.connection.string: localhost:2181
 
 # path of the root address to store the state in a local file system
 heron.statemgr.root.path: "/heron"
