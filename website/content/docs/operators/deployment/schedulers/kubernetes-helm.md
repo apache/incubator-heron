@@ -169,6 +169,23 @@ $ helm install heron-charts/heron \
   --set platform=gke
 ```
 
+##### Resource configurations
+
+Helm enables you to supply sets of variables via YAML files. There are currently a handful of different resource configurations that can be applied to your Heron on GKE cluster upon installation:
+
+Configuration | Description
+:-------------|:-----------
+[`gke-small.yaml`](https://github.com/twitter/heron/blob/master/deploy/kubernetes/gcp/resource-configs/gke-small.yaml) | Smaller Heron cluster intended for basic testing, development, and experimentation
+[`gke-large.yaml`](https://github.com/twitter/heron/blob/master/deploy/kubernetes/gcp/resource-configs/gke-large.yaml) | Larger Heron cluster intended for production usage
+
+To apply the `gke-small` configuration, for example:
+
+```bash
+$ helm install heron-charts/heron \
+  --set platform=gke \
+  --values https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/resource-configs/gke-small.yaml
+```
+
 #### Amazon Web Services
 
 To run Heron on Kubernetes on Amazon Web Services (AWS), you'll need to 

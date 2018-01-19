@@ -1,0 +1,32 @@
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Environment where Heron will be running
+# Valid values are as follows
+# "aws" - Amazon Cloud
+# "gke" - Google Container Enginer
+# "minikube" - Kubernetes in a single node
+# "baremetal" - On premise machines
+platform: gke
+
+gke:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 2
+
+  # Number of replicas for pulsar broker and memory requirements
+  brokerReplicas: 3
+  brokerCpuMin: 250m
+  brokerCpuMax: 300m
+
+  # Number of replicas for pulsar proxy and memory requirements
+  proxyReplicas: 3
+  proxyCpuMin: 100m
+  proxyCpuMax: 200m
+
+  # Number of replicas for storage bookies, memory and storage requirements 
+  bookieReplicas: 3
+  bookieCpuMin: 250m
+  bookieCpuMax: 300m
+  bookieJournalCapacity: 2G
+  bookieStorageCapacity: 5G
