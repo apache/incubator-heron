@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:common-spi-java",

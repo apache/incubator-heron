@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#!/usr/bin/env python2.7
 """ The Heron executor is a process that runs on a container and is responsible for starting and
 monitoring the processes of the topology and it's support services."""
 import argparse
@@ -399,13 +400,16 @@ class HeronExecutor(object):
                       '-cp',
                       self.metrics_manager_classpath,
                       metricsmgr_main_class,
-                      metricsManagerId,
-                      port,
-                      self.topology_name,
-                      self.topology_id,
-                      self.heron_internals_config_file,
-                      self.override_config_file,
-                      sink_config_file]
+                      '--id=' + metricsManagerId,
+                      '--port=' + str(port),
+                      '--topology=' + self.topology_name,
+                      '--cluster=' + self.cluster,
+                      '--role=' + self.role,
+                      '--environment=' + self.environment,
+                      '--topology-id=' + self.topology_id,
+                      '--system-config-file=' + self.heron_internals_config_file,
+                      '--override-config-file=' + self.override_config_file,
+                      '--sink-config-file=' + sink_config_file]
 
     return metricsmgr_cmd
 

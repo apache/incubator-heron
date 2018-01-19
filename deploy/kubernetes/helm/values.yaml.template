@@ -1,0 +1,122 @@
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Environment where Heron will be running
+# Valid values are as follows
+# "aws" - Amazon Cloud
+# "gke" - Google Container Enginer
+# "minikube" - Kubernetes in a single node
+# "baremetal" - On premise machines
+platform: minikube
+
+# Heron image to use
+image: heron/heron:VERSION
+
+# Heron image pull policy
+imagePullPolicy: IfNotPresent
+
+# Kubernetes namespace to launch
+namespace: default
+
+minikube:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 1
+
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 1
+  bookieCpuMin: 100m
+  bookieCpuMax: 250m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieReadCacheSize: 32
+  bookieWriteCacheSize: 32
+  bookieJournalCapacity: 1G
+  bookieStorageCapacity: 3G
+
+  # Number of replicas for zookeeper
+  zkReplicas: 1
+
+aws:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for bookkeeper
+  bkReplicas: 3
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+  # cpu mininum and maximum
+  cpuMin: 1000m
+  cpuMax: 2000m
+
+  # memory mininum and maximum
+  memoryMin: 3G
+  memoryMax: 5G
+
+gke:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 3
+  bookieCpuMin: 1000m
+  bookieCpuMax: 1500m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieJournalCapacity: 5G
+  bookieStorageCapacity: 10G
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+baremetal:
+  # Number of replicas for the job binary in bookkeeper
+  jobReplicas: 3
+
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 3
+  bookieCpuMin: 1000m
+  bookieCpuMax: 1500m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieJournalHostPath: /mnt/disks/ssd0
+  bookieStorageHostPath: /mnt/disks/ssd1
+
+  # Number of replicas for zookeeper
+  zkReplicas: 3
+
+bookkeeper:
+  image: apachedistributedlog/distributedlog:latest
+  imagePullPolicy: IfNotPresent
+
+zookeeper:
+  enabled: true
+  minAvailable: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2G
+    limits:
+      cpu: 1
+      memory: 4G
+  heap: 1G
+  storage: 2G
+  serverPort: 2888
+  leaderElectionPort: 3888
+  clientPort: 2181
+  tickTimeMs: 2000
+  initTicks: 10
+  syncTicks: 5
+  clientCnxns: 60
+  snapRetain: 3
+  purgeHours: 1
+  probeInitialDelaySeconds: 15
+  probeTimeoutSeconds: 5
+  antiAffinity: "hard"
+  logLevel: "INFO"
+  security:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000

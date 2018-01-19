@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # copyright 2016 twitter. all rights reserved.
 #
 # licensed under the apache license, version 2.0 (the "license");

@@ -13,7 +13,7 @@ cc_library(
     ],
     deps = [
         "//heron/proto:proto-cxx",
-        "//third_party/cereal:cereal-cxx"
+        "@com_github_cereal//:cereal-cxx",
     ],
     linkstatic = 1,
 )

@@ -12,8 +12,6 @@ cc_binary(
       "-Iheron/api/src/cpp",
       "-I$(GENDIR)/heron",
       "-I$(GENDIR)/third_party/glog/include",
-      "-I$(GENDIR)/third_party/protobuf/include",
-      "-I$(GENDIR)/third_party/cereal/include",
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
@@ -33,8 +31,6 @@ cc_binary(
       "-Iheron",
       "-I$(GENDIR)/heron",
       "-I$(GENDIR)/third_party/glog/include",
-      "-I$(GENDIR)/third_party/protobuf/include",
-      "-I$(GENDIR)/third_party/cereal/include",
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",
@@ -54,8 +50,6 @@ cc_binary(
       "-Iheron",
       "-I$(GENDIR)/heron",
       "-I$(GENDIR)/third_party/glog/include",
-      "-I$(GENDIR)/third_party/protobuf/include",
-      "-I$(GENDIR)/third_party/cereal/include",
     ],
     deps = [
         "//heron/api/src/cpp:cxx-api",

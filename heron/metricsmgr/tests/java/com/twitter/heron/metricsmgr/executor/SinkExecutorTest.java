@@ -55,7 +55,7 @@ public class SinkExecutorTest {
   private static final String EXCEPTION_FIRST_TIME = "firstTime";
   private static final String EXCEPTION_LOGGING = "logging";
   private static final String RECORD_SOURCE = "source";
-  private static final String RECORD_CONTEXT = "context";
+  private static final String RECORD_CONTEXT = "ecoExecutionContext";
 
   private volatile int processRecordInvoked = 0;
   private volatile int flushInvoked = 0;
@@ -73,7 +73,8 @@ public class SinkExecutorTest {
     communicator = new Communicator<>(null, slaveLooper);
 
     SinkContext sinkContext =
-        new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", new MultiCountMetric());
+        new SinkContextImpl("topology-name", "cluster", "role", "environment",
+            "metricsmgr-id", "sink-id", new MultiCountMetric());
 
     sinkExecutor =
         new SinkExecutor("testSinkId", metricsSink, slaveLooper, communicator, sinkContext);

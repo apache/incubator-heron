@@ -165,8 +165,10 @@ public final class Runtime {
   // working-dir/heron-core
   private static String getHeronDirectory(CommandLine cmd) {
     final String cluster = cmd.getOptionValue(Flag.Cluster.name);
-    return "local".equalsIgnoreCase(cluster)
-        ? Constants.DEFAULT_HERON_LOCAL : Key.HERON_CLUSTER_HOME.getDefaultString();
+    if ("local".equalsIgnoreCase(cluster) || "standalone".equalsIgnoreCase(cluster)) {
+      return Constants.DEFAULT_HERON_LOCAL;
+    }
+    return Key.HERON_CLUSTER_HOME.getDefaultString();
   }
 
   private static String getReleaseFile(String toolsHome, CommandLine cmd) {
@@ -193,7 +195,7 @@ public final class Runtime {
   private static String getToolsHome() throws URISyntaxException {
     final String jarLocation =
         Runtime.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-    return Paths.get(jarLocation).getParent().getParent().toFile().getAbsolutePath();
+    return Paths.get(jarLocation).getParent().getParent().getParent().toFile().getAbsolutePath();
   }
 
   private static Boolean isVerbose(CommandLine cmd) {
@@ -260,6 +262,8 @@ public final class Runtime {
         heronConfigurationDirectory);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH,
         configurationOverrides);
+    contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
+        String.valueOf(port));
 
     server.setHandler(contextHandler);
 

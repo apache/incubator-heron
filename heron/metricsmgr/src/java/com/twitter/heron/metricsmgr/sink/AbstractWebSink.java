@@ -160,6 +160,8 @@ abstract class AbstractWebSink implements IMetricsSink {
 
   @Override
   public void close() {
-    httpServer.stop(0);
+    if (httpServer != null) {
+      httpServer.stop(0);
+    }
   }
 }

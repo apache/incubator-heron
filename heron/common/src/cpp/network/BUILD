@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto", "proto_library")
-
 cc_library(
     name = "network-cxx",
     srcs = [

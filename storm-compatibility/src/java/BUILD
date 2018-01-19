@@ -1,8 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
-load("/tools/rules/javadoc", "java_doc")
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
 
 storm_deps_files = [
     "//heron/api/src/java:api-java-low-level",
@@ -20,12 +19,23 @@ java_doc(
     title = "Heron Storm Compatibility Api Documentation",
 )
 
+java_library(
+    name='storm-compatibility-java-neverlink',
+    srcs = glob(["**/*.java"]),
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    deps = storm_deps_files, 
+    neverlink = 1,
+)
+
 # Kryo is bundled here for integration test
 java_library(
     name='storm-compatibility-java',
     srcs = glob(["**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    deps = storm_deps_files + ["//third_party/java:kryo"],
+    deps = storm_deps_files + [
+        "//eco/src/java:eco-java",
+        "//third_party/java:kryo"
+    ],
 )
 
 java_binary(

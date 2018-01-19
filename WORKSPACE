@@ -145,6 +145,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_httpcomponents_httpmime",
+  artifact = "org.apache.httpcomponents:httpmime:4.4",
+)
+
+maven_jar(
   name = "org_apache_httpcomponents_http_client",
   artifact = "org.apache.httpcomponents:httpclient:4.5.2",
 )
@@ -365,6 +370,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_reef_tang",
+  artifact = "org.apache.reef:tang:" + reef_version
+)
+
+maven_jar(
   name = "org_slf4j_slf4j_api",
   artifact = "org.slf4j:slf4j-api:" + slf4j_version
 )
@@ -377,11 +387,6 @@ maven_jar(
 maven_jar(
   name = "org_yaml_snakeyaml",
   artifact = "org.yaml:snakeyaml:1.15",
-)
-
-maven_jar(
-  name = "org_apache_reef_tang",
-  artifact = "org.apache.reef:tang:" + reef_version
 )
 
 maven_jar(
@@ -729,7 +734,7 @@ maven_jar(
 # End Nomand dependencies
 
 # for pex repos
-PEX_SRC = "https://pypi.python.org/packages/9f/fa/374a621ed7cad3cb9ae90f2c612f527d403de8acbb7e9ba14717526433e8/pex-1.2.11.tar.gz"
+PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"
 PYTEST_WHEEL = "https://pypi.python.org/packages/fd/3e/d326a05d083481746a769fc051ae8d25f574ef140ad4fe7f809a2b63c0f0/pytest-3.1.3-py2.py3-none-any.whl"
 REQUESTS_SRC = "https://pypi.python.org/packages/d9/03/155b3e67fe35fe5b6f4227a8d9e96a14fda828b18199800d161bcefc1359/requests-2.12.3.tar.gz"
@@ -783,11 +788,62 @@ new_http_archive(
 )
 # end pex repos
 
+# 3rdparty C++ dependencies
+http_archive(
+    name = "com_github_gflags_gflags",
+    urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
+    strip_prefix = "gflags-2.2.1",
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+
+new_http_archive(
+    name = "com_google_googletest",
+    urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
+    strip_prefix = "googletest-release-1.8.0",
+    build_file = "third_party/gtest/gtest.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_cereal",
+    urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
+    strip_prefix = "cereal-1.2.2",
+    build_file = "third_party/cereal/cereal.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_jbeder_yaml_cpp",
+    urls = ["https://storage.googleapis.com/heron-packages/yaml-cpp-noboost.tar.gz"],
+    strip_prefix = "yaml-cpp-noboost",
+    build_file = "third_party/yaml-cpp/yaml.BUILD",
+)
+# end 3rdparty C++ dependencies
+
+# for helm
+new_http_archive(
+    name = "helm_mac",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "darwin-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+
+new_http_archive(
+    name = "helm_linux",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    strip_prefix = "linux-amd64",
+    build_file = "third_party/helm/helm.BUILD",
+)
+# end helm
+
 # for docker image building
-git_repository(
+http_archive(
     name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    tag = "v0.3.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.3.0.tar.gz"],
+    strip_prefix = "rules_docker-0.3.0",
 )
 
 load(
@@ -804,6 +860,19 @@ container_pull(
     name = "heron-base",
     registry = "index.docker.io",
     repository = "heron/base",
-    tag = "latest",
+    tag = "0.4.0",
 )
 # end docker image building
+
+# for nomad repo
+new_http_archive(
+    name = "nomad_mac",
+    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_darwin_amd64.zip"],
+    build_file = "third_party/nomad/nomad.BUILD",
+)
+
+new_http_archive(
+    name = "nomad_linux",
+    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
+    build_file = "third_party/nomad/nomad.BUILD",
+)
