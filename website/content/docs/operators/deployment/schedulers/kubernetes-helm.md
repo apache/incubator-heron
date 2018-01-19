@@ -157,19 +157,28 @@ Once the cluster has been successfully created, you'll need to install that clus
 $ gcloud container clusters get-credentials heron-gke-dev-cluster # or heron-gke-prod-cluster
 ```
 
-Once
+Once, the cluster is running (that could take a few minutes), you can initialize Helm on the cluster:
+
+```bash
+$ helm init
+```
+
+Then, you'll need to adjust some RBAC permissions for your cluster:
 
 ```bash
 $ kubectl create serviceaccount tiller \
   --namespace kube-system \
-$ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-$ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+$ kubectl create clusterrolebinding tiller-cluster-rule \
+  --clusterrole cluster-admin \
+  --serviceaccount kube-system:tiller
+$ kubectl patch deploy tiller-deploy \
+  --namespace kube-system \
+  --patch '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 ```
 
-Once, the cluster is running (that could take a few minutes), you can initialize Helm on the cluster and then install Heron:
+Finally, you can install Heron:
 
 ```bash
-$ helm init
 $ helm install heron-charts/heron \
   --set platform=gke
 ```
