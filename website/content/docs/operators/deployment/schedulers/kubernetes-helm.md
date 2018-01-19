@@ -15,9 +15,7 @@ new: true
 
 ## Requirements
 
-In order to install Heron on Kubernetes using Helm, you'll need to have:
-
-* An existing Kubernetes cluster on one of the available [platforms](#specifying-a-platform)
+In order to install Heron on Kubernetes using Helm, you'll need to have an existing Kubernetes cluster on one of the supported [platforms](#specifying-a-platform) (which includes [bare metal](#bare-metal) installations).
 
 ## Installing the Helm client
 
@@ -127,10 +125,10 @@ $ helm install heron-charts/heron \
 
 #### Google Kubernetes Engine
 
-The resources required to run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) vary based on your use case. To run a basic Heron cluster intended for experimentation, you'll need:
+The resources required to run Heron on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) vary based on your use case. To run a basic Heron cluster intended for development and experimentation, you'll need at least:
 
 * 3 nodes
-* n1-standard-2 machines
+* [n1-standard-2](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines
 * 2 SSDs per machine
 
 To create a cluster with those resources using the [gcloud](https://cloud.google.com/sdk/gcloud/) tool:
@@ -145,7 +143,7 @@ $ gcloud container clusters create heron-gke-dev-cluster \
 For a production-ready cluster you'll want a larger cluster with:
 
 * *at least* 8 nodes
-* n1-standard-4 or n1-standard-8 machines (preferably the latter)
+* [n1-standard-4 or n1-standard-8](https://cloud.google.com/compute/docs/machine-types#standard_machine_types) machines (preferably the latter)
 * 2 SSDs per machine
 
 To create such a cluster:
