@@ -14,10 +14,8 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -140,10 +138,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * TODO (jrcrawfo) -- (https://github.com/twitter/heron/issues/1981)
    */
   @Override
-  public Map<Integer, PackingPlan.ContainerPlan>
+  public Set<PackingPlan.ContainerPlan>
       addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     controller.addContainers(containersToAdd);
-    return new HashMap<>();
+    return containersToAdd;
   }
 
   /**

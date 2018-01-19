@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,7 @@
 package com.twitter.heron.scheduler.yarn;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -35,9 +33,8 @@ import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 /**
- * {@link YarnScheduler} in invoked by Heron Scheduler to perform topology actions on REEF
- * cluster. This instance will delegate all topology management functions to
- * {@link HeronMasterDriver}.
+ * {@link YarnScheduler} in invoked by Heron Scheduler to perform topology actions on REEF cluster.
+ * This instance will delegate all topology management functions to {@link HeronMasterDriver}.
  */
 public class YarnScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(YarnScheduler.class.getName());
@@ -95,8 +92,8 @@ public class YarnScheduler implements IScheduler, IScalable {
   @Override
   public boolean onUpdate(UpdateTopologyRequest request) {
     try {
-      updateTopologyManager.updateTopology(
-          request.getCurrentPackingPlan(), request.getProposedPackingPlan());
+      updateTopologyManager.updateTopology(request.getCurrentPackingPlan(),
+          request.getProposedPackingPlan());
     } catch (ExecutionException | InterruptedException e) {
       LOG.log(Level.SEVERE, "Could not update topology for request: " + request, e);
       return false;
@@ -110,14 +107,14 @@ public class YarnScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public Map<Integer, PackingPlan.ContainerPlan>
-      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
     try {
       HeronMasterDriverProvider.getInstance().scheduleHeronWorkers(containersToAdd);
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       throw new RuntimeException("Failed to launch new yarn containers", e);
     }
-    return new HashMap<>();
+    return containersToAdd;
   }
 
   @Override

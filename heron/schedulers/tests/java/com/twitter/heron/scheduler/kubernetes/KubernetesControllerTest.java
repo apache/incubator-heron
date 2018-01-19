@@ -14,8 +14,6 @@
 
 package com.twitter.heron.scheduler.kubernetes;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -74,9 +72,9 @@ public class KubernetesControllerTest {
       }
 
       @Override
-      public Map<Integer, PackingPlan.ContainerPlan>
+      public Set<PackingPlan.ContainerPlan>
           addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-        return new HashMap<>();
+        return containersToAdd;
       }
 
       @Override

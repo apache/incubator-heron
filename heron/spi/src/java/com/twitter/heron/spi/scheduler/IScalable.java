@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.spi.scheduler;
 
-import java.util.Map;
 import java.util.Set;
 
 import com.twitter.heron.classification.InterfaceAudience;
@@ -21,8 +20,8 @@ import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
- * Schedulers that implement {@code IScalable} support scaling topologies up or down by
- * adding or removing containers.
+ * Schedulers that implement {@code IScalable} support scaling topologies up or down by adding or
+ * removing containers.
  */
 @InterfaceAudience.LimitedPrivate
 @InterfaceStability.Unstable
@@ -31,13 +30,9 @@ public interface IScalable {
    * Requests new containers for scaling a topology
    *
    * @param containersToAdd Set of containers to be added by the scheduler
-   * @return Map from container-id assigned by packing algorithm,
-   *             to ContainerPlan with the actual deployed container-id.
-   *         It includes at least all container-ids requesting a remapping,
-   *         but also potentially include container-ids not requesting a remapping.
+   * @return Set of added containers with real ids and resources from the scheduler
    */
-  Map<Integer, PackingPlan.ContainerPlan>
-      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
+  Set<PackingPlan.ContainerPlan> addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
 
   /**
    * Requests containers to be released for down-scaling a topology.

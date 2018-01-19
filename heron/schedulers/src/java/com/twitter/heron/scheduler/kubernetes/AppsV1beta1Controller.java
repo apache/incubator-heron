@@ -126,7 +126,7 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   @Override
-  public Map<Integer, PackingPlan.ContainerPlan>
+  public Set<PackingPlan.ContainerPlan>
       addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     final V1beta1StatefulSet statefulSet;
     try {
@@ -148,7 +148,7 @@ public class AppsV1beta1Controller extends KubernetesController {
           ae.getMessage() + "\netails\n" + ae.getResponseBody());
     }
 
-    return new HashMap<>();
+    return containersToAdd;
   }
 
   @Override
