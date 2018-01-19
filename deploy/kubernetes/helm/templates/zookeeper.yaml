@@ -47,7 +47,7 @@ spec:
             - topologyKey: "kubernetes.io/hostname"
               labelSelector:
                 matchLabels:
-                  app: {{ template "heron.fullname" . }}
+                  app: {{ .Release.Name }}
                   release: {{ .Release.Name | quote }}
       {{- else if eq .Values.zookeeper.antiAffinity "soft" }}
       affinity:

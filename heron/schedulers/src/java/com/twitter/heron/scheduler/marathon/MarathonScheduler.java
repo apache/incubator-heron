@@ -42,19 +42,22 @@ public class MarathonScheduler implements IScheduler {
   private Config config;
   private Config runtime;
   private MarathonController controller;
+  private String marathonGroupId;
 
   @Override
   public void initialize(Config aConfig, Config aRuntime) {
     this.config = aConfig;
     this.runtime = aRuntime;
+    this.marathonGroupId = MarathonConstants.MARATHON_GROUP_PATH + Runtime.topologyName(runtime);
     this.controller = getController();
   }
 
   protected MarathonController getController() {
+
     return new MarathonController(
         MarathonContext.getSchedulerURI(config),
         MarathonContext.getSchedulerAuthToken(config),
-        Runtime.topologyName(runtime),
+        marathonGroupId,
         Context.verbose(config));
   }
 
@@ -127,8 +130,7 @@ public class MarathonScheduler implements IScheduler {
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
-      instance.put(MarathonConstants.ID,
-                   "/" + Runtime.topologyName(runtime) + "/" + Integer.toString(i));
+      instance.put(MarathonConstants.ID, marathonGroupId + "/" + Integer.toString(i));
       instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
       instance.put(MarathonConstants.CPU, containerResource.getCpu());
       instance.set(MarathonConstants.CONTAINER, getContainer(mapper));
@@ -143,7 +145,7 @@ public class MarathonScheduler implements IScheduler {
 
     // Create marathon group for a topology
     ObjectNode appConf = mapper.createObjectNode();
-    appConf.put(MarathonConstants.ID, "/" + Runtime.topologyName(runtime));
+    appConf.put(MarathonConstants.ID, marathonGroupId);
     appConf.set(MarathonConstants.APPS, instances);
 
     return appConf.toString();

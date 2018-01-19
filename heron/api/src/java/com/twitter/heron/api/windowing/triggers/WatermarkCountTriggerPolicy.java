@@ -37,10 +37,6 @@ import java.util.List;
 
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
-import com.twitter.heron.api.windowing.EvictionPolicy;
-import com.twitter.heron.api.windowing.TriggerHandler;
-import com.twitter.heron.api.windowing.TriggerPolicy;
-import com.twitter.heron.api.windowing.WindowManager;
 
 /**
  * A trigger policy that tracks event counts and sets the context for
@@ -48,21 +44,14 @@ import com.twitter.heron.api.windowing.WindowManager;
  *
  * @param <T> the type of event tracked by this policy.
  */
-public class WatermarkCountTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Long> {
+public class WatermarkCountTriggerPolicy<T extends Serializable> extends
+        AbstractBaseTriggerPolicy<T, Long> {
   private final int count;
-  private final TriggerHandler handler;
-  private final EvictionPolicy<T, ?> evictionPolicy;
-  private final WindowManager<T> windowManager;
   private volatile long lastProcessedTs;
-  private boolean started;
 
-  public WatermarkCountTriggerPolicy(int count, TriggerHandler handler, EvictionPolicy<T, ?>
-      evictionPolicy, WindowManager<T> windowManager) {
+  public WatermarkCountTriggerPolicy(int count) {
+    super();
     this.count = count;
-    this.handler = handler;
-    this.evictionPolicy = evictionPolicy;
-    this.windowManager = windowManager;
-    this.started = false;
   }
 
   @Override
@@ -75,11 +64,6 @@ public class WatermarkCountTriggerPolicy<T extends Serializable> implements Trig
   @Override
   public void reset() {
     // NOOP
-  }
-
-  @Override
-  public void start() {
-    started = true;
   }
 
   @Override
