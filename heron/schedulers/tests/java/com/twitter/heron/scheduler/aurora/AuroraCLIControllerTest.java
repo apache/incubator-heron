@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -157,7 +158,32 @@ public class AuroraCLIControllerTest {
                     Matchers.anyListOf(String.class),
                     Matchers.any(StringBuilder.class),
                     Matchers.any(StringBuilder.class));
-    controller.addContainers(containersToAdd);
+    Set<Integer> ret = controller.addContainers(containersToAdd);
+    Assert.assertEquals(containersToAdd.intValue(), ret.size());
+    Mockito.verify(controller)
+        .runProcess(Matchers.eq(expectedCommand), Matchers.any(), Matchers.any());
+  }
+
+  @Test
+  public void testAddContainersFailure() {
+    Integer containersToAdd = 3;
+    List<String> expectedCommand = asList(
+        "aurora job add --wait-until RUNNING %s/0 %s %s",
+        JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
+
+    Mockito.doAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock arg0) throws Throwable {
+        final StringBuilder originalArgument = (StringBuilder) (arg0.getArguments())[2];
+        originalArgument.append("Querying instance statuses: x");
+        return true;
+      }
+    }).when(controller).runProcess(
+                    Matchers.anyListOf(String.class),
+                    Matchers.any(StringBuilder.class),
+                    Matchers.any(StringBuilder.class));
+    Set<Integer> ret = controller.addContainers(containersToAdd);
+    Assert.assertEquals(0, ret.size());
     Mockito.verify(controller)
         .runProcess(Matchers.eq(expectedCommand), Matchers.any(), Matchers.any());
   }

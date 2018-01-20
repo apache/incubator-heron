@@ -190,6 +190,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
     // Do the actual containers adding
     LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
         controller.addContainers(containersToAdd.size()));
+    if (newAddedContainerIds.size() != containersToAdd.size()) {
+      throw new RuntimeException(
+          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          + "; input count was " + containersToAdd.size());
+    }
     Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
     // Do the remapping:
     // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
