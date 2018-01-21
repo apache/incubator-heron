@@ -107,4 +107,12 @@ python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
+T="heron build docker images"
+start_timer "$T"
+python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+  --bazelrc=tools/travis/bazel.rc build\
+  --config=$PLATFORM scripts/images:heron.tar
+end_timer "$T"
+
+
 print_timer_summary

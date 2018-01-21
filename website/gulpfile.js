@@ -71,8 +71,6 @@ gulp.task('sass-dev', function(done) {
 
 // Sass assets
 gulp.task('sass', function(done) {
-  del(['static/css/style*.css']);
-
   gulp.src(SRC.sass)
     .pipe($.sass({
       outputStyle: 'compressed'
@@ -82,8 +80,7 @@ gulp.task('sass', function(done) {
       cascade: true
     }))
     .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css))
-    .pipe(gulp.dest('data/assets/css'));
+    .pipe(gulp.dest(DIST.css));
   done();
 });
 

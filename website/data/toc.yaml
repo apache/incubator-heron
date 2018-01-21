@@ -77,8 +77,10 @@ sections:
         url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
-      - name: Kubernetes
+      - name: Kubernetes by Hand
         url: /docs/operators/deployment/schedulers/kubernetes
+      - name: Kubernetes with Helm
+        url: /docs/operators/deployment/schedulers/kubernetes-helm
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
       - name: Multi-node standalone cluster
