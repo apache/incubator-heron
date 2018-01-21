@@ -24,7 +24,11 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class TupleCache {
-  private final Map<Integer, TupleList> cache = new HashMap<>();
+  private final Map<Integer, TupleList> cache;
+
+  public TupleCache() {
+    this.cache = new HashMap<>();
+  }
 
   protected TupleList get(int destTaskId) {
     TupleList list = cache.get(destTaskId);
