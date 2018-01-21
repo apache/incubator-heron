@@ -259,6 +259,11 @@ public class AppsV1beta1Controller extends KubernetesController {
     statefulSetSpec.serviceName(topologyName);
     statefulSetSpec.setReplicas(Runtime.numContainers(runtimeConfiguration).intValue());
 
+    // Parallel pod management tells the StatefulSet controller to launch or terminate
+    // all Pods in parallel, and not to wait for Pods to become Running and Ready or completely
+    // terminated prior to launching or terminating another Pod.
+    statefulSetSpec.setPodManagementPolicy("Parallel");
+
     // add selector match labels "app=heron" and "topology=topology-name"
     // so the we know which pods to manage
     final V1LabelSelector selector = new V1LabelSelector();
@@ -309,6 +314,10 @@ public class AppsV1beta1Controller extends KubernetesController {
   private V1PodSpec getPodSpec(List<String> executorCommand, Resource resource,
       int numberOfInstances) {
     final V1PodSpec podSpec = new V1PodSpec();
+
+    // set the termination period to 0 so pods can be deleted quickly
+    podSpec.setTerminationGracePeriodSeconds(0L);
+
     podSpec.containers(Collections.singletonList(
         getContainer(executorCommand, resource, numberOfInstances)));
 

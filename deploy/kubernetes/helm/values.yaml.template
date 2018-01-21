@@ -2,16 +2,16 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Environment where Heron will be running
-# Valid values are as follows
-# "aws" - Amazon Cloud
-# "gke" - Google Container Enginer
-# "minikube" - Kubernetes in a single node
-# "baremetal" - On premise machines
+# The environment where Heron will be running
+# The following values are valid:
+# "aws" - Amazon Web Services
+# "gke" - Google Kubernetes Engine
+# "minikube" - Kubernetes on a single local node
+# "baremetal" - On-premise cluster
 platform: minikube
 
 # Heron image to use
-image: heron/heron:0.17.0
+image: heron/heron:VERSION
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
@@ -23,19 +23,19 @@ minikube:
   # Number of replicas for the job binary in bookkeeper
   jobReplicas: 1
 
-  # Number of replicas for bookkeeper
-  bkReplicas: 1
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 1
+  bookieCpuMin: 100m
+  bookieCpuMax: 250m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieReadCacheSize: 32
+  bookieWriteCacheSize: 32
+  bookieJournalCapacity: 1G
+  bookieStorageCapacity: 3G
 
   # Number of replicas for zookeeper
   zkReplicas: 1
-
-  # cpu mininum and maximum
-  cpuMin: 1000m
-  cpuMax: 2000m
-
-  # memory mininum and maximum
-  memoryMin: 1Gi
-  memoryMax: 2Gi
 
 aws:
   # Number of replicas for the job binary in bookkeeper
@@ -52,44 +52,40 @@ aws:
   cpuMax: 2000m
 
   # memory mininum and maximum
-  memoryMin: 3Gi
-  memoryMax: 5Gi
+  memoryMin: 3G
+  memoryMax: 5G
 
 gke:
   # Number of replicas for the job binary in bookkeeper
   jobReplicas: 3
 
-  # Number of replicas for bookkeeper
-  bkReplicas: 3
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 3
+  bookieCpuMin: 1000m
+  bookieCpuMax: 1500m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieJournalCapacity: 5G
+  bookieStorageCapacity: 10G
 
   # Number of replicas for zookeeper
   zkReplicas: 3
-
-  # cpu mininum and maximum
-  cpuMin: 1000m
-  cpuMax: 2000m
-
-  # memory mininum and maximum
-  memoryMin: 3Gi
-  memoryMax: 5Gi
 
 baremetal:
   # Number of replicas for the job binary in bookkeeper
   jobReplicas: 3
 
-  # Number of replicas for bookkeeper
-  bkReplicas: 3
+  # Number of replicas for storage bookies, memory and storage requirements
+  bookieReplicas: 3
+  bookieCpuMin: 1000m
+  bookieCpuMax: 1500m
+  bookieHeapMemory: 256M
+  bookieDirectMemory: 128M
+  bookieJournalHostPath: /mnt/disks/ssd0
+  bookieStorageHostPath: /mnt/disks/ssd1
 
   # Number of replicas for zookeeper
   zkReplicas: 3
-
-  # cpu mininum and maximum
-  cpuMin: 1000m
-  cpuMax: 2000m
-
-  # memory mininum and maximum
-  memoryMin: 3Gi
-  memoryMax: 5Gi
 
 bookkeeper:
   image: apachedistributedlog/distributedlog:latest
@@ -101,12 +97,12 @@ zookeeper:
   resources:
     requests:
       cpu: 500m
-      memory: 2Gi
+      memory: 2G
     limits:
       cpu: 1
-      memory: 4Gi
+      memory: 4G
   heap: 1G
-  storage: 2Gi
+  storage: 2G
   serverPort: 2888
   leaderElectionPort: 3888
   clientPort: 2181

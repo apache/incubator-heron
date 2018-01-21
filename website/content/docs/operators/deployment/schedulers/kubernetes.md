@@ -1,7 +1,10 @@
 ---
-title: Kubernetes
+title: Heron on Kubernetes by hand
+description: Run Heron on the foremost open source container orchestration platform
 new: true
 ---
+
+> This document shows you how to install Heron on Kubernetes in a step-by-step, "by hand" fashion. An easier way to install Heron on Kubernetes is to use the [Helm](https://helm.sh) package manager. For instructions on doing so, see [Heron on Kubernetes with Helm](../kubernetes-helm)).
 
 Heron supports deployment on [Kubernetes](https://kubernetes.io/) (sometimes called **k8s**). Heron deployments on Kubernetes use Docker as the containerization format for Heron topologies and use the Kubernetes API for scheduling.
 

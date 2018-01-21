@@ -18,12 +18,14 @@ import java.util.Map;
 
 import com.twitter.heron.spi.common.Config;
 
+import io.kubernetes.client.models.V1AWSElasticBlockStoreVolumeSource;
 import io.kubernetes.client.models.V1HostPathVolumeSource;
 import io.kubernetes.client.models.V1NFSVolumeSource;
 import io.kubernetes.client.models.V1Volume;
 
 final class Volumes {
 
+  static final String AWS_EBS = "awsElasticBlockStore";
   static final String HOST_PATH = "hostPath";
   static final String NFS = "nfs";
 
@@ -32,6 +34,7 @@ final class Volumes {
   private Volumes() {
     volumes.put(HOST_PATH, new HostPathVolumeFactory());
     volumes.put(NFS, new NfsVolumeFactory());
+    volumes.put(AWS_EBS, new AwsEbsVolumeFactory());
   }
 
   static Volumes get() {
@@ -50,12 +53,15 @@ final class Volumes {
     V1Volume create(Config config);
   }
 
+  private static V1Volume newVolume(Config config) {
+    final String volumeName = KubernetesContext.getVolumeName(config);
+    return new V1Volume().name(volumeName);
+  }
+
   static class HostPathVolumeFactory implements VolumeFactory {
     @Override
     public V1Volume create(Config config) {
-      final String volumeName = KubernetesContext.getVolumeName(config);
-      final V1Volume volume = new V1Volume()
-          .name(volumeName);
+      final V1Volume volume = newVolume(config);
 
       final String path = KubernetesContext.getHostPathVolumePath(config);
       final V1HostPathVolumeSource hostPathVolume =
@@ -70,8 +76,7 @@ final class Volumes {
   static class NfsVolumeFactory implements VolumeFactory {
     @Override
     public V1Volume create(Config config) {
-      final String volumeName = KubernetesContext.getVolumeName(config);
-      final V1Volume volume = new V1Volume().name(volumeName);
+      final V1Volume volume = newVolume(config);
 
       final String path = KubernetesContext.getNfsVolumePath(config);
       final String server = KubernetesContext.getNfsServer(config);
@@ -80,6 +85,23 @@ final class Volumes {
               .path(path)
               .server(server);
       volume.setNfs(nfsVolumeSource);
+
+      return volume;
+    }
+  }
+
+  static class AwsEbsVolumeFactory implements VolumeFactory {
+    @Override
+    public V1Volume create(Config config) {
+      final V1Volume volume = newVolume(config);
+
+      final String volumeId = KubernetesContext.getAwsEbsVolumeId(config);
+      final String fsType = KubernetesContext.getAwsEbsFsType(config);
+      V1AWSElasticBlockStoreVolumeSource awsElasticBlockStoreVolumeSource =
+          new V1AWSElasticBlockStoreVolumeSource()
+              .volumeID(volumeId)
+              .fsType(fsType);
+      volume.setAwsElasticBlockStore(awsElasticBlockStoreVolumeSource);
 
       return volume;
     }
