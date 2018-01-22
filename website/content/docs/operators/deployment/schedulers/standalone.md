@@ -22,7 +22,7 @@ You can easily do this by running the following command:
 $ heron-admin standalone set
 ```
 
-That will open up an `inventory.yaml` file in Vim that initially looks like this:
+That will open up an `inventory.yaml` file in whichever editor is specified in your `EDITOR` environment variable. The default is [Vim](http://www.vim.org/). That YAML file looks like this:
 
 ```yaml
 cluster:
@@ -31,9 +31,7 @@ zookeepers:
 - 127.0.0.1
 ```
 
-You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. To set the editor to edit mode, hit the **A** key; when you're finished editing, hit the **Esc** key to exit edit mode; to save changes, type **:wq** and hit **Enter**.
-
-Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
+You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
 
 > To run Heron in standalone mode locally on your laptop, use the defaults that are already provided in the `inventory.yaml` file.
 
