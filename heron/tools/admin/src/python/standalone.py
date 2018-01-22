@@ -180,7 +180,7 @@ def run(command, parser, cl_args, unknown_args):
     update_config_files(cl_args)
   elif action == Action.GET:
     action_type = cl_args["type"]
-    if action_type == Get.HERON_TRACKER_URL:
+    if action_type == Get.SERVICE_URL:
       print get_service_url(cl_args)
     elif action_type == Get.HERON_UI_URL:
       print get_heron_ui_url(cl_args)
