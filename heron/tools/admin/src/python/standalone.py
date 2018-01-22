@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' standalone.py '''
+from collections import OrderedDict
 from subprocess import call
 import subprocess
 import sys
@@ -24,6 +25,7 @@ import requests
 import time
 import netifaces
 import yaml
+import json
 
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result   import SimpleResult, Status
@@ -341,24 +343,30 @@ def get_heron_ui_url(cl_args):
   return "http://%s:8889" % list(roles[Role.MASTERS])[0]
 
 def print_cluster_info(cl_args):
-  roles = read_and_parse_roles(cl_args)
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
-  zookeepers = roles[Role.ZOOKEEPERS]
-  cluster = roles[Role.CLUSTER]
-  print "Cluster:"
-  print " - Total # of nodes: %s" % len(cluster)
-  print " - Nodes: %s" % cluster
-  print "\n"
-  print "Roles:"
-  print " - Master Servers: %s" % list(masters)
-  print " - Slave Servers: %s" % list(slaves)
-  print " - Zookeeper Servers: %s" % list(zookeepers)
-  print "\n"
-  print "URLs:"
-  print " - Service URL: %s" % get_service_url(cl_args)
-  print " - Heron UI URL: %s" % get_heron_ui_url(cl_args)
-  print " - Heron Tracker URL: %s" % get_heron_tracker_url(cl_args)
+  '''
+  get cluster info for standalone cluster
+  '''
+  parsed_roles = read_and_parse_roles(cl_args)
+  masters = list(parsed_roles[Role.MASTERS])
+  slaves = list(parsed_roles[Role.SLAVES])
+  zookeepers = list(parsed_roles[Role.ZOOKEEPERS])
+  cluster = list(parsed_roles[Role.CLUSTER])
+
+  info = OrderedDict()
+  info['numNodes'] = len(cluster)
+  info['nodes'] = cluster
+  roles = OrderedDict()
+  roles['masters'] = masters
+  roles['slaves'] = slaves
+  roles['zookeepers'] = zookeepers
+  urls = OrderedDict()
+  urls['serviceUrl'] = get_service_url(cl_args)
+  urls['heronUi'] = get_heron_ui_url(cl_args)
+  urls['heronTracker'] = get_heron_tracker_url(cl_args)
+  info['roles'] = roles
+  info['urls'] = urls
+
+  print json.dumps(info, indent=2)
 
 def add_additional_args(parsers):
   '''
