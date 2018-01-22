@@ -352,6 +352,8 @@ def print_cluster_info(cl_args):
   zookeepers = list(parsed_roles[Role.ZOOKEEPERS])
   cluster = list(parsed_roles[Role.CLUSTER])
 
+  # OrderedDicts are used here so that the key order can be
+  # specified directly
   info = OrderedDict()
   info['numNodes'] = len(cluster)
   info['nodes'] = cluster
@@ -578,7 +580,7 @@ def wait_for_job_to_start(single_master, job):
         raise RuntimeError()
     except:
       Log.debug(sys.exc_info()[0])
-      Log.info("Waiting for apiserver to come up... %s" % i)
+      Log.info("Waiting for %s to come up... %s" % (job, i))
       time.sleep(1)
       if i > 20:
         Log.error("Failed to start Nomad Cluster!")
