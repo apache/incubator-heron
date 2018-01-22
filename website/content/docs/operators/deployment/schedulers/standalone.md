@@ -70,6 +70,14 @@ You should see output like this:
 
 If you see the `Heron standalone cluster complete!` message, that means that the cluster is ready for you to [submit](#submitting-a-topology) and manage topologies.
 
+You can stop the cluster at any time using the `stop` command:
+
+```bash
+$ heron-admin standalone cluster stop
+```
+
+You will be prompted to confirm that you want to stop the cluster by typing **yes** or **y** (or **no** or **n** if you don't want to). If you enter **yes** or **y** and press **Enter**, all Heron-related jobs will be de-scheduled on Nomad.
+
 ## Submitting a topology
 
 Once your standalone cluster is up and running, you can submit and manage topologies using the [Heron CLI tool](../../../heron-cli) and specifying the `standalone` cluster. Here's an example topology submission command:
