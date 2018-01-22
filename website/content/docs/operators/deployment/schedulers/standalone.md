@@ -6,22 +6,16 @@ Heron enables you to easily run a multi-node cluster in **standalone mode**. The
 
 ## Installation
 
-You can use Heron in standalone mode using the normal [Heron CLI](../../../heron-cli) tool, which can be installed using the instructions [here](../../../../getting-started).
+You can use Heron in standalone mode using the `heron-admin` CLI tool, which can be installed using the instructions [here](../../../../getting-started).
 
 ## Configuration
 
-Once you have the Heron CLI tool installed, you need to provide a list of hosts for:
+Once you have the `heron-admin` CLI tool installed, you need to provide a list of hosts for both the Heron cluster itself and for [ZooKeeper](https://zookeeper.apache.org).
 
-* Heron master nodes
-* Heron slave nodes
-* ZooKeeper nodes
-
-You can easily do this by running the following commands:
+You can easily do this by running the following command:
 
 ```bash
-$ heron standalone set masters
-$ heron standalone set slaves
-$ heron standalone set zookeepers
+$ heron-admin standalone set
 ```
 
 Each of these commands will open up a configuration file that you can edit in Vim. To edit the file, type **a** and add each host to the existing list, separated by line. Here's an example:
