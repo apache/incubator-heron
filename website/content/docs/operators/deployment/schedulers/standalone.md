@@ -97,7 +97,45 @@ At any time, you can retrieve information about your standalone cluster by runni
 $ heron-admin standalone info
 ```
 
-This will return a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker).
+This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker). Here is a cluster info JSON string if all defaults are retained:
+
+```json
+{
+  "numNodes": 1,
+  "nodes": [
+    "127.0.0.1"
+  ],
+  "roles": {
+    "masters": [
+      "127.0.0.1"
+    ],
+    "slaves": [
+      "127.0.0.1"
+    ],
+    "zookeepers": [
+      "127.0.0.1"
+    ]
+  },
+  "urls": {
+    "serviceUrl": "http://127.0.0.1:9000",
+    "heronUi": "http://127.0.0.1:8889",
+    "heronTracker": "http://127.0.0.1:8888"
+  }
+}
+```
+
+You can also get more specific bits of info using the `get` command:
+
+```bash
+# Heron Tracker URL
+$ heron-admin standalone get heron-tracker-url
+
+# Heron UI URL
+$ heron-admin standalone get heron-ui-url
+
+# Heron cluster service URL
+$ heron-admin standalone get service-url
+```
 
 ## Managing Nomad
 
