@@ -2,6 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "//tools/rules:genproto.bzl",
+    "proto_library",
+)
+
 proto_library(
     name="extra_actions_proto",
     src = "extra_actions_base.proto",
