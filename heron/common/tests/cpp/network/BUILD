@@ -1,5 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "@//tools/rules:genproto.bzl",
+    "proto_library",
+)
+
 proto_library(
     name = "proto_unittests",
     src = "unittests.proto",
