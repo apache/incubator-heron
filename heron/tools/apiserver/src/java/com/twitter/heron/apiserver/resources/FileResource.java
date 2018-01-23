@@ -97,10 +97,6 @@ public class FileResource extends HeronResource {
 
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
 
-    if (StringUtil.isNotBlank(getDownloadHostName())) {
-      hostname = getDownloadHostName();
-    }
-
     final String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
 
     final String uploadedFileLocation
@@ -118,7 +114,7 @@ public class FileResource extends HeronResource {
     }
 
     String uri = String.format("http://%s:%s/api/v1/file/download/%s",
-        (hostname != null) ? hostname : ip, getPort(), fileName);
+        getHostNameOrIP(), getPort(), fileName);
 
     return Response.status(Response.Status.OK).entity(uri).build();
   }
@@ -155,6 +151,14 @@ public class FileResource extends HeronResource {
     final Config.Builder builder = Config.newBuilder().putAll(getBaseConfiguration());
     builder.put(Key.VERBOSE, Logging.isVerbose());
     return Config.toLocalMode(builder.build());
+  }
+
+  private String getHostNameOrIP() {
+    // Override hostname if provided in flags
+    if (StringUtil.isNotBlank(getDownloadHostName())) {
+      hostname = getDownloadHostName();
+    }
+    return (hostname != null) ? hostname : ip.toString();
   }
 
 }
