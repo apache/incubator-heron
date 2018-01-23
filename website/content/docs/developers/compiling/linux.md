@@ -21,8 +21,20 @@ $ sudo apt-get upgrade -y
 ### Step 2 --- Install required libraries
 
 ```bash
-$ sudo apt-get install git build-essential automake cmake libtool-bin zip \
+$ sudo apt-get install git build-essential automake libtool-bin zip \
   libunwind-setjmp0-dev zlib1g-dev unzip pkg-config python-setuptools -y
+```
+
+In addition, you'll also need to install [cmake](https://cmake.org/) version
+2.2.3 (this is *not* the default version installed by `apt-get`):
+
+```bash
+$ wget http://www.cmake.org/files/v2.2/cmake-2.2.3.tar.gz
+$ tar xvf cmake-2.2.2.tar.gz
+$ cd cmake-2.2.3
+$ ./configure
+$ make
+$ make install
 ```
 
 #### Step 3 --- Set the following environment variables
@@ -44,9 +56,9 @@ $ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh
-chmod +x /tmp/bazel.sh
-/tmp/bazel.sh --user
+$ wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
+$ chmod +x /tmp/bazel.sh
+$ /tmp/bazel.sh --user
 ```
 
 Make sure to download the appropriate version of Bazel (currently {{%
@@ -78,13 +90,13 @@ $ ./bazel_configure.py
 ### Step 10 --- Build the project
 
 ```bash
-$ bazel build --config=ubuntu heron/...  
+$ bazel build --config=ubuntu heron/...
 ```
 
 ### Step 11 --- Build the packages
 
 ```bash
-$ bazel build --config=ubuntu scripts/packages:binpkgs  
+$ bazel build --config=ubuntu scripts/packages:binpkgs
 $ bazel build --config=ubuntu scripts/packages:tarpkgs
 ```
 
@@ -92,7 +104,8 @@ This will install Heron packages in the `bazel-bin/scripts/packages/` directory.
 
 ## Manually Installing Libraries
 
-If you encounter errors with [libunwind](http://www.nongnu.org/libunwind), [libtool](https://www.gnu.org/software/libtool), or
+If you encounter errors with [libunwind](http://www.nongnu.org/libunwind),
+[libtool](https://www.gnu.org/software/libtool), or
 [gperftools](https://github.com/gperftools/gperftools/releases), we recommend
 installing them manually.
 
