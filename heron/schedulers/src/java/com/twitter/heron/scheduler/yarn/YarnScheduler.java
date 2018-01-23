@@ -108,12 +108,14 @@ public class YarnScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
     try {
       HeronMasterDriverProvider.getInstance().scheduleHeronWorkers(containersToAdd);
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       throw new RuntimeException("Failed to launch new yarn containers", e);
     }
+    return containersToAdd;
   }
 
   @Override

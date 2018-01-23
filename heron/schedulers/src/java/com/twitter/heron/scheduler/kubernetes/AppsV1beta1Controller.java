@@ -127,7 +127,8 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     final V1beta1StatefulSet statefulSet;
     try {
       statefulSet = getStatefulSet();
@@ -147,6 +148,8 @@ public class AppsV1beta1Controller extends KubernetesController {
       throw new TopologyRuntimeManagementException(
           ae.getMessage() + "\netails\n" + ae.getResponseBody());
     }
+
+    return containersToAdd;
   }
 
   @Override
