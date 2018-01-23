@@ -64,7 +64,7 @@ public class FileResource extends HeronResource {
       ip = InetAddress.getLocalHost();
       hostname = ip.getHostName();
     } catch (UnknownHostException e) {
-      LOG.info("Failed or resolve IP address of localhost");
+      LOG.info("Failed to resolve IP address of localhost");
     }
   }
 
@@ -156,9 +156,9 @@ public class FileResource extends HeronResource {
   private String getHostNameOrIP() {
     // Override hostname if provided in flags
     if (StringUtil.isNotBlank(getDownloadHostName())) {
-      hostname = getDownloadHostName();
+      return getDownloadHostName();
     }
-    return (hostname != null) ? hostname : ip.toString();
+    return (hostname != null) ? hostname : ( (ip != null) ? ip.toString() : "");
   }
 
 }
