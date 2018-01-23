@@ -73,7 +73,7 @@ public final class Runtime {
         .build();
 
     final Option baseTemplate = Option.builder()
-        .desc("Base configuration to use for deloying topologies")
+        .desc("Base configuration to use for deploying topologies")
         .longOpt(Flag.BaseTemplate.name)
         .hasArg()
         .argName(Flag.BaseTemplate.name)

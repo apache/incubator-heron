@@ -31,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -51,6 +52,9 @@ public class FileResource extends HeronResource {
 
   private static final String FILE_SYSTEM_DIRECTORY
       = "heron.apiserver.http.file.system.directory";
+
+  private static final String DOWNLOAD_HOSTNAME_OVERRIDE
+      = "heron.apiserver.http.download.hostname";
 
   private static InetAddress ip;
   private static String hostname;
@@ -89,6 +93,11 @@ public class FileResource extends HeronResource {
     }
 
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
+    String downloadHostNameOverride = config.getStringValue(DOWNLOAD_HOSTNAME_OVERRIDE);
+
+    if(StringUtil.isNotBlank(downloadHostNameOverride)){
+        hostname = downloadHostNameOverride;
+    }
 
     String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
 
