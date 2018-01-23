@@ -158,7 +158,7 @@ public class FileResource extends HeronResource {
     if (StringUtil.isNotBlank(getDownloadHostName())) {
       return getDownloadHostName();
     }
-    return (hostname != null) ? hostname : ( (ip != null) ? ip.toString() : "");
+    return (hostname != null) ? hostname : ((ip != null) ? ip.toString() : "");
   }
 
 }
