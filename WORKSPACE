@@ -6,7 +6,7 @@ jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-protobuf_version = "3.4.0"
+protobuf_version = "3.5.1"
 distributedlog_version = "0.5.0"
 
 # heron api server
@@ -797,8 +797,8 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
+    urls = ["https://github.com/google/protobuf/archive/v3.5.1.tar.gz"],
+    strip_prefix = "protobuf-3.5.1",
 )
 
 new_http_archive(
