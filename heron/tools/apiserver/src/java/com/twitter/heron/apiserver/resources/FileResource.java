@@ -96,10 +96,9 @@ public class FileResource extends HeronResource {
     }
 
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
-    String downloadHostNameOverride = config.getStringValue(DOWNLOAD_HOSTNAME_OVERRIDE);
 
-    if (StringUtil.isNotBlank(downloadHostNameOverride)) {
-        hostname = downloadHostNameOverride;
+    if (StringUtil.isNotBlank(getDownloadHostName())) {
+      hostname = getDownloadHostName();
     }
 
     final String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();

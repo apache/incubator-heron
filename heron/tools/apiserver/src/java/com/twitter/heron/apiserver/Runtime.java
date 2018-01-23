@@ -54,7 +54,8 @@ public final class Runtime {
     Port("port"),
     Property("D"),
     ReleaseFile("release-file"),
-    Verbose("verbose");
+    Verbose("verbose"),
+    DownloadHostName("download-hostname");
 
     final String name;
 
@@ -119,6 +120,14 @@ public final class Runtime {
         .required(false)
         .build();
 
+    final Option downloadHostName = Option.builder()
+        .desc("Download Hostname Override")
+        .longOpt(Flag.DownloadHostName.name)
+        .hasArg()
+        .argName(Flag.DownloadHostName.name)
+        .required(false)
+        .build();
+
     return new Options()
         .addOption(baseTemplate)
         .addOption(cluster)
@@ -126,7 +135,8 @@ public final class Runtime {
         .addOption(port)
         .addOption(release)
         .addOption(property)
-        .addOption(verbose);
+        .addOption(verbose)
+        .addOption(downloadHostName);
   }
 
   private static Options constructHelpOptions() {
@@ -187,6 +197,13 @@ public final class Runtime {
     return Constants.DEFAULT_PORT;
   }
 
+  private static String getDownloadHostName(CommandLine cmd) {
+    if (cmd.hasOption(Flag.DownloadHostName.name)) {
+      return String.valueOf(cmd.getOptionValue(Flag.DownloadHostName.name));
+    }
+    return null;
+  }
+
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
         cmd.getOptionProperties(Flag.Property.name));
@@ -240,6 +257,7 @@ public final class Runtime {
     final String releaseFile = getReleaseFile(toolsHome, cmd);
     final String configurationOverrides = loadOverrides(cmd);
     final int port = getPort(cmd);
+    final String downloadHostName = getDownloadHostName(cmd);
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
@@ -264,6 +282,8 @@ public final class Runtime {
         configurationOverrides);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
         String.valueOf(port));
+    contextHandler.setAttribute(HeronResource.ATTRIBUTE_DOWNLOAD_HOSTNAME,
+        String.valueOf(downloadHostName));
 
     server.setHandler(contextHandler);
 
