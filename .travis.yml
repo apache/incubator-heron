@@ -42,8 +42,6 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
-  - which cmake
-  - cmake --version
   - which python
   - python -V
   - which python2.7
