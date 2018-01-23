@@ -22,7 +22,7 @@ You can easily do this by running the following command:
 $ heron-admin standalone set
 ```
 
-That will open up an `inventory.yaml` file in Vim that initially looks like this:
+That will open up an `inventory.yaml` file in whichever editor is specified in your `EDITOR` environment variable. The default is [Vim](http://www.vim.org/). That YAML file looks like this:
 
 ```yaml
 cluster:
@@ -31,9 +31,7 @@ zookeepers:
 - 127.0.0.1
 ```
 
-You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. To set the editor to edit mode, hit the **A** key; when you're finished editing, hit the **Esc** key to exit edit mode; to save changes, type **:wq** and hit **Enter**.
-
-Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
+You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
 
 > To run Heron in standalone mode locally on your laptop, use the defaults that are already provided in the `inventory.yaml` file.
 
@@ -70,6 +68,14 @@ You should see output like this:
 
 If you see the `Heron standalone cluster complete!` message, that means that the cluster is ready for you to [submit](#submitting-a-topology) and manage topologies.
 
+You can stop the cluster at any time using the `stop` command:
+
+```bash
+$ heron-admin standalone cluster stop
+```
+
+You will be prompted to confirm that you want to stop the cluster by typing **yes** or **y** (or **no** or **n** if you don't want to). If you enter **yes** or **y** and press **Enter**, all Heron-related jobs will be de-scheduled on Nomad.
+
 ## Submitting a topology
 
 Once your standalone cluster is up and running, you can submit and manage topologies using the [Heron CLI tool](../../../heron-cli) and specifying the `standalone` cluster. Here's an example topology submission command:
@@ -91,7 +97,45 @@ At any time, you can retrieve information about your standalone cluster by runni
 $ heron-admin standalone info
 ```
 
-This will return a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker).
+This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker). Here is a cluster info JSON string if all defaults are retained:
+
+```json
+{
+  "numNodes": 1,
+  "nodes": [
+    "127.0.0.1"
+  ],
+  "roles": {
+    "masters": [
+      "127.0.0.1"
+    ],
+    "slaves": [
+      "127.0.0.1"
+    ],
+    "zookeepers": [
+      "127.0.0.1"
+    ]
+  },
+  "urls": {
+    "serviceUrl": "http://127.0.0.1:9000",
+    "heronUi": "http://127.0.0.1:8889",
+    "heronTracker": "http://127.0.0.1:8888"
+  }
+}
+```
+
+You can also get more specific bits of info using the `get` command:
+
+```bash
+# Heron Tracker URL
+$ heron-admin standalone get heron-tracker-url
+
+# Heron UI URL
+$ heron-admin standalone get heron-ui-url
+
+# Heron cluster service URL
+$ heron-admin standalone get service-url
+```
 
 ## Managing Nomad
 
