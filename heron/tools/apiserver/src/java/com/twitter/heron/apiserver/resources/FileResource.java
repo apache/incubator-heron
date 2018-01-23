@@ -68,6 +68,9 @@ public class FileResource extends HeronResource {
     }
   }
 
+/**
+ * Endpoints for artifacts upload
+ */
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -95,13 +98,13 @@ public class FileResource extends HeronResource {
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
     String downloadHostNameOverride = config.getStringValue(DOWNLOAD_HOSTNAME_OVERRIDE);
 
-    if(StringUtil.isNotBlank(downloadHostNameOverride)){
+    if (StringUtil.isNotBlank(downloadHostNameOverride)) {
         hostname = downloadHostNameOverride;
     }
 
-    String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
+    final String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
 
-    String uploadedFileLocation
+    final String uploadedFileLocation
         = uploadDir + "/" + fileName;
 
     // save it
@@ -121,6 +124,9 @@ public class FileResource extends HeronResource {
     return Response.status(Response.Status.OK).entity(uri).build();
   }
 
+/**
+ * Endpoints for artifacts download
+ */
   @GET
   @Path("/download/{file}")
   public Response downloadPdfFile(final @PathParam("file") String file) {
