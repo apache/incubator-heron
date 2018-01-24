@@ -17,6 +17,7 @@
 ''' kill.py '''
 from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.cli_helper as cli_helper
+import heron.tools.common.src.python.utils.config as config
 
 def create_parser(subparsers):
   '''
@@ -26,7 +27,7 @@ def create_parser(subparsers):
   parser = cli_helper.create_parser(subparsers, 'kill', 'Kill a topology')
 
   parser.add_argument(
-      'skip-runtime-validation',
+      '--skip-runtime-validation',
       default=False,
       help='Skip runtime validation. This option should only be used when the topology is running '
            'in an unexpected state and can\'t be killed without this option')
@@ -44,11 +45,14 @@ def run(command, parser, cl_args, unknown_args):
   :return:
   '''
   Log.debug("Kill Args: %s", cl_args)
-  skip_runtime_validation = cl_args['skip-runtime-validation']
 
   if cl_args['deploy_mode'] == config.SERVER_MODE:
-    dict_extra_args = {"skip_runtime_validation": str(skip_runtime_validation)}
+    dict_extra_args = {}
+    if cl_args['skip-runtime-validation']:
+      dict_extra_args['skip_runtime_validation'] = True
     return cli_helper.run_server(command, cl_args, "kill topology", extra_args=dict_extra_args)
   else:
-    list_extra_args = ["--skip_runtime_validation", str(skip_runtime_validation)]
+    list_extra_args = []
+    if cl_args['skip-runtime-validation']:
+      list_extra_args.append('--skip_runtime_validation')
     return cli_helper.run_direct(command, cl_args, "kill topology", extra_args=list_extra_args)

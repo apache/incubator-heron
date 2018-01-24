@@ -262,11 +262,11 @@ public class RuntimeManagerMain {
 
     // Optional argument in the case of kill
     // This option can be useful when a topolgoy is not "fully killed",
-    // a.k.a. topology is killed but data clean up is not successful,
-    // to skip the runtime validation in order to run the kill command again.
+    // for example, topology is killed but data clean up is not successful,
+    // to skip the runtime validation in order to run the kill command again
     Boolean skipRuntimeValidation = false;
     if (cmd.hasOption("skip_runtime_validation")) {
-      skipRuntimeValidation = cmd.getOptionValue("skip_runtime_validation");
+      skipRuntimeValidation = true;
     }
 
     Boolean dryRun = false;
@@ -395,7 +395,11 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateRuntimeManage(adaptor, topologyName);
+      if (!config.getBooleanValue(Key.SKIP_RUNTIME_VALIDATION)) {
+        validateRuntimeManage(adaptor, topologyName);
+      } else {
+        LOG.log(Level.FINE, "Skip runntime validation flag is set to true. Run the command now");
+      }
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
