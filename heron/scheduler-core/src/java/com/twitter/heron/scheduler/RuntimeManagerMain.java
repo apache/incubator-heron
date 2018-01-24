@@ -398,8 +398,8 @@ public class RuntimeManagerMain {
       if (!config.getBooleanValue(Key.SKIP_RUNTIME_VALIDATION)) {
         validateRuntimeManage(adaptor, topologyName);
       } else {
-        LOG.log(Level.FINE, "The skip_runtime_validation flag is set to true. " +
-          "Bypass validation and run command directly");
+        LOG.log(Level.FINE, "The skip_runtime_validation flag is set to true. "
+            + "Bypass validation and run command {0} directly", command);
       }
 
       // 2. Try to manage topology if valid
