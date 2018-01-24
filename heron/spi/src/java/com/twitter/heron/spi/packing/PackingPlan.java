@@ -123,11 +123,15 @@ public class PackingPlan {
    * @return String describing component ram distribution
    */
   public String getComponentRamDistribution() {
+    // Generate a map with the minimal ram size for each component
     Map<String, ByteAmount> ramMap = new HashMap<>();
-    // The implementation assumes instances for the same component require same ram
     for (ContainerPlan containerPlan : this.getContainers()) {
       for (InstancePlan instancePlan : containerPlan.getInstances()) {
-        ramMap.put(instancePlan.getComponentName(), instancePlan.getResource().getRam());
+        ByteAmount newRam = instancePlan.getResource().getRam();
+        ByteAmount currentRam = ramMap.get(instancePlan.getComponentName());
+        if (currentRam == null || currentRam.asBytes() > newRam.asBytes()) {
+          ramMap.put(instancePlan.getComponentName(), newRam);
+        }
       }
     }
 

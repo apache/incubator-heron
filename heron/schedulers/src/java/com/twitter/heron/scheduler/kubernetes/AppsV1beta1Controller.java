@@ -52,6 +52,7 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1ResourceRequirements;
+import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1Volume;
 import io.kubernetes.client.models.V1VolumeMount;
 import io.kubernetes.client.models.V1beta1StatefulSet;
@@ -126,7 +127,8 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     final V1beta1StatefulSet statefulSet;
     try {
       statefulSet = getStatefulSet();
@@ -146,6 +148,8 @@ public class AppsV1beta1Controller extends KubernetesController {
       throw new TopologyRuntimeManagementException(
           ae.getMessage() + "\netails\n" + ae.getResponseBody());
     }
+
+    return containersToAdd;
   }
 
   @Override
@@ -167,7 +171,7 @@ public class AppsV1beta1Controller extends KubernetesController {
       doPatch(newSpec);
     } catch (ApiException e) {
       throw new TopologyRuntimeManagementException(
-          e.getMessage() + "\netails\n" + e.getResponseBody());
+          e.getMessage() + "\ndetails\n" + e.getResponseBody());
     }
   }
 
@@ -318,12 +322,31 @@ public class AppsV1beta1Controller extends KubernetesController {
     // set the termination period to 0 so pods can be deleted quickly
     podSpec.setTerminationGracePeriodSeconds(0L);
 
+    // set the pod tolerations so pods are rescheduled when nodes go down
+    // https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#taint-based-evictions
+    podSpec.setTolerations(getTolerations());
+
     podSpec.containers(Collections.singletonList(
         getContainer(executorCommand, resource, numberOfInstances)));
 
     addVolumesIfPresent(podSpec);
 
     return podSpec;
+  }
+
+  private List<V1Toleration> getTolerations() {
+    final List<V1Toleration> tolerations = new ArrayList<>();
+    KubernetesConstants.TOLERATIONS.forEach(t -> {
+      final V1Toleration toleration =
+          new V1Toleration()
+              .key(t)
+              .operator("Exists")
+              .effect("NoExecute")
+              .tolerationSeconds(10L);
+      tolerations.add(toleration);
+    });
+
+    return tolerations;
   }
 
   private void addVolumesIfPresent(V1PodSpec spec) {

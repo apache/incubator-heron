@@ -138,8 +138,10 @@ public class KubernetesScheduler implements IScheduler, IScalable {
    * TODO (jrcrawfo) -- (https://github.com/twitter/heron/issues/1981)
    */
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan>
+      addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
     controller.addContainers(containersToAdd);
+    return containersToAdd;
   }
 
   /**

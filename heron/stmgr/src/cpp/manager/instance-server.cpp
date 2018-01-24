@@ -358,12 +358,6 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " has not yet connected to us. Dropping...";
-  } else if (droptuples_upon_backpressure_ && iter->second->conn_->hasCausedBackPressure()) {
-    LOG_EVERY_N(ERROR, 100) << "task_id " << task_id << " is causing backpressure, so dropping "
-                            << "tuples stream worth " << _message->set().size() << " to it since "
-                            << "droptuples_upon_backpressure is set to true";
-    // Ideally we would have counted the numbers lost, but we cannot since the tuples are in
-    // encoded form. Not worth deser them just to count
   } else {
     SendMessage(iter->second->conn_, _message->set().size(),
                 heron_tuple_set_2_, _message->set().c_str());
