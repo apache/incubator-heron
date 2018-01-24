@@ -48,14 +48,15 @@ public enum Key {
   STATEFUL_YAML            ("heron.config.file.stateful.yaml",  "${HERON_CONF}/stateful.yaml"),
 
   //keys for config provided in the command line
-  CLUSTER                  ("heron.config.cluster",             Type.STRING),
-  ROLE                     ("heron.config.role",                Type.STRING),
-  ENVIRON                  ("heron.config.environ",             Type.STRING),
-  SUBMIT_USER              ("heron.config.submit_user",         Type.STRING),
-  DRY_RUN                  ("heron.config.dry_run",             Boolean.FALSE),
-  DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type", Type.DRY_RUN_FORMAT_TYPE),
-  VERBOSE                  ("heron.config.verbose",             Boolean.FALSE),
-  CONFIG_PROPERTY          ("heron.config.property",            Type.STRING),
+  CLUSTER                  ("heron.config.cluster",                 Type.STRING),
+  ROLE                     ("heron.config.role",                    Type.STRING),
+  ENVIRON                  ("heron.config.environ",                 Type.STRING),
+  SUBMIT_USER              ("heron.config.submit_user",             Type.STRING),
+  DRY_RUN                  ("heron.config.dry_run",                 Boolean.FALSE),
+  DRY_RUN_FORMAT_TYPE      ("heron.config.dry_run_format_type",     Type.DRY_RUN_FORMAT_TYPE),
+  VERBOSE                  ("heron.config.verbose",                 Boolean.FALSE),
+  CONFIG_PROPERTY          ("heron.config.property",                Type.STRING),
+  SKIP_RUNTIME_VALIDATION  ("heron.config.skip_runtime_validation", Boolean.FALSE),
 
   //keys for release/build information
   BUILD_VERSION            ("heron.build.version",   Type.STRING),
