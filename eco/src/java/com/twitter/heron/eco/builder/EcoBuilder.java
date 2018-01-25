@@ -60,7 +60,7 @@ public class EcoBuilder {
     return builder;
   }
 
-  public Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+  public Config buildConfig(EcoTopologyDefinition topologyDefinition) throws Exception {
     return this.configBuilder.buildConfig(topologyDefinition);
   }
 }
