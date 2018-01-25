@@ -30,7 +30,6 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.utils.ShellUtils;
@@ -136,7 +135,7 @@ public class LocalLauncher implements ILauncher {
         return false;
       }
     } else {
-      Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME), "heron-core");
+      Path heronCore = Paths.get(LocalContext.heronCoreDirectory(config));
       Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
       try {
         Files.createSymbolicLink(heronCoreLink, heronCore);

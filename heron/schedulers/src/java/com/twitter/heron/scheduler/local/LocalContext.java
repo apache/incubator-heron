@@ -24,4 +24,10 @@ public class LocalContext extends Context {
         LocalKey.WORKING_DIRECTORY.value(), LocalKey.WORKING_DIRECTORY.getDefaultString());
     return TokenSub.substitute(config, workingDirectory);
   }
+
+  public static String heronCoreDirectory(Config config) {
+    String heronCoreDir = config.getStringValue(
+        LocalKey.HERON_CORE_DIRECTORY.value(), LocalKey.HERON_CORE_DIRECTORY.getDefaultString());
+    return TokenSub.substitute(config, heronCoreDir);
+  }
 }

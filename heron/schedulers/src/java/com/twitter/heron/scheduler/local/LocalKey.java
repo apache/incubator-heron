@@ -23,7 +23,8 @@ public enum LocalKey {
   WORKING_DIRECTORY("heron.scheduler.local.working.directory",
       "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}"),
 
-  USE_HERON_CORE_URI("heron.scheduler.local.use_core_uri", true);
+  USE_HERON_CORE_URI("heron.scheduler.local.use_core_uri", false),
+  HERON_CORE_DIRECTORY("heron.scheduler.local.core.directory", "${HERON_DIST}/heron-core");
 
   private final String value;
   private final Key.Type type;
