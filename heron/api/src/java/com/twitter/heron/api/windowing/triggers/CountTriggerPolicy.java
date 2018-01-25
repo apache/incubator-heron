@@ -37,9 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.twitter.heron.api.windowing.DefaultEvictionContext;
 import com.twitter.heron.api.windowing.Event;
-import com.twitter.heron.api.windowing.EvictionPolicy;
 import com.twitter.heron.api.windowing.TriggerHandler;
-import com.twitter.heron.api.windowing.TriggerPolicy;
 
 /**
  * A trigger that tracks event counts and calls back {@link TriggerHandler#onTrigger()}
@@ -47,20 +45,16 @@ import com.twitter.heron.api.windowing.TriggerPolicy;
  *
  * @param <T> the type of event tracked by this policy.
  */
-public class CountTriggerPolicy<T extends Serializable> implements TriggerPolicy<T, Integer> {
+public class CountTriggerPolicy<T extends Serializable> extends
+        AbstractBaseTriggerPolicy<T, Integer> {
   private final int count;
   private final AtomicInteger currentCount;
-  private final TriggerHandler handler;
-  private final EvictionPolicy<T, ?> evictionPolicy;
-  private boolean started;
 
-  public CountTriggerPolicy(int count, TriggerHandler handler, EvictionPolicy<T, ?>
-      evictionPolicy) {
+  public CountTriggerPolicy(int count) {
+    super();
+
     this.count = count;
     this.currentCount = new AtomicInteger();
-    this.handler = handler;
-    this.evictionPolicy = evictionPolicy;
-    this.started = false;
   }
 
   @Override
@@ -76,11 +70,6 @@ public class CountTriggerPolicy<T extends Serializable> implements TriggerPolicy
   @Override
   public void reset() {
     currentCount.set(0);
-  }
-
-  @Override
-  public void start() {
-    started = true;
   }
 
   @Override

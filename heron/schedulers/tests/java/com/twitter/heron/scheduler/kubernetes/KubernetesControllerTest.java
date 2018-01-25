@@ -72,8 +72,9 @@ public class KubernetesControllerTest {
       }
 
       @Override
-      public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-
+      public Set<PackingPlan.ContainerPlan>
+          addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+        return containersToAdd;
       }
 
       @Override

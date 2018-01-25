@@ -93,4 +93,12 @@ public final class KubernetesConstants {
           "Never"
       )
   );
+
+  static final List<String> TOLERATIONS = Collections.unmodifiableList(
+      Arrays.asList(
+          "node.kubernetes.io/not-ready",
+          "node.alpha.kubernetes.io/notReady",
+          "node.alpha.kubernetes.io/unreachable"
+      )
+  );
 }

@@ -5,6 +5,7 @@ def heron_client_bin_files():
     return [
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
+        "//heron/tools/admin/src/python:heron-admin",
         "//third_party/nomad:heron-nomad",
     ]
 

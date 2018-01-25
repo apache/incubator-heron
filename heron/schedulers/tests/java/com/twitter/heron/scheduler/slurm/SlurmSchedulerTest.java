@@ -74,12 +74,11 @@ public class SlurmSchedulerTest {
   }
 
   private static Config createRunnerConfig() {
-    Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
-    Mockito.when(config.getStringValue(Key.CLUSTER)).thenReturn(CLUSTER);
-    Mockito.when(config.getStringValue(Key.ROLE)).thenReturn(ROLE);
-    Mockito.when(config.getStringValue(Key.ENVIRON)).thenReturn(ENVIRON);
-
+    Config config = Config.newBuilder()
+        .put(Key.TOPOLOGY_NAME, TOPOLOGY_NAME)
+        .put(Key.CLUSTER, CLUSTER)
+        .put(Key.ROLE, ROLE)
+        .put(Key.ENVIRON, ENVIRON).build();
     return config;
   }
 

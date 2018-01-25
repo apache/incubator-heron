@@ -223,13 +223,6 @@ public class UpdateTopologyManagerTest {
     Map<String, Integer> updates = new HashMap<>();
     updates.putAll(boltUpdates);
     updates.putAll(spoutUpdates);
-
-    // assert that the updated topology config settings are as expected
-    topology = UpdateTopologyManager.mergeTopology(topology, updates);
-    bolts.putAll(boltUpdates);
-    spouts.putAll(spoutUpdates);
-
-    assertParallelism(topology, spouts, bolts);
   }
 
   private void assertParallelism(TopologyAPI.Topology topology,

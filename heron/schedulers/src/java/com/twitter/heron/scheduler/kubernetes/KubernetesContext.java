@@ -45,6 +45,13 @@ public final class KubernetesContext extends Context {
   public static final String HERON_KUBERNETES_VOLUME_NFS_SERVER =
       "heron.kubernetes.volume.nfs.server";
 
+  // awsElasticBlockStore volume keys
+  // https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore
+  public static final String HERON_KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID =
+      "heron.kubernetes.volume.awsElasticBlockStore.volumeID";
+  public static final String HERON_KUBERNETES_VOLUME_AWS_EBS_FS_TYPE =
+      "heron.kubernetes.volume.awsElasticBlockStore.fsType";
+
   // container mount volume mount keys
   public static final String HERON_KUBERNETES_CONTAINER_VOLUME_MOUNT_NAME =
       "heron.kubernetes.container.volumeMount.name";
@@ -93,6 +100,14 @@ public final class KubernetesContext extends Context {
 
   static String getNfsServer(Config config) {
     return config.getStringValue(HERON_KUBERNETES_VOLUME_NFS_SERVER);
+  }
+
+  static String getAwsEbsVolumeId(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_VOLUME_AWS_EBS_VOLUME_ID);
+  }
+
+  static String getAwsEbsFsType(Config config) {
+    return config.getStringValue(HERON_KUBERNETES_VOLUME_AWS_EBS_FS_TYPE);
   }
 
   static boolean hasVolume(Config config) {

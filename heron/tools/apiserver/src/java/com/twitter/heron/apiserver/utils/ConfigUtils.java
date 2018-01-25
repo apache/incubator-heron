@@ -25,7 +25,9 @@ import java.util.Properties;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
@@ -67,7 +69,14 @@ public final class ConfigUtils {
   }
 
   public static Config getTopologyConfig(String topologyPackage, String topologyBinaryFile,
-        String topologyDefinitionFile, TopologyAPI.Topology topology) {
+        String topologyDefinitionFile) {
+
+    final TopologyAPI.Topology topology;
+    try {
+      topology = TopologyUtils.getTopology(topologyDefinitionFile);
+    } catch (InvalidTopologyException e) {
+      throw new RuntimeException(e);
+    }
     return SubmitterUtils.topologyConfigs(
         topologyPackage,
         topologyBinaryFile,

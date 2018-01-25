@@ -25,6 +25,7 @@ public final class MarathonConstants {
   }
 
   public static final String ID = "id";
+  public static final String MARATHON_GROUP_PATH = "/heron/topologies/";
   public static final String COMMAND = "cmd";
   public static final String CPU = "cpus";
   public static final String MEMORY = "mem";

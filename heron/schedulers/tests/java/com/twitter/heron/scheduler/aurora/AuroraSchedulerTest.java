@@ -268,27 +268,6 @@ public class AuroraSchedulerTest {
       Object expected = null;
       Object found = properties.get(field);
       switch (field) {
-        case CLUSTER:
-          expected = "some_cluster";
-          break;
-        case ENVIRON:
-          expected = "some_env";
-          break;
-        case ROLE:
-          expected = "some_role";
-          break;
-        case COMPONENT_RAMMAP:
-        case STATEMGR_CONNECTION_STRING:
-        case STATEMGR_ROOT_PATH:
-          expected = null;
-          break;
-        case STATEMGR_YAML:
-          expected = expectedConf + "/statemgr.yaml";
-          break;
-        case COMPONENT_JVM_OPTS_IN_BASE64:
-        case INSTANCE_JVM_OPTS_IN_BASE64:
-          expected = "\"\"";
-          break;
         case CORE_PACKAGE_URI:
           expected = expectedDist + "/heron-core.tar.gz";
           break;
@@ -301,9 +280,6 @@ public class AuroraSchedulerTest {
         case RAM_PER_CONTAINER:
           expected = Long.valueOf(containerResource.getRam().asBytes()).toString();
           break;
-        case JAVA_HOME:
-          expected = "/usr/lib/jvm/default-java";
-          break;
         case TIER:
           expected = "preemptible";
           break;
@@ -313,79 +289,57 @@ public class AuroraSchedulerTest {
         case EXECUTOR_BINARY:
           expected = expectedBin + "/heron-executor";
           break;
-        case INSTANCE_CLASSPATH:
-          expected = expectedLib + "/instance/*";
-          break;
-        case METRICSMGR_CLASSPATH:
-          expected = expectedLib + "/metricsmgr/*";
-          break;
-        case METRICS_YAML:
-          expected = expectedConf + "/metrics_sinks.yaml";
-          break;
-        case PYTHON_INSTANCE_BINARY:
-          expected = expectedBin + "/heron-python-instance";
-          break;
-        case CPP_INSTANCE_BINARY:
-          expected = expectedBin + "/heron-cpp-instance";
-          break;
-        case SCHEDULER_CLASSPATH:
-          expected =
-              expectedLib + "/scheduler/*:./heron-core/lib/packing/*:./heron-core/lib/statemgr/*";
-          break;
-        case SHELL_BINARY:
-          expected = expectedBin + "/heron-shell";
-          break;
-        case STMGR_BINARY:
-          expected = expectedBin + "/heron-stmgr";
-          break;
-        case TMASTER_BINARY:
-          expected = expectedBin + "/heron-tmaster";
-          break;
-        case SYSTEM_YAML:
-          expected = expectedConf + "/heron_internals.yaml";
-          break;
-        case OVERRIDE_YAML:
-          expected = expectedConf + "/override.yaml";
-          break;
-        case TOPOLOGY_BINARY_FILE:
-        case TOPOLOGY_CLASSPATH:
-          expected = "binaryFile.jar";
-          break;
-        case TOPOLOGY_DEFINITION_FILE:
-          expected = "defnFile.defn";
-          break;
-        case TOPOLOGY_ID:
-          assertTrue(field + " does not start with topologyName: " + found,
-              found.toString().startsWith("topologyName"));
-          asserted = true;
-          break;
-        case TOPOLOGY_NAME:
-          expected = "topologyName";
-          break;
-        case TOPOLOGY_PACKAGE_TYPE:
-          expected = "jar";
-          break;
         case TOPOLOGY_PACKAGE_URI:
           expected = "http://foo/bar";
           break;
-        case METRICSCACHEMGR_CLASSPATH:
-          expected = expectedLib + "/metricscachemgr/*";
+        case TOPOLOGY_ARGUMENTS:
+          expected = "--topology-name=topologyName"
+            + " --topology-id=" + topology.getId()
+            + " --topology-defn-file=defnFile.defn"
+            + " --state-manager-connection=null"
+            + " --state-manager-root=null"
+            + " --state-manager-config-file=" + expectedConf + "/statemgr.yaml"
+            + " --tmaster-binary=" + expectedBin + "/heron-tmaster"
+            + " --stmgr-binary=" + expectedBin + "/heron-stmgr"
+            + " --metrics-manager-classpath=" + expectedLib + "/metricsmgr/*"
+            + " --instance-jvm-opts=\"\""
+            + " --classpath=binaryFile.jar"
+            + " --heron-internals-config-file=" + expectedConf + "/heron_internals.yaml"
+            + " --override-config-file=" + expectedConf + "/override.yaml"
+            + " --component-ram-map=null"
+            + " --component-jvm-opts=\"\""
+            + " --pkg-type=jar"
+            + " --topology-binary-file=binaryFile.jar"
+            + " --heron-java-home=/usr/lib/jvm/default-java"
+            + " --heron-shell-binary=" + expectedBin + "/heron-shell"
+            + " --cluster=some_cluster"
+            + " --role=some_role"
+            + " --environment=some_env"
+            + " --instance-classpath=" + expectedLib + "/instance/*"
+            + " --metrics-sinks-config-file=" + expectedConf + "/metrics_sinks.yaml"
+            + " --scheduler-classpath=" + expectedLib + "/scheduler/*:./heron-core"
+            + "/lib/packing/*:" + expectedLib + "/statemgr/*"
+            + " --python-instance-binary=" + expectedBin + "/heron-python-instance"
+            + " --cpp-instance-binary=" + expectedBin + "/heron-cpp-instance"
+            + " --metricscache-manager-classpath=" + expectedLib + "/metricscachemgr/*"
+            + " --is-stateful=false"
+            + " --checkpoint-manager-classpath=" + expectedLib + "/ckptmgr/*:"
+            + expectedLib + "/statefulstorage/*:"
+            + " --stateful-config-file=" + expectedConf + "/stateful.yaml"
+            + " --health-manager-mode=disabled"
+            + " --health-manager-classpath=" + expectedLib + "/healthmgr/*";
           break;
-        case CKPTMGR_CLASSPATH:
-          expected =
-              expectedLib + "/ckptmgr/*:" + expectedLib + "/statefulstorage/*:";
+        case CLUSTER:
+          expected = "some_cluster";
           break;
-        case IS_STATEFUL_ENABLED:
-          expected = Boolean.FALSE.toString();
+        case ENVIRON:
+          expected = "some_env";
           break;
-        case STATEFUL_CONFIG_YAML:
-          expected = expectedConf + "/stateful.yaml";
+        case ROLE:
+          expected = "some_role";
           break;
-        case HEALTHMGR_MODE:
-          expected = "disabled";
-          break;
-        case HEALTHMGR_CLASSPATH:
-          expected = expectedLib + "/healthmgr/*";
+        case TOPOLOGY_NAME:
+          expected = "topologyName";
           break;
         default:
           fail(String.format(

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
 # Is so creates scripts/compile/env_exec.sh containing environment used
@@ -180,14 +181,6 @@ def discover_version(path):
     if version:
       return version
 
-  # on some centos versions, cmake --version returns this
-  #   cmake version 2.6-patch 4
-  centos_line = re.search('^cmake version\s+(\d.\d)-patch\s+(\d)', first_line)
-  if centos_line:
-    version = ".".join([centos_line.group(1), centos_line.group(2)])
-    if version:
-      return version
-
   # with python anaconda, --V returns this:
   # Python 2.7.11 :: Anaconda 2.2.0 (x86_64)
   anaconda_line = re.search('.*\s+Anaconda\s+.*\s', first_line)
@@ -315,9 +308,6 @@ def write_env_exec_file(platform, environ):
   for env in ['LDFLAGS', 'LIBS']:
     export_env_to_file(out_file, env)
 
-  if 'CMAKE' in os.environ:
-    out_file.write('export PATH=' + os.path.dirname(os.environ['CMAKE']) + ':$PATH\n')
-
   # Invoke the programs
   out_file.write('# Execute the input programs\n')
   out_file.write('$*')
@@ -392,7 +382,6 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE', '2.6.4')
   env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
 
   if platform == 'Darwin':
@@ -409,7 +398,7 @@ def main():
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
 
   # write the environment executable file
-  write_env_exec_file(platform, env_map)
+  # write_env_exec_file(platform, env_map)
 
 if __name__ == '__main__':
   main()

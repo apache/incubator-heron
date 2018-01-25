@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +31,6 @@ import java.util.logging.Logger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.protobuf.Descriptors;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
@@ -43,6 +41,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
@@ -147,29 +146,37 @@ public class UpdateTopologyManager implements Closeable {
     TopologyAPI.Topology topology = getTopology(stateManager, topologyName);
     boolean initiallyRunning = topology.getState() == TopologyAPI.TopologyState.RUNNING;
 
-    // fetch the topology, which will need to be updated
-    TopologyAPI.Topology updatedTopology =
-        getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
-
     // deactivate and sleep
     if (initiallyRunning) {
       // Update the topology since the state should have changed from RUNNING to PAUSED
-      updatedTopology = deactivateTopology(stateManager, updatedTopology, proposedPackingPlan);
+      // Will throw exceptions internally if tmaster fails to deactivate
+      deactivateTopology(stateManager, topology, proposedPackingPlan);
     }
 
+    Set<PackingPlan.ContainerPlan> updatedContainers =
+        new HashSet<>(proposedPackingPlan.getContainers());
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
     if (newContainerCount > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
+      Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
+      Set<PackingPlan.ContainerPlan> containersAdded =
+          scalableScheduler.get().addContainers(containersToAdd);
+      // Update the PackingPlan with new container-ids
+      if (containersAdded != null) {
+        updatedContainers.removeAll(containersToAdd);
+        updatedContainers.addAll(containersAdded);
+      }
     }
 
-    // update parallelism in updatedTopology since TMaster checks that
-    // Sum(parallelism) == Sum(instances)
-    logInfo("Update new Topology: %s", stateManager.updateTopology(updatedTopology, topologyName));
+    PackingPlan updatedPackingPlan =
+        new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
+    LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
 
     // update packing plan to trigger the scaling event
     logInfo("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
+        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
 
     // reactivate topology
     if (initiallyRunning) {
@@ -177,7 +184,8 @@ public class UpdateTopologyManager implements Closeable {
       // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
       // and/or possibly even update the packing plan directly
       SysUtils.sleep(Duration.ofSeconds(10));
-      reactivateTopology(stateManager, updatedTopology, removableContainerCount);
+      // Will throw exceptions internally if tmaster fails to deactivate
+      reactivateTopology(stateManager, topology, removableContainerCount);
     }
 
     if (removableContainerCount > 0 && scalableScheduler.isPresent()) {
@@ -186,7 +194,7 @@ public class UpdateTopologyManager implements Closeable {
   }
 
   @VisibleForTesting
-  TopologyAPI.Topology deactivateTopology(SchedulerStateManagerAdaptor stateManager,
+  void deactivateTopology(SchedulerStateManagerAdaptor stateManager,
                           final TopologyAPI.Topology topology,
                           PackingPlan proposedPackingPlan)
       throws InterruptedException, TMasterException {
@@ -208,8 +216,6 @@ public class UpdateTopologyManager implements Closeable {
     } else {
       logInfo("Deactivated topology %s.", topology.getName());
     }
-
-    return getUpdatedTopology(topology.getName(), proposedPackingPlan, stateManager);
   }
 
   @VisibleForTesting
@@ -314,14 +320,6 @@ public class UpdateTopologyManager implements Closeable {
     }
   }
 
-  private TopologyAPI.Topology getUpdatedTopology(String topologyName,
-                                                  PackingPlan proposedPackingPlan,
-                                                  SchedulerStateManagerAdaptor stateManager) {
-    TopologyAPI.Topology updatedTopology = getTopology(stateManager, topologyName);
-    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
-    return mergeTopology(updatedTopology, proposedComponentCounts);
-  }
-
   @VisibleForTesting
   PackingPlans.PackingPlan getPackingPlan(SchedulerStateManagerAdaptor stateManager,
                                           String topologyName) {
@@ -386,75 +384,6 @@ public class UpdateTopologyManager implements Closeable {
     Set<PackingPlan.ContainerPlan> getContainersToAdd() {
       return containersToAdd;
     }
-  }
-
-  /**
-   * For each of the components with changed parallelism we need to update the Topology configs to
-   * represent the change.
-   */
-  @VisibleForTesting
-  static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
-                                            Map<String, Integer> proposedComponentCounts) {
-    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
-    for (String componentName : proposedComponentCounts.keySet()) {
-      Integer parallelism = proposedComponentCounts.get(componentName);
-
-      boolean updated = false;
-      for (TopologyAPI.Bolt.Builder boltBuilder : builder.getBoltsBuilderList()) {
-        if (updateComponent(boltBuilder.getCompBuilder(), componentName, parallelism)) {
-          updated = true;
-          break;
-        }
-      }
-
-      if (!updated) {
-        for (TopologyAPI.Spout.Builder spoutBuilder : builder.getSpoutsBuilderList()) {
-          if (updateComponent(spoutBuilder.getCompBuilder(), componentName, parallelism)) {
-            break;
-          }
-        }
-      }
-    }
-
-    return builder.build();
-  }
-
-  /**
-   * Go through all fields in the component builder until one is found where "name=componentName".
-   * When found, go through the confs in the conf builder to find the parallelism field and update
-   * that.
-   *
-   * @return true if the component was found and updated, which might not always happen. For example
-   * if the component is a spout, it won't be found if a bolt builder is passed.
-   */
-  private static boolean updateComponent(TopologyAPI.Component.Builder compBuilder,
-                                         String componentName,
-                                         int parallelism) {
-    for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
-        : compBuilder.getAllFields().entrySet()) {
-      if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
-        TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
-        boolean keyFound = false;
-        // no way to get a KeyValue builder with a get(key) so we have to iterate until found.
-        for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
-          if (kvBuilder.getKey().equals(
-              com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
-            kvBuilder.setValue(Integer.toString(parallelism));
-            keyFound = true;
-            break;
-          }
-        }
-        if (!keyFound) {
-          TopologyAPI.Config.KeyValue.Builder kvBuilder =
-              TopologyAPI.Config.KeyValue.newBuilder();
-          kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
-          kvBuilder.setValue(Integer.toString(parallelism));
-          confBuilder.addKvs(kvBuilder);
-        }
-        return true;
-      }
-    }
-    return false;
   }
 
   private static Set<Integer> toIdSet(Set<PackingPlan.ContainerPlan> containers) {

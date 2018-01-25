@@ -14,9 +14,10 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,14 +25,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.scheduler.utils.Runtime;
@@ -187,25 +185,33 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    controller.addContainers(containersToAdd.size());
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
+    // Do the actual containers adding
+    LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
+        controller.addContainers(containersToAdd.size()));
+    if (newAddedContainerIds.size() != containersToAdd.size()) {
+      throw new RuntimeException(
+          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          + "; input count was " + containersToAdd.size());
+    }
+    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
+    // Do the remapping:
+    // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
+    for (PackingPlan.ContainerPlan cp : containersToAdd) {
+      PackingPlan.ContainerPlan newContainerPlan =
+          new PackingPlan.ContainerPlan(
+              newAddedContainerIds.pop(), cp.getInstances(),
+              cp.getRequiredResource(), cp.getScheduledResource().orNull());
+      remapping.add(newContainerPlan);
+    }
+    LOG.info("The remapping structure: " + remapping);
+    return remapping;
   }
 
   @Override
   public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
     controller.removeContainers(containersToRemove);
-  }
-
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(StandardCharsets.UTF_8));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
   protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
@@ -215,39 +221,16 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     auroraProperties.put(AuroraField.EXECUTOR_BINARY,
         Context.executorBinary(config));
+
+    List<String> topologyArgs = new ArrayList<>();
+    SchedulerUtils.addExecutorTopologyArgs(topologyArgs, config, runtime);
+    String args = String.join(" ", topologyArgs);
+    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, args);
+
+    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
+    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
+    auroraProperties.put(AuroraField.ROLE, Context.role(config));
     auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
-    auroraProperties.put(AuroraField.TOPOLOGY_ID, topology.getId());
-    auroraProperties.put(AuroraField.TOPOLOGY_DEFINITION_FILE,
-        FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put(AuroraField.STATEMGR_CONNECTION_STRING,
-        Context.stateManagerConnectionString(config));
-    auroraProperties.put(AuroraField.STATEMGR_ROOT_PATH, Context.stateManagerRootPath(config));
-    auroraProperties.put(AuroraField.STATEMGR_YAML, Context.stateManagerFile(config));
-    auroraProperties.put(AuroraField.TMASTER_BINARY, Context.tmasterBinary(config));
-    auroraProperties.put(AuroraField.STMGR_BINARY, Context.stmgrBinary(config));
-    auroraProperties.put(AuroraField.METRICSMGR_CLASSPATH,
-        Context.metricsManagerClassPath(config));
-    auroraProperties.put(AuroraField.INSTANCE_JVM_OPTS_IN_BASE64,
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put(AuroraField.TOPOLOGY_CLASSPATH,
-        TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
-
-    auroraProperties.put(AuroraField.SYSTEM_YAML, Context.systemConfigFile(config));
-    auroraProperties.put(AuroraField.OVERRIDE_YAML, Context.overrideFile(config));
-    auroraProperties.put(AuroraField.COMPONENT_RAMMAP, Runtime.componentRamMap(runtime));
-    auroraProperties.put(AuroraField.COMPONENT_JVM_OPTS_IN_BASE64,
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_TYPE,
-        Context.topologyPackageType(config).name().toLowerCase());
-    auroraProperties.put(AuroraField.TOPOLOGY_BINARY_FILE,
-        Context.topologyBinaryFile(config));
-    auroraProperties.put(AuroraField.JAVA_HOME, Context.clusterJavaHome(config));
-
-    auroraProperties.put(AuroraField.SHELL_BINARY, Context.shellBinary(config));
-    auroraProperties.put(AuroraField.PYTHON_INSTANCE_BINARY,
-        Context.pythonInstanceBinary(config));
-    auroraProperties.put(AuroraField.CPP_INSTANCE_BINARY,
-        Context.cppInstanceBinary(config));
 
     auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
         Double.toString(containerResource.getCpu()));
@@ -259,10 +242,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.NUM_CONTAINERS,
         Integer.toString(1 + TopologyUtils.getNumContainers(topology)));
 
-    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
-    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
-    auroraProperties.put(AuroraField.ROLE, Context.role(config));
-
     // Job configuration attribute 'production' is deprecated.
     // Use 'tier' attribute instead
     // See: http://aurora.apache.org/documentation/latest/reference/configuration/#job-objects
@@ -272,39 +251,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
       auroraProperties.put(AuroraField.TIER, "preemptible");
     }
 
-    auroraProperties.put(AuroraField.INSTANCE_CLASSPATH, Context.instanceClassPath(config));
-    auroraProperties.put(AuroraField.METRICS_YAML, Context.metricsSinksFile(config));
-
-    String completeSchedulerClassPath = String.format("%s:%s:%s",
-        Context.schedulerClassPath(config),
-        Context.packingClassPath(config),
-        Context.stateManagerClassPath(config));
-
-    auroraProperties.put(AuroraField.SCHEDULER_CLASSPATH, completeSchedulerClassPath);
-
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
 
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
-
-    auroraProperties.put(AuroraField.METRICSCACHEMGR_CLASSPATH,
-        Context.metricsCacheManagerClassPath(config));
-
-    boolean isStatefulEnabled = TopologyUtils.shouldStartCkptMgr(topology);
-    auroraProperties.put(AuroraField.IS_STATEFUL_ENABLED, Boolean.toString(isStatefulEnabled));
-
-    String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
-        Context.ckptmgrClassPath(config),
-        Context.statefulStoragesClassPath(config),
-        Context.statefulStorageCustomClassPath(config));
-    auroraProperties.put(AuroraField.CKPTMGR_CLASSPATH, completeCkptmgrProcessClassPath);
-    auroraProperties.put(AuroraField.STATEFUL_CONFIG_YAML, Context.statefulConfigFile(config));
-
-    String healthMgrMode =
-        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
-    auroraProperties.put(AuroraField.HEALTHMGR_MODE, healthMgrMode);
-    auroraProperties.put(AuroraField.HEALTHMGR_CLASSPATH, Context.healthMgrClassPath(config));
 
     return auroraProperties;
   }

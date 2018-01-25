@@ -20,18 +20,22 @@
 ## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
 
 {{- $platform := .Values.platform }}
-{{- $bkReplicas := index (index .Values $platform) "bkReplicas" }}
-{{- $cpuMin := index (index .Values $platform) "cpuMin" }}
-{{- $cpuMax := index (index .Values $platform) "cpuMax" }}
-{{- $memoryMin := index (index .Values $platform) "memoryMin" }}
-{{- $memoryMax := index (index .Values $platform) "memoryMax" }}
+{{- $bookieReplicas := index (index .Values $platform) "bookieReplicas" }}
+{{- $bookieCpuMin := index (index .Values $platform) "bookieCpuMin" }}
+{{- $bookieCpuMax := index (index .Values $platform) "bookieCpuMax" }}
+{{- $bookieHeapMemory := index (index .Values $platform) "bookieHeapMemory" }}
+{{- $bookieDirectMemory := index (index .Values $platform) "bookieDirectMemory" }}
+{{- $bookieJournalCapacity := index (index .Values $platform) "bookieJournalCapacity" }}
+{{- $bookieStorageCapacity := index (index .Values $platform) "bookieStorageCapacity" }}
+{{- $bookieJournalHostPath := index (index .Values $platform) "bookieJournalHostPath" }}
+{{- $bookieStorageHostPath := index (index .Values $platform) "bookieStorageHostPath" }}
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-bookie-config
 data:
-  BK_BOOKIE_EXTRA_OPTS: "\"-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
+  BK_BOOKIE_EXTRA_OPTS: "\"-Xms{{ $bookieHeapMemory }} -Xmx{{ $bookieHeapMemory }} -XX:MaxDirectMemorySize={{ $bookieDirectMemory }} -XX:+UseG1GC  -XX:MaxGCPauseMillis=10 -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:G1NewSizePercent=50 -XX:+DisableExplicitGC -XX:-ResizePLAB\""
   BK_bookiePort: "3181"
   BK_journalDirectory: "/bookkeeper/data/journal"
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
@@ -48,16 +52,25 @@ data:
 ## cannot be moved across different nodes.
 ## For this reason, we run BK as a daemon set, one for each node in the
 ## cluster, unless restricted by label selectors
+{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
 apiVersion: apps/v1beta1
 kind: StatefulSet
+{{- else }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+{{- end }}
+
 metadata:
   name: {{ .Release.Name }}-bookie
   labels:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
 spec:
+{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   serviceName: {{ .Release.Name }}-bookkeeper
-  replicas: {{ $bkReplicas }}
+  replicas: {{ $bookieReplicas }}
+{{- end }}
+
   template:
     metadata:
       labels:
@@ -71,6 +84,7 @@ spec:
         prometheus.io/port: "8000"
 
     spec:
+{{- if eq .Values.platform "gke" }}
       # Make sure multiple pods of bookkeeper don't get scheduled on the
       # same node, unless there are no other available nodes
       affinity:
@@ -85,6 +99,7 @@ spec:
                       values:
                         - {{ .Release.Name }}-bookkeeper
                 topologyKey: "kubernetes.io/hostname"
+{{- end }}
       terminationGracePeriodSeconds: 0
       initContainers:
         # Wait until the zookeeper pods are up and running
@@ -107,11 +122,9 @@ spec:
           image: {{ .Values.bookkeeper.image }}
           resources:
             requests:
-              memory: {{ $memoryMin | quote }}
-              cpu: {{ $cpuMin | quote }}
+              cpu: {{ $bookieCpuMin | quote }}
             limits:
-              memory: {{ $memoryMax | quote }}
-              cpu: {{ $cpuMax | quote }}
+              cpu: {{ $bookieCpuMax | quote }}
           # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
           command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
           args: ["/opt/bookkeeper/bin/bookkeeper", "bookie"]
@@ -130,6 +143,18 @@ spec:
             - name: data-disk
               mountPath: /bookkeeper/data/ledgers
 
+{{- if eq .Values.platform "baremetal" }}
+      volumes:
+          # Mount local disks
+        - name: journal-disk
+          hostPath:
+            path: {{ $bookieJournalHostPath | quote }}
+        - name: ledgers-disk
+          hostPath:
+            path: {{ $bookieStorageHostPath | quote }}
+{{- end }}
+
+{{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   volumeClaimTemplates:
     - metadata:
         name: journal-disk
@@ -141,7 +166,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 5Gi
+            storage: {{ $bookieJournalCapacity }}
     - metadata:
         name: data-disk
         annotations:
@@ -152,8 +177,8 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 10Gi
-
+            storage: {{ $bookieStorageCapacity }}
+{{- end }}
 ---
 
 ##
