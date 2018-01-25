@@ -19,6 +19,19 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-apiserver
       terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: heron-tools-init-container

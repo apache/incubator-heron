@@ -12,6 +12,20 @@ spec:
       labels:
         app: heron-tracker
     spec:
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       containers:
         - name: heron-tracker
           image: heron/heron:latest
