@@ -396,6 +396,7 @@ public class RuntimeManagerMain {
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
       if (!config.getBooleanValue(Key.SKIP_RUNTIME_VALIDATION)) {
+        LOG.fine("Validate topology state");
         validateRuntimeManage(adaptor, topologyName);
       } else {
         LOG.log(Level.FINE, "The skip_runtime_validation flag is set to true. "

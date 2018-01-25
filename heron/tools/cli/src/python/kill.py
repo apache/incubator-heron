@@ -45,14 +45,17 @@ def run(command, parser, cl_args, unknown_args):
   :return:
   '''
   Log.debug("Kill Args: %s", cl_args)
+  skip_runtime_validation = False
+  if cl_args.get('skip_runtime_validation', 'false').lower() == 'true':
+    skip_runtime_validation = True
 
   if cl_args['deploy_mode'] == config.SERVER_MODE:
     dict_extra_args = {}
-    if cl_args['skip-runtime-validation']:
+    if skip_runtime_validation:
       dict_extra_args['skip_runtime_validation'] = True
     return cli_helper.run_server(command, cl_args, "kill topology", extra_args=dict_extra_args)
   else:
     list_extra_args = []
-    if cl_args['skip-runtime-validation']:
+    if skip_runtime_validation:
       list_extra_args.append('--skip_runtime_validation')
     return cli_helper.run_direct(command, cl_args, "kill topology", extra_args=list_extra_args)
