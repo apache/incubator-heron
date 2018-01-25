@@ -53,3 +53,19 @@ spec:
     - protocol: TCP
       port: 8889
       targetPort: 8889
+
+---
+##
+## Service to expose the heron-tracker
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: heron-tracker
+spec:
+  selector:
+    app: heron-tracker
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
