@@ -15,6 +15,7 @@
 package org.apache.heron.instance;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -55,7 +56,7 @@ public class OutgoingTupleCollection {
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
 
   // Total data emitted in bytes for the entire life
-  private long totalDataEmittedInBytes;
+  private AtomicLong totalDataEmittedInBytes = new AtomicLong();
 
   // Current size in bytes for data types to pack into the HeronTupleSet
   private long currentDataTupleSizeInBytes;
@@ -72,7 +73,7 @@ public class OutgoingTupleCollection {
         SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // Initialize the values in constructor
-    this.totalDataEmittedInBytes = 0;
+    this.totalDataEmittedInBytes.set(0);
     this.currentDataTupleSizeInBytes = 0;
 
     // Read the config values
@@ -81,7 +82,7 @@ public class OutgoingTupleCollection {
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
 
-  public void sendOutTuples() {
+  public synchronized void sendOutTuples() {
     flushRemaining();
   }
 
@@ -90,7 +91,7 @@ public class OutgoingTupleCollection {
    * @param state instance's state
    * @param checkpointId the checkpointId
    */
-  public void sendOutState(State<Serializable, Serializable> state,
+  public synchronized void sendOutState(State<Serializable, Serializable> state,
                            String checkpointId) {
     // flush all the current data before sending the state
     flushRemaining();
@@ -114,7 +115,7 @@ public class OutgoingTupleCollection {
     outQueue.offer(storeRequest);
   }
 
-  public void addDataTuple(
+  public synchronized void addDataTuple(
       String streamId,
       HeronTuples.HeronDataTuple.Builder newTuple,
       long tupleSizeInBytes) {
@@ -132,10 +133,10 @@ public class OutgoingTupleCollection {
     currentDataTuple.addTuples(newTuple);
 
     currentDataTupleSizeInBytes += tupleSizeInBytes;
-    totalDataEmittedInBytes += tupleSizeInBytes;
+    totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
   }
 
-  public void addAckTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+  public synchronized void addAckTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getFailsCount() > 0
         || currentControlTuple.getAcksCount() >= controlTupleSetCapacity) {
@@ -144,10 +145,10 @@ public class OutgoingTupleCollection {
     currentControlTuple.addAcks(newTuple);
 
     // Add the size of data in bytes ready to send out
-    totalDataEmittedInBytes += tupleSizeInBytes;
+    totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
   }
 
-  public void addFailTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+  public synchronized void addFailTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getAcksCount() > 0
         || currentControlTuple.getFailsCount() >= controlTupleSetCapacity) {
@@ -156,7 +157,7 @@ public class OutgoingTupleCollection {
     currentControlTuple.addFails(newTuple);
 
     // Add the size of data in bytes ready to send out
-    totalDataEmittedInBytes += tupleSizeInBytes;
+    totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
   }
 
   private void initNewDataTuple(String streamId) {
@@ -210,18 +211,18 @@ public class OutgoingTupleCollection {
   }
 
   public long getTotalDataEmittedInBytes() {
-    return totalDataEmittedInBytes;
+    return totalDataEmittedInBytes.get();
   }
 
   // Clean the internal state of OutgoingTupleCollection
-  public void clear() {
+  public synchronized void clear() {
     currentControlTuple = null;
     currentDataTuple = null;
 
     outQueue.clear();
   }
 
-  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+  public synchronized void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
     this.helper = physicalPlanHelper;
   }
 }
