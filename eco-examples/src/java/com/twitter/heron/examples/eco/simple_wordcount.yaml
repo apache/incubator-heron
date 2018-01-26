@@ -26,14 +26,14 @@ config:
   topology.component.resourcemap:
 
     - id: "spout-1"
-      ram: "256MB"
+      ram: 256MB
       cpu: 0.5
-      disk: "4GB"
+      disk: 4GB
 
     - id: "bolt-1"
-      ram: "128MB"
+      ram: 128MB
       cpu: 0.5
-      disk: "2GB"
+      disk: 2GB
 
 # spout definitions
 spouts:

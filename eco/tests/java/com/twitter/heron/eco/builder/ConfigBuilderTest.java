@@ -16,10 +16,10 @@ package com.twitter.heron.eco.builder;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.storm.Config;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
 import static org.hamcrest.core.Is.is;
@@ -33,13 +33,15 @@ public class ConfigBuilderTest {
 
   private ConfigBuilder subject;
 
+  private static final String objectString = "{id=spout-1, ram=256MB, cpu=0.5, disk=4GB}";
+
   @Before
   public void setUpForEachTestCase() {
     subject = new ConfigBuilder();
   }
 
   @Test
-  public void testBuildConfig_ConfigIsNotDefined_ReturnsEmptyConfig() {
+  public void testBuildConfig_ConfigIsNotDefined_ReturnsEmptyConfig() throws Exception {
     EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
@@ -48,16 +50,16 @@ public class ConfigBuilderTest {
   }
 
   @Test
-  public void testBuildConfig_ConfigIsDefined_ReturnsCorrectValues() {
+  public void testBuildConfig_ConfigIsDefined_ReturnsCorrectValues() throws Exception {
     EcoTopologyDefinition ecoTopologyDefinition = new EcoTopologyDefinition();
     Map<String, Object> topologyDefinitionConfig = new HashMap<>();
-    topologyDefinitionConfig.put(Config.STORM_ZOOKEEPER_SERVERS, 2);
-    topologyDefinitionConfig.put(Config.TOPOLOGY_WORKERS, 4);
+    topologyDefinitionConfig.put(Config.TOPOLOGY_COMPONENT_PARALLELISM, 2);
+    topologyDefinitionConfig.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, 4);
     ecoTopologyDefinition.setConfig(topologyDefinitionConfig);
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
-    assertThat(config.get(Config.STORM_ZOOKEEPER_SERVERS), is(equalTo(2)));
-    assertThat(config.get(Config.TOPOLOGY_WORKERS), is(equalTo(4)));
+    assertThat(config.get(Config.TOPOLOGY_COMPONENT_PARALLELISM), is(equalTo(2)));
+    assertThat(config.get(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED), is(equalTo(4)));
   }
 }
