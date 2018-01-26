@@ -28,6 +28,7 @@ load("//tools/rules:heron_core.bzl", "heron_core_lib_downloader_files")
 
 load("//tools/rules:heron_tools.bzl", "heron_tools_files")
 load("//tools/rules:heron_tools.bzl", "heron_tools_bin_files")
+load("//tools/rules:heron_tools.bzl", "heron_tools_bin_all_files")
 load("//tools/rules:heron_tools.bzl", "heron_tools_conf_files")
 load("//tools/rules:heron_tools.bzl", "heron_tools_lib_files")
 load("//tools/rules:heron_examples.bzl", "heron_examples_files")
@@ -175,13 +176,25 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools-bin",
     package_dir = "heron-tools/bin",
-    srcs = heron_tools_bin_files(),
+    srcs = heron_tools_bin_all_files(),
 )
 
 pkg_tar(
-    name = "heron-tools-lib",
+    name = "heron-tools-lib-api",
     package_dir = "heron-tools/lib/api",
     srcs = heron_tools_lib_files(),
+)
+
+pkg_tar(
+    name = "heron-tools-lib-third_party",
+    package_dir = "heron-tools/lib/third_party",
+    srcs = heron_client_lib_third_party_files(),
+)
+
+pkg_tar(
+    name = "heron-tools-lib-uploader",
+    package_dir = "heron-tools/lib/uploader",
+    srcs = heron_client_lib_uploader_files(),
 )
 
 pkg_tar(
@@ -205,7 +218,9 @@ pkg_tar(
     deps = [
         ":heron-tools-release",
         ":heron-tools-bin",
-        ":heron-tools-lib",
+        ":heron-tools-lib-api",
+        ":heron-tools-lib-third_party",
+        ":heron-tools-lib-uploader",
         ":heron-tools-conf",
         ":heron-tools-cluster-conf",
     ],
