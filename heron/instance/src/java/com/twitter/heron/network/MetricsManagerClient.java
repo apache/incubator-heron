@@ -72,9 +72,14 @@ public class MetricsManagerClient extends HeronClient {
     addMetricsManagerClientTasksOnWakeUp();
 
     try {
-      this.hostname = InetAddress.getLocalHost().getHostName();
+      if (System.getenv("HOST") != null) {
+        this.hostname = System.getenv("HOST");
+      } else {
+        this.hostname = InetAddress.getLocalHost().getHostName();
+      }
     } catch (UnknownHostException e) {
-      throw new RuntimeException("GetHostName failed");
+      LOG.log(Level.SEVERE, "Unable to get local host name", e);
+      this.hostname = "localhost";
     }
   }
 
