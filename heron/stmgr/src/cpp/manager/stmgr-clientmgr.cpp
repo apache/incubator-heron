@@ -35,10 +35,10 @@ namespace stmgr {
 // New connections made with other stream managers.
 const sp_string METRIC_STMGR_NEW_CONNECTIONS = "__stmgr_new_connections";
 
-StMgrClientMgr::StMgrClientMgr(EventLoop *eventLoop, const sp_string &_topology_name,
-                               const sp_string &_topology_id, const sp_string &_stmgr_id,
-                               StMgr *_stream_manager,
-                               heron::common::MetricsMgrSt *_metrics_manager_client,
+StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
+                               const sp_string& _topology_id, const sp_string& _stmgr_id,
+                               StMgr* _stream_manager,
+                               heron::common::MetricsMgrSt* _metrics_manager_client,
                                sp_int64 _high_watermark, sp_int64 _low_watermark,
                                bool _droptuples_upon_backpressure)
     : topology_name_(_topology_name),
