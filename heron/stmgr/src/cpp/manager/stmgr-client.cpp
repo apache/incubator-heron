@@ -170,6 +170,7 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
 }
 
 void StMgrClient::OnReConnectTimer() {
+  client_manager_->HandleStMgrClientReconnect(other_stmgr_id_);
   reconnect_attempts_ += 1;
 
   if (reconnect_attempts_ < reconnect_other_streammgrs_max_attempt_) {
