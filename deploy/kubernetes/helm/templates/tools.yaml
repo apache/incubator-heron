@@ -19,6 +19,19 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-apiserver
       terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: heron-tools-init-container
@@ -78,7 +91,6 @@ spec:
             - >
               kubectl proxy -p 8001
 ---
-
 ##
 ## Service to expose the heron-ui
 ##
@@ -95,6 +107,28 @@ spec:
   ports:
     - port: 8889
       targetPort: 8889
+      protocol: TCP
+  selector:
+    app: {{ .Release.Name }}-tools
+    release: {{ .Release.Name }}
+
+---
+##
+## Service to expose the heron-tracker
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-tracker
+  labels:
+    app: {{ .Release.Name }}-tools
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - port: 8888
+      targetPort: 8888
       protocol: TCP
   selector:
     app: {{ .Release.Name }}-tools
