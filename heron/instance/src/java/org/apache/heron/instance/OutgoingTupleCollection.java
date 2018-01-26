@@ -136,7 +136,8 @@ public class OutgoingTupleCollection {
     totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
   }
 
-  public synchronized void addAckTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+  public synchronized void addAckTuple(
+      HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getFailsCount() > 0
         || currentControlTuple.getAcksCount() >= controlTupleSetCapacity) {
@@ -148,7 +149,8 @@ public class OutgoingTupleCollection {
     totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
   }
 
-  public synchronized void addFailTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+  public synchronized void addFailTuple(
+      HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getAcksCount() > 0
         || currentControlTuple.getFailsCount() >= controlTupleSetCapacity) {
