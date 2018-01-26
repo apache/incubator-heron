@@ -35,6 +35,7 @@ import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
@@ -429,8 +430,7 @@ public class SubmitterMain {
 
       // Try to clear left over data in case the previous kill operation
       // wasn't fully successful
-      LOG.fine("Cleaning up previous topology state before submission");
-      SchedulerUtils.cleanState(topology.getName(), adaptor);
+      cleanState(adaptor, topology.getName());
 
       LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
@@ -547,6 +547,16 @@ public class SubmitterMain {
       throw new TopologySubmissionException(
           String.format("Topology '%s' already exists", topologyName));
     }
+  }
+
+  /**
+   * Clean all states of a heron topology
+   */
+  protected void cleanState(SchedulerStateManagerAdaptor statemgr, String topologyName)
+      throws TopologyRuntimeManagementException {
+    LOG.fine("Cleaning up topology state");
+    SchedulerUtils.cleanState(topologyName, statemgr);
+    LOG.fine("Cleaned up topology state");
   }
 
   protected URI uploadPackage(IUploader uploader) throws UploaderException {
