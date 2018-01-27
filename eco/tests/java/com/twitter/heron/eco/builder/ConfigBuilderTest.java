@@ -33,7 +33,7 @@ public class ConfigBuilderTest {
 
   private ConfigBuilder subject;
 
-  private static final String objectString = "{id=spout-1, ram=256MB, cpu=0.5, disk=4GB}";
+  private static final String OBJECT_STRING = "{id=spout-1, ram=256MB, cpu=0.5, disk=4GB}";
 
   @Before
   public void setUpForEachTestCase() {

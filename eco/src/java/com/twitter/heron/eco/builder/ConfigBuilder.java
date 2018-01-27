@@ -43,74 +43,74 @@ public class ConfigBuilder {
 
       if (entry.getKey().equals(COMPONENT_RESOURCE_MAP)) {
 
-          List<Object> objects = (List<Object>) entry.getValue();
-          for (Object obj: objects) {
+        List<Object> objects = (List<Object>) entry.getValue();
+        for (Object obj: objects) {
 
-            String objString = obj.toString();
-            System.out.println("Original objString: " + objString);
+          String objString = obj.toString();
+          System.out.println("Original objString: " + objString);
 
-            objString = objString.replace(COMMA, WHITESPACE);
-            objString = objString.replace(LEFT_BRACKET, WHITESPACE);
-            objString = objString.replace(RIGHT_BRACKET, WHITESPACE);
+          objString = objString.replace(COMMA, WHITESPACE);
+          objString = objString.replace(LEFT_BRACKET, WHITESPACE);
+          objString = objString.replace(RIGHT_BRACKET, WHITESPACE);
 
-            int idIndex = objString.indexOf(ID);
-            int ramIndex = objString.indexOf(RAM);
-            int cpuIndex = objString.indexOf(CPU);
-            int diskIndex = objString.indexOf(DISK);
+          int idIndex = objString.indexOf(ID);
+          int ramIndex = objString.indexOf(RAM);
+          int cpuIndex = objString.indexOf(CPU);
+          int diskIndex = objString.indexOf(DISK);
 
-            String id = "";
-            String ramWithUom = "";
-            String diskWithUom = "";
-            String cpu = "";
+          String id = "";
+          String ramWithUom = "";
+          String diskWithUom = "";
+          String cpu = "";
 
-            if (idIndex != -1) {
-              id = assignValue(objString, idIndex);
-            }
-
-            if (ramIndex != -1) {
-              ramWithUom = assignValue(objString, ramIndex);
-            }
-
-            if (cpuIndex != -1) {
-              cpu = assignValue(objString, cpuIndex);
-            }
-
-            if (diskIndex != -1) {
-              diskWithUom = assignValue(objString, diskIndex);
-            }
-            System.out.println("ID " + id);
-            System.out.println("RAM " + ramWithUom);
-            System.out.println("CPU " + cpu);
-            System.out.println("DISK " + diskWithUom);
-
-            if (ramWithUom.contains("MB")) {
-              // its megaBytes
-              System.out.println("Its megaBytes");
-            } else if (ramWithUom.contains("GB")) {
-              // its gigaBytes
-              System.out.println("Its gigaBytes");
-            } else if (ramWithUom.contains("B")) {
-              // its bytes
-              System.out.println("Its Bytes");
-            } else {
-              // There is no format throw an exception
-            }
-
-            ByteAmount ramInBytes = ByteAmount.fromBytes(11234L);
-
-
-
-            if (config.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-              String oldEntry = (String) config.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-              String newEntry = String.format("%s,%s:%d", oldEntry, id, ramInBytes.asBytes());
-              config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
-            } else {
-              String newEntry = String.format("%s:%d", id, ramInBytes.asBytes());
-              config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
-            }
-
-
+          if (idIndex != -1) {
+            id = assignValue(objString, idIndex);
           }
+
+          if (ramIndex != -1) {
+            ramWithUom = assignValue(objString, ramIndex);
+          }
+
+          if (cpuIndex != -1) {
+            cpu = assignValue(objString, cpuIndex);
+          }
+
+          if (diskIndex != -1) {
+            diskWithUom = assignValue(objString, diskIndex);
+          }
+          System.out.println("ID " + id);
+          System.out.println("RAM " + ramWithUom);
+          System.out.println("CPU " + cpu);
+          System.out.println("DISK " + diskWithUom);
+
+          if (ramWithUom.contains("MB")) {
+            // its megaBytes
+            System.out.println("Its megaBytes");
+          } else if (ramWithUom.contains("GB")) {
+            // its gigaBytes
+            System.out.println("Its gigaBytes");
+          } else if (ramWithUom.contains("B")) {
+            // its bytes
+            System.out.println("Its Bytes");
+          } else {
+            // There is no format throw an exception
+          }
+
+          ByteAmount ramInBytes = ByteAmount.fromBytes(11234L);
+
+
+
+          if (config.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
+            String oldEntry = (String) config.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
+            String newEntry = String.format("%s,%s:%d", oldEntry, id, ramInBytes.asBytes());
+            config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+          } else {
+            String newEntry = String.format("%s:%d", id, ramInBytes.asBytes());
+            config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+          }
+
+
+        }
 
       } else {
         config.put(entry.getKey(), entry.getValue());

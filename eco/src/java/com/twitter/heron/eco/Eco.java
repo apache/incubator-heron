@@ -15,7 +15,6 @@ package com.twitter.heron.eco;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
