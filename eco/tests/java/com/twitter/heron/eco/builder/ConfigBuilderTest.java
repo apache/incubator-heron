@@ -37,9 +37,6 @@ public class ConfigBuilderTest {
 
   private ConfigBuilder subject;
 
-  private static final String OBJECT_STRING = " [{id=spout-1, ram=256MB, cpu=0.5, disk=4GB},"
-      + " {id=bolt-1, ram=128MB, cpu=0.5, disk=2GB}]";
-
   private static final String YAML_PROPERTIES = "config:\n"
       + "  topology.workers: 1\n"
       + "  topology.component.resourcemap:\n"
