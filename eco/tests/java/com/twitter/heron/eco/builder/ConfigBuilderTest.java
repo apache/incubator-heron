@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.yaml.snakeyaml.Yaml;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -85,14 +84,10 @@ public class ConfigBuilderTest {
   @Test
   public void testBuildConfig_SpecifyingComponentResources_ReturnsCorrectValues()
       throws Exception {
-    Yaml yaml = new Yaml();
     EcoParser ecoParser = new EcoParser();
     InputStream inputStream = new ByteArrayInputStream(YAML_PROPERTY_STRING.getBytes());
     EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
-//    Map<String, Object> topologyDefinitionConfig = new HashMap<>();
-//    Object obj = yaml.load(YAML_PROPERTY_STRING);
-//    topologyDefinitionConfig.put(ConfigBuilder.COMPONENT_RESOURCE_MAP, obj);
-//    ecoTopologyDefinition.setConfig(topologyDefinitionConfig);
+
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 

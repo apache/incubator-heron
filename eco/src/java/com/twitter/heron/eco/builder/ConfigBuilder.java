@@ -83,25 +83,41 @@ public class ConfigBuilder {
           if (diskIndex != -1) {
             diskWithUom = assignValue(objString, diskIndex);
           }
-          System.out.println("ID " + id);
-          System.out.println("RAM " + ramWithUom);
-          System.out.println("CPU " + cpu);
-          System.out.println("DISK " + diskWithUom);
 
 
           // Need to make this more precise, specifically looking for last two indexes
           ByteAmount byteAmount = null;
+          // get
+
           if (ramWithUom.contains(MB)) {
             // its megaBytes
-            byteAmount = ByteAmount.fromMegabytes(extractRawValue(ramWithUom, MB));
+            int mbIndex = ramWithUom.indexOf(MB);
+            String ramUom = ramWithUom.substring(mbIndex, ramWithUom.length());
+            if (!ramUom.equalsIgnoreCase(MB)) {
+              throw new Exception(
+                  "Unit of Measure must be at the appended at the end of the value.");
+            }
+            byteAmount = ByteAmount.fromMegabytes(extractRawValue(ramWithUom, mbIndex));
 
           } else if (ramWithUom.contains(GB)) {
             // its gigaBytes
-            byteAmount = ByteAmount.fromGigabytes(extractRawValue(ramWithUom, GB));
+            int gbIndex = ramWithUom.indexOf(GB);
+            String ramUom = ramWithUom.substring(gbIndex, ramWithUom.length());
+            if (!ramUom.equalsIgnoreCase(GB)) {
+              throw new Exception(
+                  "Unit of Measure must be at the appended at the end of the value.");
+            }
+            byteAmount = ByteAmount.fromGigabytes(extractRawValue(ramWithUom, gbIndex));
 
           } else if (ramWithUom.contains(B)) {
             // its bytes
-            byteAmount = ByteAmount.fromBytes(extractRawValue(ramWithUom, B));
+            int bIndex = ramWithUom.indexOf(B);
+            String ramUom = ramWithUom.substring(bIndex, ramWithUom.length());
+            if (!ramUom.equalsIgnoreCase(B)) {
+              throw new Exception(
+                  "Unit of Measure must be at the appended at the end of the value.");
+            }
+            byteAmount = ByteAmount.fromBytes(extractRawValue(ramWithUom, bIndex));
 
           } else {
             // There is no format throw an exception
@@ -121,10 +137,9 @@ public class ConfigBuilder {
     return config;
   }
 
-  private long extractRawValue(String ramWithUom, String b) {
+  private long extractRawValue(String ramWithUom, int index) {
 
-    int mbIndex = ramWithUom.indexOf(b);
-    return Long.valueOf(ramWithUom.substring(0, mbIndex));
+    return Long.valueOf(ramWithUom.substring(0, index));
 
   }
 
