@@ -46,6 +46,8 @@ public class ConfigBuilder {
 
       if (entry.getKey().equals(COMPONENT_RESOURCE_MAP)) {
 
+        System.out.println("Object List: " + entry.getValue());
+
         List<Object> objects = (List<Object>) entry.getValue();
         for (Object obj: objects) {
 
@@ -91,15 +93,15 @@ public class ConfigBuilder {
           ByteAmount byteAmount = null;
           if (ramWithUom.contains(MB)) {
             // its megaBytes
-            byteAmount = extractRawValue(ramWithUom, MB);
+            byteAmount = ByteAmount.fromMegabytes(extractRawValue(ramWithUom, MB));
 
           } else if (ramWithUom.contains(GB)) {
             // its gigaBytes
-            byteAmount = extractRawValue(ramWithUom, GB);
+            byteAmount = ByteAmount.fromGigabytes(extractRawValue(ramWithUom, GB));
 
           } else if (ramWithUom.contains(B)) {
             // its bytes
-            byteAmount = extractRawValue(ramWithUom, B);
+            byteAmount = ByteAmount.fromBytes(extractRawValue(ramWithUom, B));
 
           } else {
             // There is no format throw an exception
@@ -119,12 +121,11 @@ public class ConfigBuilder {
     return config;
   }
 
-  private ByteAmount extractRawValue(String ramWithUom, String b) {
-    ByteAmount byteAmount;
+  private long extractRawValue(String ramWithUom, String b) {
+
     int mbIndex = ramWithUom.indexOf(b);
-    long measurement = Long.valueOf(ramWithUom.substring(0, mbIndex));
-    byteAmount = ByteAmount.fromMegabytes(measurement);
-    return byteAmount;
+    return Long.valueOf(ramWithUom.substring(0, mbIndex));
+
   }
 
   private String assignValue(String objString, int index) {

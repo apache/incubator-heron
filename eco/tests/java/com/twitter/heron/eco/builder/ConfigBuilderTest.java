@@ -13,14 +13,18 @@
 //  limitations under the License.
 package com.twitter.heron.eco.builder;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
+import com.twitter.heron.eco.parser.EcoParser;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -33,7 +37,22 @@ public class ConfigBuilderTest {
 
   private ConfigBuilder subject;
 
-  private static final String OBJECT_STRING = "{id=spout-1, ram=256MB, cpu=0.5, disk=4GB}";
+  private static final String OBJECT_STRING = " [{id=spout-1, ram=256MB, cpu=0.5, disk=4GB},"
+      + " {id=bolt-1, ram=128MB, cpu=0.5, disk=2GB}]";
+
+  private static final String YAML_PROPERTY_STRING = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 256B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 128B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
 
   @Before
   public void setUpForEachTestCase() {
@@ -61,5 +80,23 @@ public class ConfigBuilderTest {
 
     assertThat(config.get(Config.TOPOLOGY_COMPONENT_PARALLELISM), is(equalTo(2)));
     assertThat(config.get(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED), is(equalTo(4)));
+  }
+
+  @Test
+  public void testBuildConfig_SpecifyingComponentResources_ReturnsCorrectValues()
+      throws Exception {
+    Yaml yaml = new Yaml();
+    EcoParser ecoParser = new EcoParser();
+    InputStream inputStream = new ByteArrayInputStream(YAML_PROPERTY_STRING.getBytes());
+    EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+//    Map<String, Object> topologyDefinitionConfig = new HashMap<>();
+//    Object obj = yaml.load(YAML_PROPERTY_STRING);
+//    topologyDefinitionConfig.put(ConfigBuilder.COMPONENT_RESOURCE_MAP, obj);
+//    ecoTopologyDefinition.setConfig(topologyDefinitionConfig);
+
+    Config config = subject.buildConfig(ecoTopologyDefinition);
+
+    assertThat(config.get(Config.TOPOLOGY_COMPONENT_RAMMAP), is(equalTo("spout-1:256,bolt-1:128")));
+
   }
 }
