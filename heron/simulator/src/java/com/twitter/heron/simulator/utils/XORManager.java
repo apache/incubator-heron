@@ -87,6 +87,12 @@ public class XORManager {
       map.rotate();
     }
 
+    Runnable r = new Runnable() {
+      @Override
+      public void run() {
+        rotate();
+      }
+    };
     looper.registerTimerEvent(rotateInterval, this::rotate);
   }
 
