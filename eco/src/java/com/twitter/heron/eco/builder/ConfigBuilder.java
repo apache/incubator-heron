@@ -24,7 +24,7 @@ import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 @SuppressWarnings("unchecked")
 public class ConfigBuilder {
 
-  private static final String COMPONENT_RESOURCE_MAP = "topology.component.resourcemap";
+  public static final String COMPONENT_RESOURCE_MAP = "topology.component.resourcemap";
   private static final String ID = "id";
   private static final String RAM = "ram";
   private static final String CPU = "cpu";
@@ -34,6 +34,9 @@ public class ConfigBuilder {
   private static final String COMMA = ",";
   private static final String LEFT_BRACKET = "{";
   private static final String RIGHT_BRACKET = "}";
+  private static final String MB = "MB";
+  private static final String GB = "GB";
+  private static final String B = "B";
 
   protected Config buildConfig(EcoTopologyDefinition topologyDefinition) throws Exception {
 
@@ -83,24 +86,28 @@ public class ConfigBuilder {
           System.out.println("CPU " + cpu);
           System.out.println("DISK " + diskWithUom);
 
-          if (ramWithUom.contains("MB")) {
+
+          // Need to make this more precise, specifically looking for last two indexes
+          ByteAmount byteAmount = null;
+          if (ramWithUom.contains(MB)) {
             // its megaBytes
-            System.out.println("Its megaBytes");
-          } else if (ramWithUom.contains("GB")) {
+            byteAmount = extractRawValue(ramWithUom, MB);
+
+          } else if (ramWithUom.contains(GB)) {
             // its gigaBytes
-            System.out.println("Its gigaBytes");
-          } else if (ramWithUom.contains("B")) {
+            byteAmount = extractRawValue(ramWithUom, GB);
+
+          } else if (ramWithUom.contains(B)) {
             // its bytes
-            System.out.println("Its Bytes");
+            byteAmount = extractRawValue(ramWithUom, B);
+
           } else {
             // There is no format throw an exception
+            throw new
+                Exception(" Please specify 'B', 'MB', 'GB' when declaring Ram and Disk Resources");
           }
 
-          ByteAmount ramInBytes = ByteAmount.fromBytes(11234L);
-
-          config.setComponentRam(id, ramInBytes);
-
-
+          config.setComponentRam(id, byteAmount);
 
         }
 
@@ -112,9 +119,17 @@ public class ConfigBuilder {
     return config;
   }
 
-  private String assignValue(String objString, int idIndex) {
-    int equalsIndex = objString.indexOf(EQUALS, idIndex);
-    int spaceIndex = objString.indexOf(" ", idIndex);
+  private ByteAmount extractRawValue(String ramWithUom, String b) {
+    ByteAmount byteAmount;
+    int mbIndex = ramWithUom.indexOf(b);
+    long measurement = Long.valueOf(ramWithUom.substring(0, mbIndex));
+    byteAmount = ByteAmount.fromMegabytes(measurement);
+    return byteAmount;
+  }
+
+  private String assignValue(String objString, int index) {
+    int equalsIndex = objString.indexOf(EQUALS, index);
+    int spaceIndex = objString.indexOf(" ", index);
     return objString.substring(equalsIndex + 1, spaceIndex);
   }
 }
