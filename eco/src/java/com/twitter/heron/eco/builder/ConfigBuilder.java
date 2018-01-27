@@ -97,17 +97,10 @@ public class ConfigBuilder {
           }
 
           ByteAmount ramInBytes = ByteAmount.fromBytes(11234L);
+          
 
+          config.setComponentRam(id, ramInBytes);
 
-
-          if (config.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-            String oldEntry = (String) config.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-            String newEntry = String.format("%s,%s:%d", oldEntry, id, ramInBytes.asBytes());
-            config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
-          } else {
-            String newEntry = String.format("%s:%d", id, ramInBytes.asBytes());
-            config.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
-          }
 
 
         }
