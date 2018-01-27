@@ -97,7 +97,6 @@ public class ConfigBuilder {
           }
 
           ByteAmount ramInBytes = ByteAmount.fromBytes(11234L);
-          
 
           config.setComponentRam(id, ramInBytes);
 
