@@ -27,6 +27,7 @@ import com.twitter.heron.eco.parser.EcoParser;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -39,7 +40,7 @@ public class ConfigBuilderTest {
   private static final String OBJECT_STRING = " [{id=spout-1, ram=256MB, cpu=0.5, disk=4GB},"
       + " {id=bolt-1, ram=128MB, cpu=0.5, disk=2GB}]";
 
-  private static final String YAML_PROPERTY_STRING = "config:\n"
+  private static final String YAML_PROPERTIES = "config:\n"
       + "  topology.workers: 1\n"
       + "  topology.component.resourcemap:\n"
       + "\n"
@@ -50,6 +51,48 @@ public class ConfigBuilderTest {
       + "\n"
       + "    - id: \"bolt-1\"\n"
       + "      ram: 128B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
+
+  private static final String INCORRECT_BYTES_FORMAT_YAML = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: B256\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 128B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
+
+  private static final String INCORRECT_MB_FORMAT_YAML = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 25MB6\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 128B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
+
+  private static final String INCORRECT_GB_FORMAT_YAML = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: GB256\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 128GB\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
 
@@ -85,13 +128,52 @@ public class ConfigBuilderTest {
   public void testBuildConfig_SpecifyingComponentResources_ReturnsCorrectValues()
       throws Exception {
     EcoParser ecoParser = new EcoParser();
-    InputStream inputStream = new ByteArrayInputStream(YAML_PROPERTY_STRING.getBytes());
+    InputStream inputStream = new ByteArrayInputStream(YAML_PROPERTIES.getBytes());
     EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
-
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
-    assertThat(config.get(Config.TOPOLOGY_COMPONENT_RAMMAP), is(equalTo("spout-1:256,bolt-1:128")));
+    assertThat(config.get(Config.TOPOLOGY_COMPONENT_RAMMAP),
+        is(equalTo("spout-1:256,bolt-1:128")));
 
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_IncorrectByteResourceFormat_ExceptionThrow() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_BYTES_FORMAT_YAML.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_IncorrectGBResourceFormat_ExceptionThrow() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_GB_FORMAT_YAML.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_IncorrectMBResourceFormat_ExceptionThrow() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_MB_FORMAT_YAML.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
   }
 }

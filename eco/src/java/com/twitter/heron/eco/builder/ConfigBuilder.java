@@ -46,13 +46,10 @@ public class ConfigBuilder {
 
       if (entry.getKey().equals(COMPONENT_RESOURCE_MAP)) {
 
-        System.out.println("Object List: " + entry.getValue());
-
         List<Object> objects = (List<Object>) entry.getValue();
         for (Object obj: objects) {
 
           String objString = obj.toString();
-          System.out.println("Original objString: " + objString);
 
           objString = objString.replace(COMMA, WHITESPACE);
           objString = objString.replace(LEFT_BRACKET, WHITESPACE);
@@ -84,45 +81,28 @@ public class ConfigBuilder {
             diskWithUom = assignValue(objString, diskIndex);
           }
 
-
-          // Need to make this more precise, specifically looking for last two indexes
           ByteAmount byteAmount = null;
-          // get
 
           if (ramWithUom.contains(MB)) {
             // its megaBytes
-            int mbIndex = ramWithUom.indexOf(MB);
-            String ramUom = ramWithUom.substring(mbIndex, ramWithUom.length());
-            if (!ramUom.equalsIgnoreCase(MB)) {
-              throw new Exception(
-                  "Unit of Measure must be at the appended at the end of the value.");
-            }
+            int mbIndex = verifyStartingIndexOfUom(ramWithUom, MB);
             byteAmount = ByteAmount.fromMegabytes(extractRawValue(ramWithUom, mbIndex));
 
           } else if (ramWithUom.contains(GB)) {
             // its gigaBytes
-            int gbIndex = ramWithUom.indexOf(GB);
-            String ramUom = ramWithUom.substring(gbIndex, ramWithUom.length());
-            if (!ramUom.equalsIgnoreCase(GB)) {
-              throw new Exception(
-                  "Unit of Measure must be at the appended at the end of the value.");
-            }
+            int gbIndex = verifyStartingIndexOfUom(ramWithUom, GB);
             byteAmount = ByteAmount.fromGigabytes(extractRawValue(ramWithUom, gbIndex));
 
           } else if (ramWithUom.contains(B)) {
             // its bytes
-            int bIndex = ramWithUom.indexOf(B);
-            String ramUom = ramWithUom.substring(bIndex, ramWithUom.length());
-            if (!ramUom.equalsIgnoreCase(B)) {
-              throw new Exception(
-                  "Unit of Measure must be at the appended at the end of the value.");
-            }
+            int bIndex = verifyStartingIndexOfUom(ramWithUom, B);
             byteAmount = ByteAmount.fromBytes(extractRawValue(ramWithUom, bIndex));
 
           } else {
             // There is no format throw an exception
             throw new
-                Exception(" Please specify 'B', 'MB', 'GB' when declaring Ram and Disk Resources");
+                IllegalArgumentException(
+                    " Please specify 'B', 'MB', 'GB' when declaring Ram Resources");
           }
 
           config.setComponentRam(id, byteAmount);
@@ -135,6 +115,16 @@ public class ConfigBuilder {
 
     }
     return config;
+  }
+
+  private int verifyStartingIndexOfUom(String ramWithUom, String uom) {
+    int bIndex = ramWithUom.indexOf(uom);
+    String ramUom = ramWithUom.substring(bIndex, ramWithUom.length());
+    if (!ramUom.equalsIgnoreCase(uom)) {
+      throw new IllegalArgumentException(
+          "Unit of Measure must be at the appended at the end of the value.");
+    }
+    return bIndex;
   }
 
   private long extractRawValue(String ramWithUom, int index) {
