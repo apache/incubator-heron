@@ -93,7 +93,7 @@ public class XORManager {
         rotate();
       }
     };
-    looper.registerTimerEvent(rotateInterval, this::rotate);
+    looper.registerTimerEvent(rotateInterval, r);
   }
 
   // For unit test
