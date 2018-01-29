@@ -5,8 +5,8 @@ HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 INPUT=heronpy
 TMP_DIR=$(mktemp -d)
 
-sudo -H pip install heronpy==0.17.1
-sudo -H pip install --ignore-installed six
+sudo pip install heronpy==${HERONPY_VERSION}
+sudo pip install --ignore-installed six
 
 mkdir -p static/api && rm -rf static/api/python
 
