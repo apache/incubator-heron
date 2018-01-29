@@ -26,5 +26,5 @@ new-streamlet-api:
     More information on the Streamlet API can be found [below](#the-heron-streamlet-api).
 eco-api-beta:
   title: The Heron ECO API is in beta
-  content: The Heron ECO API can be used to build and test topologies locally.  The API still needs some testing and feedback from the community to understand how we  should continue to develop ECO.
+  content: The Heron ECO API can be used to build and test topologies on your local or on a cluster.  The API still needs some testing and feedback from the community to understand how we  should continue to develop ECO.
   type: success
