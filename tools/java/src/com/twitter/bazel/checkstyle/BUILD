@@ -37,7 +37,7 @@ java_library(
     name = "util",
     srcs = ["ExtraActionUtils.java"],
     deps = [
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "//third_party/java/bazel:extra_actions_proto_java",
         "//third_party/java/bazel:proto_java",
     ],
