@@ -42,23 +42,26 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.proto.system.PhysicalPlans;
+import com.twitter.heron.simulator.grouping.Grouping;
 
 
 /**
- * PhysicalPlanGenerator Tester.
+ * TopologyManager Tester.
  */
-public class PhysicalPlanUtilTest implements Serializable {
+public class TopologyManagerTest implements Serializable {
   private static final long serialVersionUID = -8532695494712446731L;
   public static final String TOPOLOGY_NAME = "topology-name";
   public static final String TOPOLOGY_ID = "topology-id";
+  public static final String BOLT_ID = "exclaim";
+  public static final String STREAM_ID = "word";
 
-  private static PhysicalPlans.PhysicalPlan plan;
+  private static TopologyManager topologyManager;
   private static TopologyAPI.Topology topology;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    topology = PhysicalPlanUtilTest.getTestTopology();
-    plan = PhysicalPlanUtil.getPhysicalPlan(topology);
+    topology = TopologyManagerTest.getTestTopology();
+    topologyManager = new TopologyManager(topology);
   }
 
   @AfterClass
@@ -72,12 +75,12 @@ public class PhysicalPlanUtilTest implements Serializable {
   public static TopologyAPI.Topology getTestTopology() {
     TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-    topologyBuilder.setSpout("word", new BaseRichSpout() {
+    topologyBuilder.setSpout(STREAM_ID, new BaseRichSpout() {
       private static final long serialVersionUID = 5406114907377311020L;
 
       @Override
       public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("word"));
+        outputFieldsDeclarer.declare(new Fields(STREAM_ID));
       }
 
       @Override
@@ -93,7 +96,7 @@ public class PhysicalPlanUtilTest implements Serializable {
       }
     }, 2);
 
-    topologyBuilder.setBolt("exclaim", new BaseBasicBolt() {
+    topologyBuilder.setBolt(BOLT_ID, new BaseBasicBolt() {
       private static final long serialVersionUID = 4398578755681473899L;
 
       @Override
@@ -106,14 +109,14 @@ public class PhysicalPlanUtilTest implements Serializable {
 
       }
     }, 2)
-        .shuffleGrouping("word");
+        .shuffleGrouping(STREAM_ID);
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", ByteAmount.fromMegabytes(500));
-    conf.setComponentRam("exclaim",  ByteAmount.fromGigabytes(1));
+    conf.setComponentRam(STREAM_ID, ByteAmount.fromMegabytes(500));
+    conf.setComponentRam(BOLT_ID,  ByteAmount.fromGigabytes(1));
     conf.setMessageTimeoutSecs(1);
 
     return topologyBuilder.createTopology().
@@ -132,28 +135,28 @@ public class PhysicalPlanUtilTest implements Serializable {
   }
 
   /**
-   * Method: getPhysicalPlan(TopologyAPI.Topology topology)
+   * Method: getPhysicalPlan()
    */
   @Test
   public void testGetPhysicalPlan() throws Exception {
-    Assert.assertEquals(topology, plan.getTopology());
+    Assert.assertEquals(topology, topologyManager.getPhysicalPlan().getTopology());
 
-    Assert.assertEquals(1, plan.getStmgrsCount());
-    PhysicalPlans.StMgr stMgr = plan.getStmgrs(0);
+    Assert.assertEquals(1, topologyManager.getPhysicalPlan().getStmgrsCount());
+    PhysicalPlans.StMgr stMgr = topologyManager.getPhysicalPlan().getStmgrs(0);
     Assert.assertEquals("", stMgr.getId());
     Assert.assertEquals("", stMgr.getHostName());
     Assert.assertEquals(-1, stMgr.getDataPort());
     Assert.assertEquals("", stMgr.getLocalEndpoint());
     Assert.assertEquals("", stMgr.getCwd());
 
-    Assert.assertEquals(4, plan.getInstancesCount());
+    Assert.assertEquals(4, topologyManager.getPhysicalPlan().getInstancesCount());
 
     ArrayList<String> componentsName = new ArrayList<>();
     ArrayList<String> instancesId = new ArrayList<>();
     ArrayList<Integer> componentsIndex = new ArrayList<>();
 
-    for (int i = 0; i < plan.getInstancesCount(); i++) {
-      PhysicalPlans.Instance instance = plan.getInstances(i);
+    for (int i = 0; i < topologyManager.getPhysicalPlan().getInstancesCount(); i++) {
+      PhysicalPlans.Instance instance = topologyManager.getPhysicalPlan().getInstances(i);
       Assert.assertEquals("", instance.getStmgrId());
       Assert.assertEquals(i + 1, instance.getInfo().getTaskId());
 
@@ -173,29 +176,57 @@ public class PhysicalPlanUtilTest implements Serializable {
   }
 
   /**
-   * Method: getComponentToTaskIds(PhysicalPlans.PhysicalPlan physicalPlan)
+   * Method: getComponentToTaskIds()
    */
   @Test
   public void testGetComponentToTaskIds() throws Exception {
-    Map<String, List<Integer>> map = PhysicalPlanUtil.getComponentToTaskIds(plan);
+    Map<String, List<Integer>> map = topologyManager.getComponentToTaskIds();
 
     Assert.assertEquals(2, map.size());
-    Assert.assertEquals(2, map.get("word").size());
-    Assert.assertEquals(2, map.get("exclaim").size());
+    Assert.assertEquals(2, map.get(STREAM_ID).size());
+    Assert.assertEquals(2, map.get(BOLT_ID).size());
 
     List<Integer> taskIds = new LinkedList<>();
-    taskIds.addAll(map.get("word"));
-    taskIds.addAll(map.get("exclaim"));
+    taskIds.addAll(map.get(STREAM_ID));
+    taskIds.addAll(map.get(BOLT_ID));
     Collections.sort(taskIds);
 
     Assert.assertEquals("[1, 2, 3, 4]", taskIds.toString());
   }
 
   /**
-   * Method: extractTopologyTimeout(TopologyAPI.Topology topology)
+   * Method: extractTopologyTimeout()
    */
   @Test
   public void testExtractTopologyTimeout() throws Exception {
-    Assert.assertEquals(Duration.ofSeconds(1), PhysicalPlanUtil.extractTopologyTimeout(topology));
+    Assert.assertEquals(Duration.ofSeconds(1), topologyManager.extractTopologyTimeout());
+  }
+
+  /**
+   * Method: getStreamConsumers()
+   */
+  @Test
+  public void testPopulateStreamConsumers() throws Exception {
+    Map<TopologyAPI.StreamId, List<Grouping>> map = topologyManager.getStreamConsumers();
+    Assert.assertEquals(1, map.size());
+
+    for (Map.Entry<TopologyAPI.StreamId, List<Grouping>> entry : map.entrySet()) {
+      TopologyAPI.StreamId streamId = entry.getKey();
+      Assert.assertEquals("default", streamId.getId());
+      Assert.assertEquals(STREAM_ID, streamId.getComponentName());
+
+      List<Grouping> consumers = entry.getValue();
+      Assert.assertNotNull(consumers);
+      Assert.assertEquals(1, consumers.size());
+
+      Grouping grouping = consumers.get(0);
+      Assert.assertTrue(grouping.getClass().toString().contains("ShuffleGrouping"));
+
+      Assert.assertEquals(1, topologyManager.getListToSend(streamId, null).size());
+
+      List<Integer> boltTasksId = topologyManager.getComponentToTaskIds().get(BOLT_ID);
+      Integer targetId = topologyManager.getListToSend(streamId, null).get(0);
+      Assert.assertTrue(boltTasksId.contains(targetId));
+    }
   }
 }
