@@ -113,7 +113,7 @@ def proto_library(name, src=None, deps=[], visibility=None,
   # workaround for the non-generated any.pb.{h,cc} from the upstream protocol
   # buffer library.
   if gen_java:
-    java_deps = ["@com_google_protobuf_protobuf_java//jar"]
+    java_deps = ["@com_google_protobuf//:protobuf_java"]
     for dep in deps:
       java_deps += [dep + "_java"]
     native.java_library(

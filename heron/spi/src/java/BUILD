@@ -39,7 +39,7 @@ java_library(
         "//heron/proto:proto_ckptmgr_java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )
 
