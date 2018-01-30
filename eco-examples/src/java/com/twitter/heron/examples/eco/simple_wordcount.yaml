@@ -39,6 +39,7 @@ config:
 
    - id: "spout-1"
      options: ["-XX:NewSize=300m"]
+     
 
 # spout definitions
 spouts:
