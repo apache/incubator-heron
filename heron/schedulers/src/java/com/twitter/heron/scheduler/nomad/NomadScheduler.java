@@ -284,12 +284,12 @@ public class NomadScheduler implements IScheduler {
             + String.valueOf(containerIndex));
 
     if (NomadContext.useCorePackageUri(this.localConfig)) {
-        envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "true");
-        envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI,
+      envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "true");
+      envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI,
             NomadContext.corePackageUri(this.localConfig));
     } else {
-        envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "false");
-        envVars.put(NomadConstants.HERON_CORE_PACKAGE_DIR,
+      envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "false");
+      envVars.put(NomadConstants.HERON_CORE_PACKAGE_DIR,
             NomadContext.corePackageDirectory(this.localConfig));
     }
 

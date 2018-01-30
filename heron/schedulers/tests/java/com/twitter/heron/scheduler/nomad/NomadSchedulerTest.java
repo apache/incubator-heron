@@ -71,7 +71,7 @@ public class NomadSchedulerTest {
   private static final ByteAmount DISK_RESOURCE = ByteAmount.fromMegabytes(1000);
   private static final int HERON_NOMAD_CORE_FREQ_MAPPING = 1000;
   private static final String CORE_PACKAGE_URI = "core-package-uri";
-  private static final boolean USE_CORE_PACKAGE_URI = true;
+  private static final Boolean USE_CORE_PACKAGE_URI = true;
   private static final String EXECUTOR_BINARY = "executor-binary";
 
   private static NomadScheduler scheduler;
@@ -357,7 +357,7 @@ public class NomadSchedulerTest {
     Assert.assertEquals(NomadKey.WORKING_DIRECTORY.getDefaultString() + "/container-"
             + String.valueOf(CONTAINER_INDEX),
         task.getEnv().get(NomadConstants.HERON_NOMAD_WORKING_DIR));
-    Assert.assertEquals(USE_CORE_PACKAGE_URI,
+    Assert.assertEquals(USE_CORE_PACKAGE_URI.toString(),
         task.getEnv().get(NomadConstants.HERON_USE_CORE_PACKAGE_URI));
     Assert.assertEquals(CORE_PACKAGE_URI,
         task.getEnv().get(NomadConstants.HERON_CORE_PACKAGE_URI));

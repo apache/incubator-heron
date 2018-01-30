@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
-import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
