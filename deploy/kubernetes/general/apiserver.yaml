@@ -46,6 +46,20 @@ spec:
         app: heron-apiserver
     spec:
       serviceAccountName: heron-apiserver
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       containers:
         - name: heron-apiserver
           image: heron/heron:latest

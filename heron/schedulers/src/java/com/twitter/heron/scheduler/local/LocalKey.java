@@ -21,9 +21,7 @@ import com.twitter.heron.spi.common.Key;
 public enum LocalKey {
   // config key for specifying the working directory of a topology
   WORKING_DIRECTORY("heron.scheduler.local.working.directory",
-      "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}"),
-
-  USE_HERON_CORE_URI("heron.scheduler.local.use_core_uri", true);
+      "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}");
 
   private final String value;
   private final Key.Type type;
