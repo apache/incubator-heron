@@ -785,8 +785,8 @@ new_http_archive(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
+    urls = ["https://github.com/google/protobuf/archive/v3.5.1.tar.gz"],
+    strip_prefix = "protobuf-3.5.1",
 )
 # end protobuf dependencies for C++ and Java
 
@@ -797,15 +797,6 @@ http_archive(
     strip_prefix = "gflags-2.2.1",
 )
 
-<<<<<<< HEAD
-http_archive(
-    name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.5.1.tar.gz"],
-    strip_prefix = "protobuf-3.5.1",
-)
-
-=======
->>>>>>> master
 new_http_archive(
     name = "com_google_googletest",
     urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
