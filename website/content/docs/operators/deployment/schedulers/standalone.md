@@ -22,7 +22,7 @@ You can easily do this by running the following command:
 $ heron-admin standalone set
 ```
 
-That will open up an `inventory.yaml` file in Vim that initially looks like this:
+That will open up an `inventory.yaml` file in whichever editor is specified in your `EDITOR` environment variable. The default is [Vim](http://www.vim.org/). That YAML file looks like this:
 
 ```yaml
 cluster:
@@ -31,9 +31,7 @@ zookeepers:
 - 127.0.0.1
 ```
 
-You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. To set the editor to edit mode, hit the **A** key; when you're finished editing, hit the **Esc** key to exit edit mode; to save changes, type **:wq** and hit **Enter**.
-
-Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
+You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
 
 > To run Heron in standalone mode locally on your laptop, use the defaults that are already provided in the `inventory.yaml` file.
 
@@ -70,18 +68,13 @@ You should see output like this:
 
 If you see the `Heron standalone cluster complete!` message, that means that the cluster is ready for you to [submit](#submitting-a-topology) and manage topologies.
 
-## Submitting a topology
-
-Once your standalone cluster is up and running, you can submit and manage topologies using the [Heron CLI tool](../../../heron-cli) and specifying the `standalone` cluster. Here's an example topology submission command:
+You can stop the cluster at any time using the `stop` command:
 
 ```bash
-$ heron submit standalone \
-  ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
-  WindowedWordCount
+$ heron-admin standalone cluster stop
 ```
 
-Once the topology has been submitted, it can be deactivated, killed, updated, and so on, just like topologies on any other scheduler.
+You will be prompted to confirm that you want to stop the cluster by typing **yes** or **y** (or **no** or **n** if you don't want to). If you enter **yes** or **y** and press **Enter**, all Heron-related jobs will be de-scheduled on Nomad.
 
 ## Fetching info about your standalone cluster
 
@@ -91,7 +84,94 @@ At any time, you can retrieve information about your standalone cluster by runni
 $ heron-admin standalone info
 ```
 
-This will return a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker).
+This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker). Here is a cluster info JSON string if all defaults are retained:
+
+```json
+{
+  "numNodes": 1,
+  "nodes": [
+    "127.0.0.1"
+  ],
+  "roles": {
+    "masters": [
+      "127.0.0.1"
+    ],
+    "slaves": [
+      "127.0.0.1"
+    ],
+    "zookeepers": [
+      "127.0.0.1"
+    ]
+  },
+  "urls": {
+    "serviceUrl": "http://127.0.0.1:9000",
+    "heronUi": "http://127.0.0.1:8889",
+    "heronTracker": "http://127.0.0.1:8888"
+  }
+}
+```
+
+You can also get more specific bits of info using the `get` command:
+
+```bash
+# Heron Tracker URL
+$ heron-admin standalone get heron-tracker-url
+
+# Heron UI URL
+$ heron-admin standalone get heron-ui-url
+
+# Heron cluster service URL
+$ heron-admin standalone get service-url
+```
+
+## Setting the service URL
+
+Once your standalone cluster is running, there's one final step before you can interact with the cluster: you need to specify the service URL for the [Heron API server](../../../heron-api-server) for the standalone cluster. You can fetch that URL in two different ways:
+
+```bash
+# Using the "get" command
+$ heron-admin standalone get service-url
+
+# Using the "info" command
+$ heron-admin standalone info | jq .urls.serviceUrl | tr -d '"'
+```
+
+Once you have the URL, you can use the `heron config` command to set the service URL:
+
+```bash
+$ heron config standalone set service_url SERVICE_URL
+```
+
+Here are some more convenient ways to set the service URL:
+
+```bash
+# Using the "get" command
+$ heron config standalone set service_url \
+  $(heron-admin standalone get service-url)
+
+# Using the "info" command
+$ heron config standalone set service_url \
+  $(heron-admin standalone info | jq .urls.serviceUrl | tr -d '"')
+```
+
+If you're running a standalone cluster locally on your laptop, the service URL will always be `http://localhost:9000`:
+
+```bash
+$ heron config standalone set service_url http://localhost:9000
+```
+
+## Submitting a topology
+
+Once your standalone cluster is up and running and you've set the service URL for the [`heron` CLI tool](../../../heron-cli), you can submit and manage topologies by specifying the `standalone` cluster. Here's an example topology submission command:
+
+```bash
+$ heron submit standalone \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
+```
+
+Once the topology has been submitted, it can be deactivated, killed, updated, and so on, just like topologies on any other scheduler.
 
 ## Managing Nomad
 

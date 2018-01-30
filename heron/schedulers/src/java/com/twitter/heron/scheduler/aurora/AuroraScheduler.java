@@ -16,6 +16,8 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,8 +185,28 @@ public class AuroraScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    controller.addContainers(containersToAdd.size());
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
+    // Do the actual containers adding
+    LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
+        controller.addContainers(containersToAdd.size()));
+    if (newAddedContainerIds.size() != containersToAdd.size()) {
+      throw new RuntimeException(
+          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          + "; input count was " + containersToAdd.size());
+    }
+    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
+    // Do the remapping:
+    // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
+    for (PackingPlan.ContainerPlan cp : containersToAdd) {
+      PackingPlan.ContainerPlan newContainerPlan =
+          new PackingPlan.ContainerPlan(
+              newAddedContainerIds.pop(), cp.getInstances(),
+              cp.getRequiredResource(), cp.getScheduledResource().orNull());
+      remapping.add(newContainerPlan);
+    }
+    LOG.info("The remapping structure: " + remapping);
+    return remapping;
   }
 
   @Override

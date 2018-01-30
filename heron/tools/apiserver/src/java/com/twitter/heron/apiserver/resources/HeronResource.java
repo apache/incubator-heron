@@ -25,6 +25,7 @@ public class HeronResource {
   public static final String ATTRIBUTE_CONFIGURATION_DIRECTORY = "configuration_directory";
   public static final String ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH = "configuration_override";
   public static final String ATTRIBUTE_PORT = "port";
+  public static final String ATTRIBUTE_DOWNLOAD_HOSTNAME = "download_hostname";
 
   @Context
   protected ServletContext servletContext;
@@ -34,6 +35,7 @@ public class HeronResource {
   private String configurationOverridePath;
   private String cluster;
   private String port;
+  private String downloadHostname;
 
   Config getBaseConfiguration() {
     if (baseConfiguration == null) {
@@ -74,4 +76,13 @@ public class HeronResource {
 
     return port;
   }
+
+  String getDownloadHostName() {
+    if (downloadHostname == null) {
+      downloadHostname = (String) servletContext.getAttribute(ATTRIBUTE_DOWNLOAD_HOSTNAME);
+    }
+
+    return downloadHostname;
+  }
+
 }

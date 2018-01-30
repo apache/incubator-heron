@@ -30,8 +30,9 @@ public interface IScalable {
    * Requests new containers for scaling a topology
    *
    * @param containersToAdd Set of containers to be added by the scheduler
+   * @return Set of added containers with real ids and resources from the scheduler
    */
-  void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
+  Set<PackingPlan.ContainerPlan> addContainers(Set<PackingPlan.ContainerPlan> containersToAdd);
 
   /**
    * Requests containers to be released for down-scaling a topology.

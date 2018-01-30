@@ -12,7 +12,7 @@ java_library(
         "//heron/proto:proto_networktests_java",
         "//third_party/java:powermock",
         "@commons_io_commons_io//jar",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",
     ],
