@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -128,14 +129,13 @@ public class LocalLauncher implements ILauncher {
     // Check if the config is set to use the heron core uri (this is the default behavior)
     // If set to false we will try to create a symlink to the install heron-core. This is used
     // in the sandbox config to avoid installing the heron client on the docker image.
-    if (config.getBooleanValue(LocalKey.USE_HERON_CORE_URI.value(),
-        LocalKey.USE_HERON_CORE_URI.getDefaultBoolean())) {
+    if (LocalContext.useCorePackageUri(config)) {
       if (!SchedulerUtils.extractPackage(topologyWorkingDirectory, coreReleasePackageURI,
           coreReleaseFileDestination, true, isVerbose)) {
         return false;
       }
     } else {
-      Path heronCore = Paths.get(LocalContext.heronCoreDirectory(config));
+      Path heronCore = Paths.get(LocalContext.corePackageDirectory(config));
       Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
       try {
         Files.createSymbolicLink(heronCoreLink, heronCore);

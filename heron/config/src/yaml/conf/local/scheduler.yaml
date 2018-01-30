@@ -9,9 +9,3 @@ heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLU
 
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:           ${JAVA_HOME}
-
-# use the link for heron core from dist directory
-heron.scheduler.local.use_core_uri:          false
-
-# use the directory for heron core
-heron.scheduler.local.core.directory:        ${HERON_DIST}/heron-core
