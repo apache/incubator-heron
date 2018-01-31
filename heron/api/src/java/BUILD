@@ -7,7 +7,7 @@ load("//tools/rules:javadoc.bzl", "java_doc")
 
 java_doc(
     name = "heron-api-javadoc",
-    libs = [":api-java"],
+    libs = [":api-java-combined"],
     pkgs = ["com/twitter/heron"],
     title = "Heron Api Documentation",
 )
@@ -35,6 +35,14 @@ java_library(
         ":api-java-low-level",
         "//third_party/java:kryo-neverlink",
     ]
+)
+
+# Functional Api
+java_library(
+    name = "api-java-combined",
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
+    deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
 )
 
 java_binary(
