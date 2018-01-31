@@ -172,7 +172,7 @@ java_library(
 java_library(
     name = "protobuf-java-neverlink",
     srcs = [ "Empty.java" ],
-    deps = [ "@com_google_protobuf_protobuf_java//jar" ],
+    deps = [ "@com_google_protobuf//:protobuf_java"],
     exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
     neverlink = 1,
 )

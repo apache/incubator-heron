@@ -81,7 +81,7 @@ def heron_client_lib_healthmgr_files():
 
 def heron_client_lib_third_party_files():
     return [
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
     ]
