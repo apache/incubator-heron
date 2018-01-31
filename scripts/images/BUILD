@@ -6,6 +6,7 @@ container_image(
     tars = [
         "//scripts/packages:heron-core",
         "//scripts/packages:heron-tools",
+        "//scripts/packages:heron-examples",
     ],
     symlinks = {
         "/usr/local/bin/heron"                   : "/heron/heron-tools/bin/heron",
@@ -13,6 +14,7 @@ container_image(
         "/usr/local/bin/heron-tracker"           : "/heron/heron-tools/bin/heron-tracker",
         "/usr/local/bin/heron-ui"                : "/heron/heron-tools/bin/heron-ui",
         "/usr/local/bin/heron-apiserver"         : "/heron/heron-tools/bin/heron-apiserver",
+        "/heron/heron-tools/dist/heron-core"     : "/heron/heron-core",
 
         "/heron/heron-tools/lib/metricscachemgr" : "/heron/heron-core/lib/metricscachemgr",
         "/heron/heron-tools/lib/packing"         : "/heron/heron-core/lib/packing", 
