@@ -64,7 +64,6 @@ build:ubuntu --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=centos_nostyle
 build:centos_nostyle --genrule_strategy=standalone
 build:centos_nostyle --ignore_unsupported_sandboxing
-build:centos_nostyle --java_toolchain=//tools/java:heron_java_toolchain
 build:centos_nostyle --linkopt -lm
 build:centos_nostyle --linkopt -lpthread
 build:centos_nostyle --linkopt -lrt
@@ -76,7 +75,6 @@ build:centos_nostyle --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=debian_nostyle
 build:debian_nostyle --genrule_strategy=standalone
 build:debian_nostyle --ignore_unsupported_sandboxing
-build:debian_nostyle --java_toolchain=//tools/java:heron_java_toolchain
 build:debian_nostyle --linkopt -lm
 build:debian_nostyle --linkopt -lpthread
 build:debian_nostyle --linkopt -lrt
@@ -88,7 +86,6 @@ build:debian_nostyle --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=darwin_nostyle
 build:darwin_nostyle --genrule_strategy=standalone
 build:darwin_nostyle --ignore_unsupported_sandboxing
-build:darwin_nostyle --java_toolchain=//tools/java:heron_java_toolchain
 build:darwin_nostyle --python2_path /usr/bin/python2.7
 build:darwin_nostyle --spawn_strategy=standalone
 build:darwin_nostyle --workspace_status_command scripts/release/status.sh
@@ -97,7 +94,6 @@ build:darwin_nostyle --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=ubuntu_nostyle
 build:ubuntu_nostyle --genrule_strategy=standalone
 build:ubuntu_nostyle --ignore_unsupported_sandboxing
-build:ubuntu_nostyle --java_toolchain=//tools/java:heron_java_toolchain
 build:ubuntu_nostyle --linkopt -lm
 build:ubuntu_nostyle --linkopt -lpthread
 build:ubuntu_nostyle --linkopt -lrt
