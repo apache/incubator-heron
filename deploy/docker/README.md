@@ -15,7 +15,7 @@ $ minikube start --memory=7168 --cpus=5 --disk-size=20g
 $ curl -O https://raw.githubusercontent.com/twitter/heron/master/deploy/docker/sandbox.sh
 ```
 
-### Getting help about heron sandbox:
+### Getting help about heron sandbox
 
 ```shell
 $ ./sandbox.sh help
@@ -35,6 +35,25 @@ http://localhost:8889
 ### Starting heron shell and play around with example topologies:
 ```shell
 $ ./sandbox.sh shell
+Starting heron sandbox shell 
+root@16092325a696:/heron# heron submit sandbox /heron/examples/heron-api-examples.jar com.twitter.heron.examples.api.ExclamationTopology exclamation
+[2018-02-01 20:24:20 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
+[2018-02-01 20:24:20 +0000] [INFO]: Launching topology: 'exclamation'
+[2018-02-01 20:24:21 +0000] [INFO]: Successfully launched topology 'exclamation' 
+root@16092325a696:/heron# heron deactivate sandbox exclamation
+[2018-02-01 20:24:46 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
+[2018-02-01 20:24:47 +0000] [INFO] com.twitter.heron.spi.utils.TMasterUtils: Topology command DEACTIVATE completed successfully.  
+[2018-02-01 20:24:47 +0000] [INFO]: Successfully deactivate topology: exclamation
+root@16092325a696:/heron# heron activate sandbox exclamation
+[2018-02-01 20:24:55 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
+[2018-02-01 20:24:56 +0000] [INFO] com.twitter.heron.spi.utils.TMasterUtils: Topology command ACTIVATE completed successfully.  
+[2018-02-01 20:24:56 +0000] [INFO]: Successfully activate topology: exclamation
+root@16092325a696:/heron# heron kill sandbox exclamation
+[2018-02-01 20:25:08 +0000] [INFO]: Using cluster definition in /heron/heron-tools/conf/sandbox
+[2018-02-01 20:25:09 +0000] [INFO]: Successfully kill topology: exclamation
+root@16092325a696:/heron# exit
+exit
+Terminating heron sandbox shell
 ```
 
 ### Shutting down heron sandbox
