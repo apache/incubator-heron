@@ -93,6 +93,25 @@ public class ConfigBuilderTest {
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
 
+  private static final String JVM_OPTIONS_CONFIG = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 256MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 128MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB\n"
+      + "\n"
+      + "  topology.component.jvmoptions:\n"
+      + "\n"
+      + "   - id: \"spout-1\"\n"
+      + "     options: \"-XX:NewSize=300m, -Xms2g\"";
+
   @Before
   public void setUpForEachTestCase() {
     subject = new ConfigBuilder();
@@ -173,4 +192,19 @@ public class ConfigBuilderTest {
       assertNull(config);
     }
   }
+
+  @Test
+  public void testBuildConfig_SpecifyingComponentJVMOptions_ReturnsCorrectValues()
+      throws Exception {
+    EcoParser ecoParser = new EcoParser();
+    InputStream inputStream = new ByteArrayInputStream(JVM_OPTIONS_CONFIG.getBytes());
+    EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+
+    Config config = subject.buildConfig(ecoTopologyDefinition);
+
+    assertThat(config.get(Config.TOPOLOGY_COMPONENT_JVMOPTS),
+        is(equalTo("{\"c3BvdXQtMSw=\":\"LVhYOk5ld1NpemU9MzAwbSwgLVhtczJnIA==\"}")));
+  }
+
+
 }

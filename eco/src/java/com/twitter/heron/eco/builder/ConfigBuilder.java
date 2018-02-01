@@ -30,6 +30,7 @@ public class ConfigBuilder {
   private static final String RAM = "ram";
   private static final String CPU = "cpu";
   private static final String DISK = "disk";
+  private static final String OPTIONS = "options";
   private static final String EQUALS = "=";
   private static final String WHITESPACE = " ";
   private static final String COMMA = ",";
@@ -39,7 +40,8 @@ public class ConfigBuilder {
   private static final String GB = "GB";
   private static final String B = "B";
 
-  protected Config buildConfig(EcoTopologyDefinition topologyDefinition) throws Exception {
+  protected Config buildConfig(EcoTopologyDefinition topologyDefinition)
+      throws IllegalArgumentException {
 
     Map<String, Object> configMap = topologyDefinition.getConfig();
     Config config = new Config();
@@ -51,7 +53,29 @@ public class ConfigBuilder {
 
       } else if (entry.getKey().equals(COMPONENT_JVM_OPTIONS)) {
 
-        System.out.println("JVM OPTIONS: " + entry.getValue());
+        List<Object> objects = (List<Object>) entry.getValue();
+        for (Object obj : objects) {
+          String objString = obj.toString();
+          objString = objString.replace(LEFT_BRACKET, WHITESPACE);
+          objString = objString.replace(RIGHT_BRACKET, WHITESPACE);
+          String jvmOptions;
+          int idIndex = objString.indexOf(ID);
+          int optionsIndex = objString.indexOf(OPTIONS);
+
+          String id = getIdValue(objString, idIndex);
+
+          if (optionsIndex != -1) {
+            int equalsIndex = objString.indexOf(EQUALS, optionsIndex);
+            jvmOptions = objString.substring(equalsIndex + 1, objString.length());
+          } else {
+            throw new IllegalArgumentException(
+                "You must specify the JVM options for your component");
+          }
+
+          config.setComponentJvmOptions(id, jvmOptions);
+
+        }
+
 
       } else {
         config.put(entry.getKey(), entry.getValue());
@@ -77,14 +101,11 @@ public class ConfigBuilder {
       int cpuIndex = objString.indexOf(CPU);
       int diskIndex = objString.indexOf(DISK);
 
-      String id = "";
+
       String ramWithUom = "";
       String diskWithUom = "";
       String cpu = "";
-
-      if (idIndex != -1) {
-        id = assignValue(objString, idIndex);
-      }
+      String id = getIdValue(objString, idIndex);
 
       if (ramIndex != -1) {
         ramWithUom = assignValue(objString, ramIndex);
@@ -125,6 +146,16 @@ public class ConfigBuilder {
       config.setComponentRam(id, byteAmount);
 
     }
+  }
+
+  private String getIdValue(String objString, int idIndex) {
+    String id = "";
+    if (idIndex != -1) {
+      id = assignValue(objString, idIndex);
+    } else {
+      throw new IllegalArgumentException("Must specify ID of component to allocate resources");
+    }
+    return id;
   }
 
   private int verifyStartingIndexOfUom(String ramWithUom, String uom) {
