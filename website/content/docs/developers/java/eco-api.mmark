@@ -1,0 +1,332 @@
+---
+title: The Heron ECO API for Java
+description: Create Heron topologies in Java from reusable spouts and bolts
+---
+
+{{< alert "eco-api-beta" >}}
+
+{{content/snippets/heron-eco-api.md}}
+
+
+## What about Storm Flux?  Is it compatible with Eco?
+
+ECO is built on top of Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
+Start reading [Migrate Storm Topologies To Heron] (../../../migrate-storm-to-heron) to learn how to migrate your Storm Flux topology then come back.
+
+## Getting started
+
+In order to use the Heron ECO API for Java, you'll need to install the `heron-api` and the `heron-storm` library, which is available
+via [Maven Central](http://search.maven.org/).
+
+### Maven setup
+
+To install the `heron-api` library using Maven, add this to the `dependencies` block of your `pom.xml`
+configuration file:
+
+```xml
+<dependency>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-api</artifactId>
+    <version>{{< heronVersion >}}</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-storm</artifactId>
+    <version>{{< heronVersion >}}</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+#### Compiling a JAR with dependencies
+
+In order to run a Java topology in a Heron cluster, you'll need to package your topology as a "fat" JAR with dependencies included. You can use the [Maven Assembly Plugin](https://maven.apache.org/plugins/maven-assembly-plugin/usage.html) to generate JARs with dependencies. To install the plugin and add a Maven goal for a single JAR, add this to the `plugins` block in your `pom.xml`:
+
+```xml
+<plugin>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <configuration>
+        <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <archive>
+            <manifest>
+                <mainClass></mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+    <executions>
+        <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+                <goal>single</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Once your `pom.xml` is properly set up, you can compile the JAR with dependencies using this command:
+
+```bash
+$ mvn assembly:assembly
+```
+
+By default, this will add a JAR in your project's `target` folder with the name `PROJECT-NAME-VERSION-jar-with-dependencies.jar`. Here's an example ECO topology submission command using a compiled JAR:
+
+```bash
+$ heron submit local \
+  target/my-project-1.2.3-jar-with-dependencies.jar \
+  com.twitter.heron.eco.Eco \
+  --eco-config-file path/to/your/topology-definition.yaml
+```
+
+Notice how the above example submission command is referencing the main class `com.twitter.heron.eco.Eco`.  This part of the command
+needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
+
+## Defining Your ECO Topology File
+
+An ECO topology definition consists of the following:
+
+* A topology name
+* An optional list of topology "components" (named Java objects that will be made available for configuration in the topology)
+* A DSL topology definition that contains:
+  - A list of spouts, each identified by a unique ID
+  - A list of bolts, each identified by a unique ID
+  - A list of "stream" objects representing a flow of tuples between spouts and bolts
+
+
+An example of a simple YAML DSL definition is below:
+
+```yaml
+
+name: "fibonacci-topology"
+
+config:
+  topology.workers: 1
+
+components:
+  - id: "property-holder"
+    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    constructorArgs:
+      - "some argument"
+    properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
+
+spouts:
+  - id: "spout-1"
+    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    constructorArgs:
+      - ref: "property-holder"
+    parallelism: 1
+
+bolts:
+  - id: "even-and-odd-bolt"
+    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
+    parallelism: 1
+
+  - id: "ibasic-print-bolt"
+    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
+    parallelism: 1
+    configMethods:
+      - name: "sampleConfigurationMethod"
+        args:
+          - "config property"
+
+  - id: "sys-out-bolt"
+    className: "com.twitter.heron.examples.eco.TestPrintBolt"
+    parallelism: 1
+
+streams:
+  - from: "spout-1"
+    to: "even-and-odd-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - from: "even-and-odd-bolt"
+    to: "ibasic-print-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "odds"
+
+  - from: "even-and-odd-bolt"
+    to: "sys-out-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "evens"
+
+```
+
+If you want to stop here and try to deploy the above topology you can execute
+
+```bash
+$ heron submit local \
+  ~/.heron/examples/heron-eco-examples.jar \
+  com.twitter.heron.eco.Eco \
+  --eco-config-file ~/.heron/examples/fibonacci.yaml
+```
+
+This ECO topology doesn't do anything spectacular, but it's a good starting point to go through some of ECO's concepts.
+
+## Taking a closer look at the YAML definition specs
+
+### Topology Name
+
+Each ECO definition file will be required to have a `name` defined.
+
+```yaml
+
+name: "simple-wordcount-topology"
+
+```
+
+### Configuration
+
+`config` is the section where you will list your properties to be inserted into a `org.apache.storm.Config` class. This section is optional.
+
+```yaml
+
+config:
+  topology.workers: 1
+
+```
+
+### Components
+
+`components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL.
+The properties that are required for each `component` instance are `id` and `className`.  `id` can be any name you choose, `className`  is the fully qualified className of the Java class. The `id` field is used to identify
+the component for injection in the coming spouts and bolts defined in the topology.  `constructorArgs` is only needed
+if a component has constructor that requires arguments.  We will get into constructor args the in the next section.  `components` are optional
+
+```yaml
+
+components:
+  - id: "property-holder"
+    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    constructorArgs:
+      - "some argument"
+
+```
+### Property Injection
+
+#### Constructor Injection
+
+`constructorArgs` can specify any object type.  Above you can see that the only constructor argument specified is a string
+that contained "some argument".  If declaring a number, you may omit the parenthesis
+
+```yaml
+
+ constructorArgs:
+      - "some argument"
+      - 123.45
+
+```
+
+The is also a way to reference other components as arguments by using `ref`.  In the example
+below we are specifying an already defined component to be a constructor argument.  Any instance that is referenced by
+`ref` must have already been defined in the ECO definition file before it is to be used.
+
+```yaml
+
+constructorArgs:
+      - ref: "property-holder"
+
+```
+
+#### Setter and Public Field Injection
+
+Besides constructor injection, you may also use setter methods. In the below example, ECO will take inspect the component
+for setters that match the names and values provided.  If no setter is defined, it will then look for a public field to set the property.
+
+
+```yaml
+
+properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
+
+```
+
+## The Topology Definition
+
+Spouts and Bolts each have their own sections for defining in the ECO file.  They are extensions of `components` so they will
+be allowed the same property injection methods above.  One difference is the `parallelism` property they contain, it sets the `parallelism`
+property for each bolt or spout once the topology has been deployed into Heron.
+
+
+### Spouts
+
+```yaml
+
+spouts:
+  - id: "spout-1"
+    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    constructorArgs:
+      - ref: "property-holder"
+    parallelism: 1
+
+```
+
+### Bolts
+
+```yaml
+
+bolts:
+  - id: "even-and-odd-bolt"
+    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
+    parallelism: 1
+
+```
+
+### Streams and Groupings
+
+Streams are what connect your bolts and spouts together.  Stream Groupings are the specific way you are to connect those streams to the spouts and bolts.
+
+##### A Stream can contain the following fields.
+
+* `from` - references the `id` of the component where data is coming from
+* `to` - references the `id` of the component where the data is going
+* `grouping` - This is grouping definition of how this stream will connect the two afore mentioned components together
+
+##### A grouping can contain the following fields
+* `type` - The type of grouping.
+  - `SHUFFLE`
+  - `FIELDS`
+  - `ALL`
+  - `GLOBAL`
+  - `NONE`
+  - `CUSTOM`
+* `args` is specific to the `FIELDS` grouping type. You would specify this as a list like so `["arg1", "arg2"]`
+* `customClass` if you wanted to create a custom grouping, you could specify the fully qualified class name here
+
+In the below example, you can see the first Stream Definition declares that data will flow from `spout-1` to `even-and-odd-bolt` with a grouping type of `SHUFFLE`
+
+
+```yaml
+
+streams:
+  - from: "spout-1"
+    to: "even-and-odd-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - from: "even-and-odd-bolt"
+    to: "ibasic-print-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "odds"
+
+  - from: "even-and-odd-bolt"
+    to: "sys-out-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "evens"
+
+```
+
