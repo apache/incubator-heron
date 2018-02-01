@@ -24,7 +24,7 @@ import org.apache.storm.tuple.Tuple;
 
 import static org.apache.storm.utils.Utils.tuple;
 
-@SuppressWarnings({"serial", "rawtypes", "unchecked"})
+@SuppressWarnings({"serial", "rawtypes", "unchecked", "HiddenField"})
 public class TestIBasicPrintBolt implements IBasicBolt {
 
   private String someProperty = "some ";
@@ -41,7 +41,8 @@ public class TestIBasicPrintBolt implements IBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    System.out.println("The configuration method has set \"someProperty\" to : " + this.someProperty);
+    System.out.println("The configuration method has set \"someProperty\" to : "
+        + this.someProperty);
     System.out.println("Emitting : " + input);
     collector.emit(tuple(input.getValues().get(0)));
 

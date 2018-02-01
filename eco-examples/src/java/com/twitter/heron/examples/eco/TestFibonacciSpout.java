@@ -25,7 +25,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 
-@SuppressWarnings({"serial", "rawtypes"})
+@SuppressWarnings({"serial", "rawtypes", "HiddenField"})
 public class TestFibonacciSpout extends BaseRichSpout {
   private static final Logger LOG = Logger.getLogger(TestFibonacciSpout.class.getName());
   private TestPropertyHolder holder;
@@ -53,7 +53,7 @@ public class TestFibonacciSpout extends BaseRichSpout {
     LOG.info("Constructor Args: " + property);
     LOG.info("Property set by setter: " + numberProperty);
     LOG.info("Property set by public field: " + publicProperty);
-    LOG.info("Emitting: number " + number );
+    LOG.info("Emitting: number " + number);
     collector.emit(new Values(number));
   }
 

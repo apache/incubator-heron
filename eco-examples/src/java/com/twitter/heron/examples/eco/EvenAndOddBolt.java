@@ -48,7 +48,7 @@ public class EvenAndOddBolt implements IBasicBolt {
       collector.emit("evens", tuple(input.getValues().get(0)));
 
     } else {
-      System.out.println("emitting to odds stream: " + number );
+      System.out.println("emitting to odds stream: " + number);
       collector.emit("odds", tuple(input.getValues().get(0)));
     }
 
