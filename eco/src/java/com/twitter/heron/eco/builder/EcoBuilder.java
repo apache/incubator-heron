@@ -16,9 +16,9 @@ package com.twitter.heron.eco.builder;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
@@ -60,7 +60,7 @@ public class EcoBuilder {
     return builder;
   }
 
-  public Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+  public Config buildConfig(EcoTopologyDefinition topologyDefinition) throws Exception {
     return this.configBuilder.buildConfig(topologyDefinition);
   }
 }
