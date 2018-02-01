@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
@@ -78,7 +78,7 @@ public class EcoBuilderTest {
   }
 
   @Test
-  public void testBuild_EmptyConfigMap_ReturnsDefaultConfigs() {
+  public void testBuild_EmptyConfigMap_ReturnsDefaultConfigs() throws Exception {
 
     Config config = new Config();
     when(mockConfigBuilder.buildConfig(eq(ecoTopologyDefinition))).thenReturn(config);
@@ -92,7 +92,7 @@ public class EcoBuilderTest {
   }
 
   @Test
-  public void testBuild_CustomConfigMap_ReturnsCorrectConfigs() {
+  public void testBuild_CustomConfigMap_ReturnsCorrectConfigs() throws Exception {
     configMap.put(Config.TOPOLOGY_DEBUG, false);
     final String environment = "dev";
     final int spouts = 3;
