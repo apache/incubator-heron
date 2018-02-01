@@ -1,7 +1,10 @@
 #!/bin/bash
 set -o errexit
 
-check_docker_installed() {
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+check_docker_install() {
   if ! [[ $(which docker) && $(docker --version) ]]; then
     echo "Docker is not installed in system"
     exit 1
@@ -10,23 +13,26 @@ check_docker_installed() {
 
 sandbox_start() {
   docker run -d -p 8889:8889 -p 9000:9000 --name=heron $1 > /dev/null
+  echo "${bold}Heron sandbox is up and running ${normal}"
 }
 
 sandbox_ps() {
   docker ps -f name=heron
 }
 
-sandbox_logs() {
+sandbox_clogs() {
   docker logs heron
 }
 
 sandbox_shell() {
+  echo "${bold}Starting heron sandbox shell ${normal}"
   docker exec -it heron /bin/bash
   EXIT_CODE=$?
   if [ $EXIT_CODE -ne 0 ]; then
     echo "Unable to create shell to the container 'heron'"
     exit 1
   fi
+  echo "${bold}Terminating heron sandbox shell ${normal}"
 }
 
 sandbox_stop() {
@@ -42,9 +48,10 @@ sandbox_stop() {
     echo "Unable to remove the container 'heron'"
     exit 1
   fi
+  echo "${bold}Heron sandbox is shutdown ${normal}"
 }
 
-check_docker_installed
+check_docker_install
 
 case $1 in
   start)
@@ -54,8 +61,8 @@ case $1 in
   ps)
     sandbox_ps
     ;;
-  logs)
-    sandbox_logs
+  clogs)
+    sandbox_clogs
     ;;
   stop)
     sandbox_stop
@@ -64,8 +71,6 @@ case $1 in
     sandbox_shell
     ;;
   help|*)
-    bold=$(tput bold)
-    normal=$(tput sgr0)
     echo "  "
     echo "${bold}Starting and shutting down the heron sandbox${normal}"
     echo "  "
