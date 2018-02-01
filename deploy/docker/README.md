@@ -3,13 +3,9 @@
 ### Requirements:
 * [Docker](https://docs.docker.com/install/)
 
-### Start Docker
-It is recommended to that docker gets 4 or more cores and 2 GB or more memory 
-```shell
-$ minikube start --memory=7168 --cpus=5 --disk-size=20g
-```
+It is recommended that docker gets 4 or more cores and 2 GB or more memory 
 
-### Download sandbox script
+### Download heron sandbox script
 
 ```shell
 $ curl -O https://raw.githubusercontent.com/twitter/heron/master/deploy/docker/sandbox.sh
