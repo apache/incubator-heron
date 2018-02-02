@@ -6,14 +6,14 @@ normal=$(tput sgr0)
 
 check_docker_install() {
   if ! [[ $(which docker) && $(docker --version) ]]; then
-    echo "Docker is not installed in system"
+    echo "Docker is not currently installed on your system"
     exit 1
   fi
 }
 
 sandbox_start() {
-  docker run -d -p 8889:8889 -p 9000:9000 --name=heron $1 > /dev/null
-  echo "${bold}Heron sandbox is up and running ${normal}"
+  docker run -d -p 8889:8889 -p 9000:9000 --name=heron-sandbox $1 > /dev/null
+  echo "${bold}The Heron Sandbox is up and running ${normal}"
 }
 
 sandbox_ps() {
@@ -25,14 +25,14 @@ sandbox_clogs() {
 }
 
 sandbox_shell() {
-  echo "${bold}Starting heron sandbox shell ${normal}"
-  docker exec -it heron /bin/bash
+  echo "${bold}Starting the Heron Sandbox shell${normal}"
+  docker exec -it heron-sandbox /bin/bash
   EXIT_CODE=$?
   if [ $EXIT_CODE -ne 0 ]; then
-    echo "Unable to create shell to the container 'heron'"
+    echo "Unable to create a shell session for the container 'heron'"
     exit 1
   fi
-  echo "${bold}Terminating heron sandbox shell ${normal}"
+  echo "${bold}Terminating the Heron Sandbox shell${normal}"
 }
 
 sandbox_stop() {
@@ -48,7 +48,7 @@ sandbox_stop() {
     echo "Unable to remove the container 'heron'"
     exit 1
   fi
-  echo "${bold}Heron sandbox is shutdown ${normal}"
+  echo "${bold}The Heron Sandbox has been successfully shut down${normal}"
 }
 
 check_docker_install
@@ -72,53 +72,63 @@ case $1 in
     ;;
   help|*)
     echo "  "
-    echo "${bold}Starting and shutting down the heron sandbox${normal}"
+    echo "${bold}The Heron Sandbox CLI tool${normal}"
+    echo "=========================="
     echo "  "
-    echo "  ${bold}Starting ${normal}the heron sandbox"
-    echo "    $0 start "
+    echo "The Heron Sandbox is a version of Heron that runs inside of a single Docker container."
+    echo "Example topologies are included inside the container as well, making the Heron Sandbox"
+    echo "an ideal tool for initial experimentation with Heron."
+    echo "  "
+    echo "${bold}Starting and shutting down the Heron Sandbox${normal}"
+    echo "  "
+    echo "  ${bold}Start${normal} the Heron Sandbox:"
+    echo "    $0 start"
     echo "  "
 
-    echo "  ${bold}Shutting down ${normal}the heron sandbox"
-    echo "    $0 stop "
+    echo "  ${bold}Shut down${normal} the Heron Sandbox:"
+    echo "    $0 stop"
     echo "  "
 
-    echo "  ${bold}Check ${normal}if the heron sandbox is running"
-    echo "    $0 ps "
+    echo "  ${bold}Check${normal} if the Heron Sandbox is running:"
+    echo "    $0 ps"
     echo "  "
 
-    echo "${bold}Topology examples in the heron sandbox ${normal}"
+    echo "${bold}Example topologies included with the Heron Sandbox${normal}"
     echo "  "
-    echo "  Heron ${bold}Java API ${normal}example topologies are available in "
+    echo "  Heron ${bold}Java API${normal} example topologies are available in:"
     echo "    /heron/examples/heron-api-examples.jar"
     echo "  "
 
-    echo "  Heron ${bold}Java Streamlet ${normal}example topologies are available in "
+    echo "  Heron ${bold}Java Streamlet API${normal} example topologies are available in:"
     echo "    /heron/examples/heron-streamlet-examples.jar"
     echo "  "
 
-    echo "  Heron ${bold}Java ECO ${normal}example topologies are available in "
+    echo "  Heron ${bold}Java ECO${normal} example topologies are available in:"
     echo "    /heron/examples/heron-eco-examples.jar"
     echo "  "
     
-    echo "${bold}Playing with the examples in the heron sandbox ${normal}"
+    echo "${bold}Experimenting with the examples in the Heron Sandbox${normal}"
     echo "  "
-    echo "  First ${bold}create ${normal}a shell to play with example topologies"
-    echo "    $0 shell "
+    echo "  First, ${bold}open a shell session${normal} to play with example topologies:"
+    echo "    $0 shell"
+    echo "  "
+    echo "      ${bold}NOTE${normal}: Make sure Docker is running on your machine first. See instructions"
+    echo "            here: https://docs.docker.com/machine/get-started"
     echo "  "
     
-    echo "  For ${bold}submitting ${normal}a topology in the shell"
+    echo "  Then you can ${bold}submit${normal} a topology via the shell:"
     echo "    heron submit sandbox /heron/examples/heron-api-examples.jar com.twitter.heron.examples.api.ExclamationTopology exclamation"
     echo "  "
     
-    echo "  For ${bold}deactivating ${normal}a topology in the shell"
+    echo "  You can ${bold}deactivate${normal} the topology via the shell as well:"
     echo "    heron deactivate sandbox exclamation"
     echo "  "
     
-    echo "  For ${bold}activating ${normal}a topology in the shell"
+    echo "  To ${bold}activate${normal} a deactivated topology:"
     echo "    heron activate sandbox exclamation"
     echo "  "
     
-    echo "  For ${bold}killing ${normal}a topology in the shell"
+    echo "  Finally, you can ${bold}kill${normal} a topology and remove it from the cluster:"
     echo "    heron kill sandbox exclamation"
     echo "  "
     
