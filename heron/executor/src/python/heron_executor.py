@@ -511,6 +511,7 @@ class HeronExecutor(object):
 
 
     if self.health_manager_mode.lower() != "disabled":
+      # align metricscache and healthmgr toggle switch
       retval["heron-metricscache"] = self._get_metrics_cache_cmd()
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
