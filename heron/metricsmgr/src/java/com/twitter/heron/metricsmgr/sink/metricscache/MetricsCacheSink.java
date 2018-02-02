@@ -210,8 +210,8 @@ public class MetricsCacheSink implements IMetricsSink {
     for (ExceptionInfo exceptionInfo : record.getExceptions()) {
       String exceptionStackTrace = exceptionInfo.getStackTrace();
       String[] exceptionStackTraceLines = exceptionStackTrace.split("\r\n|[\r\n]", 3);
-      String exceptionStackTraceFirstTwoLines =
-          String.join(System.lineSeparator(), exceptionStackTraceLines[0], exceptionStackTraceLines[1]);
+      String exceptionStackTraceFirstTwoLines = String.join(System.lineSeparator(),
+          exceptionStackTraceLines[0], exceptionStackTraceLines[1]);
       TopologyMaster.TmasterExceptionLog exceptionLog =
           TopologyMaster.TmasterExceptionLog.newBuilder()
               .setComponentName(componentName)
