@@ -16,6 +16,7 @@ package com.twitter.heron.eco.parser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -40,11 +41,12 @@ public class EcoParser {
     if (inputStream == null) {
       throw new Exception("Unable to load eco input stream");
     }
-    return loadTopologyFromYaml(yaml, inputStream, propsFile);
+    return loadTopologyFromYaml(yaml, inputStream, propsFile, envFilter);
   }
 
   private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream,
-                                                     InputStream propsIn) throws IOException {
+                                                     InputStream propsIn,
+                                                     boolean envFilter) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     int b;
     while ((b = inputStream.read()) != -1) {
@@ -66,15 +68,15 @@ public class EcoParser {
     }
 
     // environment variable substitution
-//    if(envSubstitution){
-//      LOG.info("Performing environment variable substitution...");
-//      Map<String, String> envs = System.getenv();
-//      for(String key : envs.keySet()){
-//        yamlDefinitionStr = yamlDefinitionStr.replace("${ENV-" + key + "}", envs.get(key));
-//      }
-//    } else {
-//      LOG.info("Not performing environment variable substitution.");
-//    }
+    if (envFilter) {
+      LOG.info("Performing environment variable substitution.");
+      Map<String, String> envs = System.getenv();
+      for (String key : envs.keySet()) {
+        yamlDefinitionStr = yamlDefinitionStr.replace("${ENV-" + key + "}", envs.get(key));
+      }
+    } else {
+      LOG.info("Not performing environment variable substitution.");
+    }
     return (EcoTopologyDefinition) yaml.load(yamlDefinitionStr);
   }
   private static Yaml topologyYaml() {

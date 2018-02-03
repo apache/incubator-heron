@@ -31,8 +31,9 @@ import com.twitter.heron.eco.definition.PropertyDefinition;
 import com.twitter.heron.eco.definition.StreamDefinition;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 
 /**
@@ -285,6 +286,51 @@ public class EcoParserTest {
       + "    grouping:\n"
       + "      type: SHUFFLE";
 
+  private static final String PROPERTY_SUBSTITUION_YAML = "name: \"fibonacci-topology\"\n"
+      + "\n"
+      + "config:\n"
+      + "  topology.workers: 1\n"
+      + "\n"
+      + "components:\n"
+      + "  - id: \"property-holder\"\n"
+      + "    className: \"com.twitter.heron.examples.eco.TestPropertyHolder\"\n"
+      + "    constructorArgs:\n"
+      + "      - \"some argument\"\n"
+      + "    properties:\n"
+      + "      - name: \"numberProperty\"\n"
+      + "        value: 11\n"
+      + "      - name: \"publicProperty\"\n"
+      + "        value: \"This is public property\"\n"
+      + "\n"
+      + "spouts:\n"
+      + "  - id: \"spout-1\"\n"
+      + "    className: \"com.twitter.heron.examples.eco.TestFibonacciSpout\"\n"
+      + "    constructorArgs:\n"
+      + "      - ref: \"property-holder\"\n"
+      + "    parallelism: 1\n"
+      + "\n"
+      + "bolts:\n"
+      + "  - id: \"even-and-odd-bolt\"\n"
+      + "    className: \"com.twitter.heron.examples.eco.EvenAndOddBolt\"\n"
+      + "    parallelism: 1\n"
+      + "\n"
+      + "  - id: \"ibasic-print-bolt\"\n"
+      + "    className: \"com.twitter.heron.examples.eco.TestIBasicPrintBolt\"\n"
+      + "    parallelism: 1\n"
+      + "    configMethods:\n"
+      + "      - name: \"sampleConfigurationMethod\"\n"
+      + "        args:\n"
+      + "          - \"${ecoPropertyOne}\"\n"
+      + "\n"
+      + "  - id: \"sys-out-bolt\"\n"
+      + "    className: \"com.twitter.heron.examples.eco.TestPrintBolt\"\n"
+      + "    parallelism: 1";
+
+  private static final String SAMPLE_PROPERTIES = "ecoPropertyOne=ecoValueOne\n"
+      + "\n"
+      + "ecoPropertyTwo=1234\n"
+      + "\n";
+
   private EcoParser subject;
 
   @Before
@@ -411,5 +457,19 @@ public class EcoParserTest {
     } finally {
       assertNull(ecoTopologyDefinition);
     }
+  }
+
+  @Test
+  public void testParseFromInputStream_PropertyFiltering_SubstitutesAsExpected() throws Exception {
+    InputStream inputStream = new ByteArrayInputStream(PROPERTY_SUBSTITUION_YAML.getBytes());
+    InputStream propsStream = new ByteArrayInputStream(SAMPLE_PROPERTIES.getBytes());
+    EcoTopologyDefinition ecoTopologyDefinition =
+        subject.parseFromInputStream(inputStream, propsStream, false);
+
+    BoltDefinition bolt = ecoTopologyDefinition.getBolt("ibasic-print-bolt");
+    List<Object> args = bolt.getConfigMethods().get(0).getArgs();
+
+
+    assertThat(args.get(0), is(equalTo("ecoValueOne")));
   }
 }

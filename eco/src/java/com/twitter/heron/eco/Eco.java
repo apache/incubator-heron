@@ -129,7 +129,7 @@ public class Eco {
         .argName("eco-filter")
         .build();
 
-    Option envSubOption = Option.builder("env-filter")
+    Option envSubOption = Option.builder("envFilter")
         .desc("Perform environment variable substitution.")
         .longOpt("env-filter")
         .numberOfArgs(0)

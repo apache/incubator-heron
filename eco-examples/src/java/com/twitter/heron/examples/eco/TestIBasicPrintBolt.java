@@ -27,7 +27,7 @@ import static org.apache.storm.utils.Utils.tuple;
 @SuppressWarnings({"serial", "rawtypes", "unchecked", "HiddenField"})
 public class TestIBasicPrintBolt implements IBasicBolt {
 
-  private String someProperty = "some ";
+  public String someProperty = "some ";
   @Override
   public void prepare(Map stormConf, TopologyContext context) {
 
