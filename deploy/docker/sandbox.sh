@@ -3,6 +3,7 @@ set -o errexit
 
 bold=$(tput bold)
 normal=$(tput sgr0)
+c_name="heron-sandbox"
 
 check_docker_install() {
   if ! [[ $(which docker) && $(docker --version) ]]; then
@@ -12,40 +13,40 @@ check_docker_install() {
 }
 
 sandbox_start() {
-  docker run -d -p 8889:8889 -p 9000:9000 --name=heron-sandbox $1 > /dev/null
+  docker run -d -p 8889:8889 -p 9000:9000 --name=$c_name $1 > /dev/null
   echo "${bold}The Heron Sandbox is up and running ${normal}"
 }
 
 sandbox_ps() {
-  docker ps -f name=heron
+  docker ps -f name=$c_name
 }
 
 sandbox_clogs() {
-  docker logs heron
+  docker logs $c_name
 }
 
 sandbox_shell() {
   echo "${bold}Starting the Heron Sandbox shell${normal}"
-  docker exec -it heron-sandbox /bin/bash
+  docker exec -it $c_name /bin/bash
   EXIT_CODE=$?
   if [ $EXIT_CODE -ne 0 ]; then
-    echo "Unable to create a shell session for the container 'heron'"
+    echo "Unable to create a shell session for the container '$c_name'"
     exit 1
   fi
   echo "${bold}Terminating the Heron Sandbox shell${normal}"
 }
 
 sandbox_stop() {
-  docker stop heron > /dev/null 2>&1
+  docker stop $c_name > /dev/null 2>&1
   EXIT_CODE=$?
   if [ $EXIT_CODE -ne 0 ]; then
-    echo "Unable to stop the container 'heron'"
+    echo "Unable to stop the container '$c_name'"
     exit 1
   fi
-  docker rm -f -v heron > /dev/null 2>&1
+  docker rm -f -v $c_name > /dev/null 2>&1
   EXIT_CODE=$?
   if [ $EXIT_CODE -ne 0 ]; then
-    echo "Unable to remove the container 'heron'"
+    echo "Unable to remove the container '$c_name'"
     exit 1
   fi
   echo "${bold}The Heron Sandbox has been successfully shut down${normal}"
@@ -106,7 +107,7 @@ case $1 in
     echo "  Heron ${bold}Java ECO${normal} example topologies are available in:"
     echo "    /heron/examples/heron-eco-examples.jar"
     echo "  "
-    
+
     echo "${bold}Experimenting with the examples in the Heron Sandbox${normal}"
     echo "  "
     echo "  First, ${bold}open a shell session${normal} to play with example topologies:"
@@ -115,23 +116,23 @@ case $1 in
     echo "      ${bold}NOTE${normal}: Make sure Docker is running on your machine first. See instructions"
     echo "            here: https://docs.docker.com/machine/get-started"
     echo "  "
-    
+
     echo "  Then you can ${bold}submit${normal} a topology via the shell:"
     echo "    heron submit sandbox /heron/examples/heron-api-examples.jar com.twitter.heron.examples.api.ExclamationTopology exclamation"
     echo "  "
-    
+
     echo "  You can ${bold}deactivate${normal} the topology via the shell as well:"
     echo "    heron deactivate sandbox exclamation"
     echo "  "
-    
+
     echo "  To ${bold}activate${normal} a deactivated topology:"
     echo "    heron activate sandbox exclamation"
     echo "  "
-    
+
     echo "  Finally, you can ${bold}kill${normal} a topology and remove it from the cluster:"
     echo "    heron kill sandbox exclamation"
     echo "  "
-    
+
     exit 1
     ;;
 esac
