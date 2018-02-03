@@ -57,8 +57,10 @@ public class Eco {
     this.ecoSubmitter = ecoSubmitter;
   }
 
-  public void submit(FileInputStream fileInputStream) throws Exception {
-    EcoTopologyDefinition topologyDefinition = ecoParser.parseFromInputStream(fileInputStream);
+  public void submit(FileInputStream fileInputStream, FileInputStream propertiesFile)
+      throws Exception {
+    EcoTopologyDefinition topologyDefinition = ecoParser
+        .parseFromInputStream(fileInputStream, propertiesFile);
 
     String topologyName = topologyDefinition.getName();
 
@@ -92,6 +94,8 @@ public class Eco {
 
     FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
+    FileInputStream propsInputStream = new FileInputStream(new File(cmd.getOptionValue("filter")));
+
     Eco eco = new Eco(
         new EcoBuilder(
             new SpoutBuilder(),
@@ -102,7 +106,7 @@ public class Eco {
         new EcoParser(),
         new EcoSubmitter());
 
-    eco.submit(fin);
+    eco.submit(fin, propsInputStream);
   }
 
   private static Options constructOptions() {
@@ -114,6 +118,14 @@ public class Eco {
         .argName("eco-config-file")
         .required()
         .build();
+
+    Option filterOption = Option.builder("filter")
+        .desc(".properties file for property substitution")
+        .longOpt("eco-filter")
+        .hasArgs()
+        .argName("eco-filter")
+        .build();
+    options.addOption(filterOption);
     options.addOption(ecoConfig);
     return options;
   }

@@ -13,7 +13,11 @@
 //  limitations under the License.
 package com.twitter.heron.eco.parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -25,7 +29,9 @@ import com.twitter.heron.eco.definition.SpoutDefinition;
 
 public class EcoParser {
 
-  public EcoTopologyDefinition parseFromInputStream(InputStream inputStream)
+  private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
+
+  public EcoTopologyDefinition parseFromInputStream(InputStream inputStream, InputStream propsFile)
       throws Exception {
 
     Yaml yaml = topologyYaml();
@@ -33,11 +39,42 @@ public class EcoParser {
     if (inputStream == null) {
       throw new Exception("Unable to load eco input stream");
     }
-    return loadTopologyFromYaml(yaml, inputStream);
+    return loadTopologyFromYaml(yaml, inputStream, propsFile);
   }
 
-  private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream) {
-    return (EcoTopologyDefinition) yaml.load(inputStream);
+  private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream,
+                                                     InputStream propsIn) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    int b;
+    while ((b = inputStream.read()) != -1) {
+      bos.write(b);
+    }
+
+    String yamlDefinitionStr = bos.toString();
+    // properties file substitution
+    if (propsIn != null) {
+      LOG.info("Performing property substitution.");
+      Properties props = new Properties();
+      props.load(propsIn);
+      for (Object key : props.keySet()) {
+        yamlDefinitionStr = yamlDefinitionStr.replace("${"
+            + key + "}", props.getProperty((String) key));
+      }
+    } else {
+      LOG.info("Not performing property substitution.");
+    }
+
+    // environment variable substitution
+//    if(envSubstitution){
+//      LOG.info("Performing environment variable substitution...");
+//      Map<String, String> envs = System.getenv();
+//      for(String key : envs.keySet()){
+//        yamlDefinitionStr = yamlDefinitionStr.replace("${ENV-" + key + "}", envs.get(key));
+//      }
+//    } else {
+//      LOG.info("Not performing environment variable substitution.");
+//    }
+    return (EcoTopologyDefinition) yaml.load(yamlDefinitionStr);
   }
   private static Yaml topologyYaml() {
     Constructor topologyConstructor = new Constructor(EcoTopologyDefinition.class);

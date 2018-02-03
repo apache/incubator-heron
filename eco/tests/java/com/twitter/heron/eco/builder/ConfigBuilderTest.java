@@ -14,12 +14,14 @@
 package com.twitter.heron.eco.builder;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -174,6 +176,9 @@ public class ConfigBuilderTest {
       + "      ram: 0.255GB\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
+
+
+
   @Before
   public void setUpForEachTestCase() {
     subject = new ConfigBuilder();
@@ -207,7 +212,10 @@ public class ConfigBuilderTest {
       throws Exception {
     EcoParser ecoParser = new EcoParser();
     InputStream inputStream = new ByteArrayInputStream(YAML_PROPERTIES.getBytes());
-    EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+    EcoTopologyDefinition ecoTopologyDefinition =
+        ecoParser.parseFromInputStream(inputStream, mockPropsStream);
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
@@ -222,7 +230,10 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_BYTES_FORMAT_YAML.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -235,7 +246,10 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_GB_FORMAT_YAML.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -248,7 +262,10 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_MB_FORMAT_YAML.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -260,7 +277,10 @@ public class ConfigBuilderTest {
       throws Exception {
     EcoParser ecoParser = new EcoParser();
     InputStream inputStream = new ByteArrayInputStream(JVM_OPTIONS_CONFIG.getBytes());
-    EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+    EcoTopologyDefinition ecoTopologyDefinition =
+        ecoParser.parseFromInputStream(inputStream, mockPropsStream);
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
@@ -274,7 +294,10 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_JVM_OPTIONS_CONFIG.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
@@ -288,7 +311,10 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_RAM_BYTES.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
@@ -302,7 +328,9 @@ public class ConfigBuilderTest {
     try {
       EcoParser ecoParser = new EcoParser();
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_RAM_MEGABYTES.getBytes());
-      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+      FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+      EcoTopologyDefinition ecoTopologyDefinition =
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {

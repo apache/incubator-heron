@@ -15,7 +15,6 @@ package com.twitter.heron.eco;
 
 import java.io.FileInputStream;
 
-
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
@@ -26,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
-
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.builder.EcoBuilder;
@@ -67,20 +65,22 @@ public class EcoTest {
   @Test
   public void testSubmit_AllGood_BehavesAsExpected() throws Exception {
     FileInputStream mockStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
     final String topologyName = "the name";
     EcoTopologyDefinition topologyDefinition = new EcoTopologyDefinition();
     topologyDefinition.setName(topologyName);
     Config config = new Config();
 
-    when(mockEcoParser.parseFromInputStream(eq(mockStream))).thenReturn(topologyDefinition);
+    when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream)))
+        .thenReturn(topologyDefinition);
     when(mockEcoBuilder.buildConfig(eq(topologyDefinition))).thenReturn(config);
     when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class),
         any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
 
-    subject.submit(mockStream);
+    subject.submit(mockStream, mockPropsStream);
 
-    verify(mockEcoParser).parseFromInputStream(same(mockStream));
+    verify(mockEcoParser).parseFromInputStream(same(mockStream), same(mockPropsStream));
     verify(mockEcoBuilder).buildConfig(same(topologyDefinition));
     verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
         any(ObjectBuilder.class));

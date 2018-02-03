@@ -48,7 +48,7 @@ bolts:
     configMethods:
       - name: "sampleConfigurationMethod"
         args:
-          - "config property"
+          - "${ecoPropertyOne}"
 
   - id: "sys-out-bolt"
     className: "com.twitter.heron.examples.eco.TestPrintBolt"
