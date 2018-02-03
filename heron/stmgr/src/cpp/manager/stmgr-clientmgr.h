@@ -58,10 +58,14 @@ class StMgrClientMgr {
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
   bool DidAnnounceBackPressure();
+
   // Called by StMgrClient when its connection closes
   void HandleDeadStMgrConnection(const sp_string& _stmgr_id);
   // Called by StMgrClient when it successfully registers
   void HandleStMgrClientRegistered();
+  // Called by StMgrClient when it tries to reconnect
+  void HandleStMgrClientReconnect(const sp_string &_stmgr_id);
+
   void SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
                                         proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
 
@@ -92,6 +96,9 @@ class StMgrClientMgr {
   sp_int64 low_watermark_;
 
   bool droptuples_upon_backpressure_;
+
+  sp_int32 total_reconnect_attempts_;
+  sp_int32 per_client_reconnect_other_streammgrs_max_attempt_;
 };
 
 }  // namespace stmgr

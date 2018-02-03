@@ -15,6 +15,7 @@
  */
 
 #include "manager/stmgr-clientmgr.h"
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <unordered_set>
@@ -48,9 +49,12 @@ StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_
       metrics_manager_client_(_metrics_manager_client),
       high_watermark_(_high_watermark),
       low_watermark_(_low_watermark),
-      droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
+      droptuples_upon_backpressure_(_droptuples_upon_backpressure),
+      total_reconnect_attempts_(0) {
   stmgr_clientmgr_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__clientmgr", stmgr_clientmgr_metrics_);
+  per_client_reconnect_other_streammgrs_max_attempt_ =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectMaxAttempts();
 }
 
 StMgrClientMgr::~StMgrClientMgr() {
@@ -183,6 +187,27 @@ void StMgrClientMgr::HandleDeadStMgrConnection(const sp_string& _dead_stmgr) {
 void StMgrClientMgr::HandleStMgrClientRegistered() {
   if (AllStMgrClientsRegistered()) {
     stream_manager_->HandleAllStMgrClientsRegistered();
+  }
+}
+
+void StMgrClientMgr::HandleStMgrClientReconnect(const sp_string &_stmgr_id) {
+  // The default client reconnect time is 1s and the default max attempt is 300.
+  // Therefore if a connection is broken, stmgr would be restartd in 5 minutes by stmgr client.
+  // Although we want to restart stmgr sooner if there are more broken connections,
+  // it could be risky if the threshold is too agressive and causing stmgr to restart too soon.
+  // Here the max attempt across all clients is set to: per client max attempt * client count / 8.
+  // Hence if all connections are broken, the lower bound of restart time is about 40s.
+  // However in reality, broken connections cause extra delays hence less reconnects are made.
+  // In one case, it takes more than 120 minutes for a stmgr client to reach the max attempt and
+  // restart. So the stmgr is expected to be restarted in 10 to 20 minutes with the / 8 factor.
+  // The mininum max attempt is per client max attempt * 2 in case number of clients is too low.
+  sp_int32 max_attempt = per_client_reconnect_other_streammgrs_max_attempt_ * clients_.size() / 8;
+  max_attempt = std::max(max_attempt, per_client_reconnect_other_streammgrs_max_attempt_ * 2);
+
+  total_reconnect_attempts_++;
+  if (total_reconnect_attempts_ >= max_attempt) {
+    LOG(FATAL) << "Total stmgr client reconnect attempt count reaches threshold " << max_attempt
+               << ". Quitting...";
   }
 }
 
