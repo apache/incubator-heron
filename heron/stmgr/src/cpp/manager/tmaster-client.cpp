@@ -58,7 +58,7 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   stream_to_tmaster_heartbeat_interval_sec_ = config::HeronInternalsConfigReader::Instance()
       ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
   reconnect_max_attempt_ = config::HeronInternalsConfigReader::Instance()
-      ->GetHeronStreammgrClientReconnectTmasterMaxAttempts();  
+      ->GetHeronStreammgrClientReconnectTmasterMaxAttempts();
 
   reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
