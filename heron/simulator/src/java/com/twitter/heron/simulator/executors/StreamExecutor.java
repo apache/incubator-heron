@@ -29,8 +29,7 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.PhysicalPlans;
-import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
-import com.twitter.heron.simulator.utils.StreamConsumers;
+import com.twitter.heron.simulator.utils.TopologyManager;
 import com.twitter.heron.simulator.utils.TupleCache;
 import com.twitter.heron.simulator.utils.XORManager;
 
@@ -42,7 +41,7 @@ public class StreamExecutor implements Runnable {
   // TaskId -> InstanceExecutor
   private final Map<Integer, InstanceExecutor> taskIdToInstanceExecutor;
 
-  private final Map<TopologyAPI.StreamId, StreamConsumers> streamIdStreamConsumersMap;
+  private final TopologyManager topologyManager;
 
   private final Set<String> spoutSets;
 
@@ -52,20 +51,19 @@ public class StreamExecutor implements Runnable {
 
   private final WakeableLooper looper;
 
-  public StreamExecutor(PhysicalPlans.PhysicalPlan pPlan) {
+  public StreamExecutor(TopologyManager topologyManager) {
+    this.topologyManager = topologyManager;
+
     this.taskIdToInstanceExecutor = new HashMap<>();
     this.looper = createWakeableLooper();
 
-    this.spoutSets = createSpoutsSet(pPlan);
+    this.spoutSets = createSpoutsSet(topologyManager.getPhysicalPlan());
 
-    Map<String, List<Integer>> componentToTaskIds =
-        PhysicalPlanUtil.getComponentToTaskIds(pPlan);
-
-    this.streamIdStreamConsumersMap =
-        StreamConsumers.populateStreamConsumers(pPlan.getTopology(), componentToTaskIds);
-
-    this.xorManager =
-        XORManager.populateXORManager(looper, pPlan.getTopology(), NUM_BUCKETS, componentToTaskIds);
+    this.xorManager = new XORManager(
+        looper,
+        this.topologyManager,
+        NUM_BUCKETS
+    );
 
     this.tupleCache = new TupleCache();
   }
@@ -136,29 +134,20 @@ public class StreamExecutor implements Runnable {
 
         if (msg instanceof HeronTuples.HeronTupleSet) {
           HeronTuples.HeronTupleSet tupleSet = (HeronTuples.HeronTupleSet) msg;
-          if (tupleSet == null) {
-            // No stream from this queue
-            break;
-          }
 
           if (tupleSet.hasData()) {
             HeronTuples.HeronDataTupleSet d = tupleSet.getData();
             TopologyAPI.StreamId streamId = d.getStream();
-            StreamConsumers consumers = streamIdStreamConsumersMap.get(streamId);
-            if (consumers != null) {
-              for (HeronTuples.HeronDataTuple tuple : d.getTuplesList()) {
-                List<Integer> outTasks = consumers.getListToSend(tuple);
+            for (HeronTuples.HeronDataTuple tuple : d.getTuplesList()) {
+              List<Integer> outTasks = this.topologyManager.getListToSend(streamId, tuple);
 
-                outTasks.addAll(tuple.getDestTaskIdsList());
+              outTasks.addAll(tuple.getDestTaskIdsList());
 
-                if (outTasks.isEmpty()) {
-                  LOG.severe("Nobody to sent the tuple to");
-                }
-
-                copyDataOutBound(taskId, isLocalSpout, streamId, tuple, outTasks);
+              if (outTasks.isEmpty()) {
+                LOG.severe("Nobody to send the tuple to");
               }
-            } else {
-              LOG.severe("Nobody consumes stream: " + streamId);
+
+              copyDataOutBound(taskId, isLocalSpout, streamId, tuple, outTasks);
             }
           }
 

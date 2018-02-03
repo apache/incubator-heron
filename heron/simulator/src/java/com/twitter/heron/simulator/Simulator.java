@@ -34,7 +34,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.simulator.executors.InstanceExecutor;
 import com.twitter.heron.simulator.executors.MetricsExecutor;
 import com.twitter.heron.simulator.executors.StreamExecutor;
-import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
+import com.twitter.heron.simulator.utils.TopologyManager;
 
 /**
  * One Simulator instance can only submit one topology. Please have multiple Simulator instances
@@ -119,19 +119,22 @@ public class Simulator {
       throw new RuntimeException("Stateful topology is not supported");
     }
 
-    PhysicalPlans.PhysicalPlan pPlan = PhysicalPlanUtil.getPhysicalPlan(topologyToRun);
+    TopologyManager topologyManager = new TopologyManager(topologyToRun);
 
-    LOG.info("Physical Plan: \n" + pPlan);
+    LOG.info("Physical Plan: \n" + topologyManager.getPhysicalPlan());
 
     // Create the stream executor
-    streamExecutor = new StreamExecutor(pPlan);
+    streamExecutor = new StreamExecutor(topologyManager);
 
     // Create the metrics executor
     metricsExecutor = new MetricsExecutor(systemConfig);
 
     // Create instance Executor
-    for (PhysicalPlans.Instance instance : pPlan.getInstancesList()) {
-      InstanceExecutor instanceExecutor = new InstanceExecutor(pPlan, instance.getInstanceId());
+    for (PhysicalPlans.Instance instance : topologyManager.getPhysicalPlan().getInstancesList()) {
+      InstanceExecutor instanceExecutor = new InstanceExecutor(
+          topologyManager.getPhysicalPlan(),
+          instance.getInstanceId()
+      );
 
       streamExecutor.addInstanceExecutor(instanceExecutor);
       metricsExecutor.addInstanceExecutor(instanceExecutor);

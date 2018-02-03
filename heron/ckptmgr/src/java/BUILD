@@ -16,7 +16,7 @@ java_library(
         "//heron/common/src/java:utils-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )
 

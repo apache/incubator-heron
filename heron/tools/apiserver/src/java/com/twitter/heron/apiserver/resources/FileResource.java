@@ -31,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.eclipse.jetty.util.StringUtil;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ public class FileResource extends HeronResource {
   private static final String FILE_SYSTEM_DIRECTORY
       = "heron.apiserver.http.file.system.directory";
 
+  private static final String DOWNLOAD_HOSTNAME_OVERRIDE
+      = "heron.apiserver.http.download.hostname";
+
   private static InetAddress ip;
   private static String hostname;
 
@@ -60,10 +64,13 @@ public class FileResource extends HeronResource {
       ip = InetAddress.getLocalHost();
       hostname = ip.getHostName();
     } catch (UnknownHostException e) {
-      LOG.info("Failed or resolve IP address of localhost");
+      LOG.info("Failed to resolve IP address of localhost");
     }
   }
 
+/**
+ * Endpoints for artifacts upload
+ */
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -90,9 +97,9 @@ public class FileResource extends HeronResource {
 
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
 
-    String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
+    final String fileName = UUID.randomUUID() + "-" + fileDetail.getFileName();
 
-    String uploadedFileLocation
+    final String uploadedFileLocation
         = uploadDir + "/" + fileName;
 
     // save it
@@ -107,11 +114,14 @@ public class FileResource extends HeronResource {
     }
 
     String uri = String.format("http://%s:%s/api/v1/file/download/%s",
-        (hostname != null) ? hostname : ip, getPort(), fileName);
+        getHostNameOrIP(), getPort(), fileName);
 
     return Response.status(Response.Status.OK).entity(uri).build();
   }
 
+/**
+ * Endpoints for artifacts download
+ */
   @GET
   @Path("/download/{file}")
   public Response downloadPdfFile(final @PathParam("file") String file) {
@@ -141,6 +151,14 @@ public class FileResource extends HeronResource {
     final Config.Builder builder = Config.newBuilder().putAll(getBaseConfiguration());
     builder.put(Key.VERBOSE, Logging.isVerbose());
     return Config.toLocalMode(builder.build());
+  }
+
+  private String getHostNameOrIP() {
+    // Override hostname if provided in flags
+    if (StringUtil.isNotBlank(getDownloadHostName())) {
+      return getDownloadHostName();
+    }
+    return (hostname != null) ? hostname : ((ip != null) ? ip.toString() : "");
   }
 
 }

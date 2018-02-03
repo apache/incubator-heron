@@ -12,6 +12,20 @@ spec:
       labels:
         app: heron-tracker
     spec:
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
       containers:
         - name: heron-tracker
           image: heron/heron:latest
@@ -38,7 +52,6 @@ spec:
               --port=8889
               --base_url=/api/v1/proxy/namespaces/default/services/heron-ui:8889
 ---
-
 ##
 ## Service to expose the heron-ui
 ##
@@ -53,3 +66,19 @@ spec:
     - protocol: TCP
       port: 8889
       targetPort: 8889
+
+---
+##
+## Service to expose the heron-tracker
+##
+apiVersion: v1    
+kind: Service
+metadata:
+  name: heron-tracker
+spec:
+  selector:
+    app: heron-tracker
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888

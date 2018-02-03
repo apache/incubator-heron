@@ -33,5 +33,5 @@ public interface AuroraController {
   boolean restart(Integer containerId);
 
   void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
-  void addContainers(Integer count);
+  Set<Integer> addContainers(Integer count);
 }
