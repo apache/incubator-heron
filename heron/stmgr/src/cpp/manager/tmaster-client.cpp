@@ -210,8 +210,8 @@ void TMasterClient::OnReConnectTimer() {
   if (++reconnect_attempts_ < reconnect_max_attempt_) {
     Start();
   } else {
-    LOG(FATAL) << "Could not connect to tmaster " << other_stmgr_id_
-               << " after reaching the max reconnect attempts" << reconnect_max_attempt_
+    LOG(FATAL) << "Could not connect to tmaster after reaching"
+               << " the max reconnect attempts" << reconnect_max_attempt_
                << ". Quitting...";
   }
 }
