@@ -62,7 +62,7 @@ public final class Config implements Serializable {
     static final long RAM = 100 * MB;
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
     static final Serializer SERIALIZER = Serializer.KRYO;
-    static final boolean shouldSimulate = false;
+    static final boolean SHOULDSIMULATE = false;
   }
 
   private Config(Builder builder) {
@@ -187,7 +187,7 @@ public final class Config implements Serializable {
       ram = Defaults.RAM;
       deliverySemantics = Defaults.SEMANTICS;
       serializer = Defaults.SERIALIZER;
-      shouldSimulate = Defaults.shouldSimulate;
+      shouldSimulate = Defaults.SHOULDSIMULATE;
     }
 
     /**
@@ -266,10 +266,10 @@ public final class Config implements Serializable {
 
     /**
      * Sets whether this topology should be run in the simulator or not
-     * @param shouldSimulate whether this should be run in the simulator
+     * @param value whether this should be run in the simulator
      */
-    public Builder setShouldSimulate(boolean shouldSimulate) {
-      this.shouldSimulate = shouldSimulate;
+    public Builder setShouldSimulate(boolean value) {
+      this.shouldSimulate = value;
       return this;
     }
 
