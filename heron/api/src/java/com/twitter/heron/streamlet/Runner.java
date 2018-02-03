@@ -18,6 +18,7 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.simulator.Simulator;
 import com.twitter.heron.streamlet.impl.BuilderImpl;
 
 /**
@@ -36,11 +37,20 @@ public final class Runner {
   public void run(String name, Config config, Builder builder) {
     BuilderImpl bldr = (BuilderImpl) builder;
     TopologyBuilder topologyBuilder = bldr.build();
-    try {
-      HeronSubmitter.submitTopology(name, config.getHeronConfig(),
-                                    topologyBuilder.createTopology());
-    } catch (AlreadyAliveException | InvalidTopologyException e) {
-      e.printStackTrace();
+
+    if (config.shouldSimulate()) {
+      new Simulator().submitTopology(
+              name,
+              config.getHeronConfig(),
+              topologyBuilder.createTopology()
+      );
+    } else {
+      try {
+        HeronSubmitter.submitTopology(name, config.getHeronConfig(),
+                topologyBuilder.createTopology());
+      } catch (AlreadyAliveException | InvalidTopologyException e) {
+        e.printStackTrace();
+      }
     }
   }
 }
