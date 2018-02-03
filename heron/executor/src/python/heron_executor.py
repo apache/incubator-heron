@@ -509,9 +509,10 @@ class HeronExecutor(object):
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
     retval["heron-tmaster"] = tmaster_cmd
 
-    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     if self.health_manager_mode.lower() != "disabled":
+      # align metricscache and healthmgr toggle switch
+      retval["heron-metricscache"] = self._get_metrics_cache_cmd()
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
