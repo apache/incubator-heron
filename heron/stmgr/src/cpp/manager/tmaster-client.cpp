@@ -51,11 +51,15 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
       restore_topology_watch_(std::move(_restore_topology_watch)),
       start_stateful_watch_(std::move(_start_stateful_watch)),
       reconnect_timer_id(0),
-      heartbeat_timer_id(0) {
+      heartbeat_timer_id(0),
+      reconnect_attempts_(0) {
   reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
-                                        ->GetHeronStreammgrClientReconnectTmasterIntervalSec();
+      ->GetHeronStreammgrClientReconnectTmasterIntervalSec();
   stream_to_tmaster_heartbeat_interval_sec_ = config::HeronInternalsConfigReader::Instance()
-                                                  ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
+      ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
+  reconnect_max_attempt_ = config::HeronInternalsConfigReader::Instance()
+      ->GetHeronStreammgrClientReconnectTmasterMaxAttempts();  
+  reconnect_max_attempt_ = 
 
   reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
@@ -94,6 +98,9 @@ sp_string TMasterClient::getTmasterHostPort() {
 
 void TMasterClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
+    // reset the reconnect attempt once connection established
+    reconnect_attempts_ = 0;
+
     if (to_die_) {
       Stop();
       return;
@@ -200,7 +207,14 @@ void TMasterClient::HandleStatefulCheckpointMessage(
 void TMasterClient::OnReConnectTimer() {
   // The timer has triggered the callback, so reset the timer_id;
   reconnect_timer_id = 0;
-  Start();
+
+  if (++reconnect_attempts_ < reconnect_max_attempt_) {
+    Start();
+  } else {
+    LOG(FATAL) << "Could not connect to tmaster " << other_stmgr_id_
+               << " after reaching the max reconnect attempts" << reconnect_max_attempt_
+               << ". Quitting...";
+  }
 }
 
 void TMasterClient::OnHeartbeatTimer() {

@@ -113,6 +113,10 @@ class TMasterClient : public Client {
   sp_int64 reconnect_timer_id;
   sp_int64 heartbeat_timer_id;
 
+  // Counter for reconnect attempts
+  sp_int32 reconnect_attempts_;
+  sp_int32 reconnect_max_attempt_;
+
   // Permanent timer callbacks
   VCallback<> reconnect_timer_cb;
   VCallback<> heartbeat_timer_cb;
