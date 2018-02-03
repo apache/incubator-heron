@@ -100,7 +100,6 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMU
     "heron.streammgr.network.options.maximum.packet.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC =
     "heron.streammgr.tmaster.heartbeat.interval.sec";
-
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CONNECTION_READ_BATCH_SIZE_MB =
     "heron.streammgr.connection.read.batch.size.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CONNECTION_WRITE_BATCH_SIZE_MB =
