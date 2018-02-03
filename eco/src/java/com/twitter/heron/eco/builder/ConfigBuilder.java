@@ -34,11 +34,15 @@ public class ConfigBuilder {
   private static final String EQUALS = "=";
   private static final String WHITESPACE = " ";
   private static final String COMMA = ",";
-  private static final String LEFT_BRACKET = "{";
-  private static final String RIGHT_BRACKET = "}";
+  private static final String LEFT_BRACE = "{";
+  private static final String RIGHT_BRACE = "}";
+  private static final String LEFT_BRACKET = "[";
+  private static final String RIGHT_BRACKET = "]";
   private static final String MB = "MB";
   private static final String GB = "GB";
   private static final String B = "B";
+  private static final Integer MINIMUM_BYTES = 256000000;
+  private static final Integer MINIMUM_MB = 256;
 
   protected Config buildConfig(EcoTopologyDefinition topologyDefinition)
       throws IllegalArgumentException {
@@ -56,32 +60,37 @@ public class ConfigBuilder {
         List<Object> objects = (List<Object>) entry.getValue();
         for (Object obj : objects) {
           String objString = obj.toString();
-          objString = objString.replace(LEFT_BRACKET, WHITESPACE);
-          objString = objString.replace(RIGHT_BRACKET, WHITESPACE);
-          String jvmOptions;
+          objString = objString.replace(LEFT_BRACE, WHITESPACE);
+          objString = objString.replace(RIGHT_BRACE, WHITESPACE);
+
           int idIndex = objString.indexOf(ID);
           int optionsIndex = objString.indexOf(OPTIONS);
 
           String id = getIdValue(objString, idIndex);
 
+          String jvmOptions;
           if (optionsIndex != -1) {
+
             int equalsIndex = objString.indexOf(EQUALS, optionsIndex);
             jvmOptions = objString.substring(equalsIndex + 1, objString.length());
+
+            jvmOptions = jvmOptions.replace(LEFT_BRACKET, "")
+                .replace(RIGHT_BRACKET, "");
+
           } else {
             throw new IllegalArgumentException(
                 "You must specify the JVM options for your component");
           }
 
           config.setComponentJvmOptions(id, jvmOptions);
-
         }
-
 
       } else {
         config.put(entry.getKey(), entry.getValue());
       }
 
     }
+    
     return config;
   }
 
@@ -93,8 +102,8 @@ public class ConfigBuilder {
       String objString = obj.toString();
 
       objString = objString.replace(COMMA, WHITESPACE);
-      objString = objString.replace(LEFT_BRACKET, WHITESPACE);
-      objString = objString.replace(RIGHT_BRACKET, WHITESPACE);
+      objString = objString.replace(LEFT_BRACE, WHITESPACE);
+      objString = objString.replace(RIGHT_BRACE, WHITESPACE);
 
       int idIndex = objString.indexOf(ID);
       int ramIndex = objString.indexOf(RAM);
@@ -103,9 +112,10 @@ public class ConfigBuilder {
 
 
       String ramWithUom = "";
+      String id = getIdValue(objString, idIndex);
+      //todo (josh fischer) diskWithUom and cpu are still to be implemented for use with k8s
       String diskWithUom = "";
       String cpu = "";
-      String id = getIdValue(objString, idIndex);
 
       if (ramIndex != -1) {
         ramWithUom = assignValue(objString, ramIndex);
@@ -124,17 +134,28 @@ public class ConfigBuilder {
       if (ramWithUom.contains(MB)) {
         // its megaBytes
         int mbIndex = verifyStartingIndexOfUom(ramWithUom, MB);
-        byteAmount = ByteAmount.fromMegabytes(extractRawValue(ramWithUom, mbIndex));
+        long megaBytes = extractRawValue(ramWithUom, mbIndex);
+        if (megaBytes < MINIMUM_MB) {
+          throw new IllegalArgumentException(
+              "The minimum Ram resource allocation for a component must be at least 256MB");
+        }
+        byteAmount = ByteAmount.fromMegabytes(megaBytes);
 
       } else if (ramWithUom.contains(GB)) {
         // its gigaBytes
+        // we don't validate here as NumberFormatException is thrown converting decimals to longs
         int gbIndex = verifyStartingIndexOfUom(ramWithUom, GB);
         byteAmount = ByteAmount.fromGigabytes(extractRawValue(ramWithUom, gbIndex));
 
       } else if (ramWithUom.contains(B)) {
         // its bytes
         int bIndex = verifyStartingIndexOfUom(ramWithUom, B);
-        byteAmount = ByteAmount.fromBytes(extractRawValue(ramWithUom, bIndex));
+        long bytes = extractRawValue(ramWithUom, bIndex);
+        if (bytes < MINIMUM_BYTES) {
+          throw new IllegalArgumentException(
+              "The minimum Ram resource allocation for a component must be at least 256000000B");
+        }
+        byteAmount = ByteAmount.fromBytes(bytes);
 
       } else {
         // There is no format throw an exception

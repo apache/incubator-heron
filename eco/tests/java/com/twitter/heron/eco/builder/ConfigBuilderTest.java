@@ -42,12 +42,12 @@ public class ConfigBuilderTest {
       + "  topology.component.resourcemap:\n"
       + "\n"
       + "    - id: \"spout-1\"\n"
-      + "      ram: 256B\n"
+      + "      ram: 256000000B\n"
       + "      cpu: 0.5\n"
       + "      disk: 4GB\n"
       + "\n"
       + "    - id: \"bolt-1\"\n"
-      + "      ram: 128B\n"
+      + "      ram: 256000000B\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
 
@@ -75,7 +75,7 @@ public class ConfigBuilderTest {
       + "      disk: 4GB\n"
       + "\n"
       + "    - id: \"bolt-1\"\n"
-      + "      ram: 128B\n"
+      + "      ram: 256B\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
 
@@ -89,9 +89,10 @@ public class ConfigBuilderTest {
       + "      disk: 4GB\n"
       + "\n"
       + "    - id: \"bolt-1\"\n"
-      + "      ram: 128GB\n"
+      + "      ram: 256GB\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB";
+
 
   private static final String JVM_OPTIONS_CONFIG = "config:\n"
       + "  topology.workers: 1\n"
@@ -103,15 +104,76 @@ public class ConfigBuilderTest {
       + "      disk: 4GB\n"
       + "\n"
       + "    - id: \"bolt-1\"\n"
-      + "      ram: 128MB\n"
+      + "      ram: 256MB\n"
       + "      cpu: 0.5\n"
       + "      disk: 2GB\n"
       + "\n"
       + "  topology.component.jvmoptions:\n"
       + "\n"
       + "   - id: \"spout-1\"\n"
-      + "     options: \"-XX:NewSize=300m, -Xms2g\"";
+      + "     options: [\"-XX:NewSize=300m\", \"-Xms2g\"]";
 
+  private static final String INCORRECT_JVM_OPTIONS_CONFIG = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 256MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 256MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB\n"
+      + "\n"
+      + "  topology.component.jvmoptions:\n"
+      + "\n"
+      + "   - id: \"spout-1\"\n"
+      + "     something: \"-XX:NewSize=300m -Xms2g\"";
+
+  private static final String INCORRECT_RAM_BYTES = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 25600000B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 256000000B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
+
+  private static final String INCORRECT_RAM_MEGABYTES = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 192MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 256000000B\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
+
+
+  private static final String INCORRECT_RAM_GIGABYTES = "config:\n"
+      + "  topology.workers: 1\n"
+      + "  topology.component.resourcemap:\n"
+      + "\n"
+      + "    - id: \"spout-1\"\n"
+      + "      ram: 256MB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 4GB\n"
+      + "\n"
+      + "    - id: \"bolt-1\"\n"
+      + "      ram: 0.255GB\n"
+      + "      cpu: 0.5\n"
+      + "      disk: 2GB";
   @Before
   public void setUpForEachTestCase() {
     subject = new ConfigBuilder();
@@ -150,7 +212,7 @@ public class ConfigBuilderTest {
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
     assertThat(config.get(Config.TOPOLOGY_COMPONENT_RAMMAP),
-        is(equalTo("spout-1:256,bolt-1:128")));
+        is(equalTo("spout-1:256000000,bolt-1:256000000")));
 
   }
 
@@ -206,5 +268,46 @@ public class ConfigBuilderTest {
         is(equalTo("{\"c3BvdXQtMSw=\":\"LVhYOk5ld1NpemU9MzAwbSwgLVhtczJnIA==\"}")));
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_IncorrectComponentJVMOptions_ExceptionThrown() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_JVM_OPTIONS_CONFIG.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_ByteAllocationTooSmall_ExceptionThrown() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_RAM_BYTES.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildConfig_MBAllocationTooSmall_ExceptionThrown() throws Exception {
+    Config config = null;
+    try {
+      EcoParser ecoParser = new EcoParser();
+      InputStream inputStream = new ByteArrayInputStream(INCORRECT_RAM_MEGABYTES.getBytes());
+      EcoTopologyDefinition ecoTopologyDefinition = ecoParser.parseFromInputStream(inputStream);
+
+      config = subject.buildConfig(ecoTopologyDefinition);
+    } finally {
+      assertNull(config);
+    }
+  }
 
 }
