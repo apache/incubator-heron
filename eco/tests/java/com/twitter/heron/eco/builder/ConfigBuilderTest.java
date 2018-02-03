@@ -215,7 +215,7 @@ public class ConfigBuilderTest {
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
     EcoTopologyDefinition ecoTopologyDefinition =
-        ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+        ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
@@ -233,7 +233,7 @@ public class ConfigBuilderTest {
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -249,7 +249,7 @@ public class ConfigBuilderTest {
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -265,7 +265,7 @@ public class ConfigBuilderTest {
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
       assertNull(config);
@@ -280,7 +280,7 @@ public class ConfigBuilderTest {
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
     EcoTopologyDefinition ecoTopologyDefinition =
-        ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+        ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
 
     Config config = subject.buildConfig(ecoTopologyDefinition);
 
@@ -297,7 +297,7 @@ public class ConfigBuilderTest {
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
@@ -314,7 +314,7 @@ public class ConfigBuilderTest {
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {
@@ -330,7 +330,7 @@ public class ConfigBuilderTest {
       InputStream inputStream = new ByteArrayInputStream(INCORRECT_RAM_MEGABYTES.getBytes());
       FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
       EcoTopologyDefinition ecoTopologyDefinition =
-          ecoParser.parseFromInputStream(inputStream, mockPropsStream);
+          ecoParser.parseFromInputStream(inputStream, mockPropsStream, false);
 
       config = subject.buildConfig(ecoTopologyDefinition);
     } finally {

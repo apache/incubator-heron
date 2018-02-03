@@ -299,7 +299,7 @@ public class EcoParserTest {
     InputStream inputStream = new ByteArrayInputStream(YAML_STR_1.getBytes());
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
     EcoTopologyDefinition topologyDefinition =
-        subject.parseFromInputStream(inputStream, mockPropsStream);
+        subject.parseFromInputStream(inputStream, mockPropsStream, false);
     List<BeanDefinition> components = topologyDefinition.getComponents();
 
     assertEquals("kafka-topology", topologyDefinition.getName());
@@ -347,7 +347,7 @@ public class EcoParserTest {
     InputStream inputStream = new ByteArrayInputStream(YAML_STR.getBytes());
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
     EcoTopologyDefinition topologyDefinition = subject.parseFromInputStream(inputStream,
-        mockPropsStream);
+        mockPropsStream, false);
 
     assertEquals("yaml-topology", topologyDefinition.getName());
     assertEquals(1, topologyDefinition.getConfig().size());
@@ -394,7 +394,7 @@ public class EcoParserTest {
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
     EcoTopologyDefinition topologyDefinition =
-        subject.parseFromInputStream(inputStream, mockPropsStream);
+        subject.parseFromInputStream(inputStream, mockPropsStream, false);
 
     assertNotNull(topologyDefinition.getConfig());
     assertEquals(0, topologyDefinition.getConfig().size());
@@ -406,7 +406,8 @@ public class EcoParserTest {
     EcoTopologyDefinition ecoTopologyDefinition = null;
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
     try {
-      ecoTopologyDefinition = subject.parseFromInputStream(inputStream, mockPropsStream);
+      ecoTopologyDefinition = subject.parseFromInputStream(inputStream,
+          mockPropsStream, false);
     } finally {
       assertNull(ecoTopologyDefinition);
     }

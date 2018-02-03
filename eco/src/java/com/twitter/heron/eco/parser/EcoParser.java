@@ -31,7 +31,8 @@ public class EcoParser {
 
   private static final Logger LOG = Logger.getLogger(EcoParser.class.getName());
 
-  public EcoTopologyDefinition parseFromInputStream(InputStream inputStream, InputStream propsFile)
+  public EcoTopologyDefinition parseFromInputStream(InputStream inputStream,
+                                                    InputStream propsFile, boolean envFilter)
       throws Exception {
 
     Yaml yaml = topologyYaml();
@@ -57,8 +58,8 @@ public class EcoParser {
       Properties props = new Properties();
       props.load(propsIn);
       for (Object key : props.keySet()) {
-        yamlDefinitionStr = yamlDefinitionStr.replace("${"
-            + key + "}", props.getProperty((String) key));
+        yamlDefinitionStr =
+            yamlDefinitionStr.replace("${" + key + "}", props.getProperty((String) key));
       }
     } else {
       LOG.info("Not performing property substitution.");

@@ -72,15 +72,16 @@ public class EcoTest {
     topologyDefinition.setName(topologyName);
     Config config = new Config();
 
-    when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream)))
+    when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
         .thenReturn(topologyDefinition);
     when(mockEcoBuilder.buildConfig(eq(topologyDefinition))).thenReturn(config);
     when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class),
         any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
 
-    subject.submit(mockStream, mockPropsStream);
+    subject.submit(mockStream, mockPropsStream, false);
 
-    verify(mockEcoParser).parseFromInputStream(same(mockStream), same(mockPropsStream));
+    verify(mockEcoParser).parseFromInputStream(same(mockStream),
+        same(mockPropsStream), eq(false));
     verify(mockEcoBuilder).buildConfig(same(topologyDefinition));
     verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
         any(ObjectBuilder.class));
