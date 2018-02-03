@@ -451,7 +451,7 @@ class HeronExecutor(object):
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
-                           "--environment", self.environment, "--verbose"]
+                           "--environment", self.environment]
 
     return metricscachemgr_cmd
 

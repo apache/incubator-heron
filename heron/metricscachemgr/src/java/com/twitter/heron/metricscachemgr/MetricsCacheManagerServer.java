@@ -85,7 +85,7 @@ public class MetricsCacheManagerServer extends HeronServer {
         + channel.socket().getRemoteSocketAddress());
 
     if (message instanceof TopologyMaster.PublishMetrics) {
-      LOG.info("received message " + (TopologyMaster.PublishMetrics) message);
+      LOG.fine("received message " + (TopologyMaster.PublishMetrics) message);
       metricsCache.addMetrics((TopologyMaster.PublishMetrics) message);
     } else {
       LOG.severe("Unknown kind of message received "
