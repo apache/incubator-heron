@@ -124,8 +124,9 @@ public class Eco {
 
     Option filterOption = Option.builder("filter")
         .desc(".properties file for property substitution")
-        .longOpt("eco-filter")
+        .longOpt("filter")
         .hasArgs()
+        .required(false)
         .argName("eco-filter")
         .build();
 
