@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,11 +38,15 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 
+/**
+ * Provides a basic uploader class for uploading topology packages via Http.
+ */
 public class HttpUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HttpUploader.class.getName());
 
   private Config config;
   private String topologyPackageLocation;
+  private HttpPost post;
 
   @Override
   @SuppressWarnings("HiddenField")
@@ -53,28 +58,29 @@ public class HttpUploader implements IUploader {
   @Override
   public URI uploadPackage() throws UploaderException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
-    URI uri = null;
+    URI uri;
+
     try {
       HttpClient client = HttpClients.custom().build();
 
       File file = new File(this.topologyPackageLocation);
-      String uploadeUri = HttpUploaderContext.getHeronUploaderHttpUri(this.config);
-      HttpPost post = new HttpPost(uploadeUri);
+      String uploaderUri = HttpUploaderContext.getHeronUploaderHttpUri(this.config);
+      post = new HttpPost(uploaderUri);
       FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
       MultipartEntityBuilder builder = MultipartEntityBuilder.create();
       builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
       builder.addPart("file", fileBody);
       HttpEntity entity = builder.build();
       post.setEntity(entity);
-      HttpResponse response = client.execute(post);
-      String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
+      HttpResponse response = execute(client);
+      String responseString = EntityUtils.toString(response.getEntity(),
+          StandardCharsets.UTF_8.name());
       LOG.fine("Topology package download URI: " + responseString);
       uri = new URI(responseString);
-
     } catch (IOException | URISyntaxException e) {
       String msg = "Error uploading package " + this.topologyPackageLocation;
       LOG.log(Level.SEVERE, msg, e);
-      throw new RuntimeException(msg, e);
+      throw new UploaderException(msg, e);
     } finally {
       try {
         httpclient.close();
@@ -82,7 +88,16 @@ public class HttpUploader implements IUploader {
         LOG.log(Level.SEVERE, "Error closing http client", e);
       }
     }
+
     return uri;
+  }
+
+  protected HttpResponse execute(HttpClient client) throws IOException {
+    return client.execute(post);
+  }
+
+  protected HttpPost getPost() {
+    return post;
   }
 
   @Override
