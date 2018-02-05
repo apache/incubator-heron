@@ -235,7 +235,8 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets(
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmasterMaxAttempts() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS].as<int>();
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS]
+      .as<int>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectIntervalSec() {
