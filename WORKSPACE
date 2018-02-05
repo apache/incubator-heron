@@ -7,6 +7,7 @@ powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 distributedlog_version = "0.5.0"
+http_client_version = "4.5.2"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -150,7 +151,13 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_httpcomponents_http_client",
-  artifact = "org.apache.httpcomponents:httpclient:4.5.2",
+  artifact = "org.apache.httpcomponents:httpclient:" + http_client_version,
+)
+
+http_jar(
+  name = "org_apache_httpcomponents_http_client_test",
+  url = "http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/" +
+  http_client_version + "/httpclient-" + http_client_version + "-tests.jar"
 )
 
 maven_jar(
