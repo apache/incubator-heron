@@ -19,23 +19,32 @@ import java.util.function.Supplier
 import com.twitter.heron.api.state.State
 import com.twitter.heron.streamlet.Context
 
+/**
+  * State represents the state interface as seen by stateful bolts and spouts.
+  * In Heron, state gives a notional Key/Value interface along with the
+  * ability to iterate over the key/values. This class aims its test implementation.
+  */
 private[scala] class TestState[K <: io.Serializable, V <: io.Serializable]
   extends util.HashMap[K, V] with State[K, V] {}
 
+/**
+  * Context is the information available at runtime for operators like transform.
+  * This class aims its test implementation with initial values.
+  */
 private[scala] class TestContext extends Context {
-  override def getTaskId: Int = 0
+  override def getTaskId = 0
 
-  override def getConfig: util.Map[String, AnyRef] = new util.HashMap[String, AnyRef]()
+  override def getConfig = new util.HashMap[String, AnyRef]()
 
-  override def getStreamName: String = ""
+  override def getStreamName = ""
 
-  override def getStreamPartition: Int = 0
+  override def getStreamPartition = 0
 
   override def registerMetric[T](metricName: String,
                                  collectionInterval: Int,
                                  metricFn: Supplier[T]): Unit = {}
 
-  override def getState: State[io.Serializable, io.Serializable] =
+  override def getState =
     new TestState[io.Serializable, io.Serializable]()
 
 }

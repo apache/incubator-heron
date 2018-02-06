@@ -15,16 +15,12 @@ package com.twitter.heron.streamlet.scala
 
 import scala.collection.mutable.ListBuffer
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.common.{BaseFunSuite, TestContext}
 
 /**
   * Tests for Source Trait functionality
   */
-@RunWith(classOf[JUnitRunner])
 class SourceTest extends BaseFunSuite {
 
   val expectedList = List(1, 2, 3, 4, 5)
