@@ -20,15 +20,15 @@
 ## A reference of https://github.com/apache/incubator-pulsar/blob/master/kubernetes/google-container-engine/bookie.yaml
 
 {{- $platform := .Values.platform }}
-{{- $bookieReplicas := index (index .Values $platform) "bookieReplicas" }}
-{{- $bookieCpuMin := index (index .Values $platform) "bookieCpuMin" }}
-{{- $bookieCpuMax := index (index .Values $platform) "bookieCpuMax" }}
-{{- $bookieHeapMemory := index (index .Values $platform) "bookieHeapMemory" }}
-{{- $bookieDirectMemory := index (index .Values $platform) "bookieDirectMemory" }}
-{{- $bookieJournalCapacity := index (index .Values $platform) "bookieJournalCapacity" }}
-{{- $bookieStorageCapacity := index (index .Values $platform) "bookieStorageCapacity" }}
-{{- $bookieJournalHostPath := index (index .Values $platform) "bookieJournalHostPath" }}
-{{- $bookieStorageHostPath := index (index .Values $platform) "bookieStorageHostPath" }}
+{{- $bookieReplicas := .Values.bookieReplicas }}
+{{- $bookieCpuMin := .Values.bookieCpuMin }}
+{{- $bookieCpuMax := .Values.bookieCpuMax }}
+{{- $bookieHeapMemory := .Values.bookieHeapMemory }}
+{{- $bookieDirectMemory := .Values.bookieDirectMemory }}
+{{- $bookieJournalCapacity := .Values.bookieJournalCapacity }}
+{{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
+{{- $bookieJournalHostPath := .Values.bookieJournalHostPath }}
+{{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -111,7 +111,8 @@ spec:
             - >-
               while true; do
                 status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
-                if [ "$status" = "imok" ]; then
+                writestatus=$(echo isro | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
+                if [ "$status" = "imok" ] && [ "$writestatus" == "rw" ]; then
                   break;
                 fi;
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';

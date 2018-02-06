@@ -1,0 +1,31 @@
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Environment where Heron will be running
+# Valid values are as follows
+# "aws" - Amazon Cloud
+# "gke" - Google Container Enginer
+# "minikube" - Kubernetes in a single node
+# "baremetal" - On premise machines
+platform: gke
+
+# Number of replicas for the job binary in bookkeeper
+jobReplicas: 2
+
+# amount of memory to provide for api server
+apiServerMemory: 512M
+
+# Number of replicas for storage bookies, memory and storage requirements 
+bookieReplicas: 3
+bookieCpuMin: 250m
+bookieCpuMax: 300m
+bookieHeapMemory: 256M
+bookieDirectMemory: 128M
+bookieReadCacheSize: 32
+bookieWriteCacheSize: 32
+bookieJournalCapacity: 2G
+bookieStorageCapacity: 5G
+
+# Number of replicas for zookeeper
+zkReplicas: 3
