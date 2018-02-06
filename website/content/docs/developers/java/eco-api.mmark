@@ -99,6 +99,8 @@ $ heron submit local \
 
 [Property Substitution]({{<ref "#property-substitution" >}})
 
+[Other ECO Examples]({{<ref "#other-eco-examples" >}})
+
 Notice how the above example submission command is referencing the main class `com.twitter.heron.eco.Eco`.  This part of the command
 needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
 
@@ -469,7 +471,7 @@ ${ENV-SOME_VARIABLE}
 ```
 
 
-### Run Each of the other ECO Examples
+### Other ECO examples
 
 Run the simple wordcount example
 
