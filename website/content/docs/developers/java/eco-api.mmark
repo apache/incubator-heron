@@ -463,7 +463,7 @@ for the `ibasic-print-bolt` and see the values are printing out.
 
 ### Environment Variable Substitution
 
-ECO also allows you to do environment variable substitution. For example if you `SOME_VARIABLE` defined
+ECO also allows you to do environment variable substitution. For example if you have `SOME_VARIABLE` defined
 you can reference in your yaml file like so.
 
 ```yaml
