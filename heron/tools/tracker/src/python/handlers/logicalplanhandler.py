@@ -55,6 +55,7 @@ class LogicalPlanHandler(BaseHandler):
       spouts_map = dict()
       for name, value in lplan['spouts'].items():
         spouts_map[name] = dict(
+            config=value.get("config", dict()),
             outputs=value["outputs"],
             spout_type=value["type"],
             spout_source=value["source"],
@@ -63,6 +64,7 @@ class LogicalPlanHandler(BaseHandler):
       bolts_map = dict()
       for name, value in lplan['bolts'].items():
         bolts_map[name] = dict(
+            config=value.get("config", dict()),
             inputComponents=[i['component_name'] for i in value['inputs']],
             inputs=value["inputs"],
             outputs=value["outputs"]

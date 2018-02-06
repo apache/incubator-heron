@@ -27,7 +27,63 @@ from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
+from heron.tools.tracker.src.python import pyutils
 from heron.tools.tracker.src.python import utils
+
+
+def convert_pb_kvs(kvs, include_non_primitives=True):
+  """
+  converts pb kvs to dict
+  """
+  config = {}
+  for kv in kvs:
+    if kv.value:
+      config[kv.key] = kv.value
+    elif kv.serialized_value:
+      # add serialized_value support for python values (fixme)
+
+      # is this a serialized java object
+      if topology_pb2.JAVA_SERIALIZED_VALUE == kv.type:
+        jv = _convert_java_value(kv, include_non_primitives=include_non_primitives)
+        if jv is not None:
+          config[kv.key] = jv
+      else:
+        config[kv.key] = _raw_value(kv)
+  return config
+
+
+def _convert_java_value(kv, include_non_primitives=True):
+  try:
+    pobj = javaobj.loads(kv.serialized_value)
+    if pyutils.is_str_instance(pobj):
+      return pobj
+
+    if pobj.is_primitive():
+      return pobj.value
+
+    if include_non_primitives:
+      # java objects that are not strings return value and encoded value
+      # Hexadecimal byte array for Serialized objects that
+      return {
+          'value' : json.dumps(pobj,
+                               default=lambda custom_field: custom_field.__dict__,
+                               sort_keys=True,
+                               indent=2),
+          'raw' : utils.hex_escape(kv.serialized_value)}
+
+    return None
+  except Exception:
+    Log.exception("Failed to parse data as java object")
+    if include_non_primitives:
+      return _raw_value(kv)
+    else:
+      return None
+
+def _raw_value(kv):
+  return {
+      # The value should be a valid json object
+      'value' : '{}',
+      'raw' : utils.hex_escape(kv.serialized_value)}
 
 
 class Tracker(object):
@@ -321,6 +377,7 @@ class Tracker(object):
         elif kvs.key == "spout.version":
           spoutVersion = javaobj.loads(kvs.serialized_value)
       spoutPlan = {
+          "config": convert_pb_kvs(spoutConfigs, include_non_primitives=False),
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
@@ -337,6 +394,7 @@ class Tracker(object):
     for bolt in topology.bolts():
       boltName = bolt.comp.name
       boltPlan = {
+          "config": convert_pb_kvs(bolt.comp.config.kvs, include_non_primitives=False),
           "outputs": [],
           "inputs": []
       }
@@ -384,28 +442,7 @@ class Tracker(object):
 
     # Configs
     if topology.physical_plan.topology.topology_config:
-      for kvs in topology.physical_plan.topology.topology_config.kvs:
-        if kvs.value:
-          physicalPlan["config"][kvs.key] = kvs.value
-        elif kvs.serialized_value:
-          # currently assumes that serialized_value is Java serialization
-          # when multi-language support is added later, ConfigValueType should be checked
-
-          # Hexadecimal byte array for Serialized objects
-          try:
-            pobj = javaobj.loads(kvs.serialized_value)
-            physicalPlan["config"][kvs.key] = {
-                'value' : json.dumps(pobj,
-                                     default=lambda custom_field: custom_field.__dict__,
-                                     sort_keys=True,
-                                     indent=2),
-                'raw' : utils.hex_escape(kvs.serialized_value)}
-          except Exception:
-            Log.exception("Failed to parse data as java object")
-            physicalPlan["config"][kvs.key] = {
-                # The value should be a valid json object
-                'value' : '{}',
-                'raw' : utils.hex_escape(kvs.serialized_value)}
+      physicalPlan["config"] = convert_pb_kvs(topology.physical_plan.topology.topology_config.kvs)
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []
