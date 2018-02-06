@@ -8,6 +8,8 @@ BINDIR=$(dirname ${LINK})
 HERON_HOME=$(dirname ${BINDIR})
 HERON_APISERVER_JAR=${HERON_HOME}/lib/api/heron-apiserver.jar
 RELEASE_FILE=${HERON_TOOLS_HOME}/release.yaml
+MEM_MIN=${HERON_APISERVER_MEM_MIN:-256M}
+MEM_MAX=${HERON_APISERVER_MEM_MIN:-512M}
 
 # Check for the java to use
 if [[ -z $JAVA_HOME ]]; then
@@ -20,4 +22,4 @@ else
   JAVA=${JAVA_HOME}/bin/java
 fi
 
-exec $JAVA -jar $HERON_APISERVER_JAR $@
+exec $JAVA -jar -Xms${MEM_MIN} -Xmx${MEM_MAX} $HERON_APISERVER_JAR $@
