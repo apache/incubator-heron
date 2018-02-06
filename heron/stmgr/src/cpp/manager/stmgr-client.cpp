@@ -70,8 +70,6 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
       droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
   reconnect_other_streammgrs_interval_sec_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectIntervalSec();
-  reconnect_other_streammgrs_max_attempt_ =
-      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrClientReconnectMaxAttempts();
 
   InstallResponseHandler(new proto::stmgr::StrMgrHelloRequest(), &StMgrClient::HandleHelloResponse);
   InstallMessageHandler(&StMgrClient::HandleTupleStreamMessage);
@@ -170,14 +168,10 @@ void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* 
 }
 
 void StMgrClient::OnReConnectTimer() {
-  reconnect_attempts_ += 1;
-
-  if (reconnect_attempts_ < reconnect_other_streammgrs_max_attempt_) {
-    Start();
-  } else {
-    LOG(FATAL) << "Could not connect to stmgr " << other_stmgr_id_
-               << " after reaching the max reconnect attempts. Quitting...";
-  }
+  if (++reconnect_attempts_ % 100 == 0) {
+      LOG(INFO) << "Reconnect " << ndropped_messages_ << "th times to stmgr " << other_stmgr_id_;
+    }
+  Start();
 }
 
 void StMgrClient::SendHelloRequest() {
