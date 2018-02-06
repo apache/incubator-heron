@@ -135,7 +135,8 @@ bolts:
     configMethods:
       - name: "sampleConfigurationMethod"
         args:
-          - "config property"
+          - "${ecoPropertyOne}"
+          - MB
 
   - id: "sys-out-bolt"
     className: "com.twitter.heron.examples.eco.TestPrintBolt"
@@ -330,3 +331,89 @@ streams:
 
 ```
 
+### Handling Enums
+
+The usage of Enums is supported in ECO.  You can use enums in constructor arguments, references,
+configuration methods, and properties  In the `fibonacci-topology` referenced above.  In the examples we reference the 
+enum `TestUnits`.  The enum is shown below.
+
+```java
+public enum TestUnits {
+  MB("MB"),
+  GB("GB"),
+  B("B");
+
+  String value;
+
+  TestUnits(String value) {
+    this.value = value;
+  }
+
+  public String getValue() {
+    return value;
+  }
+}
+```
+
+In the `ibasic-print-bolt` a `configMethod` is specified with the name `sampleConfigurationMethod`.  
+
+```yaml
+  - id: "ibasic-print-bolt"
+    ... excluded for simplicity
+        args:
+          - "someStringArgument"
+          - MB
+```
+This is the same as calling the following java method 
+
+```java
+
+public void sampleConfigurationMethod(String someProperty, TestUnits TestUnits) {
+    this.someProperty += someProperty;
+    this.TestUnits = TestUnits;
+  }
+  
+```
+
+### Property Substitution
+
+It's always nice to be able to define properties based on the environments you are in.  We haven't forgotten this with ECO. 
+You are able to substitute values into your ECO files by either environment variables or a properties file.  
+To turn on property substitution add the flag `--props` and specify a path to a `.properties` file. 
+
+To start over run 
+```bash
+$ heron kill local fibonacci-topology
+```
+After the topology has been killed, execute:
+
+```bash
+$ heron submit local \
+  ~/.heron/examples/heron-eco-examples.jar \
+  com.twitter.heron.eco.Eco \
+  --eco-config-file ~/.heron/examples/fibonacci.yaml --props ~/.heron/examples/sample.properties
+```
+
+If you look above at the yaml file snippet at the beginning of the page you will see
+
+```yaml
+- id: "ibasic-print-bolt"
+    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
+    parallelism: 1
+    configMethods:
+      - name: "sampleConfigurationMethod"
+        args:
+          - "${ecoPropertyOne}"
+          - MB
+ ```
+In the  `sample.properties` we have a key value set at `ecoPropertyOne=ecoValueOne`.  You can check the logs
+for the `ibasic-print-bolt` and see the values are printing out.
+
+### Environment Variable Substitution
+
+ECO also allows you to do environment variable substitution. For example if you `SOME_VARIABLE` defined
+you can reference in your yaml file like so.
+
+```yaml
+${ENV-SOME_VARIABLE}
+```

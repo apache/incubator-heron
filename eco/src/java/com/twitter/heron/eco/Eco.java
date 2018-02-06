@@ -95,7 +95,12 @@ public class Eco {
 
     FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
-    FileInputStream propsInputStream = new FileInputStream(new File(cmd.getOptionValue("filter")));
+    String propsFile = cmd.getOptionValue("filter");
+    FileInputStream propsInputStream = null;
+
+    if (propsFile != null) {
+      propsInputStream = new FileInputStream(new File(propsFile));
+    }
 
     Boolean filterFromEnv = cmd.hasOption("env-filter");
 
@@ -122,12 +127,12 @@ public class Eco {
         .required()
         .build();
 
-    Option filterOption = Option.builder("filter")
+    Option filterOption = Option.builder("props")
         .desc(".properties file for property substitution")
-        .longOpt("filter")
+        .longOpt("props")
         .hasArgs()
         .required(false)
-        .argName("eco-filter")
+        .argName("props")
         .build();
 
     Option envSubOption = Option.builder("envFilter")
