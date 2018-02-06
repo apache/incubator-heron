@@ -82,6 +82,23 @@ $ heron submit local \
   --eco-config-file path/to/your/topology-definition.yaml
 ```
 
+### Reference Links
+[Topology Name]({{<ref "#topology-name" >}})
+
+[Configuration]({{<ref "#configuration" >}})
+
+[Components]({{<ref "#components" >}})
+
+[Property Injection]({{<ref "#property-injection" >}})
+
+[The Topology Definition]({{<ref "#the-topology-definition" >}})
+
+[Streams and Groupings]({{<ref "#streams-and-groupings" >}})
+
+[Handling Enums]({{<ref "#handling-enums" >}})
+
+[Property Substitution]({{<ref "#property-substitution" >}})
+
 Notice how the above example submission command is referencing the main class `com.twitter.heron.eco.Eco`.  This part of the command
 needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
 
@@ -162,7 +179,7 @@ streams:
 
 ```
 
-If you want to stop here and try to deploy the above topology you can execute
+If you want to stop here and try to deploy the above topology you can execute:
 
 ```bash
 $ heron submit local \
@@ -171,7 +188,7 @@ $ heron submit local \
   --eco-config-file ~/.heron/examples/fibonacci.yaml
 ```
 
-This ECO topology doesn't do anything spectacular, but it's a good starting point to go through some of ECO's concepts.
+This ECO topology does not do anything spectacular, but it's a good starting point to go through some of ECO's concepts.
 
 ## Taking a closer look at the YAML definition specs
 
@@ -196,12 +213,44 @@ config:
 
 ```
 
+#### Specifying Component Level Resources
+
+You can specify component level JVM resources by referencing the `id` of the component and its `ram`.
+You can choose between Bytes `B`, Megabytes `MB`, or Gigabytes `GB`.  Examples would be `256MB` or `2GB`.
+The unit of measurement must be appended at the end of the numerical value with no spaces.
+
+```yaml
+ topology.component.resourcemap:
+
+    - id: "spout-1"
+      ram: 256MB # The minimum value for a component's specified ram is 256MB
+      cpu: 0.5
+      disk: 4GB
+
+    - id: "bolt-1"
+      ram: 256MB # The minimum value for a component's specified ram is 256MB
+      cpu: 0.5
+      disk: 2GB
+ ```
+ 
+ #### Specifying JVM Options
+ 
+ You can specify component level JVM resources by referencing the `id` of the component and a list
+ of the JVM options
+ 
+```yaml
+topology.component.jvmoptions:
+
+   - id: "spout-1"
+     options: ["-XX:NewSize=300m", "-Xms2g"]
+```
+
 ### Components
 
 `components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL.
 The properties that are required for each `component` instance are `id` and `className`.  `id` can be any name you choose, `className`  is the fully qualified className of the Java class. The `id` field is used to identify
 the component for injection in the coming spouts and bolts defined in the topology.  `constructorArgs` is only needed
-if a component has constructor that requires arguments.  We will get into constructor args the in the next section.  `components` are optional
+if a component has constructor that requires arguments.  We will get into constructor args the in the next section.  `components` are optional.
 
 ```yaml
 
@@ -212,12 +261,13 @@ components:
       - "some argument"
 
 ```
+
 ### Property Injection
 
 #### Constructor Injection
 
 `constructorArgs` can specify any object type.  Above you can see that the only constructor argument specified is a string
-that contained "some argument".  If declaring a number, you may omit the parenthesis
+that contained "some argument".  If declaring a number, you may omit the parenthesis.
 
 ```yaml
 
@@ -416,4 +466,25 @@ you can reference in your yaml file like so.
 
 ```yaml
 ${ENV-SOME_VARIABLE}
+```
+
+
+### Run Each of the other ECO Examples
+
+Run the simple wordcount example
+
+```bash
+$ heron submit local \
+  ~/.heron/examples/heron-eco-examples.jar \
+   com.twitter.heron.eco.Eco \
+   --eco-config-file ~/.heron/examples/simple_wordcount.yaml 
+```
+
+Run the simple windowing example
+
+```bash
+$ heron submit local \
+   ~/.heron/examples/heron-eco-examples.jar \
+   com.twitter.heron.eco.Eco \
+   --eco-config-file ~/.heron/examples/simple_windowing.yaml 
 ```
