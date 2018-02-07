@@ -439,7 +439,7 @@ public class SubmitterMain {
       // The packing plan might call for a number of containers different than the config
       // settings. If that's the case we need to modify the configs to match.
       runtimeWithoutPackageURI =
-          updateNumContainersIfNeeded(config, runtimeWithoutPackageURI, topology, packingPlan);
+          updateNumContainersIfNeeded(runtimeWithoutPackageURI, topology, packingPlan);
 
       // If the packing plan is valid we will upload necessary packages
       URI packageURI = uploadPackage(uploader);
@@ -476,7 +476,7 @@ public class SubmitterMain {
    * @return a new Config cloned from initialConfig and modified as needed to align with packedPlan
    */
   @VisibleForTesting
-  Config updateNumContainersIfNeeded(Config config, Config initialConfig,
+  Config updateNumContainersIfNeeded(Config initialConfig,
                                      TopologyAPI.Topology initialTopology,
                                      PackingPlan packingPlan) {
 
