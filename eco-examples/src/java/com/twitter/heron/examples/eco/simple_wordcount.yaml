@@ -23,6 +23,23 @@ name: "simple-wordcount-topology"
 #
 config:
   topology.workers: 1
+  topology.component.resourcemap:
+
+    - id: "spout-1"
+      ram: 256MB
+      cpu: 0.5
+      disk: 4GB
+
+    - id: "bolt-1"
+      ram: 128MB
+      cpu: 0.5
+      disk: 2GB
+
+  topology.component.jvmoptions:
+
+   - id: "spout-1"
+     options: ["-XX:NewSize=300m"]
+     
 
 # spout definitions
 spouts:

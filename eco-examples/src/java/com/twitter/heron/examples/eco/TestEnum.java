@@ -11,19 +11,13 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.submit;
+package com.twitter.heron.examples.eco;
 
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.AlreadyAliveException;
-import org.apache.storm.generated.InvalidTopologyException;
-import org.apache.storm.generated.StormTopology;
+public enum  TestEnum {
 
-import com.twitter.heron.api.Config;
+  FOO,
+  BAR,
+  QUX
 
-public class EcoSubmitter {
 
-  public void submitTopology(String topologyName, Config topologyConfig, StormTopology topology)
-      throws AlreadyAliveException, InvalidTopologyException {
-    StormSubmitter.submitTopology(topologyName, topologyConfig, topology);
-  }
 }

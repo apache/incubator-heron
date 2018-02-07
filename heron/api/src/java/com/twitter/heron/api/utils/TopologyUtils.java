@@ -201,7 +201,6 @@ public final class TopologyUtils {
         }
       }
     }
-    // TODO(nbhagat): Should we enforce all output stream must be consumed?
 
     return true;
   }
