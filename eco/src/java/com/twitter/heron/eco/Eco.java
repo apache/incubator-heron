@@ -47,6 +47,8 @@ public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
   private static final String PROPS = "props";
+  private static final String ENV_PROPS = "env-props";
+  private static final String ECO_CONFIG_FILE = "eco-config-file";
 
   private EcoBuilder ecoBuilder;
   private EcoParser ecoParser;
@@ -94,7 +96,8 @@ public class Eco {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
+
+    FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue(ECO_CONFIG_FILE)));
 
     String propsFile = cmd.getOptionValue(PROPS);
     FileInputStream propsInputStream = null;
@@ -103,7 +106,8 @@ public class Eco {
       propsInputStream = new FileInputStream(new File(propsFile));
     }
 
-    Boolean filterFromEnv = cmd.hasOption("env-filter");
+
+    Boolean filterFromEnv = cmd.hasOption(ENV_PROPS);
 
     Eco eco = new Eco(
         new EcoBuilder(
@@ -122,9 +126,9 @@ public class Eco {
     Options options = new Options();
     Option ecoConfig = Option.builder("eco")
         .desc("Yaml config file for specifying topology definitions")
-        .longOpt("eco-config-file")
+        .longOpt(ECO_CONFIG_FILE)
         .hasArgs()
-        .argName("eco-config-file")
+        .argName(ECO_CONFIG_FILE)
         .required()
         .build();
 
@@ -139,7 +143,7 @@ public class Eco {
 
     Option envSubOption = Option.builder("envFilter")
         .desc("Perform environment variable substitution.")
-        .longOpt("env-filter")
+        .longOpt(ENV_PROPS)
         .numberOfArgs(0)
         .required(false)
         .build();

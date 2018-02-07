@@ -506,13 +506,13 @@ If you look above at the yaml file snippet at the beginning of the page you will
           - "${ecoPropertyOne}"
           - MB
  ```
-In the  `sample.properties` we have a key value set at `ecoPropertyOne=ecoValueOne`.  You can check the logs
+In the  `sample.properties` we have a key value set at `ecoPropertyOne=thisValueWasSetFromAPropertiesFile`.  You can check the logs
 for the `ibasic-print-bolt` and see the values are printing out.
 
 ### Environment Variable Substitution
 
-ECO also allows you to do environment variable substitution. For example if you have `SOME_VARIABLE` defined
-you can reference in your yaml file like so.
+ECO also allows you to do environment variable substitution.  To activate environment variable substitution pass the flag `--env-props` upon submitting a topology. If you have `SOME_VARIABLE` defined
+you can reference in your yaml file like below.
 
 ```yaml
 ${ENV-SOME_VARIABLE}
