@@ -46,6 +46,7 @@ import com.twitter.heron.eco.submit.EcoSubmitter;
 public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
+  private static final String PROPS = "props";
 
   private EcoBuilder ecoBuilder;
   private EcoParser ecoParser;
@@ -95,7 +96,7 @@ public class Eco {
 
     FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
 
-    String propsFile = cmd.getOptionValue("filter");
+    String propsFile = cmd.getOptionValue(PROPS);
     FileInputStream propsInputStream = null;
 
     if (propsFile != null) {
@@ -127,12 +128,13 @@ public class Eco {
         .required()
         .build();
 
-    Option filterOption = Option.builder("props")
-        .desc(".properties file for property substitution")
-        .longOpt("props")
+
+    Option filterOption = Option.builder(PROPS)
+        .desc("properties file for property substitution")
+        .longOpt(PROPS)
         .hasArgs()
         .required(false)
-        .argName("props")
+        .argName(PROPS)
         .build();
 
     Option envSubOption = Option.builder("envFilter")
