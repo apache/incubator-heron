@@ -1,5 +1,4 @@
-# do not use core package URI
-heron.package.use_core_uri:                  false
+# location of the core package
+heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz
 
-# core package directory to use
-heron.package.core.directory:                ${HERON_DIST}/heron-core
+heron.package.use_core_uri:                  true
