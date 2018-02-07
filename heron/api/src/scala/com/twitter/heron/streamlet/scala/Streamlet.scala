@@ -16,7 +16,7 @@ package com.twitter.heron.streamlet.scala
 import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
 
 // TODO: This Java Streamlet API references will be changed with Scala versions when they are ready
-import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, Sink, WindowConfig}
+import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, WindowConfig}
 
 /**
   * A Streamlet is a (potentially unbounded) ordered collection of tuples.

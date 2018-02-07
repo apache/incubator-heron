@@ -44,9 +44,7 @@ private[scala] class TestContext extends Context {
                                  collectionInterval: Int,
                                  metricFn: Supplier[T]): Unit = {}
 
-  override def getState =
-    new TestState[io.Serializable, io.Serializable]()
+  override def getState = new TestState[io.Serializable, io.Serializable]()
 
 }
-
 
