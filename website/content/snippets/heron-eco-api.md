@@ -1,6 +1,8 @@
-Heron processing topologies can be written using an API called the **Heron ECO API**. The ECO API is currently available to work with the following languages:
+Heron processing topologies can be written using an API called the **Heron ECO API**. The ECO API is currently available to work with spouts and bolts from the following packages:
 
-* [Java](../../../developers/java/eco-api)
+* `org.apache.storm`
+
+We will expand compatibility based on feedback we get from the community.
 
 > Although this document focuses on the ECO API, both the [Streamlet API](../../../concepts/streamlet-api) and [Topology API](../../../concepts/topologies) topologies you have built can still be used with Heron
 
