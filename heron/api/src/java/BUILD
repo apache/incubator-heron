@@ -15,7 +15,7 @@ java_doc(
 api_deps_files =  \
     heron_java_api_proto_files() + [
         ":classification",
-        "//heron/common/src/java:basics-java"
+        "//heron/common/src/java:basics-java",
     ]
 
 # Low Level Api
@@ -34,7 +34,6 @@ java_library(
     deps = api_deps_files + [
         ":api-java-low-level",
         "//third_party/java:kryo-neverlink",
-        "//heron/simulator/src/java:simulator-java"
     ]
 )
 
@@ -43,13 +42,13 @@ java_library(
     name = "api-java-low-level-functional",
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
-    deps = api_deps_files + ["//third_party/java:kryo-neverlink", "//heron/simulator/src/java:simulator-java"]
+    deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
 )
 
 java_binary(
     name = "api-unshaded",
     srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
-    deps = api_deps_files + ["//third_party/java:kryo-neverlink", "//heron/simulator/src/java:simulator-java"],
+    deps = api_deps_files + ["//third_party/java:kryo-neverlink"],
 )
 
 jarjar_binary(

@@ -31,10 +31,8 @@ public final class Config implements Serializable {
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
   private com.twitter.heron.api.Config heronConfig;
-  private final boolean shouldSimulate;
   private static final long MB = 1024 * 1024;
   private static final long GB = 1024 * MB;
-
 
   /**
    * An enum encapsulating the delivery semantics that can be applied to Heron topologies. The
@@ -62,7 +60,6 @@ public final class Config implements Serializable {
     static final long RAM = 100 * MB;
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
     static final Serializer SERIALIZER = Serializer.KRYO;
-    static final boolean shouldSimulate = false;
   }
 
   private Config(Builder builder) {
@@ -71,7 +68,6 @@ public final class Config implements Serializable {
     cpu = builder.cpu;
     ram = builder.ram;
     deliverySemantics = builder.deliverySemantics;
-    shouldSimulate = builder.shouldSimulate;
   }
 
   /**
@@ -151,14 +147,6 @@ public final class Config implements Serializable {
     return serializer;
   }
 
-  /**
-   * Gets whether this should be simulated
-   * @return whether this should be simulated
-   */
-  public boolean shouldSimulate() {
-    return shouldSimulate;
-  }
-
   private static com.twitter.heron.api.Config.TopologyReliabilityMode translateSemantics(
       DeliverySemantics semantics) {
     switch (semantics) {
@@ -179,15 +167,13 @@ public final class Config implements Serializable {
     private long ram;
     private DeliverySemantics deliverySemantics;
     private Serializer serializer;
-    private boolean shouldSimulate;
 
     private Builder() {
       config = Defaults.CONFIG;
       cpu = Defaults.CPU;
       ram = Defaults.RAM;
       deliverySemantics = Defaults.SEMANTICS;
-      serializer = Defaults.SERIALIZER;
-      shouldSimulate = Defaults.shouldSimulate;
+      serializer = Serializer.KRYO;
     }
 
     /**
@@ -261,15 +247,6 @@ public final class Config implements Serializable {
      */
     public Builder setUserConfig(String key, Object value) {
       config.put(key, value);
-      return this;
-    }
-
-    /**
-     * Sets whether this topology should be run in the simulator or not
-     * @param shouldSimulate whether this should be run in the simulator
-     */
-    public Builder setShouldSimulate(boolean shouldSimulate) {
-      this.shouldSimulate = shouldSimulate;
       return this;
     }
 
