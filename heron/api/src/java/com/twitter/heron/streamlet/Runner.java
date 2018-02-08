@@ -15,6 +15,7 @@
 package com.twitter.heron.streamlet;
 
 import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.TopologySubmitter;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -34,11 +35,18 @@ public final class Runner {
    * @param builder The builder used to keep track of the sources.
    */
   public void run(String name, Config config, Builder builder) {
+    this.run(name, config, builder, new HeronSubmitter());
+  }
+
+  public void run(String name, Config config, Builder builder, TopologySubmitter submitter) {
     BuilderImpl bldr = (BuilderImpl) builder;
     TopologyBuilder topologyBuilder = bldr.build();
     try {
-      HeronSubmitter.submitTopology(name, config.getHeronConfig(),
-                                    topologyBuilder.createTopology());
+      submitter.submitTopologyInherited(
+          name,
+          config.getHeronConfig(),
+          topologyBuilder.createTopology()
+      );
     } catch (AlreadyAliveException | InvalidTopologyException e) {
       e.printStackTrace();
     }
