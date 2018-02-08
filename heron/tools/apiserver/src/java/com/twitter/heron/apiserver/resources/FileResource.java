@@ -142,7 +142,7 @@ public class FileResource extends HeronResource {
    * Endpoint for downloading Heron Core
    */
   @GET
-  @Path("/downloadcore")
+  @Path("/download/core")
   public Response downloadHeronCore() {
     String corePath = getHeronCorePackagePath();
     File file = new File(corePath);
