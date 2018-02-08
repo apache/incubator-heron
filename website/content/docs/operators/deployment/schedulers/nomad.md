@@ -18,8 +18,15 @@ When setting up your Nomad cluster, the following are required:
 
 ## Configuring Heron settings
 
-Before installing Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `$HOME/.heron/conf/nomad` diredctory.
+Before installing Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
 
 First, you'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:
 
-* The HTTP uploader in conjunction with Heron's [API server](../../../heron-api-server)
+* The HTTP uploader in conjunction with Heron's [API server](../../../heron-api-server). The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described [below](#deploying-with-the-api-server)) <!-- TODO: link to upcoming HTTP uploader documentation -->
+* [Amazon S3](../../uploaders/s3). Please note that the S3 uploader requires an AWS account.
+* [SCP](../../uploaders/scp). Please note that the SCP uploader requires SSH access to nodes in the cluster.
+
+You can modify the `heron.class.uploader` parameter in `~/.heron/conf/nomad/uploader.yaml` to choose an uploader. The following uploaders are available:
+
+{{< list "uploaders" >}}
+
