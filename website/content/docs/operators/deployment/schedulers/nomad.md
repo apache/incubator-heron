@@ -77,7 +77,7 @@ heron.package.core.uri: http://some.webserver.io/heron-core.tar.gz
 
 ## Submitting Heron topologies to the Nomad cluster
 
-You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](../../heron-cli):
+You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](../../../heron-cli):
 
 ```bash
 $ heron submit nomad \
@@ -90,14 +90,14 @@ Here's an example:
 
 ```bash
 $ heron submit nomad \
-  ~/.heron/examples/heron-streamlet-examples.jar \     # Package path
-  com.twitter.heron.examples.api.ExclamationTopology \ # Topology classpath
-  exclamation-topology                                 # Args passed to topology
+  ~/.heron/examples/heron-streamlet-examples.jar \           # Package path
+  com.twitter.heron.examples.api.WindowedWordCountTopology \ # Topology classpath
+  windowed-word-count                                        # Args passed to topology
 ```
 
 ## Deploying with the API server
 
-The advantage of running the [Heron API Server](../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  y using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
+The advantage of running the [Heron API Server](../../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  y using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
 
 ## Running the API server
 
@@ -140,4 +140,73 @@ job "apiserver" {
     }
   }
 }
+```
+
+Make sure to replace the following:
+
+* `<heron_apiserver_executable>` --- The local path to where the [Heron API server](../../../heron-api-server) executable is located (usually `~/.heron/bin/heron-apiserver`)
+* `<zookeeper_uri>` --- The URI for your ZooKeeper cluster
+* `<scheduler_uri>` --- The URI for your Nomad server
+
+## Using the Heron API server to distribute Heron topology packages
+
+Heron users can upload their Heron topology packages to the Heron API server using the HTTP uploader by modifying the `uploader.yaml` file to including the following:
+
+```yaml
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:    com.twitter.heron.uploader.http.HttpUploader
+heron.uploader.http.uri: http://localhost:9000/api/v1/file/upload
+```
+
+The [Heron CLI](../../../heron-cli) will take care of the upload. When the topology is starting up, the topology package will be automatically downloaded from the API server.
+
+## Using the API server to distribute the Heron core package
+
+Heron users can use the Heron API server to distribute the Heron core package. When running the API server, just add this argument:
+
+```bash
+--heron-core-package-path <path to Heron core>
+```
+
+Here's an example:
+
+```bash
+$ ~/.heron/bin/heron-apiserver \
+  --cluster nomad \
+  --base-template nomad \
+  --download-hostname 127.0.0.1 \
+  --heron-core-package-path ~/.heron/dist/heron-core.tar.gz \
+  -D heron.statemgr.connection.string=127.0.0.1:2181 \
+  -D heron.nomad.scheduler.uri=127.0.0.1:4647 \
+  -D heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader \
+  --verbose
+```
+
+Then change the `client.yaml` file in `~/.heron/conf/nomad` to the following:
+
+```yaml
+heron.package.use_core_uri: true
+heron.package.core.uri:     http://localhost:9000/api/v1/file/download/core
+```
+
+## Using the API server to submit Heron topologies
+
+Users can submit topologies using the [Heron CLI](../../../heron-cli) by specifying a service URL to the API server. Here's the format of that command:
+
+```bash
+$ heron submit nomad \
+  --service-url=<Heron API server URL> \
+  <topology package path> \
+  <topology classpath> \
+  <topology args>
+```
+
+Here's an example:
+
+```bash
+$ heron submit nomad \
+  --service-url=http://localhost:9000 \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.api.WindowedWordCountTopology \
+  windowed-word-count
 ```
