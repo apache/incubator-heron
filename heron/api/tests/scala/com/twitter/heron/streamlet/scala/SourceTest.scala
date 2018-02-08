@@ -13,38 +13,30 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala
 
-import java.{io, util}
-import java.util.function.Supplier
-
-import com.twitter.heron.api.state.State
-import com.twitter.heron.streamlet.Context
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.WordSpec
-
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
-class SourceTest extends WordSpec {
+import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.scala.common.{BaseFunSuite, TestContext}
 
-  "SourceTest" should {
+/**
+  * Tests for Source Trait functionality
+  */
+class SourceTest extends BaseFunSuite {
 
-    val expectedList = List(1, 2, 3, 4, 5)
+  val expectedList = List(1, 2, 3, 4, 5)
 
-    "provide data" in {
-      val source = new MySource()
-      source.setup(new MyContext())
-      assert(source.get == expectedList)
-    }
+  test("Source should provide data") {
+    val source = new MySource()
+    source.setup(new TestContext())
+    assert(source.get == expectedList)
+  }
 
-    "support cleanup" in {
-      val source = new MySource()
-      source.setup(new MyContext())
-      assert(source.get == expectedList)
-      source.cleanup()
-      assert(source.get == List[Int]())
-    }
-
+  test("Source should support cleanup") {
+    val source = new MySource()
+    source.setup(new TestContext())
+    assert(source.get == expectedList)
+    source.cleanup()
+    assert(source.get == List[Int]())
   }
 
   private class MySource() extends Source[Int] {
@@ -59,17 +51,4 @@ class SourceTest extends WordSpec {
     override def cleanup(): Unit = numbers.clear()
   }
 
-  private class MyContext extends Context {
-    override def getTaskId: Int = ???
-
-    override def getConfig: util.Map[String, AnyRef] = ???
-
-    override def getStreamName: String = ???
-
-    override def getStreamPartition: Int = ???
-
-    override def registerMetric[T](metricName: String, collectionInterval: Int, metricFn: Supplier[T]): Unit = ???
-
-    override def getState: State[io.Serializable, io.Serializable] = ???
-  }
 }

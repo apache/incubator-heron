@@ -1,5 +1,5 @@
 {{- $platform := .Values.platform }}
-{{- $zkReplicas := index (index .Values $platform) "zkReplicas" }}
+{{- $zkReplicas := .Values.zkReplicas }}
 
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget

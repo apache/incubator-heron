@@ -360,8 +360,8 @@ public class RoundRobinPackingTest {
     Assert.assertEquals(2 * componentParallelism, numInstance);
 
     Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, componentParallelism - 1);
-    componentChanges.put(BOLT_NAME, componentParallelism + 1);
+    componentChanges.put(SPOUT_NAME, -1);
+    componentChanges.put(BOLT_NAME,  +1);
     PackingPlan output = getRoundRobinRePackingPlan(topology, componentChanges);
     Assert.assertEquals(numContainers, output.getContainers().size());
     Assert.assertEquals((Integer) numInstance, output.getInstanceCount());

@@ -491,7 +491,7 @@ genrule(
         'sed "s/VERSION/$$HERON_VERSION/" $$HELM_DIR/Chart.yaml.template > $$HELM_DIR/Chart.yaml',
         'sed "s/VERSION/$$HERON_VERSION/" $$HELM_DIR/values.yaml.template > $$HELM_DIR/values.yaml',
         'mkdir $$HELM_DIR/charts $$HELM_DIR/templates',
-        'mv $$HELM_DIR/bookkeeper.yaml $$HELM_DIR/tools.yaml $$HELM_DIR/templates',
+        'mv $$HELM_DIR/bookie.yaml $$HELM_DIR/tools.yaml $$HELM_DIR/templates',
         'mv $$HELM_DIR/zookeeper.yaml $$HELM_DIR/templates',
         'mv $$HELM_DIR/*.txt $$HELM_DIR/*.tpl $$HELM_DIR/templates',
         'rm $$HELM_DIR/Chart.yaml.template $$HELM_DIR/values.yaml.template $$HELM_DIR/release.yaml',

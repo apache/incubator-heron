@@ -57,12 +57,12 @@ configfiles:
   - name: heron.streammgr.client.reconnect.interval.sec
     description: The reconnect interval to other stream managers (in seconds) for the stream manager client
     default: 1
-  - name: heron.streammgr.client.reconnect.max.attempts
-    description: The max reconnect attempts to other stream managers for the stream manager client
-    default: 300
   - name: heron.streammgr.client.reconnect.tmaster.interval.sec
     description: The reconnect interval to the topology master (in seconds) for the stream manager client
     default: 10
+  - name: heron.streammgr.client.reconnect.tmaster.max.attempts
+    description: The max reconnect attempts to tmaster for stream manager client
+    default: 30
   - name: heron.streammgr.network.options.maximum.packet.mb
     description: The maximum packet size (in MB) of the stream manager's network options
     default: 10

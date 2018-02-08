@@ -892,5 +892,3 @@ http_archive(
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
 scala_repositories()
-load("@io_bazel_rules_scala//specs2:specs2_junit.bzl","specs2_junit_repositories")
-specs2_junit_repositories()

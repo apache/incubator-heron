@@ -65,14 +65,14 @@ heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 # The max number of messages in the memory pool for each message type
 heron.streammgr.mempool.max.message.number: 512
 
-# The max reconnect attempts to other stream managers for stream manager client
-heron.streammgr.client.reconnect.max.attempts: 300
-
 # The reconnect interval to other stream managers in secs for stream manager client
 heron.streammgr.client.reconnect.interval.sec: 1
 
 # The reconnect interval to tamster in second for stream manager client
 heron.streammgr.client.reconnect.tmaster.interval.sec: 10
+
+# The max reconnect attempts to tmaster for stream manager client
+heron.streammgr.client.reconnect.tmaster.max.attempts: 30
 
 # The maximum packet size in MB of stream manager's network options
 heron.streammgr.network.options.maximum.packet.mb: 10

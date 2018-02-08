@@ -10,8 +10,10 @@ WAIT_ZK_PORT=$2
 
 while true; do
   status=$(echo ruok | nc $WAIT_ZK_HOST $WAIT_ZK_PORT);
-  if [ "$status" = "imok" ]; then
-    break;
+  writestatus=$(echo isro | nc $WAIT_ZK_HOST $WAIT_ZK_PORT)
+  if [ "$status" = "imok" ] && [ "$writestatus" == "rw" ]; then
+    echo "Zookeeper $WAIT_ZK_HOST:$WAIT_ZK_PORT is ready";
+    exit 0
   fi;
   echo "Zookeeper $WAIT_ZK_HOST:$WAIT_ZK_PORT not ready";
   sleep 4;
