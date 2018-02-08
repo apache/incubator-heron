@@ -15,8 +15,11 @@
 package com.twitter.heron.healthmgr.detectors;
 
 import com.microsoft.dhalion.api.IDetector;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 public abstract class BaseDetector implements IDetector {
+  private ExecutionContext context;
+
   public enum SymptomName {
     SYMPTOM_BACK_PRESSURE(BackPressureDetector.class.getSimpleName()),
     SYMPTOM_GROWING_WAIT_Q(GrowingWaitQueueDetector.class.getSimpleName()),
@@ -38,5 +41,10 @@ public abstract class BaseDetector implements IDetector {
     public String toString() {
       return text();
     }
+  }
+
+  @Override
+  public void initialize(ExecutionContext context) {
+    this.context = context;
   }
 }

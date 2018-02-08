@@ -14,7 +14,7 @@
 
 package com.twitter.heron.healthmgr.common;
 
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Action;
 
 public class HealthManagerEvents {
 

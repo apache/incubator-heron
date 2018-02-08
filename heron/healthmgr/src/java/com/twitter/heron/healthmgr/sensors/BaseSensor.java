@@ -15,8 +15,11 @@
 package com.twitter.heron.healthmgr.sensors;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.microsoft.dhalion.api.ISensor;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
@@ -24,6 +27,7 @@ import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 public abstract class BaseSensor implements ISensor {
   static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(300);
   static final String COMPONENT_STMGR = "__stmgr__";
+  private ExecutionContext context;
 
   public enum MetricName {
     METRIC_EXE_COUNT("__execute-count/default"),
@@ -78,8 +82,14 @@ public abstract class BaseSensor implements ISensor {
     return value;
   }
 
-  public String getMetricName() {
-    return metricName;
+  @Override
+  public void initialize(ExecutionContext context) {
+    this.context = context;
+  }
+
+  @Override
+  public Collection<String> getMetricTypes() {
+    return Collections.singletonList(metricName);
   }
 
   public HealthPolicyConfig getConfig() {

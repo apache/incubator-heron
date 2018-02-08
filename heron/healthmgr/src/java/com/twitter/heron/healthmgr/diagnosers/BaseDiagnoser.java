@@ -17,11 +17,10 @@ package com.twitter.heron.healthmgr.diagnosers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.microsoft.dhalion.api.IDiagnoser;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName;
 
@@ -30,6 +29,8 @@ import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYM
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY;
 
 public abstract class BaseDiagnoser implements IDiagnoser {
+  private ExecutionContext context;
+
   public enum DiagnosisName {
     SYMPTOM_UNDER_PROVISIONING("SYMPTOM_UNDER_PROVISIONING"),
     SYMPTOM_DATA_SKEW("SYMPTOM_DATA_SKEW"),
@@ -86,5 +87,10 @@ public abstract class BaseDiagnoser implements IDiagnoser {
       }
     }
     return result;
+  }
+
+  @Override
+  public void initialize(ExecutionContext context) {
+    this.context = context;
   }
 }

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;

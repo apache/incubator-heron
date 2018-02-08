@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
-import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;

@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 

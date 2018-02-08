@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.core.Action;
 
 import org.junit.Test;
 

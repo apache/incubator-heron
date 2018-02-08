@@ -17,7 +17,7 @@ package com.twitter.heron.healthmgr;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.microsoft.dhalion.detector.Symptom;
+import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 

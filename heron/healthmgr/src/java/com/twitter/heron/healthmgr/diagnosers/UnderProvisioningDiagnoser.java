@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
