@@ -109,7 +109,6 @@ public class ConfigBuilder {
       int cpuIndex = objString.indexOf(CPU);
       int diskIndex = objString.indexOf(DISK);
 
-
       String ramWithUom = "";
       String id = getIdValue(objString, idIndex);
       //todo (josh fischer) diskWithUom and cpu are still to be implemented for use with k8s
@@ -162,9 +161,7 @@ public class ConfigBuilder {
             IllegalArgumentException(
             " Please specify 'B', 'MB', 'GB' when declaring Ram Resources");
       }
-
       config.setComponentRam(id, byteAmount);
-
     }
   }
 
@@ -189,9 +186,7 @@ public class ConfigBuilder {
   }
 
   private long extractRawValue(String ramWithUom, int index) {
-
     return Long.valueOf(ramWithUom.substring(0, index));
-
   }
 
   private String assignValue(String objString, int index) {
