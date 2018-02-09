@@ -57,6 +57,12 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   public void prepare(Map<String, Object> map,
                       TopologyContext topologyContext,
                       OutputCollector outputCollector) {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        finishBatch();
+      }
+    });
   }
 
   @Override
