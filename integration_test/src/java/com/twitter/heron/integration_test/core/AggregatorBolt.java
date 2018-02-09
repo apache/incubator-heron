@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,20 +25,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.hooks.ITaskHook;
-import com.twitter.heron.api.hooks.info.BoltAckInfo;
-import com.twitter.heron.api.hooks.info.BoltExecuteInfo;
-import com.twitter.heron.api.hooks.info.BoltFailInfo;
-import com.twitter.heron.api.hooks.info.EmitInfo;
-import com.twitter.heron.api.hooks.info.SpoutAckInfo;
-import com.twitter.heron.api.hooks.info.SpoutFailInfo;
+import com.twitter.heron.api.hooks.BaseTaskHook;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
 /**
- * A Bolt which collects the tuples, converts them into json,
- * and posts the json into the given http server.
+ * A Bolt which collects the tuples, converts them into json, and posts the json into the given http
+ * server.
  */
 public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private static final long serialVersionUID = -2994625720418843748L;
@@ -60,46 +54,18 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     writeFinishedData();
   }
 
+  class CleanupTaskHook extends BaseTaskHook {
+    @Override
+    public void cleanup() {
+      LOG.log(Level.INFO, "AggregatorBolt is dying. Emitting cached tuples");
+      finishBatch();
+    }
+  }
+
   @Override
-  public void prepare(Map<String, Object> map,
-                      TopologyContext topologyContext,
-                      OutputCollector outputCollector) {
-    topologyContext.addTaskHook(new ITaskHook() {
-      
-      @Override
-      public void spoutFail(SpoutFailInfo info) {
-      }
-      
-      @Override
-      public void spoutAck(SpoutAckInfo info) {
-      }
-      
-      @Override
-      public void prepare(Map<String, Object> conf, TopologyContext context) {
-      }
-      
-      @Override
-      public void emit(EmitInfo info) {
-      }
-      
-      @Override
-      public void cleanup() {
-        LOG.log(Level.INFO, "AggregatorBolt is dying. Emitting cached tuples");
-        finishBatch();  
-      }
-      
-      @Override
-      public void boltFail(BoltFailInfo info) {
-      }
-      
-      @Override
-      public void boltExecute(BoltExecuteInfo info) {
-      }
-      
-      @Override
-      public void boltAck(BoltAckInfo info) {
-      }
-    });
+  public void prepare(Map<String, Object> map, TopologyContext topologyContext,
+      OutputCollector outputCollector) {
+    topologyContext.addTaskHook(new CleanupTaskHook());
   }
 
   @Override
@@ -109,8 +75,8 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     try {
       tupleInJSON = MAPPER.writeValueAsString(tuple.getValue(0));
     } catch (JsonProcessingException e) {
-      LOG.log(Level.SEVERE,
-          "Could not convert map to JSONString: " + tuple.getValue(0).toString(), e);
+      LOG.log(Level.SEVERE, "Could not convert map to JSONString: " + tuple.getValue(0).toString(),
+          e);
     }
     result.add(tupleInJSON);
   }
@@ -122,7 +88,7 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
 
   public void writeFinishedData() {
     String resultJson = result.toString();
-    LOG.info(String.format("Posting actual result to %s: %s",  httpPostUrl, resultJson));
+    LOG.info(String.format("Posting actual result to %s: %s", httpPostUrl, resultJson));
     try {
       int responseCode = -1;
       for (int attempts = 0; attempts < 2; attempts++) {
@@ -132,9 +98,9 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
         }
       }
       throw new RuntimeException(
-          String.format("Failed to post actual result to %s: %s",  httpPostUrl, responseCode));
+          String.format("Failed to post actual result to %s: %s", httpPostUrl, responseCode));
     } catch (IOException | ParseException e) {
-      throw new RuntimeException(String.format("Posting result to %s failed",  httpPostUrl), e);
+      throw new RuntimeException(String.format("Posting result to %s failed", httpPostUrl), e);
     }
   }
 }
