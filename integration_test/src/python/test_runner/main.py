@@ -1,5 +1,6 @@
 ''' main '''
 import argparse
+import collections
 import json
 import logging
 import os
@@ -151,7 +152,7 @@ def _frequency_dict(values):
     if value in frequency:
       count = frequency[value]
     frequency[value] = count + 1
-  return frequency
+  return collections.OrderedDict(sorted(frequency.items()))
 
 def run_test(topology_name, classpath, results_checker,
              params, http_server_host_port, update_args, extra_topology_args):

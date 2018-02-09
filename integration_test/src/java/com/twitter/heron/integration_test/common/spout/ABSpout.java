@@ -59,7 +59,7 @@ public class ABSpout extends BaseRichSpout {
   public void nextTuple() {
     String word = TO_SEND[emitted % TO_SEND.length];
     if (appendSequenceId) {
-      word = word + "_" + emitted;
+      word = String.format("%02d_%s", emitted, word);
     }
     collector.emit(new Values(word));
     emitted++;
