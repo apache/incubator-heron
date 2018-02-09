@@ -14,19 +14,24 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.Map;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
-import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +54,9 @@ public class BackPressureSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = MetricName.METRIC_BACK_PRESSURE + boltId;
+      String metric = METRIC_BACK_PRESSURE + boltId;
       // the back pressure sensor will return average bp per second, so multiply by duration
-      BufferSizeSensorTest.registerStMgrInstanceMetricResponse(metricsProvider,
+      registerStMgrInstanceMetricResponse(metricsProvider,
           metric,
           boltId.length() * DEFAULT_METRIC_DURATION.getSeconds());
     }
@@ -59,17 +64,29 @@ public class BackPressureSensorTest {
     BackPressureSensor backPressureSensor =
         new BackPressureSensor(packingPlanProvider, topologyProvider, null, metricsProvider);
 
-    Map<String, ComponentMetrics> componentMetrics = backPressureSensor.get();
-    assertEquals(2, componentMetrics.size());
+    Collection<Measurement> componentMetrics = backPressureSensor.fetch();
+    assertEquals(3, componentMetrics.size());
+    MeasurementsTable table = MeasurementsTable.of(componentMetrics);
+    assertEquals(1, table.component("bolt-1").size());
+    assertEquals(boltIds[0].length(), table.component("bolt-1").instance(boltIds[0])
+        .type(METRIC_BACK_PRESSURE.text()).sum(), 0.01);
 
-    assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
-    assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
+    assertEquals(2, table.component("bolt-2").size());
+    assertEquals(boltIds[1].length(), table.component("bolt-2").instance(boltIds[1])
+        .type(METRIC_BACK_PRESSURE.text()).sum(), 0.01);
+    assertEquals(boltIds[2].length(), table.component("bolt-2").instance(boltIds[2])
+        .type(METRIC_BACK_PRESSURE.text()).sum(), 0.01);
+  }
 
-    assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
-    assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
-    assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValueSum(MetricName.METRIC_BACK_PRESSURE.text()).intValue());
+  static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
+                                                  String metric,
+                                                  long value) {
+    Instant instant = Instant.ofEpochSecond(10);
+    Measurement measurement = new Measurement("__stmgr__", "stmgr-1", metric, instant, value);
+    Collection<Measurement> result = Collections.singletonList(measurement);
+
+    when(metricsProvider.getMeasurements(
+        any(Instant.class), eq(DEFAULT_METRIC_DURATION), eq(metric), eq("__stmgr__")))
+        .thenReturn(result);
   }
 }

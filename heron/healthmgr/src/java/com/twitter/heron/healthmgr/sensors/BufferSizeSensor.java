@@ -15,18 +15,16 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
@@ -50,74 +48,39 @@ public class BufferSizeSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
-  @Override
-  public Map<String, ComponentMetrics> get() {
-    return get(topologyProvider.getBoltNames());
-  }
-
   /**
    * The buffer size as provided by tracker
    *
-   * @return buffer size
+   * @return buffer size measurements
    */
-  public Map<String, ComponentMetrics> get(String... desiredBoltNames) {
-    Map<String, ComponentMetrics> result = new HashMap<>();
-
-    Set<String> boltNameFilter = new HashSet<>();
-    if (desiredBoltNames.length > 0) {
-      boltNameFilter.addAll(Arrays.asList(desiredBoltNames));
-    }
+  @Override
+  public Collection<Measurement> fetch() {
+    Collection<Measurement> result = new ArrayList<>();
 
     String[] boltComponents = topologyProvider.getBoltNames();
-    for (String boltComponent : boltComponents) {
-      if (!boltNameFilter.isEmpty() && !boltNameFilter.contains(boltComponent)) {
-        continue;
-      }
+    Duration duration = getDuration();
 
-      String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
+    for (String component : boltComponents) {
+      String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(component);
+      for (String instance : boltInstanceNames) {
+        String metric = getMetricName() + instance + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
 
-      Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
-      for (String boltInstanceName : boltInstanceNames) {
-        String metric = getMetricName() + boltInstanceName + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
-
-        Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
-            metric,
-            getDuration(),
-            COMPONENT_STMGR);
-
-        if (stmgrResult.get(COMPONENT_STMGR) == null) {
+        Collection<Measurement> stmgrResult
+            = metricsProvider.getMeasurements(Instant.now(), duration, metric, COMPONENT_STMGR);
+        if (stmgrResult.isEmpty()) {
           continue;
         }
 
-        HashMap<String, InstanceMetrics> streamManagerResult =
-            stmgrResult.get(COMPONENT_STMGR).getMetrics();
-
-        if (streamManagerResult.isEmpty()) {
+        MeasurementsTable table = MeasurementsTable.of(stmgrResult).component(COMPONENT_STMGR);
+        if (table.size() == 0) {
           continue;
         }
+        double totalSize = table.type(metric).sum();
 
-        // since a bolt instance belongs to one stream manager, expect just one metrics
-        // manager instance in the result
-        Double stmgrInstanceResult = 0.0;
-        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-            it.hasNext();) {
-          InstanceMetrics iMetrics = it.next();
-          Double val = iMetrics.getMetricValueSum(metric);
-          if (val == null) {
-            continue;
-          } else {
-            stmgrInstanceResult += val;
-          }
-        }
-
-        InstanceMetrics boltInstanceMetric =
-            new InstanceMetrics(boltInstanceName, getMetricName(), stmgrInstanceResult);
-
-        instanceMetrics.put(boltInstanceName, boltInstanceMetric);
+        Measurement measurement
+            = new Measurement(component, instance, getMetricName(), Instant.now(), totalSize);
+        result.add(measurement);
       }
-
-      ComponentMetrics componentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
-      result.put(boltComponent, componentMetrics);
     }
 
     return result;

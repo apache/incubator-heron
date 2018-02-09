@@ -92,6 +92,10 @@ public abstract class BaseSensor implements ISensor {
     return Collections.singletonList(metricName);
   }
 
+  String getMetricName() {
+    return metricName;
+  }
+
   public HealthPolicyConfig getConfig() {
     return config;
   }

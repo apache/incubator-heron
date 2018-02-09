@@ -14,12 +14,15 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 
 import org.junit.Test;
 
@@ -28,54 +31,44 @@ import com.twitter.heron.healthmgr.common.TopologyProvider;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ExecuteCountSensorTest {
   @Test
   public void providesBoltExecutionCountMetrics() {
+    String metric = METRIC_EXE_COUNT.text();
     TopologyProvider topologyProvider = mock(TopologyProvider.class);
     when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
 
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
-    Map<String, ComponentMetrics> result = new HashMap<>();
+    Collection<Measurement> result = new ArrayList<>();
+    result.add(new Measurement("bolt-1", "container_1_bolt-1_1", metric, Instant.now(), 123));
+    result.add(new Measurement("bolt-1", "container_1_bolt-1_2", metric, Instant.now(), 345));
+    result.add(new Measurement("bolt-2", "container_1_bolt-2_3", metric, Instant.now(), 321));
+    result.add(new Measurement("bolt-2", "container_1_bolt-2_4", metric, Instant.now(), 543));
 
-    ComponentMetrics metrics = new ComponentMetrics("bolt-1");
-    metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-1_1", 123));
-    metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-1_2", 345));
-    result.put("bolt-1", metrics);
-
-    metrics = new ComponentMetrics("bolt-2");
-    metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-2_3", 321));
-    metrics.addInstanceMetric(createTestInstanceMetric("container_1_bolt-2_4", 543));
-    result.put("bolt-2", metrics);
-
-    when(metricsProvider
-        .getComponentMetrics(METRIC_EXE_COUNT.text(), DEFAULT_METRIC_DURATION, "bolt-1", "bolt-2"))
+    Collection<String> comps = Arrays.asList("bolt-1", "bolt-2");
+    when(metricsProvider.getMeasurements(
+        any(Instant.class), eq(DEFAULT_METRIC_DURATION), eq(Collections.singletonList(metric)), eq(comps)))
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor
         = new ExecuteCountSensor(topologyProvider, null, metricsProvider);
-    Map<String, ComponentMetrics> componentMetrics = executeCountSensor.get();
-    assertEquals(2, componentMetrics.size());
-    assertEquals(123, componentMetrics.get("bolt-1")
-        .getMetrics("container_1_bolt-1_1")
-        .getMetricValueSum(METRIC_EXE_COUNT.text()).intValue());
-    assertEquals(345, componentMetrics.get("bolt-1")
-        .getMetrics("container_1_bolt-1_2")
-        .getMetricValueSum(METRIC_EXE_COUNT.text()).intValue());
-    assertEquals(321, componentMetrics.get("bolt-2")
-        .getMetrics("container_1_bolt-2_3")
-        .getMetricValueSum(METRIC_EXE_COUNT.text()).intValue());
-    assertEquals(543, componentMetrics.get("bolt-2")
-        .getMetrics("container_1_bolt-2_4")
-        .getMetricValueSum(METRIC_EXE_COUNT.text()).intValue());
-  }
 
-  private InstanceMetrics createTestInstanceMetric(String name, int value) {
-    InstanceMetrics instanceMetrics = new InstanceMetrics(name);
-    instanceMetrics.addMetric(METRIC_EXE_COUNT.text(), value);
-    return instanceMetrics;
+    Collection<Measurement> componentMetrics = executeCountSensor.fetch();
+    assertEquals(4, componentMetrics.size());
+    MeasurementsTable table = MeasurementsTable.of(componentMetrics);
+    assertEquals(123, table.component("bolt-1").instance("container_1_bolt-1_1")
+        .type(metric).sum(), 0.01);
+    assertEquals(345, table.component("bolt-1").instance("container_1_bolt-1_2")
+        .type(metric).sum(), 0.01);
+    assertEquals(321, table.component("bolt-2").instance("container_1_bolt-2_3")
+        .type(metric).sum(), 0.01);
+    assertEquals(543, table.component("bolt-2").instance("container_1_bolt-2_4")
+        .type(metric).sum(), 0.01);
   }
 }
