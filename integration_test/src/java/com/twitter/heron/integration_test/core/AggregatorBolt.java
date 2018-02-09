@@ -25,6 +25,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.hooks.ITaskHook;
+import com.twitter.heron.api.hooks.info.BoltAckInfo;
+import com.twitter.heron.api.hooks.info.BoltExecuteInfo;
+import com.twitter.heron.api.hooks.info.BoltFailInfo;
+import com.twitter.heron.api.hooks.info.EmitInfo;
+import com.twitter.heron.api.hooks.info.SpoutAckInfo;
+import com.twitter.heron.api.hooks.info.SpoutFailInfo;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
@@ -57,10 +64,40 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   public void prepare(Map<String, Object> map,
                       TopologyContext topologyContext,
                       OutputCollector outputCollector) {
-    Runtime.getRuntime().addShutdownHook(new Thread() {
+    topologyContext.addTaskHook(new ITaskHook() {
+      
       @Override
-      public void run() {
-        finishBatch();
+      public void spoutFail(SpoutFailInfo info) {
+      }
+      
+      @Override
+      public void spoutAck(SpoutAckInfo info) {
+      }
+      
+      @Override
+      public void prepare(Map<String, Object> conf, TopologyContext context) {
+      }
+      
+      @Override
+      public void emit(EmitInfo info) {
+      }
+      
+      @Override
+      public void cleanup() {
+        LOG.log(Level.INFO, "AggregatorBolt is dying. Emitting cached tuples");
+        finishBatch();  
+      }
+      
+      @Override
+      public void boltFail(BoltFailInfo info) {
+      }
+      
+      @Override
+      public void boltExecute(BoltExecuteInfo info) {
+      }
+      
+      @Override
+      public void boltAck(BoltAckInfo info) {
       }
     });
   }
