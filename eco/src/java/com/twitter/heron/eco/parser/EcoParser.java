@@ -47,6 +47,7 @@ public class EcoParser {
   private EcoTopologyDefinition loadTopologyFromYaml(Yaml yaml, InputStream inputStream,
                                                      InputStream propsIn,
                                                      boolean envFilter) throws IOException {
+    LOG.info("Parsing eco config file");
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     int b;
     while ((b = inputStream.read()) != -1) {
