@@ -2,6 +2,7 @@ test_deps_files = [
     "//third_party/java:powermock",
     "//third_party/java:mockito",
     "//third_party/java:junit4",
+    "@org_yaml_snakeyaml//jar",
 ]
 
 heron_local_deps = [

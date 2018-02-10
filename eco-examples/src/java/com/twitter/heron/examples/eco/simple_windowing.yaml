@@ -52,16 +52,14 @@ bolts:
 # stream definitions define connections between spouts and bolts.
 # note that such connections can be cyclical
 streams:
-  - name: "spout-1 --> bolt-1" # name isn't used (placeholder for logging, UI, etc.)
-#    id: "connection-1"
-    from: "spout-1"
+
+  - from: "spout-1"
     to: "bolt-1"
     grouping:
       type: FIELDS
       args: ["word"]
-  - name: "bolt-1 --> bolt-2" # name isn't used (placeholder for logging, UI, etc.)
-#    id: "connection-1"
-    from: "bolt-1"
+
+  - from: "bolt-1"
     to: "bolt-2"
     grouping:
       type: SHUFFLE
