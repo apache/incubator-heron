@@ -109,6 +109,16 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
     setPackingConfigs(config);
+    LOG.info(String.format("Initalizing FirstFitDecreasingPacking. "
+        + "CPU default: %f, RAM default: %s, DISK default: %s, Paddng percentage: %d, "
+        + "CPU max: %f, RAM max: %s, DISK max: %s.",
+        this.defaultInstanceResources.getCpu(),
+        this.defaultInstanceResources.getRam().toString(),
+        this.defaultInstanceResources.getDisk().toString(),
+        this.paddingPercentage,
+        this.maxContainerResources.getCpu(),
+        this.maxContainerResources.getRam().toString(),
+        this.maxContainerResources.getDisk().toString()));
   }
 
   /**

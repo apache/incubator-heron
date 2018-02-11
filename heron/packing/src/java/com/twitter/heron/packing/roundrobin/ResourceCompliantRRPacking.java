@@ -121,6 +121,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         Context.instanceRam(config),
         Context.instanceDisk(config));
     resetToFirstContainer();
+
+    LOG.info(String.format("Initalizing ResourceCompliantRRPacking. "
+        + "CPU default: %f, RAM default: %s, DISK default: %s.",
+        this.defaultInstanceResources.getCpu(),
+        this.defaultInstanceResources.getRam().toString(),
+        this.defaultInstanceResources.getDisk().toString()));
   }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
@@ -143,6 +149,12 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
             defaultDisk.increaseBy(paddingPercentage)));
 
+    LOG.info(String.format("ResourceCompliantRRPacking newPackingPlanBuilder. "
+        + "CPU max: %f, RAMmaxMax: %s, DISK max: %s, Padding percentage: %d.",
+        maxContainerResources.getCpu(),
+        maxContainerResources.getRam().toString(),
+        maxContainerResources.getDisk().toString(),
+        paddingPercentage));
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
         .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
