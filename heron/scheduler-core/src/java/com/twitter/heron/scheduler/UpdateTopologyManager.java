@@ -153,39 +153,41 @@ public class UpdateTopologyManager implements Closeable {
       deactivateTopology(stateManager, topology, proposedPackingPlan);
     }
 
-    Set<PackingPlan.ContainerPlan> updatedContainers =
-        new HashSet<>(proposedPackingPlan.getContainers());
-    // request new resources if necessary. Once containers are allocated we should make the changes
-    // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
-    if (newContainerCount > 0 && scalableScheduler.isPresent()) {
-      Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
-      Set<PackingPlan.ContainerPlan> containersAdded =
-          scalableScheduler.get().addContainers(containersToAdd);
-      // Update the PackingPlan with new container-ids
-      if (containersAdded != null) {
-        updatedContainers.removeAll(containersToAdd);
-        updatedContainers.addAll(containersAdded);
+    try {
+      Set<PackingPlan.ContainerPlan> updatedContainers =
+          new HashSet<>(proposedPackingPlan.getContainers());
+      // request new resources if necessary. Once containers are allocated we should make the changes
+      // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
+      if (newContainerCount > 0 && scalableScheduler.isPresent()) {
+        Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
+        Set<PackingPlan.ContainerPlan> containersAdded =
+            scalableScheduler.get().addContainers(containersToAdd);
+        // Update the PackingPlan with new container-ids
+        if (containersAdded != null) {
+          updatedContainers.removeAll(containersToAdd);
+          updatedContainers.addAll(containersAdded);
+        }
       }
-    }
-
-    PackingPlan updatedPackingPlan =
-        new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
-    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
-    PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
-    LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
-
-    // update packing plan to trigger the scaling event
-    logInfo("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
-
-    // reactivate topology
-    if (initiallyRunning) {
-      // wait before reactivating to give the tmaster a chance to receive the packing update and
-      // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
-      // and/or possibly even update the packing plan directly
-      SysUtils.sleep(Duration.ofSeconds(10));
-      // Will throw exceptions internally if tmaster fails to deactivate
-      reactivateTopology(stateManager, topology, removableContainerCount);
+  
+      PackingPlan updatedPackingPlan =
+          new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
+      PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+      PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
+      LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
+  
+      // update packing plan to trigger the scaling event
+      logInfo("Update new PackingPlan: %s",
+          stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
+    } finally {
+      // reactivate topology
+      if (initiallyRunning) {
+        // wait before reactivating to give the tmaster a chance to receive the packing update and
+        // delete the packing plan. Instead we could message tmaster to invalidate the physical plan
+        // and/or possibly even update the packing plan directly
+        SysUtils.sleep(Duration.ofSeconds(10));
+        // Will throw exceptions internally if tmaster fails to deactivate
+        reactivateTopology(stateManager, topology, removableContainerCount);
+      }
     }
 
     if (removableContainerCount > 0 && scalableScheduler.isPresent()) {
