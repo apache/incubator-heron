@@ -43,11 +43,14 @@ healthmgr_deps_files = [
     "@org_apache_commons_commons_math3//jar",
 ]
 
+filegroup(
+    name = "exported-healthmgr-java",
+    srcs = glob(["**/*.java"]),
+)
+
 java_library(
     name = "healthmgr-java",
-    srcs = glob(
-        ["**/*.java"],
-         ),
+    srcs = glob(["**/*.java"]),
     deps = heron_java_proto_files() + healthmgr_deps_files,
 )
 
