@@ -403,6 +403,12 @@ public class RuntimeManagerMain {
     }
   }
 
+  // Before continuing to the action logic (including kill), verify:
+  // - the topology is running
+  // - the information in execution state matches the request
+  //   -- For kill command, it is possible that execution state may not be available
+  //      if kill command was executed but not fully successful. In this case, it is ok
+  //      to skip the execution state check.
   protected void validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) throws TopologyRuntimeManagementException {
@@ -417,24 +423,36 @@ public class RuntimeManagerMain {
     // Check whether cluster/role/environ matched
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
     if (executionState == null) {
-      throw new TopologyRuntimeManagementException(
-          String.format("Failed to get execution state for topology %s", topologyName));
-    }
-
-    String stateCluster = executionState.getCluster();
-    String stateRole = executionState.getRole();
-    String stateEnv = executionState.getEnviron();
-    String configCluster = Context.cluster(config);
-    String configRole = Context.role(config);
-    String configEnv = Context.environ(config);
-    if (!stateCluster.equals(configCluster)
-        || !stateRole.equals(configRole)
-        || !stateEnv.equals(configEnv)) {
-      String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
-      String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
-      throw new TopologyRuntimeManagementException(String.format(
-          "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
-          topologyName, currentState, configState));
+      if (command == Command.KILL) {
+        // Data cleaning up (for kill command) is not an atomic operation. Therefore it is possible
+        // for a cleaning up operation to be interrupted and the topology to have partial data.
+        // In this case, user needs to be able to run kill command again. Here we log a warning
+        // instead of throw an exception when when execution state is not available and the
+        // incoming command is a kill command.
+        LOG.warning("Execution state data is not found. This might happen if a topology was"
+            + " killed but the kill command was interrupted. Rerunnng kill command is"
+            + " expected in this case.");
+      } else {
+        throw new TopologyRuntimeManagementException(
+            String.format("Failed to get execution state for topology %s", topologyName));
+      }
+    } else {
+      // Execution state is available, validate configurations.
+      String stateCluster = executionState.getCluster();
+      String stateRole = executionState.getRole();
+      String stateEnv = executionState.getEnviron();
+      String configCluster = Context.cluster(config);
+      String configRole = Context.role(config);
+      String configEnv = Context.environ(config);
+      if (!stateCluster.equals(configCluster)
+          || !stateRole.equals(configRole)
+          || !stateEnv.equals(configEnv)) {
+        String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
+        String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
+        throw new TopologyRuntimeManagementException(String.format(
+            "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
+            topologyName, currentState, configState));
+      }
     }
   }
 

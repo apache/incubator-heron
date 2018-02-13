@@ -55,7 +55,7 @@ import static org.mockito.Mockito.when;
 public class RuntimeManagerMainTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String TOPOLOGY_ID = "topologyId";
-  private static final Command MOCK_COMMAND = Command.KILL;
+  private static final Command MOCK_COMMAND = Command.ACTIVATE;
   private static final String CLUSTER = "cluster";
   private static final String ROLE = "role";
   private static final String ENVIRON = "env";
@@ -121,6 +121,15 @@ public class RuntimeManagerMainTest {
     // Matched
     ExecutionEnvironment.ExecutionState correctState = stateBuilder.setRole(ROLE).build();
     when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(correctState);
+    runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
+  }
+
+  @Test
+  public void testValidateRuntimeManageExecStateNotRequiredForKillCommand() {
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, Command.KILL);
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(null);
     runtimeManagerMain.validateRuntimeManage(adaptor, TOPOLOGY_NAME);
   }
 
