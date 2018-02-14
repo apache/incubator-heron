@@ -199,7 +199,10 @@ public class RuntimeManagerRunner {
     LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
       throw new TopologyRuntimeManagementException(String.format(
-          "Failed to update topology with Scheduler, updateTopologyRequest="
+          "Failed to update topology with Scheduler. "
+          + "The topology can be in a strange stage. "
+          + "Please check carefully or redeploy the topology. "
+          + "UpdateTopologyRequest="
               + updateTopologyRequest));
     }
 
