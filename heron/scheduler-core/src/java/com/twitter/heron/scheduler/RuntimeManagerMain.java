@@ -340,12 +340,16 @@ public class RuntimeManagerMain {
   // command to manage a topology
   private final Command command;
 
+  // topology is running or not
+  private boolean running;
+
   public RuntimeManagerMain(
       Config config,
       Command command) {
     // initialize the options
     this.config = config;
     this.command = command;
+    this.running = false;
   }
 
   /**
@@ -378,7 +382,7 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateRuntimeManage(adaptor, topologyName);
+      running = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
@@ -403,35 +407,33 @@ public class RuntimeManagerMain {
     }
   }
 
-  // Before continuing to the action logic (including kill), verify:
+  // Before continuing to the action logic, verify:
   // - the topology is running
   // - the information in execution state matches the request
-  //   -- For kill command, it is possible that execution state may not be available
-  //      if kill command was executed but not fully successful. In this case, it is ok
-  //      to skip the execution state check.
-  protected void validateRuntimeManage(
+  // There is an edge case that the topology data is only partally available,
+  // which could be caused by not fully successful SUBMIT or KILL command. In this
+  // case, we need to allow KILL command to go through when some data is not available.
+  // However, a KILL command can still be rejected if environment data doesn't match.
+  protected boolean validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
-
-    if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      throw new TopologyRuntimeManagementException(
-          String.format("Topology '%s' does not exist", topologyName));
+    boolean topologyRunning = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
+    if (!topologyRunning) {
+      if (command == Command.KILL) {
+        LOG.warning(String.format("Topology '%s' is not found or not running", topologyName));
+      } else {
+        throw new TopologyRuntimeManagementException(
+            String.format("Topology '%s' does not exist", topologyName));
+      }
     }
 
     // Check whether cluster/role/environ matched
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
     if (executionState == null) {
       if (command == Command.KILL) {
-        // Data cleaning up (for kill command) is not an atomic operation. Therefore it is possible
-        // for a cleaning up operation to be interrupted and the topology to have partial data.
-        // In this case, user needs to be able to run kill command again. Here we log a warning
-        // instead of throw an exception when when execution state is not available and the
-        // incoming command is a kill command.
-        LOG.warning("Execution state data is not found. This might happen if a topology was"
-            + " killed but the kill command was interrupted. Rerunnng kill command is"
-            + " expected in this case.");
+        LOG.warning(String.format("Topology execution state for '%s' is not found", topologyName));
       } else {
         throw new TopologyRuntimeManagementException(
             String.format("Failed to get execution state for topology %s", topologyName));
@@ -454,13 +456,14 @@ public class RuntimeManagerMain {
             topologyName, currentState, configState));
       }
     }
+    return topologyRunning;
   }
 
   protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient, running);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
