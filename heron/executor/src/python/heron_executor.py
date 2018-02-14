@@ -1053,8 +1053,13 @@ def main():
     # The filename format is heron-executor-<container_id>.stdxxx
     log.configure(logfile='heron-executor-%s.stdout' % shardid)
 
-    Log.info('Set up process group; executor becomes leader')
-    os.setpgrp() # create new process group, become its leader
+    pid = os.getpid()
+    sid = os.getsid(pid)
+
+    # POSIX prohibits the change of the process group ID of a session leader
+    if pid <> sid:
+      Log.info('Set up process group; executor becomes leader')
+      os.setpgrp() # create new process group, become its leader
 
     Log.info('Register the SIGTERM signal handler')
     signal.signal(signal.SIGTERM, signal_handler)
