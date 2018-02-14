@@ -156,8 +156,9 @@ public class UpdateTopologyManager implements Closeable {
     try {
       Set<PackingPlan.ContainerPlan> updatedContainers =
           new HashSet<>(proposedPackingPlan.getContainers());
-      // request new resources if necessary. Once containers are allocated we should make the changes
-      // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
+      // request new resources if necessary. Once containers are allocated we should make the
+      // changes to state manager quickly, otherwise the scheduler might penalize for thrashing
+      // on start-up
       if (newContainerCount > 0 && scalableScheduler.isPresent()) {
         Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
         Set<PackingPlan.ContainerPlan> containersAdded =
@@ -168,13 +169,13 @@ public class UpdateTopologyManager implements Closeable {
           updatedContainers.addAll(containersAdded);
         }
       }
-  
+
       PackingPlan updatedPackingPlan =
           new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
       PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
       PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
       LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
-  
+
       // update packing plan to trigger the scaling event
       logInfo("Update new PackingPlan: %s",
           stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
