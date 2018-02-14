@@ -163,6 +163,10 @@ public class UpdateTopologyManager implements Closeable {
         Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
         Set<PackingPlan.ContainerPlan> containersAdded =
             scalableScheduler.get().addContainers(containersToAdd);
+        if (containersAdded.size() != containersToAdd.size()) {
+          throw new RuntimeException("Scheduler failed to add expected countainer count: added "
+              + containersAdded.size() + ", requested " + containersToAdd.size());
+        }
         // Update the PackingPlan with new container-ids
         if (containersAdded != null) {
           updatedContainers.removeAll(containersToAdd);
