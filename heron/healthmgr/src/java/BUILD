@@ -44,11 +44,6 @@ healthmgr_deps_files = [
 ]
 
 filegroup(
-    name = "exported-healthmgr-java-deps",
-    srcs = healthmgr_deps_files,
-)
-
-filegroup(
     name = "exported-healthmgr-java-src",
     srcs = glob(["**/*.java"]),
 )
