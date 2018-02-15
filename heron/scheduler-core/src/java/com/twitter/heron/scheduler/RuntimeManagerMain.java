@@ -341,7 +341,7 @@ public class RuntimeManagerMain {
   private final Command command;
 
   // topology is running or not
-  private boolean running;
+  private boolean isRunning;
 
   public RuntimeManagerMain(
       Config config,
@@ -349,7 +349,7 @@ public class RuntimeManagerMain {
     // initialize the options
     this.config = config;
     this.command = command;
-    this.running = false;
+    this.isRunning = false;
   }
 
   /**
@@ -382,7 +382,7 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      running = validateRuntimeManage(adaptor, topologyName);
+      isRunning = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
@@ -419,8 +419,8 @@ public class RuntimeManagerMain {
       String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
-    boolean topologyRunning = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
-    if (!topologyRunning) {
+    boolean runningFlag = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
+    if (!runningFlag) {
       if (command == Command.KILL) {
         LOG.warning(String.format("Topology '%s' is not found or not running", topologyName));
       } else {
@@ -456,14 +456,14 @@ public class RuntimeManagerMain {
             topologyName, currentState, configState));
       }
     }
-    return topologyRunning;
+    return runningFlag;
   }
 
   protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient, running);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient, isRunning);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
