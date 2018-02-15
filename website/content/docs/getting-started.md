@@ -18,13 +18,13 @@ For other platforms, you need to build from source. Please refer to the [guide t
 
 ## Step 1 --- Download the Heron tools
 
-Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
+Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
 
-> You can install using [installation scripts](#using-installation-scripts) on MacOS as well.
+> You can install using [installation scripts](#using-installation-scripts) on macOS as well.
 
-## MacOS/Homebrew
+## macOS/Homebrew
 
-The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
+The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh). There are three tools currently available:
 
 * The Heron command-line client tools:
 
@@ -51,20 +51,18 @@ For this getting started tutorial we recommend installing all three tools.
 ## Using installation scripts
 
 To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, are named
-`heron-client-install-{{% heronVersion %}}-darwin.sh` and
-`heron-tools-install-{{% heronVersion %}}-darwin.sh`.
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
+`heron-install-{{% heronVersion %}}-darwin.sh`.
 
 Download both the `client` and `tools` installation scripts for your platform either from the releases page or using [wget](https://www.gnu.org/software/wget/).
 
 Here's an example for Ubuntu:
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-ubuntu.sh
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-ubuntu.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
 ```
 
-Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
 
 ```bash
 $ chmod +x heron-*.sh
@@ -72,26 +70,15 @@ $ chmod +x heron-*.sh
 
 > Both installation scripts will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set:
+Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
 
 ```bash
-$ ./heron-client-install-{{% heronVersion %}}--PLATFORM.sh --user
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
 Heron client installer
 ----------------------
 
 Uncompressing......
 Heron is now installed!
-```
-
-Now run the script for Heron tools (again setting the `--user` flag):
-
-```bash
-$ ./heron-tools-install-{{% heronVersion %}}-PLATFORM.sh --user
-Heron tools installer
----------------------
-
-Uncompressing......
-Heron Tools is now installed!
 ```
 
 To check that Heron is successfully installed, run `heron version`:
@@ -109,9 +96,9 @@ heron.build.git.status : Clean
 
 ## Step 2 --- Launch an example topology
 
-> #### Note for MacOS users
+> #### Note for macOS users
 
-> If you want to run topologies locally on MacOS, you may need to add your
+> If you want to run topologies locally on macOS, you may need to add your
 > hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
 > `127.0.0.1 localhost My-Mac-Laptop.local`. You can fetch your hostname by simply
 > running `hostname` in your shell.
