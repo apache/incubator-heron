@@ -14,6 +14,9 @@
 
 package com.twitter.heron.healthmgr.common;
 
+import java.time.Instant;
+import java.util.Collection;
+
 import com.microsoft.dhalion.core.Action;
 
 public class HealthManagerEvents {
@@ -22,8 +25,8 @@ public class HealthManagerEvents {
    * This event is created when a resolver executes topology update action
    */
   public static class TopologyUpdate extends Action {
-    public TopologyUpdate() {
-      super(TopologyUpdate.class.getSimpleName());
+    public TopologyUpdate(Instant timestamp, Collection<String> assignments) {
+      super(TopologyUpdate.class.getSimpleName(), timestamp, assignments, null);
     }
   }
 
@@ -31,8 +34,8 @@ public class HealthManagerEvents {
    * This event is created when a resolver executes restart container action
    */
   public static class ContainerRestart extends Action {
-    public ContainerRestart() {
-      super(ContainerRestart.class.getSimpleName());
+    public ContainerRestart(Instant timestamp, Collection<String> assignments) {
+      super(ContainerRestart.class.getSimpleName(), timestamp, assignments, null);
     }
   }
 }
