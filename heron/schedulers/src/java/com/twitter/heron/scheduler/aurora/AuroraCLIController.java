@@ -38,6 +38,10 @@ class AuroraCLIController implements AuroraController {
   private final String jobSpec;
   private final boolean isVerbose;
   private final String auroraFilename;
+  private final String env;
+  private final String cluster;
+  private final String role;
+  
 
   AuroraCLIController(
       String jobName,
@@ -48,6 +52,9 @@ class AuroraCLIController implements AuroraController {
       boolean isVerbose) {
     this.auroraFilename = auroraFilename;
     this.isVerbose = isVerbose;
+    this.env = env;
+    this.cluster = cluster;
+    this.role = role;
     this.jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
   }
 
@@ -112,8 +119,38 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
+  private boolean hasEnoughQuota(Integer count) {
+    String roleSpec = cluster+"/"+role;
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList(
+        "aurora", "quota", "get", "--write-json", roleSpec));
+    
+    LOG.info(String.format("Query quota: %s", auroraCmd));
+    StringBuilder stderr = new StringBuilder();
+    if (!runProcess(auroraCmd, null, stderr)) {
+      throw new RuntimeException("Failed to query quota for " + roleSpec);
+    }
+
+    if (stderr.length() <= 0) { // no container was added
+      throw new RuntimeException("empty quota query output by Aurora");
+    }
+    
+    String jsonStr = stderr.toString();
+    LOG.info(String.format("Quota: %s", jsonStr));
+    JsonObject jsonQuota = new JsonObject(jsonStr);
+    jsonQuota.
+    
+    
+    return true;
+  }
+  
   @Override
   public Set<Integer> addContainers(Integer count) {
+    if (env.equalsIgnoreCase("prod")) {
+      if (!hasEnoughQuota(count)) {
+        throw new RuntimeException("[Aurora quota exception] Aurora quota request is not satified");
+      }
+    }
+    
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
     //clone instance 0
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
