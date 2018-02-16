@@ -162,23 +162,23 @@ public class RuntimeManagerRunner {
     LOG.fine("Scheduler killed topology successfully.");
   }
 
-  boolean consolePrompt(int oldContainerCount, int newContainerCount) {
+  boolean confirmWithUser(int oldContainerCount, int newContainerCount) {
     String fmt =
-        "The present aurora job has %d containers. After update there will be %d containers. ";
+        "The present aurora job has %d containers. After update there will be %d containers.";
     Console c = System.console();
     if (c == null) {
-      LOG.warning("No console to prompt user");
+      LOG.warning("No console to prompt user. Proceeding.");
       System.err.println(String.format(fmt, oldContainerCount, newContainerCount));
       return true;
     }
 
     String userInput = c.readLine(
         String.format(fmt + " Please make sure there are sufficient resources to update this job."
-            + " Continue update? [Y/n]: ", oldContainerCount, newContainerCount));
-    if ("n".equalsIgnoreCase(userInput)) {
-      return false;
+            + " Continue update? [y/N]: ", oldContainerCount, newContainerCount));
+    if ("y".equalsIgnoreCase(userInput)) {
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
@@ -213,8 +213,8 @@ public class RuntimeManagerRunner {
     int newContainerCount = proposedPlan.getContainerPlansCount();
     int oldContainerCount = currentPlan.getContainerPlansCount();
     if (newContainerCount > oldContainerCount) {
-      if (!consolePrompt(oldContainerCount, newContainerCount)) {
-        LOG.fine("Scheduler updated topology canceled.");
+      if (!confirmWithUser(oldContainerCount, newContainerCount)) {
+        LOG.warning("Scheduler updated topology canceled.");
         return;
       }
     }
