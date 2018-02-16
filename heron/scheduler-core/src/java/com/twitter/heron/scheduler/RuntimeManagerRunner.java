@@ -175,7 +175,7 @@ public class RuntimeManagerRunner {
     String userInput = c.readLine(
         String.format(fmt + " Please make sure there are sufficient resources to update this job."
             + " Continue update? [Y/n]: ", oldContainerCount, newContainerCount));
-    if (userInput.equalsIgnoreCase("n")) {
+    if ("n".equalsIgnoreCase(userInput)) {
       return false;
     }
     return true;
@@ -209,7 +209,7 @@ public class RuntimeManagerRunner {
       PackingPlan newPlan = deserializer.fromProto(proposedPlan);
       throw new UpdateDryRunResponse(topology, config, newPlan, oldPlan, changeRequests);
     }
-    
+
     int newContainerCount = proposedPlan.getContainerPlansCount();
     int oldContainerCount = currentPlan.getContainerPlansCount();
     if (newContainerCount > oldContainerCount) {
