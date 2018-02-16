@@ -21,52 +21,50 @@ import java.util.Collection;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 
-import static com.twitter.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.WaitQueueSkewDetector.CONF_SKEW_RATIO;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class BackPressureDetectorTest {
+public class WaitQueueSkewDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_NOISE_FILTER, 20)).thenReturn(50);
-
+    when(config.getConfig(CONF_SKEW_RATIO, 20.0)).thenReturn(15.0);
 
     Measurement measurement1
-        = new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), Instant.now(), 55);
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 1501);
     Measurement measurement2
-        = new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), Instant.now(), 3);
-    Measurement measurement3
-        = new Measurement("bolt", "i3", METRIC_BACK_PRESSURE.text(), Instant.now(), 0);
+        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 100.0);
+
     Collection<Measurement> metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
-    metrics.add(measurement3);
-
-    BackPressureDetector detector = new BackPressureDetector(config);
+    WaitQueueSkewDetector detector = new WaitQueueSkewDetector(config);
     Collection<Symptom> symptoms = detector.detect(metrics);
 
-    Assert.assertEquals(1, symptoms.size());
-    Symptom symptom = symptoms.iterator().next();
-    Assert.assertEquals(1, symptom.assignments().size());
+    assertEquals(1, symptoms.size());
 
-    measurement1
-        = new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), Instant.now(), 45);
-    measurement2
-        = new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), Instant.now(), 3);
+     measurement1
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 1500);
+     measurement2
+        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 110.0);
+
     metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
-
-    detector = new BackPressureDetector(config);
+    detector = new WaitQueueSkewDetector(config);
     symptoms = detector.detect(metrics);
 
-    Assert.assertEquals(0, symptoms.size());
+    assertEquals(0, symptoms.size());
   }
 }

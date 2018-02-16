@@ -32,8 +32,8 @@ public abstract class BaseSensor implements ISensor {
   public enum MetricName {
     METRIC_EXE_COUNT("__execute-count/default"),
     METRIC_BACK_PRESSURE("__time_spent_back_pressure_by_compid/"),
-    METRIC_BUFFER_SIZE("__connection_buffer_by_instanceid/"),
-    METRIC_BUFFER_SIZE_SUFFIX("/bytes"),
+    METRIC_WAIT_Q_SIZE("__connection_buffer_by_instanceid/"),
+    METRIC_WAIT_Q_SIZE_SUFFIX("/bytes"),
     METRIC_WAIT_Q_GROWTH_RATE("METRIC_WAIT_Q_GROWTH_RATE");
 
     private String text;
