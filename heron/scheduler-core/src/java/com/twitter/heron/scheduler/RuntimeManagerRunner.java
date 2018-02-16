@@ -227,9 +227,10 @@ public class RuntimeManagerRunner {
 
     LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-      throw new TopologyRuntimeManagementException(String.format(
+      throw new TopologyRuntimeManagementException(
           "Failed to update topology with Scheduler, updateTopologyRequest="
-              + updateTopologyRequest));
+              + updateTopologyRequest + "The topology can be in a strange stage. "
+                  + "Please check carefully or redeploy the topology !!");
     }
 
     // Clean the connection when we are done.
