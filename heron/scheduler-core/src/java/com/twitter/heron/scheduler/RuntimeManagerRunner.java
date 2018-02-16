@@ -18,6 +18,7 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -163,18 +164,12 @@ public class RuntimeManagerRunner {
   }
 
   boolean confirmWithUser(int oldContainerCount, int newContainerCount) {
-    String fmt =
-        "The present aurora job has %d containers. After update there will be %d containers.";
-    Console c = System.console();
-    if (c == null) {
-      LOG.warning("No console to prompt user. Proceeding.");
-      System.err.println(String.format(fmt, oldContainerCount, newContainerCount));
-      return true;
-    }
-
-    String userInput = c.readLine(
-        String.format(fmt + " Please make sure there are sufficient resources to update this job."
-            + " Continue update? [y/N]: ", oldContainerCount, newContainerCount));
+    System.out.print(String.format("The present aurora job has %d containers. "
+        + "After update there will be %d containers. "
+        + "Please make sure there are sufficient resources to update this job. "
+        + "Continue update? [y/N]: ", oldContainerCount, newContainerCount));
+    Scanner scanner = new Scanner(System.in);
+    String userInput = scanner.nextLine();
     if ("y".equalsIgnoreCase(userInput)) {
       return true;
     }
