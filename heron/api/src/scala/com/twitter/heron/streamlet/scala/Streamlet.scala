@@ -13,7 +13,7 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala
 
-import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
+import com.twitter.heron.streamlet.{KeyValue, KeyedWindow, Streamlet}
 
 // TODO: This Java Streamlet API references will be changed with Scala versions when they are ready
 import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, Sink, WindowConfig}
