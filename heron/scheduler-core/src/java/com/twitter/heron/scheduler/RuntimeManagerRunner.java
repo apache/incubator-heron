@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.io.Console;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -161,6 +162,25 @@ public class RuntimeManagerRunner {
     LOG.fine("Scheduler killed topology successfully.");
   }
 
+  boolean consolePrompt(int oldContainerCount, int newContainerCount) {
+    String fmt =
+        "The present aurora job has %d containers. After update there will be %d containers. ";
+    Console c = System.console();
+    if (c == null) {
+      LOG.warning("No console to prompt user");
+      System.err.println(String.format(fmt, oldContainerCount, newContainerCount));
+      return true;
+    }
+
+    String userInput = c.readLine(
+        String.format(fmt + " Please make sure there are sufficient resources to update this job."
+            + " Continue update? [Y/n]: ", oldContainerCount, newContainerCount));
+    if (userInput.equalsIgnoreCase("n")) {
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Handler to update a topology
    */
@@ -188,6 +208,15 @@ public class RuntimeManagerRunner {
       PackingPlan oldPlan = deserializer.fromProto(currentPlan);
       PackingPlan newPlan = deserializer.fromProto(proposedPlan);
       throw new UpdateDryRunResponse(topology, config, newPlan, oldPlan, changeRequests);
+    }
+    
+    int newContainerCount = proposedPlan.getContainerPlansCount();
+    int oldContainerCount = currentPlan.getContainerPlansCount();
+    if (newContainerCount > oldContainerCount) {
+      if (!consolePrompt(oldContainerCount, newContainerCount)) {
+        LOG.fine("Scheduler updated topology canceled.");
+        return;
+      }
     }
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
