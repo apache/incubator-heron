@@ -113,7 +113,7 @@ public final class JavaCheckstyle {
         Predicates.containsPattern("storm-compatibility.src.java"),
         Predicates.containsPattern("tools/test/LcovMerger"),
         Predicates.containsPattern("contrib"),
-        Predicates.containsPattern("external") // from external/ directory for bazel  
+        Predicates.containsPattern("external") // from external/ directory for bazel
     )));
   }
 
