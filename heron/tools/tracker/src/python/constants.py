@@ -57,7 +57,7 @@ RESPONSE_KEY_EXECUTION_TIME = "executiontime"
 RESPONSE_KEY_MESSAGE = "message"
 RESPONSE_KEY_RESULT = "result"
 RESPONSE_KEY_STATUS = "status"
-RESPONSE_KEY_VERSION = "version"
+RESPONSE_KEY_VERSION = "tracker_version"
 
 # These are the values of the status
 # in the JSON repsonse.
