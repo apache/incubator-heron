@@ -255,7 +255,7 @@ public class RuntimeManagerMainTest {
 
     // Failed to callRuntimeManagerRunner
     doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
-        .callRuntimeManagerRunner(any(Config.class), eq(client));
+        .callRuntimeManagerRunner(any(Config.class), eq(client), true);
     runtimeManagerMain.manageTopology();
   }
 
@@ -341,7 +341,8 @@ public class RuntimeManagerMainTest {
     ISchedulerClient client = mock(ISchedulerClient.class);
     doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
     // Happy path
-    doNothing().when(runtimeManagerMain).callRuntimeManagerRunner(any(Config.class), eq(client));
+    doNothing().when(runtimeManagerMain)
+        .callRuntimeManagerRunner(any(Config.class), eq(client), true);
     runtimeManagerMain.manageTopology();
   }
 }

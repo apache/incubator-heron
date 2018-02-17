@@ -340,16 +340,12 @@ public class RuntimeManagerMain {
   // command to manage a topology
   private final Command command;
 
-  // topology is running or not
-  private boolean isRunning;
-
   public RuntimeManagerMain(
       Config config,
       Command command) {
     // initialize the options
     this.config = config;
     this.command = command;
-    this.isRunning = false;
   }
 
   /**
@@ -357,7 +353,6 @@ public class RuntimeManagerMain {
    * 1. Instantiate necessary resources
    * 2. Valid whether the runtime management is legal
    * 3. Complete the runtime management for a specific command
-   *
    */
   public void manageTopology()
       throws TopologyRuntimeManagementException, TMasterException, PackingException {
@@ -382,7 +377,7 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      isRunning = validateRuntimeManage(adaptor, topologyName);
+      boolean foundData = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
@@ -397,7 +392,7 @@ public class RuntimeManagerMain {
       // Create a ISchedulerClient basing on the config
       ISchedulerClient schedulerClient = getSchedulerClient(runtime);
 
-      callRuntimeManagerRunner(runtime, schedulerClient);
+      callRuntimeManagerRunner(runtime, schedulerClient, foundData);
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
@@ -407,20 +402,23 @@ public class RuntimeManagerMain {
     }
   }
 
-  // Before continuing to the action logic, verify:
-  // - the topology is running
-  // - the information in execution state matches the request
-  // There is an edge case that the topology data is only partally available,
-  // which could be caused by not fully successful SUBMIT or KILL command. In this
-  // case, we need to allow KILL command to go through when some data is not available.
-  // However, a KILL command can still be rejected if environment data doesn't match.
+  /**
+   * Before continuing to the action logic, verify:
+   * - the topology is running
+   * - the information in execution state matches the request
+   * There is an edge case that the topology data could be only partially available,
+   * which could be caused by not fully successful SUBMIT or KILL command. In this
+   * case, we need to skip the validation and allow KILL command to go through.
+   * In case execution state data is available, environment check will be done anyway.
+   * @return true if the topology data is found, false otherwise.
+   */
   protected boolean validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
-    boolean runningFlag = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
-    if (!runningFlag) {
+    boolean found = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
+    if (!found) {
       if (command == Command.KILL) {
         LOG.warning(String.format("Topology '%s' is not found or not running", topologyName));
       } else {
@@ -456,14 +454,17 @@ public class RuntimeManagerMain {
             topologyName, currentState, configState));
       }
     }
-    return runningFlag;
+    return found;
   }
 
-  protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
+  protected void callRuntimeManagerRunner(
+      Config runtime,
+      ISchedulerClient schedulerClient,
+      boolean foundData)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient, isRunning);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient, foundData);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
