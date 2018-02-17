@@ -325,8 +325,8 @@ public class Context {
     return cfg.getStringValue(Key.DOWNLOADER_BINARY);
   }
 
-  public static boolean updatePrompt(Config cfg) {
-    return cfg.getBooleanValue(Key.UPDATE_PROMPT);
+  public static String updatePrompt(Config cfg) {
+    return cfg.getStringValue(Key.UPDATE_PROMPT);
   }
 
   @SuppressWarnings("unchecked")

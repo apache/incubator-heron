@@ -163,7 +163,7 @@ public class RuntimeManagerRunner {
   }
 
   boolean confirmWithUser(int oldContainerCount, int newContainerCount) {
-    System.out.print(String.format("The present aurora job has %d containers. "
+    LOG.info(String.format("The present aurora job has %d containers. "
         + "After update there will be %d containers. "
         + "Please make sure there are sufficient resources to update this job. "
         + "Continue update? [y/N]: ", oldContainerCount, newContainerCount));
@@ -206,7 +206,7 @@ public class RuntimeManagerRunner {
 
     int newContainerCount = proposedPlan.getContainerPlansCount();
     int oldContainerCount = currentPlan.getContainerPlansCount();
-    if (newContainerCount > oldContainerCount && Context.updatePrompt(config)) {
+    if (newContainerCount > oldContainerCount && "prompt".equals(Context.updatePrompt(config))) {
       if (!confirmWithUser(oldContainerCount, newContainerCount)) {
         LOG.warning("Scheduler updated topology canceled.");
         return;

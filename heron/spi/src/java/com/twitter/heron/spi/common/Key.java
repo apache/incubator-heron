@@ -173,7 +173,7 @@ public enum Key {
   DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
 
   // keys for `heron` command line
-  UPDATE_PROMPT         ("heron.command.update.prompt", Boolean.FALSE);
+  UPDATE_PROMPT         ("heron.command.update.prompt", "disable");
 
 
   private final String value;
