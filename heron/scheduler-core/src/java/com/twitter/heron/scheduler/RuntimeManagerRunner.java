@@ -206,7 +206,8 @@ public class RuntimeManagerRunner {
 
     int newContainerCount = proposedPlan.getContainerPlansCount();
     int oldContainerCount = currentPlan.getContainerPlansCount();
-    if (newContainerCount > oldContainerCount && "prompt".equals(Context.updatePrompt(config))) {
+    if (newContainerCount > oldContainerCount
+        && "prompt".equalsIgnoreCase(Context.updatePrompt(config))) {
       if (!confirmWithUser(oldContainerCount, newContainerCount)) {
         LOG.warning("Scheduler updated topology canceled.");
         return;

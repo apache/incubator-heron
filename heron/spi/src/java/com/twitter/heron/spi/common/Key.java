@@ -173,8 +173,9 @@ public enum Key {
   DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
 
   // keys for `heron` command line.
-  // `heron update` prompt default config: disabled => no prompt
-  // to enable `heron update` prompt: prompt => enable prompt
+  // Prompt user when more containers are required so that
+  // user has another chance to double check quota is available.
+  // To enable it, change the config from "disabled" to "prompt".
   UPDATE_PROMPT         ("heron.command.update.prompt", "disabled");
 
 
