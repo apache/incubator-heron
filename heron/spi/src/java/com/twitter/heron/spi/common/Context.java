@@ -325,6 +325,10 @@ public class Context {
     return cfg.getStringValue(Key.DOWNLOADER_BINARY);
   }
 
+  public static boolean updatePrompt(Config cfg) {
+    return cfg.getBooleanValue(Key.UPDATE_PROMPT);
+  }
+
   @SuppressWarnings("unchecked")
   public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
