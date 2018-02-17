@@ -171,7 +171,8 @@ public enum Key {
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),
   DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
-  
+
+  // keys for `heron` command line
   UPDATE_PROMPT         ("heron.command.update.prompt", Boolean.FALSE);
 
 
