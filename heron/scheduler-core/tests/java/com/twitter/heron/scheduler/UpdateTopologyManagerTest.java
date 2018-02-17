@@ -46,7 +46,6 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
-import com.twitter.heron.proto.system.PackingPlans.ContainerPlan;
 import com.twitter.heron.scheduler.UpdateTopologyManager.ContainerDelta;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
