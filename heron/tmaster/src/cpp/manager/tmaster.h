@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 #include <vector>
+
 #include "statemgr/heron-statemgr.h"
 #include "metrics/metrics-mgr-st.h"
 #include "metrics/metrics.h"
@@ -42,6 +43,8 @@ class CkptMgrClient;
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
 
+typedef std::map<sp_string, std::map<sp_string, sp_string>> ConfigMap;
+
 class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
@@ -56,8 +59,16 @@ class TMaster {
   const std::string& GetTopologyId() const { return current_pplan_->topology().id(); }
   const std::string& GetTopologyName() const { return current_pplan_->topology().name(); }
   proto::api::TopologyState GetTopologyState() const { return current_pplan_->topology().state(); }
+
   void ActivateTopology(VCallback<proto::system::StatusCode> cb);
   void DeActivateTopology(VCallback<proto::system::StatusCode> cb);
+  // Update runtime configs in a topology.
+  // Return true if successful; false otherwise and the callback function won't be invoked.
+  bool RuntimeConfigTopology(const ConfigMap& _config,
+                             VCallback<proto::system::StatusCode> cb);
+  // Validate runtime config. Return false if any issue is found.
+  bool ValidateRuntimeConfig(const ConfigMap& _config);
+
   proto::system::Status* RegisterStMgr(const proto::system::StMgr& _stmgr,
                                        const std::vector<proto::system::Instance*>& _instances,
                                        Connection* _conn, proto::system::PhysicalPlan*& _pplan);
@@ -115,7 +126,7 @@ class TMaster {
   proto::system::PhysicalPlan* MakePhysicalPlan();
 
   // Check to see if the topology is of correct format
-  bool ValidateTopology(proto::api::Topology _topology);
+  bool ValidateTopology(const proto::api::Topology& _topology);
 
   // Check to see if the topology and stmgrs match
   // in terms of workers
@@ -123,7 +134,12 @@ class TMaster {
 
   // Check to see if the stmgrs and pplan match
   // in terms of workers
-  bool ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan);
+  bool ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan);
+
+  // Check if incoming runtime configs are valid or not.
+  // All incoming configurations must exist. If there is any non-existing
+  // configuration, or the data type is wrong, return false.
+  bool ValidateRuntimeConfigNames(const ConfigMap& _config);
 
   // If the assignment is already done, then:
   // 1. Distribute physical plan to all active stmgrs
@@ -159,12 +175,17 @@ class TMaster {
 
   void UpdateProcessMetrics(EventLoop::Status);
 
+  // Update configurations in physical plan.
+  bool UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
+                                     const ConfigMap& _config);
+
   // Function called when a new stateful ckpt record is saved
-  void HandleStatefulCheckpointSave(std::string _oldest_ckpt);
+  void HandleStatefulCheckpointSave(const std::string& _oldest_ckpt);
 
   // Function called to kill container
   void KillContainer(const std::string& host_name,
-                     sp_int32 port, sp_string stmgr_id);
+                     sp_int32 port,
+                     const sp_string& stmgr_id);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;

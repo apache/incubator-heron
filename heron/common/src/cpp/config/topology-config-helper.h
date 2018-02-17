@@ -129,15 +129,36 @@ class TopologyConfigHelper {
 
   // Gets the list of all spout component names
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,
-                                     std::unordered_set<std::string> spouts);
+                                     std::unordered_set<std::string>& spouts);
 
   // Do we want to drop tuples upon backpressure detection
   static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
 
+  // Return topology level config
+  static void GetTopologyConfig(const proto::api::Topology& _topology,
+                                std::map<sp_string, sp_string>& retval);
+
+  static void SetTopologyConfig(proto::api::Topology* _topology,
+                                const std::map<sp_string, sp_string>& retval);
+
+
+  // Return component level config
+  static void GetComponentConfig(const proto::api::Topology& _topology,
+                                 const sp_string& _component_name,
+                                 std::map<sp_string, sp_string>& config);
+
+  static void SetComponentConfig(proto::api::Topology* _topology,
+                                 const sp_string& _component_name,
+                                 const std::map<sp_string, sp_string>& config);
+
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
-                                    const std::string& _config_name,
+                                    const sp_string& _config_name,
                                     bool _default_value);
+  static void ConvertConfigToMap(const proto::api::Config& _config,
+                                 std::map<sp_string, sp_string>& retval);
+  static void UpdateConfigValues(proto::api::Config* _pb_config,
+                                 const std::map<sp_string, sp_string>& _config);
 };
 }  // namespace config
 }  // namespace heron

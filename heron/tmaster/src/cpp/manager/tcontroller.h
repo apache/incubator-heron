@@ -17,6 +17,10 @@
 #ifndef __TCONTROLLER_H_
 #define __TCONTROLLER_H_
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
 #include "basics/basics.h"
@@ -50,6 +54,8 @@ class TController {
   void HandleCleanStatefulCheckpointRequest(IncomingHTTPRequest* request);
   void HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* request,
                                                 proto::system::StatusCode);
+  void HandleRuntimeConfigRequest(IncomingHTTPRequest* request);
+  void HandleRuntimeConfigRequestDone(IncomingHTTPRequest* request, proto::system::StatusCode);
 
   // We are a http server
   HTTPServer* http_server_;
@@ -59,6 +65,34 @@ class TController {
 
   // The callback to be called upon receiving clean stateful checkpoint response
   std::function<void(proto::system::StatusCode)> clean_stateful_checkpoint_cb_;
+
+  // Validate basic topology data
+  // - topology id is available and matches the current topology
+  // - physical plan is available
+  // Detailed errors are logged in the function and returned in the ValidationResult object.
+  // return true when passed; return false if any issue is found.
+  class ValidationResult {
+   public:
+    ValidationResult() { code_ = 0; message_ = ""; }
+    void SetResult(sp_int32 code, const sp_string& message) {
+      code_ = code;
+      message_ = message;
+    }
+    sp_int32 GetCode() { return code_; }
+    sp_string& GetMessage() { return message_; }
+
+   private:
+    sp_int32 code_;
+    sp_string message_;
+  };
+
+  bool ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result);
+
+  // Parse and build a map of component name to config kv map from incoming runtime configs.
+  // The incoming runtime configs should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
+  // Return false if the configs have bad format.
+  bool ParseRuntimeConfig(const std::vector<sp_string>& paramters,
+                          std::map<sp_string, std::map<sp_string, sp_string>>& configMap);
 };
 }  // namespace tmaster
 }  // namespace heron

@@ -388,7 +388,7 @@ sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
 }
 
 void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,
-                                                  std::unordered_set<std::string> spouts) {
+                                                  std::unordered_set<std::string>& spouts) {
   for (int i = 0; i < _topology.spouts_size(); ++i) {
     spouts.insert(_topology.spouts(i).comp().name());
   }
@@ -399,17 +399,103 @@ bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology
                                TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, false);
 }
 
+// Return topology level config
+void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topology,
+                                             std::map<sp_string, sp_string>& retval) {
+  if (_topology.has_topology_config()) {
+    const proto::api::Config& config = _topology.topology_config();
+    ConvertConfigToMap(config, retval);
+  }
+}
+
+void TopologyConfigHelper::SetTopologyConfig(proto::api::Topology* _topology,
+                                             const std::map<sp_string, sp_string>& _update) {
+  if (_topology->has_topology_config()) {
+    proto::api::Config* config = _topology->mutable_topology_config();
+    UpdateConfigValues(config, _update);
+  }
+}
+
+// Return component level config
+void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topology,
+                                              const sp_string& _component_name,
+                                              std::map<sp_string, sp_string>& retval) {
+  // We are assuming component names are unique and returning the config
+  // of the first spout or bolt found with the name.
+  for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
+    if (_topology.spouts(i).comp().name() == _component_name) {
+      if (_topology.spouts(i).comp().has_config()) {
+        const proto::api::Config& config = _topology.spouts(i).comp().config();
+        ConvertConfigToMap(config, retval);
+      }
+      return;
+    }
+  }
+
+  for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
+    if (_topology.bolts(i).comp().name() == _component_name) {
+      if (_topology.bolts(i).comp().has_config()) {
+        const proto::api::Config& config = _topology.bolts(i).comp().config();
+        ConvertConfigToMap(config, retval);
+      }
+      return;
+    }
+  }
+}
+
+// Return component level config
+void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
+                                              const sp_string& _component_name,
+                                              const std::map<sp_string, sp_string>& _update) {
+  // We are assuming component names are unique and updating config for all instances
+  // with the specific component name.
+  for (sp_int32 i = 0; i < _topology->spouts_size(); ++i) {
+    proto::api::Component* comp = _topology->mutable_spouts(i)->mutable_comp();
+    if (comp->name() == _component_name && comp->has_config()) {
+      proto::api::Config* config = comp->mutable_config();
+      UpdateConfigValues(config, _update);
+    }
+  }
+
+  for (sp_int32 i = 0; i < _topology->bolts_size(); ++i) {
+    proto::api::Component* comp = _topology->mutable_bolts(i)->mutable_comp();
+    if (comp->name() == _component_name && comp->has_config()) {
+      proto::api::Config* config = comp->mutable_config();
+      UpdateConfigValues(config, _update);
+    }
+  }
+}
+
+// For every existing config, if it is in the new config, update the value
+void TopologyConfigHelper::UpdateConfigValues(proto::api::Config* _config,
+                                              const std::map<sp_string, sp_string>& _update) {
+  for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
+    const std::string& key = _config->mutable_kvs(i)->key();
+    std::map<sp_string, sp_string>::const_iterator iter = _update.find(key);
+    if (iter != _update.end()) {
+      _config->mutable_kvs(i)->set_value(iter->second);
+    }
+  }
+}
+
 bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
-                                                 const std::string& _config_name,
+                                                 const sp_string& _config_name,
                                                  bool _default_value) {
   sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == _config_name) {
-      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+  const proto::api::Config& config = _topology.topology_config();
+  for (sp_int32 i = 0; i < config.kvs_size(); ++i) {
+    if (config.kvs(i).key() == _config_name) {
+      return value_true_.compare(config.kvs(i).value().c_str()) == 0;
     }
   }
   return _default_value;
+}
+
+void TopologyConfigHelper::ConvertConfigToMap(const proto::api::Config& _config,
+                                              std::map<sp_string, sp_string>& retval) {
+  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
+    retval[_config.kvs(i).key()] = _config.kvs(i).value();
+  }
 }
 }  // namespace config
 }  // namespace heron
