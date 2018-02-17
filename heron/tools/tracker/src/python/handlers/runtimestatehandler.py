@@ -108,6 +108,7 @@ class RuntimeStateHandler(BaseHandler):
       topology_name = self.get_argument_topology()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       runtime_state = topology_info["runtime_state"]
+      runtime_state["topology_version"] = topology_info["metadata"]["release_version"]
       topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
           cluster, role, environ, topology_name)
       reg_summary = yield tornado.gen.Task(self.getStmgrsRegSummary, topology.tmaster)
