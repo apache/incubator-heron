@@ -162,7 +162,6 @@ public class UpdateTopologyManager implements Closeable {
       Set<PackingPlan.ContainerPlan> containersAdded =
           scalableScheduler.get().addContainers(containersToAdd);
       if (containersAdded.size() != containersToAdd.size()) {
-        updatedContainers.addAll(containersAdded);
         throw new RuntimeException("Scheduler failed to add requested containers. Requested "
             + containersToAdd.size() + ", added " + containersAdded.size() + ". "
                 + "The topology can be in a strange stage. "

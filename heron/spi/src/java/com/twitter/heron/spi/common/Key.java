@@ -172,7 +172,9 @@ public enum Key {
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),
   DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
 
-  // keys for `heron` command line
+  // keys for `heron` command line.
+  // `heron update` prompt default config: disabled => no prompt
+  // to enable `heron update` prompt: prompt => enable prompt
   UPDATE_PROMPT         ("heron.command.update.prompt", "disabled");
 
 
