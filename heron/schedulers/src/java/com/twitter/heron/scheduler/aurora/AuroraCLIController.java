@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.aurora;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,8 +24,12 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 
+import com.twitter.heron.scheduler.TopologyUpdateRecoverableException;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.ShellUtils;
 
@@ -38,6 +43,9 @@ class AuroraCLIController implements AuroraController {
   private final String jobSpec;
   private final boolean isVerbose;
   private final String auroraFilename;
+  private final String env;
+  private final String cluster;
+  private final String role;
 
   AuroraCLIController(
       String jobName,
@@ -48,6 +56,9 @@ class AuroraCLIController implements AuroraController {
       boolean isVerbose) {
     this.auroraFilename = auroraFilename;
     this.isVerbose = isVerbose;
+    this.env = env;
+    this.cluster = cluster;
+    this.role = role;
     this.jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
   }
 
@@ -112,10 +123,122 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
+  private JsonNode askAuroraQuota() throws JsonProcessingException, IOException {
+    String roleSpec = cluster + "/" + role;
+    List<String> auroraCmd =
+        new ArrayList<>(Arrays.asList("aurora", "quota", "get", "--write-json", roleSpec));
+
+    LOG.info(String.format("Query quota: %s", auroraCmd));
+    StringBuilder stderr = new StringBuilder();
+    if (!runProcess(auroraCmd, null, stderr)) {
+      throw new RuntimeException("Failed to query quota for " + roleSpec);
+    }
+
+    if (stderr.length() <= 0) { // no container was added
+      throw new RuntimeException("empty quota query output by Aurora");
+    }
+
+    String jsonStr = stderr.toString();
+    LOG.info(String.format("Quota: %s", jsonStr));
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode actualObj = mapper.readTree(jsonStr);
+    return actualObj;
+  }
+
+  private JsonNode askAuroraStatus() throws JsonProcessingException, IOException {
+    List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "status", jobSpec));
+
+    LOG.info(String.format("Query resource per container: %s", auroraCmd));
+    StringBuilder stderr = new StringBuilder();
+    if (!runProcess(auroraCmd, null, stderr)) {
+      throw new TopologyUpdateRecoverableException(
+          "Failed to query resource per container " + jobSpec);
+    }
+
+    if (stderr.length() <= 0) { // no container was added
+      throw new TopologyUpdateRecoverableException(
+          "empty resource per container query output by Aurora");
+    }
+
+    String jsonStr = stderr.toString();
+    LOG.info(String.format("Resource per container: %s", jsonStr));
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode actualObj = mapper.readTree(jsonStr);
+    return actualObj;
+  }
+
+  private boolean hasEnoughQuota(JsonNode resource, Integer count)
+      throws JsonProcessingException, IOException {
+    // calc available quota
+    JsonNode quota = askAuroraQuota();
+
+    JsonNode quotaNode = quota.get("quota");
+    long quotaDiskMb = quotaNode.get("diskMb").longValue();
+    double quotaNumCpus = quotaNode.get("numCpus").doubleValue();
+    long quotaRamMb = quotaNode.get("ramMb").longValue();
+
+    JsonNode prodNode = quota.get("prodSharedConsumption");
+    long prodDiskMb = prodNode.get("diskMb").longValue();
+    double prodNumCpus = prodNode.get("numCpus").doubleValue();
+    long prodRamMb = prodNode.get("ramMb").longValue();
+
+    long availableDiskMb = quotaDiskMb - prodDiskMb;
+    double availableNumCpus = quotaNumCpus - prodNumCpus;
+    long availableRamMb = quotaRamMb - prodRamMb;
+
+    // calc res for one container
+    JsonNode containerNode =
+        resource.get(0).get("active").get(0).get("assignedTask").get("task").get("resources");
+    double containerNumCpus = containerNode.get("numCpus").doubleValue();
+    long containerRamMb = containerNode.get("ramMb").longValue();
+    long containerDiskMb = containerNode.get("diskMb").longValue();
+
+    // check if res is enough
+    if (containerNumCpus * count > availableNumCpus) {
+      String msg =
+          String.format("not enough cpu quota: %f cpu per container x %d container > %f available",
+              containerNumCpus, count, availableNumCpus);
+      throw new TopologyUpdateRecoverableException(msg);
+    } else if (containerRamMb * count > availableRamMb) {
+      String msg =
+          String.format("not enough ram quota: %d ram per container x %d container > %d available",
+              containerRamMb, count, availableRamMb);
+      throw new TopologyUpdateRecoverableException(msg);
+    } else if (containerDiskMb * count > availableDiskMb) {
+      String msg = String.format(
+          "not enough disk quota: %d disk per container x %d container > %d available",
+          containerDiskMb, count, availableDiskMb);
+      throw new TopologyUpdateRecoverableException(msg);
+    }
+    return true;
+  }
+
+  private boolean isProd(JsonNode jsonStatus) {
+    String tier = jsonStatus.get(0).get("active").get(0).get("assignedTask").get("task").get("tier")
+        .textValue();
+    if ("preferred".equals(tier)) {
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public Set<Integer> addContainers(Integer count) {
-    //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
-    //clone instance 0
+    try {
+      JsonNode jsonStatus = askAuroraStatus();
+      if (isProd(jsonStatus)) {
+        if (!hasEnoughQuota(jsonStatus, count)) {
+          throw new TopologyUpdateRecoverableException(
+              "[Aurora quota exception] Aurora quota request is not satified");
+        }
+      }
+    } catch (IOException e) {
+      throw new TopologyUpdateRecoverableException("recoverable error before `aurora add` command",
+          e);
+    }
+
+    // aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
+    // clone instance 0
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
         "aurora", "job", "add", "--wait-until", "RUNNING",
         jobSpec + "/0", count.toString(), "--verbose"));

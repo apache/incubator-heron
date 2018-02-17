@@ -325,6 +325,14 @@ public class RuntimeManagerMain {
       // Exit with status code 200 to indicate dry-run response is sent out
       System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (TopologyUpdateRecoverableException recoverableException) {
+      LOG.log(Level.FINE, "encountered recoverable error and the topology keep unchanged.");
+     // Output may contain UTF-8 characters, so we should print using UTF-8 encoding
+      PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8.name());
+      recoverableException.printStackTrace(out);
+      // Exit with status code 201 to indicate `heron update` was not performed
+      System.exit(201);
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       LOG.log(Level.FINE, "Exception when submitting topology", e);
       System.out.println(e.getMessage());
