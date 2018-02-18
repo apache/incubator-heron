@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -161,6 +162,19 @@ public class RuntimeManagerRunner {
     LOG.fine("Scheduler killed topology successfully.");
   }
 
+  boolean confirmWithUser(int oldContainerCount, int newContainerCount) {
+    LOG.info(String.format("The present aurora job has %d containers. "
+        + "After update there will be %d containers. "
+        + "Please make sure there are sufficient resources to update this job. "
+        + "Continue update? [y/N]: ", oldContainerCount, newContainerCount));
+    Scanner scanner = new Scanner(System.in);
+    String userInput = scanner.nextLine();
+    if ("y".equalsIgnoreCase(userInput)) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Handler to update a topology
    */
@@ -190,6 +204,16 @@ public class RuntimeManagerRunner {
       throw new UpdateDryRunResponse(topology, config, newPlan, oldPlan, changeRequests);
     }
 
+    int newContainerCount = proposedPlan.getContainerPlansCount();
+    int oldContainerCount = currentPlan.getContainerPlansCount();
+    if (newContainerCount > oldContainerCount
+        && "prompt".equalsIgnoreCase(Context.updatePrompt(config))) {
+      if (!confirmWithUser(oldContainerCount, newContainerCount)) {
+        LOG.warning("Scheduler updated topology canceled.");
+        return;
+      }
+    }
+
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
             .setCurrentPackingPlan(currentPlan)
@@ -198,9 +222,10 @@ public class RuntimeManagerRunner {
 
     LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-      throw new TopologyRuntimeManagementException(String.format(
+      throw new TopologyRuntimeManagementException(
           "Failed to update topology with Scheduler, updateTopologyRequest="
-              + updateTopologyRequest));
+              + updateTopologyRequest + "The topology can be in a strange stage. "
+                  + "Please check carefully or redeploy the topology !!");
     }
 
     // Clean the connection when we are done.
