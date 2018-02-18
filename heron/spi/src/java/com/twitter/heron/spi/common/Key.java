@@ -170,7 +170,13 @@ public enum Key {
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),
-  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader");
+  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
+
+  // keys for `heron` command line.
+  // Prompt user when more containers are required so that
+  // user has another chance to double check quota is available.
+  // To enable it, change the config from "disabled" to "prompt".
+  UPDATE_PROMPT         ("heron.command.update.prompt", "disabled");
 
 
   private final String value;
