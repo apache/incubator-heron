@@ -153,13 +153,13 @@ public class RuntimeManagerMain {
         .build();
 
     Option dryRun = Option.builder("u")
-        .desc("run in dry-run mode")
+        .desc("Run in dry-run mode")
         .longOpt("dry_run")
         .required(false)
         .build();
 
     Option dryRunFormat = Option.builder("t")
-        .desc("dry-run format")
+        .desc("Dry-run format")
         .longOpt("dry_run_format")
         .hasArg()
         .required(false)
@@ -168,6 +168,12 @@ public class RuntimeManagerMain {
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt("verbose")
+        .build();
+
+    Option skipRuntimeValidation = Option.builder("k")
+        .desc("Skip runtime validation")
+        .longOpt("skip_runtime_validation")
+        .required(false)
         .build();
 
     options.addOption(cluster);
@@ -185,6 +191,7 @@ public class RuntimeManagerMain {
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
     options.addOption(verbose);
+    options.addOption(skipRuntimeValidation);
 
     return options;
   }
@@ -253,6 +260,15 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
+    // Optional argument in the case of kill
+    // This option can be useful when a topolgoy is not "fully killed",
+    // for example, topology is killed but data clean up is not successful,
+    // to skip the runtime validation in order to run the kill command again
+    Boolean skipRuntimeValidation = false;
+    if (cmd.hasOption("skip_runtime_validation")) {
+      skipRuntimeValidation = true;
+    }
+
     Boolean dryRun = false;
     if (cmd.hasOption("u")) {
       dryRun = true;
@@ -277,7 +293,8 @@ public class RuntimeManagerMain {
         .put(Key.DRY_RUN, dryRun)
         .put(Key.DRY_RUN_FORMAT_TYPE, dryRunFormat)
         .put(Key.VERBOSE, verbose)
-        .put(Key.TOPOLOGY_CONTAINER_ID, containerId);
+        .put(Key.TOPOLOGY_CONTAINER_ID, containerId)
+        .put(Key.SKIP_RUNTIME_VALIDATION, skipRuntimeValidation);
 
     // This is a command line option, but not a valid config key. Hence we don't use Keys
     if (componentParallelism != null) {
@@ -378,7 +395,13 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateRuntimeManage(adaptor, topologyName);
+      if (!config.getBooleanValue(Key.SKIP_RUNTIME_VALIDATION)) {
+        LOG.fine("Validate topology state");
+        validateRuntimeManage(adaptor, topologyName);
+      } else {
+        LOG.log(Level.FINE, "The skip_runtime_validation flag is set to true. "
+            + "Bypass validation and run command {0} directly", command);
+      }
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
