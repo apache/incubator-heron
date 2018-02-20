@@ -48,18 +48,18 @@ public class RuntimeManagerRunner {
   private final Config runtime;
   private final Command command;
   private final ISchedulerClient schedulerClient;
-  private final boolean foundData;
+  private final boolean hasRunningData;
 
   public RuntimeManagerRunner(Config config,
                               Config runtime,
                               Command command,
                               ISchedulerClient schedulerClient,
-                              boolean foundData) {
+                              boolean hasRunningData) {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
-    this.foundData = foundData;
+    this.hasRunningData = hasRunningData;
 
     this.schedulerClient = schedulerClient;
   }
@@ -95,7 +95,7 @@ public class RuntimeManagerRunner {
    * Handler to activate a topology
    */
   private void activateTopologyHandler(String topologyName) throws TMasterException {
-    assert foundData;
+    assert hasRunningData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     TMasterUtils.transitionTopologyState(topologyName,
@@ -107,7 +107,7 @@ public class RuntimeManagerRunner {
    * Handler to deactivate a topology
    */
   private void deactivateTopologyHandler(String topologyName) throws TMasterException {
-    assert foundData;
+    assert hasRunningData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     TMasterUtils.transitionTopologyState(topologyName,
@@ -120,7 +120,7 @@ public class RuntimeManagerRunner {
    */
   @VisibleForTesting
   void restartTopologyHandler(String topologyName) throws TopologyRuntimeManagementException {
-    assert foundData;
+    assert hasRunningData;
     Integer containerId = Context.topologyContainerId(config);
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
@@ -165,7 +165,7 @@ public class RuntimeManagerRunner {
     // clean up the state of the topology in state manager
     cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime));
 
-    if (foundData) {
+    if (hasRunningData) {
       LOG.fine(String.format("Scheduler killed topology %s successfully.", topologyName));
     } else {
       LOG.warning(String.format("Topology %s data is not found, but scheduler has tried to"
@@ -179,7 +179,7 @@ public class RuntimeManagerRunner {
   @VisibleForTesting
   void updateTopologyHandler(String topologyName, String newParallelism)
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
-    assert foundData;
+    assert hasRunningData;
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);

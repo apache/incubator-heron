@@ -255,7 +255,7 @@ public class RuntimeManagerMainTest {
 
     // Failed to callRuntimeManagerRunner
     doThrow(new TopologyRuntimeManagementException("")).when(runtimeManagerMain)
-        .callRuntimeManagerRunner(any(Config.class), eq(client), true);
+        .callRuntimeManagerRunner(any(Config.class), eq(client), eq(true));
     runtimeManagerMain.manageTopology();
   }
 
@@ -342,7 +342,7 @@ public class RuntimeManagerMainTest {
     doReturn(client).when(runtimeManagerMain).getSchedulerClient(any(Config.class));
     // Happy path
     doNothing().when(runtimeManagerMain)
-        .callRuntimeManagerRunner(any(Config.class), eq(client), true);
+        .callRuntimeManagerRunner(any(Config.class), eq(client), eq(true));
     runtimeManagerMain.manageTopology();
   }
 }

@@ -377,7 +377,7 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean foundData = validateRuntimeManage(adaptor, topologyName);
+      boolean hasRunningData = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
@@ -392,7 +392,7 @@ public class RuntimeManagerMain {
       // Create a ISchedulerClient basing on the config
       ISchedulerClient schedulerClient = getSchedulerClient(runtime);
 
-      callRuntimeManagerRunner(runtime, schedulerClient, foundData);
+      callRuntimeManagerRunner(runtime, schedulerClient, hasRunningData);
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
@@ -417,8 +417,8 @@ public class RuntimeManagerMain {
       String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
-    boolean found = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
-    if (!found) {
+    boolean hasRunningData = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
+    if (!hasRunningData) {
       if (command == Command.KILL) {
         LOG.warning(String.format("Topology '%s' is not found or not running", topologyName));
       } else {
@@ -454,17 +454,17 @@ public class RuntimeManagerMain {
             topologyName, currentState, configState));
       }
     }
-    return found;
+    return hasRunningData;
   }
 
   protected void callRuntimeManagerRunner(
       Config runtime,
       ISchedulerClient schedulerClient,
-      boolean foundData)
+      boolean hasRunningData)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient, foundData);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient, hasRunningData);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
