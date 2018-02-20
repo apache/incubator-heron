@@ -20,16 +20,16 @@ import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 public abstract class BaseDetector implements IDetector {
   private ExecutionContext context;
 
-  public enum SymptomName {
+  public enum SymptomType {
     SYMPTOM_BACK_PRESSURE(BackPressureDetector.class.getSimpleName()),
     SYMPTOM_GROWING_WAIT_Q(GrowingWaitQueueDetector.class.getSimpleName()),
     SYMPTOM_LARGE_WAIT_Q(LargeWaitQueueDetector.class.getSimpleName()),
     SYMPTOM_PROCESSING_RATE_SKEW(ProcessingRateSkewDetector.class.getSimpleName()),
-    SYMPTOM_WAIT_Q_DISPARITY(WaitQueueDisparityDetector.class.getSimpleName());
+    SYMPTOM_WAIT_Q_SIZE_SKEW(WaitQueueSkewDetector.class.getSimpleName());
 
     private String text;
 
-    SymptomName(String name) {
+    SymptomType(String name) {
       this.text = name;
     }
 

@@ -31,6 +31,7 @@ import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
@@ -42,7 +43,7 @@ public class BufferSizeSensor extends BaseSensor {
                           PackingPlanProvider packingPlanProvider,
                           TopologyProvider topologyProvider,
                           MetricsProvider metricsProvider) {
-    super(policyConfig, METRIC_BUFFER_SIZE.text(), BufferSizeSensor.class.getSimpleName());
+    super(policyConfig, METRIC_WAIT_Q_SIZE.text(), BufferSizeSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
@@ -63,7 +64,7 @@ public class BufferSizeSensor extends BaseSensor {
     for (String component : boltComponents) {
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(component);
       for (String instance : boltInstanceNames) {
-        String metric = getMetricName() + instance + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
+        String metric = getMetricName() + instance + MetricName.METRIC_WAIT_Q_SIZE_SUFFIX;
 
         Collection<Measurement> stmgrResult
             = metricsProvider.getMeasurements(Instant.now(), duration, metric, COMPONENT_STMGR);

@@ -15,73 +15,70 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Logger;
 
-import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.Diagnosis;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
 
-import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.common.MetricsStats;
-
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_DATA_SKEW;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_DATA_SKEW;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 public class DataSkewDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(DataSkewDiagnoser.class.getName());
 
   @Override
-  public Diagnosis diagnose(List<Symptom> symptoms) {
-    List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    Map<String, ComponentMetrics> processingRateSkewComponents =
-        getProcessingRateSkewComponents(symptoms);
-    Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
+  public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
+    Collection<Diagnosis> diagnoses = new ArrayList<>();
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
+    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
+    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
-    if (bpSymptoms.isEmpty() || processingRateSkewComponents.isEmpty()
-        || waitQDisparityComponents.isEmpty()) {
-      // Since there is no back pressure or disparate execute count, no action is needed
-      return null;
-    } else if (bpSymptoms.size() > 1) {
+    if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    // verify data skew, larger queue size and back pressure for the same component exists
-    ComponentMetrics exeCountMetrics = processingRateSkewComponents.get(bpMetrics.getName());
-    ComponentMetrics pendingBufferMetrics = waitQDisparityComponents.get(bpMetrics.getName());
-    if (exeCountMetrics == null || pendingBufferMetrics == null) {
-      // no processing rate skew and buffer size skew
-      // for the component with back pressure. This is not a data skew case
+    if (bp.size() == 0) {
       return null;
     }
 
-    ComponentMetrics mergedData = ComponentMetrics.merge(bpMetrics,
-        ComponentMetrics.merge(exeCountMetrics, pendingBufferMetrics));
-    ComponentMetricsHelper compStats = new ComponentMetricsHelper(mergedData);
-    compStats.computeBpStats();
-    MetricsStats exeStats = compStats.computeMinMaxStats(METRIC_EXE_COUNT);
-    MetricsStats bufferStats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE);
+    String bpComponent = bp.first().assignments().iterator().next();
 
-    Symptom resultSymptom = null;
-    for (InstanceMetrics boltMetrics : compStats.getBoltsWithBackpressure()) {
-      double exeCount = boltMetrics.getMetricValueSum(METRIC_EXE_COUNT.text());
-      double bufferSize = boltMetrics.getMetricValueSum(METRIC_BUFFER_SIZE.text());
-      double bpValue = boltMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
-      if (exeStats.getMetricMax() < 1.10 * exeCount
-          && bufferStats.getMetricMax() < 2 * bufferSize) {
-        LOG.info(String.format("DataSkew: %s back-pressure(%s), high execution count: %s and "
-            + "high buffer size %s", boltMetrics.getName(), bpValue, exeCount, bufferSize));
-        resultSymptom = new Symptom(SYMPTOM_DATA_SKEW.text(), mergedData);
+    // verify data skew, larger queue size and back pressure for the same component exists
+    if (waitQSkew.assignment(bpComponent).size() == 0 || processingRateSkew.assignment
+        (bpComponent).size() == 0) {
+      return null;
+    }
+
+    Collection<String> assignments = new ArrayList<>();
+
+    for (String instance : context.measurements().component(bpComponent).uniqueInstances()) {
+      double waitQSize = context.measurements().type(METRIC_WAIT_Q_SIZE.text()).instance
+          (instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).last().value();
+      double processingRate = context.measurements().type(METRIC_EXE_COUNT.text()).instance
+          (instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).last().value();
+      if ((context.measurements().type(METRIC_WAIT_Q_SIZE.text()).component(bpComponent).max() <
+          waitQSize * 2) && (context.measurements().type(METRIC_EXE_COUNT.text()).component
+          (bpComponent).max() < 1.10 * processingRate)) {
+        assignments.add(instance);
+        LOG.info(String.format("DataSkew: %s back-pressure, high execution count: %s and "
+            + "high buffer size %s", instance, processingRate, waitQSize));
       }
     }
 
-    return resultSymptom != null ? new Diagnosis(DIAGNOSIS_DATA_SKEW.text(), resultSymptom) : null;
+    if (assignments.size() > 0)
+      diagnoses.add(new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), Instant.now(), assignments));
+
+    return diagnoses;
   }
 }

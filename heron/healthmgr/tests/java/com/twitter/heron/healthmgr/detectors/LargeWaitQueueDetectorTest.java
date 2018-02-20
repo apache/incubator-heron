@@ -14,20 +14,19 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
 
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.detectors.LargeWaitQueueDetector.CONF_SIZE_LIMIT;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,28 +37,37 @@ public class LargeWaitQueueDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_SIZE_LIMIT, 1000)).thenReturn(20);
 
-    ComponentMetrics compMetrics
-        = new ComponentMetrics("bolt", "i1", METRIC_BUFFER_SIZE.text(), 21);
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 21);
+    Measurement measurement2
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892322), 21);
 
-    Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
-    topologyMetrics.put("bolt", compMetrics);
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
 
-    BufferSizeSensor sensor = mock(BufferSizeSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
-
-    LargeWaitQueueDetector detector = new LargeWaitQueueDetector(sensor, config);
-    List<Symptom> symptoms = detector.detect();
+    LargeWaitQueueDetector detector = new LargeWaitQueueDetector(config);
+    Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(1, symptoms.size());
+    assertEquals(1, symptoms.iterator().next().assignments().size());
 
-    compMetrics = new ComponentMetrics("bolt", "i1", METRIC_BUFFER_SIZE.text(), 19);
-    topologyMetrics.put("bolt", compMetrics);
 
-    sensor = mock(BufferSizeSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
+    measurement1
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 11);
+    measurement2
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892322), 10);
 
-    detector = new LargeWaitQueueDetector(sensor, config);
-    symptoms = detector.detect();
+    metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+
+    detector = new LargeWaitQueueDetector(config);
+    symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());
   }

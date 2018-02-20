@@ -15,53 +15,53 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
 
-import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.common.MetricsStats;
 import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
 public class SkewDetector extends BaseDetector {
   private static final Logger LOG = Logger.getLogger(SkewDetector.class.getName());
-  private final BaseSensor sensor;
   private final double skewRatio;
-  private final BaseDetector.SymptomName symptomName;
+  private final String metricName;
+  private final BaseDetector.SymptomType symptomType;
 
   @Inject
-  SkewDetector(BaseSensor sensor, double skewRatio, BaseDetector.SymptomName symptom) {
-    this.sensor = sensor;
+  SkewDetector(double skewRatio, BaseSensor.MetricName metricName, BaseDetector.SymptomType
+      symptomType) {
     this.skewRatio = skewRatio;
-    this.symptomName = symptom;
+    this.metricName = metricName.text();
+    this.symptomType = symptomType;
   }
 
   /**
-   * Detects components experiencing data skew, instances with vastly different execute counts.
+   * Detects components experiencing skew on a specific metric
    *
-   * @return A collection of affected components
+   * @return At most two symptoms corresponding to each affected component -- one for positive skew
+   * and one for negative skew
    */
   @Override
-  public List<Symptom> detect() {
-    ArrayList<Symptom> result = new ArrayList<>();
+  public Collection<Symptom> detect(Collection<Measurement> measurements) {
+    Collection<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetrics> metrics = sensor.get();
-    for (ComponentMetrics compMetrics : metrics.values()) {
-      ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      MetricsStats stats = compStats.computeMinMaxStats(sensor.getMetricName());
-      if (stats.getMetricMax() > skewRatio * stats.getMetricMin()) {
-        LOG.info(String.format("Detected skew for %s, min = %f, max = %f",
-            compMetrics.getName(), stats.getMetricMin(), stats.getMetricMax()));
-        result.add(new Symptom(symptomName.text(), compMetrics));
+    MeasurementsTable metrics = MeasurementsTable.of(measurements).type(metricName);
+    for (String component : metrics.uniqueComponents()) {
+      Set<String> addresses = new HashSet<>();
+      if (metrics.component(component).max() > skewRatio * metrics.component(component).min()) {
+        //there is skew
+        addresses.add(component);
+        result.add(new Symptom(symptomType.text(), Instant.now(), addresses));
       }
     }
-
     return result;
   }
 }

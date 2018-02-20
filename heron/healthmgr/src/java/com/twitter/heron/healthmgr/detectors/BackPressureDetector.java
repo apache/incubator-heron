@@ -15,34 +15,32 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Symptom;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureDetector implements IDetector {
   public static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
-  private final BackPressureSensor bpSensor;
   private final int noiseFilterMillis;
 
   @Inject
-  BackPressureDetector(BackPressureSensor bpSensor,
-                       HealthPolicyConfig policyConfig) {
-    this.bpSensor = bpSensor;
+  BackPressureDetector(HealthPolicyConfig policyConfig) {
     noiseFilterMillis = (int) policyConfig.getConfig(CONF_NOISE_FILTER, 20);
   }
 
@@ -50,23 +48,29 @@ public class BackPressureDetector implements IDetector {
    * Detects all components initiating backpressure above the configured limit. Normally there
    * will be only one component
    *
-   * @return A collection of all components causing backpressure.
+   * @return A collection of symptoms each one corresponding to a components with backpressure.
    */
   @Override
-  public List<Symptom> detect() {
-    ArrayList<Symptom> result = new ArrayList<>();
+  public Collection<Symptom> detect(Collection<Measurement> measurements) {
+    Collection<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetrics> backpressureMetrics = bpSensor.get();
-    for (ComponentMetrics compMetrics : backpressureMetrics.values()) {
-      ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      compStats.computeBpStats();
-      if (compStats.getTotalBackpressure() > noiseFilterMillis) {
+    MeasurementsTable bpMetrics = MeasurementsTable.of(measurements).type(METRIC_BACK_PRESSURE
+        .text());
+    for (String component : bpMetrics.uniqueComponents()) {
+      Set<String> addresses = new HashSet<>();
+      double compBackPressure = bpMetrics.component(component).sum();
+      if (compBackPressure > noiseFilterMillis) {
         LOG.info(String.format("Detected back pressure for %s, total back pressure is %f",
-            compMetrics.getName(), compStats.getTotalBackpressure()));
-        result.add(new Symptom(SYMPTOM_BACK_PRESSURE.text(), compMetrics));
+            component, compBackPressure));
+        addresses.add(component);
+        /*bpMetrics.component(component).uniqueInstances().forEach(instance -> {
+          if (bpMetrics.instance(instance) != null && bpMetrics.instance(instance).sum() > 0) {
+            addresses.add(instance);
+          }
+        });*/
+        result.add(new Symptom(SYMPTOM_BACK_PRESSURE.text(), Instant.now(), addresses));
       }
     }
-
     return result;
   }
 }
