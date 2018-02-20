@@ -10,6 +10,7 @@ heron.healthmgr.metricsource.url: http://localhost:8888
 ## list of policies to be executed for self regulation
 #heron.class.health.policies:
 #  - dynamic-resource-allocation
+#  - auto-restart-slow-container
 #  - auto-restart-backpressure-container
 #
 ## configuration specific to individual policies listed above
@@ -18,7 +19,11 @@ heron.healthmgr.metricsource.url: http://localhost:8888
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20
 #  GrowingWaitQueueDetector.limit: 5
+#auto-restart-slow-container:
+#  health.policy.class: com.twitter.heron.healthmgr.policy.AutoRestartSlowContainerPolicy
+#  health.policy.interval.ms: 120000
+#  BackPressureDetector.noiseFilterMillis: 20
 #auto-restart-backpressure-container:
 #  health.policy.class: com.twitter.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
 #  health.policy.interval.ms: 120000
-#  BackPressureDetector.noiseFilterMillis: 20
+#  BackPressureDetector.noiseFilterMillis: 60000
