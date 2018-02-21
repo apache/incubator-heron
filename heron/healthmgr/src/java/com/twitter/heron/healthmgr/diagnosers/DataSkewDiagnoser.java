@@ -28,7 +28,7 @@ import com.microsoft.dhalion.core.SymptomsTable;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
@@ -39,45 +39,49 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
   public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
-    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
-    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
-    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
+    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
     if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-
     if (bp.size() == 0) {
-      return null;
+      return diagnoses;
     }
-
     String bpComponent = bp.first().assignments().iterator().next();
+
+    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
+    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
     // verify data skew, larger queue size and back pressure for the same component exists
     if (waitQSkew.assignment(bpComponent).size() == 0 || processingRateSkew.assignment
         (bpComponent).size() == 0) {
-      return null;
+      return diagnoses;
     }
 
     Collection<String> assignments = new ArrayList<>();
 
-    for (String instance : context.measurements().component(bpComponent).uniqueInstances()) {
-      double waitQSize = context.measurements().type(METRIC_WAIT_Q_SIZE.text()).instance
-          (instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).last().value();
-      double processingRate = context.measurements().type(METRIC_EXE_COUNT.text()).instance
-          (instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).last().value();
-      if ((context.measurements().type(METRIC_WAIT_Q_SIZE.text()).component(bpComponent).max() <
-          waitQSize * 2) && (context.measurements().type(METRIC_EXE_COUNT.text()).component
-          (bpComponent).max() < 1.10 * processingRate)) {
+    Instant newest = context.checkpoint();
+    Instant oldest = context.previousCheckpoint();
+    MeasurementsTable measurements = context.measurements()
+        .between(oldest, newest)
+        .component(bpComponent);
+
+    for (String instance : measurements.uniqueInstances()) {
+      MeasurementsTable instanceMeasurements = measurements.instance(instance);
+      double waitQSize = instanceMeasurements.type(METRIC_WAIT_Q_SIZE.text()).mean();
+      double processingRate = instanceMeasurements.type(METRIC_EXE_COUNT.text()).mean();
+      if ((measurements.type(METRIC_WAIT_Q_SIZE.text()).max() < waitQSize * 2)
+          && (measurements.type(METRIC_EXE_COUNT.text()).max() < 1.10 * processingRate)) {
         assignments.add(instance);
         LOG.info(String.format("DataSkew: %s back-pressure, high execution count: %s and "
             + "high buffer size %s", instance, processingRate, waitQSize));
       }
     }
 
-    if (assignments.size() > 0)
-      diagnoses.add(new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), Instant.now(), assignments));
+    if (assignments.size() > 0) {
+      diagnoses.add(new Diagnosis(DIAGNOSIS_DATA_SKEW.text(), Instant.now(), assignments));
+    }
 
     return diagnoses;
   }

@@ -26,7 +26,7 @@ import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
 import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,8 +50,8 @@ public class BufferSizeSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = METRIC_BUFFER_SIZE
-          + boltId + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
+      String metric = METRIC_WAIT_Q_SIZE
+          + boltId + MetricName.METRIC_WAIT_Q_SIZE_SUFFIX;
       BackPressureSensorTest
           .registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
     }
@@ -65,12 +65,12 @@ public class BufferSizeSensorTest {
     MeasurementsTable table = MeasurementsTable.of(componentMetrics);
     assertEquals(1, table.component("bolt-1").size());
     assertEquals(boltIds[0].length(), table.component("bolt-1").instance(boltIds[0])
-        .type(METRIC_BUFFER_SIZE.text()).sum(), 0.01);
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
 
     assertEquals(2, table.component("bolt-2").size());
     assertEquals(boltIds[1].length(), table.component("bolt-2").instance(boltIds[1])
-        .type(METRIC_BUFFER_SIZE.text()).sum(), 0.01);
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
     assertEquals(boltIds[2].length(), table.component("bolt-2").instance(boltIds[2])
-        .type(METRIC_BUFFER_SIZE.text()).sum(), 0.01);
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
   }
 }

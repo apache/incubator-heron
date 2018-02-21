@@ -15,9 +15,9 @@
 
 package com.twitter.heron.healthmgr.diagnosers;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import com.microsoft.dhalion.core.Diagnosis;
@@ -38,31 +38,32 @@ public class UnderProvisioningDiagnoser extends BaseDiagnoser {
 
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
     SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
-    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
-    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
-
     if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
 
     if (bp.size() == 0) {
-      return null;
+      return diagnoses;
+    }
+    String bpComponent = bp.first().assignments().iterator().next();
+
+    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
+    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
+
+    if (waitQSkew.assignment(bpComponent).size() != 0
+        || processingRateSkew.assignment(bpComponent).size() != 0) {
+      return diagnoses;
     }
 
-    String bpComponent = bp.first().assignments().iterator().next();
-    if (waitQSkew.assignment(bpComponent).size() != 0 || processingRateSkew.assignment
-        (bpComponent).size() != 0) {
-      return null;
-    }
-    Collection<String> assignments = new ArrayList<>();
-    assignments.add(bpComponent);
+    Collection<String> assignments = Collections.singletonList(bpComponent);
     LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure and similar processing rates "
         + "and wait queue sizes", bpComponent));
 
-    if (assignments.size() > 0) {
-      diagnoses.add(new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING.text(), Instant.now(), assignments));
-    }
+    diagnoses.add(
+        new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING.text(), context.checkpoint(), assignments));
+
+    //TODO verify large wait queue for all instances
 
     return diagnoses;
   }

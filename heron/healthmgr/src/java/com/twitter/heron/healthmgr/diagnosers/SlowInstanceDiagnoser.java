@@ -37,34 +37,39 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
-    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
-    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
-    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
+    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
     if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-
     if (bp.size() == 0) {
-      return null;
+      return diagnoses;
     }
-
     String bpComponent = bp.first().assignments().iterator().next();
+
+    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
+    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
     // verify wait Q disparity, similar processing rates and back pressure for the same component
     // exist
-    if (waitQSkew.assignment(bpComponent).size() == 0 || processingRateSkew.assignment
-        (bpComponent).size() > 0) {
-      return null;
+    if (waitQSkew.assignment(bpComponent).size() == 0
+        || processingRateSkew.assignment(bpComponent).size() > 0) {
+      // TODO in a short window rate skew could exist
+      return diagnoses;
     }
 
     Collection<String> assignments = new ArrayList<>();
 
-    for (String instance : context.measurements().component(bpComponent).uniqueInstances()) {
-      double waitQSize = context.measurements().type(METRIC_WAIT_Q_SIZE.text()).instance
-          (instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).last().value();
-      if (context.measurements().type(METRIC_WAIT_Q_SIZE.text()).component(bpComponent).max() <
-          waitQSize * 2) {
+    Instant newest = context.checkpoint();
+    Instant oldest = context.previousCheckpoint();
+    MeasurementsTable measurements = context.measurements()
+        .between(oldest, newest)
+        .component(bpComponent);
+
+    for (String instance : measurements.uniqueInstances()) {
+      MeasurementsTable instanceMeasurements = measurements.instance(instance);
+      double waitQSize = instanceMeasurements.type(METRIC_WAIT_Q_SIZE.text()).mean();
+      if (measurements.type(METRIC_WAIT_Q_SIZE.text()).max() < waitQSize * 2) {
         assignments.add(instance);
         LOG.info(String.format("SLOW: %s back-pressure and high buffer size: %s "
                 + "and similar processing rates",
