@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IDetector;
@@ -54,8 +55,8 @@ public class BackPressureDetector implements IDetector {
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
     Collection<Symptom> result = new ArrayList<>();
 
-    MeasurementsTable bpMetrics = MeasurementsTable.of(measurements).type(METRIC_BACK_PRESSURE
-        .text());
+    MeasurementsTable bpMetrics = MeasurementsTable.of(measurements)
+        .type(METRIC_BACK_PRESSURE.text());
     for (String component : bpMetrics.uniqueComponents()) {
       Set<String> addresses = new HashSet<>();
       double compBackPressure = bpMetrics.component(component).sum();

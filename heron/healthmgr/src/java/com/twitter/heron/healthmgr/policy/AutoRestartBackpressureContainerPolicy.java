@@ -15,34 +15,27 @@
 
 package com.twitter.heron.healthmgr.policy;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
-import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.detectors.BackPressureDetector;
-import com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector;
-import com.twitter.heron.healthmgr.detectors.WaitQueueDisparityDetector;
-import com.twitter.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import com.twitter.heron.healthmgr.resolvers.RestartContainerResolver;
+import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
 import static com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
 
 /**
  * This Policy class
  * 1. detector: find out the container that has been in backpressure
- *              state for long time, which we believe the container cannot recover.
+ * state for long time, which we believe the container cannot recover.
  * 2. resolver: try to restart the backpressure container so as to be rescheduled.
  */
 public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
@@ -54,44 +47,29 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
       Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
 
   private final HealthPolicyConfig policyConfig;
-  private final RestartContainerResolver restartContainerResolver;
 
   @Inject
-  AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig, EventManager eventManager,
-      BackPressureDetector backPressureDetector,
-      ProcessingRateSkewDetector processingRateSkewDetector,
-      WaitQueueDisparityDetector waitQueueDisparityDetector,
-      SlowInstanceDiagnoser slowInstanceDiagnoser,
-      RestartContainerResolver restartContainerResolver) {
+  AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig,
+                                         EventManager eventManager,
+                                         BackPressureSensor backPressureSensor,
+                                         BackPressureDetector backPressureDetector,
+                                         RestartContainerResolver restartContainerResolver) {
     this.policyConfig = policyConfig;
-    this.restartContainerResolver = restartContainerResolver;
 
-    registerDetectors(backPressureDetector, waitQueueDisparityDetector, processingRateSkewDetector);
-    registerDiagnosers(slowInstanceDiagnoser);
+    registerSensors(backPressureSensor);
+    registerDetectors(backPressureDetector);
+    registerResolvers(restartContainerResolver);
 
-    setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
-        TypeUtils.getInteger(policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
+    setPolicyExecutionInterval(
+        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
 
     eventManager.addEventListener(ContainerRestart.class, this);
-  }
-
-  @Override
-  public IResolver selectResolver(List<Diagnosis> diagnosis) {
-    Map<String, Diagnosis> diagnosisMap =
-        diagnosis.stream().collect(Collectors.toMap(Diagnosis::getName, d -> d));
-
-    if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
-      return restartContainerResolver;
-    }
-
-    LOG.warning("Unknown diagnoses. None resolver selected.");
-    return null;
   }
 
   @Override
   public void onEvent(ContainerRestart event) {
     int interval = (int) policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, 180000);
     LOG.info("Received container restart action event: " + event);
-    setOneTimeDelay(TimeUnit.MILLISECONDS, interval);
+    setOneTimeDelay(Duration.ofMillis(interval));
   }
 }
