@@ -35,9 +35,11 @@ import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.DryRunFormatType;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.DryRunRenders;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
@@ -324,6 +326,7 @@ public class SubmitterMain {
        - status code >= 200
          program sends out dry-run response */
     try {
+      // Submit topology
       submitterMain.submitTopology();
     } catch (SubmitDryRunResponse response) {
       LOG.log(Level.FINE, "Sending out dry-run response");
@@ -424,6 +427,10 @@ public class SubmitterMain {
 
       // Check if topology is already running
       validateSubmit(adaptor, topology.getName());
+
+      // Try to clear left over data in case the previous kill operation
+      // wasn't fully successful
+      cleanState(adaptor, topology.getName());
 
       LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
@@ -530,11 +537,26 @@ public class SubmitterMain {
     // Check whether the topology has already been running
     // TODO(rli): anti-pattern is too nested on this path to be refactored
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
+    ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
 
-    if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
+    // RuntimeManager considers topology to be running when isTopologyRunning is true and
+    // executionState exists in validateRuntimeManage() function. The same condition is used here
+    if (isTopologyRunning != null
+        && isTopologyRunning.equals(Boolean.TRUE)
+        && executionState != null) {
       throw new TopologySubmissionException(
           String.format("Topology '%s' already exists", topologyName));
     }
+  }
+
+  /**
+   * Clean all states of a heron topology
+   */
+  protected void cleanState(SchedulerStateManagerAdaptor statemgr, String topologyName)
+      throws TopologyRuntimeManagementException {
+    LOG.fine("Cleaning up topology state");
+    SchedulerUtils.cleanState(topologyName, statemgr);
+    LOG.fine("Cleaned up topology state");
   }
 
   protected URI uploadPackage(IUploader uploader) throws UploaderException {

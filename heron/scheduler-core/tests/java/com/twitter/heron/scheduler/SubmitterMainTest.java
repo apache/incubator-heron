@@ -26,6 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
+import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.dryrun.SubmitDryRunResponse;
 import com.twitter.heron.scheduler.utils.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
@@ -71,6 +72,8 @@ public class SubmitterMainTest {
 
   private TopologyAPI.Topology topology;
 
+  private ExecutionEnvironment.ExecutionState dummyState;
+
   @Before
   public void setUp() throws Exception {
     // Mock objects to be verified
@@ -104,6 +107,14 @@ public class SubmitterMainTest {
         .thenReturn(PackingTestUtils.testPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking()));
 
     topology = TopologyAPI.Topology.getDefaultInstance();
+
+    ExecutionEnvironment.ExecutionState.Builder stateBuilder =
+        ExecutionEnvironment.ExecutionState.newBuilder()
+            .setTopologyName(TOPOLOGY_NAME)
+            .setTopologyId("test").
+            setCluster("test").
+            setEnviron("test");
+    dummyState = stateBuilder.setRole("test").build();
   }
 
   @Test
@@ -111,9 +122,17 @@ public class SubmitterMainTest {
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     // Topology is not running
+    /*
+    */
+
+    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(dummyState);
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(null);
     submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(false);
+    submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
+    // No execution state
+    when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
+    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(null);
     submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
   }
 
@@ -122,6 +141,7 @@ public class SubmitterMainTest {
     SubmitterMain submitterMain = new SubmitterMain(config, topology);
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     // Topology is running
+    when(adaptor.getExecutionState(eq(TOPOLOGY_NAME))).thenReturn(dummyState);
     when(adaptor.isTopologyRunning(eq(TOPOLOGY_NAME))).thenReturn(true);
     submitterMain.validateSubmit(adaptor, TOPOLOGY_NAME);
   }
@@ -148,6 +168,8 @@ public class SubmitterMainTest {
     SubmitterMain submitterMain = spy(new SubmitterMain(config, topology));
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
+    doNothing().when(submitterMain)
+        .cleanState(any(SchedulerStateManagerAdaptor.class), anyString());
     try {
       submitterMain.submitTopology();
     } finally {
@@ -164,6 +186,8 @@ public class SubmitterMainTest {
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
     doThrow(new UploaderException("")).when(submitterMain).uploadPackage(eq(uploader));
+    doNothing().when(submitterMain)
+        .cleanState(any(SchedulerStateManagerAdaptor.class), anyString());
     try {
       submitterMain.submitTopology();
     } finally {
@@ -183,6 +207,8 @@ public class SubmitterMainTest {
     doReturn(packageURI).when(submitterMain).uploadPackage(eq(uploader));
     doThrow(new PackingException("")).when(submitterMain)
         .callLauncherRunner(Mockito.any(Config.class));
+    doNothing().when(submitterMain)
+        .cleanState(any(SchedulerStateManagerAdaptor.class), anyString());
     submitterMain.submitTopology();
   }
 
@@ -209,6 +235,11 @@ public class SubmitterMainTest {
     doNothing().when(submitterMain)
         .validateSubmit(any(SchedulerStateManagerAdaptor.class), anyString());
     doNothing().when(submitterMain).callLauncherRunner(Mockito.any(Config.class));
+    doNothing().when(submitterMain)
+        .cleanState(any(SchedulerStateManagerAdaptor.class), anyString());
     submitterMain.submitTopology();
+
+    verify(submitterMain, atLeastOnce())
+        .cleanState(any(SchedulerStateManagerAdaptor.class), anyString());
   }
 }
