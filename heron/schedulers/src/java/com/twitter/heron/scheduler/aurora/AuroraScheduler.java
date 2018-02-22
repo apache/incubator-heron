@@ -185,27 +185,24 @@ public class AuroraScheduler implements IScheduler, IScalable {
     return true;
   }
 
-
-  boolean confirmWithUser(int newContainerCount) {
+  private static final String CONFIRMED_YES = "y";
+  boolean hasConfirmedWithUser(int newContainerCount) {
     LOG.info(String.format("After update there will be %d more containers. "
         + "Please make sure there are sufficient resources to update this job. "
         + "Continue update? [y/N]: ", newContainerCount));
     Scanner scanner = new Scanner(System.in);
     String userInput = scanner.nextLine();
-    if ("y".equalsIgnoreCase(userInput)) {
-      return true;
-    }
-    return false;
+    return CONFIRMED_YES.equalsIgnoreCase(userInput);
   }
 
   @Override
   public Set<PackingPlan.ContainerPlan> addContainers(
       Set<PackingPlan.ContainerPlan> containersToAdd) {
-    if ("prompt".equalsIgnoreCase(Context.updatePrompt(config))) {
-      if (!confirmWithUser(containersToAdd.size())) {
-        LOG.warning("Scheduler updated topology canceled.");
-        return null;
-      }
+    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
+    if ("prompt".equalsIgnoreCase(Context.updatePrompt(config))
+        && !hasConfirmedWithUser(containersToAdd.size())) {
+      LOG.warning("Scheduler updated topology canceled.");
+      return remapping;
     }
 
     // Do the actual containers adding
@@ -217,7 +214,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
           + "; input count was " + containersToAdd.size());
     }
     // Do the remapping:
-    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
     // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
     for (PackingPlan.ContainerPlan cp : containersToAdd) {
       PackingPlan.ContainerPlan newContainerPlan =
