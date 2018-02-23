@@ -438,23 +438,34 @@ public class RuntimeManagerMain {
       }
     } else {
       // Execution state is available, validate configurations.
-      String stateCluster = executionState.getCluster();
-      String stateRole = executionState.getRole();
-      String stateEnv = executionState.getEnviron();
-      String configCluster = Context.cluster(config);
-      String configRole = Context.role(config);
-      String configEnv = Context.environ(config);
-      if (!stateCluster.equals(configCluster)
-          || !stateRole.equals(configRole)
-          || !stateEnv.equals(configEnv)) {
-        String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
-        String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
-        throw new TopologyRuntimeManagementException(String.format(
-            "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
-            topologyName, currentState, configState));
-      }
+      validateExecutionState(topologyName, executionState);
     }
     return hasExecutionData;
+  }
+
+  /**
+   * Verify that the environment information in execution state matches the request
+   */
+  protected void validateExecutionState(
+      String topologyName,
+      ExecutionEnvironment.ExecutionState executionState)
+      throws TopologyRuntimeManagementException {
+    String stateCluster = executionState.getCluster();
+    String stateRole = executionState.getRole();
+    String stateEnv = executionState.getEnviron();
+    String configCluster = Context.cluster(config);
+    String configRole = Context.role(config);
+    String configEnv = Context.environ(config);
+
+    if (!stateCluster.equals(configCluster)
+        || !stateRole.equals(configRole)
+        || !stateEnv.equals(configEnv)) {
+      String currentState = String.format("%s/%s/%s", stateCluster, stateRole, stateEnv);
+      String configState = String.format("%s/%s/%s", configCluster, configRole, configEnv);
+      throw new TopologyRuntimeManagementException(String.format(
+          "cluster/role/environ does not match. Topology '%s' is running at %s, not %s",
+          topologyName, currentState, configState));
+    }
   }
 
   protected void callRuntimeManagerRunner(
