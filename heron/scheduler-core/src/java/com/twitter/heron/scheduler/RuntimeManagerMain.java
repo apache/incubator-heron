@@ -471,11 +471,12 @@ public class RuntimeManagerMain {
   protected void callRuntimeManagerRunner(
       Config runtime,
       ISchedulerClient schedulerClient,
-      boolean hasStaleExecutionData)
+      boolean potentialStaleExecutionData)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient, hasStaleExecutionData);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient,
+            potentialStaleExecutionData);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
