@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
 
 import org.junit.Test;
 
@@ -50,7 +51,17 @@ public class WaitQueueSkewDetectorTest {
     WaitQueueSkewDetector detector = new WaitQueueSkewDetector(config);
     Collection<Symptom> symptoms = detector.detect(metrics);
 
-    assertEquals(1, symptoms.size());
+    assertEquals(3, symptoms.size());
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i1").size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i2").size());
+
 
      measurement1
         = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond

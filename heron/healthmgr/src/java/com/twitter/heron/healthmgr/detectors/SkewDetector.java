@@ -56,12 +56,51 @@ public class SkewDetector extends BaseDetector {
     MeasurementsTable metrics = MeasurementsTable.of(measurements).type(metricName);
     for (String component : metrics.uniqueComponents()) {
       Set<String> addresses = new HashSet<>();
-      if (metrics.component(component).max() > skewRatio * metrics.component(component).min()) {
+      Set<String> positiveAddresses = new HashSet<>();
+      Set<String> negativeAddresses = new HashSet<>();
+
+      double componentMax = getMaxOfAverage(metrics.component(component));
+      double componentMin = getMinOfAverage(metrics.component(component));
+      if (componentMax > skewRatio * componentMin) {
         //there is skew
         addresses.add(component);
         result.add(new Symptom(symptomType.text(), Instant.now(), addresses));
+
+        for (String instance : metrics.component(component).uniqueInstances()) {
+          if (metrics.instance(instance).mean() >= 0.90 * componentMax) {
+            positiveAddresses.add(instance);
+          }
+          if (metrics.instance(instance).mean() <= 1.10 * componentMin) {
+            negativeAddresses.add(instance);
+          }
+        }
+        result.add(new Symptom("POSITIVE " + symptomType.text(), Instant.now(), positiveAddresses));
+        result.add(new Symptom("NEGATIVE " + symptomType.text(), Instant.now(), negativeAddresses));
       }
+
     }
     return result;
+  }
+
+  double getMaxOfAverage(MeasurementsTable table) {
+    double max = 0;
+    for (String instance : table.uniqueInstances()) {
+      double instanceMean = table.instance(instance).mean();
+      if (instanceMean > max) {
+        max = instanceMean;
+      }
+    }
+    return max;
+  }
+
+  double getMinOfAverage(MeasurementsTable table) {
+    double min = Double.MAX_VALUE;
+    for (String instance : table.uniqueInstances()) {
+      double instanceMean = table.instance(instance).mean();
+      if (instanceMean < min) {
+        min = instanceMean;
+      }
+    }
+    return min;
   }
 }
