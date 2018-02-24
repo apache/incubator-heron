@@ -238,6 +238,8 @@ class HeronExecutor(object):
     self.checkpoint_manager_classpath = parsed_args.checkpoint_manager_classpath
     self.checkpoint_manager_port = parsed_args.checkpoint_manager_port
     self.stateful_config_file = parsed_args.stateful_config_file
+    self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
+        if parsed_args.jvm_remote_debugger_ports else "disabled"
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
@@ -312,6 +314,7 @@ class HeronExecutor(object):
     parser.add_argument("--metricscache-manager-classpath", required=True)
     parser.add_argument("--metricscache-manager-master-port", required=True)
     parser.add_argument("--metricscache-manager-stats-port", required=True)
+    parser.add_argument("--metricscache-manager-mode", required=False)
     parser.add_argument("--is-stateful", required=True)
     parser.add_argument("--checkpoint-manager-classpath", required=True)
     parser.add_argument("--checkpoint-manager-port", required=True)
@@ -510,9 +513,10 @@ class HeronExecutor(object):
     retval["heron-tmaster"] = tmaster_cmd
 
 
-    if self.health_manager_mode.lower() != "disabled":
-      # align metricscache and healthmgr toggle switch
+    if self.metricscache_manager_mode.lower() != "disabled":
       retval["heron-metricscache"] = self._get_metrics_cache_cmd()
+
+    if self.health_manager_mode.lower() != "disabled":
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(

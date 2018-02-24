@@ -121,6 +121,8 @@ public enum Key {
   STATEFUL_STORAGE_CONF                    ("heron.statefulstorage.config", Type.MAP),
   STATEFUL_STORAGE_CUSTOM_CLASSPATH        ("heron.statefulstorage.custom.classpath", Type.STRING),
 
+  // keys for metricscache manager
+  METRICSCACHEMGR_MODE       ("heron.topology.metricscachemgr.mode", "disabled"),
   // keys for health manager
   HEALTHMGR_MODE             ("heron.topology.healthmgr.mode", Type.STRING),
 
