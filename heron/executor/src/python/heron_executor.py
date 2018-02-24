@@ -239,7 +239,7 @@ class HeronExecutor(object):
     self.checkpoint_manager_port = parsed_args.checkpoint_manager_port
     self.stateful_config_file = parsed_args.stateful_config_file
     self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
-        if parsed_args.jvm_remote_debugger_ports else "disabled"
+        if parsed_args.metricscache_manager_mode else "disabled"
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
