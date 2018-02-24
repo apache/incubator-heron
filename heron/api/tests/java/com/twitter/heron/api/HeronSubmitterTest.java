@@ -183,7 +183,7 @@ public class HeronSubmitterTest {
 
   public static class TestSpout2 extends TestSpout {
 
-    private static final long serialVersionUID = -630307949908406294L;
+    private static final long serialVersionUID = 4070649954154119533L;
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
