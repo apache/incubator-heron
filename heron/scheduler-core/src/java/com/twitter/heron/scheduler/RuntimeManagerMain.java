@@ -353,7 +353,6 @@ public class RuntimeManagerMain {
    * 1. Instantiate necessary resources
    * 2. Valid whether the runtime management is legal
    * 3. Complete the runtime management for a specific command
-   *
    */
   public void manageTopology()
       throws TopologyRuntimeManagementException, TMasterException, PackingException {
@@ -378,7 +377,7 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      validateRuntimeManage(adaptor, topologyName);
+      boolean hasExecutionData = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       // invoke the appropriate command to manage the topology
@@ -393,7 +392,7 @@ public class RuntimeManagerMain {
       // Create a ISchedulerClient basing on the config
       ISchedulerClient schedulerClient = getSchedulerClient(runtime);
 
-      callRuntimeManagerRunner(runtime, schedulerClient);
+      callRuntimeManagerRunner(runtime, schedulerClient, !hasExecutionData);
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
@@ -403,30 +402,61 @@ public class RuntimeManagerMain {
     }
   }
 
-  protected void validateRuntimeManage(
+  /**
+   * Before continuing to the action logic, verify:
+   * - the topology is running
+   * - the information in execution state matches the request
+   * There is an edge case that the topology data could be only partially available,
+   * which could be caused by not fully successful SUBMIT or KILL command. In this
+   * case, we need to skip the validation and allow KILL command to go through.
+   * In case execution state data is available, environment check will be done anyway.
+   * @return true if the topology execution data is found, false otherwise.
+   */
+  protected boolean validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) throws TopologyRuntimeManagementException {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
-
-    if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
-      throw new TopologyRuntimeManagementException(
-          String.format("Topology '%s' does not exist", topologyName));
+    boolean hasExecutionData = isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE);
+    if (!hasExecutionData) {
+      if (command == Command.KILL) {
+        LOG.warning(String.format("Topology '%s' is not found or not running", topologyName));
+      } else {
+        throw new TopologyRuntimeManagementException(
+            String.format("Topology '%s' does not exist", topologyName));
+      }
     }
 
-    // Check whether cluster/role/environ matched
+    // Check whether cluster/role/environ matched if execution state data is available.
     ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
     if (executionState == null) {
-      throw new TopologyRuntimeManagementException(
-          String.format("Failed to get execution state for topology %s", topologyName));
+      if (command == Command.KILL) {
+        LOG.warning(String.format("Topology execution state for '%s' is not found", topologyName));
+      } else {
+        throw new TopologyRuntimeManagementException(
+            String.format("Failed to get execution state for topology %s", topologyName));
+      }
+    } else {
+      // Execution state is available, validate configurations.
+      validateExecutionState(topologyName, executionState);
     }
+    return hasExecutionData;
+  }
 
+  /**
+   * Verify that the environment information in execution state matches the request
+   */
+  protected void validateExecutionState(
+      String topologyName,
+      ExecutionEnvironment.ExecutionState executionState)
+      throws TopologyRuntimeManagementException {
     String stateCluster = executionState.getCluster();
     String stateRole = executionState.getRole();
     String stateEnv = executionState.getEnviron();
     String configCluster = Context.cluster(config);
     String configRole = Context.role(config);
     String configEnv = Context.environ(config);
+
     if (!stateCluster.equals(configCluster)
         || !stateRole.equals(configRole)
         || !stateEnv.equals(configEnv)) {
@@ -438,11 +468,15 @@ public class RuntimeManagerMain {
     }
   }
 
-  protected void callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient)
+  protected void callRuntimeManagerRunner(
+      Config runtime,
+      ISchedulerClient schedulerClient,
+      boolean potentialStaleExecutionData)
     throws TopologyRuntimeManagementException, TMasterException, PackingException {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, schedulerClient);
+        new RuntimeManagerRunner(config, runtime, command, schedulerClient,
+            potentialStaleExecutionData);
 
     // invoke the appropriate handlers based on command
     runtimeManagerRunner.call();
