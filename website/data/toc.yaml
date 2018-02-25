@@ -75,6 +75,8 @@ sections:
         url: /docs/operators/deployment/uploaders/localfs
       - name: HDFS
         url: /docs/operators/deployment/uploaders/hdfs
+      - name: HTTP
+        url: /docs/operators/deployment/uploaders/http
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
       - name: Secure Copy (SCP)
