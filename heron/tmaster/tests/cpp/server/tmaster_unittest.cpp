@@ -45,7 +45,7 @@ const sp_string CONTAINER_INDEX = "0";
 const sp_string STMGR_NAME = "stmgr";
 const sp_string MESSAGE_TIMEOUT = "30";  // seconds
 const sp_string LOCALHOST = "127.0.0.1";
-const sp_string heron_internals_config_filename =
+sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
 const sp_string metrics_sinks_config_filename =
     "../../../../../../../../heron/config/metrics_sinks.yaml";

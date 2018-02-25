@@ -287,8 +287,8 @@ bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
   std::map<sp_string, sp_string> scoped_config_map;
   for (scoped_iter = paramters.begin(); scoped_iter != paramters.end(); ++scoped_iter) {
     // Each config should have only one '='
-    int index = scoped_iter->find_first_of('=');
-    if (index <= 0 || index != scoped_iter->find_last_of('=')) {
+    size_t index = scoped_iter->find_first_of('=');
+    if (index == sp_string::npos || index != scoped_iter->find_last_of('=')) {
       LOG(ERROR) << "Failed to parse config: " << *scoped_iter
           << ". More than one '='s are found."
           << " Configs should be in this format: (COMPONENT_NAME|topology):(CONFIG_NAME)=(VALUE)";
@@ -305,8 +305,8 @@ bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
   for (iter = scoped_config_map.begin(); iter != scoped_config_map.end(); ++iter) {
     LOG(INFO) << "Runtime config " << iter->first << " => " << iter->second;
     // Incoming config names should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
-    int index = iter->first.find_first_of(':');
-    if (index <= 0 || index != iter->first.find_last_of(':')) {
+    size_t index = iter->first.find_first_of(':');
+    if (index == sp_string::npos || index != iter->first.find_last_of(':')) {
       LOG(ERROR) << "Invalid config name: " << iter->first << "."
           << ". More than one ':'s are found."
           << " Config names should be in this format: (COMPONENT_NAME|topology):(CONFIG_NAME)";
