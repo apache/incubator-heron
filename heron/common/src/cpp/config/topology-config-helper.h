@@ -138,6 +138,7 @@ class TopologyConfigHelper {
   static void GetTopologyConfig(const proto::api::Topology& _topology,
                                 std::map<sp_string, sp_string>& retval);
 
+  // Update topology level config
   static void SetTopologyConfig(proto::api::Topology* _topology,
                                 const std::map<sp_string, sp_string>& retval);
 
@@ -147,6 +148,7 @@ class TopologyConfigHelper {
                                  const sp_string& _component_name,
                                  std::map<sp_string, sp_string>& config);
 
+  // Update component level config
   static void SetComponentConfig(proto::api::Topology* _topology,
                                  const sp_string& _component_name,
                                  const std::map<sp_string, sp_string>& config);
@@ -155,10 +157,12 @@ class TopologyConfigHelper {
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
                                     const sp_string& _config_name,
                                     bool _default_value);
-  static void ConvertConfigToMap(const proto::api::Config& _config,
-                                 std::map<sp_string, sp_string>& retval);
-  static void UpdateConfigValues(proto::api::Config* _pb_config,
-                                 const std::map<sp_string, sp_string>& _config);
+  // Convert topology config to a key value map
+  static void ConvertConfigToKVMap(const proto::api::Config& _config,
+                                   std::map<sp_string, sp_string>& retval);
+  // Update topology config from a key value map
+  static void UpdateConfigFromKVMap(proto::api::Config* _config,
+                                    const std::map<sp_string, sp_string>& _update);
 };
 }  // namespace config
 }  // namespace heron

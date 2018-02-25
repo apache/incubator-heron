@@ -45,14 +45,15 @@ const sp_string CONTAINER_INDEX = "0";
 const sp_string STMGR_NAME = "stmgr";
 const sp_string MESSAGE_TIMEOUT = "30";  // seconds
 const sp_string LOCALHOST = "127.0.0.1";
-sp_string heron_internals_config_filename =
+const sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
-sp_string metrics_sinks_config_filename = "../../../../../../../../heron/config/metrics_sinks.yaml";
+const sp_string metrics_sinks_config_filename =
+    "../../../../../../../../heron/config/metrics_sinks.yaml";
 
-sp_string topology_user_config_1 = "topology.user.test_config";
-sp_string topology_user_config_2 = "topology.user.test_config2";
-sp_string spout_user_config = "topology.user.spout.test_config";
-sp_string bolt_user_config = "topology.user.bolt.test_config";
+const sp_string topology_user_config_1 = "topology.user.test_config";
+const sp_string topology_user_config_2 = "topology.user.test_config2";
+const sp_string spout_user_config = "topology.user.spout.test_config";
+const sp_string bolt_user_config = "topology.user.bolt.test_config";
 
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
@@ -120,6 +121,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     heron::proto::api::Config::KeyValue* kv = config->add_kvs();
     kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM);
     kv->set_value(std::to_string(num_bolt_instances));
+    // Add user config
     heron::proto::api::Config::KeyValue* kv1 = config->add_kvs();
     kv1->set_key(bolt_user_config);
     kv1->set_value("-1");
@@ -129,6 +131,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
   kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS);
   kv->set_value(MESSAGE_TIMEOUT);
+  // Add user config
   heron::proto::api::Config::KeyValue* kv1 = topology_config->add_kvs();
   kv1->set_key(topology_user_config_1);
   kv1->set_value("-1");

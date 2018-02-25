@@ -404,15 +404,16 @@ void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topolo
                                              std::map<sp_string, sp_string>& retval) {
   if (_topology.has_topology_config()) {
     const proto::api::Config& config = _topology.topology_config();
-    ConvertConfigToMap(config, retval);
+    ConvertConfigToKVMap(config, retval);
   }
 }
 
+// Update topology level config
 void TopologyConfigHelper::SetTopologyConfig(proto::api::Topology* _topology,
                                              const std::map<sp_string, sp_string>& _update) {
   if (_topology->has_topology_config()) {
     proto::api::Config* config = _topology->mutable_topology_config();
-    UpdateConfigValues(config, _update);
+    UpdateConfigFromKVMap(config, _update);
   }
 }
 
@@ -426,7 +427,7 @@ void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topol
     if (_topology.spouts(i).comp().name() == _component_name) {
       if (_topology.spouts(i).comp().has_config()) {
         const proto::api::Config& config = _topology.spouts(i).comp().config();
-        ConvertConfigToMap(config, retval);
+        ConvertConfigToKVMap(config, retval);
       }
       return;
     }
@@ -436,14 +437,14 @@ void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topol
     if (_topology.bolts(i).comp().name() == _component_name) {
       if (_topology.bolts(i).comp().has_config()) {
         const proto::api::Config& config = _topology.bolts(i).comp().config();
-        ConvertConfigToMap(config, retval);
+        ConvertConfigToKVMap(config, retval);
       }
       return;
     }
   }
 }
 
-// Return component level config
+// Update component level config
 void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
                                               const sp_string& _component_name,
                                               const std::map<sp_string, sp_string>& _update) {
@@ -453,7 +454,7 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
     proto::api::Component* comp = _topology->mutable_spouts(i)->mutable_comp();
     if (comp->name() == _component_name && comp->has_config()) {
       proto::api::Config* config = comp->mutable_config();
-      UpdateConfigValues(config, _update);
+      UpdateConfigFromKVMap(config, _update);
     }
   }
 
@@ -461,14 +462,14 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
     proto::api::Component* comp = _topology->mutable_bolts(i)->mutable_comp();
     if (comp->name() == _component_name && comp->has_config()) {
       proto::api::Config* config = comp->mutable_config();
-      UpdateConfigValues(config, _update);
+      UpdateConfigFromKVMap(config, _update);
     }
   }
 }
 
 // For every existing config, if it is in the new config, update the value
-void TopologyConfigHelper::UpdateConfigValues(proto::api::Config* _config,
-                                              const std::map<sp_string, sp_string>& _update) {
+void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
+                                                 const std::map<sp_string, sp_string>& _update) {
   for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
     const std::string& key = _config->mutable_kvs(i)->key();
     std::map<sp_string, sp_string>::const_iterator iter = _update.find(key);
@@ -491,8 +492,9 @@ bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _to
   return _default_value;
 }
 
-void TopologyConfigHelper::ConvertConfigToMap(const proto::api::Config& _config,
-                                              std::map<sp_string, sp_string>& retval) {
+// Convert topology config to a key value map
+void TopologyConfigHelper::ConvertConfigToKVMap(const proto::api::Config& _config,
+                                                std::map<sp_string, sp_string>& retval) {
   for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
     retval[_config.kvs(i).key()] = _config.kvs(i).value();
   }
