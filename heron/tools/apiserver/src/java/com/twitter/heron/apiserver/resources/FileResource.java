@@ -29,7 +29,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.jetty.util.StringUtil;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -122,11 +121,12 @@ public class FileResource extends HeronResource {
  */
   @GET
   @Path("/download/{file}")
-  public Response downloadFile(final @PathParam("file") String file) {
+  public Response downloadFile(final @PathParam("file") String filename) {
     Config config = createConfig();
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
-    String filePath = uploadDir + "/" + file;
-    if (!new File(filePath).exists()) {
+    String filePath = uploadDir + "/" + filename;
+    File file = new File(filePath);
+    if (!file.exists()) {
       LOG.debug("Download request file " + file + " doesn't exist at " + uploadDir);
       return Response.status(Response.Status.NOT_FOUND).build();
     }
@@ -145,6 +145,9 @@ public class FileResource extends HeronResource {
   @Path("/download/core")
   public Response downloadHeronCore() {
     String corePath = getHeronCorePackagePath();
+    if (corePath == null || corePath.isEmpty()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
     File file = new File(corePath);
     if (!file.exists()) {
       return Response.status(Response.Status.NOT_FOUND).build();
@@ -164,11 +167,11 @@ public class FileResource extends HeronResource {
 
   private String getHostNameOrIP() {
     // Override hostname if provided in flags
-    if (StringUtil.isNotBlank(getDownloadHostName())) {
+    if (getDownloadHostName() != null && !getDownloadHostName().isEmpty()) {
       return getDownloadHostName();
-    } else if (StringUtil.isNotBlank(hostname)) {
+    } else if (hostname != null && !hostname.isEmpty()) {
       return hostname;
-    } else if (ip != null && StringUtil.isNotBlank(ip.toString())) {
+    } else if (ip != null && !ip.toString().isEmpty()) {
       return ip.toString();
     }
     return "";

@@ -283,8 +283,6 @@ public final class Runtime {
             releaseFile,
             configurationOverrides);
 
-    LOG.info("heronCorePackagePath: " + heronCorePackagePath);
-
     final ResourceConfig config = new ResourceConfig(Resources.get());
     final Server server = new Server(port);
 
@@ -303,9 +301,11 @@ public final class Runtime {
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
         String.valueOf(port));
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_DOWNLOAD_HOSTNAME,
-        String.valueOf(downloadHostName));
+        (downloadHostName != null && !downloadHostName.isEmpty())
+            ? String.valueOf(downloadHostName) : null);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_HERON_CORE_PACKAGE_PATH,
-        String.valueOf(heronCorePackagePath));
+        (heronCorePackagePath != null && !heronCorePackagePath.isEmpty())
+            ? String.valueOf(heronCorePackagePath) : null);
 
     server.setHandler(contextHandler);
 
