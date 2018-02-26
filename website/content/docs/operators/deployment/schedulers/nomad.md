@@ -18,7 +18,7 @@ When setting up your Nomad cluster, the following are required:
 
 ## Configuring Heron settings
 
-Before installing Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
+Before running Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
 
 First, you'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:
 
@@ -97,7 +97,7 @@ $ heron submit nomad \
 
 ## Deploying with the API server
 
-The advantage of running the [Heron API Server](../../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  y using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
+The advantage of running the [Heron API Server](../../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
 
 ## Running the API server
 
