@@ -89,6 +89,8 @@ sections:
         url: /docs/operators/deployment/schedulers/aurora
       - name: Multi-node standalone cluster
         url: /docs/operators/deployment/schedulers/standalone
+      - name: Nomad
+        url: /docs/operators/deployment/schedulers/nomad
       - name: Local Cluster
         url: /docs/operators/deployment/schedulers/local
 #      - name: Mesos Cluster
