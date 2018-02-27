@@ -30,6 +30,7 @@ heron.uploader.http.uri: http://localhost:9000/api/v1/file/upload
 
 Also Heron's API server can be used as a file server for the HttpUploader to upload topology 
 package/jars as follows:
+
 ```
 ${HOME}/.heron/bin/heron-apiserver 
 --cluster standalone 
@@ -39,3 +40,6 @@ ${HOME}/.heron/bin/heron-apiserver
 -D heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader 
 --verbose
 ```
+
+Also Http Server that topology package/jars are uploaded needs to return an URI upon upload 
+so that Heron will know the location to download in the future.
