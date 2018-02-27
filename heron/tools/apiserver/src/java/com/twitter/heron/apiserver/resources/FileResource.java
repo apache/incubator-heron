@@ -167,9 +167,9 @@ public class FileResource extends HeronResource {
 
   private String getHostNameOrIP() {
     // Override hostname if provided in flags
-    if (getDownloadHostName() != null && !getDownloadHostName().isEmpty()) {
+    if (Utils.isNotEmpty(getDownloadHostName())) {
       return getDownloadHostName();
-    } else if (hostname != null && !hostname.isEmpty()) {
+    } else if (Utils.isNotEmpty(hostname)) {
       return hostname;
     } else if (ip != null && !ip.toString().isEmpty()) {
       return ip.toString();
