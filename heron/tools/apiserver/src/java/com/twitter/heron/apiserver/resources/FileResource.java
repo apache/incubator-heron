@@ -121,21 +121,11 @@ public class FileResource extends HeronResource {
  */
   @GET
   @Path("/download/{file}")
-  public Response downloadFile(final @PathParam("file") String filename) {
+  public Response downloadFile(final @PathParam("file") String file) {
     Config config = createConfig();
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
-    String filePath = uploadDir + "/" + filename;
-    File file = new File(filePath);
-    if (!file.exists()) {
-      LOG.debug("Download request file " + file + " doesn't exist at " + uploadDir);
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    String mimeType = new MimetypesFileTypeMap().getContentType(file);
-    Response.ResponseBuilder rb = Response.ok(file, mimeType);
-    rb.header("content-disposition", "attachment; filename = "
-        + file);
-    return rb.build();
+    String filePath = uploadDir + "/" + file;
+    return getResponseByFile(filePath);
   }
 
   /**
@@ -145,10 +135,12 @@ public class FileResource extends HeronResource {
   @Path("/download/core")
   public Response downloadHeronCore() {
     String corePath = getHeronCorePackagePath();
-    if (corePath == null || corePath.isEmpty()) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    File file = new File(corePath);
+    return getResponseByFile(corePath);
+  }
+
+  private Response getResponseByFile(String filePath) {
+
+    File file = new File(filePath);
     if (!file.exists()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
@@ -157,6 +149,7 @@ public class FileResource extends HeronResource {
     rb.header("content-disposition", "attachment; filename = "
         + file.getName());
     return rb.build();
+
   }
 
   private Config createConfig() {
