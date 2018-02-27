@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -40,6 +41,7 @@ public class AbstractOutputCollector {
   private long totalTuplesEmitted;
   private long totalBytesEmitted;
   private PhysicalPlanHelper helper;
+  public final ReentrantLock lock = new ReentrantLock();
 
   /**
    * The SuppressWarnings is only until TOPOLOGY_ENABLE_ACKING exists.
@@ -73,7 +75,7 @@ public class AbstractOutputCollector {
       }
     }
 
-    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
+    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue, lock);
   }
 
   public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {

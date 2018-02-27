@@ -148,11 +148,18 @@ public class SpoutInstance implements IInstance {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
-    if (spout instanceof IStatefulComponent) {
-      ((IStatefulComponent) spout).preSave(checkpointId);
-    }
+    // need to synchronize with other OutgoingTupleCollection operations
+    // so that topology emit, ack, fail are thread safe
+    collector.lock.lock();
+    try {
+      if (spout instanceof IStatefulComponent) {
+        ((IStatefulComponent) spout).preSave(checkpointId);
+      }
 
-    collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId);
+    } finally {
+      collector.lock.unlock();
+    }
   }
 
   @SuppressWarnings("unchecked")

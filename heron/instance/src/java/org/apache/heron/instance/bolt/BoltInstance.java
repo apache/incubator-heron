@@ -139,12 +139,19 @@ public class BoltInstance implements IInstance {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
 
-    // Checkpoint
-    if (bolt instanceof IStatefulComponent) {
-      ((IStatefulComponent) bolt).preSave(checkpointId);
-    }
+    // need to synchronize with other OutgoingTupleCollection operations
+    // so that topology emit, ack, fail are thread safe
+    collector.lock.lock();
+    try {
+      // Checkpoint
+      if (bolt instanceof IStatefulComponent) {
+        ((IStatefulComponent) bolt).preSave(checkpointId);
+      }
 
-    collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId);
+    } finally {
+      collector.lock.unlock();
+    }
   }
 
   @SuppressWarnings("unchecked")
