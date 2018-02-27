@@ -119,7 +119,7 @@ class HeronExecutorTest(unittest.TestCase):
              "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
              "--system_config_file %s --override_config_file %s " \
              "--sink_config_file metrics_sinks_config_file " \
-             "--cluster cluster --role role --environment environ --verbose" %\
+             "--cluster cluster --role role --environment environ" %\
              (INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_healthmgr_command():

@@ -5,9 +5,6 @@ source ${DIR}/../../scripts/detect_os_type.sh
 
 PLATFORM=`platform`
 if [ $PLATFORM = darwin ]; then
-  brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
-  nvm install node
-  curl -L https://www.npmjs.com/install.sh | sh
   go get -v github.com/gohugoio/hugo
   which wget || brew install wget
 elif [ $PLATFORM = ubuntu ]; then

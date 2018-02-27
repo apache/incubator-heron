@@ -218,7 +218,10 @@ public class SchedulerMainTest {
     int configuredNumStreamManagers = configuredNumContainers - 1;
     int packingPlanSize = 1;
 
-    SubmitterMain submitterMain = new SubmitterMain(null, null);
+    SubmitterMain submitterMain = new SubmitterMain(
+        Config.newBuilder()
+        .put(Key.PACKING_CLASS, "com.twitter.heron.packing.roundrobin.ResourceCompliantRRPacking")
+        .build(), null);
     PackingPlan packingPlan =
         PackingTestUtils.testPackingPlan(TOPOLOGY_NAME, new RoundRobinPacking());
     assertEquals(packingPlanSize, packingPlan.getContainers().size());

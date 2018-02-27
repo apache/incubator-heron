@@ -41,6 +41,7 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
@@ -152,15 +153,36 @@ public class UpdateTopologyManager implements Closeable {
       deactivateTopology(stateManager, topology, proposedPackingPlan);
     }
 
+    Set<PackingPlan.ContainerPlan> updatedContainers =
+        new HashSet<>(proposedPackingPlan.getContainers());
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
     if (newContainerCount > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
+      Set<PackingPlan.ContainerPlan> containersToAdd = containerDelta.getContainersToAdd();
+      Set<PackingPlan.ContainerPlan> containersAdded =
+          scalableScheduler.get().addContainers(containersToAdd);
+      // Update the PackingPlan with new container-ids
+      if (containersAdded != null) {
+        if (containersAdded.size() != containersToAdd.size()) {
+          throw new RuntimeException("Scheduler failed to add requested containers. Requested "
+              + containersToAdd.size() + ", added " + containersAdded.size() + ". "
+                  + "The topology can be in a strange stage. "
+                  + "Please check carefully or redeploy the topology !!");
+        }
+        updatedContainers.removeAll(containersToAdd);
+        updatedContainers.addAll(containersAdded);
+      }
     }
+
+    PackingPlan updatedPackingPlan =
+        new PackingPlan(proposedPackingPlan.getId(), updatedContainers);
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlans.PackingPlan updatedProtoPackingPlan = serializer.toProto(updatedPackingPlan);
+    LOG.fine("The updated Packing Plan: " + updatedProtoPackingPlan);
 
     // update packing plan to trigger the scaling event
     logInfo("Update new PackingPlan: %s",
-        stateManager.updatePackingPlan(proposedProtoPackingPlan, topologyName));
+        stateManager.updatePackingPlan(updatedProtoPackingPlan, topologyName));
 
     // reactivate topology
     if (initiallyRunning) {

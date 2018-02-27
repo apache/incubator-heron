@@ -42,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -50,6 +51,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
@@ -150,6 +152,12 @@ public class UpdateTopologyManagerTest {
     SchedulerStateManagerAdaptor mockStateMgr = mockStateManager(
         testTopology, this.currentProtoPlan, lock);
     IScalable mockScheduler = mock(IScalable.class);
+    HashSet<PackingPlan.ContainerPlan> mockRetrunSet = new HashSet<>();
+    mockRetrunSet.add(new PackingPlan.ContainerPlan(0, new HashSet<>(),
+        new Resource(5, ByteAmount.ZERO, ByteAmount.ZERO)));
+    mockRetrunSet.add(new PackingPlan.ContainerPlan(1, new HashSet<>(),
+        new Resource(6, ByteAmount.ZERO, ByteAmount.ZERO)));
+    when(mockScheduler.addContainers(any())).thenReturn(mockRetrunSet);
     UpdateTopologyManager spyUpdateManager =
         spyUpdateManager(mockStateMgr, mockScheduler, testTopology);
 

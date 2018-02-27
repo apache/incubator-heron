@@ -99,10 +99,16 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
-    this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config);
+    this.instanceRamDefault = Context.instanceRam(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
-    containerRamPadding = getContainerRamPadding(inputTopology.getTopologyConfig().getKvsList());
+    this.containerRamPadding = getContainerRamPadding(topology.getTopologyConfig().getKvsList());
+    LOG.info(String.format("Initalizing RoundRobinPacking. "
+        + "CPU default: %f, RAM default: %s, DISK default: %s, RAM padding: %s.",
+        this.instanceCpuDefault,
+        this.instanceRamDefault.toString(),
+        this.instanceDiskDefault.toString(),
+        this.containerRamPadding.toString()));
   }
 
   @Override
@@ -124,6 +130,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     ByteAmount containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
+    ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
+
+    LOG.info(String.format("Pack internal: container cpu hint: %f, ram hint: %s, disk hint: %s.",
+        containerCpu,
+        containerDiskInBytes.toString(),
+        containerRamHint.toString()));
 
     // Construct the PackingPlan
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
@@ -184,6 +196,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMapInContainer = new HashMap<>();
+    ByteAmount containerRamHint = getContainerRamHint(allocation);
 
     for (int containerId : allocation.keySet()) {
       List<InstanceId> instanceIds = allocation.get(containerId);
@@ -206,7 +219,6 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
       // Now we have calculated ram for instances specified in ComponentRamMap
       // Then to calculate ram for the rest instances
-      ByteAmount containerRamHint = getContainerRamHint(allocation);
       int instancesToAllocate = instancesToBeAccounted.size();
 
       if (instancesToAllocate != 0) {
@@ -367,7 +379,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     Map<String, Integer> currentComponentParallelism = currentPackingPlan.getComponentCounts();
 
     for (Map.Entry<String, Integer> e : componentChanges.entrySet()) {
-      currentComponentParallelism.put(e.getKey(), e.getValue());
+      Integer newParallelism = currentComponentParallelism.get(e.getKey()) + e.getValue();
+      currentComponentParallelism.put(e.getKey(), newParallelism);
     }
 
     int newNumInstance = TopologyUtils.getTotalInstance(currentComponentParallelism);

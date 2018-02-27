@@ -16,10 +16,12 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -110,36 +112,63 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
+  private static final String ERR_PROMPT =
+      "The topology can be in a strange stage. Please check carefully or redeploy the topology !!";
+
   @Override
-  public void addContainers(Integer count) {
+  public Set<Integer> addContainers(Integer count) {
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
     //clone instance 0
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
-        "aurora", "job", "add", "--wait-until", "RUNNING", jobSpec + "/0", count.toString()));
-
-    if (isVerbose) {
-      auroraCmd.add("--verbose");
-    }
+        "aurora", "job", "add", "--wait-until", "RUNNING",
+        jobSpec + "/0", count.toString(), "--verbose"));
 
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
-    if (!runProcess(auroraCmd)) {
-      throw new RuntimeException("Failed to create " + count + " new aurora instances");
+    StringBuilder stderr = new StringBuilder();
+    if (!runProcess(auroraCmd, null, stderr)) {
+      throw new RuntimeException(
+          "Failed to create " + count + " new aurora instances. " + ERR_PROMPT);
     }
+
+    if (stderr.length() <= 0) { // no container was added
+      throw new RuntimeException("Empty output by Aurora. " + ERR_PROMPT);
+    }
+    return extractContainerIds(stderr.toString());
+  }
+
+  private Set<Integer> extractContainerIds(String auroraOutputStr) {
+    String pattern = "Querying instance statuses: [";
+    int idx1 = auroraOutputStr.indexOf(pattern);
+    if (idx1 < 0) { // no container was added
+      LOG.info("stdout & stderr by Aurora " + auroraOutputStr);
+      return new HashSet<Integer>();
+    }
+    idx1 += pattern.length();
+    int idx2 = auroraOutputStr.indexOf("]", idx1);
+    String containerIdStr = auroraOutputStr.substring(idx1, idx2);
+    LOG.info("container IDs returned by Aurora " + containerIdStr);
+    return Arrays.asList(containerIdStr.split(", "))
+        .stream().map(x->Integer.valueOf(x)).collect(Collectors.toSet());
   }
 
   // Utils method for unit tests
   @VisibleForTesting
-  boolean runProcess(List<String> auroraCmd) {
-    StringBuilder stdout = new StringBuilder();
-    StringBuilder stderr = new StringBuilder();
+  boolean runProcess(List<String> auroraCmd, StringBuilder stdout, StringBuilder stderr) {
     int status =
-        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]), stderr);
+        ShellUtils.runProcess(auroraCmd.toArray(new String[auroraCmd.size()]),
+            stderr != null ? stderr : new StringBuilder());
 
     if (status != 0) {
       LOG.severe(String.format(
           "Failed to run process. Command=%s, STDOUT=%s, STDERR=%s", auroraCmd, stdout, stderr));
     }
     return status == 0;
+  }
+
+  // Utils method for unit tests
+  @VisibleForTesting
+  boolean runProcess(List<String> auroraCmd) {
+    return runProcess(auroraCmd, null, null);
   }
 
   private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {

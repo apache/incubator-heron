@@ -451,7 +451,7 @@ class HeronExecutor(object):
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
-                           "--environment", self.environment, "--verbose"]
+                           "--environment", self.environment]
 
     return metricscachemgr_cmd
 
@@ -509,9 +509,10 @@ class HeronExecutor(object):
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
     retval["heron-tmaster"] = tmaster_cmd
 
-    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     if self.health_manager_mode.lower() != "disabled":
+      # align metricscache and healthmgr toggle switch
+      retval["heron-metricscache"] = self._get_metrics_cache_cmd()
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
@@ -1052,8 +1053,13 @@ def main():
     # The filename format is heron-executor-<container_id>.stdxxx
     log.configure(logfile='heron-executor-%s.stdout' % shardid)
 
-    Log.info('Set up process group; executor becomes leader')
-    os.setpgrp() # create new process group, become its leader
+    pid = os.getpid()
+    sid = os.getsid(pid)
+
+    # POSIX prohibits the change of the process group ID of a session leader
+    if pid <> sid:
+      Log.info('Set up process group; executor becomes leader')
+      os.setpgrp() # create new process group, become its leader
 
     Log.info('Register the SIGTERM signal handler')
     signal.signal(signal.SIGTERM, signal_handler)

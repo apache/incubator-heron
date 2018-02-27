@@ -16,8 +16,11 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -182,9 +185,45 @@ public class AuroraScheduler implements IScheduler, IScalable {
     return true;
   }
 
+  private static final String CONFIRMED_YES = "y";
+  boolean hasConfirmedWithUser(int newContainerCount) {
+    LOG.info(String.format("After update there will be %d more containers. "
+        + "Please make sure there are sufficient resources to update this job. "
+        + "Continue update? [y/N]: ", newContainerCount));
+    Scanner scanner = new Scanner(System.in);
+    String userInput = scanner.nextLine();
+    return CONFIRMED_YES.equalsIgnoreCase(userInput);
+  }
+
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    controller.addContainers(containersToAdd.size());
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
+    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
+    if ("prompt".equalsIgnoreCase(Context.updatePrompt(config))
+        && !hasConfirmedWithUser(containersToAdd.size())) {
+      LOG.warning("Scheduler updated topology canceled.");
+      return remapping;
+    }
+
+    // Do the actual containers adding
+    LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
+        controller.addContainers(containersToAdd.size()));
+    if (newAddedContainerIds.size() != containersToAdd.size()) {
+      throw new RuntimeException(
+          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          + "; input count was " + containersToAdd.size());
+    }
+    // Do the remapping:
+    // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
+    for (PackingPlan.ContainerPlan cp : containersToAdd) {
+      PackingPlan.ContainerPlan newContainerPlan =
+          new PackingPlan.ContainerPlan(
+              newAddedContainerIds.pop(), cp.getInstances(),
+              cp.getRequiredResource(), cp.getScheduledResource().orNull());
+      remapping.add(newContainerPlan);
+    }
+    LOG.info("The remapping structure: " + remapping);
+    return remapping;
   }
 
   @Override

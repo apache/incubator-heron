@@ -25,6 +25,8 @@ public class HeronResource {
   public static final String ATTRIBUTE_CONFIGURATION_DIRECTORY = "configuration_directory";
   public static final String ATTRIBUTE_CONFIGURATION_OVERRIDE_PATH = "configuration_override";
   public static final String ATTRIBUTE_PORT = "port";
+  public static final String ATTRIBUTE_DOWNLOAD_HOSTNAME = "download_hostname";
+  public static final String ATTRIBUTE_HERON_CORE_PACKAGE_PATH = "heron_core_package_path";
 
   @Context
   protected ServletContext servletContext;
@@ -34,6 +36,8 @@ public class HeronResource {
   private String configurationOverridePath;
   private String cluster;
   private String port;
+  private String downloadHostname;
+  private String heronCorePackagePath;
 
   Config getBaseConfiguration() {
     if (baseConfiguration == null) {
@@ -74,4 +78,22 @@ public class HeronResource {
 
     return port;
   }
+
+  String getDownloadHostName() {
+    if (downloadHostname == null) {
+      downloadHostname = (String) servletContext.getAttribute(ATTRIBUTE_DOWNLOAD_HOSTNAME);
+    }
+
+    return downloadHostname;
+  }
+
+  String getHeronCorePackagePath() {
+    if (heronCorePackagePath == null) {
+      heronCorePackagePath
+          = (String) servletContext.getAttribute(ATTRIBUTE_HERON_CORE_PACKAGE_PATH);
+    }
+
+    return heronCorePackagePath;
+  }
+
 }

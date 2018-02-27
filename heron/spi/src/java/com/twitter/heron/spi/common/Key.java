@@ -83,9 +83,14 @@ public enum Key {
   //keys for config provided files and directories
   INTERNALS_CONFIG_FILE    ("heron.internals.config.file", Type.STRING),
 
+  // heron core can be either a directory or URI, a switch to control it
+  // default is to use core URI
+  CORE_PACKAGE_DIRECTORY   ("heron.package.core.directory",   "${HERON_DIST}/heron-core"),
+  CORE_PACKAGE_URI         ("heron.package.core.uri",         "${HERON_DIST}/heron-core.tar.gz"),
+  USE_CORE_PACKAGE_URI     ("heron.package.use_core_uri",     Boolean.TRUE),
+
   //keys for packages URIs
-  CORE_PACKAGE_URI         ("heron.package.core.uri", "${HERON_DIST}/heron-core.tar.gz"),
-  TOPOLOGY_PACKAGE_URI     ("heron.package.topology.uri", Type.STRING),
+  TOPOLOGY_PACKAGE_URI     ("heron.package.topology.uri",     Type.STRING),
 
   //keys for topology
   TOPOLOGY_ID              ("heron.topology.id",              Type.STRING),
@@ -165,7 +170,13 @@ public enum Key {
   SHELL_BINARY          ("heron.binaries.shell",           "${HERON_BIN}/heron-shell"),
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),
-  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader");
+  DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
+
+  // keys for `heron` command line.
+  // Prompt user when more containers are required so that
+  // user has another chance to double check quota is available.
+  // To enable it, change the config from "disabled" to "prompt".
+  UPDATE_PROMPT         ("heron.command.update.prompt", "disabled");
 
 
   private final String value;

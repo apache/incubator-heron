@@ -97,7 +97,7 @@ if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
 fi
 
 mkdir -p ${bin} ${base} ${base}/etc
-echo -n .
+echo "..done"
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 untar ${base}/heron.tar.gz ${base}
@@ -120,9 +120,13 @@ ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
 ln -s "${base}/bin/heron-ui" "${bin}/heron-ui"
 ln -s "${base}/bin/heron-apiserver" "${bin}/heron-apiserver"
-echo -n .
+
+echo "Uncompressing."
+untar ${base}/dist/heron-core.tar.gz ${base}/dist
 
 rm "${base}/heron.tar.gz"
+rm "${base}/dist/heron-core.tar.gz"
+rm -f "${base}/dist/release.yaml"
 
 cat <<EOF
 

@@ -159,8 +159,6 @@ public class InstanceExecutor implements Runnable {
 
       // Reset the flag value
       toStop = false;
-
-      return;
     }
   }
 

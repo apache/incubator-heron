@@ -173,6 +173,14 @@ public class Context {
     return cfg.getStringValue(Key.CORE_PACKAGE_URI);
   }
 
+  public static String corePackageDirectory(Config cfg) {
+    return cfg.getStringValue(Key.CORE_PACKAGE_DIRECTORY);
+  }
+
+  public static Boolean useCorePackageUri(Config cfg) {
+    return cfg.getBooleanValue(Key.USE_CORE_PACKAGE_URI);
+  }
+
   public static String healthMgrMode(Config cfg) {
     return cfg.getStringValue(Key.HEALTHMGR_MODE);
   }
@@ -315,6 +323,10 @@ public class Context {
 
   public static String downloaderBinary(Config cfg) {
     return cfg.getStringValue(Key.DOWNLOADER_BINARY);
+  }
+
+  public static String updatePrompt(Config cfg) {
+    return cfg.getStringValue(Key.UPDATE_PROMPT);
   }
 
   @SuppressWarnings("unchecked")

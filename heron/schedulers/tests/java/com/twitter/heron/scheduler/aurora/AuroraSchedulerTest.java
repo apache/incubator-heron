@@ -213,6 +213,8 @@ public class AuroraSchedulerTest {
     PowerMockito.mockStatic(Config.class);
     when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
+    AuroraController controller = Mockito.mock(AuroraController.class);
+    doReturn(controller).when(scheduler).getController();
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
 
     PowerMockito.spy(TokenSub.class);

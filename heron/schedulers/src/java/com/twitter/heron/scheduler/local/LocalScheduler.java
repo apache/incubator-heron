@@ -288,7 +288,7 @@ public class LocalScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containers) {
+  public Set<PackingPlan.ContainerPlan> addContainers(Set<PackingPlan.ContainerPlan> containers) {
     synchronized (processToContainer) {
       for (PackingPlan.ContainerPlan container : containers) {
         if (processToContainer.values().contains(container.getId())) {
@@ -298,6 +298,7 @@ public class LocalScheduler implements IScheduler, IScalable {
         startExecutor(container.getId(), container.getInstances());
       }
     }
+    return containers;
   }
 
   @Override

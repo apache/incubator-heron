@@ -18,100 +18,72 @@ For other platforms, you need to build from source. Please refer to the [guide t
 
 ## Step 1 --- Download the Heron tools
 
-Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
+Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
 
-> You can install using [installation scripts](#using-installation-scripts) on MacOS as well.
+> You can install using [installation scripts](#using-installation-scripts) on macOS as well.
 
-## MacOS/Homebrew
+## macOS/Homebrew
 
-The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
+The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh):
 
-* The Heron command-line client tools:
+```bash
+$ brew install heron
+```
 
-    ```shell
-    $ brew install heron-client
-    ```
+This will install a variety of executables and other resources by default in `/usr/local/opt/heron`.
 
-    This will install both the [`heron`](../operators/heron-cli) and [`heron-explorer`](../operators/heron-explorer) tools.
-
-* The [Heron UI](../operators/heron-ui) dashboard:
-
-    ```shell
-    $ brew install heron-ui
-    ```
-
-* The [Heron Tracker](../operators/heron-tracker), which powers Heron UI:
-
-    ```shell
-    $ brew install heron-tracker
-    ```
-
-For this getting started tutorial we recommend installing all three tools.
+> Homebrew may use a different folder than `/usr/local/opt/heron`. To check which folder is being used, run `brew --prefix heron`.
 
 ## Using installation scripts
 
 To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, are named
-`heron-client-install-{{% heronVersion %}}-darwin.sh` and
-`heron-tools-install-{{% heronVersion %}}-darwin.sh`.
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
+`heron-install-{{% heronVersion %}}-darwin.sh`.
 
-Download both the `client` and `tools` installation scripts for your platform either from the releases page or using [wget](https://www.gnu.org/software/wget/).
-
-Here's an example for Ubuntu:
+Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-ubuntu.sh
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-ubuntu.sh
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
 ```
 
-Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
 
 ```bash
 $ chmod +x heron-*.sh
 ```
 
-> Both installation scripts will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
+> The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set:
+Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
 
 ```bash
-$ ./heron-client-install-{{% heronVersion %}}--PLATFORM.sh --user
-Heron client installer
-----------------------
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
+Heron installer
+---------------
 
-Uncompressing......
+Uncompressing...done
+...
 Heron is now installed!
-```
-
-Now run the script for Heron tools (again setting the `--user` flag):
-
-```bash
-$ ./heron-tools-install-{{% heronVersion %}}-PLATFORM.sh --user
-Heron tools installer
----------------------
-
-Uncompressing......
-Heron Tools is now installed!
 ```
 
 To check that Heron is successfully installed, run `heron version`:
 
 ```bash
 $ heron version
-heron.build.version : {{% heronVersion %}}
-heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
-heron.build.timestamp : 1470512147000
-heron.build.host : ${HOSTNAME}
-heron.build.user : ${USERNAME}
 heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
 heron.build.git.status : Clean
+heron.build.host : ...
+heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
+heron.build.timestamp : 1470512147000
+heron.build.user : ...
+heron.build.version : {{% heronVersion %}}
 ```
 
 ## Step 2 --- Launch an example topology
 
-> #### Note for MacOS users
+> #### Note for macOS users
 
-> If you want to run topologies locally on MacOS, you may need to add your
+> If you want to run topologies locally on macOS, you may need to add your
 > hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
 > `127.0.0.1 localhost My-Mac-Laptop.local`. You can fetch your hostname by simply
 > running `hostname` in your shell.

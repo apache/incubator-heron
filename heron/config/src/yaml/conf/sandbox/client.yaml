@@ -1,0 +1,5 @@
+# do not use core package URI
+heron.package.use_core_uri:                  false
+
+# core package directory to use
+heron.package.core.directory:                ${HERON_DIST}/heron-core

@@ -6,8 +6,8 @@ jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-protobuf_version = "3.4.0"
 distributedlog_version = "0.5.0"
+http_client_version = "4.5.2"
 
 # heron api server
 jetty_version = "9.4.6.v20170531"
@@ -151,7 +151,13 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_httpcomponents_http_client",
-  artifact = "org.apache.httpcomponents:httpclient:4.5.2",
+  artifact = "org.apache.httpcomponents:httpclient:" + http_client_version,
+)
+
+http_jar(
+  name = "org_apache_httpcomponents_http_client_test",
+  url = "http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/" +
+  http_client_version + "/httpclient-" + http_client_version + "-tests.jar"
 )
 
 maven_jar(
@@ -342,11 +348,6 @@ maven_jar(
 maven_jar(
   name = "org_powermock_powermock_reflect",
   artifact = "org.powermock:powermock-reflect:" + powermock_version,
-)
-
-maven_jar(
-  name = "com_google_protobuf_protobuf_java",
-  artifact = "com.google.protobuf:protobuf-java:" + protobuf_version,
 )
 
 maven_jar(
@@ -788,17 +789,19 @@ new_http_archive(
 )
 # end pex repos
 
+# protobuf dependencies for C++ and Java
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
+    strip_prefix = "protobuf-3.4.1",
+)
+# end protobuf dependencies for C++ and Java
+
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
     urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
     strip_prefix = "gflags-2.2.1",
-)
-
-http_archive(
-    name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
 )
 
 new_http_archive(
@@ -876,3 +879,16 @@ new_http_archive(
     urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
     build_file = "third_party/nomad/nomad.BUILD",
 )
+
+# scala integration
+rules_scala_version="5cdae2f034581a05e23c3473613b409de5978833" # update this as needed
+
+http_archive(
+    name = "io_bazel_rules_scala",
+    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip"%rules_scala_version,
+    type = "zip",
+    strip_prefix= "rules_scala-%s" % rules_scala_version
+)
+
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
+scala_repositories()
