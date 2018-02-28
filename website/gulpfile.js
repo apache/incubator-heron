@@ -6,14 +6,14 @@ const gulp     = require("gulp"),
       del      = require("del");
 
 const SRCS = {
-  sass: 'assets/sass/**/*.sass',
+  sass: 'assets/sass/**/*.scss',
   js: 'assets/js/app.js',
   hash: 'hash.json'
 }
 
 const DIST = {
-  css: 'dist/css',
-  js: 'dist/js'
+  css: 'static/css',
+  js: 'static/js'
 }
 
 const sassConfig = {
@@ -29,16 +29,14 @@ gulp.task('sass', (done) => {
   del(['static/css/style-*.css']);
 
   gulp.src(SRCS.sass)
-    .pipe(sass({
-      outputStyle: 'compressed'
-    }).on('error', sass.logError))
+    .pipe(sass(sassConfig).on('error', sass.logError))
     .pipe(prefixer(prefixerConfig))
     .pipe(gulp.dest(DIST.css));
   done();
 });
 
 gulp.task('sass-dev', (done) => {
-  del(['static/css/style-*.css']);
+  del([`${DIST.css}/style-*.css`]);
 
   gulp.src(SRCS.sass)
     .pipe(sass(sassConfig).on('error', sass.logError))
@@ -46,7 +44,7 @@ gulp.task('sass-dev', (done) => {
     .pipe(prefixer(prefixerConfig))
     .pipe(gulp.dest(DIST.css))
     .pipe(hash.manifest(DIST.hash))
-    .pipe(gulp.dest(DIST.css));
+    .pipe(gulp.dest('data/css'));
   done();
 });
 
@@ -62,11 +60,13 @@ gulp.task('js', (done) => {
 });
 
 gulp.task('js-dev', (done) => {
-  del(['static/js/app-*.js']);
+  del([`${DIST.js}/app-*.js`]);
 
   gulp.src(SRCS.js)
     .pipe(hash())
-    .pipe(gulp.dest(DIST.js));
+    .pipe(gulp.dest(DIST.js))
+    .pipe(hash.manifest(DIST.hash))
+    .pipe(gulp.dest('data/js'));
   done();
 });
 
