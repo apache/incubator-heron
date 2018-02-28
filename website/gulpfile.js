@@ -1,12 +1,28 @@
-var gulp     = require("gulp"),
-    sass     = require("gulp-sass"),
-    hash     = require("gulp-hash"),
-    prefixer = require("gulp-autoprefixer"),
-    del      = require("del");
+const gulp     = require("gulp"),
+      sass     = require("gulp-sass"),
+      hash     = require("gulp-hash"),
+      prefixer = require("gulp-autoprefixer"),
+      uglify   = require("gulp-uglify"),
+      del      = require("del");
 
-var SRCS = {
+const SRCS = {
   sass: 'assets/sass/**/*.sass',
-  js: 'assets/js/app.js'
+  js: 'assets/js/app.js',
+  hash: 'hash.json'
+}
+
+const DIST = {
+  css: 'dist/css',
+  js: 'dist/js'
+}
+
+const sassConfig = {
+  outputStyle: 'compressed'
+}
+
+const prefixerConfig = {
+  browsers: ['last 2 versions'],
+	cascade: false
 }
 
 gulp.task('sass', (done) => {
@@ -16,11 +32,8 @@ gulp.task('sass', (done) => {
     .pipe(sass({
       outputStyle: 'compressed'
     }).on('error', sass.logError))
-    .pipe(prefixer({
-			browsers: ['last 2 versions'],
-			cascade: false
-		}))
-    .pipe(gulp.dest('static/css'));
+    .pipe(prefixer(prefixerConfig))
+    .pipe(gulp.dest(DIST.css));
   done();
 });
 
@@ -28,17 +41,12 @@ gulp.task('sass-dev', (done) => {
   del(['static/css/style-*.css']);
 
   gulp.src(SRCS.sass)
-    .pipe(sass({
-      outputStyle: 'compressed'
-    }).on('error', sass.logError))
+    .pipe(sass(sassConfig).on('error', sass.logError))
     .pipe(hash())
-    .pipe(prefixer({
-			browsers: ['last 2 versions'],
-			cascade: false
-		}))
-    .pipe(gulp.dest('static/css'))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/css'));
+    .pipe(prefixer(prefixerConfig))
+    .pipe(gulp.dest(DIST.css))
+    .pipe(hash.manifest(DIST.hash))
+    .pipe(gulp.dest(DIST.css));
   done();
 });
 
@@ -48,7 +56,7 @@ gulp.task('sass:watch', () => {
 
 gulp.task('js', (done) => {
   gulp.src(SRCS.js)
-    .pipe(gulp.dest('static/js'));
+    .pipe(gulp.dest(DIST.js));
 
   done();
 });
@@ -58,10 +66,7 @@ gulp.task('js-dev', (done) => {
 
   gulp.src(SRCS.js)
     .pipe(hash())
-    .pipe(gulp.dest('static/js'))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/js'));
-
+    .pipe(gulp.dest(DIST.js));
   done();
 });
 

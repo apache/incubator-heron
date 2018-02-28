@@ -6,5 +6,6 @@
     "gulp-autoprefixer": "^4.0.0",
     "gulp-hash": "^4.1.1",
     "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^3.0.0"
   }
 }
