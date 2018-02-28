@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.logging.Logger;
 
 /**
  * A WakeableLooper is a class that could:
