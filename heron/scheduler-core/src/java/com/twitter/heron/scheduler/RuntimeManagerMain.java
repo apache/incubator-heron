@@ -244,7 +244,6 @@ public class RuntimeManagerMain {
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
-    String componentParallelism = cmd.getOptionValue("component_parallelism");
 
     // Optional argument in the case of restart
     // TODO(karthik): convert into CLI
@@ -280,10 +279,7 @@ public class RuntimeManagerMain {
         .put(Key.TOPOLOGY_CONTAINER_ID, containerId);
 
     // This is a command line option, but not a valid config key. Hence we don't use Keys
-    if (componentParallelism != null) {
-      commandLineConfig.put(
-          RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY, componentParallelism);
-    }
+    translateCommandLineConfig(cmd, commandLineConfig);
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Key.TOPOLOGY_NAME, topologyName);
@@ -485,5 +481,18 @@ public class RuntimeManagerMain {
   protected ISchedulerClient getSchedulerClient(Config runtime)
       throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
+  }
+
+  protected static void translateCommandLineConfig(CommandLine cmd, Config.Builder config) {
+    String componentParallelism = cmd.getOptionValue("component_parallelism");
+    if (componentParallelism != null && !componentParallelism.isEmpty()) {
+      config.put(
+          RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY, componentParallelism);
+    }
+    String userConfigurations = cmd.getOptionValue("user_config");
+    if (userConfigurations != null && !userConfigurations.isEmpty()) {
+      config.put(
+          RuntimeManagerRunner.RUNTIME_MANAGER_USER_RUNTIME_CONFIG_KEY, userConfigurations);
+    }
   }
 }
