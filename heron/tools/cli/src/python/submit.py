@@ -425,6 +425,9 @@ def run(command, parser, cl_args, unknown_args):
   # set the tmp dir and deactivated state in global options
   opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
   opts.set_config('cmdline.topology.initial.state', initial_state)
+  opts.set_config('cmdline.topology.role', cl_args['role'])
+  opts.set_config('cmdline.topology.environment', cl_args['environ'])
+
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:

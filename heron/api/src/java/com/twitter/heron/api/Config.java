@@ -234,6 +234,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_TEAM_EMAIL = "topology.team.email";
   /**
+   * Name of the of the environment this topology should run in.
+   */
+  public static final String TOPOLOGY_TEAM_ENVIRONMENT = "topology.team.environment";
+  /**
    * Cap ticket (if filed) for the topology. If the topology is in prod this has to be set or it
    * cannot be deployed.
    */
