@@ -92,7 +92,7 @@ public abstract class WakeableLooper {
   }
 
   private void onExit() {
-    int s= exitTasks.size();
+    int s = exitTasks.size();
     for (int i = 0; i < s; i ++) {
       // in case previous task cleared the list
       if (exitTasks.size() <= i) {
