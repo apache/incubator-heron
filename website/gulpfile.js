@@ -1,104 +1,74 @@
-var gulp = require('gulp'),
-    // Pulls in any Gulp-related metadata
-    pkg = require('./package.json'),
-    hash = require('gulp-hash'),
-    // Use $ to invoke Gulp plugins
-    $ = require('gulp-load-plugins')(),
-    // All non-Gulp modules here
-    del = require('del');
+var gulp     = require("gulp"),
+    sass     = require("gulp-sass"),
+    hash     = require("gulp-hash"),
+    prefixer = require("gulp-autoprefixer"),
+    del      = require("del");
 
-// Define the source and distribution directories
-var srcDir = './assets';
-var distDir = './static';
-
-// Define asset sources
-var SRC = {
-  js: srcDir + '/js/**/*.js',
-  sass: srcDir + '/sass/**/*.scss'
+var SRCS = {
+  sass: 'assets/sass/**/*.sass',
+  js: 'assets/js/app.js'
 }
 
-// Define asset distribution destination
-var DIST = {
-  js: distDir + '/js',
-  css: distDir + '/css',
-  all: distDir
-}
+gulp.task('sass', (done) => {
+  del(['static/css/style-*.css']);
 
-// JavaScript assets
-gulp.task('js', function(done) {
-  gulp.src(SRC.js)
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
-    .pipe($.concat('app.min.js'))
-    .pipe(gulp.dest(DIST.js));
-  done();
-});
-
-gulp.task('js-dev', function(done) {
-  del(['static/js/app*.js']);
-
-  gulp.src(SRC.js)
-    .pipe(hash())
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
-    .pipe(gulp.dest(DIST.js))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/js'));
-  done();
-});
-
-gulp.task('js:watch', function() {
-  gulp.watch(SRC.js, gulp.series('js-dev'));
-});
-
-// Sass assets (dev mode)
-gulp.task('sass-dev', function(done) {
-  del(['static/css/style*.css']);
-
-  gulp.src(SRC.sass)
-    .pipe($.sass({
+  gulp.src(SRCS.sass)
+    .pipe(sass({
       outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe(hash())
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: false
-    }))
-    .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/css'));
+    }).on('error', sass.logError))
+    .pipe(prefixer({
+			browsers: ['last 2 versions'],
+			cascade: false
+		}))
+    .pipe(gulp.dest('static/css'));
   done();
 });
 
-// Sass assets
-gulp.task('sass', function(done) {
-  gulp.src(SRC.sass)
-    .pipe($.sass({
+gulp.task('sass-dev', (done) => {
+  del(['static/css/style-*.css']);
+
+  gulp.src(SRCS.sass)
+    .pipe(sass({
       outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: true
-    }))
-    .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css));
+    }).on('error', sass.logError))
+    .pipe(hash())
+    .pipe(prefixer({
+			browsers: ['last 2 versions'],
+			cascade: false
+		}))
+    .pipe(gulp.dest('static/css'))
+    .pipe(hash.manifest('hash.json'))
+    .pipe(gulp.dest('data/css'));
   done();
 });
 
-gulp.task('sass:watch', function() {
-  gulp.watch(SRC.sass, gulp.series('sass-dev'));
+gulp.task('sass:watch', () => {
+  gulp.watch(SRCS.sass, gulp.series('sass-dev'));
 });
 
-// One-time build; doesn't watch for changes
-gulp.task('build', gulp.series('js', 'sass'));
+gulp.task('js', (done) => {
+  gulp.src(SRCS.js)
+    .pipe(gulp.dest('static/js'));
 
-// Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js-dev', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
-
-// Help => list tasks
-gulp.task('help', function(done) {
-  $.taskListing.withFilters(null, 'help')
   done();
 });
 
-// Default
-gulp.task('default', gulp.series('help'));
+gulp.task('js-dev', (done) => {
+  del(['static/js/app-*.js']);
+
+  gulp.src(SRCS.js)
+    .pipe(hash())
+    .pipe(gulp.dest('static/js'))
+    .pipe(hash.manifest('hash.json'))
+    .pipe(gulp.dest('data/js'));
+
+  done();
+});
+
+gulp.task('js:watch', () => {
+  gulp.watch(SRCS.js, gulp.series('js-dev'));
+});
+
+gulp.task('build', gulp.series('sass', 'js'));
+
+gulp.task('dev', gulp.series('sass-dev', 'js-dev', gulp.parallel('sass:watch', 'js:watch')));
