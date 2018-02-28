@@ -36,6 +36,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -128,7 +129,8 @@ public final class HeronSubmitter {
           + "Please set cmdline option: " + CMD_TOPOLOGY_DEFN_TEMPDIR);
     }
 
-    String fileName = dirName + "/" + fTopology.getName() + TOPOLOGY_DEFINITION_SUFFIX;
+    String fileName =
+        Paths.get(dirName, fTopology.getName() + TOPOLOGY_DEFINITION_SUFFIX).toString();
 
     try (FileOutputStream fos = new FileOutputStream(new File(fileName));
         BufferedOutputStream bos = new BufferedOutputStream(fos)) {
