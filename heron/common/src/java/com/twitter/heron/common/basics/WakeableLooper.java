@@ -68,7 +68,6 @@ public abstract class WakeableLooper {
   }
 
   public void clearTasksOnWakeup() {
-    if (Thread.currentThread().getName().equals("SlaveThread")) LOG.info("clear");
     tasksOnWakeup.clear();
   }
 
@@ -157,7 +156,6 @@ public abstract class WakeableLooper {
     return nextTimeoutInterval;
   }
 
-  Logger LOG = Logger.getLogger(WakeableLooper.class.getName());
   private void executeTasksOnWakeup() {
     // Be careful here we could not use iterator, since it is possible that we may
     // add some items into this list during the iteration, which may cause
