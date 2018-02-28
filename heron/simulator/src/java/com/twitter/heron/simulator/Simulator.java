@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
+import com.twitter.heron.api.TopologySubmitter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.ByteAmount;
@@ -40,7 +41,7 @@ import com.twitter.heron.simulator.utils.TopologyManager;
  * One Simulator instance can only submit one topology. Please have multiple Simulator instances
  * for multiple topologies.
  */
-public class Simulator {
+public class Simulator implements TopologySubmitter {
 
   private static final Logger LOG = Logger.getLogger(Simulator.class.getName());
   private final List<InstanceExecutor> instanceExecutors = new LinkedList<>();
@@ -94,6 +95,12 @@ public class Simulator {
    */
   protected void registerSystemConfig(SystemConfig sysConfig) {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, sysConfig);
+  }
+
+  public void submitTopologyInherited(String name,
+                                      Config heronConfig,
+                                      HeronTopology heronTopology) {
+    this.submitTopology(name, heronConfig, heronTopology);
   }
 
   /**

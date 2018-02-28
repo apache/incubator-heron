@@ -52,10 +52,10 @@ import com.twitter.heron.api.utils.Utils;
  * with the "heron jar" command from the command-line, and then use this class to
  * submit your topologies.
  */
-public final class HeronSubmitter {
+public final class HeronSubmitter implements TopologySubmitter {
   private static final Logger LOG = Logger.getLogger(HeronSubmitter.class.getName());
 
-  private HeronSubmitter() {
+  public HeronSubmitter() {
   }
 
   /**
@@ -69,6 +69,11 @@ public final class HeronSubmitter {
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
   public static void submitTopology(String name, Config heronConfig, HeronTopology topology)
+      throws AlreadyAliveException, InvalidTopologyException {
+    new HeronSubmitter().submitTopologyInherited(name, heronConfig, topology);
+  }
+
+  public void submitTopologyInherited(String name, Config heronConfig, HeronTopology topology)
       throws AlreadyAliveException, InvalidTopologyException {
     Map<String, String> heronCmdOptions = Utils.readCommandLineOpts();
 
