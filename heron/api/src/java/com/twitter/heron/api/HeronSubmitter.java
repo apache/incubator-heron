@@ -55,6 +55,11 @@ import com.twitter.heron.api.utils.Utils;
 public final class HeronSubmitter {
   private static final Logger LOG = Logger.getLogger(HeronSubmitter.class.getName());
 
+  private static final String CMD_TOPOLOGY_INITIAL_STATE = "cmdline.topology.initial.state";
+  private static final String CMD_TOPOLOGY_DEFN_TEMPDIR = "cmdline.topologydefn.tmpdirectory";
+  private static final String CMD_TOPOLOGY_ROLE = "cmdline.topology.role";
+  private static final String CMD_TOPOLOGY_ENVIRONMENT = "cmdline.topology.environment";
+
   private HeronSubmitter() {
   }
 
@@ -74,14 +79,25 @@ public final class HeronSubmitter {
 
     // We would read the topology initial state from arguments from heron-cli
     TopologyAPI.TopologyState initialState;
-    if (heronCmdOptions.get("cmdline.topology.initial.state") != null) {
+    if (heronCmdOptions.get(CMD_TOPOLOGY_INITIAL_STATE) != null) {
       initialState = TopologyAPI.TopologyState.valueOf(
-          heronCmdOptions.get("cmdline.topology.initial.state"));
+          heronCmdOptions.get(CMD_TOPOLOGY_INITIAL_STATE));
     } else {
       initialState = TopologyAPI.TopologyState.RUNNING;
     }
 
     LOG.log(Level.FINE, "To deploy a topology in initial state {0}", initialState);
+
+    //  add role and environment if present
+    final String role = heronCmdOptions.get(CMD_TOPOLOGY_ROLE);
+    if (role != null) {
+      heronConfig.putIfAbsent(Config.TOPOLOGY_TEAM_NAME, role);
+    }
+
+    final String environment = heronCmdOptions.get(CMD_TOPOLOGY_ENVIRONMENT);
+    if (environment != null) {
+      heronConfig.putIfAbsent(Config.TOPOLOGY_TEAM_ENVIRONMENT, environment);
+    }
 
     TopologyAPI.Topology fTopology =
         topology.setConfig(heronConfig).
@@ -91,7 +107,7 @@ public final class HeronSubmitter {
     TopologyUtils.validateTopology(fTopology);
     assert fTopology.isInitialized();
 
-    if (heronCmdOptions.get("cmdline.topologydefn.tmpdirectory") != null) {
+    if (heronCmdOptions.get(CMD_TOPOLOGY_DEFN_TEMPDIR) != null) {
       submitTopologyToFile(fTopology, heronCmdOptions);
     } else {
       throw new RuntimeException("topology definition temp directory not specified");
