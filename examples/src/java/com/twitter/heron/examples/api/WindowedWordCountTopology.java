@@ -43,7 +43,7 @@ public final class WindowedWordCountTopology {
   private static class SentenceSpout extends BaseRichSpout {
     private static final long serialVersionUID = 2879005791639364028L;
     private SpoutOutputCollector collector;
-    Random rand = new Random();
+    private Random rand = new Random();
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
