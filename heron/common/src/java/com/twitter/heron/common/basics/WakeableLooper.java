@@ -15,9 +15,9 @@
 package com.twitter.heron.common.basics;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A WakeableLooper is a class that could:
@@ -40,11 +40,11 @@ import java.util.PriorityQueue;
  */
 public abstract class WakeableLooper {
   // The tasks could only be added but not removed
-  private final List<Runnable> tasksOnWakeup;
+  private final CopyOnWriteArrayList<Runnable> tasksOnWakeup;
   private final PriorityQueue<TimerTask> timers;
 
   // The tasks would be invoked before exit
-  private final ArrayList<Runnable> exitTasks;
+  private final CopyOnWriteArrayList<Runnable> exitTasks;
 
   // For selector since there is bug in selector.select(timeout): we could not
   // use a timeout > 10 * Integer.MAX_VALUE
@@ -55,9 +55,9 @@ public abstract class WakeableLooper {
 
   public WakeableLooper() {
     exitLoop = false;
-    tasksOnWakeup = new ArrayList<Runnable>();
+    tasksOnWakeup = new CopyOnWriteArrayList<>();
     timers = new PriorityQueue<TimerTask>();
-    exitTasks = new ArrayList<>();
+    exitTasks = new CopyOnWriteArrayList<>();
   }
 
   public void clear() {
@@ -92,8 +92,16 @@ public abstract class WakeableLooper {
   }
 
   private void onExit() {
-    for (Runnable r : exitTasks) {
-      r.run();
+    // Using CopyOnWriteArrayList to prevent from tasks in exitTasks from clearing
+    // the exitTasks list and potentially causing IndexOutOfBoundsException.
+    // The method iterator() in CopyOnWriteArrayList return an iterator object that holds
+    // different copy of the elements, hence the term snapshot iterator. The snapshot iterator
+    // doesn’t allow modifying the list while traversing, and it will not throw
+    // ConcurrentModificationException if the list is being modified by other thread during
+    // the traversal, and the read and write operations work on different copies of elements.
+    Iterator<Runnable> it = exitTasks.iterator();
+    while(it.hasNext()) {
+      it.next().run();
     }
   }
 
@@ -151,13 +159,16 @@ public abstract class WakeableLooper {
   }
 
   private void executeTasksOnWakeup() {
-    // Be careful here we could not use iterator, since it is possible that we may
-    // add some items into this list during the iteration, which may cause
-    // ConcurrentModificationException
-    // We pre-get the size to avoid execute the tasks added during execution
-    int s = tasksOnWakeup.size();
-    for (int i = 0; i < s; i++) {
-      tasksOnWakeup.get(i).run();
+    // Using CopyOnWriteArrayList to prevent from tasks in tasksOnWakeup from clearing
+    // the tasksOnWakeup list and potentially causing IndexOutOfBoundsException.
+    // The method iterator() in CopyOnWriteArrayList return an iterator object that holds
+    // different copy of the elements, hence the term snapshot iterator. The snapshot iterator
+    // doesn’t allow modifying the list while traversing, and it will not throw
+    // ConcurrentModificationException if the list is being modified by other thread during
+    // the traversal, and the read and write operations work on different copies of elements.
+    Iterator<Runnable> it = tasksOnWakeup.iterator();
+    while(it.hasNext()) {
+      it.next().run();
     }
   }
 
