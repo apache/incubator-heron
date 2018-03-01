@@ -11,33 +11,52 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala
+package com.twitter.heron.streamlet.scala.impl
 
 import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
+import com.twitter.heron.streamlet.{
+  JoinType,
+  SerializableTransformer,
+  WindowConfig
+}
+import com.twitter.heron.streamlet.scala.{Sink, Streamlet}
+import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
-// TODO: This Java Streamlet API references will be changed with Scala versions when they are ready
-import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, WindowConfig}
+object StreamletImpl {
+
+  def toScalaStreamlet[R](
+      javaStreamlet: com.twitter.heron.streamlet.Streamlet[R]): Streamlet[R] =
+    new StreamletImpl[R](javaStreamlet)
+
+  def toJavaStreamlet[R](
+      streamlet: Streamlet[R]): com.twitter.heron.streamlet.Streamlet[R] =
+    streamlet.asInstanceOf[StreamletImpl[R]].javaStreamlet
+
+  /**
+    * Create a Streamlet based on the supplier function
+    *
+    * @param supplier The Supplier function to generate the elements
+    */
+  private[impl] def createSupplierStreamlet[R](supplier: () => R) = {
+    val serializableSupplier = toSerializableSupplier[R](supplier)
+    val newJavaStreamlet =
+      new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
+        serializableSupplier)
+    toScalaStreamlet[R](newJavaStreamlet)
+  }
+
+}
 
 /**
-  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
-  * Streamlets originate from pub/sub systems(such Pulsar/Kafka), or from
-  * static data(such as csv files, HDFS files), or for that matter any other
-  * source. They are also created by transforming existing Streamlets using
-  * operations such as map/flatMap, etc.
-  * Besides the tuples, a Streamlet has the following properties associated with it
-  * a) name. User assigned or system generated name to refer the streamlet
-  * b) nPartitions. Number of partitions that the streamlet is composed of. Thus the
-  * ordering of the tuples in a Streamlet is wrt the tuples within a partition.
-  * This allows the system to distribute  each partition to different nodes across the cluster.
-  * A bunch of transformations can be done on Streamlets(like map/flatMap, etc.). Each
-  * of these transformations operate on every tuple of the Streamlet and produce a new
-  * Streamlet. One can think of a transformation attaching itself to the stream and processing
-  * each tuple as they go by. Thus the parallelism of any operator is implicitly determined
-  * by the number of partitions of the stream that it is operating on. If a particular
-  * transformation wants to operate at a different parallelism, one can repartition the
-  * Streamlet before doing the transformation.
+  * This class provides Scala Streamlet Implementation by wrapping Java Streamlet API.
+  * Passed User defined Scala Functions are transformed to related FunctionalInterface versions and
+  * related Java Streamlet is transformed to Scala version again.
   */
-trait Streamlet[R] {
+class StreamletImpl[R](
+    val javaStreamlet: com.twitter.heron.streamlet.Streamlet[R])
+    extends Streamlet[R] {
+
+  import StreamletImpl._
 
   /**
     * Sets the name of the Streamlet.
@@ -45,14 +64,15 @@ trait Streamlet[R] {
     * @param sName The name given by the user for this Streamlet
     * @return Returns back the Streamlet with changed name
     */
-  def setName(sName: String): Streamlet[R]
+  override def setName(sName: String): Streamlet[R] =
+    toScalaStreamlet[R](javaStreamlet.setName(sName))
 
   /**
     * Gets the name of the Streamlet.
     *
     * @return Returns the name of the Streamlet
     */
-  def getName: String
+  override def getName(): String = javaStreamlet.getName
 
   /**
     * Sets the number of partitions of the streamlet
@@ -60,21 +80,26 @@ trait Streamlet[R] {
     * @param numPartitions The user assigned number of partitions
     * @return Returns back the Streamlet with changed number of partitions
     */
-  def setNumPartitions(numPartitions: Int): Streamlet[R]
+  override def setNumPartitions(numPartitions: Int): Streamlet[R] =
+    toScalaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
 
   /**
     * Gets the number of partitions of this Streamlet.
     *
     * @return the number of partitions of this Streamlet
     */
-  def getNumPartitions: Int
+  override def getNumPartitions(): Int = javaStreamlet.getNumPartitions
 
   /**
     * Return a new Streamlet by applying mapFn to each element of this Streamlet
     *
     * @param mapFn The Map Function that should be applied to each element
     */
-  def map[T](mapFn: R => _ <: T): Streamlet[T]
+  override def map[T](mapFn: R => _ <: T): Streamlet[T] = {
+    val serializableFunction = toSerializableFunction[R, T](mapFn)
+    val newJavaStreamlet = javaStreamlet.map[T](serializableFunction)
+    toScalaStreamlet[T](newJavaStreamlet)
+  }
 
   /**
     * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -82,7 +107,8 @@ trait Streamlet[R] {
     *
     * @param flatMapFn The FlatMap Function that should be applied to each element
     */
-  def flatMap[T](flatMapFn: R => _ <: Iterable[_ <: T]): Streamlet[T]
+  override def flatMap[T](flatMapFn: R => _ <: Iterable[_ <: T]): Streamlet[T] =
+    ???
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet
@@ -90,12 +116,12 @@ trait Streamlet[R] {
     *
     * @param filterFn The filter Function that should be applied to each element
     */
-  def filter(filterFn: R => Boolean): Streamlet[R]
+  override def filter(filterFn: R => Boolean): Streamlet[R] = ???
 
   /**
     * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
     */
-  def repartition(numPartitions: Int): Streamlet[R]
+  override def repartition(numPartitions: Int): Streamlet[R] = ???
 
   /**
     * A more generalized version of repartition where a user can determine which partitions
@@ -105,7 +131,9 @@ trait Streamlet[R] {
     * return 0 or more unique numbers between 0 and npartitions to indicate which partitions
     * this element should be routed to.
     */
-  def repartition(numPartitions: Int, partitionFn: (R, Int) => Seq[Int]): Streamlet[R]
+  override def repartition(numPartitions: Int,
+                           partitionFn: (R, Int) => Seq[Int]): Streamlet[R] =
+    ???
 
   /**
     * Clones the current Streamlet. It returns an array of numClones Streamlets where each
@@ -113,7 +141,7 @@ trait Streamlet[R] {
     *
     * @param numClones The number of clones to clone
     */
-  def clone(numClones: Int): Seq[Streamlet[R]]
+  override def clone(numClones: Int): Seq[Streamlet[R]] = ???
 
   /**
     * Return a new Streamlet by inner joining 'this streamlet with ‘other’ streamlet.
@@ -128,11 +156,13 @@ trait Streamlet[R] {
     * have. Typical windowing strategies are sliding windows and tumbling windows
     * @param joinFunction      The join function that needs to be applied
     */
-  def join[K, S, T](other: Streamlet[S],
-                    thisKeyExtractor: R => K,
-                    otherKeyExtractor: S => K,
-                    windowCfg: WindowConfig,
-                    joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  override def join[K, S, T](
+      other: Streamlet[S],
+      thisKeyExtractor: R => K,
+      otherKeyExtractor: S => K,
+      windowCfg: WindowConfig,
+      joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] =
+    ???
 
   /**
     * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
@@ -148,14 +178,16 @@ trait Streamlet[R] {
     * @param windowCfg         This is a specification of what kind of windowing strategy you like to
     * have. Typical windowing strategies are sliding windows and tumbling windows
     * @param joinType          Type of Join. Options { @link JoinType}
-    * @param joinFunction The join function that needs to be applied
+    * @param joinFunction      The join function that needs to be applied
     */
-  def join[K, S, T](other: Streamlet[S],
-                    thisKeyExtractor: R => K,
-                    otherKeyExtractor: S => K,
-                    windowCfg: WindowConfig,
-                    joinType: JoinType,
-                    joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  override def join[K, S, T](
+      other: Streamlet[S],
+      thisKeyExtractor: R => K,
+      otherKeyExtractor: S => K,
+      windowCfg: WindowConfig,
+      joinType: JoinType,
+      joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] =
+    ???
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -168,10 +200,11 @@ trait Streamlet[R] {
     *                       Typical windowing strategies are sliding windows and tumbling windows
     * @param reduceFn       The reduce function that you want to apply to all the values of a key.
     */
-  def reduceByKeyAndWindow[K, V](keyExtractor: R => K,
-                                 valueExtractor: R => V,
-                                 windowCfg: WindowConfig,
-                                 reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]]
+  override def reduceByKeyAndWindow[K, V](
+      keyExtractor: R => K,
+      valueExtractor: R => V,
+      windowCfg: WindowConfig,
+      reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]] = ???
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -187,16 +220,17 @@ trait Streamlet[R] {
     * @param reduceFn     The reduce function takes two parameters: a partial result of the reduction
     *                     and the next element of the stream. It returns a new partial result.
     */
-  def reduceByKeyAndWindow[K, T](keyExtractor: R => K,
-                                 windowCfg: WindowConfig,
-                                 identity: T,
-                                 reduceFn: (T, R) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  override def reduceByKeyAndWindow[K, T](
+      keyExtractor: R => K,
+      windowCfg: WindowConfig,
+      identity: T,
+      reduceFn: (T, R) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] = ???
 
   /**
     * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
     * the new streamlet will contain tuples belonging to both Streamlets
     */
-  def union(other: Streamlet[_ <: R]): Streamlet[R]
+  override def union(other: Streamlet[_ <: R]): Streamlet[R] = ???
 
   /**
     * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
@@ -207,13 +241,15 @@ trait Streamlet[R] {
     * @param <                       T> The return type of the transform
     * @return Streamlet containing the output of the transformFunction
     */
-  def transform[T](serializableTransformer: SerializableTransformer[R, _ <: T]): Streamlet[T]
+  override def transform[T](
+      serializableTransformer: SerializableTransformer[R, _ <: T])
+    : Streamlet[T] = ???
 
   /**
     * Logs every element of the streamlet using String.valueOf function
     * This is one of the sink functions in the sense that this operation returns void
     */
-  def log(): Unit
+  override def log(): Unit = javaStreamlet.log()
 
   /**
     * Applies the consumer function to every element of the stream
@@ -222,7 +258,7 @@ trait Streamlet[R] {
     * @param consumer The user supplied consumer function that is invoked for each element
     *                 of this streamlet.
     */
-  def consume(consumer: R => Unit): Unit
+  override def consume(consumer: R => Unit): Unit = ???
 
   /**
     * Applies the sink's put function to every element of the stream
@@ -231,6 +267,25 @@ trait Streamlet[R] {
     * @param sink The Sink whose put method consumes each element
     *             of this streamlet.
     */
-  def toSink(sink: Sink[R]): Unit
+  override def toSink(sink: Sink[R]): Unit = {
+    val javaSink = toJavaSink[R](sink)
+    javaStreamlet.toSink(javaSink)
+  }
 
+  /**
+    * Gets all the children of this streamlet.
+    * Children of a streamlet are streamlets that are resulting from transformations of elements of
+    * this and potentially other streamlets.
+    *
+    * @return The kid streamlets
+    */
+  private[impl] def getChildren
+    : List[com.twitter.heron.streamlet.impl.StreamletImpl[_]] = {
+    import _root_.scala.collection.JavaConversions._
+    val children =
+      javaStreamlet
+        .asInstanceOf[com.twitter.heron.streamlet.impl.StreamletImpl[_]]
+        .getChildren
+    children.toList
+  }
 }
