@@ -30,19 +30,20 @@
  * limitations under the License.
  */
 
-
 package com.twitter.heron.api;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.exception.TopologySubmissionException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.api.utils.Utils;
@@ -53,8 +54,10 @@ import com.twitter.heron.api.utils.Utils;
  * submit your topologies.
  */
 public final class HeronSubmitter {
+
   private static final Logger LOG = Logger.getLogger(HeronSubmitter.class.getName());
 
+  private static final String TOPOLOGY_DEFINITION_SUFFIX = ".defn";
   private static final String CMD_TOPOLOGY_INITIAL_STATE = "cmdline.topology.initial.state";
   private static final String CMD_TOPOLOGY_DEFN_TEMPDIR = "cmdline.topologydefn.tmpdirectory";
   private static final String CMD_TOPOLOGY_ROLE = "cmdline.topology.role";
@@ -75,7 +78,8 @@ public final class HeronSubmitter {
    */
   public static void submitTopology(String name, Config heronConfig, HeronTopology topology)
       throws AlreadyAliveException, InvalidTopologyException {
-    Map<String, String> heronCmdOptions = Utils.readCommandLineOpts();
+
+    Map<String, String> heronCmdOptions = getHeronCmdOptions();
 
     // We would read the topology initial state from arguments from heron-cli
     TopologyAPI.TopologyState initialState;
@@ -107,33 +111,34 @@ public final class HeronSubmitter {
     TopologyUtils.validateTopology(fTopology);
     assert fTopology.isInitialized();
 
-    if (heronCmdOptions.get(CMD_TOPOLOGY_DEFN_TEMPDIR) != null) {
-      submitTopologyToFile(fTopology, heronCmdOptions);
-    } else {
-      throw new RuntimeException("topology definition temp directory not specified");
-    }
+    submitTopologyToFile(fTopology, heronCmdOptions);
   }
 
-  // Submits to the file
+  /**
+   * Submits a topology to definition file
+   *
+   * @param fTopology the processing to execute.
+   * @param heronCmdOptions the commandline options.
+   * @throws TopologySubmissionException if the topology submission is failed
+   */
   private static void submitTopologyToFile(TopologyAPI.Topology fTopology,
                                            Map<String, String> heronCmdOptions) {
-    String dirName = heronCmdOptions.get("cmdline.topologydefn.tmpdirectory");
+    String dirName = heronCmdOptions.get(CMD_TOPOLOGY_DEFN_TEMPDIR);
     if (dirName == null || dirName.isEmpty()) {
-      throw new RuntimeException("Improper specification of directory");
+      throw new TopologySubmissionException("Topology definition temp directory not specified. "
+          + "Please set cmdline option: " + CMD_TOPOLOGY_DEFN_TEMPDIR);
     }
-    String fileName = dirName + "/" + fTopology.getName() + ".defn";
-    BufferedOutputStream bos = null;
-    try {
-      //create an object of FileOutputStream
-      FileOutputStream fos = new FileOutputStream(new File(fileName));
-      //create an object of BufferedOutputStream
-      bos = new BufferedOutputStream(fos);
+
+    String fileName =
+        Paths.get(dirName, fTopology.getName() + TOPOLOGY_DEFINITION_SUFFIX).toString();
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
+        BufferedOutputStream bos = new BufferedOutputStream(fos)) {
       byte[] topEncoding = fTopology.toByteArray();
       bos.write(topEncoding);
-      bos.flush();
-      bos.close();
     } catch (IOException e) {
-      throw new RuntimeException("Error writing topology defn to temp directory " + dirName);
+      throw new TopologySubmissionException("Error writing topology definition to temp directory: "
+          + dirName, e);
     }
   }
 
@@ -143,6 +148,10 @@ public final class HeronSubmitter {
    */
   // TODO add submit options
   public static String submitJar(Config config, String localJar) {
-    throw new UnsupportedOperationException("submitJar unsupported");
+    throw new UnsupportedOperationException("submitJar functionality is unsupported");
+  }
+
+  static Map<String, String> getHeronCmdOptions() {
+    return Utils.readCommandLineOpts();
   }
 }

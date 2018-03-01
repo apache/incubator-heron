@@ -13,64 +13,43 @@
 //  limitations under the License.
 package com.twitter.heron.api;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.exception.AlreadyAliveException;
 import com.twitter.heron.api.exception.InvalidTopologyException;
+import com.twitter.heron.api.exception.TopologySubmissionException;
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.common.basics.ByteAmount;
 
+/**
+ * This class covers HeronSubmitter Unit Tests for both positive and negative cases
+ */
+@RunWith(PowerMockRunner.class)
 public class HeronSubmitterTest {
 
-  public static class TestSpout extends BaseRichSpout {
-
-    private static final long serialVersionUID = -630307949908406294L;
-
-    @SuppressWarnings("rawtypes")
-    public void open(
-        Map conf,
-        TopologyContext context,
-        SpoutOutputCollector acollector) {
-    }
-
-    public void close() {
-    }
-
-    public void nextTuple() {
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
-    }
-  }
-
-  public static class TestBolt extends BaseBasicBolt {
-
-    private static final long serialVersionUID = -5888421647633083078L;
-
-    @Override
-    public void execute(Tuple input, BasicOutputCollector collector) {
-
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
-    }
-  }
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
 
   @Test(expected = InvalidTopologyException.class)
-  public void testInvalidTopologySubmittion()
+  public void testInvalidTopologySubmission()
       throws AlreadyAliveException, InvalidTopologyException {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -105,4 +84,126 @@ public class HeronSubmitterTest {
     conf.setNumStmgrs(2);
     HeronSubmitter.submitTopology("test", conf, builder.createTopology());
   }
+
+  @Test
+  @PrepareForTest(HeronSubmitter.class)
+  public void testValidTopologySubmission() throws AlreadyAliveException, InvalidTopologyException {
+    TopologyBuilder builder = createTopologyBuilderWithMinimumSetup();
+
+    Config conf = new Config();
+
+    Map<String, String> map = new HashMap();
+    map.put("cmdline.topologydefn.tmpdirectory", folder.getRoot().getPath());
+
+    PowerMockito.spy(HeronSubmitter.class);
+    Mockito.when(HeronSubmitter.getHeronCmdOptions()).thenReturn(map);
+
+    HeronSubmitter.submitTopology("test", conf, builder.createTopology());
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  @PrepareForTest(HeronSubmitter.class)
+  public void testTopologySubmissionWhenTmpDirectoryIsEmptyPath()
+      throws AlreadyAliveException, InvalidTopologyException {
+    TopologyBuilder builder = createTopologyBuilderWithMinimumSetup();
+
+    Config conf = new Config();
+
+    Map<String, String> map = new HashMap();
+    map.put("cmdline.topologydefn.tmpdirectory", "");
+
+    PowerMockito.spy(HeronSubmitter.class);
+    Mockito.when(HeronSubmitter.getHeronCmdOptions()).thenReturn(map);
+
+    HeronSubmitter.submitTopology("test", conf, builder.createTopology());
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  @PrepareForTest(HeronSubmitter.class)
+  public void testTopologySubmissionWhenTmpDirectoryIsSetAsInvalidPath()
+      throws AlreadyAliveException, InvalidTopologyException {
+    TopologyBuilder builder = createTopologyBuilderWithMinimumSetup();
+
+    Config conf = new Config();
+
+    Map<String, String> map = new HashMap();
+    map.put("cmdline.topologydefn.tmpdirectory", "invalid_path");
+
+    PowerMockito.spy(HeronSubmitter.class);
+    Mockito.when(HeronSubmitter.getHeronCmdOptions()).thenReturn(map);
+
+    HeronSubmitter.submitTopology("test", conf, builder.createTopology());
+  }
+
+  @Test(expected = TopologySubmissionException.class)
+  public void testTopologySubmissionWhenTmpDirectoryIsNotSet()
+      throws AlreadyAliveException, InvalidTopologyException {
+    TopologyBuilder builder = createTopologyBuilderWithMinimumSetup();
+    Config conf = new Config();
+    HeronSubmitter.submitTopology("test", conf, builder.createTopology());
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testSubmitJar() {
+    Config conf = new Config();
+    HeronSubmitter.submitJar(conf, "test_jar");
+  }
+
+  private TopologyBuilder createTopologyBuilderWithMinimumSetup() {
+    TopologyBuilder builder = new TopologyBuilder();
+
+    int spouts = 2;
+    int bolts = 2;
+    builder.setSpout("word", new TestSpout2(), spouts);
+    builder.setBolt("exclaim1", new TestBolt(), bolts).shuffleGrouping("word");
+    return builder;
+  }
+
+  public static class TestSpout extends BaseRichSpout {
+
+    private static final long serialVersionUID = -630307949908406294L;
+
+    @SuppressWarnings("rawtypes")
+    public void open(
+        Map conf,
+        TopologyContext context,
+        SpoutOutputCollector acollector) {
+    }
+
+    public void close() {
+    }
+
+    public void nextTuple() {
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    }
+  }
+
+  public static class TestSpout2 extends TestSpout {
+
+    private static final long serialVersionUID = 4070649954154119533L;
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+      declarer.declare(new Fields("word"));
+    }
+  }
+
+  public static class TestBolt extends BaseBasicBolt {
+
+    private static final long serialVersionUID = -5888421647633083078L;
+
+    @Override
+    public void execute(Tuple input, BasicOutputCollector collector) {
+
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
+    }
+  }
+
 }
