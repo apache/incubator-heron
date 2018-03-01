@@ -25,7 +25,13 @@ sections:
       url: /docs/developers/java/topologies
     - name: The Heron Topology API for Python
       url: /docs/developers/python/topologies
-  - name: Topology development
+  - name: Client API docs
+    sublinks:
+      - name: Java
+        url: /api/java
+      - name: Python
+        url: /api/python
+  - name: Guides
     sublinks:
       - name: Effectively-once Java topologies
         url: /docs/developers/java/effectively-once
@@ -45,12 +51,6 @@ sections:
         url: /docs/developers/simulator-mode
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
-  - name: Client API docs
-    sublinks:
-      - name: Java
-        url: /api/java
-      - name: Python
-        url: /api/python
   - name: Heron Concepts
     sublinks:
       - name: Heron Design Goals
