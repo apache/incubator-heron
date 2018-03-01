@@ -59,7 +59,7 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
   auto cbRuntimeConfg = [this](IncomingHTTPRequest* request) {
     this->HandleRuntimeConfigRequest(request);
   };
-  http_server_->InstallCallBack("/runtime_config", std::move(cbRuntimeConfg));
+  http_server_->InstallCallBack("/runtime_config/update", std::move(cbRuntimeConfg));
 }
 
 TController::~TController() { delete http_server_; }

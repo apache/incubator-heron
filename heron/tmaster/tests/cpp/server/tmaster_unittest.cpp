@@ -543,7 +543,7 @@ void RuntimeConfigTopology(sp_string topology_id,
     kvs.push_back(make_pair("user-config", *iter));
   }
 
-  sp_string requesturl = "/runtime_config";
+  sp_string requesturl = "/runtime_config/update";
   OutgoingHTTPRequest* request =
       new OutgoingHTTPRequest(LOCALHOST, port, requesturl, BaseHTTPRequest::GET, kvs);
 
