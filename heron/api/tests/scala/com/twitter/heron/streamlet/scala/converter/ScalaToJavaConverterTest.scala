@@ -15,7 +15,6 @@ package com.twitter.heron.streamlet.scala.converter
 
 import org.junit.Assert.assertTrue
 
-import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 
@@ -45,15 +44,33 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
 
   test("ScalaToJavaConverterTest should support Java Sink") {
     val javaSink =
-      ScalaToJavaConverter.toJavaSink[Int](new TestSink())
+      ScalaToJavaConverter.toJavaSink[Int](new TestSink[Int]())
     assertTrue(
       javaSink
         .isInstanceOf[com.twitter.heron.streamlet.Sink[Int]])
   }
 
-  private class TestSink() extends Sink[Int] {
-    override def setup(context: Context): Unit = {}
-    override def put(tuple: Int): Unit = {}
+  test("ScalaToJavaConverterTest should support SerializablePredicate") {
+    def intToBooleanFunction(number: Int) = number.<(5)
+    val serializablePredicate =
+      ScalaToJavaConverter.toSerializablePredicate[Int](intToBooleanFunction)
+    assertTrue(
+      serializablePredicate
+        .isInstanceOf[com.twitter.heron.streamlet.SerializablePredicate[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableConsumer") {
+    def consumerFunction(number: Int): Unit = number.toString
+    val serializableConsumer =
+      ScalaToJavaConverter.toSerializableConsumer[Int](consumerFunction)
+    assertTrue(
+      serializableConsumer
+        .isInstanceOf[com.twitter.heron.streamlet.SerializableConsumer[Int]])
+  }
+
+  private class TestSink[T] extends Sink[T] {
+    override def setup(context: com.twitter.heron.streamlet.Context): Unit = {}
+    override def put(tuple: T): Unit = {}
     override def cleanup(): Unit = {}
   }
 

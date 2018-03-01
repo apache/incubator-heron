@@ -13,7 +13,6 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
-import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
 
 /**
@@ -32,9 +31,20 @@ object ScalaToJavaConverter {
       override def apply(r: R): T = f(r)
     }
 
+  def toSerializablePredicate[R](f: R => Boolean) =
+    new com.twitter.heron.streamlet.SerializablePredicate[R] {
+      override def test(r: R): Boolean = f(r)
+    }
+
+  def toSerializableConsumer[R](f: R => Unit) =
+    new com.twitter.heron.streamlet.SerializableConsumer[R] {
+      override def accept(r: R): Unit = f(r)
+    }
+
   def toJavaSink[T](sink: Sink[T]): com.twitter.heron.streamlet.Sink[T] = {
     new com.twitter.heron.streamlet.Sink[T] {
-      override def setup(context: Context): Unit = sink.setup(context)
+      override def setup(context: com.twitter.heron.streamlet.Context): Unit =
+        sink.setup(context)
 
       override def put(tuple: T): Unit = sink.put(tuple)
 

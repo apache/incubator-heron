@@ -13,10 +13,18 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.common
 
-import org.scalatest.FunSuite
+import scala.collection.mutable.ListBuffer
+
+import com.twitter.heron.streamlet.scala.Sink
 
 /**
-  * Base abstract class for all unit tests in Heron Streamlet Scala API
-  * in order to keep common test functionality.
+  * Test ListBuffer Sink for Scala Streamlet API Unit Tests' general usage.
   */
-private[scala] abstract class BaseFunSuite extends FunSuite
+private[scala] class TestListBufferSink(
+    numbers: ListBuffer[Int] = ListBuffer[Int]())
+    extends Sink[Int] {
+  override def setup(context: com.twitter.heron.streamlet.Context): Unit =
+    numbers += (1, 2)
+  override def put(tuple: Int): Unit = numbers += tuple
+  override def cleanup(): Unit = numbers.clear()
+}
