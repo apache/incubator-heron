@@ -265,11 +265,8 @@ public class Slave implements Runnable, AutoCloseable {
     metricsCollector.forceGatherAllMetrics();
 
     // Stop slave looper consuming data/control_msg
-    // lock looper to prevent new tasks from being added
-    slaveLooper.lock();
     slaveLooper.clearTasksOnWakeup();
     slaveLooper.clearTimers();
-    slaveLooper.unlock();
 
     if (instance != null) {
       instance.clean();
@@ -289,6 +286,10 @@ public class Slave implements Runnable, AutoCloseable {
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
+
+    // lock looper to prevent new tasks from being added
+    slaveLooper.lock();
+
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
     // Clean buffers and unregister tasks in slave looper
@@ -317,6 +318,9 @@ public class Slave implements Runnable, AutoCloseable {
     if (instanceState == null) {
       instanceState = new HashMapState<>();
     }
+
+    // Unlock looper to allow tasks to be added
+    slaveLooper.unlock();
 
     LOG.info("Instance state restored for checkpoint id: "
         + request.getState().getCheckpointId());
