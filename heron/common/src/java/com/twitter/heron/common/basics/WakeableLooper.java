@@ -52,12 +52,24 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
+  private boolean lockAddNewTasks = false;
 
   public WakeableLooper() {
     exitLoop = false;
     tasksOnWakeup = new ArrayList<>();
     timers = new PriorityQueue<TimerTask>();
     exitTasks = new ArrayList<>();
+  }
+
+  /**
+   * lock looper to prevent additional tasks and timers from being added
+   */
+  public void lock() {
+    lockAddNewTasks = true;
+  }
+
+  public void unlock() {
+    lockAddNewTasks = false;
   }
 
   public void clear() {
@@ -93,7 +105,7 @@ public abstract class WakeableLooper {
 
   private void onExit() {
     int s = exitTasks.size();
-    for (int i = 0; i < s; i ++) {
+    for (int i = 0; i < s; i++) {
       // in case previous task cleared the list
       if (exitTasks.size() <= i) {
         break;
@@ -107,31 +119,39 @@ public abstract class WakeableLooper {
   public abstract void wakeUp();
 
   public void addTasksOnWakeup(Runnable task) {
-    tasksOnWakeup.add(task);
-    // We need to wake up the looper itself when we add a new task, otherwise, it is possible
-    // this task will never be executed due to the looper will never be wake up.
-    wakeUp();
+    if (!lockAddNewTasks) {
+      tasksOnWakeup.add(task);
+      // We need to wake up the looper itself when we add a new task, otherwise, it is possible
+      // this task will never be executed due to the looper will never be wake up.
+      wakeUp();
+    }
   }
 
   public void addTasksOnExit(Runnable task) {
-    exitTasks.add(task);
+    if (!lockAddNewTasks) {
+      exitTasks.add(task);
+    }
   }
 
   public void registerTimerEvent(Duration timerDuration, Runnable task) {
-    assert timerDuration.getSeconds() >= 0;
-    assert task != null;
-    Duration expiration = timerDuration.plusNanos(System.nanoTime());
-    timers.add(new TimerTask(expiration, task));
+    if (!lockAddNewTasks) {
+      assert timerDuration.getSeconds() >= 0;
+      assert task != null;
+      Duration expiration = timerDuration.plusNanos(System.nanoTime());
+      timers.add(new TimerTask(expiration, task));
+    }
   }
 
   public void registerPeriodicEvent(Duration frequency, Runnable task) {
-    registerTimerEvent(frequency, new Runnable() {
-      @Override
-      public void run() {
-        task.run();
-        registerPeriodicEvent(frequency, task);
-      }
-    });
+    if (!lockAddNewTasks) {
+      registerTimerEvent(frequency, new Runnable() {
+        @Override
+        public void run() {
+          task.run();
+          registerPeriodicEvent(frequency, task);
+        }
+      });
+    }
   }
 
   public void exitLoop() {
@@ -163,7 +183,7 @@ public abstract class WakeableLooper {
     int s = tasksOnWakeup.size();
     for (int i = 0; i < s; i++) {
       // in case previous task cleared the list
-      if (tasksOnWakeup.size() <= i){
+      if (tasksOnWakeup.size() <= i) {
         break;
       }
       tasksOnWakeup.get(i).run();

@@ -265,8 +265,11 @@ public class Slave implements Runnable, AutoCloseable {
     metricsCollector.forceGatherAllMetrics();
 
     // Stop slave looper consuming data/control_msg
+    // lock looper to prevent new tasks from being added
+    slaveLooper.lock();
     slaveLooper.clearTasksOnWakeup();
     slaveLooper.clearTimers();
+    slaveLooper.unlock();
 
     if (instance != null) {
       instance.clean();
