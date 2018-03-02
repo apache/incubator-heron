@@ -107,6 +107,7 @@ public class TopologyResource extends HeronResource {
   };
 
   private static final String PARAM_COMPONENT_PARALLELISM = "component_parallelism";
+  private static final String PARAM_USER_RUNTIME_CONFIG_KEY = "user_config";
   private static final String PARAM_DRY_RUN = "dry_run";
   private static final String PARAM_DRY_RUN_FORMAT = "dry_run_format";
   private static final String DEFAULT_DRY_RUN_FORMAT = DryRunFormatType.TABLE.toString();
@@ -340,43 +341,27 @@ public class TopologyResource extends HeronResource {
       final @PathParam("name") String name,
       MultivaluedMap<String, String> params) {
     try {
-      if (params == null || !params.containsKey(PARAM_COMPONENT_PARALLELISM)) {
+      if (params == null) {
         return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
             .type(MediaType.APPLICATION_JSON)
-            .entity(Utils.createMessage("missing component_parallelism param"))
+            .entity(Utils.createMessage("no param"))
             .build();
+      } else {
+        List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
+        List<String> userRuntimeConfigs = params.get(PARAM_USER_RUNTIME_CONFIG_KEY);
+
+        if (!components.isEmpty()) {
+          return updateComponentParallelism(cluster, role, environment, name, params, components);
+        } else if (!userRuntimeConfigs.isEmpty()) {
+          return updateUserRuntimeConfig(cluster, role, environment, name, params,
+                                         userRuntimeConfigs);
+        } else {
+          return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
+            .type(MediaType.APPLICATION_JSON)
+            .entity(Utils.createMessage("missing component_parallelism or user_config param"))
+            .build();
+        }
       }
-
-      List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
-      final List<Pair<String, Object>> keyValues = new ArrayList<>(
-          Arrays.asList(
-              Pair.create(Key.CLUSTER.value(), cluster),
-              Pair.create(Key.ROLE.value(), role),
-              Pair.create(Key.ENVIRON.value(), environment),
-              Pair.create(Key.TOPOLOGY_NAME.value(), name),
-              Pair.create(Keys.NEW_COMPONENT_PARALLELISM_KEY,
-                  String.join(",", components))
-          )
-      );
-
-      // has a dry run been requested?
-      if (params.containsKey(PARAM_DRY_RUN)) {
-        keyValues.add(Pair.create(Key.DRY_RUN.value(), Boolean.TRUE));
-      }
-
-      final Set<Pair<String, Object>> overrides = getUpdateOverrides(params);
-      // apply overrides if they exists
-      if (!overrides.isEmpty()) {
-        keyValues.addAll(overrides);
-      }
-
-      final Config config = createConfig(keyValues);
-      getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
-
-      return Response.ok()
-          .type(MediaType.APPLICATION_JSON)
-          .entity(Utils.createMessage(String.format("%s updated", name)))
-          .build();
     } catch (UpdateDryRunResponse response) {
       return createDryRunResponse(response,
           Forms.getFirstOrDefault(params, PARAM_DRY_RUN_FORMAT, DEFAULT_DRY_RUN_FORMAT));
@@ -387,6 +372,57 @@ public class TopologyResource extends HeronResource {
           .entity(Utils.createMessage(ex.getMessage()))
           .build();
     }
+  }
+
+  protected Response updateComponentParallelism(
+      String cluster,
+      String role,
+      String environment,
+      String name,
+      MultivaluedMap<String, String> params,
+      List<String> components) {
+    final List<Pair<String, Object>> keyValues = new ArrayList<>(
+        Arrays.asList(
+            Pair.create(Key.CLUSTER.value(), cluster),
+            Pair.create(Key.ROLE.value(), role),
+            Pair.create(Key.ENVIRON.value(), environment),
+            Pair.create(Key.TOPOLOGY_NAME.value(), name),
+            Pair.create(Keys.PARAM_COMPONENT_PARALLELISM,
+                String.join(",", components))
+        )
+    );
+
+    // has a dry run been requested?
+    if (params.containsKey(PARAM_DRY_RUN)) {
+      keyValues.add(Pair.create(Key.DRY_RUN.value(), Boolean.TRUE));
+    }
+
+    final Set<Pair<String, Object>> overrides = getUpdateOverrides(params);
+    // apply overrides if they exists
+    if (!overrides.isEmpty()) {
+      keyValues.addAll(overrides);
+    }
+
+    final Config config = createConfig(keyValues);
+    getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
+
+    return Response.ok()
+        .type(MediaType.APPLICATION_JSON)
+        .entity(Utils.createMessage(String.format("%s updated", name)))
+        .build();
+  }
+
+  protected Response updateUserRuntimeConfig(
+      String cluster,
+      String role,
+      String environment,
+      String name,
+      MultivaluedMap<String, String> params,
+      List<String> userRuntimeConfigs) {
+    return Response.ok()
+    .type(MediaType.APPLICATION_JSON)
+    .entity(Utils.createMessage(String.format("%s updated", name)))
+    .build();
   }
 
   @DELETE

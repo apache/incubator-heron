@@ -14,8 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' restart.py '''
+''' update.py '''
 from heron.common.src.python.utils.log import Log
+from heron.tools.cli.src.python.result import SimpleResult, Status
+
 import heron.tools.cli.src.python.args as args
 import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.cli.src.python.jars as jars
@@ -30,7 +32,8 @@ def create_parser(subparsers):
       'update',
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
-      + "[--component-parallelism <name:value>] [--user-config <topology|component-name:config=value>]",
+      + "[--component-parallelism <name:value>] "
+      + "[--user-config <topology|component-name:config=value>]",
       add_help=True)
 
   args.add_titles(parser)
@@ -41,7 +44,7 @@ def create_parser(subparsers):
     pattern = re.compile(r"^[\w\.-]+:[\d]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          'Invalid syntax for component parallelism (<component_name>:<value>): %s' % value)
+          "Invalid syntax for component parallelism (<component_name>:<value>): %s" % value)
     return value
 
   parser.add_argument(
@@ -56,8 +59,8 @@ def create_parser(subparsers):
     pattern = re.compile(r"^[\w\.-]+:[\w\.-_]+=[\w\.-_]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          'Invalid syntax for user config (<topology|component_name>:<config>=<value>): %s'
-              % value)
+          "Invalid syntax for user config (<topology|component_name>:<config>=<value>): %s"
+          % value)
     return value
 
   parser.add_argument(
@@ -76,6 +79,48 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='update')
   return parser
 
+def build_extra_args_dict(cl_args):
+  """ Build extra args map """
+  # Check parameters
+  component_parallelisms = cl_args['component_parallelism']
+  user_configs = cl_args['user_config']
+  # Users need to provide either component-parallelism or user-config
+  if component_parallelisms and user_configs:
+    raise Exception(
+        "component-parallelism and user-config can't be used together")
+
+  dict_extra_args = {}
+  if component_parallelisms:
+    dict_extra_args.update({'component_parallelism', component_parallelisms})
+  elif user_configs:
+    dict_extra_args.update({'user_config', user_configs})
+  else:
+    raise Exception(
+        "Missing arguments --component-parallelism or --user-config")
+
+  if cl_args['dry_run']:
+    dict_extra_args.update({'dry_run': True})
+    if 'dry_run_format' in cl_args:
+      dict_extra_args.update({'dry_run_format', cl_args["dry_run_format"]})
+
+  return dict_extra_args
+
+
+def convert_args_dict_to_list(dict_extra_args):
+  """ flatten extra args """
+  list_extra_args = []
+  if 'component_parallelism' in dict_extra_args:
+    list_extra_args += ["--component_parallelism",
+                        ','.join(dict_extra_args['component_parallelism'])]
+  if 'user_config' in dict_extra_args:
+    list_extra_args += ["--user_config",
+                        ','.join(dict_extra_args['user_config'])]
+  if 'dry_run' in dict_extra_args and dict_extra_args['dry_run']:
+    list_extra_args += '--dry_run'
+  if 'dry_run_format' in dict_extra_args:
+    list_extra_args += ['--dry_run_format', dict_extra_args['dry_run_format']]
+
+  return list_extra_args
 
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
@@ -83,49 +128,21 @@ def run(command, parser, cl_args, unknown_args):
 
   Log.debug("Update Args: %s", cl_args)
 
-  # Check parameters
-  component_parallelisms = cl_args['component_parallelism']
-  user_configs = cl_args['user_config']
-  # Users need to provide at least one component-parallelism or at least one user-config
-  if len(component_parallelisms) > 0 and len(user_configs) > 0:
-    err_context = "--component-parallelism and --user-config can not be updated at the same time"
-      return SimpleResult(Status.InvocationError, err_context)
-
-  # Build and run command
+  # Build jar list
   extra_lib_jars = jars.packing_jars()
   action = "update topology%s" % (' in dry-run mode' if cl_args["dry_run"] else '')
 
+  # Build extra args
+  dict_extra_args = {}
+  try:
+    dict_extra_args = build_extra_args_dict(cl_args)
+  except Exception as err:
+    return SimpleResult(Status.InvocationError, err.message)
+
+  # Execute
   if cl_args['deploy_mode'] == config.SERVER_MODE:
-    # Build extra args
-    dict_extra_args = {}
-    if len(component_parallelisms) > 0:
-        dict_extra_args.update({"component_parallelism", component_parallelisms})
-    elif len(user_configs) > 0:
-        dict_extra_args.update({"user_config", user_configs})
-    else:
-      err_context = "Missing arguments --component-parallelism or --user-config"
-      return SimpleResult(Status.InvocationError, err_context)
-
-    if cl_args["dry_run"]:
-      dict_extra_args.update({'dry_run': True})
-      if "dry_run_format" in cl_args:
-        dict_extra_args.update({"dry_run_format", cl_args["dry_run_format"]})
-
     return cli_helper.run_server(command, cl_args, action, dict_extra_args)
   else:
-    # Build extra args
-    list_extra_args = []
-    if len(component_parallelisms) > 0:
-      list_extra_args += ["--component_parallelism", ','.join(component_parallelisms)]
-    elif len(user_configs) > 0:
-      list_extra_args += ["--user_config", ','.join(user_configs)]
-    else:
-      err_context = "Missing arguments --component-parallelism or --user-config"
-      return SimpleResult(Status.InvocationError, err_context)
-
-    if cl_args["dry_run"]:
-      list_extra_args.append('--dry_run')
-      if "dry_run_format" in cl_args:
-        list_extra_args += ["--dry_run_format", cl_args["dry_run_format"]]
-
+    # Convert extra argument to commandline format and then execute
+    list_extra_args = convert_args_dict_to_list(dict_extra_args)
     return cli_helper.run_direct(command, cl_args, action, list_extra_args, extra_lib_jars)
