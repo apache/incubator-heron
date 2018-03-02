@@ -52,7 +52,7 @@ def create_parser(subparsers):
       help='Component name and the new parallelism value '
       + 'colon-delimited: [component_name]:[parallelism]')
 
-def user_config_type(value):
+  def user_config_type(value):
     pattern = re.compile(r"^[\w\.-]+:[\w\.-_]+=[\w\.-_]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
@@ -66,7 +66,7 @@ def user_config_type(value):
       type=user_config_type,
       required=False,
       help='Runtime config topology and/or components'
-      + 'colon-delimited: [topology|component_name]:[config_name]=[config_value]')
+      + 'colon-delimited: [topology|component_name]:[config]=[value]')
 
   args.add_config(parser)
   args.add_dry_run(parser)
