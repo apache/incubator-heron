@@ -95,20 +95,20 @@ using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
 $ heron submit local \
-  ~/.heron/examples/heron-streamlet-api-examples.jar \
-  com.twitter.heron.examples.streamlet.WordCountDslTopology \
-  WordCountDslTopology \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCountTopology \
   --deploy-deactivated
 ```
 
 The output should look something like this:
 
 ```bash
-INFO: Launching topology 'WordCountDslTopology'
+INFO: Launching topology 'WindowedWordCountTopology'
 
 ...
 
-INFO: Topology 'WordCountDslTopology' launched successfully
+INFO: Topology 'WindowedWordCountTopology' launched successfully
 INFO: Elapsed time: 3.409s.
 ```
 
@@ -123,8 +123,8 @@ the working directory for the topology.
 To check what's under the working directory, run:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology
--rw-r--r--   1 username  staff     6141 Oct 12 09:58 WordCountDslTopology.defn
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology
+-rw-r--r--   1 username  staff     6141 Oct 12 09:58 WindowedWordCountTopology.defn
 -rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_flatmap1_4.pid
 -rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_logger1_3.pid
 # etc.
@@ -133,7 +133,7 @@ $ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology
 All instances' log files can be found in `log-files` under the working directory:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology/log-files
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology/log-files
 total 408
 -rw-r--r--   1 username  staff   5055 Oct 12 09:58 container_1_flatmap1_4.log.0
 -rw-r--r--   1 username  staff      0 Oct 12 09:58 container_1_flatmap1_4.log.0.lck
@@ -183,15 +183,15 @@ In step 2 you submitted a topology to your local cluster. The `heron` CLI tool
 also enables you to activate, deactivate, and kill topologies and more.
 
 ```bash
-$ heron activate local WordCountDslTopology
-$ heron deactivate local WordCountDslTopology
-$ heron kill local WordCountDslTopology
+$ heron activate local WindowedWordCountTopology
+$ heron deactivate local WindowedWordCountTopology
+$ heron kill local WindowedWordCountTopology
 ```
 
 Upon successful actions, a message similar to the following will appear:
 
 ```bash
-INFO: Successfully activated topology 'WordCountDslTopology'
+INFO: Successfully activated topology 'WindowedWordCountTopology'
 INFO: Elapsed time: 1.980s.
 ```
 

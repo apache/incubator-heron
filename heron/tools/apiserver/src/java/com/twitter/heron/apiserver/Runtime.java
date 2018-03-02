@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.twitter.heron.apiserver.resources.HeronResource;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.Logging;
+import com.twitter.heron.apiserver.utils.Utils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 
@@ -283,8 +284,6 @@ public final class Runtime {
             releaseFile,
             configurationOverrides);
 
-    LOG.info("heronCorePackagePath: " + heronCorePackagePath);
-
     final ResourceConfig config = new ResourceConfig(Resources.get());
     final Server server = new Server(port);
 
@@ -303,9 +302,11 @@ public final class Runtime {
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
         String.valueOf(port));
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_DOWNLOAD_HOSTNAME,
-        String.valueOf(downloadHostName));
+        Utils.isNotEmpty(downloadHostName)
+            ? String.valueOf(downloadHostName) : null);
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_HERON_CORE_PACKAGE_PATH,
-        String.valueOf(heronCorePackagePath));
+        Utils.isNotEmpty(heronCorePackagePath)
+            ? String.valueOf(heronCorePackagePath) : null);
 
     server.setHandler(contextHandler);
 

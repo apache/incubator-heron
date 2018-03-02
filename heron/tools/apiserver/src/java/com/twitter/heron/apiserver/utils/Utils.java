@@ -44,4 +44,9 @@ public final class Utils {
 
     return node.toString();
   }
+
+  public static boolean isNotEmpty(String str) {
+    return str != null && !str.isEmpty();
+
+  }
 }
