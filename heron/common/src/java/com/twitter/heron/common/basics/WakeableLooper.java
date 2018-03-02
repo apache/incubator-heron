@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A WakeableLooper is a class that could:
@@ -52,12 +54,15 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
+  // Used as a flag that the looper has exited after exitLoop() is called.
+  private final CountDownLatch exitCountDownLatch;
 
   public WakeableLooper() {
     exitLoop = false;
     tasksOnWakeup = new ArrayList<Runnable>();
     timers = new PriorityQueue<TimerTask>();
     exitTasks = new ArrayList<>();
+    exitCountDownLatch = new CountDownLatch(1);
   }
 
   public void clear() {
@@ -94,6 +99,21 @@ public abstract class WakeableLooper {
   private void onExit() {
     for (Runnable r : exitTasks) {
       r.run();
+    }
+    exitCountDownLatch.countDown();
+  }
+
+  /**
+   * After exitLoop() is called, caller can use waitForExit() to make sure
+   * the looper has finished/skipped all sheduled tasks and the runOnce() function
+   * won't be called any more.
+   * @return true if the count down lanch reaches 0, false if the wait times out or is interrupted.
+   */
+  public boolean waitForExit(long timeout, TimeUnit unit) {
+    try {
+      return exitCountDownLatch.await(timeout, unit);
+    } catch (InterruptedException e) {
+      return false;
     }
   }
 

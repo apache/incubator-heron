@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.ByteAmount;
@@ -213,6 +214,10 @@ public class SocketChannelHelper {
   // Force to flush all data in underneath buffer queue to socket with best effort
   // It is most likely happen when we are handling some unexpected cases, such as exiting
   public void forceFlushWithBestEffort() {
+    looper.exitLoop();
+    // Wait for NIO loop to confirm stopping process.
+    looper.waitForExit(10, TimeUnit.SECONDS);
+
     LOG.info("Forcing to flush data to socket with best effort.");
     while (!outgoingPacketsToWrite.isEmpty()) {
       int writeState = outgoingPacketsToWrite.poll().writeToChannel(socketChannel);
