@@ -15,7 +15,6 @@
 package com.twitter.heron.streamlet.scala
 
 import com.twitter.heron.streamlet.{Source, Streamlet}
-import com.twitter.heron.streamlet.impl.BuilderImpl
 
 
 /**
@@ -23,10 +22,6 @@ import com.twitter.heron.streamlet.impl.BuilderImpl
   * of all the starting points of the computation dag and uses this
   * information to build the topology
   */
-object Builder {
-  def newBuilder = new BuilderImpl
-}
-
 trait Builder {
   /**
     * All sources of the computation should register using addSource.
@@ -43,5 +38,5 @@ trait Builder {
     * @param <         R>
     * @return
     */
-  def newSource[R](generatorFn: Source[R]): Streamlet[R]
+  def newSource[R](sourceFn: Source[R]): Streamlet[R]
 }
