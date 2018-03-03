@@ -350,9 +350,9 @@ public class TopologyResource extends HeronResource {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
         List<String> userRuntimeConfigs = params.get(PARAM_USER_RUNTIME_CONFIG_KEY);
 
-        if (!components.isEmpty()) {
+        if (components != null && !components.isEmpty()) {
           return updateComponentParallelism(cluster, role, environment, name, params, components);
-        } else if (!userRuntimeConfigs.isEmpty()) {
+        } else if (userRuntimeConfigs != null && !userRuntimeConfigs.isEmpty()) {
           return updateUserRuntimeConfig(cluster, role, environment, name, params,
                                          userRuntimeConfigs);
         } else {
