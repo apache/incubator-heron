@@ -35,6 +35,7 @@ public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundExcepti
     final ArrayNode arrayNode = node.putArray("paths");
     arrayNode.add("/api/v1/topologies");
     arrayNode.add("/api/v1/version");
+    arrayNode.add("/api/v1/file");
 
     final String response;
     try {

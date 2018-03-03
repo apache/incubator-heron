@@ -13,11 +13,12 @@
 //  limitations under the License.
 package com.twitter.heron.eco.submit;
 
-import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
+
+import com.twitter.heron.api.Config;
 
 public class EcoSubmitter {
 

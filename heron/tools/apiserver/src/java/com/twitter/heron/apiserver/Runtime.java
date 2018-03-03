@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.twitter.heron.apiserver.resources.HeronResource;
 import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.apiserver.utils.Logging;
+import com.twitter.heron.apiserver.utils.Utils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 
@@ -55,7 +56,8 @@ public final class Runtime {
     Property("D"),
     ReleaseFile("release-file"),
     Verbose("verbose"),
-    DownloadHostName("download-hostname");
+    DownloadHostName("download-hostname"),
+    HeronCorePackagePath("heron-core-package-path");
 
     final String name;
 
@@ -128,6 +130,14 @@ public final class Runtime {
         .required(false)
         .build();
 
+    final Option downloadHeronCoreName = Option.builder()
+        .desc("Path to Heron Core Package. API Server can serve Heron Core Package")
+        .longOpt(Flag.HeronCorePackagePath.name)
+        .hasArg()
+        .argName(Flag.HeronCorePackagePath.name)
+        .required(false)
+        .build();
+
     return new Options()
         .addOption(baseTemplate)
         .addOption(cluster)
@@ -136,7 +146,8 @@ public final class Runtime {
         .addOption(release)
         .addOption(property)
         .addOption(verbose)
-        .addOption(downloadHostName);
+        .addOption(downloadHostName)
+        .addOption(downloadHeronCoreName);
   }
 
   private static Options constructHelpOptions() {
@@ -204,6 +215,13 @@ public final class Runtime {
     return null;
   }
 
+  private static String getHeronCorePackagePath(CommandLine cmd) {
+    if (cmd.hasOption(Flag.HeronCorePackagePath.name)) {
+      return String.valueOf(cmd.getOptionValue(Flag.HeronCorePackagePath.name));
+    }
+    return null;
+  }
+
   private static String loadOverrides(CommandLine cmd) throws IOException {
     return ConfigUtils.createOverrideConfiguration(
         cmd.getOptionProperties(Flag.Property.name));
@@ -258,6 +276,7 @@ public final class Runtime {
     final String configurationOverrides = loadOverrides(cmd);
     final int port = getPort(cmd);
     final String downloadHostName = getDownloadHostName(cmd);
+    final String heronCorePackagePath = getHeronCorePackagePath(cmd);
 
     final Config baseConfiguration =
         ConfigUtils.getBaseConfiguration(heronDirectory,
@@ -283,7 +302,11 @@ public final class Runtime {
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_PORT,
         String.valueOf(port));
     contextHandler.setAttribute(HeronResource.ATTRIBUTE_DOWNLOAD_HOSTNAME,
-        String.valueOf(downloadHostName));
+        Utils.isNotEmpty(downloadHostName)
+            ? String.valueOf(downloadHostName) : null);
+    contextHandler.setAttribute(HeronResource.ATTRIBUTE_HERON_CORE_PACKAGE_PATH,
+        Utils.isNotEmpty(heronCorePackagePath)
+            ? String.valueOf(heronCorePackagePath) : null);
 
     server.setHandler(contextHandler);
 
@@ -291,8 +314,6 @@ public final class Runtime {
         new ServletHolder(new ServletContainer(config));
 
     contextHandler.addServlet(apiServlet, API_BASE_PATH);
-
-
 
     try {
       server.start();

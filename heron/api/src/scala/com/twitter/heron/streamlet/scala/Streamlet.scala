@@ -16,7 +16,7 @@ package com.twitter.heron.streamlet.scala
 import com.twitter.heron.streamlet.{KeyValue, KeyedWindow, Streamlet}
 
 // TODO: This Java Streamlet API references will be changed with Scala versions when they are ready
-import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, Sink, WindowConfig}
+import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, WindowConfig}
 
 /**
   * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -74,7 +74,7 @@ trait Streamlet[R] {
     *
     * @param mapFn The Map Function that should be applied to each element
     */
-  def map[T](mapFn: R => (_ <: T)): Streamlet[T]
+  def map[T](mapFn: R => _ <: T): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -82,7 +82,7 @@ trait Streamlet[R] {
     *
     * @param flatMapFn The FlatMap Function that should be applied to each element
     */
-  def flatMap[T](flatMapFn: R => (_ <: Iterable[_ <: T])): Streamlet[T]
+  def flatMap[T](flatMapFn: R => _ <: Iterable[_ <: T]): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet
@@ -155,7 +155,7 @@ trait Streamlet[R] {
                     otherKeyExtractor: S => K,
                     windowCfg: WindowConfig,
                     joinType: JoinType,
-                    joinFunction: (R, S) => (_ <: T)): Streamlet[KeyValue[KeyedWindow[K], T]]
+                    joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
