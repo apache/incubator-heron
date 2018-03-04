@@ -13,6 +13,13 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
+import com.twitter.heron.streamlet.{
+  Context,
+  SerializableConsumer,
+  SerializableFunction,
+  SerializablePredicate,
+  SerializableSupplier
+}
 import com.twitter.heron.streamlet.scala.Sink
 
 /**
@@ -22,29 +29,28 @@ import com.twitter.heron.streamlet.scala.Sink
 object ScalaToJavaConverter {
 
   def toSerializableSupplier[T](f: () => T) =
-    new com.twitter.heron.streamlet.SerializableSupplier[T] {
+    new SerializableSupplier[T] {
       override def get(): T = f()
     }
 
-  def toSerializableFunction[R, T](f: R => _ <: T) =
-    new com.twitter.heron.streamlet.SerializableFunction[R, T] {
+  def toSerializableFunction[R, T](f: R => T) =
+    new SerializableFunction[R, T] {
       override def apply(r: R): T = f(r)
     }
 
   def toSerializablePredicate[R](f: R => Boolean) =
-    new com.twitter.heron.streamlet.SerializablePredicate[R] {
+    new SerializablePredicate[R] {
       override def test(r: R): Boolean = f(r)
     }
 
   def toSerializableConsumer[R](f: R => Unit) =
-    new com.twitter.heron.streamlet.SerializableConsumer[R] {
+    new SerializableConsumer[R] {
       override def accept(r: R): Unit = f(r)
     }
 
   def toJavaSink[T](sink: Sink[T]): com.twitter.heron.streamlet.Sink[T] = {
     new com.twitter.heron.streamlet.Sink[T] {
-      override def setup(context: com.twitter.heron.streamlet.Context): Unit =
-        sink.setup(context)
+      override def setup(context: Context): Unit = sink.setup(context)
 
       override def put(tuple: T): Unit = sink.put(tuple)
 

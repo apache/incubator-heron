@@ -29,7 +29,7 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
       ScalaToJavaConverter.toSerializableSupplier[String](testFunction)
     assertTrue(
       serializableSupplier
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableSupplier[_]])
+        .isInstanceOf[com.twitter.heron.streamlet.SerializableSupplier[String]])
   }
 
   test("ScalaToJavaConverterTest should support SerializableFunction") {
@@ -39,7 +39,8 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         stringToIntFunction)
     assertTrue(
       serializableFunction
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableFunction[_, _]])
+        .isInstanceOf[
+          com.twitter.heron.streamlet.SerializableFunction[String, Int]])
   }
 
   test("ScalaToJavaConverterTest should support Java Sink") {

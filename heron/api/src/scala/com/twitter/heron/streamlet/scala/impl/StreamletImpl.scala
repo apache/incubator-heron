@@ -95,7 +95,7 @@ class StreamletImpl[R](
     *
     * @param mapFn The Map Function that should be applied to each element
     */
-  override def map[T](mapFn: R => _ <: T): Streamlet[T] = {
+  override def map[T](mapFn: R => T): Streamlet[T] = {
     val serializableFunction = toSerializableFunction[R, T](mapFn)
     val newJavaStreamlet = javaStreamlet.map[T](serializableFunction)
     toScalaStreamlet[T](newJavaStreamlet)

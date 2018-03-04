@@ -15,6 +15,7 @@ package com.twitter.heron.streamlet.scala.common
 
 import scala.collection.mutable.ListBuffer
 
+import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
 
 /**
@@ -23,8 +24,7 @@ import com.twitter.heron.streamlet.scala.Sink
 private[scala] class TestListBufferSink(
     numbers: ListBuffer[Int] = ListBuffer[Int]())
     extends Sink[Int] {
-  override def setup(context: com.twitter.heron.streamlet.Context): Unit =
-    numbers += (1, 2)
+  override def setup(context: Context): Unit = numbers += (1, 2)
   override def put(tuple: Int): Unit = numbers += tuple
   override def cleanup(): Unit = numbers.clear()
 }
