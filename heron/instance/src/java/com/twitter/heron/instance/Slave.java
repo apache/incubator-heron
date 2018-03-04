@@ -286,7 +286,6 @@ public class Slave implements Runnable, AutoCloseable {
   }
 
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
-
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
     // Clean buffers and unregister tasks in slave looper
