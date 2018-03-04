@@ -52,24 +52,12 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
-  private boolean lockAddNewTasks = false;
 
   public WakeableLooper() {
     exitLoop = false;
     tasksOnWakeup = new ArrayList<>();
     timers = new PriorityQueue<TimerTask>();
     exitTasks = new ArrayList<>();
-  }
-
-  /**
-   * lock looper to prevent additional tasks and timers from being added
-   */
-  public void lock() {
-    lockAddNewTasks = true;
-  }
-
-  public void unlock() {
-    lockAddNewTasks = false;
   }
 
   public void clear() {
@@ -119,39 +107,32 @@ public abstract class WakeableLooper {
   public abstract void wakeUp();
 
   public void addTasksOnWakeup(Runnable task) {
-    if (!lockAddNewTasks) {
-      tasksOnWakeup.add(task);
-      // We need to wake up the looper itself when we add a new task, otherwise, it is possible
-      // this task will never be executed due to the looper will never be wake up.
-      wakeUp();
-    }
+    tasksOnWakeup.add(task);
+    // We need to wake up the looper itself when we add a new task, otherwise, it is possible
+    // this task will never be executed due to the looper will never be wake up.
+    wakeUp();
+
   }
 
   public void addTasksOnExit(Runnable task) {
-    if (!lockAddNewTasks) {
-      exitTasks.add(task);
-    }
+    exitTasks.add(task);
   }
 
   public void registerTimerEvent(Duration timerDuration, Runnable task) {
-    if (!lockAddNewTasks) {
-      assert timerDuration.getSeconds() >= 0;
-      assert task != null;
-      Duration expiration = timerDuration.plusNanos(System.nanoTime());
-      timers.add(new TimerTask(expiration, task));
-    }
+    assert timerDuration.getSeconds() >= 0;
+    assert task != null;
+    Duration expiration = timerDuration.plusNanos(System.nanoTime());
+    timers.add(new TimerTask(expiration, task));
   }
 
   public void registerPeriodicEvent(Duration frequency, Runnable task) {
-    if (!lockAddNewTasks) {
-      registerTimerEvent(frequency, new Runnable() {
-        @Override
-        public void run() {
-          task.run();
-          registerPeriodicEvent(frequency, task);
-        }
-      });
-    }
+    registerTimerEvent(frequency, new Runnable() {
+      @Override
+      public void run() {
+        task.run();
+        registerPeriodicEvent(frequency, task);
+      }
+    });
   }
 
   public void exitLoop() {
