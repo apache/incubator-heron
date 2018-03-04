@@ -52,6 +52,8 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
+  private boolean clearTasksOnWakeup = false;
+  private boolean clearExitTasks = false;
 
   public WakeableLooper() {
     exitLoop = false;
@@ -61,17 +63,23 @@ public abstract class WakeableLooper {
   }
 
   public void clear() {
-    tasksOnWakeup.clear();
-    timers.clear();
-    exitTasks.clear();
+    clearTasksOnWakeup();
+    clearTimers();
+    clearExitTasks();
   }
 
   public void clearTasksOnWakeup() {
     tasksOnWakeup.clear();
+    clearTasksOnWakeup = true;
   }
 
   public void clearTimers() {
     timers.clear();
+  }
+
+  public void clearExitTasks() {
+    exitTasks.clear();
+    clearExitTasks = true;
   }
 
   public void loop() {
@@ -94,12 +102,12 @@ public abstract class WakeableLooper {
   private void onExit() {
     int s = exitTasks.size();
     for (int i = 0; i < s; i++) {
-      // in case previous task cleared the list
-      if (exitTasks.size() <= i) {
+      if (clearExitTasks) {
         break;
       }
       exitTasks.get(i).run();
     }
+    clearExitTasks = false;
   }
 
   protected abstract void doWait();
@@ -163,12 +171,12 @@ public abstract class WakeableLooper {
     // We pre-get the size to avoid execute the tasks added during execution
     int s = tasksOnWakeup.size();
     for (int i = 0; i < s; i++) {
-      // in case previous task cleared the list
-      if (tasksOnWakeup.size() <= i) {
+      if (clearTasksOnWakeup) {
         break;
       }
       tasksOnWakeup.get(i).run();
     }
+    clearTasksOnWakeup = false;
   }
 
   private void triggerExpiredTimers(long currentTime) {
