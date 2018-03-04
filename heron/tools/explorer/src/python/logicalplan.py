@@ -69,6 +69,9 @@ def to_table(components, topo_info):
   spouts_instance = topo_info['physical_plan']['spouts']
   bolts_instance = topo_info['physical_plan']['bolts']
   for ctype, component in components.items():
+    # stages is an int so keep going
+    if ctype == "stages":
+      continue
     for component_name, component_info in component.items():
       row = [ctype[:-1], component_name]
       if ctype == 'spouts':
