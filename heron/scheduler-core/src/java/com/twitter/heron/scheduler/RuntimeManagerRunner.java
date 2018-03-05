@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -401,22 +404,19 @@ public class RuntimeManagerRunner {
   @VisibleForTesting
   String[] parseUserRuntimeConfigParam(String userRuntimeConfig)
       throws IllegalArgumentException {
+    // Regex for "[component_name:]<config>:<value>[,[component_name>:]<config>:<value>]"
+    final Pattern pattern = Pattern.compile("^([\\w\\.-]+:){1,2}[\\w\\.-]+$");
     if (userRuntimeConfig.isEmpty()) {
       return new String[0];
     }
 
     String[] configs = userRuntimeConfig.split(",");
     for (String configValuePair: configs) {
-      // The format for each config is <topology|COMPONENT_NAM>:<VALUE>=<VALUE>. So there
-      // should be one ':' and one '='. And ':' should be in front of '='.
-      int commaIndex = configValuePair.indexOf(':');
-      int equalIndex = configValuePair.indexOf('=');
-      if (commaIndex == -1 || equalIndex == -1 ||  commaIndex > equalIndex
-          || configValuePair.lastIndexOf(':') != commaIndex
-          || configValuePair.lastIndexOf('=') != equalIndex) {
+      Matcher matcher = pattern.matcher(configValuePair);
+      if (!matcher.find()) {
         throw new IllegalArgumentException("Invalid user config found. Expected: "
-            + "<topology|component_name>:<config>=<value>"
-            + "[,<topology|component_name>:<config>=<value>], Found: " + userRuntimeConfig);
+            + "[component_name:]<config>:<value>"
+            + "[,[component_name>:]<config>:<value>], Found: " + userRuntimeConfig);
       }
     }
 

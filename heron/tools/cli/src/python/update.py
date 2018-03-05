@@ -33,18 +33,24 @@ def create_parser(subparsers):
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
       + "[--component-parallelism <name:value>] "
-      + "[--user-config <topology|component-name:config=value>]",
+      + "[--user-config [component:]<name:value>]",
       add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
   args.add_topology(parser)
 
+  args.add_config(parser)
+  args.add_dry_run(parser)
+  args.add_service_url(parser)
+  args.add_verbose(parser)
+
+  # Special parameters for update command
   def parallelism_type(value):
     pattern = re.compile(r"^[\w\.-]+:[\d]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for component parallelism (<component_name>:<value>): %s" % value)
+          "Invalid syntax for component parallelism (<name:value>): %s" % value)
     return value
 
   parser.add_argument(
@@ -53,13 +59,13 @@ def create_parser(subparsers):
       type=parallelism_type,
       required=False,
       help='Component name and the new parallelism value '
-      + 'colon-delimited: [component_name]:[parallelism]')
+      + 'colon-delimited: <component_name>:<parallelism>')
 
   def user_config_type(value):
-    pattern = re.compile(r"^[\w\.-]+:[\w\.-_]+=[\w\.-_]+$")
+    pattern = re.compile(r"^([\w\.-]+:){1,2}[\w\.-]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for user config (<topology|component_name>:<config>=<value>): %s"
+          "Invalid syntax for user config ([component:]<name:value>): %s"
           % value)
     return value
 
@@ -68,13 +74,8 @@ def create_parser(subparsers):
       action='append',
       type=user_config_type,
       required=False,
-      help='Runtime config topology and/or components'
-      + 'colon-delimited: [topology|component_name]:[config]=[value]')
-
-  args.add_config(parser)
-  args.add_dry_run(parser)
-  args.add_service_url(parser)
-  args.add_verbose(parser)
+      help='Runtime configurations for topology and/or components'
+      + 'colon-delimited: [component:]<name>:<value>')
 
   parser.set_defaults(subcommand='update')
   return parser
@@ -87,13 +88,13 @@ def build_extra_args_dict(cl_args):
   # Users need to provide either component-parallelism or user-config
   if component_parallelisms and user_configs:
     raise Exception(
-        "component-parallelism and user-config can't be used together")
+        "component-parallelism and user-config can't be updated at the same time")
 
   dict_extra_args = {}
   if component_parallelisms:
-    dict_extra_args.update({'component_parallelism', component_parallelisms})
+    dict_extra_args.update({'component_parallelism': component_parallelisms})
   elif user_configs:
-    dict_extra_args.update({'user_config', user_configs})
+    dict_extra_args.update({'user_config': user_configs})
   else:
     raise Exception(
         "Missing arguments --component-parallelism or --user-config")

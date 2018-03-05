@@ -251,9 +251,10 @@ public class RuntimeManagerRunnerTest {
   @PrepareForTest({NetworkUtils.class, Runtime.class})
   @Test
   public void testUpdateTopologyUserRuntimeConfig() throws Exception {
-    String userRuntimeConfig = "testSpout:topology.user=1,testBolt:topology.user=4";
+    String testConfig = "topology.user:test,testSpout:topology.user:1,testBolt:topology.user:4";
     URL expectedURL = new URL("http://host:1/runtime_config/update?topologyid=topology-id&"
-        + "user-config=testSpout:topology.user=1&user-config=testBolt:topology.user=4");
+        + "user-config=topology.user:test&user-config=testSpout:topology.user:1&"
+        + "user-config=testBolt:topology.user:4");
 
     // Success case
     ISchedulerClient client = mock(ISchedulerClient.class);
@@ -272,7 +273,7 @@ public class RuntimeManagerRunnerTest {
     PowerMockito.when(NetworkUtils.getProxiedHttpConnectionIfNeeded(
         eq(expectedURL), any(NetworkUtils.TunnelConfig.class))).thenReturn(connection);
 
-    runner.updateTopologyUserRuntimeConfig(TOPOLOGY_NAME, userRuntimeConfig);
+    runner.updateTopologyUserRuntimeConfig(TOPOLOGY_NAME, testConfig);
   }
 
   @Test
@@ -336,10 +337,10 @@ public class RuntimeManagerRunnerTest {
   @Test
   public void testParseUserRuntimeConfigParam() {
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
-    String[] configs = runner.parseUserRuntimeConfigParam("topology:foo=1,bolt:bar=2");
+    String[] configs = runner.parseUserRuntimeConfigParam("foo:1,bolt:bar:2");
     assertEquals(2, configs.length);
-    assertEquals("topology:foo=1", configs[0]);
-    assertEquals("bolt:bar=2", configs[1]);
+    assertEquals("foo:1", configs[0]);
+    assertEquals("bolt:bar:2", configs[1]);
   }
 
   @Test
@@ -353,6 +354,6 @@ public class RuntimeManagerRunnerTest {
   public void testparseUserRuntimeConfigParamInvalid1() {
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
 
-    runner.parseUserRuntimeConfigParam("topolgy:foo=1,bolt:bar2");
+    runner.parseUserRuntimeConfigParam(":foo:1,bolt:bar2");
   }
 }
