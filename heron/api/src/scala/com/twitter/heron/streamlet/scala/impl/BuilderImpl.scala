@@ -20,8 +20,7 @@ object BuilderImpl {
   def toScalaBuilder[R](javaBuilder: com.twitter.heron.streamlet.Builder[R]): Builder[R] =
     new BuilderImpl[R](javaBuilder)
 
-  def toJavaBuilder[R](
-                          builder: Builder[R]): com.twitter.heron.streamlet.Builder[R] =
+  def toJavaBuilder[R](builder: Builder[R]): com.twitter.heron.streamlet.Builder[R] =
     builder.asInstanceOf[BuilderImpl[R]].javaBuilder
 
 }
