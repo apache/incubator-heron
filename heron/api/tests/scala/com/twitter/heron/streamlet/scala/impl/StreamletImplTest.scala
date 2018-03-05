@@ -17,10 +17,12 @@ import scala.util.Random
 
 import org.junit.Assert.{assertEquals, assertTrue}
 
+import com.twitter.heron.streamlet.WindowConfig
 import com.twitter.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
   FilterStreamlet,
   LogStreamlet,
+  JoinStreamlet,
   MapStreamlet,
   SinkStreamlet,
   UnionStreamlet
@@ -250,6 +252,81 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals("Union_Streamlet_1", unionStreamlet.getName)
     assertEquals(0, unionStreamlet.getChildren.size())
     assertEquals(4, unionStreamlet.getNumPartitions)
+  }
+
+  test("StreamletImpl should support join transformation") {
+    val numberStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_with_Numbers")
+      .setNumPartitions(4)
+
+    val textStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Random.nextString(3))
+      .setName("Supplier_Streamlet_with_Strings")
+      .setNumPartitions(3)
+
+    numberStreamlet
+      .join[String, String, String](textStreamlet,
+                                    (x: Int) => x.toString,
+                                    (y: String) => y,
+                                    WindowConfig.TumblingCountWindow(10),
+                                    (x: Int, y: String) => x + y)
+      .setName("Joined_Streamlet_1")
+      .setNumPartitions(2)
+
+    verifyJoinedStreamlet[Int](numberStreamlet,
+                               expectedName = "Joined_Streamlet_1",
+                               expectedNumPartitions = 2)
+    verifyJoinedStreamlet[String](textStreamlet,
+                                  expectedName = "Joined_Streamlet_1",
+                                  expectedNumPartitions = 2)
+  }
+
+  test("StreamletImpl should support clone operation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(5)
+
+    val clonedStreamlets = supplierStreamlet.clone(numClones = 3)
+    assertEquals(3, clonedStreamlets.size)
+
+    verifyClonedStreamlets[Double](supplierStreamlet, numClones = 3)
+  }
+
+  private def verifyClonedStreamlets[R](supplierStreamlet: Streamlet[R],
+                                        numClones: Int): Unit = {
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[R]]
+    assertEquals(numClones, supplierStreamletImpl.getChildren.size)
+    for (index <- 0 to (numClones - 1)) {
+      assertTrue(
+        supplierStreamletImpl
+          .getChildren(index)
+          .isInstanceOf[MapStreamlet[_, _]])
+      val mapStreamlet = supplierStreamletImpl
+        .getChildren(index)
+        .asInstanceOf[MapStreamlet[R, R]]
+      assertEquals(0, mapStreamlet.getChildren.size())
+    }
+  }
+
+  private def verifyJoinedStreamlet[R](supplierStreamlet: Streamlet[R],
+                                       expectedName: String,
+                                       expectedNumPartitions: Int): Unit = {
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[R]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[JoinStreamlet[_, _, _, _]])
+    val joinStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[JoinStreamlet[String, Int, String, String]]
+    assertEquals(expectedName, joinStreamlet.getName)
+    assertEquals(expectedNumPartitions, joinStreamlet.getNumPartitions)
+    assertEquals(0, joinStreamlet.getChildren.size())
   }
 
 }

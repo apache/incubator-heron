@@ -15,11 +15,14 @@ package com.twitter.heron.streamlet.scala.converter
 
 import com.twitter.heron.streamlet.{
   Context,
+  SerializableBiFunction,
   SerializableConsumer,
   SerializableFunction,
   SerializablePredicate,
-  SerializableSupplier
+  SerializableSupplier,
+  Sink => JavaSink
 }
+
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.Source
 import java.lang.Iterable
@@ -66,8 +69,13 @@ object ScalaToJavaConverter {
       override def accept(r: R): Unit = f(r)
     }
 
-  def toJavaSink[T](sink: Sink[T]): com.twitter.heron.streamlet.Sink[T] = {
-    new com.twitter.heron.streamlet.Sink[T] {
+  def toSerializableBiFunction[R, S, T](f: (R, S) => T) =
+    new SerializableBiFunction[R, S, T] {
+      override def apply(r: R, s: S): T = f(r, s)
+    }
+
+  def toJavaSink[T](sink: Sink[T]): JavaSink[T] = {
+    new JavaSink[T] {
       override def setup(context: Context): Unit = sink.setup(context)
 
       override def put(tuple: T): Unit = sink.put(tuple)
