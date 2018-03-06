@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 spi_deps_files = [
     "//heron/spi/src/java:statefulstorage-spi-java",
     "//heron/proto:proto_ckptmgr_java",
@@ -11,7 +9,7 @@ spi_deps_files = [
 localfs_deps_files = \
     spi_deps_files + [
         "//heron/common/src/java:basics-java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ]
 
 java_library(

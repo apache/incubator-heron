@@ -1,8 +1,5 @@
-
 licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
-
-load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 # The heron/common targets is divided into 3 levels by design:
 # 1. only depends on jdk;
@@ -34,7 +31,7 @@ java_library(
     srcs = glob(["**/network/*.java"]),
     deps = [
         ":basics-java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )
 
@@ -57,7 +54,7 @@ java_library(
    deps = [
         ":basics-java",
         ":network-java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "//third_party/java:junit4",
         "//third_party/java:mockito",
    ]

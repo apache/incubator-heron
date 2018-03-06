@@ -16,7 +16,6 @@ package com.twitter.heron.apiserver.actions;
 import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
-import com.twitter.heron.apiserver.utils.ConfigUtils;
 import com.twitter.heron.spi.common.Config;
 
 public class ActionFactoryImpl implements ActionFactory {
@@ -30,16 +29,8 @@ public class ActionFactoryImpl implements ActionFactory {
     } catch (InvalidTopologyException e) {
       throw new RuntimeException(e);
     }
-    final Config topologyConfig =
-        ConfigUtils.getTopologyConfig(topologyPackagePath, topologyBinaryFileName,
-            topologyDefinitionPath, topology);
-    final Config configWithTopology =
-        Config.newBuilder()
-            .putAll(config)
-            .putAll(topologyConfig)
-            .build();
 
-    return new SubmitTopologyAction(configWithTopology, topology);
+    return new SubmitTopologyAction(config, topology);
   }
 
   @Override

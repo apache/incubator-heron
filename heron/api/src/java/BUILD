@@ -2,14 +2,12 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron_deps", "heron_java_api_proto_files")
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
-load("/tools/rules/javadoc", "java_doc")
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
 
 java_doc(
     name = "heron-api-javadoc",
-    libs = [":api-java"],
+    libs = [":api-java-low-level-functional"],
     pkgs = ["com/twitter/heron"],
     title = "Heron Api Documentation",
 )
@@ -37,6 +35,14 @@ java_library(
         ":api-java-low-level",
         "//third_party/java:kryo-neverlink",
     ]
+)
+
+# Functional Api
+java_library(
+    name = "api-java-low-level-functional",
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
+    deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
 )
 
 java_binary(

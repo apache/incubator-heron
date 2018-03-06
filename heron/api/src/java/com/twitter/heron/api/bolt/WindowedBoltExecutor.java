@@ -234,26 +234,44 @@ public class WindowedBoltExecutor implements IRichBolt,
             "Late tuple stream can be defined only when " + "specifying" + " a timestamp field");
       }
     }
-    // validate
-    validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
-        slidingIntervalDurationMs);
-    evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
-    triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs, manager,
-        evictionPolicy, topoConf);
+
+    boolean hasCustomTrigger = topoConf
+            .containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
+    boolean hasCustomEvictor = topoConf
+            .containsKey(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
+
+    if (hasCustomTrigger && hasCustomEvictor) {
+      triggerPolicy = (TriggerPolicy<Tuple, ?>)
+              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_TRIGGER);
+      evictionPolicy = (EvictionPolicy<Tuple, ?>)
+              topoConf.get(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_CUSTOM_EVICTOR);
+    } else if (!hasCustomEvictor && !hasCustomTrigger) {
+      // validate
+      validate(topoConf, windowLengthCount, windowLengthDurationMs, slidingIntervalCount,
+              slidingIntervalDurationMs);
+
+      evictionPolicy = getEvictionPolicy(windowLengthCount, windowLengthDurationMs);
+      triggerPolicy = getTriggerPolicy(slidingIntervalCount, slidingIntervalDurationMs);
+    } else {
+      throw new IllegalArgumentException(
+              "If either a custom TriggerPolicy or EvictionPolicy is defined, both must be."
+      );
+    }
+
+    triggerPolicy.setEvictionPolicy(evictionPolicy);
+    triggerPolicy.setTopologyConfig(topoConf);
+    triggerPolicy.setTriggerHandler(manager);
+    triggerPolicy.setWindowManager(manager);
+
     manager.setEvictionPolicy(evictionPolicy);
     manager.setTriggerPolicy(triggerPolicy);
     // restore state if there is existing state
     if (this.state != null
         && this.state.get(WINDOWING_INTERNAL_STATE) != null
         && !((HashMapState) this.state.get(WINDOWING_INTERNAL_STATE)).isEmpty()) {
-      restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
+      manager.restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
     }
     return manager;
-  }
-
-  @SuppressWarnings("HiddenField")
-  protected void restoreState(Map<String, Serializable> state) {
-    windowManager.restoreState(state);
   }
 
   protected Map<String, Serializable> getState() {
@@ -286,22 +304,18 @@ public class WindowedBoltExecutor implements IRichBolt,
 
   @SuppressWarnings("HiddenField")
   private TriggerPolicy<Tuple, ?> getTriggerPolicy(Count slidingIntervalCount, Long
-      slidingIntervalDurationMs, WindowManager<Tuple> manager, EvictionPolicy<Tuple, ?>
-      evictionPolicy, Map<String, Object> topoConf) {
+      slidingIntervalDurationMs) {
     if (slidingIntervalCount != null) {
       if (isTupleTs()) {
-        return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value, manager,
-            evictionPolicy, manager);
+        return new WatermarkCountTriggerPolicy<>(slidingIntervalCount.value);
       } else {
-        return new CountTriggerPolicy<>(slidingIntervalCount.value, manager, evictionPolicy);
+        return new CountTriggerPolicy<>(slidingIntervalCount.value);
       }
     } else {
       if (isTupleTs()) {
-        return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
-            evictionPolicy, manager);
+        return new WatermarkTimeTriggerPolicy<>(slidingIntervalDurationMs);
       } else {
-        return new TimeTriggerPolicy<>(slidingIntervalDurationMs, manager,
-            evictionPolicy, topoConf);
+        return new TimeTriggerPolicy<>(slidingIntervalDurationMs);
       }
     }
   }

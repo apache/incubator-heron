@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto", "proto_library")
-
 proto_library(
     name = "proto_unittests",
     src = "unittests.proto",
@@ -21,7 +19,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -47,7 +45,7 @@ cc_test(
     deps = [
         ":proto_unittests_cc",
         "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -67,7 +65,7 @@ cc_test(
     deps = [
         ":proto_unittests_cc",
         "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -92,7 +90,7 @@ cc_test(
     deps = [
         ":proto_unittests_cc",
         "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",
@@ -111,7 +109,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/network:network-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron/common/src/cpp",

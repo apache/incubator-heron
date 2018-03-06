@@ -1,7 +1,3 @@
-load("/tools/rules/java_tests", "java_tests")
-
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = [
   "//third_party/java:mockito",
   "//third_party/java:junit4",

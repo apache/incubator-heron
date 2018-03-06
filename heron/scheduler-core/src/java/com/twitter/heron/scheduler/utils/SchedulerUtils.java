@@ -79,7 +79,7 @@ public final class SchedulerUtils {
     }
 
     public static String getPort(ExecutorPort executorPort,
-                                  Map<ExecutorPort, String> portMap) {
+                                 Map<ExecutorPort, String> portMap) {
       if (!portMap.containsKey(executorPort) && executorPort.isRequired()) {
         throw new RuntimeException("Required port " + executorPort.getName() + " not provided");
       }
@@ -179,7 +179,7 @@ public final class SchedulerUtils {
    *
    * @param config The static config
    * @param runtime The runtime config
-   * @param containerIndex the executor/container index
+   * @param shardId the executor/container index
    * @param ports a map of ports to use where the key indicate the port type and the
    * value is the port
    * @return String[] representing the command to start heron-executor
@@ -187,13 +187,30 @@ public final class SchedulerUtils {
   public static String[] getExecutorCommand(
       Config config,
       Config runtime,
-      int containerIndex,
+      int shardId,
+      Map<ExecutorPort, String> ports) {
+    return getExecutorCommand(config, runtime, Integer.toString(shardId), ports);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static config
+   * @param runtime The runtime config
+   * @param shardId the executor/container index
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] getExecutorCommand(
+      Config config,
+      Config runtime,
+      String shardId,
       Map<ExecutorPort, String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorBinary(config));
-    commands.add(createCommandArg(ExecutorFlag.Shard, Integer.toString(containerIndex)));
 
-    String[] commandArgs = executorCommandArgs(config, runtime, ports);
+    String[] commandArgs = executorCommandArgs(config, runtime, ports, shardId);
     commands.addAll(Arrays.asList(commandArgs));
 
     return commands.toArray(new String[0]);
@@ -207,118 +224,136 @@ public final class SchedulerUtils {
    * @param runtime The runtime Config
    * @param ports a map of ports to use where the key indicate the port type and the
    * value is the port
+   * @param containerIndex The index of the current container
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, Map<ExecutorPort, String> ports) {
+      Config config, Config runtime, Map<ExecutorPort, String> ports, String containerIndex) {
+    List<String> args = new ArrayList<>();
+    addExecutorTopologyArgs(args, config, runtime);
+    addExecutorContainerArgs(args, ports, containerIndex);
+
+    return args.toArray(new String[args.size()]);
+  }
+
+  /**
+   * Util method to parse configs and translate them into topology configs to be used by executor
+   *
+   * @param args The list to accept new topology arguments
+   * @param config The static Config
+   * @param runtime The runtime Config
+   */
+  public static void addExecutorTopologyArgs(List<String> args, Config config, Config runtime) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    String masterPort = ExecutorPort.getPort(
-        ExecutorPort.MASTER_PORT, ports);
-    String tmasterControllerPort = ExecutorPort.getPort(
-        ExecutorPort.TMASTER_CONTROLLER_PORT, ports);
-    String tmasterStatsPort = ExecutorPort.getPort(
-        ExecutorPort.TMASTER_STATS_PORT, ports);
-    String shellPort = ExecutorPort.getPort(
-        ExecutorPort.SHELL_PORT, ports);
-    String metricsmgrPort = ExecutorPort.getPort(
-        ExecutorPort.METRICS_MANAGER_PORT, ports);
-    String schedulerPort = ExecutorPort.getPort(
-        ExecutorPort.SCHEDULER_PORT, ports);
-    String metricsCacheMasterPort =  ExecutorPort.getPort(
-        ExecutorPort.METRICS_CACHE_MASTER_PORT, ports);
-    String metricsCacheStatsPort = ExecutorPort.getPort(
-        ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
-    String ckptmgrPort = ExecutorPort.getPort(
-        ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
-    String remoteDebuggerPorts = ExecutorPort.getPort(
-        ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports
-    );
-
-    List<String> commands = new ArrayList<>();
-    commands.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
-    commands.add(createCommandArg(ExecutorFlag.TopologyId, topology.getId()));
-    commands.add(createCommandArg(ExecutorFlag.TopologyDefinitionFile,
+    args.add(createCommandArg(ExecutorFlag.TopologyName, topology.getName()));
+    args.add(createCommandArg(ExecutorFlag.TopologyId, topology.getId()));
+    args.add(createCommandArg(ExecutorFlag.TopologyDefinitionFile,
         FileUtils.getBaseName(Context.topologyDefinitionFile(config))));
-    commands.add(createCommandArg(ExecutorFlag.StateManagerConnection,
+    args.add(createCommandArg(ExecutorFlag.StateManagerConnection,
         Context.stateManagerConnectionString(config)));
-    commands.add(createCommandArg(ExecutorFlag.StateManagerRoot,
+    args.add(createCommandArg(ExecutorFlag.StateManagerRoot,
         Context.stateManagerRootPath(config)));
-    commands.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
-    commands.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
-    commands.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,
+    args.add(createCommandArg(ExecutorFlag.StateManagerConfigFile,
+        Context.stateManagerFile(config)));
+    args.add(createCommandArg(ExecutorFlag.TMasterBinary, Context.tmasterBinary(config)));
+    args.add(createCommandArg(ExecutorFlag.StmgrBinary, Context.stmgrBinary(config)));
+    args.add(createCommandArg(ExecutorFlag.MetricsManagerClasspath,
         Context.metricsManagerClassPath(config)));
-    commands.add(createCommandArg(ExecutorFlag.InstanceJvmOpts,
+    args.add(createCommandArg(ExecutorFlag.InstanceJvmOpts,
         SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology))));
-    commands.add(createCommandArg(ExecutorFlag.Classpath,
+    args.add(createCommandArg(ExecutorFlag.Classpath,
         TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config))));
-    commands.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
-    commands.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
-    commands.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
-    commands.add(createCommandArg(ExecutorFlag.HeronInternalsConfigFile,
+    args.add(createCommandArg(ExecutorFlag.HeronInternalsConfigFile,
         Context.systemConfigFile(config)));
-    commands.add(createCommandArg(ExecutorFlag.OverrideConfigFile, Context.overrideFile(config)));
-    commands.add(createCommandArg(ExecutorFlag.ComponentRamMap, Runtime.componentRamMap(runtime)));
-    commands.add(createCommandArg(ExecutorFlag.ComponentJvmOpts,
+    args.add(createCommandArg(ExecutorFlag.OverrideConfigFile, Context.overrideFile(config)));
+    args.add(createCommandArg(ExecutorFlag.ComponentRamMap, Runtime.componentRamMap(runtime)));
+    args.add(createCommandArg(ExecutorFlag.ComponentJvmOpts,
         SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology))));
-    commands.add(createCommandArg(ExecutorFlag.PkgType,
+    args.add(createCommandArg(ExecutorFlag.PkgType,
         Context.topologyPackageType(config).name().toLowerCase()));
-    commands.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
+    args.add(createCommandArg(ExecutorFlag.TopologyBinaryFile,
         Context.topologyBinaryFile(config)));
-    commands.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
-    commands.add(createCommandArg(ExecutorFlag.ShellPort, shellPort));
-    commands.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
-    commands.add(createCommandArg(ExecutorFlag.MetricsManagerPort, metricsmgrPort));
-    commands.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
-    commands.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
-    commands.add(createCommandArg(ExecutorFlag.Environment, Context.environ(config)));
-    commands.add(createCommandArg(ExecutorFlag.InstanceClasspath,
-        Context.instanceClassPath(config)));
-    commands.add(createCommandArg(ExecutorFlag.MetricsSinksConfigFile,
+    args.add(createCommandArg(ExecutorFlag.HeronJavaHome, Context.clusterJavaHome(config)));
+    args.add(createCommandArg(ExecutorFlag.HeronShellBinary, Context.shellBinary(config)));
+    args.add(createCommandArg(ExecutorFlag.Cluster, Context.cluster(config)));
+    args.add(createCommandArg(ExecutorFlag.Role, Context.role(config)));
+    args.add(createCommandArg(ExecutorFlag.Environment, Context.environ(config)));
+    args.add(createCommandArg(ExecutorFlag.InstanceClasspath, Context.instanceClassPath(config)));
+    args.add(createCommandArg(ExecutorFlag.MetricsSinksConfigFile,
         Context.metricsSinksFile(config)));
 
     String completeSchedulerProcessClassPath = String.format("%s:%s:%s",
         Context.schedulerClassPath(config),
-        Context.packingClassPath(config),
-        Context.stateManagerClassPath(config));
+        Context.packingClassPath(config), Context.stateManagerClassPath(config));
 
-    commands.add(createCommandArg(ExecutorFlag.SchedulerClasspath,
-        completeSchedulerProcessClassPath));
-    commands.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
-    commands.add(createCommandArg(ExecutorFlag.PythonInstanceBinary,
+    args.add(createCommandArg(ExecutorFlag.SchedulerClasspath, completeSchedulerProcessClassPath));
+    args.add(createCommandArg(ExecutorFlag.PythonInstanceBinary,
         Context.pythonInstanceBinary(config)));
-    commands.add(createCommandArg(ExecutorFlag.CppInstanceBinary,
-        Context.cppInstanceBinary(config)));
+    args.add(createCommandArg(ExecutorFlag.CppInstanceBinary, Context.cppInstanceBinary(config)));
 
-    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
         Context.metricsCacheManagerClassPath(config)));
-    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort,
-        metricsCacheMasterPort));
-    commands.add(createCommandArg(ExecutorFlag.MetricsCacheManagerStatsPort,
-        metricsCacheStatsPort));
 
     Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
-    commands.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
+    args.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
     String completeCkptmgrProcessClassPath = String.format("%s:%s:%s",
         Context.ckptmgrClassPath(config),
         Context.statefulStoragesClassPath(config),
         Context.statefulStorageCustomClassPath(config));
-    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerClasspath,
+    args.add(createCommandArg(ExecutorFlag.CheckpointManagerClasspath,
         completeCkptmgrProcessClassPath));
-    commands.add(createCommandArg(ExecutorFlag.CheckpointManagerPort, ckptmgrPort));
-    commands.add(createCommandArg(ExecutorFlag.StatefulConfigFile,
-        Context.statefulConfigFile(config)));
+    args.add(createCommandArg(ExecutorFlag.StatefulConfigFile, Context.statefulConfigFile(config)));
 
-    String healthMgrMode =
-        Context.healthMgrMode(config) == null ? "disabled" : Context.healthMgrMode(config);
-    commands.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
-    commands.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
+    String healthMgrMode = Context.healthMgrMode(config)
+        == null ? "disabled" : Context.healthMgrMode(config);
+    args.add(createCommandArg(ExecutorFlag.HealthManagerMode, healthMgrMode));
+    args.add(createCommandArg(ExecutorFlag.HealthManagerClasspath,
         Context.healthMgrClassPath(config)));
-    if (remoteDebuggerPorts != null) {
-      commands.add(createCommandArg(ExecutorFlag.JvmRemoteDebuggerPorts, remoteDebuggerPorts));
-    }
+  }
 
-    return commands.toArray(new String[commands.size()]);
+  /**
+   * Util method to parse port map and container id and translate them into arguments to be used
+   * by executor
+   *
+   * @param args The list to accept new topology arguments
+   * @param ports a map of ports to use where the key indicate the port type and the
+   * value is the port
+   * @param containerIndex The index of the current container
+   */
+  public static void addExecutorContainerArgs(
+      List<String> args,
+      Map<ExecutorPort, String> ports,
+      String containerIndex) {
+    String masterPort = ExecutorPort.getPort(ExecutorPort.MASTER_PORT, ports);
+    String tmasterControllerPort = ExecutorPort.getPort(
+        ExecutorPort.TMASTER_CONTROLLER_PORT, ports);
+    String tmasterStatsPort = ExecutorPort.getPort(ExecutorPort.TMASTER_STATS_PORT, ports);
+    String shellPort = ExecutorPort.getPort(ExecutorPort.SHELL_PORT, ports);
+    String metricsmgrPort = ExecutorPort.getPort(ExecutorPort.METRICS_MANAGER_PORT, ports);
+    String schedulerPort = ExecutorPort.getPort(ExecutorPort.SCHEDULER_PORT, ports);
+    String metricsCacheMasterPort = ExecutorPort.getPort(
+        ExecutorPort.METRICS_CACHE_MASTER_PORT, ports);
+    String metricsCacheStatsPort = ExecutorPort.getPort(
+        ExecutorPort.METRICS_CACHE_STATS_PORT, ports);
+    String ckptmgrPort = ExecutorPort.getPort(ExecutorPort.CHECKPOINT_MANAGER_PORT, ports);
+    String remoteDebuggerPorts = ExecutorPort.getPort(
+        ExecutorPort.JVM_REMOTE_DEBUGGER_PORTS, ports);
+
+    if (containerIndex != null) {
+      args.add(createCommandArg(ExecutorFlag.Shard, containerIndex));
+    }
+    args.add(createCommandArg(ExecutorFlag.MasterPort, masterPort));
+    args.add(createCommandArg(ExecutorFlag.TMasterControllerPort, tmasterControllerPort));
+    args.add(createCommandArg(ExecutorFlag.TMasterStatsPort, tmasterStatsPort));
+    args.add(createCommandArg(ExecutorFlag.ShellPort, shellPort));
+    args.add(createCommandArg(ExecutorFlag.MetricsManagerPort, metricsmgrPort));
+    args.add(createCommandArg(ExecutorFlag.SchedulerPort, schedulerPort));
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMasterPort, metricsCacheMasterPort));
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerStatsPort, metricsCacheStatsPort));
+    args.add(createCommandArg(ExecutorFlag.CheckpointManagerPort, ckptmgrPort));
+    if (remoteDebuggerPorts != null) {
+      args.add(createCommandArg(ExecutorFlag.JvmRemoteDebuggerPorts, remoteDebuggerPorts));
+    }
   }
 
   public static String createCommandArg(ExecutorFlag flag, String value) {

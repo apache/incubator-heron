@@ -127,13 +127,17 @@ public final class TopologyUtils {
     return getConfigWithDefault(topologyConfig, Config.TOPOLOGY_COMPONENT_JVMOPTS, "");
   }
 
-  public static int getTotalInstance(TopologyAPI.Topology topology) {
-    Map<String, Integer> parallelismMap = getComponentParallelism(topology);
+  public static int getTotalInstance(Map<String, Integer> parallelismMap) {
     int numInstances = 0;
     for (int parallelism : parallelismMap.values()) {
       numInstances += parallelism;
     }
     return numInstances;
+  }
+
+  public static int getTotalInstance(TopologyAPI.Topology topology) {
+    Map<String, Integer> parallelismMap = getComponentParallelism(topology);
+    return getTotalInstance(parallelismMap);
   }
 
   public static boolean shouldStartCkptMgr(TopologyAPI.Topology topology) {

@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 api_deps_files = [
   "//heron/spi/src/java:heron-spi",
   "//heron/common/src/java:basics-java",
@@ -17,6 +15,7 @@ scheduler_deps_files = [
   "//heron/schedulers/src/java:mesos-scheduler-java",
   "//heron/schedulers/src/java:yarn-scheduler-java",
   "//heron/schedulers/src/java:slurm-scheduler-java",
+  "//heron/schedulers/src/java:nomad-scheduler-java"
 ]
 
 packing_deps_files = [
@@ -30,6 +29,7 @@ uploader_deps_files = [
   "//heron/uploaders/src/java:gcs-uploader-java",
   "//heron/uploaders/src/java:s3-uploader-java",
   "//heron/uploaders/src/java:dlog-uploader-java",
+  "//heron/uploaders/src/java:http-uploader-java"
 ]
 
 state_manager_deps_files = [

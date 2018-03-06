@@ -146,14 +146,14 @@ class HeronInternalsConfigVars {
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
 
-  // The max reconnect attempts to other stream managers for stream manager client
-  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS;
-
   // The reconnect interval to other stream managers in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC;
 
   // The reconnect interval to tamster in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC;
+
+  // The max reconnect attempts to tmaster for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS;
 
   // The maximum packet size in MB of stream manager's network options
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;

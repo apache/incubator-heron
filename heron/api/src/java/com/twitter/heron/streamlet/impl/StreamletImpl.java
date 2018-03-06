@@ -92,6 +92,33 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return true;
   }
 
+  protected enum StreamletNamePrefix {
+    CONSUMER("consumer"),
+    FILTER("filter"),
+    FLATMAP("flatmap"),
+    REDUCE("reduceByKeyAndWindow"),
+    JOIN("join"),
+    LOGGER("logger"),
+    MAP("map"),
+    REMAP("remap"),
+    SINK("sink"),
+    SOURCE("generator"),
+    SUPPLIER("supplier"),
+    TRANSFORM("transform"),
+    UNION("union");
+
+    private final String prefix;
+
+    StreamletNamePrefix(final String prefix) {
+      this.prefix = prefix;
+    }
+
+    @Override
+    public String toString() {
+      return prefix;
+    }
+  }
+
   /**
    * Gets all the children of this streamlet.
    * Children of a streamlet are streamlets that are resulting from transformations of elements of
@@ -109,9 +136,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setName(String sName) {
-    if (sName == null || sName.trim().isEmpty()) {
-      throw new IllegalArgumentException("Streamlet name cannot be null/blank");
-    }
+    require(sName != null && !sName.trim().isEmpty(),
+        "Streamlet name cannot be null/blank");
     this.name = sName;
     return this;
   }
@@ -125,7 +151,13 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return name;
   }
 
-  protected void setDefaultNameIfNone(String prefix, Set<String> stageNames) {
+  /**
+   * Sets a default unique name to the Streamlet by type if it is not set.
+   * Otherwise, just checks its uniqueness.
+   * @param prefix The name prefix of this streamlet
+   * @param stageNames The collections of created streamlet/stage names
+   */
+  protected void setDefaultNameIfNone(StreamletNamePrefix prefix, Set<String> stageNames) {
     if (getName() == null) {
       setName(defaultNameCalculator(prefix, stageNames));
     }
@@ -133,6 +165,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
       throw new RuntimeException(String.format(
           "The stage name %s is used multiple times in the same topology", getName()));
     }
+    stageNames.add(getName());
   }
 
   /**
@@ -142,9 +175,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setNumPartitions(int numPartitions) {
-    if (numPartitions < 1) {
-      throw new IllegalArgumentException("Streamlet's partitions cannot be < 1");
-    }
+    require(numPartitions > 0,
+        "Streamlet's partitions number should be > 0");
     this.nPartitions = numPartitions;
     return this;
   }
@@ -188,11 +220,11 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     children.add(child);
   }
 
-  protected String defaultNameCalculator(String prefix, Set<String> stageNames) {
+  private String defaultNameCalculator(StreamletNamePrefix prefix, Set<String> stageNames) {
     int index = 1;
     String calculatedName;
     while (true) {
-      calculatedName = new StringBuilder(prefix).append(index).toString();
+      calculatedName = new StringBuilder(prefix.toString()).append(index).toString();
       if (!stageNames.contains(calculatedName)) {
         break;
       }
@@ -363,7 +395,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   /**
    * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
    * windowCfg and applying reduceFn on those tuples. For each window, the value identity is used
-   * as a initial value. All the matching tuples are reduced using reduceFn startin from this
+   * as a initial value. All the matching tuples are reduced using reduceFn starting from this
    * initial value.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
@@ -385,7 +417,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a new Streamlet thats the union of this and the ‘other’ streamlet. Essentially
+   * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   @Override
@@ -429,7 +461,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
+   * Returns a new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
@@ -443,5 +475,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
+  }
+
+  /**
+   * Verifies the requirement as the utility function.
+   * @param requirement The requirement to verify
+   * @param errorMessage The error message
+   * @throws IllegalArgumentException if the requirement fails
+   */
+  private void require(Boolean requirement, String errorMessage) {
+    if (!requirement) {
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 }

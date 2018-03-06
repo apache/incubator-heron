@@ -25,6 +25,12 @@ package com.twitter.heron.spi.metricsmgr.sink;
 public interface SinkContext {
   String getTopologyName();
 
+  String getCluster();
+
+  String getRole();
+
+  String getEnvironment();
+
   String getMetricsMgrId();
 
   String getSinkId();

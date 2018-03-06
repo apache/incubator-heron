@@ -1,8 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto",  "proto_library")
-load("/tools/rules/pex/pex_rules", "pex_library")
-
 filegroup(
     name = "proto-srcs",
     srcs = glob(["**/*.proto"]),
@@ -170,7 +167,7 @@ java_library(
         ":proto_stmgr_java",
         ":proto_ckptmgr_java",
         ":proto_networktests_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
     srcs = [
         "Empty.java",
@@ -232,7 +229,7 @@ cc_library(
         ":proto_topology_cc",
         ":proto_stats_cc",
         ":proto_common_cc",
-        "//third_party/protobuf:protobuf-cxx",
+        "@com_google_protobuf//:protobuf",
     ],
     linkstatic = 1,
 )

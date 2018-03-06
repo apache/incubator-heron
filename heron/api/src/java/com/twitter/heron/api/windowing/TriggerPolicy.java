@@ -30,10 +30,10 @@
  * limitations under the License.
  */
 
-
 package com.twitter.heron.api.windowing;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Triggers the window calculations based on the policy.
@@ -80,4 +80,32 @@ public interface TriggerPolicy<T extends Serializable, S> {
    * @param state the state
    */
   void restoreState(S state);
+
+  /**
+   * Set the eviction policy to whatever eviction policy to use this with
+   *
+   * @param evictionPolicy the eviction policy
+   */
+  void setEvictionPolicy(EvictionPolicy<T, ?> evictionPolicy);
+
+  /**
+   * Set the trigger handler for this trigger policy to trigger
+   *
+   * @param triggerHandler the trigger handler
+   */
+  void setTriggerHandler(TriggerHandler triggerHandler);
+
+  /**
+   * Sets the window manager that uses this trigger policy
+   *
+   * @param windowManager the window manager
+   */
+  void setWindowManager(WindowManager<T> windowManager);
+
+  /**
+   * Sets the Config used for this topology
+   *
+   * @param config the configuration policy
+   */
+  void setTopologyConfig(Map<String, Object> config);
 }

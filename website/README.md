@@ -15,19 +15,11 @@ installed:
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
 * [pip](https://pypi.python.org/pypi/pip)
+* [Go](https://golang.org) (make sure that your `GOPATH` and `GOROOT` are set)
 
-### OS X Setup
+### macOS setup
 
-To install Node.js and npm on Mac OS X, make sure that you have
-[Homebrew](http://brew.sh/) installed and run:
-
-```bash
-$ brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
-$ nvm install node
-$ curl -L https://www.npmjs.com/install.sh | sh
-```
-
-Once this has completed:
+To get set up on macOS:
 
 ```bash
 $ cd website
@@ -35,8 +27,8 @@ $ make setup
 $ make build-static-assets
 ```
 
-This will install Hugo, Gulp, and all of the necessary Gulp plugins and build
-the static assets for the site.
+This will install Gulp and all of the necessary Gulp plugins and build the
+static assets for the site, as well as some necessary Python libraries.
 
 ### Other Operating Systems Setup
 

@@ -172,7 +172,7 @@ java_library(
 java_library(
     name = "protobuf-java-neverlink",
     srcs = [ "Empty.java" ],
-    deps = [ "@com_google_protobuf_protobuf_java//jar" ],
+    deps = [ "@com_google_protobuf//:protobuf_java"],
     exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
     neverlink = 1,
 )
@@ -229,6 +229,43 @@ java_library(
     ],
     deps = [ 
         "@apache_pulsar_client//jar",
+    ],
+)
+
+java_library(
+    name = "kubernetes-java-client",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@kubernetes_java_client//jar",
+        "@kubernetes_java_client_api//jar",
+        "@swagger_annotations//jar",
+        "@squareup_okhttp//jar",
+        "@squareup_okio//jar",
+        "@squareup_okhttp_logging_interceptor//jar",
+        "@squareup_okhttp_ws//jar",
+        "@google_gson//jar",
+        "//third_party/java:joda_time",
+        "@kubernetes_java_client_proto//jar",
+        "@org_yaml_snakeyaml//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_codec//jar",
+        "@log4j_log4j//jar",
+    ],
+    deps = [
+        "@kubernetes_java_client//jar",
+        "@kubernetes_java_client_api//jar",
+        "@swagger_annotations//jar",
+        "@squareup_okhttp//jar",
+        "@squareup_okio//jar",
+        "@squareup_okhttp_logging_interceptor//jar",
+        "@squareup_okhttp_ws//jar",
+        "@google_gson//jar",
+        "//third_party/java:joda_time",
+        "@kubernetes_java_client_proto//jar",
+        "@org_yaml_snakeyaml//jar",
+        "@commons_lang_commons_lang//jar",
+        "@commons_codec//jar",
+        "@log4j_log4j//jar",
     ],
 )
 

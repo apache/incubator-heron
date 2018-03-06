@@ -5,6 +5,8 @@ def heron_client_bin_files():
     return [
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
+        "//heron/tools/admin/src/python:heron-admin",
+        "//third_party/nomad:heron-nomad",
     ]
 
 def heron_client_conf_files():
@@ -37,6 +39,7 @@ def heron_client_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-mesos-scheduler",
         "//heron/schedulers/src/java:heron-marathon-scheduler",
         "//heron/schedulers/src/java:heron-kubernetes-scheduler",
+        "//heron/schedulers/src/java:heron-nomad-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
         "//heron/packing/src/java:heron-binpacking-packing",
     ]
@@ -68,6 +71,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-scp-uploader",
         "//heron/uploaders/src/java:heron-gcs-uploader",
         "//heron/uploaders/src/java:heron-dlog-uploader",
+        "//heron/uploaders/src/java:heron-http-uploader"
     ]
 
 def heron_client_lib_healthmgr_files():
@@ -77,7 +81,7 @@ def heron_client_lib_healthmgr_files():
 
 def heron_client_lib_third_party_files():
     return [
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
     ]

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2017 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +40,7 @@ class ClientCommandTest(unittest.TestCase):
     config.get_heron_dir = MagicMock(return_value='/heron/home')
     config.get_java_path = MagicMock(return_value='/usr/lib/bin/java')
     config.get_heron_release_file = MagicMock(return_value='/heron/home/release.yaml')
-    config.parse_override_config = MagicMock(return_value='/heron/home/override.yaml')
+    config.parse_override_config_and_write_file = MagicMock(return_value='/heron/home/override.yaml')
     # Mock result module
     result.render = MagicMock(return_value=None)
     result.is_successful = MagicMock(return_value=True)

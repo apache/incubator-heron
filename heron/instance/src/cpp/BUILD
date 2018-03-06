@@ -55,7 +55,7 @@ cc_binary(
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
+        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
     linkstatic = 1,
     linkopts = ['-ldl'],

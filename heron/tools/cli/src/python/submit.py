@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,6 +164,14 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       environment=cl_args['environ'],
       user=cl_args['submit_user'],
   )
+
+  Log.info("" + str(cl_args))
+  overrides = dict()
+  if 'config_property' in cl_args:
+    overrides = config.parse_override_config(cl_args['config_property'])
+
+  if overrides:
+    data.update(overrides)
 
   if cl_args['dry_run']:
     data["dry_run"] = True
@@ -414,6 +425,9 @@ def run(command, parser, cl_args, unknown_args):
   # set the tmp dir and deactivated state in global options
   opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
   opts.set_config('cmdline.topology.initial.state', initial_state)
+  opts.set_config('cmdline.topology.role', cl_args['role'])
+  opts.set_config('cmdline.topology.environment', cl_args['environ'])
+
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:

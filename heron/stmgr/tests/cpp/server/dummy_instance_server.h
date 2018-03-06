@@ -35,7 +35,7 @@ class DummyInstanceServer : public heron::stmgr::InstanceServer {
   : heron::stmgr::InstanceServer(_eventLoop, _options, _pplan->topology().name(),
                               _pplan->topology().id(), _stmgr,
                               _expected_instances, NULL, _metrics,
-                              new heron::stmgr::NeighbourCalculator()),
+                              new heron::stmgr::NeighbourCalculator(), false),
     pplan_(_pplan), clear_called_(false), all_instances_connected_(false),
     my_stmgr_id_(_stmgr) {
   }

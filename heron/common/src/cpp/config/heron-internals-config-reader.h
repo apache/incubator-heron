@@ -160,14 +160,14 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
 
-  // The max reconnect attempts to other stream managers for stream manager client
-  sp_int32 GetHeronStreammgrClientReconnectMaxAttempts();
-
   // The reconnect interval to other stream managers in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectIntervalSec();
 
   // The reconnect interval to tamster in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectTmasterIntervalSec();
+
+  // The max reconnect attempts to tmaster for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectTmasterMaxAttempts();
 
   // The maximum packet size in MB of stream manager's network options
   sp_int32 GetHeronStreammgrNetworkOptionsMaximumPacketMb();

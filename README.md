@@ -1,13 +1,47 @@
 [![Build Status](https://travis-ci.org/twitter/heron.svg?&branch=master)](https://travis-ci.org/twitter/heron)
 
-# Heron
+![logo](website/static/img/HeronTextLogo.png)
 
 Heron is realtime analytics platform developed by Twitter. It is the direct
 successor of [Apache Storm](http://storm.apache.org), built to be backwards
 compatible with Storm's [topology API](http://storm.apache.org/releases/current/Tutorial.html#topologies)
 but with a wide array of architectural improvements.
 
-For more information:
+http://incubator.apache.org/projects/heron.html
+
+https://heron.incubator.apache.org (coming soon...)
+
+### Documentation
+http://heronstreaming.io (official until)
+
+#### Heron Requirements:
+ * Java JDK 1.8
+ * Python 2.7
+ * Bazel
+
+
+## Contact
+
+#### Mailing lists
+
+Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
+
+Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
+
+
+| Name                                                                      | Scope                           |                                                                |                                                                    |                                                                           |
+|:--------------------------------------------------------------------------|:--------------------------------|:---------------------------------------------------------------|:-------------------------------------------------------------------|:--------------------------------------------------------------------------|
+| [user@heron.incubator.apache.org](mailto:user@heron.incubator.apache.org) | User-related discussions        | [Subscribe](mailto:user-subscribe@heron.incubator.apache.org)  | [Unsubscribe](mailto:user-unsubscribe@heron.incubator.apache.org)  | [Archives](http://mail-archives.apache.org/mod_mbox/incubator-heron-user/)|
+| [dev@heron.incubator.apache.org](mailto:dev@heron.incubator.apache.org)   | Development-related discussions | [Subscribe](mailto:dev-subscribe@heron.incubator.apache.org)   | [Unsubscribe](mailto:dev-unsubscribe@heron.incubator.apache.org)   | [Archives](http://mail-archives.apache.org/mod_mbox/incubator-heron-dev/) |
+
+#### Slack
+
+heron slack channel at https://heronstreaming.slack.com/
+
+You can self-register at http://heronstreaming.herokuapp.com/
+
+
+## For more information:
 
 * Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
 * Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](http://twitter.github.io/heron/docs/resources/)
@@ -27,8 +61,7 @@ We also added beta testing for [Apache YARN](https://hadoop.apache.org/docs/r2.7
 
 We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We will continue to post updates as we progress.
 
-## Documentation
 
-The official documentation for Heron is located at [heronstreaming.io](http://heronstreaming.io). To contribute to documentation, build and run the documentation locally. More information can be
-found in the [documentation
-README](website/README.md).
+## License
+
+Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0

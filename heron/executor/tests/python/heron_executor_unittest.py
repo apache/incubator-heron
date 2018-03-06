@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,9 +101,11 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
            "-Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true " \
-           "-cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager metricsmgr-%d " \
-           "metricsmgr_port topname topid %s %s " \
-           "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
+           "-cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager " \
+           "--id=metricsmgr-%d --port=metricsmgr_port " \
+           "--topology=topname --cluster=cluster --role=role --environment=environ --topology-id=topid " \
+           "--system-config-file=%s --override-config-file=%s --sink-config-file=metrics_sinks_config_file" %\
+           (container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_metricscachemgr_command():
       return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
@@ -114,7 +119,7 @@ class HeronExecutorTest(unittest.TestCase):
              "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
              "--system_config_file %s --override_config_file %s " \
              "--sink_config_file metrics_sinks_config_file " \
-             "--cluster cluster --role role --environment environ --verbose" %\
+             "--cluster cluster --role role --environment environ" %\
              (INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_healthmgr_command():
@@ -228,6 +233,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--topology-defn-file", "topdefnfile"),
       ("--state-manager-connection", "zknode"),
       ("--state-manager-root", "zkroot"),
+      ("--state-manager-config-file", "state_manager_config_file"),
       ("--tmaster-binary", "tmaster_binary"),
       ("--stmgr-binary", "stmgr_binary"),
       ("--metrics-manager-classpath", "metricsmgr_classpath"),

@@ -1,5 +1,3 @@
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = [
     "//third_party/java:powermock",
     "@commons_io_commons_io//jar",
@@ -97,3 +95,18 @@ java_test(
         "//third_party/java:google-api-services-storage"
     ],
 )
+
+java_test(
+    name = "HttpUploaderTest",
+    srcs = glob(["**/http/HttpUploaderTest.java"]),
+    deps = common_deps_files + spi_deps_files + [
+         "//heron/uploaders/src/java:http-uploader-java",
+         "@commons_logging_commons_logging//jar",
+         "@org_apache_httpcomponents_http_core//jar",
+         "@org_apache_httpcomponents_http_client//jar",
+         "@org_apache_httpcomponents_http_client_test//jar",
+         "//heron/common/src/java:basics-java",
+    ],
+    size = "small",
+)
+

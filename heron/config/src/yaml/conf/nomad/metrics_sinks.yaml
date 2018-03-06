@@ -1,0 +1,123 @@
+########### These all have default values as shown
+
+# We would specify the unique sink-id first
+sinks:
+  - file-sink
+  - tmaster-sink
+  - prometheus-sink
+  - metricscache-sink
+
+########### Now we would specify the detailed configuration for every unique sink
+########### Syntax: sink-id: - option(s)
+
+########### option class is required as we need to instantiate a new instance by reflection
+########### option flush-frequency-ms is required to invoke flush() at interval
+########### option sink-restart-attempts, representsing # of times to restart a sink when it throws exceptions and dies.
+###########   If this option is missed, default value 0 would be supplied; negative value represents to restart it forever.
+
+########### Other options would be constructed as an immutable map passed to IMetricsSink's init(Map conf) as argument,
+########### We would be able to fetch value by conf.get(options), for instance:
+########### We could get "com.twitter.heron.metricsmgr.sink.FileSink" if conf.get("class") is called inside file-sink's instance
+
+### Config for file-sink
+file-sink:
+  class: "com.twitter.heron.metricsmgr.sink.FileSink"
+  flush-frequency-ms: 60000 # 1 min
+  sink-restart-attempts: -1 # Forever
+  filename-output: "metrics.json" # File for metrics to write to
+  file-maximum: 5 # maximum number of file saved in disk
+
+### Config for tmaster-sink
+tmaster-sink:
+  class: "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSink"
+  flush-frequency-ms: 60000
+  sink-restart-attempts: -1 # Forever
+  tmaster-location-check-interval-sec: 5
+  tmaster-client:
+    reconnect-interval-second: 5 # The re-connect interval to TMaster from TMasterClient
+    # The size of packets written to TMaster will be determined by the minimal of: (a) time based (b) size based
+    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
+    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
+    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+    socket-send-buffer-size-bytes: 6553600 # The maximum socket's send buffer size in bytes
+    socket-received-buffer-size-bytes: 8738000 # The maximum socket's received buffer size in bytes
+  tmaster-metrics-type:
+    "__emit-count": SUM
+    "__execute-count": SUM
+    "__fail-count": SUM
+    "__ack-count": SUM
+    "__complete-latency": AVG
+    "__execute-latency": AVG
+    "__process-latency": AVG
+    "__jvm-uptime-secs": LAST
+    "__jvm-process-cpu-load": LAST
+    "__jvm-memory-used-mb": LAST
+    "__jvm-memory-mb-total": LAST
+    "__jvm-gc-collection-time-ms": LAST
+    "__server/__time_spent_back_pressure_initiated": SUM
+    "__time_spent_back_pressure_by_compid": SUM
+
+prometheus-sink:
+   class: "com.twitter.heron.metricsmgr.sink.PrometheusSink"
+   port: 8080 # The port on which to run (either port or port-file are mandatory)
+   path: /metrics # The path on which to publish the metrics (mandatory)
+   flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
+   include-topology-name: true # Include topology name in metric name (default false)
+   metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
+   metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)
+
+### Config for metricscache-sink
+metricscache-sink:
+  class: "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSink"
+  flush-frequency-ms: 60000
+  sink-restart-attempts: -1 # Forever
+  metricscache-location-check-interval-sec: 5
+  metricscache-client:
+    reconnect-interval-second: 5 # The re-connect interval to TMaster from TMasterClient
+    # The size of packets written to TMaster will be determined by the minimal of: (a) time based (b) size based
+    network-write-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
+    network-write-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+    network-read-batch-size-bytes: 32768 # Size based, the maximum batch size in bytes to write to TMaster
+    network-read-batch-time-ms: 16 # Time based, the maximum batch time in ms for Metrics Manager to write to TMaster per attempt
+    socket-send-buffer-size-bytes: 6553600 # The maximum socket's send buffer size in bytes
+    socket-received-buffer-size-bytes: 8738000 # The maximum socket's received buffer size in bytes
+  metricscache-metrics-type:
+    "__emit-count": SUM
+    "__execute-count": SUM
+    "__fail-count": SUM
+    "__ack-count": SUM
+    "__complete-latency": AVG
+    "__execute-latency": AVG
+    "__process-latency": AVG
+    "__jvm-uptime-secs": LAST
+    "__jvm-process-cpu-load": LAST
+    "__jvm-memory-used-mb": LAST
+    "__jvm-memory-mb-total": LAST
+    "__jvm-gc-collection-time-ms": LAST
+    "__server/__time_spent_back_pressure_initiated": SUM
+    "__time_spent_back_pressure_by_compid": SUM
+
+### Config for scribe-sink
+# scribe-sink:
+#   class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
+#   flush-frequency-ms: 60000
+#   sink-restart-attempts: -1 # Forever
+#   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
+#   scribe-port: 1463 # The port of scribe to be exported metrics to
+#   scribe-category: "scribe-category" # The category of the scribe to be exported metrics to
+#   service-namespace: "heron" # The service name of the metrics in scribe-category
+#   scribe-timeout-ms: 200 # The timeout in seconds for metrics manager to write metrics to scribe
+#   scribe-connect-server-attempts: 2 # The maximum retry attempts to connect to scribe server
+#   scribe-retry-attempts: 5 # The maximum retry attempts to write metrics to scribe
+#   scribe-retry-interval-ms: 100 # The interval to retry to write metrics to scribe
+
+### Config for graphite-sink
+### Currently the graphite-sink is disabled
+# graphite-sink:
+#   class: "com.twitter.heron.metricsmgr.sink.GraphiteSink"
+#   flush-frequency-ms: 60000
+#   graphite_host: "127.0.0.1" # The host of graphite to be exported metrics to
+#   graphite_port: 2004 # The port of graphite to be exported metrics to
+#   metrics_prefix: "heron" # The prefix of every metrics
+#   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,6 +69,9 @@ def to_table(components, topo_info):
   spouts_instance = topo_info['physical_plan']['spouts']
   bolts_instance = topo_info['physical_plan']['bolts']
   for ctype, component in components.items():
+    # stages is an int so keep going
+    if ctype == "stages":
+      continue
     for component_name, component_info in component.items():
       row = [ctype[:-1], component_name]
       if ctype == 'spouts':

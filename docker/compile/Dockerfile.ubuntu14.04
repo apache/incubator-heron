@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM ubuntu
-ENV bazelVersion 0.5.4
+ENV bazelVersion 0.9.0
 
 RUN apt-get update && apt-get -y install \
       automake \
@@ -20,9 +20,8 @@ RUN apt-get update && apt-get -y install \
       unzip \
       wget
 
-RUN add-apt-repository ppa:george-edison55/cmake-3.x --yes && \
-    apt-get update && \
-    apt-get -y install cmake
+RUN add-apt-repository ppa:george-edison55/cmake-3.x && apt-get -y update && \
+      apt-get -y install cmake
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
 RUN apt-get -y install openjdk-8-jdk

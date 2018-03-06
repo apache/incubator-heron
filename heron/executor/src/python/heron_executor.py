@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#!/usr/bin/env python2.7
 """ The Heron executor is a process that runs on a container and is responsible for starting and
 monitoring the processes of the topology and it's support services."""
 import argparse
@@ -50,7 +51,9 @@ def print_usage():
       "Usage: ./heron-executor --shard=<shardid> --topology-name=<topname>"
       " --topology-id=<topid> --topology-defn-file=<topdefnfile>"
       " --state-manager-connection=<state_manager_connection>"
-      " --state-manager-root=<state_manager_root> --tmaster-binary=<tmaster_binary>"
+      " --state-manager-root=<state_manager_root>"
+      " --state-manager-config-file=<state_manager_config_file>"
+      " --tmaster-binary=<tmaster_binary>"
       " --stmgr-binary=<stmgr_binary> --metrics-manager-classpath=<metricsmgr_classpath>"
       " --instance-jvm-opts=<instance_jvm_opts_in_base64> --classpath=<classpath>"
       " --master-port=<master_port> --tmaster-controller-port=<tmaster_controller_port>"
@@ -173,6 +176,7 @@ class HeronExecutor(object):
     self.topology_defn_file = parsed_args.topology_defn_file
     self.state_manager_connection = parsed_args.state_manager_connection
     self.state_manager_root = parsed_args.state_manager_root
+    self.state_manager_config_file = parsed_args.state_manager_config_file
     self.tmaster_binary = parsed_args.tmaster_binary
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
@@ -277,6 +281,7 @@ class HeronExecutor(object):
     parser.add_argument("--topology-defn-file", required=True)
     parser.add_argument("--state-manager-connection", required=True)
     parser.add_argument("--state-manager-root", required=True)
+    parser.add_argument("--state-manager-config-file", required=True)
     parser.add_argument("--tmaster-binary", required=True)
     parser.add_argument("--stmgr-binary", required=True)
     parser.add_argument("--metrics-manager-classpath", required=True)
@@ -395,13 +400,16 @@ class HeronExecutor(object):
                       '-cp',
                       self.metrics_manager_classpath,
                       metricsmgr_main_class,
-                      metricsManagerId,
-                      port,
-                      self.topology_name,
-                      self.topology_id,
-                      self.heron_internals_config_file,
-                      self.override_config_file,
-                      sink_config_file]
+                      '--id=' + metricsManagerId,
+                      '--port=' + str(port),
+                      '--topology=' + self.topology_name,
+                      '--cluster=' + self.cluster,
+                      '--role=' + self.role,
+                      '--environment=' + self.environment,
+                      '--topology-id=' + self.topology_id,
+                      '--system-config-file=' + self.heron_internals_config_file,
+                      '--override-config-file=' + self.override_config_file,
+                      '--sink-config-file=' + sink_config_file]
 
     return metricsmgr_cmd
 
@@ -443,7 +451,7 @@ class HeronExecutor(object):
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
-                           "--environment", self.environment, "--verbose"]
+                           "--environment", self.environment]
 
     return metricscachemgr_cmd
 
@@ -501,9 +509,10 @@ class HeronExecutor(object):
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
     retval["heron-tmaster"] = tmaster_cmd
 
-    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     if self.health_manager_mode.lower() != "disabled":
+      # align metricscache and healthmgr toggle switch
+      retval["heron-metricscache"] = self._get_metrics_cache_cmd()
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
 
     retval[self.metricsmgr_ids[0]] = self._get_metricsmgr_cmd(
@@ -978,7 +987,9 @@ class HeronExecutor(object):
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
     statemgr_config = StateMgrConfig()
-    statemgr_config.set_state_locations(configloader.load_state_manager_locations(self.cluster))
+    statemgr_config.set_state_locations(configloader.load_state_manager_locations(
+        self.cluster, state_manager_config_file=self.state_manager_config_file,
+        overrides={"heron.statemgr.connection.string": self.state_manager_connection}))
     try:
       self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
       for state_manager in self.state_managers:
@@ -1042,8 +1053,13 @@ def main():
     # The filename format is heron-executor-<container_id>.stdxxx
     log.configure(logfile='heron-executor-%s.stdout' % shardid)
 
-    Log.info('Set up process group; executor becomes leader')
-    os.setpgrp() # create new process group, become its leader
+    pid = os.getpid()
+    sid = os.getsid(pid)
+
+    # POSIX prohibits the change of the process group ID of a session leader
+    if pid <> sid:
+      Log.info('Set up process group; executor becomes leader')
+      os.setpgrp() # create new process group, become its leader
 
     Log.info('Register the SIGTERM signal handler')
     signal.signal(signal.SIGTERM, signal_handler)

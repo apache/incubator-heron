@@ -30,7 +30,6 @@ import com.twitter.heron.streamlet.impl.operators.TransformOperator;
 public class TransformStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
-  private static final String NAMEPREFIX = "transform";
 
   public TransformStreamlet(StreamletImpl<R> parent,
                        SerializableTransformer<? super R, ? extends T> serializableTransformer) {
@@ -41,8 +40,7 @@ public class TransformStreamlet<R, T> extends StreamletImpl<T> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefix.TRANSFORM, stageNames);
     bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

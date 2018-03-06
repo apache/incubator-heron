@@ -30,7 +30,6 @@ import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.utils.ShellUtils;
@@ -107,7 +106,7 @@ public class LocalLauncher implements ILauncher {
     // get the path of core release URI
     String coreReleasePackageURI = LocalContext.corePackageUri(config);
 
-    LOG.info("core release package uri: " + coreReleasePackageURI);
+    LOG.log(Level.FINE, "core release package uri: {0}", coreReleasePackageURI);
 
     // form the target dest core release file name
     String coreReleaseFileDestination = Paths.get(
@@ -129,14 +128,13 @@ public class LocalLauncher implements ILauncher {
     // Check if the config is set to use the heron core uri (this is the default behavior)
     // If set to false we will try to create a symlink to the install heron-core. This is used
     // in the sandbox config to avoid installing the heron client on the docker image.
-    if (config.getBooleanValue(LocalKey.USE_HERON_CORE_URI.value(),
-        LocalKey.USE_HERON_CORE_URI.getDefaultBoolean())) {
+    if (LocalContext.useCorePackageUri(config)) {
       if (!SchedulerUtils.extractPackage(topologyWorkingDirectory, coreReleasePackageURI,
           coreReleaseFileDestination, true, isVerbose)) {
         return false;
       }
     } else {
-      Path heronCore = Paths.get(config.getStringValue(Key.HERON_HOME), "heron-core");
+      Path heronCore = Paths.get(LocalContext.corePackageDirectory(config));
       Path heronCoreLink = Paths.get(topologyWorkingDirectory, "heron-core");
       try {
         Files.createSymbolicLink(heronCoreLink, heronCore);

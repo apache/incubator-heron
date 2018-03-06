@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#!/usr/bin/env python2.7
 ''' configloader.py '''
 
 import os
@@ -19,7 +21,10 @@ import re
 import sys
 import yaml
 
-def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/statemgr.yaml'):
+# pylint: disable=dangerous-default-value
+
+def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/statemgr.yaml',
+                                 overrides={}):
   """ Reads configs to determine which state manager to use and converts them to state manager
   locations. Handles a subset of config wildcard substitution supported in the substitute method in
   com.twitter.heron.spi.common.Misc.java"""
@@ -36,6 +41,10 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
     wildcards["${JAVA_HOME}"] = os.getenv('JAVA_HOME')
 
   config = __replace(config, wildcards, state_manager_config_file)
+
+  # merge with overrides
+  if overrides:
+    config.update(overrides)
 
   # need to convert from the format in statemgr.yaml to the format that the python state managers
   # takes. first, set reasonable defaults to local

@@ -1,14 +1,15 @@
 FROM ubuntu:14.04
 
-RUN apt-get update
-RUN apt-get -y install python ; apt-get clean all
-RUN apt-get -y install unzip ; apt-get clean all
-RUN apt-get -y install software-properties-common ; apt-get clean all
-RUN apt-get -y install curl ; apt-get clean all
+RUN apt-get -y update && apt-get -y install \
+    python \
+    unzip \
+    software-properties-common \
+    supervisor \
+    curl && \
+    apt-get clean all
 
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
-RUN apt-get -y install openjdk-8-jdk; apt-get clean all
-RUN apt-get -y install supervisor; apt-get clean all
+RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
+    apt-get -y install openjdk-8-jdk && apt-get clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f
@@ -18,17 +19,15 @@ ADD artifacts /heron
 WORKDIR /heron
 
 # run heron installers
-RUN /heron/heron-client-install.sh
-RUN /heron/heron-tools-install.sh
+RUN /heron/heron-client-install.sh && /heron/heron-tools-install.sh
 
 RUN tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron
 
-RUN rm -f /heron/heron-tools-install.sh
-RUN rm -f /heron/heron-client-install.sh
-RUN rm -f /heron/heron-core.tar.gz
+RUN rm -f /heron/heron-tools-install.sh && \
+    rm -f /heron/heron-client-install.sh && \
+    rm -f /heron/heron-core.tar.gz
 
 ENV HERON_HOME /heron/heron-core/
-RUN export HERON_HOME
 
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.10

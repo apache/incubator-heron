@@ -1,9 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-load("/tools/rules/build_defs", "DOCLINT_HTML_AND_SYNTAX")
-load("/tools/rules/javadoc", "java_doc")
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
 
 java_doc(
     name = "heron-spi-javadoc",
@@ -41,7 +39,7 @@ java_library(
         "//heron/proto:proto_ckptmgr_java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )
 

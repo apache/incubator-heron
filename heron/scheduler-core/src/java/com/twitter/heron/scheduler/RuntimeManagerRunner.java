@@ -48,13 +48,18 @@ public class RuntimeManagerRunner {
   private final Config runtime;
   private final Command command;
   private final ISchedulerClient schedulerClient;
+  private final boolean potentialStaleExecutionData;
 
-  public RuntimeManagerRunner(Config config, Config runtime,
-                              Command command, ISchedulerClient schedulerClient) {
+  public RuntimeManagerRunner(Config config,
+                              Config runtime,
+                              Command command,
+                              ISchedulerClient schedulerClient,
+                              boolean potentialStaleExecutionData) {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
+    this.potentialStaleExecutionData = potentialStaleExecutionData;
 
     this.schedulerClient = schedulerClient;
   }
@@ -90,6 +95,7 @@ public class RuntimeManagerRunner {
    * Handler to activate a topology
    */
   private void activateTopologyHandler(String topologyName) throws TMasterException {
+    assert !potentialStaleExecutionData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     TMasterUtils.transitionTopologyState(topologyName,
@@ -101,6 +107,7 @@ public class RuntimeManagerRunner {
    * Handler to deactivate a topology
    */
   private void deactivateTopologyHandler(String topologyName) throws TMasterException {
+    assert !potentialStaleExecutionData;
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
     TMasterUtils.transitionTopologyState(topologyName,
@@ -113,6 +120,7 @@ public class RuntimeManagerRunner {
    */
   @VisibleForTesting
   void restartTopologyHandler(String topologyName) throws TopologyRuntimeManagementException {
+    assert !potentialStaleExecutionData;
     Integer containerId = Context.topologyContainerId(config);
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
@@ -157,8 +165,12 @@ public class RuntimeManagerRunner {
     // clean up the state of the topology in state manager
     cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime));
 
-    // Clean the connection when we are done.
-    LOG.fine("Scheduler killed topology successfully.");
+    if (potentialStaleExecutionData) {
+      LOG.warning(String.format("Topology %s does not exist. Cleaned up potential stale state.",
+          topologyName));
+    } else {
+      LOG.fine(String.format("Scheduler killed topology %s successfully.", topologyName));
+    }
   }
 
   /**
@@ -167,6 +179,7 @@ public class RuntimeManagerRunner {
   @VisibleForTesting
   void updateTopologyHandler(String topologyName, String newParallelism)
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
+    assert !potentialStaleExecutionData;
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
@@ -198,9 +211,10 @@ public class RuntimeManagerRunner {
 
     LOG.fine("Sending Updating topology request: " + updateTopologyRequest);
     if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-      throw new TopologyRuntimeManagementException(String.format(
+      throw new TopologyRuntimeManagementException(
           "Failed to update topology with Scheduler, updateTopologyRequest="
-              + updateTopologyRequest));
+              + updateTopologyRequest + "The topology can be in a strange stage. "
+                  + "Please check carefully or redeploy the topology !!");
     }
 
     // Clean the connection when we are done.
@@ -219,9 +233,6 @@ public class RuntimeManagerRunner {
 
     Boolean result;
 
-    // It is possible that TMasterLocation, MetricsCacheLocation, PackingPlan, PhysicalPlan and
-    // SchedulerLocation are not set. Just log but don't consider it a failure and don't return
-    // false
     result = statemgr.deleteTMasterLocation(topologyName);
     if (result == null || !result) {
       throw new TopologyRuntimeManagementException(

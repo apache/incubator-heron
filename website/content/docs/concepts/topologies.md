@@ -2,16 +2,7 @@
 title: Heron Topologies
 ---
 
-> ## New Streamlet API for Heron
-> As of version 0.16.0, Heron offers a new **Streamlet API** that you can use
-> to write topologies in a more declarative, functional manner, without
-> needing to specify spout and bolt logic directly. The Streamlet API is
-> **currently in beta** and available for
-> [Java](../../developers/java/streamlet-api). The Streamlet API for Python will
-> be available soon.
->
-> More information on the Streamlet API can be found
-> [below](#the-heron-streamlet-api).
+{{< alert "new-streamlet-api" >}}
 
 A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) used to process
@@ -85,171 +76,19 @@ physical plan:
 
 ![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
 
-In this example, a Heron topology consists of one [spout](#spouts) and five
+In this example, a Heron topology consists of two [spout](#spouts) and five
 different [bolts](#bolts) (each of which has multiple instances) that have automatically 
 been distributed between five different containers.
 
-## The Heron Streamlet API
-
-{{< alert "streamlet-api-beta" >}}
-
-When Heron was first created, the model for creating topologies was deeply
-indebted to the Apache Storm model. Under that model, developers creating topologies
-needed to explicitly define the behavior of every spout and bolt in the topology.
-Although this provided a powerful low-level API for creating topologies, that approach
-presented a variety of drawbacks for developers:
-
-* **Verbosity** --- In both the Java and Python topology APIs, creating spouts and bolts involved substantial boilerplate, requiring developers to both provide implementations for spout and bolt classes and also specify the connections between those spouts and bolts. This often led to the problem of...
-* **Difficult debugging** --- When spouts, bolts, and the connections between them need to be created "by hand," a great deal of cognitive load
-* **Tuple-based data model** --- In the older topology API, spouts and bolts passed tuples and nothing but tuples within topologies. Although tuples are a powerful and flexible data type, the topology API forced *all* spouts and bolts to serialize or deserialize tuples.
-
-In contrast with the topology API, the Heron Streamlet API offers:
-
-* **Boilerplate-free code** --- Instead of re to implement spout and bolt classes, the Heron Streamlet API enables you to write functions, such as map, flatMap, join, and filter functions, instead.
-* **Easy debugging** --- With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
-* **Completely flexible, type-safe data model** --- Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish. In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than runtime.
-
-### Heron Streamlet API topologies
-
-With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron
-automatically performs the heavy lifting of converting the streamlet-based processing logic
-that you create into spouts and bolts and, from there, into containers that are then deployed using
-whichever [scheduler](../../operators/deployment) your Heron cluster is using.
-
-From the standpoint of both operators and developers [managing topologies'
-lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a
-development workflow standpoint, however, the difference is profound.
-
-### Streamlets
-
-The core construct underlying the Heron Streamlet API is that of the **streamlet**. A streamlet is
-a potentially unbounded, ordered collection of tuples. Streamlets can originate from a
-wide variety of sources, such as pub-sub messaging systems like [Apache
-Kafka](http://kafka.apache.org/) and [Apache Pulsar](https://pulsar.incubator.apache.org)
-(incubating), random generators, or static files like CVS or Parquet files.
-
-#### Streamlet operations
-
-In the Heron Streamlet API, processing data means *transforming streamlets into other
-streamlets*. This can be done using a wide variety of available operations, including
-many that you may be familiar with from functional programming:
-
-Operation | Description
-:---------|:-----------
-map | Returns a new streamlet by applying the supplied mapping function to each element in the original streamlet
-flatMap | Like a map operation but with the important difference that each element of the streamlet is flattened
-join | Joins two separate streamlets into a single streamlet
-filter | Returns a new streamlet containing only the elements that satisfy the supplied filtering function
-
-### Streamlet API example
-
-You can see an example streamlet-based processing graph in the diagram below:
-
-![Streamlet-based processing graph for Heron](https://www.lucidchart.com/publicSegments/view/dc74f0b2-0d3d-46da-b80d-0bc70ad4f64c/image.png)
-
-Here's the corresponding Java code for the processing logic shown in the diagram:
-
-```java
-package heron.streamlet.example;
-
-import com.twitter.heron.streamlet.*;
-import com.twitter.heron.streamlet.impl.StreamletImpl;
-
-import java.util.concurrent.ThreadLocalRandom;
-
-public final class ExampleStreamletAPITopology {
-    public ExampleStreamletAPITopology() {}
-
-    private int randomInt(int lower, int upper) {
-        return ThreadLocalRandom.current().nextInt(lower, upper + 1);
-    }
-
-    public static void main(String[] args) {
-        Builder builder = Builder.CreateBuilder();
-
-        builder.newSource(() -> 0)
-                .setName("zeroes");
-
-        builder.newSource(() -> randomInt(1, 10))
-                .setName("random-ints")
-                .map(i -> i + 1)
-                .setName("add-one")
-                .union(zeroes)
-                .setName("unify-streams")
-                .filter(i -> i != 2)
-                .setName("remove-all-twos")
-                .log();
-
-        Config conf = new Config();
-        conf.setNumContainers(2);
-
-        new Runner().run("ExampleStreamletAPITopology", conf, builder);
-    }
-}
-```
-
-That Java code will produce this [logical plan](#logical-plan):
-
-![Heron Streamlet API logical plan](https://www.lucidchart.com/publicSegments/view/4e6e1ede-45f1-471f-b131-b3ecb7b7c3b5/image.png)
-
-### Key-value streamlets
-
-In order to perform some operations, such as streamlet joins and streamlet reduce operations, you'll need to create **key-value** streamlets.
-
-## Partitioning
-
-In the topology API, processing parallelism can be managed via adjusting the number of spouts and bolts performing different operations, enabling you to, for example, increase the relative parallelism of a bolt by using three of that bolt instead of two.
-
-The Heron Streamlet API provides a different mechanism for controlling parallelism: **partitioning**. To understand partitioning, keep in mind that rather than physical spouts and bolts, the core processing construct in the Heron Streamlet API is the processing step. With the Heron Streamlet API, you can explicitly assign a number of partitions to each processing step in your graph (the default is one partition).
-
-The example topology [above](#streamlets), for example, has five steps:
-
-* the random integer source
-* the "add one" map operation
-* the union operation
-* the filtering operation
-* the logging operation.
-
-You could apply varying numbers of partitions to each step in that topology like this:
-
-```java
-Builder builder = Builder.CreateBuilder();
-
-builder.newSource(() -> 0)
-        .setName("zeroes");
-
-builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
-        .setName("random-ints")
-        .setNumPartitions(3)
-        .map(i -> i + 1)
-        .setName("add-one")
-        .setNumPartitions(3)
-        .union(zeroes)
-        .setName("unify-streams")
-        .setNumPartitions(2)
-        .filter(i -> i != 2)
-        .setName("remove-all-twos")
-        .setNumPartitions(2)
-        .log();
-```
-
-The number of partitions to assign to each processing step when using the Streamlet API depends
-on a variety of factors.
 
 ## Window operations
-
-<!--
-> For documentation on using time windows in Heron topologies, see:
-> 
-> * [Window operations in Java](../../developers/java/topologies)
--->
 
 **Windowed computations** gather results from a topology or topology component within a specified finite time frame rather than, say, on a per-tuple basis.
 
 Here are some examples of window operations:
 
 * Counting how many customers have purchased a product during each one-hour period in the last 24 hours.
-* Determining which player in an online game has the highest score during a 15-minute period.
+* Determining which player in an online game has the highest score within the last 1000 computations.
 
 ### Sliding windows
 

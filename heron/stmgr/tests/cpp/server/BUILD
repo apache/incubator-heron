@@ -19,7 +19,7 @@ cc_test(
         "//heron/stmgr/src/cpp:util-cxx",
         # TODO: Stmgr unit tests should not depend on tmaster
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     data = [
         "//heron/config/src/yaml:test-config-internals-yaml",
@@ -48,7 +48,7 @@ cc_test(
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/stmgr/src/cpp:grouping-cxx",
         "//heron/stmgr/src/cpp:util-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",
@@ -78,7 +78,7 @@ cc_test(
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/stmgr/src/cpp:grouping-cxx",
         "//heron/stmgr/src/cpp:util-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [

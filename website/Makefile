@@ -1,19 +1,20 @@
-HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+HERONPY_VERSION := $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+GULP            = node_modules/.bin/gulp
 
 setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/api static/style.css static/style*.css static/js
+	rm -rf public/* static/api static/style.css static/style*.css node_modules
 
 serve:
 	@hugo serve --buildDrafts
 
 develop-static-assets:
-	@npm run develop
+	@$(GULP) dev
 
 build-static-assets:
-	@npm run build
+	@$(GULP) build
 
 pages:
 	@hugo
@@ -33,6 +34,9 @@ site:
 	@make javadocs
 	@make python-docs
 	@make pages
+
+publish:
+	@scripts/publish.sh
 
 travis-site:
 	@make clean

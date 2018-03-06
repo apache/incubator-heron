@@ -2,8 +2,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto",  "proto_library")
-
 proto_library(
     name="extra_actions_proto",
     src = "extra_actions_base.proto",
@@ -17,9 +15,9 @@ java_library(
     srcs = [ "Empty.java" ],
     deps = [
         ":extra_actions_proto_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
     exports = [
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )

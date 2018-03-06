@@ -23,12 +23,11 @@ import com.twitter.heron.streamlet.impl.sources.SupplierSource;
 
 /**
  * SupplierStreamlet is a very quick and flexible way of creating a Streamlet
- * from a user supplied Supplier Function. The supplier function is the
+ * from an user supplied Supplier Function. The supplier function is the
  * source of all tuples for this Streamlet.
  */
 public class SupplierStreamlet<R> extends StreamletImpl<R> {
   private SerializableSupplier<R> supplier;
-  private static final String NAMEPREFIX = "supplier";
 
   public SupplierStreamlet(SerializableSupplier<R> supplier) {
     this.supplier = supplier;
@@ -37,8 +36,7 @@ public class SupplierStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefix.SUPPLIER, stageNames);
     bldr.setSpout(getName(), new SupplierSource<R>(supplier), getNumPartitions());
     return true;
   }

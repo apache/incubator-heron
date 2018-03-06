@@ -183,6 +183,7 @@ public class TMasterSink implements IMetricsSink {
 
     // First Entry
     tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    LOG.info("TMasterChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
@@ -360,8 +361,8 @@ public class TMasterSink implements IMetricsSink {
               TypeUtils.getDuration(
                   tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS));
 
-      LOG.severe(String.format("Starting TMasterClient for the %d time.",
-          startedAttempts.incrementAndGet()));
+      int attempts = startedAttempts.incrementAndGet();
+      LOG.severe(String.format("Starting TMasterClient for the %d time.", attempts));
       tmasterClientExecutor.execute(tMasterClient);
     }
 

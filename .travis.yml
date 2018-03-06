@@ -28,9 +28,9 @@ env:
 
 before_install:
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.5.4-installer-linux-x86_64.sh
-  - ./bazel-0.5.4-installer-linux-x86_64.sh --user
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.9.0/bazel-0.9.0-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.9.0-installer-linux-x86_64.sh
+  - ./bazel-0.9.0-installer-linux-x86_64.sh --user
 
 before_script:
   # install python module for wheel files
@@ -42,8 +42,6 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
-  - which cmake
-  - cmake --version
   - which python
   - python -V
   - which python2.7

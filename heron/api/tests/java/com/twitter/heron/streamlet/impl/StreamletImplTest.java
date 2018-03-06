@@ -20,17 +20,17 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.streamlet.Config;
 import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Resources;
+import com.twitter.heron.streamlet.SerializableConsumer;
 import com.twitter.heron.streamlet.SerializableTransformer;
 import com.twitter.heron.streamlet.Streamlet;
 import com.twitter.heron.streamlet.WindowConfig;
+import com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import com.twitter.heron.streamlet.impl.streamlets.JoinStreamlet;
@@ -46,10 +46,6 @@ import static org.junit.Assert.*;
  * Unit tests for {@link StreamletImpl}
  */
 public class StreamletImplTest {
-
-  @Before
-  public void setUp() {
-  }
 
   @Test
   public void testBasicParams() throws Exception {
@@ -262,61 +258,130 @@ public class StreamletImplTest {
   }
 
   @Test
-  public void testResourcesBuilder() {
-    Resources defaultResources = Resources.defaultResources();
-    assertEquals(0, Float.compare(defaultResources.getCpu(), 1.0f));
-    assertEquals(defaultResources.getRam(), ByteAmount.fromMegabytes(100));
+  @SuppressWarnings("unchecked")
+  public void testCalculatedDefaultStageNames() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 0);
 
-    Resources nonDefaultResources = new Resources.Builder()
-        .setCpu(5.1f)
-        .setRamInGB(20)
-        .build();
-    assertEquals(0, Float.compare(nonDefaultResources.getCpu(), 5.1f));
-    assertEquals(nonDefaultResources.getRam(), ByteAmount.fromGigabytes(20));
+    // apply the consumer function
+    baseStreamlet.consume((SerializableConsumer<String>) s -> { });
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
+
+    // verify SupplierStreamlet
+    assertTrue(supplierStreamlet.allBuilt());
+    assertEquals(1, supplierStreamlet.getChildren().size());
+    assertTrue(supplierStreamlet.getChildren().get(0) instanceof ConsumerStreamlet);
+    assertEquals("consumer1", supplierStreamlet.getChildren().get(0).getName());
+
+    // verify stageNames
+    assertEquals(2, stageNames.size());
+    List<String> expectedStageNames = Arrays.asList("consumer1", "supplier1");
+    assertTrue(stageNames.containsAll(expectedStageNames));
+
+    // verify ConsumerStreamlet
+    ConsumerStreamlet<String> consumerStreamlet =
+        (ConsumerStreamlet<String>) supplierStreamlet.getChildren().get(0);
+    assertEquals(0, consumerStreamlet.getChildren().size());
   }
 
   @Test
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
-    assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
-    assertEquals(defaultConfig.getNumContainers(), 1);
-    assertEquals(0, Float.compare(defaultConfig.getResources().getCpu(), 1.0f));
-    assertEquals(defaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(100));
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
-
-    Resources nonDefaultResources = new Resources.Builder()
-        .setCpu(3.1f)
-        .setRamInMB(2500)
-        .build();
-
-    Config nonDefaultConfig = new Config.Builder()
-        .setContainerResources(nonDefaultResources)
+    assertEquals(0, Float.compare(defaultConfig.getPerContainerCpu(), 1.0f));
+    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100).asBytes());
+    assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
+    Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
-        .setNumContainers(8)
-        .setTopologySerializer(Config.Serializer.JAVA)
-        .setUserConfig("key", "value")
+        .setSerializer(Config.Serializer.JAVA)
+        .setPerContainerCpu(3.5f)
+        .setPerContainerRamInGigabytes(10)
         .build();
-    assertEquals(nonDefaultConfig.getNumContainers(), 8);
     assertEquals(nonDefaultConfig.getDeliverySemantics(),
         Config.DeliverySemantics.EFFECTIVELY_ONCE);
-    assertEquals(0, Float.compare(nonDefaultConfig.getResources().getCpu(), 3.1f));
-    assertEquals(nonDefaultConfig.getResources().getRam(), ByteAmount.fromMegabytes(2500));
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
+    assertEquals(nonDefaultConfig.getPerContainerRamAsGigabytes(), 10);
+    assertEquals(nonDefaultConfig.getPerContainerRamAsMegabytes(), 1024 * 10);
+    assertEquals(0, Float.compare(nonDefaultConfig.getPerContainerCpu(), 3.5f));
+  }
 
-    Config multiSetConfig = new Config.Builder()
-        .setTopologySerializer(Config.Serializer.JAVA)
-        .setTopologySerializer(Config.Serializer.KRYO)
-        .build();
-    assertEquals(multiSetConfig.getSerializer(), Config.Serializer.KRYO);
+  @Test
+  public void testDefaultStreamletNameIfNotSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefix.SUPPLIER, stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList("supplier1")));
+  }
+
+  @Test
+  public void testStreamletNameIfAlreadySet() {
+    String supplierName = "MyStringSupplier";
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+    supplierStreamlet.setName(supplierName);
+    Set<String> stageNames = new HashSet<>();
+
+    // set default name by streamlet name prefix
+    supplierStreamlet.setDefaultNameIfNone(
+        StreamletImpl.StreamletNamePrefix.SUPPLIER, stageNames);
+
+    // verify stageNames
+    assertEquals(1, stageNames.size());
+    assertTrue(stageNames.containsAll(Arrays.asList(supplierName)));
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testStreamletNameIfDuplicateNameIsSet() {
+    // create SupplierStreamlet
+    Streamlet<String> baseStreamlet = StreamletImpl.createSupplierStreamlet(() ->
+        "This is test content");
+
+    SupplierStreamlet<String> supplierStreamlet = (SupplierStreamlet<String>) baseStreamlet;
+
+    // set duplicate streamlet name and expect thrown exception
+    supplierStreamlet
+        .map((content) -> content.toUpperCase()).setName("MyMapStreamlet")
+        .map((content) -> content + "_test_suffix").setName("MyMapStreamlet");
+
+    // build SupplierStreamlet
+    assertFalse(supplierStreamlet.isBuilt());
+    TopologyBuilder builder = new TopologyBuilder();
+    Set<String> stageNames = new HashSet<>();
+    supplierStreamlet.build(builder, stageNames);
   }
 
   @Test
   public void testSetNameWithInvalidValues() {
-    Streamlet<Double> sample = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Function<String, Streamlet<Double>> function = sample::setName;
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Function<String, Streamlet<Double>> function = streamlet::setName;
     testByFunction(function, null);
     testByFunction(function, "");
     testByFunction(function, "  ");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSetNumPartitionsWithInvalidValue() {
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    streamlet.setNumPartitions(0);
   }
 
   private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {

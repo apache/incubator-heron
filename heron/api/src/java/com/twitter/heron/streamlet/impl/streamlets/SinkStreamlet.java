@@ -29,7 +29,6 @@ import com.twitter.heron.streamlet.impl.sinks.ComplexSink;
 public class SinkStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private Sink<R> sink;
-  private static final String NAMEPREFIX = "sink";
 
   public SinkStreamlet(StreamletImpl<R> parent, Sink<R> sink) {
     this.parent = parent;
@@ -39,8 +38,7 @@ public class SinkStreamlet<R> extends StreamletImpl<R> {
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(NAMEPREFIX, stageNames);
-    stageNames.add(getName());
+    setDefaultNameIfNone(StreamletNamePrefix.SINK, stageNames);
     bldr.setBolt(getName(), new ComplexSink<>(sink),
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

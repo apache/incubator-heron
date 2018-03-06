@@ -30,6 +30,7 @@ import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -75,7 +76,7 @@ import com.twitter.heron.spi.packing.Resource;
  * 7. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value.
  */
-public class RoundRobinPacking implements IPacking {
+public class RoundRobinPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
 
   // TODO(mfu): Read these values from Config
@@ -98,16 +99,30 @@ public class RoundRobinPacking implements IPacking {
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
-    this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config);
+    this.instanceRamDefault = Context.instanceRam(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
-    containerRamPadding = getContainerRamPadding(inputTopology.getTopologyConfig().getKvsList());
+    this.containerRamPadding = getContainerRamPadding(topology.getTopologyConfig().getKvsList());
+    LOG.info(String.format("Initalizing RoundRobinPacking. "
+        + "CPU default: %f, RAM default: %s, DISK default: %s, RAM padding: %s.",
+        this.instanceCpuDefault,
+        this.instanceRamDefault.toString(),
+        this.instanceDiskDefault.toString(),
+        this.containerRamPadding.toString()));
   }
 
   @Override
   public PackingPlan pack() {
+    int numContainer = TopologyUtils.getNumContainers(topology);
+    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
+
+    return packInternal(numContainer, parallelismMap);
+  }
+
+  private PackingPlan packInternal(int numContainer, Map<String, Integer> parallelismMap) {
     // Get the instances' round-robin allocation
-    Map<Integer, List<InstanceId>> roundRobinAllocation = getRoundRobinAllocation();
+    Map<Integer, List<InstanceId>> roundRobinAllocation =
+        getRoundRobinAllocation(numContainer, parallelismMap);
 
     // Get the ram map for every instance
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
@@ -115,6 +130,12 @@ public class RoundRobinPacking implements IPacking {
 
     ByteAmount containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
+    ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
+
+    LOG.info(String.format("Pack internal: container cpu hint: %f, ram hint: %s, disk hint: %s.",
+        containerCpu,
+        containerDiskInBytes.toString(),
+        containerRamHint.toString()));
 
     // Construct the PackingPlan
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
@@ -175,6 +196,7 @@ public class RoundRobinPacking implements IPacking {
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMapInContainer = new HashMap<>();
+    ByteAmount containerRamHint = getContainerRamHint(allocation);
 
     for (int containerId : allocation.keySet()) {
       List<InstanceId> instanceIds = allocation.get(containerId);
@@ -197,7 +219,6 @@ public class RoundRobinPacking implements IPacking {
 
       // Now we have calculated ram for instances specified in ComponentRamMap
       // Then to calculate ram for the rest instances
-      ByteAmount containerRamHint = getContainerRamHint(allocation);
       int instancesToAllocate = instancesToBeAccounted.size();
 
       if (instancesToAllocate != 0) {
@@ -232,10 +253,10 @@ public class RoundRobinPacking implements IPacking {
    *
    * @return containerId -&gt; list of InstanceId belonging to this container
    */
-  private Map<Integer, List<InstanceId>> getRoundRobinAllocation() {
+  private Map<Integer, List<InstanceId>> getRoundRobinAllocation(
+      int numContainer, Map<String, Integer> parallelismMap) {
     Map<Integer, List<InstanceId>> allocation = new HashMap<>();
-    int numContainer = TopologyUtils.getNumContainers(topology);
-    int totalInstance = TopologyUtils.getTotalInstance(topology);
+    int totalInstance = TopologyUtils.getTotalInstance(parallelismMap);
     if (numContainer > totalInstance) {
       throw new RuntimeException("More containers allocated than instance.");
     }
@@ -246,7 +267,6 @@ public class RoundRobinPacking implements IPacking {
 
     int index = 1;
     int globalTaskIndex = 1;
-    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     for (String component : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
@@ -342,5 +362,30 @@ public class RoundRobinPacking implements IPacking {
         }
       }
     }
+  }
+
+  /*
+   * read the current packing plan with update parallelism to calculate a new packing plan
+   * the packing algorithm packInternal() is shared with pack()
+   * delegate to packInternal() with the new container count and component parallelism
+   */
+  @Override
+  public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges)
+      throws PackingException {
+    int initialNumContainer = TopologyUtils.getNumContainers(topology);
+    int initialNumInstance = TopologyUtils.getTotalInstance(topology);
+    double initialNumInstancePerContainer = (double) initialNumInstance / initialNumContainer;
+
+    Map<String, Integer> currentComponentParallelism = currentPackingPlan.getComponentCounts();
+
+    for (Map.Entry<String, Integer> e : componentChanges.entrySet()) {
+      Integer newParallelism = currentComponentParallelism.get(e.getKey()) + e.getValue();
+      currentComponentParallelism.put(e.getKey(), newParallelism);
+    }
+
+    int newNumInstance = TopologyUtils.getTotalInstance(currentComponentParallelism);
+    int newNumContainer = (int) Math.ceil(newNumInstance / initialNumInstancePerContainer);
+
+    return packInternal(newNumContainer, currentComponentParallelism);
   }
 }
