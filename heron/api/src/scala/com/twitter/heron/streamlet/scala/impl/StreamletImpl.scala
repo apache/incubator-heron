@@ -13,12 +13,14 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
 import com.twitter.heron.streamlet.{
   JoinType,
+  KeyValue,
+  KeyedWindow,
   SerializableTransformer,
   WindowConfig
 }
+import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet
 import com.twitter.heron.streamlet.scala.{Sink, Streamlet}
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
@@ -40,8 +42,7 @@ object StreamletImpl {
   private[impl] def createSupplierStreamlet[R](supplier: () => R) = {
     val serializableSupplier = toSerializableSupplier[R](supplier)
     val newJavaStreamlet =
-      new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
-        serializableSupplier)
+      new SupplierStreamlet[R](serializableSupplier)
     toScalaStreamlet[R](newJavaStreamlet)
   }
 

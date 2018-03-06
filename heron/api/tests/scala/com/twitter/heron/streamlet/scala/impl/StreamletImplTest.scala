@@ -17,6 +17,15 @@ import scala.util.Random
 
 import org.junit.Assert.{assertEquals, assertTrue}
 
+import com.twitter.heron.streamlet.impl.streamlets.{
+  ConsumerStreamlet,
+  FilterStreamlet,
+  LogStreamlet,
+  MapStreamlet,
+  SinkStreamlet,
+  UnionStreamlet
+}
+
 import com.twitter.heron.streamlet.scala.Streamlet
 import com.twitter.heron.streamlet.scala.common.{
   BaseFunSuite,
@@ -40,7 +49,9 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(20, supplierStreamlet.getNumPartitions)
 
     val mapStreamlet = supplierStreamlet
-      .map[Double]((num: Double) => num * 10)
+      .map[Double] { num: Double =>
+        num * 10
+      }
       .setName("Map_Streamlet_1")
       .setNumPartitions(5)
 
@@ -56,7 +67,9 @@ class StreamletImplTest extends BaseFunSuite {
       .setNumPartitions(20)
 
     supplierStreamlet
-      .map[String]((num: Double) => (num * 10).toString)
+      .map[String] { num: Double =>
+        (num * 10).toString
+      }
       .setName("Map_Streamlet_1")
       .setNumPartitions(5)
 
@@ -66,13 +79,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[_, _]])
+        .isInstanceOf[MapStreamlet[_, _]])
     val mapStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[
-        Double,
-        String]]
+      .asInstanceOf[MapStreamlet[Double, String]]
     assertEquals("Map_Streamlet_1", mapStreamlet.getName)
     assertEquals(0, mapStreamlet.getChildren.size())
   }
@@ -84,7 +94,9 @@ class StreamletImplTest extends BaseFunSuite {
       .setNumPartitions(20)
 
     supplierStreamlet
-      .filter((num: Double) => num > 10)
+      .filter { num: Double =>
+        num > 10
+      }
       .setName("Filter_Streamlet_1")
       .setNumPartitions(5)
 
@@ -94,12 +106,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet[_]])
+        .isInstanceOf[FilterStreamlet[_]])
     val filterStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.FilterStreamlet[Double]]
+      .asInstanceOf[FilterStreamlet[Double]]
     assertEquals("Filter_Streamlet_1", filterStreamlet.getName)
     assertEquals(0, filterStreamlet.getChildren.size())
   }
@@ -122,13 +132,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[_, _]])
+        .isInstanceOf[MapStreamlet[_, _]])
     val repartitionedStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[
-        String,
-        String]]
+      .asInstanceOf[MapStreamlet[String, String]]
     assertEquals("Repartitioned_Streamlet_1", repartitionedStreamlet.getName)
     assertEquals(0, repartitionedStreamlet.getChildren.size())
     assertEquals(10, repartitionedStreamlet.getNumPartitions)
@@ -161,7 +168,9 @@ class StreamletImplTest extends BaseFunSuite {
       .setNumPartitions(20)
 
     supplierStreamlet
-      .consume((num: Double) => num > 10)
+      .consume { num: Double =>
+        num > 10
+      }
 
     val supplierStreamletImpl =
       supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
@@ -169,12 +178,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet[_]])
+        .isInstanceOf[ConsumerStreamlet[_]])
     val consumerStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.ConsumerStreamlet[Double]]
+      .asInstanceOf[ConsumerStreamlet[Double]]
     assertEquals(null, consumerStreamlet.getName)
     assertEquals(0, consumerStreamlet.getChildren.size())
     assertEquals(20, consumerStreamlet.getNumPartitions)
@@ -195,12 +202,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.LogStreamlet[_]])
+        .isInstanceOf[LogStreamlet[_]])
     val consumerStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.LogStreamlet[Double]]
+      .asInstanceOf[LogStreamlet[Double]]
     assertEquals(null, consumerStreamlet.getName)
     assertEquals(0, consumerStreamlet.getChildren.size())
     assertEquals(10, consumerStreamlet.getNumPartitions)
@@ -221,12 +226,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet[_]])
+        .isInstanceOf[SinkStreamlet[_]])
     val consumerStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.SinkStreamlet[Int]]
+      .asInstanceOf[SinkStreamlet[Int]]
     assertEquals(null, consumerStreamlet.getName)
     assertEquals(0, consumerStreamlet.getChildren.size())
     assertEquals(10, consumerStreamlet.getNumPartitions)
@@ -240,12 +243,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet[_]])
+        .isInstanceOf[UnionStreamlet[_]])
     val unionStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.UnionStreamlet[String]]
+      .asInstanceOf[UnionStreamlet[String]]
     assertEquals("Union_Streamlet_1", unionStreamlet.getName)
     assertEquals(0, unionStreamlet.getChildren.size())
     assertEquals(4, unionStreamlet.getNumPartitions)

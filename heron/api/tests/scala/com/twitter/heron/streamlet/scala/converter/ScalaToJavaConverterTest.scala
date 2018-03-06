@@ -15,6 +15,14 @@ package com.twitter.heron.streamlet.scala.converter
 
 import org.junit.Assert.assertTrue
 
+import com.twitter.heron.streamlet.{
+  Context,
+  SerializableConsumer,
+  SerializableFunction,
+  SerializablePredicate,
+  SerializableSupplier
+}
+
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 
@@ -29,7 +37,7 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
       ScalaToJavaConverter.toSerializableSupplier[String](testFunction)
     assertTrue(
       serializableSupplier
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableSupplier[String]])
+        .isInstanceOf[SerializableSupplier[String]])
   }
 
   test("ScalaToJavaConverterTest should support SerializableFunction") {
@@ -39,8 +47,7 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         stringToIntFunction)
     assertTrue(
       serializableFunction
-        .isInstanceOf[
-          com.twitter.heron.streamlet.SerializableFunction[String, Int]])
+        .isInstanceOf[SerializableFunction[String, Int]])
   }
 
   test("ScalaToJavaConverterTest should support Java Sink") {
@@ -57,20 +64,20 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
       ScalaToJavaConverter.toSerializablePredicate[Int](intToBooleanFunction)
     assertTrue(
       serializablePredicate
-        .isInstanceOf[com.twitter.heron.streamlet.SerializablePredicate[Int]])
+        .isInstanceOf[SerializablePredicate[Int]])
   }
 
   test("ScalaToJavaConverterTest should support SerializableConsumer") {
-    def consumerFunction(number: Int): Unit = number.toString
+    def consumerFunction(number: Int): Unit = number * 10
     val serializableConsumer =
       ScalaToJavaConverter.toSerializableConsumer[Int](consumerFunction)
     assertTrue(
       serializableConsumer
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableConsumer[Int]])
+        .isInstanceOf[SerializableConsumer[Int]])
   }
 
   private class TestSink[T] extends Sink[T] {
-    override def setup(context: com.twitter.heron.streamlet.Context): Unit = {}
+    override def setup(context: Context): Unit = {}
     override def put(tuple: T): Unit = {}
     override def cleanup(): Unit = {}
   }
