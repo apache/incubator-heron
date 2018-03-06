@@ -734,13 +734,13 @@ TEST(StMgr, test_runtime_config) {
   std::map<sp_string, sp_string> validate_good_config;
   validate_good_config[topology_user_config_1] = "1";
   validate_good_config[topology_user_config_2] = "2";
-  validate_good_config_map["topology"] = validate_good_config;
+  validate_good_config_map[""] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 
   heron::tmaster::ConfigMap validate_bad_config_map;
   std::map<sp_string, sp_string> validate_bad_config;
   validate_bad_config["unknown"] = "1";
-  validate_bad_config_map["topology"] = validate_bad_config;
+  validate_bad_config_map[""] = validate_bad_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_bad_config_map), false);
 
   // Post runtime config request with no configs and expect 400 response.
@@ -759,8 +759,8 @@ TEST(StMgr, test_runtime_config) {
   delete wrong_config1_update_thread;
 
   std::vector<sp_string> wrong_config2;
-  wrong_config2.push_back("topology:topology.user.test_config=1");
-  wrong_config2.push_back("bad_component:topology.user.test_config.bad=1");  // Doesn't exist
+  wrong_config2.push_back("topology.user.test_config:1");
+  wrong_config2.push_back("bad_component:topology.user.test_config.bad:1");  // Doesn't exist
   std::thread* wrong_config2_update_thread = new std::thread(RuntimeConfigTopology,
       common.topology_id_, common.tmaster_controller_port_, wrong_config2, 400, "wrong_config2");
   wrong_config2_update_thread->join();
@@ -768,10 +768,10 @@ TEST(StMgr, test_runtime_config) {
 
   // Post runtime config request with good configs and expect 200 response.
   std::vector<sp_string> good_config;
-  good_config.push_back("topology:" + topology_user_config_1 + "=1");
-  good_config.push_back("topology:" + topology_user_config_2 + "=2");
-  good_config.push_back(runtime_test_spout + ":" + spout_user_config + "=3");
-  good_config.push_back(runtime_test_bolt + ":" + bolt_user_config + "=4");
+  good_config.push_back(topology_user_config_1 + ":1");
+  good_config.push_back(topology_user_config_2 + ":2");
+  good_config.push_back(runtime_test_spout + ":" + spout_user_config + ":3");
+  good_config.push_back(runtime_test_bolt + ":" + bolt_user_config + ":4");
   std::thread* good_config_update_thread = new std::thread(RuntimeConfigTopology,
       common.topology_id_, common.tmaster_controller_port_, good_config, 200, "good_config");
   good_config_update_thread->join();

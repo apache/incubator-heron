@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <map>
+#include <regex>  // NOLINT (build/c++11)
 #include <string>
 #include <utility>
 #include <vector>
@@ -200,7 +201,7 @@ void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
   if (!request->GetAllValues("user-config", parameters)) {
     LOG(ERROR) << "No runtime config is found";
     http_server_->SendErrorReply(request, 400, "No runtime config is found."
-        " Usage: --user-config=(COMPONENT_NAME|topology):(CONFIG_NAME).");
+        " Usage: --user-config=[COMPONENT:]<CONFIG>:<VALUE>.");
     delete request;
     return;
   }
@@ -210,7 +211,7 @@ void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
   std::map<std::string, std::map<std::string, std::string>> config;
   if (!ParseRuntimeConfig(parameters, config)) {
     http_server_->SendErrorReply(request, 400, "Failed to parse runtime configs."
-        " Possibly bad format. The expected format is (COMPONENT_NAME|topology):(CONFIG_NAME).");
+        " Possibly bad format. The expected format is [COMPONENT:]<CONFIG>:<VALUE>.");
     delete request;
     return;
   }
@@ -279,23 +280,24 @@ bool TController::ValidateTopology(const IncomingHTTPRequest* request, Validatio
 
 bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
                                      std::map<sp_string, std::map<sp_string, sp_string>>& retval) {
-  // Parse configs.
-  // Configs are in the followingconfigMap format: scope:config=value.
-  // Only the '=' delimiter is handled in this step and the output should be
-  // a map of scope:config -> value.
+  // Configs are in the followingconfigMap format: [component:]config:value.
+  std::regex pattern("^([\\w\\.-]+:){1,2}[\\w\\.-]+$");
+
   std::vector<sp_string>::const_iterator scoped_iter;
   std::map<sp_string, sp_string> scoped_config_map;
   for (scoped_iter = paramters.begin(); scoped_iter != paramters.end(); ++scoped_iter) {
-    // Each config should have only one '='
-    size_t index = scoped_iter->find_first_of('=');
-    if (index == sp_string::npos || index != scoped_iter->find_last_of('=')) {
+    if (!std::regex_match(*scoped_iter, pattern)) {
       LOG(ERROR) << "Failed to parse config: " << *scoped_iter
-          << ". More than one '='s are found."
-          << " Configs should be in this format: (COMPONENT_NAME|topology):(CONFIG_NAME)=(VALUE)";
+          << " Each config should be in this format: [component:]config:value";
       return false;
     }
-    sp_string key = scoped_iter->substr(0, index);
-    sp_string value = scoped_iter->substr(index + 1);
+    size_t index = scoped_iter->find_last_of(':');
+    if (index == sp_string::npos) {
+      LOG(ERROR) << "No ':' is found in " << *scoped_iter << "."
+          << " Each config should be in this format: [component:]config:value";
+    }
+    const sp_string key = scoped_iter->substr(0, index);
+    const sp_string value = scoped_iter->substr(index + 1);
     LOG(INFO) << "Parsed config " << key << " => " << value;
     scoped_config_map[key] = value;
   }
@@ -304,22 +306,17 @@ bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
   std::map<std::string, std::string>::const_iterator iter;
   for (iter = scoped_config_map.begin(); iter != scoped_config_map.end(); ++iter) {
     LOG(INFO) << "Runtime config " << iter->first << " => " << iter->second;
-    // Incoming config names should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
+    // Incoming config names should have this format: [component:]config
     size_t index = iter->first.find_first_of(':');
-    if (index == sp_string::npos || index != iter->first.find_last_of(':')) {
-      LOG(ERROR) << "Invalid config name: " << iter->first << "."
-          << ". More than one ':'s are found."
-          << " Config names should be in this format: (COMPONENT_NAME|topology):(CONFIG_NAME)";
-      return false;
+    if (index == sp_string::npos) {
+      // No ':' is found. This is a topology level config
+      retval[""][iter->first] = iter->second;
+    } else {
+      // This is a component level config
+      const std::string component = iter->first.substr(0, index);
+      const std::string config_name = iter->first.substr(index + 1);
+      retval[component][config_name] = iter->second;
     }
-    std::string component = iter->first.substr(0, index);
-    std::string config_name = iter->first.substr(index + 1);
-
-    // if (retval.find(component) == retval.end()) {
-      // The component doesn't exist in map yet.
-    //  retval[component] = new std::vector<std::string>();
-    //}
-    retval[component][config_name] = iter->second;
   }
   return true;
 }
