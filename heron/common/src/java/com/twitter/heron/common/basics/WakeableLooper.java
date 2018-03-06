@@ -52,34 +52,52 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
-  private boolean clearTasksOnWakeup = false;
-  private boolean clearExitTasks = false;
+  private boolean terminateAllTasksOnWakeup;
+  private boolean terminateAllExitTasks;
 
   public WakeableLooper() {
     exitLoop = false;
     tasksOnWakeup = new ArrayList<>();
     timers = new PriorityQueue<TimerTask>();
     exitTasks = new ArrayList<>();
+    terminateAllTasksOnWakeup = false;
+    terminateAllExitTasks = false;
   }
 
+  /**
+   * Clears all tasks.
+   * This is expected to be call synchronously.  This call is not thread safe!
+   */
   public void clear() {
     clearTasksOnWakeup();
     clearTimers();
     clearExitTasks();
   }
 
+  /**
+   * Clears all tasks on wakeup.
+   * This is expected to be call synchronously.  This call is not thread safe!
+   */
   public void clearTasksOnWakeup() {
     tasksOnWakeup.clear();
-    clearTasksOnWakeup = true;
+    terminateAllTasksOnWakeup = true;
   }
 
+  /**
+   * Clears all timer tasks.
+   * This is expected to be call synchronously.  This call is not thread safe!
+   */
   public void clearTimers() {
     timers.clear();
   }
 
+  /**
+   * Clears all tasks on exit.
+   * This is expected to be call synchronously.  This call is not thread safe!
+   */
   public void clearExitTasks() {
     exitTasks.clear();
-    clearExitTasks = true;
+    terminateAllExitTasks = true;
   }
 
   public void loop() {
@@ -102,12 +120,13 @@ public abstract class WakeableLooper {
   private void onExit() {
     int s = exitTasks.size();
     for (int i = 0; i < s; i++) {
-      if (clearExitTasks) {
+      // this flag is not thread safe!
+      if (terminateAllExitTasks) {
         break;
       }
       exitTasks.get(i).run();
     }
-    clearExitTasks = false;
+    terminateAllExitTasks = false;
   }
 
   protected abstract void doWait();
@@ -171,12 +190,13 @@ public abstract class WakeableLooper {
     // We pre-get the size to avoid execute the tasks added during execution
     int s = tasksOnWakeup.size();
     for (int i = 0; i < s; i++) {
-      if (clearTasksOnWakeup) {
+      // this flag is not thread safe
+      if (terminateAllTasksOnWakeup) {
         break;
       }
       tasksOnWakeup.get(i).run();
     }
-    clearTasksOnWakeup = false;
+    terminateAllTasksOnWakeup = false;
   }
 
   private void triggerExpiredTimers(long currentTime) {
