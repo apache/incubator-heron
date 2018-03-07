@@ -237,23 +237,6 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(10, consumerStreamlet.getNumPartitions)
   }
 
-  private def verifySupplierStreamlet(
-      supplierStreamlet: Streamlet[String]): Unit = {
-    val supplierStreamletImpl =
-      supplierStreamlet.asInstanceOf[StreamletImpl[String]]
-    assertEquals(1, supplierStreamletImpl.getChildren.size)
-    assertTrue(
-      supplierStreamletImpl
-        .getChildren(0)
-        .isInstanceOf[UnionStreamlet[_]])
-    val unionStreamlet = supplierStreamletImpl
-      .getChildren(0)
-      .asInstanceOf[UnionStreamlet[String]]
-    assertEquals("Union_Streamlet_1", unionStreamlet.getName)
-    assertEquals(0, unionStreamlet.getChildren.size())
-    assertEquals(4, unionStreamlet.getNumPartitions)
-  }
-
   test("StreamletImpl should support join transformation") {
     val numberStreamlet = StreamletImpl
       .createSupplierStreamlet(() => Random.nextInt(10))
@@ -327,6 +310,23 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(expectedName, joinStreamlet.getName)
     assertEquals(expectedNumPartitions, joinStreamlet.getNumPartitions)
     assertEquals(0, joinStreamlet.getChildren.size())
+  }
+
+  private def verifySupplierStreamlet(
+      supplierStreamlet: Streamlet[String]): Unit = {
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[String]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[UnionStreamlet[_]])
+    val unionStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[UnionStreamlet[String]]
+    assertEquals("Union_Streamlet_1", unionStreamlet.getName)
+    assertEquals(0, unionStreamlet.getChildren.size())
+    assertEquals(4, unionStreamlet.getNumPartitions)
   }
 
 }
