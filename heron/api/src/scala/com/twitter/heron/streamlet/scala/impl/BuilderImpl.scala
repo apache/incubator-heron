@@ -32,13 +32,13 @@ class BuilderImpl[R](val javaBuilder: com.twitter.heron.streamlet.Builder[R]) ex
     val newJavaStreamlet =
       new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
         serializableSupplier)
-    toScalaStreamlet[R](newJavaStreamlet)
+    toScalaBuilder[R](newJavaStreamlet)
   }
 
 
   override def newSource[R](sourceFn: Source[R]): Streamlet[R]} = {
     val javaSource = toJavaSource[R](sourceFn)
-    javaStreamlet.toSource(javaSource)
+    javaBuilder.toSource(javaSource)
   }
 
 }

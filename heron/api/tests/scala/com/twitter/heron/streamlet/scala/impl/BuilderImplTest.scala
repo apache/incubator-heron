@@ -11,21 +11,27 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala
+package com.twitter.heron.streamlet.scala.impl
+
+import com.twitter.heron.streamlet.scala.Streamlet
+import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+import org.junit.Assert.{assertEquals, assertTrue}
 
 import scala.collection.mutable.ListBuffer
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.common.{BaseFunSuite, TestContext}
-
 
 /**
-  * Tests for Builder Trait functionality
+  * Tests for Scala Builder Implementation functionality
   */
-class BuilderTest extends BaseFunSuite {
+class BuilderImplTest extends BaseFunSuite {
+  test(
+    "BuilderImpl should support generating a streamlet from a user generated source function") {
+      val source = MySource
+
+    }
 
 
-  test("Builder should provide new source based on user defined supplier function") {
-    assert(1==1)
+  "BuilderImpl should support generating a streamlet from a user generated serializable supplier function") {
+    val source = MySource
 
   }
 
@@ -40,8 +46,5 @@ class BuilderTest extends BaseFunSuite {
 
     override def cleanup(): Unit = numbers.clear()
   }
-
-
-
 
 }
