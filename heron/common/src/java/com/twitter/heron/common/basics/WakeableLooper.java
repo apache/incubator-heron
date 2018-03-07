@@ -37,6 +37,8 @@ import java.util.PriorityQueue;
  * <p>
  * So to use this class, user could add the persistent tasks, one time tasks and timer tasks as many
  * as they want.
+ * Most methods except the onExit() are not thread-safe.
+ * People should handle the concurrent scenarios in their business logic rather than in this class.
  */
 public abstract class WakeableLooper {
   // The tasks could only be added but not removed
@@ -52,7 +54,11 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
+  // this boolean is set when the tasksOnWakeup list is cleared.
+  // this boolean is need if it is one of the tasks in taskOnWakeup that clears the list
   private boolean terminateAllTasksOnWakeup;
+  // this boolean is set when the exitTasks list is cleared.
+  // this boolean is need if it is one of the tasks in exitTask that clears the list
   private boolean terminateAllExitTasks;
 
   public WakeableLooper() {
