@@ -281,7 +281,7 @@ bool TController::ValidateTopology(const IncomingHTTPRequest* request, Validatio
 bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
                                      std::map<sp_string, std::map<sp_string, sp_string>>& retval) {
   // Configs are in the followingconfigMap format: [component:]config:value.
-  std::regex pattern("^([\\w\\.-]+:){1,2}[\\w\\.-]+$");
+  static const std::regex pattern("^([\\w\\.-]+:){1,2}[\\w\\.-]+$");
 
   std::vector<sp_string>::const_iterator scoped_iter;
   std::map<sp_string, sp_string> scoped_config_map;

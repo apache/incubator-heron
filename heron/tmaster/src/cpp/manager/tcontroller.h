@@ -41,6 +41,12 @@ class TController {
   // Called by the tmaster when it gets response form ckptmgr
   void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status);
 
+  // Parse and build a map of component name to config kv map from incoming runtime configs.
+  // The incoming runtime configs should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
+  // Return false if the configs have bad format.
+  static bool ParseRuntimeConfig(const std::vector<sp_string>& paramters,
+                                 std::map<sp_string, std::map<sp_string, sp_string>>& configMap);
+
  private:
   // Handlers for the requests
   // In all the below handlers, the incoming _request
@@ -87,12 +93,6 @@ class TController {
   };
 
   bool ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result);
-
-  // Parse and build a map of component name to config kv map from incoming runtime configs.
-  // The incoming runtime configs should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
-  // Return false if the configs have bad format.
-  bool ParseRuntimeConfig(const std::vector<sp_string>& paramters,
-                          std::map<sp_string, std::map<sp_string, sp_string>>& configMap);
 };
 }  // namespace tmaster
 }  // namespace heron
