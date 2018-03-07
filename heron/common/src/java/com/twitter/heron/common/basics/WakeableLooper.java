@@ -84,7 +84,7 @@ public abstract class WakeableLooper {
   public void clearTimers() {
     timers.clear();
   }
-  
+
   public void clearExitTasks() {
     exitTasks.clear();
     terminateAllExitTasks = true;
@@ -128,7 +128,6 @@ public abstract class WakeableLooper {
     // We need to wake up the looper itself when we add a new task, otherwise, it is possible
     // this task will never be executed due to the looper will never be wake up.
     wakeUp();
-
   }
 
   public void addTasksOnExit(Runnable task) {
