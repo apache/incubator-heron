@@ -70,37 +70,21 @@ public abstract class WakeableLooper {
     terminateAllExitTasks = false;
   }
 
-  /**
-   * Clears all tasks.
-   * This is expected to be call synchronously.  This call is not thread safe!
-   */
   public void clear() {
     clearTasksOnWakeup();
     clearTimers();
     clearExitTasks();
   }
 
-  /**
-   * Clears all tasks on wakeup.
-   * This is expected to be call synchronously.  This call is not thread safe!
-   */
   public void clearTasksOnWakeup() {
     tasksOnWakeup.clear();
     terminateAllTasksOnWakeup = true;
   }
 
-  /**
-   * Clears all timer tasks.
-   * This is expected to be call synchronously.  This call is not thread safe!
-   */
   public void clearTimers() {
     timers.clear();
   }
-
-  /**
-   * Clears all tasks on exit.
-   * This is expected to be call synchronously.  This call is not thread safe!
-   */
+  
   public void clearExitTasks() {
     exitTasks.clear();
     terminateAllExitTasks = true;
