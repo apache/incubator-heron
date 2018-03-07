@@ -310,7 +310,7 @@ bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
     size_t index = iter->first.find_first_of(':');
     if (index == sp_string::npos) {
       // No ':' is found. This is a topology level config
-      retval[""][iter->first] = iter->second;
+      retval[TOPOLOGY_CONFIG_KEY][iter->first] = iter->second;
     } else {
       // This is a component level config
       const std::string component = iter->first.substr(0, index);

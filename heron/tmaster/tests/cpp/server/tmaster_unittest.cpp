@@ -734,13 +734,13 @@ TEST(StMgr, test_runtime_config) {
   std::map<sp_string, sp_string> validate_good_config;
   validate_good_config[topology_user_config_1] = "1";
   validate_good_config[topology_user_config_2] = "2";
-  validate_good_config_map[""] = validate_good_config;
+  validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 
   heron::tmaster::ConfigMap validate_bad_config_map;
   std::map<sp_string, sp_string> validate_bad_config;
   validate_bad_config["unknown"] = "1";
-  validate_bad_config_map[""] = validate_bad_config;
+  validate_bad_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_bad_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_bad_config_map), false);
 
   // Post runtime config request with no configs and expect 400 response.

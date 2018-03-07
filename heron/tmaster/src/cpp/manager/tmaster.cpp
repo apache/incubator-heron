@@ -634,7 +634,7 @@ bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
     std::map<std::string, std::string> current_config;
-    if (iter->first == "") {
+    if (iter->first == TOPOLOGY_CONFIG_KEY) {
       config::TopologyConfigHelper::SetTopologyConfig(_topology, iter->second);
     } else {
       config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, iter->second);
@@ -1018,7 +1018,7 @@ bool TMaster::ValidateRuntimeConfigNames(const ConfigMap& _config) {
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
     std::map<sp_string, sp_string> current_config;
-    if (iter->first == "") {
+    if (iter->first == TOPOLOGY_CONFIG_KEY) {
       config::TopologyConfigHelper::GetTopologyConfig(topology, current_config);
     } else {
       config::TopologyConfigHelper::GetComponentConfig(topology, iter->first, current_config);

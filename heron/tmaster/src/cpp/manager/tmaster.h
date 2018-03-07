@@ -45,6 +45,8 @@ typedef StMgrMap::iterator StMgrMapIter;
 
 typedef std::map<sp_string, std::map<sp_string, sp_string>> ConfigMap;
 
+const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
+
 class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
