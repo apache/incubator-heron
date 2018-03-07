@@ -14,23 +14,27 @@
 package com.twitter.heron.streamlet.scala.converter
 
 import org.junit.Assert.assertTrue
-import com.twitter.heron.streamlet.Context
+
+import scala.collection.mutable.ListBuffer
 
 import com.twitter.heron.streamlet.{
   Context,
   SerializableBiFunction,
+  SerializableBinaryOperator,
   SerializableConsumer,
   SerializableFunction,
   SerializablePredicate,
   SerializableSupplier,
+  SerializableTransformer,
   Sink => JavaSink
 }
 
-import com.twitter.heron.streamlet.scala.Sink
-import com.twitter.heron.streamlet.scala.Source
-import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+import com.twitter.heron.streamlet.scala.{Sink, Source}
 
-import scala.collection.mutable.ListBuffer
+import com.twitter.heron.streamlet.scala.common.{
+  BaseFunSuite,
+  TestIncrementSerializableTransformer
+}
 
 /**
   * Tests for Streamlet APIs' Scala to Java Conversion functionality
@@ -83,7 +87,6 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         .isInstanceOf[com.twitter.heron.streamlet.Source[Int]])
   }
 
-
   test("ScalaToJavaConverterTest should support SerializablePredicate") {
     def intToBooleanFunction(number: Int) = number.<(5)
     val serializablePredicate =
@@ -100,6 +103,28 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
     assertTrue(
       serializableConsumer
         .isInstanceOf[SerializableConsumer[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableBinaryOperator") {
+    def addNumbersFunction(number1: Int, number2: Int): Int =
+      number1 + number2
+    val serializableBinaryOperator =
+      ScalaToJavaConverter.toSerializableBinaryOperator[Int](addNumbersFunction)
+    assertTrue(
+      serializableBinaryOperator
+        .isInstanceOf[SerializableBinaryOperator[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableTransformer") {
+    val serializableTransformer =
+      new TestIncrementSerializableTransformer(factor = 100)
+
+    val javaSerializableTransformer =
+      ScalaToJavaConverter.toSerializableTransformer[Int, Int](
+        serializableTransformer)
+    assertTrue(
+      javaSerializableTransformer
+        .isInstanceOf[SerializableTransformer[Int, Int]])
   }
 
   private class TestSink[T] extends Sink[T] {
