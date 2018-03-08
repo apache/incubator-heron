@@ -52,6 +52,11 @@ public class CommunicatorTest {
       communicator.offer(i);
       Assert.assertEquals(i + 1, communicator.size());
     }
+
+    for (int i = QUEUE_BUFFER_SIZE; i > 0; --i) {
+      communicator.poll();
+      Assert.assertEquals(i - 1, communicator.size());
+    }
   }
 
   /**
@@ -59,9 +64,14 @@ public class CommunicatorTest {
    */
   @Test
   public void testRemainingCapacity() {
-    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
+    for (int i = QUEUE_BUFFER_SIZE; i > 0; --i) {
       communicator.offer(i);
-      Assert.assertEquals(QUEUE_BUFFER_SIZE - i - 1, communicator.remainingCapacity());
+      Assert.assertEquals(i - 1, communicator.remainingCapacity());
+    }
+
+    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
+      communicator.poll();
+      Assert.assertEquals(i + 1, communicator.remainingCapacity());
     }
   }
 
