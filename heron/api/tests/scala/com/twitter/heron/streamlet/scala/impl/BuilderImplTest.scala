@@ -13,12 +13,23 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
+<<<<<<< HEAD
 
 import com.twitter.heron.streamlet.scala.{Builder,Streamlet,Source}
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 import org.junit.Assert.{assertEquals, assertTrue}
 import com.twitter.heron.streamlet.Context
 
+=======
+import com.twitter.heron.streamlet.scala.Streamlet
+import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+import org.junit.Assert.{assertEquals, assertTrue}
+import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.scala.Source
+import com.twitter.heron.streamlet.scala.Builder
+import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
+import com.twitter.heron.streamlet.scala.impl.StreamletImpl
+>>>>>>> ae589f0969c78168a305983f2037a2db9dcd56d4
 
 import scala.collection.mutable.ListBuffer
 
@@ -26,6 +37,7 @@ import scala.collection.mutable.ListBuffer
   * Tests for Scala Builder Implementation functionality
   */
 class BuilderImplTest extends BaseFunSuite {
+
 
   test("BuilderImpl should support streamlet generation from a user defined supplier function") {
     val supplierStreamletObj = Builder.newBuilder.newSource(() => Math.random).setName("Supplier_Streamlet_1").setNumPartitions(20)
@@ -45,7 +57,8 @@ class BuilderImplTest extends BaseFunSuite {
   }
 
 
-  private class MySource() extends Source[Int] {
+
+  private class MySource extends Source[Int] {
     private val numbers = ListBuffer[Int]()
 
     override def setup(context: Context): Unit = {
@@ -53,6 +66,7 @@ class BuilderImplTest extends BaseFunSuite {
     }
 
     override def get(): Iterable[Int] = numbers
+
 
     override def cleanup(): Unit = numbers.clear()
   }

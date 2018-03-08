@@ -18,7 +18,6 @@ import com.twitter.heron.streamlet.{Source, Streamlet}
 import com.twitter.heron.streamlet.scala.impl.BuilderImpl
 
 
-
 /**
   * Builder is used to register all sources. Builder thus keeps track
   * of all the starting points of the computation dag and uses this
@@ -27,8 +26,14 @@ import com.twitter.heron.streamlet.scala.impl.BuilderImpl
 object Builder {
 
   def newBuilder(): Builder = new BuilderImpl
+
 }
 
+/**
+  * Builder is used to register all sources. Builder thus keeps track
+  * of all the starting points of the computation dag and uses this
+  * information to build the topology
+  */
 trait Builder {
 
   /**
