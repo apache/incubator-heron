@@ -48,13 +48,9 @@ public class CommunicatorTest {
    */
   @Test
   public void testSize() {
-    for (int i = 0; i < 1024 * 1024; i++) {
-      if (i % QUEUE_BUFFER_SIZE == 0) {
-        communicator = new Communicator<Integer>(producer, consumer);
-        communicator.init(QUEUE_BUFFER_SIZE, QUEUE_BUFFER_SIZE, 0.5);
-      }
+    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
       communicator.offer(i);
-      Assert.assertEquals((i % QUEUE_BUFFER_SIZE) + 1, communicator.size());
+      Assert.assertEquals(i + 1, communicator.size());
     }
   }
 
@@ -63,14 +59,9 @@ public class CommunicatorTest {
    */
   @Test
   public void testRemainingCapacity() {
-    for (int i = 0; i < 1024 * 1024; i++) {
-      if (i % QUEUE_BUFFER_SIZE == 0) {
-        communicator = new Communicator<Integer>(producer, consumer);
-        communicator.init(QUEUE_BUFFER_SIZE, QUEUE_BUFFER_SIZE, 0.5);
-      }
+    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
       communicator.offer(i);
-      Assert.assertEquals(QUEUE_BUFFER_SIZE - (i % QUEUE_BUFFER_SIZE) - 1,
-          communicator.remainingCapacity());
+      Assert.assertEquals(QUEUE_BUFFER_SIZE - i - 1, communicator.remainingCapacity());
     }
   }
 
@@ -82,6 +73,7 @@ public class CommunicatorTest {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
+
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       Assert.assertEquals(i, communicator.poll().intValue());
     }
@@ -101,7 +93,18 @@ public class CommunicatorTest {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       Assert.assertEquals(i, communicator.poll().intValue());
     }
+  }
 
+  @Test
+  public void testOverOffer() {
+    // The queue is soft bounded, hence over offer is allowed.
+    for (int i = 0; i < QUEUE_BUFFER_SIZE + 2; i++) {
+      communicator.offer(i);
+    }
+
+    for (int i = 0; i < QUEUE_BUFFER_SIZE + 2; i++) {
+      Assert.assertEquals(i, communicator.poll().intValue());
+    }
   }
 
   /**
@@ -135,6 +138,8 @@ public class CommunicatorTest {
    */
   @Test
   public void testGetCapacity() {
+    Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
+    communicator.offer(1);
     Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
   }
 }
