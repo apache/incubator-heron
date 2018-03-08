@@ -37,5 +37,4 @@ class BuilderImpl extends Builder {
     StreamletImpl.toScalaStreamlet[R](newJavaStreamlet)
   }
 
-
 }

@@ -16,7 +16,10 @@ package com.twitter.heron.streamlet.scala.converter
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.Source
+import java.lang.Iterable
 import java.util.Collection
+import scala.collection.JavaConverters._
+
 
 /**
   * This class transforms passed User defined Scala Functions, Sources, Sinks
@@ -35,8 +38,11 @@ object ScalaToJavaConverter {
       override def setup(context: Context): Unit = source.setup(context)
 
       override def get(): Collection[T] = scala.collection.JavaConverters.asJavaCollectionConverter(source.get).asJavaCollection
+<<<<<<< HEAD
 
       override def get(): scala.Iterable[T] = source.get()
+=======
+>>>>>>> d42a83df9... new files and fixes for Builder
 
       override def cleanup(): Unit = source.cleanup()
     }
