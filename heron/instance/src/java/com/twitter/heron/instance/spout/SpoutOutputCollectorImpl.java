@@ -24,6 +24,7 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.serializer.IPluggableSerializer;
@@ -64,8 +65,9 @@ public class SpoutOutputCollectorImpl
   protected SpoutOutputCollectorImpl(IPluggableSerializer serializer,
                                      PhysicalPlanHelper helper,
                                      Communicator<Message> streamOutQueue,
+                                     RateLimiter rateLimiter,
                                      ComponentMetrics spoutMetrics) {
-    super(serializer, helper, streamOutQueue, spoutMetrics);
+    super(serializer, helper, streamOutQueue, rateLimiter, spoutMetrics);
     if (helper.getMySpout() == null) {
       throw new RuntimeException(helper.getMyTaskId() + " is not a spout ");
     }

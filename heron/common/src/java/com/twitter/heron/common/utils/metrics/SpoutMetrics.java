@@ -42,6 +42,8 @@ public class SpoutMetrics implements ComponentMetrics {
   private final CountMetric emitCount;
   private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
+  private final ReducedMetric<MeanReducerState, Number, Double> rateLimitLatency;
+
 
   // The # of times back-pressure happens on outStreamQueue so instance could not
   // produce more tuples
@@ -61,6 +63,7 @@ public class SpoutMetrics implements ComponentMetrics {
     nextTupleCount = new CountMetric();
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
+    rateLimitLatency = new ReducedMetric<>(new MeanReducer());
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -79,6 +82,7 @@ public class SpoutMetrics implements ComponentMetrics {
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
+    topologyContext.registerMetric("__rate-limit-latency/default", rateLimitLatency, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -123,5 +127,9 @@ public class SpoutMetrics implements ComponentMetrics {
   }
 
   public void serializeDataTuple(String streamId, long latency) {
+  }
+
+  public void rateLimitLatency(String streamId, long latency) {
+    rateLimitLatency.update(latency);
   }
 }

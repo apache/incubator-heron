@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.bolt.IOutputCollector;
@@ -61,8 +62,9 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   protected BoltOutputCollectorImpl(IPluggableSerializer serializer,
                                     PhysicalPlanHelper helper,
                                     Communicator<Message> streamOutQueue,
+                                    RateLimiter rateLimiter,
                                     BoltMetrics boltMetrics) {
-    super(serializer, helper, streamOutQueue, boltMetrics);
+    super(serializer, helper, streamOutQueue, rateLimiter, boltMetrics);
     this.boltMetrics = boltMetrics;
 
     if (helper.getMyBolt() == null) {

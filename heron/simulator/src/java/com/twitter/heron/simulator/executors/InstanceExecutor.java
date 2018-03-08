@@ -17,6 +17,7 @@ package com.twitter.heron.simulator.executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -49,6 +50,7 @@ public class InstanceExecutor implements Runnable {
   private final Communicator<Message> streamInQueue;
   private final Communicator<Message> streamOutQueue;
   private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutQueue;
+  private RateLimiter outputRateLimiter;
 
   private IInstance instance;
 
@@ -64,6 +66,7 @@ public class InstanceExecutor implements Runnable {
     streamOutQueue = new Communicator<>();
     metricsOutQueue = new Communicator<>();
     looper = new SlaveLooper();
+    outputRateLimiter = RateLimiter.create(10000000);
 
     MetricsCollector metricsCollector = new MetricsCollector(looper, metricsOutQueue);
 
@@ -101,8 +104,10 @@ public class InstanceExecutor implements Runnable {
 
   protected IInstance createInstance() {
     return (physicalPlanHelper.getMySpout() != null)
-        ? new SpoutInstance(physicalPlanHelper, streamInQueue, streamOutQueue, looper)
-        : new BoltInstance(physicalPlanHelper, streamInQueue, streamOutQueue, looper);
+        ? new SpoutInstance(physicalPlanHelper, streamInQueue, streamOutQueue, outputRateLimiter,
+                            looper)
+        : new BoltInstance(physicalPlanHelper, streamInQueue, streamOutQueue, outputRateLimiter,
+                           looper);
   }
 
   protected PhysicalPlanHelper createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan,

@@ -24,5 +24,6 @@ import com.twitter.heron.classification.InterfaceStability;
 public interface ComponentMetrics {
 
   void serializeDataTuple(String streamId, long latency);
+  void rateLimitLatency(String streamId, long latency);
   void emittedTuple(String streamId);
 }

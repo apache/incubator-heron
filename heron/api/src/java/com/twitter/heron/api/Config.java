@@ -96,7 +96,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
   /**
-   * The per componentparallelism for a component in this topology.
+   * The per component parallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
   public static final String TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
@@ -290,6 +290,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE =
       "topology.droptuples.upon.backpressure";
 
+  /**
+   * The per component output tuple per second in this topology.
+   */
+  public static final String TOPOLOGY_COMPONENT_OUTPUT_TPS = "topology.component.output.tps";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -327,6 +332,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
     apiVars.add(TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE);
+    apiVars.add(TOPOLOGY_COMPONENT_OUTPUT_TPS);
   }
 
   public Config() {
@@ -713,4 +719,9 @@ public class Config extends HashMap<String, Object> {
   public void setTopologyDropTuplesUponBackpressure(boolean dropTuples) {
     this.put(Config.TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, String.valueOf(dropTuples));
   }
+
+  public void setTopologyComponentOutputTPS(double tps) {
+    this.put(Config.TOPOLOGY_COMPONENT_OUTPUT_TPS, String.valueOf(tps));
+  }
+
 }

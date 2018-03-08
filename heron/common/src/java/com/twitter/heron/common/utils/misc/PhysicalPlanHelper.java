@@ -197,19 +197,24 @@ public class PhysicalPlanHelper {
 
   public void setTopologyContext(MetricsCollector metricsCollector) {
     topologyContext =
-        new TopologyContextImpl(mergeConfigs(pplan.getTopology().getTopologyConfig(), component),
+        new TopologyContextImpl(
+            mergeConfigs(pplan.getTopology().getTopologyConfig(), getComponentConfig()),
             pplan.getTopology(), makeTaskToComponentMap(), myTaskId, metricsCollector);
   }
 
-  private Map<String, Object> mergeConfigs(TopologyAPI.Config config,
-                                           TopologyAPI.Component acomponent) {
+  public TopologyAPI.Config getComponentConfig() {
+    return component.getConfig();
+  }
+
+  private Map<String, Object> mergeConfigs(TopologyAPI.Config topoConfig,
+                                           TopologyAPI.Config compConfig) {
     LOG.info("Building configs for component: " + myComponent);
 
     Map<String, Object> map = new HashMap<>();
-    addConfigsToMap(config, map);
+    addConfigsToMap(topoConfig, map);
     LOG.info("Added topology-level configs: " + map.toString());
 
-    addConfigsToMap(acomponent.getConfig(), map); // Override any component specific configs
+    addConfigsToMap(compConfig, map); // Override any component specific configs
     LOG.info("Added component-specific configs: " + map.toString());
     return map;
   }

@@ -102,7 +102,7 @@ public class SpoutInstanceTest {
    */
   @Test
   public void testNextTuple() {
-    initSpout(slaveTester, false, -1);
+    initSpout(slaveTester, false, -1, 10000);
 
     Runnable task = new Runnable() {
       private String streamId = "";
@@ -124,9 +124,6 @@ public class SpoutInstanceTest {
               HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
               streamId = dataTupleSet.getStream().getId();
               componentName = dataTupleSet.getStream().getComponentName();
-              Assert.assertEquals(streamId, "default");
-              Assert.assertEquals(componentName, "test-spout");
-
               Assert.assertEquals(streamId, "default");
               Assert.assertEquals(componentName, "test-spout");
 
@@ -154,11 +151,71 @@ public class SpoutInstanceTest {
   }
 
   /**
+   * Test tuple emitting with ratelimiter
+   */
+  @Test
+  public void testRateLimiter() {
+    initSpout(slaveTester, false, -1, 5);
+
+    Runnable task = new Runnable() {
+      private String streamId = "";
+      private String componentName = "";
+      private String receivedTupleStrings = "";
+
+      @Override
+      public void run() {
+        for (int i = 0; i < Constants.RETRY_TIMES; i++) {
+          if (slaveTester.getOutStreamQueue().size() != 0) {
+            Message msg = slaveTester.getOutStreamQueue().poll();
+            if (msg instanceof HeronTuples.HeronTupleSet) {
+              HeronTuples.HeronTupleSet set = (HeronTuples.HeronTupleSet) msg;
+
+              Assert.assertTrue(set.isInitialized());
+              Assert.assertFalse(set.hasControl());
+              Assert.assertTrue(set.hasData());
+
+              HeronTuples.HeronDataTupleSet dataTupleSet = set.getData();
+              streamId = dataTupleSet.getStream().getId();
+              componentName = dataTupleSet.getStream().getComponentName();
+              Assert.assertEquals(streamId, "default");
+              Assert.assertEquals(componentName, "test-spout");
+
+              for (HeronTuples.HeronDataTuple dataTuple : dataTupleSet.getTuplesList()) {
+                for (ByteString b : dataTuple.getValuesList()) {
+                  receivedTupleStrings += serializer.deserialize(b.toByteArray());
+                }
+              }
+              tupleReceived += dataTupleSet.getTuplesCount();
+            }
+            if (tupleReceived == 10) {
+              Assert.assertEquals("ABABABABAB", receivedTupleStrings);
+              slaveTester.getTestLooper().exitLoop();
+              break;
+            }
+          }
+        }
+      }
+    };
+
+    long startTime = System.currentTimeMillis();
+    slaveTester.getTestLooper().addTasksOnWakeup(task);
+    slaveTester.getTestLooper().loop();
+    long latency = System.currentTimeMillis() - startTime;
+
+    Assert.assertEquals(tupleReceived, 10);
+    // Guava rate limiter is used to limiting output. It allows continous rate limiting but doesn't
+    // guarrenty that every second the number of emittd tuples is less or equal to the tps config.
+    // For 10 tuples, it should take 5~6 millis to finish without rate limiting and at least 100x
+    // slower with a 5 tuple per second rate limiter.
+    Assert.assertTrue(latency >= 500);
+  }
+
+  /**
    * Test the gathering of metrics
    */
   @Test
   public void testGatherMetrics() {
-    initSpout(slaveTester, false, -1);
+    initSpout(slaveTester, false, -1, 10000);
 
     Runnable task = new Runnable() {
       @Override
@@ -199,7 +256,7 @@ public class SpoutInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_LATCH, ackLatch);
 
-    initSpout(slaveTester, false, -1);
+    initSpout(slaveTester, false, -1, 10000);
 
     Runnable task = new Runnable() {
       @Override
@@ -226,7 +283,7 @@ public class SpoutInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_LATCH, failLatch);
 
-    initSpout(slaveTester, true, 1);
+    initSpout(slaveTester, true, 1, 10000);
 
     Runnable task = new Runnable() {
       @Override
@@ -259,7 +316,7 @@ public class SpoutInstanceTest {
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_LATCH, failLatch);
 
-    initSpout(slaveTester, true, -1);
+    initSpout(slaveTester, true, -1, 10000);
 
     Runnable task = new Runnable() {
       @Override
@@ -334,8 +391,10 @@ public class SpoutInstanceTest {
     }
   }
 
-  private static void initSpout(SlaveTester slaveTester, boolean ackEnabled, int timeout) {
-    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(ackEnabled, timeout);
+  private static void initSpout(SlaveTester slaveTester, boolean ackEnabled, int timeout,
+                                int tuplePerSecond) {
+    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(ackEnabled, timeout,
+                                                                             tuplePerSecond);
     PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
 
     slaveTester.getInControlQueue().offer(

@@ -55,10 +55,11 @@ public final class UnitTestHelper {
   public static PhysicalPlans.PhysicalPlan getPhysicalPlan(
       boolean ackEnabled,
       int messageTimeout,
+      int tuplePerSecond,
       TopologyAPI.TopologyState topologyState) {
     PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
 
-    setTopology(pPlan, ackEnabled, messageTimeout, topologyState);
+    setTopology(pPlan, ackEnabled, messageTimeout, tuplePerSecond, topologyState);
 
     setInstances(pPlan);
 
@@ -67,12 +68,18 @@ public final class UnitTestHelper {
     return pPlan.build();
   }
 
-  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout) {
-    return getPhysicalPlan(ackEnabled, messageTimeout, TopologyAPI.TopologyState.RUNNING);
+  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled,
+                                                           int messageTimeout,
+                                                           int tuplePerSecond) {
+    return getPhysicalPlan(ackEnabled, messageTimeout, tuplePerSecond,
+                           TopologyAPI.TopologyState.RUNNING);
   }
 
-  private static void setTopology(PhysicalPlans.PhysicalPlan.Builder pPlan, boolean ackEnabled,
-                                  int messageTimeout, TopologyAPI.TopologyState topologyState) {
+  private static void setTopology(PhysicalPlans.PhysicalPlan.Builder pPlan,
+                                  boolean ackEnabled,
+                                  int messageTimeout,
+                                  int tuplePerSecond,
+                                  TopologyAPI.TopologyState topologyState) {
     TopologyBuilder topologyBuilder = new TopologyBuilder();
     topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
     // Here we need case switch to corresponding grouping
@@ -84,6 +91,7 @@ public final class UnitTestHelper {
     conf.setTopologyProjectName("heron-integration-test");
     conf.setNumStmgrs(1);
     conf.setMaxSpoutPending(100);
+    conf.setTopologyComponentOutputTPS(tuplePerSecond);
     if (ackEnabled) {
       conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
     } else {
@@ -183,7 +191,7 @@ public final class UnitTestHelper {
   public static StreamManager.RegisterInstanceResponse getRegisterInstanceResponse() {
     StreamManager.RegisterInstanceResponse.Builder registerInstanceResponse =
         StreamManager.RegisterInstanceResponse.newBuilder();
-    registerInstanceResponse.setPplan(getPhysicalPlan(false, -1));
+    registerInstanceResponse.setPplan(getPhysicalPlan(false, -1, 1000));
     Common.Status.Builder status = Common.Status.newBuilder();
     status.setStatus(Common.StatusCode.OK);
     registerInstanceResponse.setStatus(status);

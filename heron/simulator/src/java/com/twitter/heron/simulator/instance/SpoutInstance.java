@@ -17,6 +17,7 @@ package com.twitter.heron.simulator.instance;
 import java.time.Duration;
 import java.util.Map;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
@@ -43,8 +44,10 @@ public class SpoutInstance
   @SuppressWarnings("deprecation")
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<Message> streamInQueue,
-                       Communicator<Message> streamOutQueue, SlaveLooper looper) {
-    super(helper, streamInQueue, streamOutQueue, looper);
+                       Communicator<Message> streamOutQueue,
+                       RateLimiter outputRateLimiter,
+                       SlaveLooper looper) {
+    super(helper, streamInQueue, streamOutQueue, outputRateLimiter, looper);
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
