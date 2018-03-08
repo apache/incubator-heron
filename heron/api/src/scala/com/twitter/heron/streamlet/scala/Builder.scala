@@ -15,7 +15,15 @@
 package com.twitter.heron.streamlet.scala
 
 import com.twitter.heron.streamlet.{Source, Streamlet}
+import com.twitter.heron.streamlet.scala.impl.BuilderImpl
 
+
+
+object Builder {
+
+  def newBuilder(): Builder = new BuilderImpl
+
+}
 
 /**
   * Builder is used to register all sources. Builder thus keeps track
@@ -28,7 +36,7 @@ trait Builder {
     *
     * @param supplier The supplier function that is used to create the streamlet
     */
-  def newSource[R](supplierFn: ()=>Unit): Streamlet[R]
+  def newSource[R](supplierFn: () => R): Streamlet[R]
 
 
   /**

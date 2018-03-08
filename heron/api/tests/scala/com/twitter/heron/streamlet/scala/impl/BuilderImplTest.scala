@@ -16,6 +16,11 @@ package com.twitter.heron.streamlet.scala.impl
 import com.twitter.heron.streamlet.scala.Streamlet
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 import org.junit.Assert.{assertEquals, assertTrue}
+import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.scala.Source
+import com.twitter.heron.streamlet.scala.Builder
+import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
+import com.twitter.heron.streamlet.scala.impl.StreamletImpl
 
 import scala.collection.mutable.ListBuffer
 
@@ -23,19 +28,47 @@ import scala.collection.mutable.ListBuffer
   * Tests for Scala Builder Implementation functionality
   */
 class BuilderImplTest extends BaseFunSuite {
-  test(
-    "BuilderImpl should support generating a streamlet from a user generated source function") {
-      val source = MySource
-
-    }
 
 
-  "BuilderImpl should support generating a streamlet from a user generated serializable supplier function") {
-    val source = MySource
+  //val supplierStreamlet = StreamletImpl
+  //  .createSupplierStreamlet(() => Math.random)
+  //  .setName("Supplier_Streamlet_1")
+  //  .setNumPartitions(20)
 
+
+  //def toSerializableSupplier[T](f: () => T) =
+  //  new com.twitter.heron.streamlet.SerializableSupplier[T] {
+  //    override def get(): T = f()
+  //  }
+
+
+  /**
+    * Create a Streamlet based on the supplier function
+    *
+    * @param supplier The Supplier function to generate the elements
+    *
+  private[impl] def createSupplierStreamlet[R](supplier: () => R) = {
+    val serializableSupplier = toSerializableSupplier[R](supplier)
+    val newJavaStreamlet =
+      new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
+        serializableSupplier)
+    toScalaStreamlet[R](newJavaStreamlet)
+  }*/
+
+  test("BuilderImpl should support streamlet generation from a user defined supplier function") {
+    val resultOfBuilder = Builder.newBuilder
+    val streamletObj = resultOfBuilder.newSource(() => Math.random)
+    assert(streamletObj.isInstanceOf[Streamlet[Double]])
   }
 
-  private class MySource() extends Source[Int] {
+  test("BuilderImpl should support streamlet generation from a user defined source function") {
+    val source = new MySource
+    val resultOfBuilder = Builder.newBuilder
+    val streamletObj = resultOfBuilder.newSource(source)
+    assert(streamletObj.isInstanceOf[Streamlet[Int]])
+  }
+
+  private class MySource extends Source[Int] {
     private val numbers = ListBuffer[Int]()
 
     override def setup(context: Context): Unit = {

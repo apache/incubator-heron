@@ -32,6 +32,7 @@ object ScalaToJavaConverter {
       override def get(): T = f()
     }
 
+
   def toJavaSource[T](source: Source[T]): com.twitter.heron.streamlet.Source[T] = {
     new com.twitter.heron.streamlet.Source[T] {
       override def setup(context: Context): Unit = source.setup(context)

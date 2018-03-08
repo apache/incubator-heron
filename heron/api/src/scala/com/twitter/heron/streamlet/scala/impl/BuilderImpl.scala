@@ -13,32 +13,29 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-import com.twitter.heron.streamlet.scala.{Source, Streamlet, Builder}
+import com.twitter.heron.streamlet.scala.{Builder, Source, Streamlet}
+import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
 
-object BuilderImpl {
 
-  def toScalaBuilder[R](javaBuilder: com.twitter.heron.streamlet.Builder[R]): Builder[R] =
-    new BuilderImpl[R](javaBuilder)
 
-  def toJavaBuilder[R](builder: Builder[R]): com.twitter.heron.streamlet.Builder[R] =
-    builder.asInstanceOf[BuilderImpl[R]].javaBuilder
+class BuilderImpl extends Builder {
 
-}
-
-class BuilderImpl[R](val javaBuilder: com.twitter.heron.streamlet.Builder[R]) extends Builder[R] {
-
-  override def newSource[R](supplierFn: ()=>Unit): Streamlet[R] = {
-    val serializableSupplier = toSerializableSupplier[R](supplierFn)
+  override def newSource[R](supplierFn: () => R): Streamlet[R] = {
+    val serializableSupplier = ScalaToJavaConverter.toSerializableSupplier[R](supplierFn)
     val newJavaStreamlet =
       new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
         serializableSupplier)
-    toScalaBuilder[R](newJavaStreamlet)
+    StreamletImpl.toScalaStreamlet[R](newJavaStreamlet)
   }
 
 
-  override def newSource[R](sourceFn: Source[R]): Streamlet[R]} = {
-    val javaSource = toJavaSource[R](sourceFn)
-    javaBuilder.toSource(javaSource)
+  def newSource[R](sourceFn: Source[R]): Streamlet[R] = {
+    val javaSourceObj = ScalaToJavaConverter.toJavaSource[R](sourceFn)
+    val newJavaStreamlet =
+      new com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet[R](
+        javaSourceObj)
+    StreamletImpl.toScalaStreamlet[R](newJavaStreamlet)
   }
+
 
 }
