@@ -13,17 +13,12 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-import com.twitter.heron.streamlet.scala.Streamlet
+
+import com.twitter.heron.streamlet.scala.{Builder,Streamlet,Source}
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 import org.junit.Assert.{assertEquals, assertTrue}
-<<<<<<< HEAD
 import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.Source
-import com.twitter.heron.streamlet.scala.Builder
-import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
-import com.twitter.heron.streamlet.scala.impl.StreamletImpl
-=======
->>>>>>> d76d869b6... more changes for Builder
+
 
 import scala.collection.mutable.ListBuffer
 
@@ -31,46 +26,33 @@ import scala.collection.mutable.ListBuffer
   * Tests for Scala Builder Implementation functionality
   */
 class BuilderImplTest extends BaseFunSuite {
-<<<<<<< HEAD
-
-
 
   test("BuilderImpl should support streamlet generation from a user defined supplier function") {
-    val resultOfBuilder = Builder.newBuilder
-    val streamletObj = resultOfBuilder.newSource(() => Math.random)
-    assert(streamletObj.isInstanceOf[Streamlet[Double]])
+    val supplierStreamletObj = Builder.newBuilder.newSource(() => Math.random).setName("Supplier_Streamlet_1").setNumPartitions(20)
+    assert(supplierStreamletObj.isInstanceOf[Streamlet[Int]])
+    assertEquals("Supplier_Streamlet_1", supplierStreamletObj.getName)
+    assertEquals(20, supplierStreamletObj.getNumPartitions)
   }
 
   test("BuilderImpl should support streamlet generation from a user defined source function") {
     val source = new MySource
-    val resultOfBuilder = Builder.newBuilder
-    val streamletObj = resultOfBuilder.newSource(source)
-    assert(streamletObj.isInstanceOf[Streamlet[Int]])
+    assert(source.get == List[Int]())
+    val generatorStreamletObj = Builder.newBuilder.newSource(source).setName("Generator_Streamlet_1").setNumPartitions(20)
+
+    assert(generatorStreamletObj.isInstanceOf[Streamlet[Int]])
+    assertEquals("Generator_Streamlet_1", generatorStreamletObj.getName)
+    assertEquals(20, generatorStreamletObj.getNumPartitions)
   }
 
-  private class MySource extends Source[Int] {
-=======
-  test(
-    "BuilderImpl should support generating a streamlet from a user generated source function") {
-      val source = MySource
-
-    }
-
-
-  "BuilderImpl should support generating a streamlet from a user generated serializable supplier function") {
-    val source = MySource
-
-  }
 
   private class MySource() extends Source[Int] {
->>>>>>> d76d869b6... more changes for Builder
     private val numbers = ListBuffer[Int]()
 
     override def setup(context: Context): Unit = {
       numbers += (1, 2, 3, 4, 5)
     }
 
-    override def get: Iterable[Int] = numbers
+    override def get(): Iterable[Int] = numbers
 
     override def cleanup(): Unit = numbers.clear()
   }

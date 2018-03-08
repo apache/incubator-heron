@@ -72,7 +72,7 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
     override def setup(context: Context): Unit = {
       numbers += (1, 2, 3, 4, 5)
     }
-    override def get: Iterable[Int] = numbers
+    override def get(): Iterable[Int] = numbers
     override def cleanup(): Unit = numbers.clear()
   }
 

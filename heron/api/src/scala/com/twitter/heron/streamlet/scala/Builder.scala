@@ -30,10 +30,12 @@ object Builder {
 }
 
 trait Builder {
+
   /**
     * All sources of the computation should register using addSource.
     *
     * @param supplier The supplier function that is used to create the streamlet
+    * @return a Streamlet representation of the supplier object
     */
   def newSource[R](supplierFn: () => R): Streamlet[R]
 
@@ -42,8 +44,7 @@ trait Builder {
     * Creates a new Streamlet using the underlying generator
     *
     * @param generator The generator that generates the tuples of the streamlet
-    * @param <         R>
-    * @return
+    * @return  a Streamlet representation of the source object
     */
   def newSource[R](sourceFn: Source[R]): Streamlet[R]
 }
