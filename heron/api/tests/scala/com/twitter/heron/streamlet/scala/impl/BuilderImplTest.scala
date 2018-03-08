@@ -13,23 +13,14 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-<<<<<<< HEAD
 
 import com.twitter.heron.streamlet.scala.{Builder,Streamlet,Source}
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 import org.junit.Assert.{assertEquals, assertTrue}
 import com.twitter.heron.streamlet.Context
-
-=======
-import com.twitter.heron.streamlet.scala.Streamlet
-import com.twitter.heron.streamlet.scala.common.BaseFunSuite
-import org.junit.Assert.{assertEquals, assertTrue}
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.Source
-import com.twitter.heron.streamlet.scala.Builder
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
 import com.twitter.heron.streamlet.scala.impl.StreamletImpl
->>>>>>> ae589f0969c78168a305983f2037a2db9dcd56d4
+
 
 import scala.collection.mutable.ListBuffer
 
