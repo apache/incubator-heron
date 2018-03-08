@@ -15,6 +15,8 @@ package com.twitter.heron.streamlet.scala.converter
 
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
+import com.twitter.heron.streamlet.scala.Source
+import java.util.Collection
 
 /**
   * This class transforms passed User defined Scala Functions, Sources, Sinks
@@ -26,6 +28,19 @@ object ScalaToJavaConverter {
     new com.twitter.heron.streamlet.SerializableSupplier[T] {
       override def get(): T = f()
     }
+
+
+  def toJavaSource[T](source: Source[T]): com.twitter.heron.streamlet.Source[T] = {
+    new com.twitter.heron.streamlet.Source[T] {
+      override def setup(context: Context): Unit = source.setup(context)
+
+      override def get(): Collection[T] = scala.collection.JavaConverters.asJavaCollectionConverter(source.get).asJavaCollection
+
+      override def get(): scala.Iterable[T] = source.get()
+
+      override def cleanup(): Unit = source.cleanup()
+    }
+  }
 
   def toSerializableFunction[R, T](f: R => _ <: T) =
     new com.twitter.heron.streamlet.SerializableFunction[R, T] {

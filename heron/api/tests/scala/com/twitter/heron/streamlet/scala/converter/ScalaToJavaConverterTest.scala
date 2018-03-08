@@ -17,6 +17,7 @@ import org.junit.Assert.assertTrue
 
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
+import com.twitter.heron.streamlet.scala.Source
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 
 /**
