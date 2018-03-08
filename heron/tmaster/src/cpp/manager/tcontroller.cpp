@@ -196,12 +196,12 @@ void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
     return;
   }
 
-    // Look for --user-config parameters
+    // Look for runtime-config parameters
   std::vector<sp_string> parameters;
-  if (!request->GetAllValues("user-config", parameters)) {
+  if (!request->GetAllValues("runtime-config", parameters)) {
     LOG(ERROR) << "No runtime config is found";
     http_server_->SendErrorReply(request, 400, "No runtime config is found."
-        " Usage: --user-config=[COMPONENT:]<CONFIG>:<VALUE>.");
+        " Usage: runtime-config=[COMPONENT:]<CONFIG>:<VALUE>.");
     delete request;
     return;
   }
@@ -281,20 +281,27 @@ bool TController::ValidateTopology(const IncomingHTTPRequest* request, Validatio
 bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
                                      std::map<sp_string, std::map<sp_string, sp_string>>& retval) {
   // Configs are in the followingconfigMap format: [component:]config:value.
+  // It seems the regex implementation in c++ 11 is not very stable (The regex
+  // pattern("^([\\w\\.-]+:)?[\\w\\.-]+:[\\w\\.-]+$") runs ok in osx but throws exception in
+  // linux). Therefore we are manually searching ':' here (there should be 1 or 2 ':'s) instead of
+  // using regex matching.
   static const std::regex pattern("^([\\w\\.-]+:)?[\\w\\.-]+:[\\w\\.-]+$");
 
   std::vector<sp_string>::const_iterator scoped_iter;
   std::map<sp_string, sp_string> scoped_config_map;
   for (scoped_iter = paramters.begin(); scoped_iter != paramters.end(); ++scoped_iter) {
+    // Validate format
     if (!std::regex_match(*scoped_iter, pattern)) {
-      LOG(ERROR) << "Failed to parse config: " << *scoped_iter
+      LOG(ERROR) << "Failed to parse config: " << *scoped_iter << "."
           << " Each config should be in this format: [component:]config:value";
       return false;
     }
+    // Split using the last ':'
     size_t index = scoped_iter->find_last_of(':');
     if (index == sp_string::npos) {
       LOG(ERROR) << "No ':' is found in " << *scoped_iter << "."
           << " Each config should be in this format: [component:]config:value";
+      return false;
     }
     const sp_string key = scoped_iter->substr(0, index);
     const sp_string value = scoped_iter->substr(index + 1);
