@@ -18,16 +18,16 @@
 
 #include <iostream>
 #include <map>
-#include <regex>  // NOLINT (build/c++11)
 #include <string>
 #include <utility>
 #include <vector>
-#include "manager/tmaster.h"
-#include "proto/messages.h"
 #include "basics/basics.h"
+#include "basics/strutils.h"
 #include "errors/errors.h"
-#include "threads/threads.h"
+#include "manager/tmaster.h"
 #include "network/network.h"
+#include "proto/messages.h"
+#include "threads/threads.h"
 
 namespace heron {
 namespace tmaster {
@@ -285,44 +285,21 @@ bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
   // pattern("^([\\w\\.-]+:)?[\\w\\.-]+:[\\w\\.-]+$") runs ok in osx but throws exception in
   // linux). Therefore we are manually searching ':' here (there should be 1 or 2 ':'s) instead of
   // using regex matching.
-  static const std::regex pattern("^([\\w\\.-]+:)?[\\w\\.-]+:[\\w\\.-]+$");
-
-  std::vector<sp_string>::const_iterator scoped_iter;
-  std::map<sp_string, sp_string> scoped_config_map;
-  for (scoped_iter = paramters.begin(); scoped_iter != paramters.end(); ++scoped_iter) {
-    // Validate format
-    if (!std::regex_match(*scoped_iter, pattern)) {
-      LOG(ERROR) << "Failed to parse config: " << *scoped_iter << "."
-          << " Each config should be in this format: [component:]config:value";
-      return false;
-    }
-    // Split using the last ':'
-    size_t index = scoped_iter->find_last_of(':');
-    if (index == sp_string::npos) {
-      LOG(ERROR) << "No ':' is found in " << *scoped_iter << "."
-          << " Each config should be in this format: [component:]config:value";
-      return false;
-    }
-    const sp_string key = scoped_iter->substr(0, index);
-    const sp_string value = scoped_iter->substr(index + 1);
-    LOG(INFO) << "Parsed config " << key << " => " << value;
-    scoped_config_map[key] = value;
-  }
-
-  // Parse scope:config part and build a map of component_name -> config_kv vector.
-  std::map<std::string, std::string>::const_iterator iter;
-  for (iter = scoped_config_map.begin(); iter != scoped_config_map.end(); ++iter) {
-    LOG(INFO) << "Runtime config " << iter->first << " => " << iter->second;
-    // Incoming config names should have this format: [component:]config
-    size_t index = iter->first.find_first_of(':');
-    if (index == sp_string::npos) {
-      // No ':' is found. This is a topology level config
-      retval[TOPOLOGY_CONFIG_KEY][iter->first] = iter->second;
+  std::vector<sp_string>::const_iterator iter;
+  for (iter = paramters.begin(); iter != paramters.end(); ++iter) {
+    // Split using ':'
+    std::vector<std::string> segments = StrUtils::split(*iter, ":");
+    if (segments.size() == 2) {
+      // Topology level config
+      retval[TOPOLOGY_CONFIG_KEY][segments[0]] = segments[1];
+    } else if (segments.size() == 3) {
+      // Component level config
+      retval[segments[0]][segments[1]] = segments[2];
     } else {
-      // This is a component level config
-      const std::string component = iter->first.substr(0, index);
-      const std::string config_name = iter->first.substr(index + 1);
-      retval[component][config_name] = iter->second;
+      // Wrong number of ':'s
+      LOG(ERROR) << "Bad format detected in " << *iter << "."
+          << " Each config should be in this format: [component:]config:value";
+      return false;
     }
   }
   return true;
