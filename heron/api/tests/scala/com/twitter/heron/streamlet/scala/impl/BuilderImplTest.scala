@@ -16,11 +16,14 @@ package com.twitter.heron.streamlet.scala.impl
 import com.twitter.heron.streamlet.scala.Streamlet
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
 import org.junit.Assert.{assertEquals, assertTrue}
+<<<<<<< HEAD
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Source
 import com.twitter.heron.streamlet.scala.Builder
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
 import com.twitter.heron.streamlet.scala.impl.StreamletImpl
+=======
+>>>>>>> d76d869b6... more changes for Builder
 
 import scala.collection.mutable.ListBuffer
 
@@ -28,6 +31,7 @@ import scala.collection.mutable.ListBuffer
   * Tests for Scala Builder Implementation functionality
   */
 class BuilderImplTest extends BaseFunSuite {
+<<<<<<< HEAD
 
 
 
@@ -45,6 +49,21 @@ class BuilderImplTest extends BaseFunSuite {
   }
 
   private class MySource extends Source[Int] {
+=======
+  test(
+    "BuilderImpl should support generating a streamlet from a user generated source function") {
+      val source = MySource
+
+    }
+
+
+  "BuilderImpl should support generating a streamlet from a user generated serializable supplier function") {
+    val source = MySource
+
+  }
+
+  private class MySource() extends Source[Int] {
+>>>>>>> d76d869b6... more changes for Builder
     private val numbers = ListBuffer[Int]()
 
     override def setup(context: Context): Unit = {

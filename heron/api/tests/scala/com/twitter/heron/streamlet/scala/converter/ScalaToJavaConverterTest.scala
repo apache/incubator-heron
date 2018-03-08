@@ -14,11 +14,12 @@
 package com.twitter.heron.streamlet.scala.converter
 
 import org.junit.Assert.assertTrue
-
 import com.twitter.heron.streamlet.Context
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.Source
 import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+
+import scala.collection.mutable.ListBuffer
 
 /**
   * Tests for Streamlet APIs' Scala to Java Conversion functionality
@@ -52,10 +53,27 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         .isInstanceOf[com.twitter.heron.streamlet.Sink[Int]])
   }
 
+  test("ScalaToJavaConverterTest should support Java Source") {
+    val javaSource =
+      ScalaToJavaConverter.toJavaSource[Int](new TestSource())
+    assertTrue(
+      javaSource
+        .isInstanceOf[com.twitter.heron.streamlet.Source[Int]])
+  }
+
   private class TestSink() extends Sink[Int] {
     override def setup(context: Context): Unit = {}
     override def put(tuple: Int): Unit = {}
     override def cleanup(): Unit = {}
+  }
+
+  private class TestSource() extends Source[Int] {
+    private val numbers = ListBuffer[Int]()
+    override def setup(context: Context): Unit = {
+      numbers += (1, 2, 3, 4, 5)
+    }
+    override def get: Iterable[Int] = numbers
+    override def cleanup(): Unit = numbers.clear()
   }
 
 }

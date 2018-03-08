@@ -38,11 +38,9 @@ object ScalaToJavaConverter {
       override def setup(context: Context): Unit = source.setup(context)
 
       override def get(): Collection[T] = scala.collection.JavaConverters.asJavaCollectionConverter(source.get).asJavaCollection
-<<<<<<< HEAD
 
       override def get(): scala.Iterable[T] = source.get()
-=======
->>>>>>> d42a83df9... new files and fixes for Builder
+
 
       override def cleanup(): Unit = source.cleanup()
     }
