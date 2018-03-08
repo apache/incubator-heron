@@ -172,18 +172,18 @@ public final class TMasterUtils {
         "Topology command {0} completed successfully.", topologyStateControlCommand);
   }
 
-  public static void sendUserRuntimeConfig(String topologyName,
-                                           TMasterCommand topologyStateControlCommand,
-                                           SchedulerStateManagerAdaptor statemgr,
-                                           String[] configs,
-                                           NetworkUtils.TunnelConfig tunnelConfig)
+  public static void sendRuntimeConfig(String topologyName,
+                                       TMasterCommand topologyStateControlCommand,
+                                       SchedulerStateManagerAdaptor statemgr,
+                                       String[] configs,
+                                       NetworkUtils.TunnelConfig tunnelConfig)
       throws TMasterException {
-    final String userConfigKey = "user-config";
+    final String runtimeConfigKey = "runtime-config";
     final String runtimeConfigUpdateEndpoint = "runtime_config/update";
 
     String[] arguments = new String[configs.length];
     for (int i = 0; i < configs.length; ++i) {
-      arguments[i] = userConfigKey + "=" + configs[i];
+      arguments[i] = runtimeConfigKey + "=" + configs[i];
     }
 
     TMasterUtils.sendToTMasterWithArguments(

@@ -49,8 +49,8 @@ public class RuntimeManagerRunner {
   // into handlers.
   public static final String RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY =
       "RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY";
-  public static final String RUNTIME_MANAGER_USER_RUNTIME_CONFIG_KEY =
-      "RUNTIME_MANAGER_USER_RUNTIME_CONFIG_KEY";
+  public static final String RUNTIME_MANAGER_RUNTIME_CONFIG_KEY =
+      "RUNTIME_MANAGER_RUNTIME_CONFIG_KEY";
 
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
   private final Config config;
@@ -189,7 +189,7 @@ public class RuntimeManagerRunner {
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     assert !potentialStaleExecutionData;
     String newParallelism = updateConfig.getStringValue(RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY);
-    String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_USER_RUNTIME_CONFIG_KEY);
+    String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_RUNTIME_CONFIG_KEY);
 
     if (newParallelism != null && !newParallelism.isEmpty()) {
       // Update parallelism if newParallelism parameter is available
@@ -257,11 +257,11 @@ public class RuntimeManagerRunner {
     // Send user runtime config to TMaster
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
-    TMasterUtils.sendUserRuntimeConfig(topologyName,
-                                       TMasterUtils.TMasterCommand.RUNTIME_CONFIG_UPDATE,
-                                       Runtime.schedulerStateManagerAdaptor(runtime),
-                                       runtimeConfigs,
-                                       tunnelConfig);
+    TMasterUtils.sendRuntimeConfig(topologyName,
+                                   TMasterUtils.TMasterCommand.RUNTIME_CONFIG_UPDATE,
+                                   Runtime.schedulerStateManagerAdaptor(runtime),
+                                   runtimeConfigs,
+                                   tunnelConfig);
   }
 
   /**

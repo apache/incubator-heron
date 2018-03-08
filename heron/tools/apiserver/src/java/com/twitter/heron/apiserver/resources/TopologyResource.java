@@ -107,7 +107,7 @@ public class TopologyResource extends HeronResource {
   };
 
   private static final String PARAM_COMPONENT_PARALLELISM = "component_parallelism";
-  private static final String PARAM_USER_RUNTIME_CONFIG_KEY = "user_config";
+  private static final String PARAM_RUNTIME_CONFIG_KEY = "runtime_config";
   private static final String PARAM_DRY_RUN = "dry_run";
   private static final String PARAM_DRY_RUN_FORMAT = "dry_run_format";
   private static final String DEFAULT_DRY_RUN_FORMAT = DryRunFormatType.TABLE.toString();
@@ -348,17 +348,16 @@ public class TopologyResource extends HeronResource {
             .build();
       } else {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
-        List<String> userRuntimeConfigs = params.get(PARAM_USER_RUNTIME_CONFIG_KEY);
+        List<String> runtimeConfigs = params.get(PARAM_RUNTIME_CONFIG_KEY);
 
         if (components != null && !components.isEmpty()) {
           return updateComponentParallelism(cluster, role, environment, name, params, components);
-        } else if (userRuntimeConfigs != null && !userRuntimeConfigs.isEmpty()) {
-          return updateUserRuntimeConfig(cluster, role, environment, name, params,
-                                         userRuntimeConfigs);
+        } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
+          return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
           return Response.status(HTTP_UNPROCESSABLE_ENTITY_CODE)
             .type(MediaType.APPLICATION_JSON)
-            .entity(Utils.createMessage("missing component_parallelism or user_config param"))
+            .entity(Utils.createMessage("missing component_parallelism or runtime_config param"))
             .build();
         }
       }
@@ -412,13 +411,14 @@ public class TopologyResource extends HeronResource {
         .build();
   }
 
-  protected Response updateUserRuntimeConfig(
+  protected Response updateRuntimeConfig(
       String cluster,
       String role,
       String environment,
       String name,
       MultivaluedMap<String, String> params,
-      List<String> userRuntimeConfigs) {
+      List<String> runtimeConfigs) {
+    // TODO(nwang): Implement runtime config in API server
     return Response.ok()
     .type(MediaType.APPLICATION_JSON)
     .entity(Utils.createMessage(String.format("%s updated", name)))

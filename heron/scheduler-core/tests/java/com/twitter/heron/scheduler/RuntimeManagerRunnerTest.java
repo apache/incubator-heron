@@ -253,8 +253,8 @@ public class RuntimeManagerRunnerTest {
   public void testUpdateTopologyUserRuntimeConfig() throws Exception {
     String testConfig = "topology.user:test,testSpout:topology.user:1,testBolt:topology.user:4";
     URL expectedURL = new URL("http://host:1/runtime_config/update?topologyid=topology-id&"
-        + "user-config=topology.user:test&user-config=testSpout:topology.user:1&"
-        + "user-config=testBolt:topology.user:4");
+        + "runtime-config=topology.user:test&runtime-config=testSpout:topology.user:1&"
+        + "runtime-config=testBolt:topology.user:4");
 
     // Success case
     ISchedulerClient client = mock(ISchedulerClient.class);

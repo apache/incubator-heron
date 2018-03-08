@@ -489,10 +489,10 @@ public class RuntimeManagerMain {
       config.put(
           RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY, componentParallelism);
     }
-    String userConfigurations = cmd.getOptionValue("user_config");
-    if (userConfigurations != null && !userConfigurations.isEmpty()) {
+    String runtimeConfigurations = cmd.getOptionValue("runtime_config");
+    if (runtimeConfigurations != null && !runtimeConfigurations.isEmpty()) {
       config.put(
-          RuntimeManagerRunner.RUNTIME_MANAGER_USER_RUNTIME_CONFIG_KEY, userConfigurations);
+          RuntimeManagerRunner.RUNTIME_MANAGER_RUNTIME_CONFIG_KEY, runtimeConfigurations);
     }
   }
 }

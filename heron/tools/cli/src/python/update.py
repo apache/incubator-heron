@@ -33,7 +33,7 @@ def create_parser(subparsers):
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
       + "[--component-parallelism <name:value>] "
-      + "[--user-config [component:]<name:value>]",
+      + "[--runtime-config [component:]<name:value>]",
       add_help=True)
 
   args.add_titles(parser)
@@ -61,18 +61,18 @@ def create_parser(subparsers):
       help='Component name and the new parallelism value '
       + 'colon-delimited: <component_name>:<parallelism>')
 
-  def user_config_type(value):
+  def runtime_config_type(value):
     pattern = re.compile(r"^([\w\.-]+:){1,2}[\w\.-]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for user config ([component:]<name:value>): %s"
+          "Invalid syntax for runtime config ([component:]<name:value>): %s"
           % value)
     return value
 
   parser.add_argument(
-      '--user-config',
+      '--runtime-config',
       action='append',
-      type=user_config_type,
+      type=runtime_config_type,
       required=False,
       help='Runtime configurations for topology and/or components'
       + 'colon-delimited: [component:]<name>:<value>')
@@ -84,20 +84,20 @@ def build_extra_args_dict(cl_args):
   """ Build extra args map """
   # Check parameters
   component_parallelisms = cl_args['component_parallelism']
-  user_configs = cl_args['user_config']
-  # Users need to provide either component-parallelism or user-config
-  if component_parallelisms and user_configs:
+  runtime_configs = cl_args['runtime_config']
+  # Users need to provide either component-parallelism or runtime-config
+  if component_parallelisms and runtime_configs:
     raise Exception(
-        "component-parallelism and user-config can't be updated at the same time")
+        "component-parallelism and runtime-config can't be updated at the same time")
 
   dict_extra_args = {}
   if component_parallelisms:
     dict_extra_args.update({'component_parallelism': component_parallelisms})
-  elif user_configs:
-    dict_extra_args.update({'user_config': user_configs})
+  elif runtime_configs:
+    dict_extra_args.update({'runtime_config': runtime_configs})
   else:
     raise Exception(
-        "Missing arguments --component-parallelism or --user-config")
+        "Missing arguments --component-parallelism or --runtime-config")
 
   if cl_args['dry_run']:
     dict_extra_args.update({'dry_run': True})
@@ -113,9 +113,9 @@ def convert_args_dict_to_list(dict_extra_args):
   if 'component_parallelism' in dict_extra_args:
     list_extra_args += ["--component_parallelism",
                         ','.join(dict_extra_args['component_parallelism'])]
-  if 'user_config' in dict_extra_args:
-    list_extra_args += ["--user_config",
-                        ','.join(dict_extra_args['user_config'])]
+  if 'runtime_config' in dict_extra_args:
+    list_extra_args += ["--runtime_config",
+                        ','.join(dict_extra_args['runtime_config'])]
   if 'dry_run' in dict_extra_args and dict_extra_args['dry_run']:
     list_extra_args += '--dry_run'
   if 'dry_run_format' in dict_extra_args:
