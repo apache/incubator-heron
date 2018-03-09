@@ -13,12 +13,14 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
 import com.twitter.heron.streamlet.{
   JoinType,
+  KeyValue,
+  KeyedWindow,
   SerializableTransformer,
   WindowConfig
 }
+import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet
 import com.twitter.heron.streamlet.scala.{Sink, Streamlet}
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
@@ -40,8 +42,7 @@ object StreamletImpl {
   private[impl] def createSupplierStreamlet[R](supplier: () => R) = {
     val serializableSupplier = toSerializableSupplier[R](supplier)
     val newJavaStreamlet =
-      new com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet[R](
-        serializableSupplier)
+      new SupplierStreamlet[R](serializableSupplier)
     toScalaStreamlet[R](newJavaStreamlet)
   }
 
@@ -95,7 +96,7 @@ class StreamletImpl[R](
     *
     * @param mapFn The Map Function that should be applied to each element
     */
-  override def map[T](mapFn: R => _ <: T): Streamlet[T] = {
+  override def map[T](mapFn: R => T): Streamlet[T] = {
     val serializableFunction = toSerializableFunction[R, T](mapFn)
     val newJavaStreamlet = javaStreamlet.map[T](serializableFunction)
     toScalaStreamlet[T](newJavaStreamlet)
@@ -116,19 +117,26 @@ class StreamletImpl[R](
     *
     * @param filterFn The filter Function that should be applied to each element
     */
-  override def filter(filterFn: R => Boolean): Streamlet[R] = ???
+  override def filter(filterFn: R => Boolean): Streamlet[R] = {
+    val serializablePredicate = toSerializablePredicate[R](filterFn)
+    val newJavaStreamlet = javaStreamlet.filter(serializablePredicate)
+    toScalaStreamlet[R](newJavaStreamlet)
+  }
 
   /**
     * Same as filter(filterFn).setNumPartitions(nPartitions) where filterFn is identity
     */
-  override def repartition(numPartitions: Int): Streamlet[R] = ???
+  override def repartition(numPartitions: Int): Streamlet[R] = {
+    val newJavaStreamlet = javaStreamlet.repartition(numPartitions)
+    toScalaStreamlet[R](newJavaStreamlet)
+  }
 
   /**
     * A more generalized version of repartition where a user can determine which partitions
     * any particular tuple should go to. For each element of the current streamlet, the user
     * supplied partitionFn is invoked passing in the element as the first argument. The second
     * argument is the number of partitions of the downstream streamlet. The partitionFn should
-    * return 0 or more unique numbers between 0 and npartitions to indicate which partitions
+    * return 0 or more unique numbers between 0 and n partitions to indicate which partitions
     * this element should be routed to.
     */
   override def repartition(numPartitions: Int,
@@ -230,7 +238,10 @@ class StreamletImpl[R](
     * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
     * the new streamlet will contain tuples belonging to both Streamlets
     */
-  override def union(other: Streamlet[_ <: R]): Streamlet[R] = ???
+  override def union(other: Streamlet[_ <: R]): Streamlet[R] = {
+    val newJavaStreamlet = javaStreamlet.union(toJavaStreamlet(other))
+    toScalaStreamlet(newJavaStreamlet)
+  }
 
   /**
     * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
@@ -258,7 +269,10 @@ class StreamletImpl[R](
     * @param consumer The user supplied consumer function that is invoked for each element
     *                 of this streamlet.
     */
-  override def consume(consumer: R => Unit): Unit = ???
+  override def consume(consumer: R => Unit): Unit = {
+    val serializableConsumer = toSerializableConsumer[R](consumer)
+    javaStreamlet.consume(serializableConsumer)
+  }
 
   /**
     * Applies the sink's put function to every element of the stream
