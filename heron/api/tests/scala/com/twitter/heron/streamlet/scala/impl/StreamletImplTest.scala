@@ -13,9 +13,24 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
-import com.twitter.heron.streamlet.scala.Streamlet
-import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+import scala.util.Random
+
 import org.junit.Assert.{assertEquals, assertTrue}
+
+import com.twitter.heron.streamlet.impl.streamlets.{
+  ConsumerStreamlet,
+  FilterStreamlet,
+  LogStreamlet,
+  MapStreamlet,
+  SinkStreamlet,
+  UnionStreamlet
+}
+
+import com.twitter.heron.streamlet.scala.Streamlet
+import com.twitter.heron.streamlet.scala.common.{
+  BaseFunSuite,
+  TestListBufferSink
+}
 
 /**
   * Tests for Scala Streamlet Implementation functionality
@@ -34,7 +49,9 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(20, supplierStreamlet.getNumPartitions)
 
     val mapStreamlet = supplierStreamlet
-      .map[Double]((num: Double) => num * 10)
+      .map[Double] { num: Double =>
+        num * 10
+      }
       .setName("Map_Streamlet_1")
       .setNumPartitions(5)
 
@@ -50,7 +67,9 @@ class StreamletImplTest extends BaseFunSuite {
       .setNumPartitions(20)
 
     supplierStreamlet
-      .map[Double]((num: Double) => num * 10)
+      .map[String] { num: Double =>
+        (num * 10).toString
+      }
       .setName("Map_Streamlet_1")
       .setNumPartitions(5)
 
@@ -60,14 +79,177 @@ class StreamletImplTest extends BaseFunSuite {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[
-          com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[_, _]])
+        .isInstanceOf[MapStreamlet[_, _]])
     val mapStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[
-        com.twitter.heron.streamlet.impl.streamlets.MapStreamlet[_, _]]
+      .asInstanceOf[MapStreamlet[Double, String]]
     assertEquals("Map_Streamlet_1", mapStreamlet.getName)
     assertEquals(0, mapStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support filter transformation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(20)
+
+    supplierStreamlet
+      .filter { num: Double =>
+        num > 10
+      }
+      .setName("Filter_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[FilterStreamlet[_]])
+    val filterStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[FilterStreamlet[Double]]
+    assertEquals("Filter_Streamlet_1", filterStreamlet.getName)
+    assertEquals(0, filterStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support repartition transformation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => "aa bb cc dd ee")
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(5)
+
+    supplierStreamlet
+      .repartition(10)
+      .setName("Repartitioned_Streamlet_1")
+
+    assertEquals(5, supplierStreamlet.getNumPartitions)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[String]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    val repartitionedStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[MapStreamlet[String, String]]
+    assertEquals("Repartitioned_Streamlet_1", repartitionedStreamlet.getName)
+    assertEquals(0, repartitionedStreamlet.getChildren.size())
+    assertEquals(10, repartitionedStreamlet.getNumPartitions)
+  }
+
+  test("StreamletImpl should support union transformation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => "aa bb cc dd ee")
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(2)
+
+    val supplierStreamlet2 = StreamletImpl
+      .createSupplierStreamlet(() => "fff ggg hhh")
+      .setName("Supplier_Streamlet_2")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .union(supplierStreamlet2)
+      .setName("Union_Streamlet_1")
+      .setNumPartitions(4)
+
+    verifySupplierStreamlet(supplierStreamlet)
+    verifySupplierStreamlet(supplierStreamlet2)
+  }
+
+  test("StreamletImpl should support consume function") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(20)
+
+    supplierStreamlet
+      .consume { num: Double =>
+        num > 10
+      }
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[ConsumerStreamlet[_]])
+    val consumerStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[ConsumerStreamlet[Double]]
+    assertEquals(null, consumerStreamlet.getName)
+    assertEquals(0, consumerStreamlet.getChildren.size())
+    assertEquals(20, consumerStreamlet.getNumPartitions)
+  }
+
+  test("StreamletImpl should support log sink") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(10)
+
+    supplierStreamlet
+      .log()
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[LogStreamlet[_]])
+    val consumerStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[LogStreamlet[Double]]
+    assertEquals(null, consumerStreamlet.getName)
+    assertEquals(0, consumerStreamlet.getChildren.size())
+    assertEquals(10, consumerStreamlet.getNumPartitions)
+  }
+
+  test("StreamletImpl should support custom sink") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(10)
+
+    supplierStreamlet
+      .toSink(new TestListBufferSink())
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[SinkStreamlet[_]])
+    val consumerStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[SinkStreamlet[Int]]
+    assertEquals(null, consumerStreamlet.getName)
+    assertEquals(0, consumerStreamlet.getChildren.size())
+    assertEquals(10, consumerStreamlet.getNumPartitions)
+  }
+
+  private def verifySupplierStreamlet(
+      supplierStreamlet: Streamlet[String]): Unit = {
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[String]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[UnionStreamlet[_]])
+    val unionStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[UnionStreamlet[String]]
+    assertEquals("Union_Streamlet_1", unionStreamlet.getName)
+    assertEquals(0, unionStreamlet.getChildren.size())
+    assertEquals(4, unionStreamlet.getNumPartitions)
   }
 
 }

@@ -13,7 +13,13 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
-import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.{
+  Context,
+  SerializableConsumer,
+  SerializableFunction,
+  SerializablePredicate,
+  SerializableSupplier
+}
 import com.twitter.heron.streamlet.scala.Sink
 import com.twitter.heron.streamlet.scala.Source
 import java.lang.Iterable
@@ -28,9 +34,10 @@ import scala.collection.JavaConverters._
 object ScalaToJavaConverter {
 
   def toSerializableSupplier[T](f: () => T) =
-    new com.twitter.heron.streamlet.SerializableSupplier[T] {
+    new SerializableSupplier[T] {
       override def get(): T = f()
     }
+
 
 
   def toJavaSource[T](source: Source[T]): com.twitter.heron.streamlet.Source[T] = {
@@ -43,9 +50,20 @@ object ScalaToJavaConverter {
     }
   }
 
-  def toSerializableFunction[R, T](f: R => _ <: T) =
-    new com.twitter.heron.streamlet.SerializableFunction[R, T] {
+  def toSerializableFunction[R, T](f: R => T) =
+    new SerializableFunction[R, T] {
+
       override def apply(r: R): T = f(r)
+    }
+
+  def toSerializablePredicate[R](f: R => Boolean) =
+    new SerializablePredicate[R] {
+      override def test(r: R): Boolean = f(r)
+    }
+
+  def toSerializableConsumer[R](f: R => Unit) =
+    new SerializableConsumer[R] {
+      override def accept(r: R): Unit = f(r)
     }
 
   def toJavaSink[T](sink: Sink[T]): com.twitter.heron.streamlet.Sink[T] = {
