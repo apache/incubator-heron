@@ -28,7 +28,7 @@ class BuilderImpl extends Builder {
   }
 
 
-  def newSource[R](sourceFn: Source[R]): Streamlet[R] = {
+  override def newSource[R](sourceFn: Source[R]): Streamlet[R] = {
     val javaSourceObj = ScalaToJavaConverter.toJavaSource[R](sourceFn)
     val newJavaStreamlet =
       new com.twitter.heron.streamlet.impl.streamlets.SourceStreamlet[R](
