@@ -14,7 +14,7 @@
 
 package com.twitter.heron.streamlet.scala
 
-import com.twitter.heron.streamlet.{Source, Streamlet}
+
 import com.twitter.heron.streamlet.scala.impl.BuilderImpl
 
 
@@ -24,9 +24,8 @@ import com.twitter.heron.streamlet.scala.impl.BuilderImpl
   * information to build the topology
   */
 object Builder {
-
-  def newBuilder(): Builder = new BuilderImpl
-
+  def newBuilder(): Builder =
+    new BuilderImpl(com.twitter.heron.streamlet.Builder.newBuilder())
 }
 
 /**
