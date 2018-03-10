@@ -71,6 +71,13 @@ void TController::HandleActivateRequest(IncomingHTTPRequest* request) {
   LOG(INFO) << "Got a activate topology request from " << request->GetRemoteHost() << ":"
             << request->GetRemotePort();
   // Validation
+  ValidationResult result;
+  if (!ValidateTopology(request, result)) {
+    http_server_->SendErrorReply(request, result.GetCode(), result.GetMessage());
+    delete request;
+    return;
+  }
+
   if (tmaster_->GetTopologyState() != proto::api::PAUSED) {
     LOG(ERROR) << "Topology not in paused state";
     http_server_->SendErrorReply(request, 400);
@@ -260,8 +267,8 @@ void TController::HandleRuntimeConfigRequestDone(IncomingHTTPRequest* request,
 bool TController::ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result) {
   const sp_string& id = request->GetValue("topologyid");
   if (id == "") {
-    LOG(ERROR) << "Topologyid not specified in the request";
-    result.SetResult(400, "Missing topologyid argument in the request");
+    LOG(ERROR) << "Argument 'topologyid' not specified in the request";
+    result.SetResult(400, "Missing 'topologyid' argument in the request");
     return false;
   }
   if (id != tmaster_->GetTopologyId()) {
