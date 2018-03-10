@@ -31,7 +31,7 @@ import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
 object StreamletImpl {
 
-  def toScalaStreamlet[R](javaStreamlet: JavaStreamlet[R]): Streamlet[R] =
+  def fromJavaStreamlet[R](javaStreamlet: JavaStreamlet[R]): Streamlet[R] =
     new StreamletImpl[R](javaStreamlet)
 
   def toJavaStreamlet[R](streamlet: Streamlet[R]): JavaStreamlet[R] =
@@ -46,7 +46,7 @@ object StreamletImpl {
     val serializableSupplier = toSerializableSupplier[R](supplier)
     val newJavaStreamlet =
       new SupplierStreamlet[R](serializableSupplier)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
 }
@@ -68,7 +68,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * @return Returns back the Streamlet with changed name
     */
   override def setName(sName: String): Streamlet[R] =
-    toScalaStreamlet[R](javaStreamlet.setName(sName))
+    fromJavaStreamlet[R](javaStreamlet.setName(sName))
 
   /**
     * Gets the name of the Streamlet.
@@ -84,7 +84,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * @return Returns back the Streamlet with changed number of partitions
     */
   override def setNumPartitions(numPartitions: Int): Streamlet[R] =
-    toScalaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
+    fromJavaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
 
   /**
     * Gets the number of partitions of this Streamlet.
@@ -101,7 +101,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
   override def map[T](mapFn: R => T): Streamlet[T] = {
     val serializableFunction = toSerializableFunction[R, T](mapFn)
     val newJavaStreamlet = javaStreamlet.map[T](serializableFunction)
-    toScalaStreamlet[T](newJavaStreamlet)
+    fromJavaStreamlet[T](newJavaStreamlet)
   }
 
   /**
@@ -122,7 +122,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
   override def filter(filterFn: R => Boolean): Streamlet[R] = {
     val serializablePredicate = toSerializablePredicate[R](filterFn)
     val newJavaStreamlet = javaStreamlet.filter(serializablePredicate)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
   /**
@@ -130,7 +130,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     */
   override def repartition(numPartitions: Int): Streamlet[R] = {
     val newJavaStreamlet = javaStreamlet.repartition(numPartitions)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
   /**
@@ -157,7 +157,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       .asScalaBufferConverter(javaClonedStreamlets)
       .asScala
     javaClonedStreamletsAsScalaList.map(streamlet =>
-      toScalaStreamlet[R](streamlet))
+      fromJavaStreamlet[R](streamlet))
   }
 
   /**
@@ -189,7 +189,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
                                                        javaOtherKeyExtractor,
                                                        windowCfg,
                                                        javaJoinFunction)
-    toScalaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
   }
 
   /**
@@ -226,7 +226,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
                                                        windowCfg,
                                                        joinType,
                                                        javaJoinFunction)
-    toScalaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
   }
 
   /**
@@ -272,7 +272,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     */
   override def union(other: Streamlet[_ <: R]): Streamlet[R] = {
     val newJavaStreamlet = javaStreamlet.union(toJavaStreamlet(other))
-    toScalaStreamlet(newJavaStreamlet)
+    fromJavaStreamlet(newJavaStreamlet)
   }
 
   /**
