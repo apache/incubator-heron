@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,14 +51,16 @@ public final class TMasterUtils {
   public static void sendToTMaster(String command,
                                    String topologyName,
                                    SchedulerStateManagerAdaptor stateManager,
-                                   NetworkUtils.TunnelConfig tunnelConfig) {
-    sendToTMasterWithArguments(command, topologyName, null, stateManager, tunnelConfig);
+                                   NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
+    final List<String> empty = new ArrayList<String>();
+    sendToTMasterWithArguments(command, topologyName, empty, stateManager, tunnelConfig);
   }
 
   @VisibleForTesting
   public static void sendToTMasterWithArguments(String command,
                                                 String topologyName,
-                                                String[] arguments,
+                                                List<String> arguments,
                                                 SchedulerStateManagerAdaptor stateManager,
                                                 NetworkUtils.TunnelConfig tunnelConfig)
       throws TMasterException {
@@ -75,11 +79,9 @@ public final class TMasterUtils {
     String url = String.format("http://%s:%d/%s?topologyid=%s",
         location.getHost(), location.getControllerPort(), command, location.getTopologyId());
     // Append extra url arguments
-    if (arguments != null) {
-      for (String arg: arguments) {
-        url += "&";
-        url += arg;
-      }
+    for (String arg: arguments) {
+      url += "&";
+      url += arg;
     }
 
     try {
@@ -181,9 +183,9 @@ public final class TMasterUtils {
     final String runtimeConfigKey = "runtime-config";
     final String runtimeConfigUpdateEndpoint = "runtime_config/update";
 
-    String[] arguments = new String[configs.length];
-    for (int i = 0; i < configs.length; ++i) {
-      arguments[i] = runtimeConfigKey + "=" + configs[i];
+    List<String> arguments = new ArrayList<String>();
+    for (String config: configs) {
+      arguments.add(runtimeConfigKey + "=" + config);
     }
 
     TMasterUtils.sendToTMasterWithArguments(

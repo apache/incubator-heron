@@ -50,7 +50,7 @@ def create_parser(subparsers):
     pattern = re.compile(r"^[\w\.-]+:[\d]+$")
     if not pattern.match(value):
       raise argparse.ArgumentTypeError(
-          "Invalid syntax for component parallelism (<name:value>): %s" % value)
+          "Invalid syntax for component parallelism (<component_name:value>): %s" % value)
     return value
 
   parser.add_argument(
@@ -83,16 +83,16 @@ def create_parser(subparsers):
 def build_extra_args_dict(cl_args):
   """ Build extra args map """
   # Check parameters
-  component_parallelisms = cl_args['component_parallelism']
+  component_parallelism = cl_args['component_parallelism']
   runtime_configs = cl_args['runtime_config']
   # Users need to provide either component-parallelism or runtime-config
-  if component_parallelisms and runtime_configs:
+  if component_parallelism and runtime_configs:
     raise Exception(
         "component-parallelism and runtime-config can't be updated at the same time")
 
   dict_extra_args = {}
-  if component_parallelisms:
-    dict_extra_args.update({'component_parallelism': component_parallelisms})
+  if component_parallelism:
+    dict_extra_args.update({'component_parallelism': component_parallelism})
   elif runtime_configs:
     dict_extra_args.update({'runtime_config': runtime_configs})
   else:

@@ -191,6 +191,13 @@ public class RuntimeManagerRunner {
     String newParallelism = updateConfig.getStringValue(RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY);
     String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_RUNTIME_CONFIG_KEY);
 
+    // parallelism and runtime config can not be updated at the same time.
+    if (newParallelism != null && !newParallelism.isEmpty()
+        && userRuntimeConfig != null && !userRuntimeConfig.isEmpty()) {
+      throw new TopologyRuntimeManagementException(
+          "parallelism and runtime config can not be updated at the same time.");
+    }
+
     if (newParallelism != null && !newParallelism.isEmpty()) {
       // Update parallelism if newParallelism parameter is available
       updateTopologyComponentParallelism(topologyName, newParallelism);
@@ -198,8 +205,7 @@ public class RuntimeManagerRunner {
       // Update user runtime config if userRuntimeConfig parameter is available
       updateTopologyUserRuntimeConfig(topologyName, userRuntimeConfig);
     } else {
-      throw new TopologyRuntimeManagementException(
-          String.format("Missing arguments. Not taking action."));
+      throw new TopologyRuntimeManagementException("Missing arguments. Not taking action.");
     }
     // Clean the connection when we are done.
     LOG.fine("Scheduler updated topology successfully.");
