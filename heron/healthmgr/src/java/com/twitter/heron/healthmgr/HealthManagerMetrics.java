@@ -111,19 +111,19 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   }
 
   public synchronized void executeSensorIncr(String sensor) {
-    executeSensorCount.scope(sensor);
+    executeSensorCount.scope(sensor).incr();
   }
 
   public synchronized void executeDetectorIncr(String detector) {
-    executeDetectorCount.scope(detector);
+    executeDetectorCount.scope(detector).incr();
   }
 
   public synchronized void executeDiagnoserIncr(String diagnoser) {
-    executeDiagnoserCount.scope(diagnoser);
+    executeDiagnoserCount.scope(diagnoser).incr();
   }
 
   public synchronized void executeResolver(String resolver) {
-    executeResolverCount.scope(resolver);
+    executeResolverCount.scope(resolver).incr();
   }
 
   @Override
@@ -134,8 +134,8 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
 
   @Override
   public void close() throws Exception {
-    metricsMgrClient.stop();
     looper.exitLoop();
+    metricsMgrClient.stop();
     outMetricsQueues.clear();
   }
 
