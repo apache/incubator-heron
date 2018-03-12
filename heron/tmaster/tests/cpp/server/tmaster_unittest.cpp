@@ -38,8 +38,8 @@
 #include "manager/tmaster.h"
 #include "manager/stmgr.h"
 
-const sp_string SPOUT_NAME = "test_spout";
-const sp_string BOLT_NAME = "test_bolt";
+const sp_string SPOUT_NAME = "spout";
+const sp_string BOLT_NAME = "bolt";
 const sp_string STREAM_NAME = "stream";
 const sp_string CONTAINER_INDEX = "0";
 const sp_string STMGR_NAME = "stmgr";
@@ -489,10 +489,11 @@ void TearCommonResources(CommonResources& common) {
 }
 
 void ControlTopologyDone(HTTPClient* client, IncomingHTTPResponse* response) {
-  client->getEventLoop()->loopExit();
   if (response->response_code() != 200) {
     FAIL() << "Error while controlling topology " << response->response_code()
            << " " << response->body();
+  } else {
+    client->getEventLoop()->loopExit();
   }
 
   delete response;
@@ -683,8 +684,8 @@ TEST(StMgr, test_activate_deactivate) {
 
 // Test to see if runtime_config works
 TEST(StMgr, test_runtime_config) {
-  sp_string runtime_test_spout = "test_spout3";
-  sp_string runtime_test_bolt = "test_bolt4";
+  sp_string runtime_test_spout = "spout3";
+  sp_string runtime_test_bolt = "bolt4";
 
   CommonResources common;
   SetUpCommonResources(common);
