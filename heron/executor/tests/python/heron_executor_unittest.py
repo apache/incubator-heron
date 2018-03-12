@@ -269,7 +269,8 @@ class HeronExecutorTest(unittest.TestCase):
       ("--checkpoint-manager-port", "ckptmgr-port"),
       ("--stateful-config-file", "stateful_config_file"),
       ("--health-manager-mode", "healthmgr_mode"),
-      ("--health-manager-classpath", "healthmgr_classpath")
+      ("--health-manager-classpath", "healthmgr_classpath"),
+      ("--metricscache-manager-mode", "metricscache_mode")
     ]
 
     args = ("%s=%s" % (arg[0], (str(arg[1]))) for arg in executor_args)
