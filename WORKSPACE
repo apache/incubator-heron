@@ -495,6 +495,15 @@ maven_jar(
 )
 # end Pulsar Client
 
+# java cc
+new_http_archive(
+  name = "javacc",
+  url = "https://javacc.org/downloads/javacc-5.0.tar.gz",
+  strip_prefix = "javacc-5.0",
+  build_file = "third_party/java/javacc/javacc.BUILD",
+)
+# end java cc
+
 # Kubernetes java client
 kubernetes_client_version = "1.0.0-beta1"
 squareup_okhttp_version = "2.7.5"
