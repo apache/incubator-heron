@@ -44,8 +44,8 @@ class TController {
   // Parse and build a map of component name to config kv map from incoming runtime configs.
   // The incoming runtime configs should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
   // Return false if the configs have bad format.
-  static bool ParseRuntimeConfig(const std::vector<sp_string>& paramters,
-                                 std::map<sp_string, std::map<sp_string, sp_string>>& configMap);
+  static bool ParseRuntimeConfig(const std::vector<std::string>& paramters,
+      std::map<std::string, std::map<std::string, std::string>>& configMap);
 
  private:
   // Handlers for the requests
@@ -60,8 +60,9 @@ class TController {
   void HandleCleanStatefulCheckpointRequest(IncomingHTTPRequest* request);
   void HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* request,
                                                 proto::system::StatusCode);
-  void HandleRuntimeConfigRequest(IncomingHTTPRequest* request);
-  void HandleRuntimeConfigRequestDone(IncomingHTTPRequest* request, proto::system::StatusCode);
+  void HandleUpdateRuntimeConfigRequest(IncomingHTTPRequest* request);
+  void HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* request,
+                                            proto::system::StatusCode);
 
   // We are a http server
   HTTPServer* http_server_;
@@ -80,16 +81,16 @@ class TController {
   class ValidationResult {
    public:
     ValidationResult() { code_ = 0; message_ = ""; }
-    void SetResult(sp_int32 code, const sp_string& message) {
+    void SetResult(sp_int32 code, const std::string& message) {
       code_ = code;
       message_ = message;
     }
     sp_int32 GetCode() { return code_; }
-    sp_string& GetMessage() { return message_; }
+    std::string& GetMessage() { return message_; }
 
    private:
     sp_int32 code_;
-    sp_string message_;
+    std::string message_;
   };
 
   bool ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result);

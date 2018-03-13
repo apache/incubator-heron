@@ -43,7 +43,7 @@ class CkptMgrClient;
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
 
-typedef std::map<sp_string, std::map<sp_string, sp_string>> ConfigMap;
+typedef std::map<std::string, std::map<std::string, std::string>> ConfigMap;
 
 const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
 
@@ -66,8 +66,8 @@ class TMaster {
   void DeActivateTopology(VCallback<proto::system::StatusCode> cb);
   // Update runtime configs in a topology.
   // Return true if successful; false otherwise and the callback function won't be invoked.
-  bool RuntimeConfigTopology(const ConfigMap& _config,
-                             VCallback<proto::system::StatusCode> cb);
+  bool UpdateRuntimeConfig(const ConfigMap& _config,
+                           VCallback<proto::system::StatusCode> cb);
   // Validate runtime config. Return false if any issue is found.
   bool ValidateRuntimeConfig(const ConfigMap& _config);
 
@@ -187,13 +187,13 @@ class TMaster {
   // Function called to kill container
   void KillContainer(const std::string& host_name,
                      sp_int32 port,
-                     const sp_string& stmgr_id);
+                     const std::string& stmgr_id);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;
 
   // map of connection to stmgr id
-  std::map<Connection*, sp_string> connection_to_stmgr_id_;
+  std::map<Connection*, std::string> connection_to_stmgr_id_;
 
   // set of nodemanagers that have not yet connected to us
   std::set<std::string> absent_stmgrs_;

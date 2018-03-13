@@ -587,8 +587,8 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
-bool TMaster::RuntimeConfigTopology(const ConfigMap& _config,
-                                    VCallback<proto::system::StatusCode> cb) {
+bool TMaster::UpdateRuntimeConfig(const ConfigMap& _config,
+                                  VCallback<proto::system::StatusCode> cb) {
   DCHECK(current_pplan_->topology().IsInitialized());
 
   // Parse and set the new configs
@@ -649,7 +649,7 @@ bool TMaster::ValidateRuntimeConfig(const ConfigMap& _config) {
 }
 
 void TMaster::KillContainer(const std::string& host_name,
-    sp_int32 shell_port, const sp_string& stmgr_id) {
+    sp_int32 shell_port, const std::string& stmgr_id) {
   LOG(INFO) << "Start killing " << stmgr_id << " on " <<
     host_name << ":" << shell_port;
   HTTPKeyValuePairs kvs;
@@ -687,9 +687,9 @@ proto::system::Status* TMaster::RegisterStMgr(
                  << stmgrs_[stmgr_id]->get_connection()->getPort()
                  << " with the same id and it hasn't timed out";
       LOG(INFO) << "Potential zombie host exists. Start killing both containers";
-      sp_string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
+      std::string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
       sp_int32 zombie_port = stmgrs_[stmgr_id]->get_stmgr()->shell_port();
-      sp_string new_host_name = _stmgr.host_name();
+      std::string new_host_name = _stmgr.host_name();
       sp_int32 new_port = _stmgr.shell_port();
       KillContainer(zombie_host_name, zombie_port, stmgr_id);
       KillContainer(new_host_name, new_port, stmgr_id);
@@ -894,7 +894,7 @@ proto::system::Status* TMaster::UpdateStMgrHeartbeat(Connection* _conn, sp_int64
     retval->set_message("Unknown connection doing stmgr heartbeat");
     return retval;
   }
-  const sp_string& stmgr = connection_to_stmgr_id_[_conn];
+  const std::string& stmgr = connection_to_stmgr_id_[_conn];
   // TODO(kramasamy): Maybe do more checks?
   if (stmgrs_.find(stmgr) == stmgrs_.end()) {
     retval->set_status(proto::system::INVALID_STMGR);
@@ -915,7 +915,7 @@ proto::system::StatusCode TMaster::RemoveStMgrConnection(Connection* _conn) {
   if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
     return proto::system::INVALID_STMGR;
   }
-  const sp_string& stmgr_id = connection_to_stmgr_id_[_conn];
+  const std::string& stmgr_id = connection_to_stmgr_id_[_conn];
   if (stmgrs_.find(stmgr_id) == stmgrs_.end()) {
     return proto::system::INVALID_STMGR;
   }
@@ -1017,15 +1017,15 @@ bool TMaster::ValidateRuntimeConfigNames(const ConfigMap& _config) {
   ConfigMap::const_iterator iter;
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
-    std::map<sp_string, sp_string> current_config;
+    std::map<std::string, std::string> current_config;
     if (iter->first == TOPOLOGY_CONFIG_KEY) {
       config::TopologyConfigHelper::GetTopologyConfig(topology, current_config);
     } else {
       config::TopologyConfigHelper::GetComponentConfig(topology, iter->first, current_config);
     }
     // Search for the config name.
-    std::map<sp_string, sp_string> cfg = iter->second;
-    std::map<sp_string, sp_string>::const_iterator it;
+    std::map<std::string, std::string> cfg = iter->second;
+    std::map<std::string, std::string>::const_iterator it;
     for (it = cfg.begin(); it != cfg.end(); ++it) {
       if (current_config.find(it->first) == current_config.end()) {
         return false;

@@ -57,10 +57,10 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
   http_server_->InstallCallBack("/clean_all_stateful_checkpoints", std::move(cbCleanState));
 
   // Runtime config
-  auto cbRuntimeConfg = [this](IncomingHTTPRequest* request) {
-    this->HandleRuntimeConfigRequest(request);
+  auto cbUpdateRuntimeConfg = [this](IncomingHTTPRequest* request) {
+    this->HandleUpdateRuntimeConfigRequest(request);
   };
-  http_server_->InstallCallBack("/runtime_config/update", std::move(cbRuntimeConfg));
+  http_server_->InstallCallBack("/runtime_config/update", std::move(cbUpdateRuntimeConfg));
 }
 
 TController::~TController() { delete http_server_; }
@@ -98,7 +98,7 @@ void TController::HandleActivateRequestDone(IncomingHTTPRequest* request,
     LOG(ERROR) << "Unable to Activate topology " << _status;
     http_server_->SendErrorReply(request, 500);
   } else {
-    sp_string s = "Topology successfully activated";
+    std::string s = "Topology successfully activated";
     LOG(INFO) << s;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(s);
@@ -137,7 +137,7 @@ void TController::HandleDeActivateRequestDone(IncomingHTTPRequest* request,
     LOG(ERROR) << "Unable to DeActivate topology " << _status;
     http_server_->SendErrorReply(request, 500);
   } else {
-    sp_string s = "Topology successfully deactivated";
+    std::string s = "Topology successfully deactivated";
     LOG(INFO) << s;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(s);
@@ -184,7 +184,7 @@ void TController::HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* 
     LOG(ERROR) << "Unable to CleanStatefulCheckpoint" << _status;
     http_server_->SendErrorReply(request, 500);
   } else {
-    sp_string msg = "Checkpoints successfully cleaned";
+    std::string msg = "Checkpoints successfully cleaned";
     LOG(INFO) << msg;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(msg);
@@ -193,7 +193,7 @@ void TController::HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* 
   delete request;
 }
 
-void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
+void TController::HandleUpdateRuntimeConfigRequest(IncomingHTTPRequest* request) {
   LOG(INFO) << "Got a RuntimeConfig request from " << request->GetRemoteHost() << ":"
             << request->GetRemotePort();
   ValidationResult result;
@@ -204,7 +204,7 @@ void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
   }
 
     // Look for runtime-config parameters
-  std::vector<sp_string> parameters;
+  std::vector<std::string> parameters;
   if (!request->GetAllValues("runtime-config", parameters)) {
     LOG(ERROR) << "No runtime config is found";
     http_server_->SendErrorReply(request, 400, "No runtime config is found."
@@ -231,25 +231,25 @@ void TController::HandleRuntimeConfigRequest(IncomingHTTPRequest* request) {
   }
 
   auto cb = [request, this](proto::system::StatusCode status) {
-    this->HandleRuntimeConfigRequestDone(request, status);
+    this->HandleUpdateRuntimeConfigRequestDone(request, status);
   };
 
-  if (!tmaster_->RuntimeConfigTopology(config, std::move(cb))) {
+  if (!tmaster_->UpdateRuntimeConfig(config, std::move(cb))) {
     http_server_->SendErrorReply(request, 400, "Failed to update runtime configs");
     delete request;
     return;
   }
 }
 
-void TController::HandleRuntimeConfigRequestDone(IncomingHTTPRequest* request,
-                                                 proto::system::StatusCode _status) {
+void TController::HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* request,
+                                                       proto::system::StatusCode _status) {
   if (_status != proto::system::OK) {
-    sp_string error = "Failed to update runtime configs ";
+    std::string error = "Failed to update runtime configs ";
     error += _status;
     LOG(ERROR) << error;
     http_server_->SendErrorReply(request, 500, error);
   } else {
-    const sp_string message("Runtime config updated");
+    const std::string message("Runtime config updated");
     LOG(INFO) << message;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(message);
@@ -265,7 +265,7 @@ void TController::HandleRuntimeConfigRequestDone(IncomingHTTPRequest* request,
  * return true if topology is validated, false otherwise with error details stored in result object
  */
 bool TController::ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result) {
-  const sp_string& id = request->GetValue("topologyid");
+  const std::string& id = request->GetValue("topologyid");
   if (id == "") {
     LOG(ERROR) << "Argument 'topologyid' not specified in the request";
     result.SetResult(400, "Missing 'topologyid' argument in the request");
@@ -285,14 +285,14 @@ bool TController::ValidateTopology(const IncomingHTTPRequest* request, Validatio
   return true;
 }
 
-bool TController::ParseRuntimeConfig(const std::vector<sp_string>& paramters,
-                                     std::map<sp_string, std::map<sp_string, sp_string>>& retval) {
+bool TController::ParseRuntimeConfig(const std::vector<std::string>& paramters,
+    std::map<std::string, std::map<std::string, std::string>>& retval) {
   // Configs are in the followingconfigMap format: [component:]config:value.
   // It seems the regex implementation in c++ 11 is not very stable (The regex
   // pattern("^([\\w\\.-]+:)?[\\w\\.-]+:[\\w\\.-]+$") runs ok in osx but throws exception in
   // linux). Therefore we are manually searching ':' here (there should be 1 or 2 ':'s) instead of
   // using regex matching.
-  std::vector<sp_string>::const_iterator iter;
+  std::vector<std::string>::const_iterator iter;
   for (iter = paramters.begin(); iter != paramters.end(); ++iter) {
     // Split using ':'
     std::vector<std::string> segments = StrUtils::split(*iter, ":");
