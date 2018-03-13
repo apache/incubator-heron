@@ -415,6 +415,6 @@ public class Slave implements Runnable, AutoCloseable {
         return validated;
       } catch (NumberFormatException e) { }
     }
-    return maxOutputTuplePerSecond;
+    return outputRateLimiter.getRate();  // Use the current rate as fallback
   }
 }
