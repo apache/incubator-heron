@@ -587,7 +587,7 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
-bool TMaster::UpdateRuntimeConfig(const ConfigMap& _config,
+bool TMaster::UpdateRuntimeConfig(const ComponentConfigMap& _config,
                                   VCallback<proto::system::StatusCode> cb) {
   DCHECK(current_pplan_->topology().IsInitialized());
 
@@ -627,24 +627,25 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
 // Return false if a config doesn't exist, but this shouldn't happen if the config has been
 // validated using ValidateRuntimeConig() function.
 bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
-                                            const ConfigMap& _config) {
+                                            const ComponentConfigMap& _config) {
   DCHECK(_topology->IsInitialized());
 
-  ConfigMap::const_iterator iter;
+  ComponentConfigMap::const_iterator iter;
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
-    std::map<std::string, std::string> current_config;
+    std::map<std::string, std::string> runtime_config;
+    AppendPostfix(iter->second, RUNTIME_CONFIG_POSTFIX, runtime_config);
     if (iter->first == TOPOLOGY_CONFIG_KEY) {
-      config::TopologyConfigHelper::SetTopologyConfig(_topology, iter->second);
+      config::TopologyConfigHelper::SetTopologyConfig(_topology, runtime_config);
     } else {
-      config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, iter->second);
+      config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, runtime_config);
     }
   }
 
   return true;
 }
 
-bool TMaster::ValidateRuntimeConfig(const ConfigMap& _config) {
+bool TMaster::ValidateRuntimeConfig(const ComponentConfigMap& _config) const {
   return ValidateRuntimeConfigNames(_config);
 }
 
@@ -1009,23 +1010,23 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan
   return true;
 }
 
-bool TMaster::ValidateRuntimeConfigNames(const ConfigMap& _config) {
+bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) const {
   LOG(INFO) << "Validating runtime configs.";
   const proto::api::Topology& topology = current_pplan_->topology();
   DCHECK(topology.IsInitialized());
 
-  ConfigMap::const_iterator iter;
+  ComponentConfigMap::const_iterator iter;
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
-    std::map<std::string, std::string> current_config;
+    ConfigValueMap current_config;
     if (iter->first == TOPOLOGY_CONFIG_KEY) {
       config::TopologyConfigHelper::GetTopologyConfig(topology, current_config);
     } else {
       config::TopologyConfigHelper::GetComponentConfig(topology, iter->first, current_config);
     }
     // Search for the config name.
-    std::map<std::string, std::string> cfg = iter->second;
-    std::map<std::string, std::string>::const_iterator it;
+    ConfigValueMap cfg = iter->second;
+    ConfigValueMap::const_iterator it;
     for (it = cfg.begin(); it != cfg.end(); ++it) {
       if (current_config.find(it->first) == current_config.end()) {
         return false;
@@ -1034,6 +1035,15 @@ bool TMaster::ValidateRuntimeConfigNames(const ConfigMap& _config) {
   }
 
   return true;
+}
+
+void TMaster::AppendPostfix(const ConfigValueMap& _origin,
+                            const std::string& post_fix,
+                            ConfigValueMap& _retval) {
+  ConfigValueMap::const_iterator it;
+  for (it = _origin.begin(); it != _origin.end(); ++it) {
+    _retval[it->first + post_fix] = it->second;
+  }
 }
 
 }  // namespace tmaster

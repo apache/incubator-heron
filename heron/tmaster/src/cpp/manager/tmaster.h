@@ -43,9 +43,12 @@ class CkptMgrClient;
 typedef std::map<std::string, StMgrState*> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
 
-typedef std::map<std::string, std::map<std::string, std::string>> ConfigMap;
+typedef std::map<std::string, std::string> ConfigValueMap;
+// From component name to config/value pairs
+typedef std::map<std::string, std::map<std::string, std::string>> ComponentConfigMap;
 
 const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
+const sp_string RUNTIME_CONFIG_POSTFIX = ":runtime";
 
 class TMaster {
  public:
@@ -66,10 +69,10 @@ class TMaster {
   void DeActivateTopology(VCallback<proto::system::StatusCode> cb);
   // Update runtime configs in a topology.
   // Return true if successful; false otherwise and the callback function won't be invoked.
-  bool UpdateRuntimeConfig(const ConfigMap& _config,
+  bool UpdateRuntimeConfig(const ComponentConfigMap& _config,
                            VCallback<proto::system::StatusCode> cb);
   // Validate runtime config. Return false if any issue is found.
-  bool ValidateRuntimeConfig(const ConfigMap& _config);
+  bool ValidateRuntimeConfig(const ComponentConfigMap& _config) const;
 
   proto::system::Status* RegisterStMgr(const proto::system::StMgr& _stmgr,
                                        const std::vector<proto::system::Instance*>& _instances,
@@ -141,7 +144,7 @@ class TMaster {
   // Check if incoming runtime configs are valid or not.
   // All incoming configurations must exist. If there is any non-existing
   // configuration, or the data type is wrong, return false.
-  bool ValidateRuntimeConfigNames(const ConfigMap& _config);
+  bool ValidateRuntimeConfigNames(const ComponentConfigMap& _config) const;
 
   // If the assignment is already done, then:
   // 1. Distribute physical plan to all active stmgrs
@@ -179,7 +182,7 @@ class TMaster {
 
   // Update configurations in physical plan.
   bool UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
-                                     const ConfigMap& _config);
+                                     const ComponentConfigMap& _config);
 
   // Function called when a new stateful ckpt record is saved
   void HandleStatefulCheckpointSave(const std::string& _oldest_ckpt);
@@ -188,6 +191,10 @@ class TMaster {
   void KillContainer(const std::string& host_name,
                      sp_int32 port,
                      const std::string& stmgr_id);
+
+  void AppendPostfix(const ConfigValueMap& _origin,
+                     const std::string& post_fix,
+                     ConfigValueMap& _update);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;

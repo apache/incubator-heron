@@ -516,10 +516,10 @@ void ControlTopology(std::string topology_id, sp_int32 port, bool activate) {
   ss.loop();
 }
 
-void RuntimeConfigTopologyDone(HTTPClient* client,
-                               IncomingHTTPResponse* response,
-                               sp_int32 code,
-                               const std::string& message) {
+void UpdateRuntimeConfigDone(HTTPClient* client,
+                             IncomingHTTPResponse* response,
+                             sp_int32 code,
+                             const std::string& message) {
   client->getEventLoop()->loopExit();
   if (response->response_code() != code) {
     FAIL() << "Got unexected result while runtime config topology for " << message
@@ -530,11 +530,11 @@ void RuntimeConfigTopologyDone(HTTPClient* client,
   delete response;
 }
 
-void RuntimeConfigTopology(std::string topology_id,
-                           sp_int32 port,
-                           std::vector<std::string> configs,
-                           sp_int32 code,
-                           const std::string& message) {
+void UpdateRuntimeConfig(std::string topology_id,
+                         sp_int32 port,
+                         std::vector<std::string> configs,
+                         sp_int32 code,
+                         const std::string& message) {
   EventLoopImpl ss;
   AsyncDNS dns(&ss);
   HTTPClient* client = new HTTPClient(&ss, &dns);
@@ -549,7 +549,7 @@ void RuntimeConfigTopology(std::string topology_id,
       new OutgoingHTTPRequest(LOCALHOST, port, requesturl, BaseHTTPRequest::GET, kvs);
 
   auto cb = [client, code, message](IncomingHTTPResponse* response) {
-    RuntimeConfigTopologyDone(client, response, code, message);
+    UpdateRuntimeConfigDone(client, response, code, message);
   };
 
   if (client->SendRequest(request, std::move(cb)) != SP_OK) {
@@ -731,14 +731,14 @@ TEST(StMgr, test_runtime_config) {
   EXPECT_EQ(init_bolt_config[bolt_runtime_config], "-1");
 
   // Test ValidateRuntimeConfig()
-  heron::tmaster::ConfigMap validate_good_config_map;
+  heron::tmaster::ComponentConfigMap validate_good_config_map;
   std::map<std::string, std::string> validate_good_config;
   validate_good_config[topology_runtime_config_1] = "1";
   validate_good_config[topology_runtime_config_2] = "2";
   validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 
-  heron::tmaster::ConfigMap validate_bad_config_map;
+  heron::tmaster::ComponentConfigMap validate_bad_config_map;
   std::map<std::string, std::string> validate_bad_config;
   validate_bad_config["unknown"] = "1";
   validate_bad_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_bad_config;
@@ -746,7 +746,7 @@ TEST(StMgr, test_runtime_config) {
 
   // Post runtime config request with no configs and expect 400 response.
   std::vector<std::string> no_config;
-  std::thread* no_config_update_thread = new std::thread(RuntimeConfigTopology,
+  std::thread* no_config_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, no_config, 400, "no_config");
   no_config_update_thread->join();
   delete no_config_update_thread;
@@ -754,7 +754,7 @@ TEST(StMgr, test_runtime_config) {
   // Post runtime config request with unavailable configs and expect 400 response.
   std::vector<std::string> wrong_config1;
   wrong_config1.push_back("badformat");  // Bad format
-  std::thread* wrong_config1_update_thread = new std::thread(RuntimeConfigTopology,
+  std::thread* wrong_config1_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, wrong_config1, 400, "wrong_config1");
   wrong_config1_update_thread->join();
   delete wrong_config1_update_thread;
@@ -762,7 +762,7 @@ TEST(StMgr, test_runtime_config) {
   std::vector<std::string> wrong_config2;
   wrong_config2.push_back("topology.runtime.test_config:1");
   wrong_config2.push_back("bad_component:topology.runtime.test_config.bad:1");  // Doesn't exist
-  std::thread* wrong_config2_update_thread = new std::thread(RuntimeConfigTopology,
+  std::thread* wrong_config2_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, wrong_config2, 400, "wrong_config2");
   wrong_config2_update_thread->join();
   delete wrong_config2_update_thread;
@@ -773,7 +773,7 @@ TEST(StMgr, test_runtime_config) {
   good_config.push_back(topology_runtime_config_2 + ":2");
   good_config.push_back(runtime_test_spout + ":" + spout_runtime_config + ":3");
   good_config.push_back(runtime_test_bolt + ":" + bolt_runtime_config + ":4");
-  std::thread* good_config_update_thread = new std::thread(RuntimeConfigTopology,
+  std::thread* good_config_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, good_config, 200, "good_config");
   good_config_update_thread->join();
   delete good_config_update_thread;
@@ -785,26 +785,34 @@ TEST(StMgr, test_runtime_config) {
     std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
     const heron::proto::system::PhysicalPlan* pplan = common.stmgrs_list_[i]->GetPhysicalPlan();
     heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
-    EXPECT_EQ(updated_config[topology_runtime_config_1], "1");
-    EXPECT_EQ(updated_config[topology_runtime_config_2], "2");
+    EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
+    EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
+    EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
+    EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
     heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
         runtime_test_spout, updated_spout_config);
-    EXPECT_EQ(updated_spout_config[spout_runtime_config], "3");
+    EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
+    EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
     heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
         runtime_test_bolt, updated_bolt_config);
-    EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "4");
+    EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
+    EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
   }
   std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
   const heron::proto::system::PhysicalPlan* pplan = common.tmaster_->getPhysicalPlan();
   heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
-  EXPECT_EQ(updated_config[topology_runtime_config_1], "1");
-  EXPECT_EQ(updated_config[topology_runtime_config_2], "2");
+  EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
+  EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
+  EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
+  EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
   heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
       runtime_test_spout, updated_spout_config);
-  EXPECT_EQ(updated_spout_config[spout_runtime_config], "3");
+  EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
+  EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
   heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
       runtime_test_bolt, updated_bolt_config);
-  EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "4");
+  EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
+  EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
 
   // Stop the schedulers
   for (size_t i = 0; i < common.ss_list_.size(); ++i) {

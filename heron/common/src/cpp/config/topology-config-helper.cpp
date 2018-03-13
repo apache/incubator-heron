@@ -71,7 +71,6 @@ TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) 
 
 bool TopologyConfigHelper::EnableMessageTimeouts(const proto::api::Topology& _topology) {
   sp_string value_true_ = "true";
-  std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
@@ -84,7 +83,6 @@ bool TopologyConfigHelper::EnableMessageTimeouts(const proto::api::Topology& _to
 }
 
 sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topology) {
-  std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
@@ -401,7 +399,7 @@ bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology
 
 // Return topology level config
 void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topology,
-                                             std::map<sp_string, sp_string>& retval) {
+                                             std::map<std::string, std::string>& retval) {
   if (_topology.has_topology_config()) {
     const proto::api::Config& config = _topology.topology_config();
     ConvertConfigToKVMap(config, retval);
@@ -410,7 +408,7 @@ void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topolo
 
 // Update topology level config
 void TopologyConfigHelper::SetTopologyConfig(proto::api::Topology* _topology,
-                                             const std::map<sp_string, sp_string>& _update) {
+                                             const std::map<std::string, std::string>& _update) {
   if (_topology->has_topology_config()) {
     proto::api::Config* config = _topology->mutable_topology_config();
     UpdateConfigFromKVMap(config, _update);
@@ -419,8 +417,8 @@ void TopologyConfigHelper::SetTopologyConfig(proto::api::Topology* _topology,
 
 // Return component level config
 void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topology,
-                                              const sp_string& _component_name,
-                                              std::map<sp_string, sp_string>& retval) {
+                                              const std::string& _component_name,
+                                              std::map<std::string, std::string>& retval) {
   // We are assuming component names are unique and returning the config
   // of the first spout or bolt found with the name.
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
@@ -446,8 +444,8 @@ void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topol
 
 // Update component level config
 void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
-                                              const sp_string& _component_name,
-                                              const std::map<sp_string, sp_string>& _update) {
+                                              const std::string& _component_name,
+                                              const std::map<std::string, std::string>& _update) {
   // We are assuming component names are unique and updating config for all instances
   // with the specific component name.
   for (sp_int32 i = 0; i < _topology->spouts_size(); ++i) {
@@ -467,14 +465,26 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
   }
 }
 
-// For every existing config, if it is in the new config, update the value
+// For every existing config, update the value; for every non-existing config, add it.
 void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
-                                                 const std::map<sp_string, sp_string>& _update) {
+    const std::map<std::string, std::string>& _kv_map) {
+  std::set<const std::string> updated;
   for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
-    const std::string& key = _config->mutable_kvs(i)->key();
-    std::map<sp_string, sp_string>::const_iterator iter = _update.find(key);
-    if (iter != _update.end()) {
-      _config->mutable_kvs(i)->set_value(iter->second);
+    // Runtime config has a postfix
+    const std::string key = _config->mutable_kvs(i)->key();
+    const std::map<std::string, std::string>::const_iterator it = _kv_map.find(key);
+    if (it != _kv_map.end()) {  // If the runtime config exists, update value
+      _config->mutable_kvs(i)->set_value(it->second);
+      updated.insert(key);
+    }
+  }
+  // After existing configs are updated, append the newly added ones
+  std::map<std::string, std::string>::const_iterator it;
+  for (it = _kv_map.begin(); it != _kv_map.end(); ++it) {
+    if (updated.find(it->first) == updated.end()) {
+      proto::api::Config::KeyValue* kv = _config->add_kvs();
+      kv->set_key(it->first);
+      kv->set_value(it->second);
     }
   }
 }
@@ -494,7 +504,7 @@ bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _to
 
 // Convert topology config to a key value map
 void TopologyConfigHelper::ConvertConfigToKVMap(const proto::api::Config& _config,
-                                                std::map<sp_string, sp_string>& retval) {
+                                                std::map<std::string, std::string>& retval) {
   for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
     retval[_config.kvs(i).key()] = _config.kvs(i).value();
   }
