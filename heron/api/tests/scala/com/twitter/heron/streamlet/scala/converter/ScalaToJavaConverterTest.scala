@@ -18,10 +18,12 @@ import com.twitter.heron.streamlet.Context
 
 import com.twitter.heron.streamlet.{
   Context,
+  SerializableBiFunction,
   SerializableConsumer,
   SerializableFunction,
   SerializablePredicate,
-  SerializableSupplier
+  SerializableSupplier,
+  Sink => JavaSink
 }
 
 import com.twitter.heron.streamlet.scala.Sink
@@ -54,12 +56,23 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         .isInstanceOf[SerializableFunction[String, Int]])
   }
 
+  test("ScalaToJavaConverterTest should support SerializableBiFunction") {
+    def numbersToStringFunction(number1: Int, number2: Long): String =
+      (number1.toLong + number2).toString
+    val serializableBiFunction =
+      ScalaToJavaConverter.toSerializableBiFunction[Int, Long, String](
+        numbersToStringFunction)
+    assertTrue(
+      serializableBiFunction
+        .isInstanceOf[SerializableBiFunction[Int, Long, String]])
+  }
+
   test("ScalaToJavaConverterTest should support Java Sink") {
     val javaSink =
       ScalaToJavaConverter.toJavaSink[Int](new TestSink[Int]())
     assertTrue(
       javaSink
-        .isInstanceOf[com.twitter.heron.streamlet.Sink[Int]])
+        .isInstanceOf[JavaSink[Int]])
   }
 
   test("ScalaToJavaConverterTest should support Java Source") {
