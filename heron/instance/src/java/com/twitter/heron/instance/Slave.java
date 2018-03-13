@@ -399,7 +399,7 @@ public class Slave implements Runnable, AutoCloseable {
   }
 
   @VisibleForTesting
-  public static double getOutputRate(Map<String, Object> topoConf) {
+  protected static double getOutputRate(Map<String, Object> topoConf) {
     if (topoConf.containsKey(Config.TOPOLOGY_COMPONENT_OUTPUT_TPS)
         && topoConf.containsKey(Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
       String tpsString = (String) topoConf.get(Config.TOPOLOGY_COMPONENT_OUTPUT_TPS);
