@@ -13,25 +13,28 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
+import scala.collection.JavaConverters
+
 import com.twitter.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
   SerializableTransformer,
+  Streamlet => JavaStreamlet,
   WindowConfig
 }
+import com.twitter.heron.streamlet.impl.{StreamletImpl => JavaStreamletImpl}
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet
+
 import com.twitter.heron.streamlet.scala.{Sink, Streamlet}
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
 object StreamletImpl {
 
-  def toScalaStreamlet[R](
-      javaStreamlet: com.twitter.heron.streamlet.Streamlet[R]): Streamlet[R] =
+  def fromJavaStreamlet[R](javaStreamlet: JavaStreamlet[R]): Streamlet[R] =
     new StreamletImpl[R](javaStreamlet)
 
-  def toJavaStreamlet[R](
-      streamlet: Streamlet[R]): com.twitter.heron.streamlet.Streamlet[R] =
+  def toJavaStreamlet[R](streamlet: Streamlet[R]): JavaStreamlet[R] =
     streamlet.asInstanceOf[StreamletImpl[R]].javaStreamlet
 
   /**
@@ -43,7 +46,7 @@ object StreamletImpl {
     val serializableSupplier = toSerializableSupplier[R](supplier)
     val newJavaStreamlet =
       new SupplierStreamlet[R](serializableSupplier)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
 }
@@ -53,8 +56,7 @@ object StreamletImpl {
   * Passed User defined Scala Functions are transformed to related FunctionalInterface versions and
   * related Java Streamlet is transformed to Scala version again.
   */
-class StreamletImpl[R](
-    val javaStreamlet: com.twitter.heron.streamlet.Streamlet[R])
+class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     extends Streamlet[R] {
 
   import StreamletImpl._
@@ -66,7 +68,7 @@ class StreamletImpl[R](
     * @return Returns back the Streamlet with changed name
     */
   override def setName(sName: String): Streamlet[R] =
-    toScalaStreamlet[R](javaStreamlet.setName(sName))
+    fromJavaStreamlet[R](javaStreamlet.setName(sName))
 
   /**
     * Gets the name of the Streamlet.
@@ -82,7 +84,7 @@ class StreamletImpl[R](
     * @return Returns back the Streamlet with changed number of partitions
     */
   override def setNumPartitions(numPartitions: Int): Streamlet[R] =
-    toScalaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
+    fromJavaStreamlet[R](javaStreamlet.setNumPartitions(numPartitions))
 
   /**
     * Gets the number of partitions of this Streamlet.
@@ -99,7 +101,7 @@ class StreamletImpl[R](
   override def map[T](mapFn: R => T): Streamlet[T] = {
     val serializableFunction = toSerializableFunction[R, T](mapFn)
     val newJavaStreamlet = javaStreamlet.map[T](serializableFunction)
-    toScalaStreamlet[T](newJavaStreamlet)
+    fromJavaStreamlet[T](newJavaStreamlet)
   }
 
   /**
@@ -120,7 +122,7 @@ class StreamletImpl[R](
   override def filter(filterFn: R => Boolean): Streamlet[R] = {
     val serializablePredicate = toSerializablePredicate[R](filterFn)
     val newJavaStreamlet = javaStreamlet.filter(serializablePredicate)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
   /**
@@ -128,7 +130,7 @@ class StreamletImpl[R](
     */
   override def repartition(numPartitions: Int): Streamlet[R] = {
     val newJavaStreamlet = javaStreamlet.repartition(numPartitions)
-    toScalaStreamlet[R](newJavaStreamlet)
+    fromJavaStreamlet[R](newJavaStreamlet)
   }
 
   /**
@@ -149,7 +151,14 @@ class StreamletImpl[R](
     *
     * @param numClones The number of clones to clone
     */
-  override def clone(numClones: Int): Seq[Streamlet[R]] = ???
+  override def clone(numClones: Int): Seq[Streamlet[R]] = {
+    val javaClonedStreamlets = javaStreamlet.clone(numClones)
+    val javaClonedStreamletsAsScalaList = JavaConverters
+      .asScalaBufferConverter(javaClonedStreamlets)
+      .asScala
+    javaClonedStreamletsAsScalaList.map(streamlet =>
+      fromJavaStreamlet[R](streamlet))
+  }
 
   /**
     * Return a new Streamlet by inner joining 'this streamlet with ‘other’ streamlet.
@@ -169,8 +178,19 @@ class StreamletImpl[R](
       thisKeyExtractor: R => K,
       otherKeyExtractor: S => K,
       windowCfg: WindowConfig,
-      joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] =
-    ???
+      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+    val javaOtherStreamlet = toJavaStreamlet[S](other)
+    val javaThisKeyExtractor = toSerializableFunction[R, K](thisKeyExtractor)
+    val javaOtherKeyExtractor = toSerializableFunction[S, K](otherKeyExtractor)
+    val javaJoinFunction = toSerializableBiFunction[R, S, T](joinFunction)
+
+    val newJavaStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
+                                                       javaThisKeyExtractor,
+                                                       javaOtherKeyExtractor,
+                                                       windowCfg,
+                                                       javaJoinFunction)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+  }
 
   /**
     * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
@@ -194,8 +214,20 @@ class StreamletImpl[R](
       otherKeyExtractor: S => K,
       windowCfg: WindowConfig,
       joinType: JoinType,
-      joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] =
-    ???
+      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+    val javaOtherStreamlet = toJavaStreamlet[S](other)
+    val javaThisKeyExtractor = toSerializableFunction[R, K](thisKeyExtractor)
+    val javaOtherKeyExtractor = toSerializableFunction[S, K](otherKeyExtractor)
+    val javaJoinFunction = toSerializableBiFunction[R, S, T](joinFunction)
+
+    val newJavaStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
+                                                       javaThisKeyExtractor,
+                                                       javaOtherKeyExtractor,
+                                                       windowCfg,
+                                                       joinType,
+                                                       javaJoinFunction)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+  }
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -232,7 +264,7 @@ class StreamletImpl[R](
       keyExtractor: R => K,
       windowCfg: WindowConfig,
       identity: T,
-      reduceFn: (T, R) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]] = ???
+      reduceFn: (T, R) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = ???
 
   /**
     * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
@@ -240,7 +272,7 @@ class StreamletImpl[R](
     */
   override def union(other: Streamlet[_ <: R]): Streamlet[R] = {
     val newJavaStreamlet = javaStreamlet.union(toJavaStreamlet(other))
-    toScalaStreamlet(newJavaStreamlet)
+    fromJavaStreamlet(newJavaStreamlet)
   }
 
   /**
@@ -293,12 +325,11 @@ class StreamletImpl[R](
     *
     * @return The kid streamlets
     */
-  private[impl] def getChildren
-    : List[com.twitter.heron.streamlet.impl.StreamletImpl[_]] = {
+  private[impl] def getChildren: List[JavaStreamletImpl[_]] = {
     import _root_.scala.collection.JavaConversions._
     val children =
       javaStreamlet
-        .asInstanceOf[com.twitter.heron.streamlet.impl.StreamletImpl[_]]
+        .asInstanceOf[JavaStreamletImpl[_]]
         .getChildren
     children.toList
   }

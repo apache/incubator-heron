@@ -16,20 +16,20 @@ package com.twitter.heron.streamlet.scala.impl
 import com.twitter.heron.streamlet.scala.{Builder, Source, Streamlet}
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
 
-
-class BuilderImpl(builder: com.twitter.heron.streamlet.Builder) extends Builder {
+class BuilderImpl(builder: com.twitter.heron.streamlet.Builder)
+    extends Builder {
 
   override def newSource[R](supplierFn: () => R): Streamlet[R] = {
-    val serializableSupplier = ScalaToJavaConverter.toSerializableSupplier[R](supplierFn)
+    val serializableSupplier =
+      ScalaToJavaConverter.toSerializableSupplier[R](supplierFn)
     val newJavaStreamlet = builder.newSource(serializableSupplier)
-    StreamletImpl.toScalaStreamlet[R](newJavaStreamlet)
+    StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
   }
-
 
   override def newSource[R](sourceFn: Source[R]): Streamlet[R] = {
     val javaSourceObj = ScalaToJavaConverter.toJavaSource[R](sourceFn)
     val newJavaStreamlet = builder.newSource(javaSourceObj)
-    StreamletImpl.toScalaStreamlet[R](newJavaStreamlet)
+    StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
   }
 
 }
