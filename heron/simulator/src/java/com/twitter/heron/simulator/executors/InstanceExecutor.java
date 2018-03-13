@@ -66,7 +66,7 @@ public class InstanceExecutor implements Runnable {
     streamOutQueue = new Communicator<>();
     metricsOutQueue = new Communicator<>();
     looper = new SlaveLooper();
-    outputRateLimiter = RateLimiter.create(10000000);
+    outputRateLimiter = RateLimiter.create(Double.MAX_VALUE);
 
     MetricsCollector metricsCollector = new MetricsCollector(looper, metricsOutQueue);
 
