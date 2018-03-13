@@ -2,3 +2,7 @@
 heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz
 
 heron.package.use_core_uri:                  true
+
+# Can use API Server to distribute core
+#heron.package.core.uri:                      http://localhost:9000/api/v1/file/download/core
+

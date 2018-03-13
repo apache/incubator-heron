@@ -18,10 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,9 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
-import org.eclipse.jetty.util.StringUtil;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -124,27 +121,35 @@ public class FileResource extends HeronResource {
  */
   @GET
   @Path("/download/{file}")
-  public Response downloadPdfFile(final @PathParam("file") String file) {
+  public Response downloadFile(final @PathParam("file") String file) {
     Config config = createConfig();
     String uploadDir = config.getStringValue(FILE_SYSTEM_DIRECTORY);
     String filePath = uploadDir + "/" + file;
-    if (!new File(filePath).exists()) {
-      LOG.debug("Download request file " + file + " doesn't exist at " + uploadDir);
+    return getResponseByFile(filePath);
+  }
+
+  /**
+   * Endpoint for downloading Heron Core
+   */
+  @GET
+  @Path("/download/core")
+  public Response downloadHeronCore() {
+    String corePath = getHeronCorePackagePath();
+    return getResponseByFile(corePath);
+  }
+
+  private Response getResponseByFile(String filePath) {
+
+    File file = new File(filePath);
+    if (!file.exists()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
-    StreamingOutput fileStream = new StreamingOutput() {
-      @Override
-      public void write(java.io.OutputStream output) throws IOException {
-          java.nio.file.Path path = Paths.get(filePath);
-          byte[] data = Files.readAllBytes(path);
-          output.write(data);
-          output.flush();
-      }
-    };
-    return Response
-        .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-        .header("content-disposition", "attachment; filename = " + file)
-        .build();
+    String mimeType = new MimetypesFileTypeMap().getContentType(file);
+    Response.ResponseBuilder rb = Response.ok(file, mimeType);
+    rb.header("content-disposition", "attachment; filename = "
+        + file.getName());
+    return rb.build();
+
   }
 
   private Config createConfig() {
@@ -155,10 +160,14 @@ public class FileResource extends HeronResource {
 
   private String getHostNameOrIP() {
     // Override hostname if provided in flags
-    if (StringUtil.isNotBlank(getDownloadHostName())) {
+    if (Utils.isNotEmpty(getDownloadHostName())) {
       return getDownloadHostName();
+    } else if (Utils.isNotEmpty(hostname)) {
+      return hostname;
+    } else if (ip != null && !ip.toString().isEmpty()) {
+      return ip.toString();
     }
-    return (hostname != null) ? hostname : ((ip != null) ? ip.toString() : "");
+    return "";
   }
 
 }

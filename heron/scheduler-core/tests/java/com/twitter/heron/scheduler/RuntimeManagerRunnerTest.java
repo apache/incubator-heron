@@ -63,7 +63,7 @@ public class RuntimeManagerRunnerTest {
   }
 
   private RuntimeManagerRunner newRuntimeManagerRunner(Command command, ISchedulerClient client) {
-    return spy(new RuntimeManagerRunner(config, runtime, command, client));
+    return spy(new RuntimeManagerRunner(config, runtime, command, client, false));
   }
 
   @Test

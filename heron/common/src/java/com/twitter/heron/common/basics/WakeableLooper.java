@@ -37,6 +37,8 @@ import java.util.PriorityQueue;
  * <p>
  * So to use this class, user could add the persistent tasks, one time tasks and timer tasks as many
  * as they want.
+ * Most methods except the onExit() are not thread-safe.
+ * People should handle the concurrent scenarios in their business logic rather than in this class.
  */
 public abstract class WakeableLooper {
   // The tasks could only be added but not removed
@@ -44,7 +46,7 @@ public abstract class WakeableLooper {
   private final PriorityQueue<TimerTask> timers;
 
   // The tasks would be invoked before exit
-  private final ArrayList<Runnable> exitTasks;
+  private final List<Runnable> exitTasks;
 
   // For selector since there is bug in selector.select(timeout): we could not
   // use a timeout > 10 * Integer.MAX_VALUE
@@ -52,26 +54,40 @@ public abstract class WakeableLooper {
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private static final Duration INFINITE_FUTURE = Duration.ofMillis(Integer.MAX_VALUE);
   private volatile boolean exitLoop;
+  // this boolean is set when the tasksOnWakeup list is cleared.
+  // this boolean is need if it is one of the tasks in taskOnWakeup that clears the list
+  private boolean terminateAllTasksOnWakeup;
+  // this boolean is set when the exitTasks list is cleared.
+  // this boolean is need if it is one of the tasks in exitTask that clears the list
+  private boolean terminateAllExitTasks;
 
   public WakeableLooper() {
     exitLoop = false;
-    tasksOnWakeup = new ArrayList<Runnable>();
+    tasksOnWakeup = new ArrayList<>();
     timers = new PriorityQueue<TimerTask>();
     exitTasks = new ArrayList<>();
+    terminateAllTasksOnWakeup = false;
+    terminateAllExitTasks = false;
   }
 
   public void clear() {
-    tasksOnWakeup.clear();
-    timers.clear();
-    exitTasks.clear();
+    clearTasksOnWakeup();
+    clearTimers();
+    clearExitTasks();
   }
 
   public void clearTasksOnWakeup() {
     tasksOnWakeup.clear();
+    terminateAllTasksOnWakeup = true;
   }
 
   public void clearTimers() {
     timers.clear();
+  }
+
+  public void clearExitTasks() {
+    exitTasks.clear();
+    terminateAllExitTasks = true;
   }
 
   public void loop() {
@@ -92,9 +108,15 @@ public abstract class WakeableLooper {
   }
 
   private void onExit() {
-    for (Runnable r : exitTasks) {
-      r.run();
+    int s = exitTasks.size();
+    for (int i = 0; i < s; i++) {
+      // this flag is not thread safe!
+      if (terminateAllExitTasks) {
+        break;
+      }
+      exitTasks.get(i).run();
     }
+    terminateAllExitTasks = false;
   }
 
   protected abstract void doWait();
@@ -157,8 +179,13 @@ public abstract class WakeableLooper {
     // We pre-get the size to avoid execute the tasks added during execution
     int s = tasksOnWakeup.size();
     for (int i = 0; i < s; i++) {
+      // this flag is not thread safe
+      if (terminateAllTasksOnWakeup) {
+        break;
+      }
       tasksOnWakeup.get(i).run();
     }
+    terminateAllTasksOnWakeup = false;
   }
 
   private void triggerExpiredTimers(long currentTime) {

@@ -26,7 +26,7 @@ trait Source[T] extends Serializable {
 
   def setup(context: Context): Unit
 
-  def get: scala.Iterable[T]
+  def get(): scala.Iterable[T]
 
   def cleanup(): Unit
 

@@ -10,7 +10,7 @@ You can use Heron in standalone mode using the `heron-admin` CLI tool, which can
 
 ## Requirements
 
-In order to run Heron in standalone mode, you'll need to run a [ZooKeeper](https://zookeeper.apache.org) cluster.
+In order to run Heron in standalone mode, you'll need to run a [ZooKeeper](https://zookeeper.apache.org) cluster. You will also need to be able to ssh into all the nodes that you want to have in your standalone cluster from the node that your are setting up the cluster.
 
 ## Configuration
 
@@ -31,7 +31,7 @@ zookeepers:
 - 127.0.0.1
 ```
 
-You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
+You can modify the file to include all hosts for your standalone cluster and for ZooKeeper. Remember you need to be able to ssh into all the nodes listed in the cluster section. Once you've added the lists of hosts for the Heron standalone cluster and ZooKeeper and saved the file, you can move on to [starting the cluster](#starting-and-stopping-the-cluster).
 
 > To run Heron in standalone mode locally on your laptop, use the defaults that are already provided in the `inventory.yaml` file.
 
@@ -171,6 +171,17 @@ $ heron submit standalone \
   WindowedWordCount
 ```
 
+You can also specify the service url as part of the submission command:
+
+```bash
+$ heron submit standalone \
+  --service-url http://localhost:9000 \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCount
+```
+
+
 Once the topology has been submitted, it can be deactivated, killed, updated, and so on, just like topologies on any other scheduler.
 
 ## Managing Nomad
@@ -178,3 +189,36 @@ Once the topology has been submitted, it can be deactivated, killed, updated, an
 Heron standalone uses [Nomad](https://www.nomadproject.io/) as a scheduler. For the most part, you shouldn't need to interact with Nomad when managing your Heron standalone cluster. If you do need to manage Nomad directly, however, you can do so using the `heron-nomad` executable, which is installed at `~/.heron/bin/heron-nomad`. That executable is essentially an alias for the `nomad` CLI tool. You can find documentation in the [official Nomad docs](https://www.nomadproject.io/docs/commands/index.html).
 
 You can also access the [Nomad Web UI](https://www.nomadproject.io/guides/ui.html) on port 4646 of any master node in the Heron cluster. You can see a list of master nodes by running `heron-admin standalone info`. If you're running a standalone cluster locally on your machine, you can access the Nomad UI at `localhost:4646`.
+
+## Debugging Help
+
+The locations of the logs for the Nomad Server (master node) and Nomad Clients (slave nodes) are located at '/tmp/nomad_server_log' and '/tmp/nomad_client.log' respectively. Please look through these logs to see if there was a error setting up the Nomad cluster
+
+### Common Problems
+
+If you see the following in '/tmp/nomad_server_log'
+
+```bash
+Error starting agent: Failed to start Consul server: Failed to start lan serf: Failed to parse advertise address!
+```
+
+The Nomad server cannot determine the network address to advertise itself on.  You will need to manually set that address. You can do that by modifying the configuration file:
+
+~/.heron/conf/standalone/resources/master.hcl 
+
+You will need to add a stanza like:
+
+advertise {
+  # Defaults to the node's hostname. If the hostname resolves to a loopback
+  # address you must manually configure advertise addresses.
+  http = "1.2.3.4"
+  rpc  = "1.2.3.4"
+  serf = "1.2.3.4:5648" # non-default ports may be specified
+}
+
+Please reference:
+
+https://www.nomadproject.io/docs/agent/configuration/index.html
+
+You can then stop the cluster and restart.
+

@@ -11,12 +11,21 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala.common
 
-import org.scalatest.FunSuite
+package com.twitter.heron.api.exception;
 
 /**
-  * Base abstract class for all unit tests in Heron Streamlet Scala API
-  * in order to keep common test functionality.
-  */
-private[scala] abstract class BaseFunSuite extends FunSuite
+ * Thrown to indicate that the application has attempted to submit an invalid topology.
+ */
+public class TopologySubmissionException extends RuntimeException {
+
+  private static final long serialVersionUID = -5045350685867299824L;
+
+  public TopologySubmissionException(String message) {
+    super(message);
+  }
+
+  public TopologySubmissionException(String message, Throwable cause) {
+    super(message, cause);
+  }
+}

@@ -11,12 +11,22 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala.common
+package com.twitter.heron.streamlet.scala
 
-import org.scalatest.FunSuite
+import java.io.Serializable
+import com.twitter.heron.streamlet.Context
 
 /**
-  * Base abstract class for all unit tests in Heron Streamlet Scala API
-  * in order to keep common test functionality.
+  * Sink is how Streamlet's end. The put method invocation consumes the tuple into say
+  * external database/cache, etc. setup/cleanup is where the sink can do any one time setup work,
+  * like establishing/closing connection to sources, etc.
   */
-private[scala] abstract class BaseFunSuite extends FunSuite
+trait Sink[T] extends Serializable {
+
+  def setup(context: Context): Unit
+
+  def put(tuple: T): Unit
+
+  def cleanup(): Unit
+
+}
