@@ -2,9 +2,7 @@
 title: Nomad
 ---
 
-Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler.
-
-> Heron's [standalone](../standalone) mode uses Nomad as the scheduler. You can also use Nomad for large-scale Heron deployments.
+Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler. You can use Nomad for either small- or large-scale Heron deployments or to run Heron locally in [standalone mode](../standalone).
 
 ## Nomad setup
 
