@@ -293,6 +293,9 @@ public final class SchedulerUtils {
 
     args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
         Context.metricsCacheManagerClassPath(config)));
+    String metricscacheMgrMode = Context.metricscacheMgrMode(config)
+        == null ? "disabled" : Context.metricscacheMgrMode(config);
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMode, metricscacheMgrMode));
 
     Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
     args.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
