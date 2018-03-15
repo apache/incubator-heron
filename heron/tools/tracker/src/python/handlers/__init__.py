@@ -24,4 +24,5 @@ from runtimestatehandler import RuntimeStateHandler
 from schedulerlocationhandler import SchedulerLocationHandler
 from stateshandler import StatesHandler
 from topologieshandler import TopologiesHandler
+from topologyconfighandler import TopologyConfigHandler
 from topologyhandler import TopologyHandler
