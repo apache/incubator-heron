@@ -34,6 +34,8 @@ void BaseClient::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
   connection_options_.high_watermark_ = options_.get_high_watermark();
   connection_options_.low_watermark_ = options_.get_low_watermark();
+  connection_options_.read_bps_ = options_.get_read_bps();
+  connection_options_.burst_read_bps_ = options_.get_burst_read_bps();
   state_ = DISCONNECTED;
 }
 

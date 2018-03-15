@@ -69,12 +69,14 @@ class ConnectionEndPoint {
 
 /**
  * Options that the server passes to the Connection.
- * Currently we just have the maximum packet size allowed.
+ * Note that some options might be updatable in runtime.
  */
 struct ConnectionOptions {
   sp_uint32 max_packet_size_;
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+  sp_int64 read_bps_;           // updatable in runtime
+  sp_int64 burst_read_bps_;     // updatable in runtime
 };
 
 /*
@@ -128,6 +130,12 @@ class BaseConnection {
    * Gets the total outstanding bytes pending to be sent
    */
   sp_int32 getOutstandingBytes() const;
+
+  /**
+   * Set rate limiting (bytes per second). negative bps means no rate limiting.
+   * Currently only available to read traffic
+   */
+  bool setRateLimit(sp_int64 read_bps, sp_int64 burst_read_bps);
 
  protected:
   /**
@@ -201,6 +209,9 @@ class BaseConnection {
   EventLoop* mEventLoop;
   // The underlying bufferevent
   struct bufferevent* buffer_;
+
+  // The config for rate limit (bytes per second) on read
+  struct ev_token_bucket_cfg* read_rate_limit_cfg_;
 };
 
 #endif  // HERON_COMMON_SRC_CPP_NETWORK_BASECONNECTION_H_

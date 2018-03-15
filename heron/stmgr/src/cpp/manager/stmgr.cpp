@@ -314,6 +314,9 @@ void StMgr::StartInstanceServer() {
       1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
+
+  sops.set_read_bps(-1);        // No rate limiting at beginning
+  sops.set_burst_read_bps(-1);
   instance_server_ = new InstanceServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_,
                      instances_, this, metrics_manager_client_,
                      neighbour_calculator_,
@@ -589,6 +592,7 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   if (!stateful_restorer_) {
     clientmgr_->StartConnections(pplan_);
   }
+  instance_server_->UpdateRateLimiters(_pplan->topology());
   instance_server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 

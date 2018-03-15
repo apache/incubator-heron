@@ -50,6 +50,10 @@ class NetworkOptions {
   // applicable only for unix sockets
   void set_sin_path(const std::string& socket_path);
 
+  // set rate limiting parameters
+  void set_read_bps(sp_int64 read_bps);
+  void set_burst_read_bps(sp_int64 burst_read_bps);
+
   // get functions for inet address family
   sp_string get_host() const;
   sp_int32 get_port() const;
@@ -72,6 +76,10 @@ class NetworkOptions {
   // get the unix path
   const std::string& get_sin_path() const;
 
+  // get rate limiting parameters
+  sp_int64 get_read_bps() const;
+  sp_int64 get_burst_read_bps() const;
+
  private:
   // The host that we shd bind on
   sp_string host_;
@@ -91,6 +99,10 @@ class NetworkOptions {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  // Rate limiting options
+  sp_int64 read_bps_;
+  sp_int64 burst_read_bps_;
 };
 
 #endif  // NETWORKOPTIONS_H_

@@ -90,6 +90,8 @@ class InstanceServer : public Server {
   void AttemptStopBackPressureFromSpouts();
   // Start back pressure on the spouts
   void StartBackPressureOnSpouts();
+  // Extract settings from config and update the rate limiters in connections
+  void UpdateRateLimiters(const proto::api::Topology& _topology);
 
  protected:
   virtual void HandleNewConnection(Connection* newConnection);

@@ -34,6 +34,8 @@ NetworkOptions::NetworkOptions() {
   sin_path_ = "";
   high_watermark_ = systemHWMOutstandingBytes;
   low_watermark_ = systemLWMOutstandingBytes;
+  read_bps_ = -1;        // No rate limiting
+  burst_read_bps_ = -1;
 }
 
 NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
@@ -44,6 +46,8 @@ NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
   high_watermark_ = _copyFrom.get_high_watermark();
   low_watermark_ = _copyFrom.get_low_watermark();
   sin_path_ = _copyFrom.get_sin_path();
+  read_bps_ = _copyFrom.get_read_bps();
+  burst_read_bps_ = _copyFrom.get_burst_read_bps();
 }
 
 NetworkOptions::~NetworkOptions() {}
@@ -88,3 +92,11 @@ sp_int32 NetworkOptions::get_sin_family() const {
 void NetworkOptions::set_sin_path(const std::string& _sin_path) { sin_path_ = _sin_path; }
 
 const std::string& NetworkOptions::get_sin_path() const { return sin_path_; }
+
+void NetworkOptions::set_read_bps(sp_int64 _bps) { read_bps_ = _bps; }
+
+sp_int64 NetworkOptions::get_read_bps() const { return read_bps_; }
+
+void NetworkOptions::set_burst_read_bps(sp_int64 _burst_bps) { burst_read_bps_ = _burst_bps; }
+
+sp_int64 NetworkOptions::get_burst_read_bps() const { return burst_read_bps_; }

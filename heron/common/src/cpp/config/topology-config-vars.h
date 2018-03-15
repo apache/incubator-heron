@@ -59,6 +59,7 @@ class TopologyConfigVars {
   static const sp_string TOPOLOGY_TEAM_EMAIL;
   static const sp_string TOPOLOGY_CAP_TICKET;
   static const sp_string TOPOLOGY_PROJECT_NAME;
+  static const sp_string TOPOLOGY_COMPONENT_OUTPUT_BPS;
 };
 }  // namespace config
 }  // namespace heron
