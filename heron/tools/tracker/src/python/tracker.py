@@ -477,7 +477,8 @@ class Tracker(object):
       shell_port = stmgrInfo["shell_port"]
 
 
-      # instance_id format contaner_1_component_1
+      # instance_id format container_<index>_component_1
+      # group name is container_<index>
       group_name = instance_id.rsplit("_", 2)[0]
       igroup = instance_groups.get(group_name, list())
       igroup.append(instance_id)
