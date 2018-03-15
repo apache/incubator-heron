@@ -29,6 +29,7 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/topology-config-helper.h"
 #include "metrics/metrics.h"
 
 namespace heron {
@@ -74,12 +75,12 @@ const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10_s;
 
 
 InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _options,
-                         const sp_string& _topology_name, const sp_string& _topology_id,
-                         const sp_string& _stmgr_id,
-                         const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-                         heron::common::MetricsMgrSt* _metrics_manager_client,
-                         NeighbourCalculator* _neighbour_calculator,
-                         bool _droptuples_upon_backpressure)
+                               const sp_string& _topology_name, const sp_string& _topology_id,
+                               const sp_string& _stmgr_id,
+                               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
+                               heron::common::MetricsMgrSt* _metrics_manager_client,
+                               NeighbourCalculator* _neighbour_calculator,
+                               bool _droptuples_upon_backpressure)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -252,7 +253,7 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
 }
 
 void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
-                                                proto::stmgr::RegisterInstanceRequest* _request) {
+    proto::stmgr::RegisterInstanceRequest* _request) {
   LOG(INFO) << "Got HandleRegisterInstanceRequest from connection " << _conn << " and instance "
             << _request->instance().instance_id();
   // Do some basic checks
@@ -421,7 +422,25 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
   for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
     LOG(INFO) << "Sending new physical plan to instance with task_id: " << iter->second;
-    SendMessage(iter->first, new_assignment);
+    Connection* conn = iter->first;
+    SendMessage(conn, new_assignment);
+    // Update connection's rate limiting base on component config
+    sp_int32 id = iter->second;
+    const std::string component = instance_info_[id]->instance_->info().component_name();
+    ApplyRateLimit(_pplan, component, conn);
+  }
+}
+
+void InstanceServer::ApplyRateLimit(const proto::system::PhysicalPlan& _pplan,
+                                    const std::string& _component,
+                                    Connection* _conn) const {
+  sp_int64 read_bsp =
+      config::TopologyConfigHelper::GetComponentOutputBPS(_pplan.topology(), _component);
+  if (read_bsp > 0) {
+    sp_int64 burst_read_bsp = read_bsp + read_bsp / 2;
+    _conn->applyRateLimit(read_bsp, burst_read_bsp);
+  } else {
+    _conn->disableRateLimit();
   }
 }
 

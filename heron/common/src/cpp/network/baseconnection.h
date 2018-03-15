@@ -74,9 +74,6 @@ struct ConnectionOptions {
   sp_uint32 max_packet_size_;
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
-  // Rate limiting options. Rate limiting is off when any of them is negative
-  sp_int64 read_bps_;
-  sp_int64 burst_read_bps_;
 };
 
 /*
@@ -132,10 +129,16 @@ class BaseConnection {
   sp_int32 getOutstandingBytes() const;
 
   /**
-   * Set rate limiting (bytes per second). negative bps means no rate limiting.
-   * Currently only available to read traffic
+   * Set rate limiting (bytes per second). Both arguments should be positive.
+   * The function can be called multiple times. Return false when it fails to
+   * apply the new rate limit.
    */
-  bool applyRateLimit();
+  bool applyRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps);
+
+  /**
+   * Disable rate limiting.
+   */
+  void disableRateLimit();
 
  protected:
   /**
@@ -211,7 +214,9 @@ class BaseConnection {
   struct bufferevent* buffer_;
 
   // The config for rate limit (bytes per second) on read
-  struct ev_token_bucket_cfg* read_rate_limit_cfg_;
+  sp_int64 read_bps_;
+  sp_int64 burst_read_bps_;
+  struct ev_token_bucket_cfg* rate_limit_cfg_;
 };
 
 #endif  // HERON_COMMON_SRC_CPP_NETWORK_BASECONNECTION_H_

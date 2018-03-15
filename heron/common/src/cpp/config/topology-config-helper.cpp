@@ -411,6 +411,17 @@ const std::string TopologyConfigHelper::GetConfigValue(const proto::api::Config&
   return _default;
 }
 
+bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
+                                                 const std::string& _config_name,
+                                                 bool _default_value) {
+  const sp_string value_true_ = "true";
+  const proto::api::Config& cfg = _topology.topology_config();
+  const std::string value = GetConfigValue(cfg, _config_name, "");
+  if (!value.empty()) {
+    return value_true_.compare(value.c_str()) == 0;
+  }
+  return _default_value;
+}
 
 const std::string TopologyConfigHelper::GetComponentConfigValue(
     const proto::api::Topology& _topology,
@@ -423,9 +434,8 @@ const std::string TopologyConfigHelper::GetComponentConfigValue(
       return GetConfigValue(config, _key, _default);
     }
   }
-  for (auto bolt : _topology.bolts()) {
+  for (auto bolt : _topology.bolts()) {  // Found the component
     if (bolt.comp().name() == _component) {
-      // return &bolt.comp().config();
       const proto::api::Config& config = bolt.comp().config();
       return GetConfigValue(config, _key, _default);
     }
@@ -442,18 +452,6 @@ sp_int64 TopologyConfigHelper::GetComponentOutputBPS(const proto::api::Topology&
     return atol(value.c_str());
   }
   return -1;  // default to -1 (no rate limit)
-}
-
-bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
-                                                 const std::string& _config_name,
-                                                 bool _default_value) {
-  sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  const std::string value = GetConfigValue(cfg, _config_name, "");
-  if (!value.empty()) {
-    return value_true_.compare(value.c_str()) == 0;
-  }
-  return _default_value;
 }
 }  // namespace config
 }  // namespace heron

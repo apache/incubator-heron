@@ -134,7 +134,7 @@ class BaseServer {
   // The socket that we are listening on
   sp_int32 listen_fd_;
 
-  // When we create a Connection structure, we use the following options
+  // When we create a Connection structure, we use the following options as base
   ConnectionOptions connection_options_;
 
   // The options of this server.
