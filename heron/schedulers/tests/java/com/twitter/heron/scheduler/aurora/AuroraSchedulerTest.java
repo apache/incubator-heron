@@ -324,6 +324,7 @@ public class AuroraSchedulerTest {
             + " --python-instance-binary=" + expectedBin + "/heron-python-instance"
             + " --cpp-instance-binary=" + expectedBin + "/heron-cpp-instance"
             + " --metricscache-manager-classpath=" + expectedLib + "/metricscachemgr/*"
+            + " --metricscache-manager-mode=disabled"
             + " --is-stateful=false"
             + " --checkpoint-manager-classpath=" + expectedLib + "/ckptmgr/*:"
             + expectedLib + "/statefulstorage/*:"
