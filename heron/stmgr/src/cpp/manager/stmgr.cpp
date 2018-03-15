@@ -592,7 +592,6 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   if (!stateful_restorer_) {
     clientmgr_->StartConnections(pplan_);
   }
-  instance_server_->UpdateRateLimiters(_pplan->topology());
   instance_server_->BroadcastNewPhysicalPlan(*pplan_);
 }
 

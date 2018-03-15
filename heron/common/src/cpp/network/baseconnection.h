@@ -69,14 +69,14 @@ class ConnectionEndPoint {
 
 /**
  * Options that the server passes to the Connection.
- * Note that some options might be updatable in runtime.
  */
 struct ConnectionOptions {
   sp_uint32 max_packet_size_;
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
-  sp_int64 read_bps_;           // updatable in runtime
-  sp_int64 burst_read_bps_;     // updatable in runtime
+  // Rate limiting options. Rate limiting is off when any of them is negative
+  sp_int64 read_bps_;
+  sp_int64 burst_read_bps_;
 };
 
 /*
@@ -135,7 +135,7 @@ class BaseConnection {
    * Set rate limiting (bytes per second). negative bps means no rate limiting.
    * Currently only available to read traffic
    */
-  bool setRateLimit(sp_int64 read_bps, sp_int64 burst_read_bps);
+  bool applyRateLimit();
 
  protected:
   /**

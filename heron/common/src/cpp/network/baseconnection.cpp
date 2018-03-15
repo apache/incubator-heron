@@ -51,11 +51,9 @@ BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* 
   mOnClose = NULL;
   bufferevent_options boptions = BEV_OPT_DEFER_CALLBACKS;
   buffer_ = bufferevent_socket_new(mEventLoop->dispatcher(), mEndpoint->get_fd(), boptions);
-  // No rate limiting at beginning
-  read_rate_limit_cfg_ = NULL;
-  if (mOptions->read_bps_ >= 0 && mOptions->burst_read_bps_ >= 0) {
-    read_rate_limit_cfg_ = ev_token_bucket_cfg_new(mOptions->read_bps_, mOptions->burst_read_bps_,
-                                                   EV_RATE_LIMIT_MAX, EV_RATE_LIMIT_MAX, NULL);
+  // Set rate limiting
+  if (!applyRateLimit()) {
+    LOG(ERROR) << "Faild to apply read rate limiteing";
   }
 }
 
@@ -188,27 +186,19 @@ sp_int32 BaseConnection::getOutstandingBytes() const {
   return evbuffer_get_length(bufferevent_get_output(buffer_));
 }
 
-bool BaseConnection::setRateLimit(sp_int64 _read_bps, sp_int64 _burst_read_bps) {
+bool BaseConnection::applyRateLimit() {
   bool ret = true;
-  if (_read_bps != mOptions->read_bps_ || _burst_read_bps != mOptions->burst_read_bps_) {
-    struct ev_token_bucket_cfg* new_rate_limit_cfg = NULL;
-    if (_read_bps >= 0 && _burst_read_bps >= 0) {
-      // Create new config
-      new_rate_limit_cfg = ev_token_bucket_cfg_new(_read_bps, _burst_read_bps,
-                                                  EV_RATE_LIMIT_MAX, EV_RATE_LIMIT_MAX, NULL);
-    }
-    if (bufferevent_set_rate_limit(buffer_, new_rate_limit_cfg) == -1) {
-      ret = false;
-      LOG(ERROR) << "Faild to apply read rate limiter\n";
-    }
-    // Release the old config
-    if (read_rate_limit_cfg_) {
-      ev_token_bucket_cfg_free(read_rate_limit_cfg_);
-    }
-    // Keep track of current config
-    mOptions->read_bps_ = _read_bps;
-    mOptions->burst_read_bps_ = _burst_read_bps;
-    read_rate_limit_cfg_ = new_rate_limit_cfg;
+  struct ev_token_bucket_cfg* new_rate_limit_cfg = NULL;
+  if (mOptions->read_bps_ >= 0 && mOptions->burst_read_bps_ >= 0) {
+    // Create new config
+      new_rate_limit_cfg = ev_token_bucket_cfg_new(mOptions->read_bps_, mOptions->burst_read_bps_,
+                                                   EV_RATE_LIMIT_MAX, EV_RATE_LIMIT_MAX, NULL);
   }
+  // Apply to bufferevent
+  if (bufferevent_set_rate_limit(buffer_, new_rate_limit_cfg) == -1) {
+    ret = false;
+    LOG(ERROR) << "Faild to apply rate limiting to bufferevent ";
+  }
+  read_rate_limit_cfg_ = new_rate_limit_cfg;
   return ret;
 }

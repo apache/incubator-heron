@@ -328,19 +328,6 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
   delete _request;
 }
 
-void InstanceServer::UpdateRateLimiters(const proto::api::Topology& _topology) {
-  for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
-    // Get component name for the instance
-    const InstanceData* data = instance_info_[iter->second];
-    std::string component_name = data->instance_->info().component_name();
-    // Get component config
-    sp_int64 output_bps =
-        config::TopologyConfigHelper::GetComponentOutputBPS(_topology, component_name);
-    sp_int64 output_burst_bps = output_bps + output_bps / 2;
-    iter->first->setRateLimit(output_bps, output_burst_bps);
-  }
-}
-
 void InstanceServer::HandleTupleSetMessage(Connection* _conn,
                                         proto::system::HeronTupleSet* _message) {
   auto iter = active_instances_.find(_conn);
