@@ -19,14 +19,17 @@ import com.twitter.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
-  SerializableTransformer,
   Streamlet => JavaStreamlet,
   WindowConfig
 }
 import com.twitter.heron.streamlet.impl.{StreamletImpl => JavaStreamletImpl}
 import com.twitter.heron.streamlet.impl.streamlets.SupplierStreamlet
 
-import com.twitter.heron.streamlet.scala.{Sink, Streamlet}
+import com.twitter.heron.streamlet.scala.{
+  SerializableTransformer,
+  Sink,
+  Streamlet
+}
 import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
 object StreamletImpl {
@@ -244,7 +247,18 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       keyExtractor: R => K,
       valueExtractor: R => V,
       windowCfg: WindowConfig,
-      reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]] = ???
+      reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaValueExtractor = toSerializableFunction[R, V](valueExtractor)
+    val javaReduceFunction = toSerializableBinaryOperator[V](reduceFn)
+
+    val newJavaStreamlet = javaStreamlet.reduceByKeyAndWindow[K, V](
+      javaKeyExtractor,
+      javaValueExtractor,
+      windowCfg,
+      javaReduceFunction)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], V]](newJavaStreamlet)
+  }
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -264,7 +278,17 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       keyExtractor: R => K,
       windowCfg: WindowConfig,
       identity: T,
-      reduceFn: (T, R) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = ???
+      reduceFn: (T, R) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaReduceFunction = toSerializableBiFunction[T, R, T](reduceFn)
+
+    val newJavaStreamlet = javaStreamlet.reduceByKeyAndWindow[K, T](
+      javaKeyExtractor,
+      windowCfg,
+      identity,
+      javaReduceFunction)
+    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+  }
 
   /**
     * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
@@ -286,7 +310,13 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     */
   override def transform[T](
       serializableTransformer: SerializableTransformer[R, _ <: T])
-    : Streamlet[T] = ???
+    : Streamlet[T] = {
+    val javaSerializableTransformer =
+      toSerializableTransformer[R, T](serializableTransformer)
+    val newJavaStreamlet =
+      javaStreamlet.transform[T](javaSerializableTransformer)
+    fromJavaStreamlet(newJavaStreamlet)
+  }
 
   /**
     * Logs every element of the streamlet using String.valueOf function

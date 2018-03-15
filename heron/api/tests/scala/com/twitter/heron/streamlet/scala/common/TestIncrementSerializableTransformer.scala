@@ -11,24 +11,19 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala
-
-import java.io.Serializable
+package com.twitter.heron.streamlet.scala.common
 
 import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.scala.SerializableTransformer
 
 /**
-  * Source is how Streamlet's originate. The get method
-  * invocation returns new element that form the tuples of the streamlet.
-  * setup/cleanup is where the generator can do any one time setup work, like
-  * establishing/closing connection to sources, etc.
+  * Test Increment SerializableTransformer
   */
-trait Source[T] extends Serializable {
+class TestIncrementSerializableTransformer(factor: Int)
+    extends SerializableTransformer[Int, Int] {
+  override def setup(context: Context): Unit = {}
 
-  def setup(context: Context): Unit
+  override def transform(i: Int, f: Int => Unit): Unit = f(i + factor)
 
-  def get(): scala.Iterable[T]
-
-  def cleanup(): Unit
-
+  override def cleanup(): Unit = {}
 }
