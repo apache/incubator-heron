@@ -476,8 +476,9 @@ class Tracker(object):
       cwd = stmgrInfo["cwd"]
       shell_port = stmgrInfo["shell_port"]
 
-      index = int(instance.info.component_index) + 1
-      group_name = "container_%d" % index
+
+      # instance_id format contaner_1_component_1
+      group_name = instance_id.rsplit("_", 2)[0]
       igroup = instance_groups.get(group_name, list())
       igroup.append(instance_id)
       instance_groups[group_name] = igroup
