@@ -442,21 +442,24 @@ public final class SchedulerUtils {
    * Encode the JVM options
    * <br> 1. Convert it into Base64 format
    * <br> 2. Add \" at the start and at the end
-   * <br> 3. replace "=" with "&amp;equals;"
+   * <br> 3. replace "=" with "(61)" and "&amp;equals;"
+   * Note that '=' is escaped in two different ways. '(61)' is the new escaping.
+   * '&amp;equals;' was the original way but it is not friendly to bash and is
+   * causing issues in some schedulers. It is still left there for backward compatibility
+   * reason
    *
    * @return encoded string
    */
   public static String encodeJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
         javaOpts.getBytes(StandardCharsets.UTF_8));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
+    return String.format("\"%s\"", javaOptsBase64.replace("=", "(61)").replace("=", "&equals;"));
   }
 
   /**
    * Decode the JVM options
    * <br> 1. strip \" at the start and at the end
-   * <br> 2. replace "&amp;equals;" with "="
+   * <br> 2. replace "(61)" and "&amp;equals;" with "="
    * <br> 3. Revert from Base64 format
    *
    * @return decoded string
@@ -466,6 +469,7 @@ public final class SchedulerUtils {
         encodedJavaOpts.
             replaceAll("^\"+", "").
             replaceAll("\\s+$", "").
+            replace("(61)", "=").
             replace("&equals;", "=");
 
     return new String(

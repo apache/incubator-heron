@@ -237,7 +237,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--tmaster-binary", "tmaster_binary"),
       ("--stmgr-binary", "stmgr_binary"),
       ("--metrics-manager-classpath", "metricsmgr_classpath"),
-      ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;"),
+      ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg(61)(61)"),
       ("--classpath", "classpath"),
       ("--master-port", "master_port"),
       ("--tmaster-controller-port", "tmaster_controller_port"),
