@@ -44,7 +44,7 @@ TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::s
 
 TopologyConfigVars::TopologyReliabilityMode
 TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
+  static const std::string value_true_ = "true";
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     // First search for reliabiliy mode
@@ -70,7 +70,7 @@ TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) 
 }
 
 bool TopologyConfigHelper::EnableMessageTimeouts(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
+  static const std::string value_true_ = "true";
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
@@ -490,9 +490,9 @@ void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
 }
 
 bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
-                                                 const sp_string& _config_name,
+                                                 const std::string& _config_name,
                                                  bool _default_value) {
-  sp_string value_true_ = "true";
+  static const std::string value_true_ = "true";
   const proto::api::Config& config = _topology.topology_config();
   for (sp_int32 i = 0; i < config.kvs_size(); ++i) {
     if (config.kvs(i).key() == _config_name) {

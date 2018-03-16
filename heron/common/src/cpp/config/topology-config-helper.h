@@ -62,11 +62,11 @@ class TopologyConfigHelper {
   static void SetComponentParallelism(proto::api::Config* _config, sp_int32 _parallelism);
 
   // Gets the topology specific JVM childopts if any
-  static sp_string GetWorkerChildOpts(const proto::api::Topology& _topology);
+  static std::string GetWorkerChildOpts(const proto::api::Topology& _topology);
 
   // Gets the TOPOLOGY_RELEASE_OVERRIDES for this topology if any
   // Returns empty string otherwise
-  static sp_string GetTopologyReleaseOverrides(const proto::api::Topology& _topology);
+  static std::string GetTopologyReleaseOverrides(const proto::api::Topology& _topology);
 
   // Does some sanity checking on the topology structure.
   // returns true if the structure is sane. False otherwise
@@ -155,7 +155,7 @@ class TopologyConfigHelper {
 
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
-                                    const sp_string& _config_name,
+                                    const std::string& _config_name,
                                     bool _default_value);
   // Convert topology config to a key value map
   static void ConvertConfigToKVMap(const proto::api::Config& _config,
