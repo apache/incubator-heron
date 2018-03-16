@@ -1010,25 +1010,22 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan
   return true;
 }
 
+/**
+ * Make sure component names exist
+ */
 bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) const {
   LOG(INFO) << "Validating runtime configs.";
   const proto::api::Topology& topology = current_pplan_->topology();
   DCHECK(topology.IsInitialized());
 
+  std::unordered_set<std::string> components;
+  config::TopologyConfigHelper::GetAllComponentNames(topology, components);
+
   ComponentConfigMap::const_iterator iter;
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
-    // Get config for topology or component.
-    ConfigValueMap current_config;
-    if (iter->first == TOPOLOGY_CONFIG_KEY) {
-      config::TopologyConfigHelper::GetTopologyConfig(topology, current_config);
-    } else {
-      config::TopologyConfigHelper::GetComponentConfig(topology, iter->first, current_config);
-    }
-    // Search for the config name.
-    ConfigValueMap cfg = iter->second;
-    ConfigValueMap::const_iterator it;
-    for (it = cfg.begin(); it != cfg.end(); ++it) {
-      if (current_config.find(it->first) == current_config.end()) {
+    if (iter->first != TOPOLOGY_CONFIG_KEY) {
+      // It is a component, search for it
+      if (components.find(iter->first) == components.end()) {
         return false;
       }
     }

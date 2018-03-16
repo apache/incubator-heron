@@ -736,12 +736,13 @@ TEST(StMgr, test_runtime_config) {
   validate_good_config[topology_runtime_config_1] = "1";
   validate_good_config[topology_runtime_config_2] = "2";
   validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
+  validate_good_config_map["spout1"] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 
   heron::tmaster::ComponentConfigMap validate_bad_config_map;
   std::map<std::string, std::string> validate_bad_config;
-  validate_bad_config["unknown"] = "1";
-  validate_bad_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_bad_config;
+  validate_good_config[topology_runtime_config_1] = "1";
+  validate_bad_config_map["unknown_component"] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_bad_config_map), false);
 
   // Post runtime config request with no configs and expect 400 response.
@@ -761,7 +762,8 @@ TEST(StMgr, test_runtime_config) {
 
   std::vector<std::string> wrong_config2;
   wrong_config2.push_back("topology.runtime.test_config:1");
-  wrong_config2.push_back("bad_component:topology.runtime.test_config.bad:1");  // Doesn't exist
+  // Component doesn't exist
+  wrong_config2.push_back("bad_component:topology.runtime.bolt.test_config:1");
   std::thread* wrong_config2_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, wrong_config2, 400, "wrong_config2");
   wrong_config2_update_thread->join();
