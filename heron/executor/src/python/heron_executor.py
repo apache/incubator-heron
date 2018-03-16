@@ -184,7 +184,8 @@ class HeronExecutor(object):
     # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
     # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
     # the original replacement but it is not friendly to bash and is causing issues. The original
-    # escaping is still left there for reference and backward compatibility reasons
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('(61)', '=').replace('&equals;', '='))
@@ -215,7 +216,8 @@ class HeronExecutor(object):
     # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
     # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
     # the original replacement but it is not friendly to bash and is causing issues. The original
-    # escaping is still left there for reference and backward compatibility reasons
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
