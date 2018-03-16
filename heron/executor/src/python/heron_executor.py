@@ -181,9 +181,10 @@ class HeronExecutor(object):
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
     self.metricscache_manager_classpath = parsed_args.metricscache_manager_classpath
-    # '=' is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
-    # the original way but it is not friendly to bash and is causing issues in some
-    # schedulers. It is still left there for backward compatibility reason
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility reasons
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
                          rstrip('"').replace('(61)', '=').replace('&equals;', '='))
@@ -210,7 +211,11 @@ class HeronExecutor(object):
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
-    # First we need to decode the base64 string back to a json map string
+    # First we need to decode the base64 string back to a json map string.
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility reasons
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))

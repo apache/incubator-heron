@@ -443,10 +443,11 @@ public final class SchedulerUtils {
    * <br> 1. Convert it into Base64 format
    * <br> 2. Add \" at the start and at the end
    * <br> 3. replace "=" with "(61)" and "&amp;equals;"
-   * Note that '=' is escaped in two different ways. '(61)' is the new escaping.
-   * '&amp;equals;' was the original way but it is not friendly to bash and is
-   * causing issues in some schedulers. It is still left there for backward compatibility
-   * reason
+   * '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+   * Note that it is escaped in two different ways. '(61)' is the new escaping.
+   * '&equals;' was the original replacement but it is not friendly to bash and
+   * is causing issues. The original escaping is still left there for reference
+   * and backward compatibility reasons
    *
    * @return encoded string
    */
