@@ -423,20 +423,16 @@ void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topol
   // of the first spout or bolt found with the name.
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
     if (_topology.spouts(i).comp().name() == _component_name) {
-      if (_topology.spouts(i).comp().has_config()) {
-        const proto::api::Config& config = _topology.spouts(i).comp().config();
-        ConvertConfigToKVMap(config, retval);
-      }
+      const proto::api::Config& config = _topology.spouts(i).comp().config();
+      ConvertConfigToKVMap(config, retval);
       return;
     }
   }
 
   for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
     if (_topology.bolts(i).comp().name() == _component_name) {
-      if (_topology.bolts(i).comp().has_config()) {
-        const proto::api::Config& config = _topology.bolts(i).comp().config();
-        ConvertConfigToKVMap(config, retval);
-      }
+      const proto::api::Config& config = _topology.bolts(i).comp().config();
+      ConvertConfigToKVMap(config, retval);
       return;
     }
   }
@@ -450,7 +446,7 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
   // with the specific component name.
   for (sp_int32 i = 0; i < _topology->spouts_size(); ++i) {
     proto::api::Component* comp = _topology->mutable_spouts(i)->mutable_comp();
-    if (comp->name() == _component_name && comp->has_config()) {
+    if (comp->name() == _component_name) {
       proto::api::Config* config = comp->mutable_config();
       UpdateConfigFromKVMap(config, _update);
     }
@@ -458,7 +454,7 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
 
   for (sp_int32 i = 0; i < _topology->bolts_size(); ++i) {
     proto::api::Component* comp = _topology->mutable_bolts(i)->mutable_comp();
-    if (comp->name() == _component_name && comp->has_config()) {
+    if (comp->name() == _component_name) {
       proto::api::Config* config = comp->mutable_config();
       UpdateConfigFromKVMap(config, _update);
     }
