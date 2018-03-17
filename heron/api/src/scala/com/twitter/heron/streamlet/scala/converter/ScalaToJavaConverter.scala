@@ -13,6 +13,8 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
+import java.lang.{Iterable => JavaIterable}
+import java.util.{List => JavaList}
 import java.util.Collection
 import java.util.function.Consumer
 
@@ -46,8 +48,13 @@ object ScalaToJavaConverter {
 
   def toSerializableFunction[R, T](f: R => T) =
     new SerializableFunction[R, T] {
-
       override def apply(r: R): T = f(r)
+    }
+
+  def toSerializableFunctionWithIterable[R, T](f: R => scala.Iterable[_ <: T]) =
+    new SerializableFunction[R, JavaIterable[_ <: T]] {
+      override def apply(r: R): JavaIterable[_ <: T] =
+        JavaConverters.asJavaIterableConverter(f(r)).asJava
     }
 
   def toSerializablePredicate[R](f: R => Boolean) =
@@ -68,6 +75,16 @@ object ScalaToJavaConverter {
   def toSerializableBinaryOperator[T](f: (T, T) => T) =
     new SerializableBinaryOperator[T] {
       override def apply(t1: T, t2: T): T = f(t1, t2)
+    }
+
+  def toSerializableBiFunctionWithSeq[R](f: (R, Int) => Seq[Int]) =
+    new SerializableBiFunction[R, Integer, JavaList[Integer]] {
+      override def apply(r: R, s: Integer): JavaList[Integer] = {
+        val result = f(r, s.intValue()).map(x => Integer.valueOf(x))
+        JavaConverters
+          .seqAsJavaListConverter[Integer](result)
+          .asJava
+      }
     }
 
   def toJavaSink[T](sink: Sink[T]): JavaSink[T] = {
