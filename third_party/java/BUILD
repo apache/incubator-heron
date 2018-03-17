@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "javacc",
-    srcs = ["@javacc//:javacc"],
+    srcs = ["//third_party/java/javacc:javacc"],
 )
 
 java_library(

@@ -496,12 +496,12 @@ maven_jar(
 # end Pulsar Client
 
 # java cc
-new_http_archive(
-  name = "javacc",
-  url = "https://javacc.org/downloads/javacc-5.0.tar.gz",
-  strip_prefix = "javacc-5.0",
-  build_file = "third_party/java/javacc/javacc.BUILD",
-)
+# new_http_archive(
+#   name = "javacc",
+#   url = "https://javacc.org/downloads/javacc-5.0.tar.gz",
+#   strip_prefix = "javacc-5.0",
+#   build_file = "third_party/java/javacc/javacc.BUILD",
+# )
 # end java cc
 
 # Kubernetes java client
