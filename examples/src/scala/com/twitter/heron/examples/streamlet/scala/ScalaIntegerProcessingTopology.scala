@@ -23,12 +23,19 @@ package com.twitter.heron.examples.streamlet.scala
 
 import java.util.concurrent.ThreadLocalRandom
 
+import org.apache.commons.lang3.StringUtils
+
 import com.twitter.heron.streamlet.Config
 
 import com.twitter.heron.streamlet.scala.{Builder, Runner}
 
-//TODO - Add javadoc
-
+/**
+  * This is a very simple topology that shows a series of Scala Streamlet operations
+  * on a source streamlet of random integers (between 1 and 10). First, 10 is multiplied
+  * to each integer and then, the numbers that are lower than 50, are excluded form streamlet.
+  * That streamlet is then united with a streamlet that consists of an indefinite stream of zeroes.
+  * The final output of the processing graph is then logged.
+  */
 object ScalaIntegerProcessingTopology {
 
   private val CPU = 1.5f
@@ -39,7 +46,6 @@ object ScalaIntegerProcessingTopology {
     * All Heron topologies require a main function that defines the topology's behavior
     * at runtime
     */
-  @throws[Exception]
   def main(args: Array[String]): Unit = {
     val builder = Builder.newBuilder
 
@@ -48,13 +54,12 @@ object ScalaIntegerProcessingTopology {
     builder
       .newSource(() => ThreadLocalRandom.current.nextInt(1, 11))
       .setName("random-numbers")
-      .map[Int]((i: Int) => (i * 10))
-      .setNumPartitions(3)
+      .map[Int]((i: Int) => i * 10)
+      .setNumPartitions(2)
       .filter((i: Int) => i >= 50)
       .setName("numbers-higher-than-50")
       .union(zeroes)
-      .setName("unioned-numbers")
-      .setNumPartitions(3)
+      .setName("union-of-numbers")
       .log()
 
     val config = Config.newBuilder
@@ -75,9 +80,10 @@ object ScalaIntegerProcessingTopology {
     * Fetches the topology's name from the first command-line argument or
     * throws an exception if not present.
     */
-  @throws[Exception]
-  private def getTopologyName(args: Array[String]): String = {
+  private def getTopologyName(args: Array[String]) = {
     require(args.length > 0, "A Topology name should be supplied")
+    require(StringUtils.isNotBlank(args(0)),
+            "A Topology name must not be blank")
     args(0)
   }
 
