@@ -31,6 +31,7 @@ import com.twitter.heron.streamlet.{
   SerializableTransformer,
   Sink => JavaSink
 }
+
 import com.twitter.heron.streamlet.scala.{Sink, Source}
 import com.twitter.heron.streamlet.scala.common.{
   BaseFunSuite,
@@ -70,11 +71,11 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
     assertTrue(
       serializableFunction
         .isInstanceOf[SerializableFunction[String, _]])
+
     val iterable = serializableFunction.apply("123")
     val list = StreamSupport
       .stream(iterable.spliterator(), false)
       .collect(Collectors.toList())
-
     assertEquals(1, list.size())
     assertTrue(list.contains(123))
   }

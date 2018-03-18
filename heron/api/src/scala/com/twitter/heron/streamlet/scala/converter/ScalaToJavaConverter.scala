@@ -51,7 +51,7 @@ object ScalaToJavaConverter {
       override def apply(r: R): T = f(r)
     }
 
-  def toSerializableFunctionWithIterable[R, T](f: R => scala.Iterable[_ <: T]) =
+  def toSerializableFunctionWithIterable[R, T](f: R => Iterable[_ <: T]) =
     new SerializableFunction[R, JavaIterable[_ <: T]] {
       override def apply(r: R): JavaIterable[_ <: T] =
         JavaConverters.asJavaIterableConverter(f(r)).asJava
