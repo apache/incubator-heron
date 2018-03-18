@@ -105,7 +105,7 @@ java_test(
          "@org_apache_httpcomponents_http_core//jar",
          "@org_apache_httpcomponents_http_client//jar",
          "@org_apache_httpcomponents_http_client_test//jar",
-         "//heron/common/src/java:basics-java",
+         "//heron/common/src/java:basics-java"
     ],
     size = "small",
 )

@@ -30,7 +30,9 @@ http_uploader_deps_files = \
     uploader_spi_files + [
         "@org_apache_httpcomponents_httpmime//jar",
         "@org_apache_httpcomponents_http_client//jar",
-        "@org_apache_httpcomponents_http_core//jar"
+        "@org_apache_httpcomponents_http_core//jar",
+        "@org_apache_commons_commons_lang3//jar",
+        "//third_party/java:guava"
     ]
 
 java_library(

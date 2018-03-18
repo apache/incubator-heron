@@ -21,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.base.Preconditions;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -35,6 +38,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.UploaderException;
 
@@ -44,6 +48,7 @@ import com.twitter.heron.spi.uploader.UploaderException;
 public class HttpUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HttpUploader.class.getName());
 
+  private static final String FILE = "file";
   private Config config;
   private String topologyPackageLocation;
   private HttpPost post;
@@ -51,48 +56,49 @@ public class HttpUploader implements IUploader {
   @Override
   @SuppressWarnings("HiddenField")
   public void initialize(Config config) {
+    String uploaderUri = HttpUploaderContext.getHeronUploaderHttpUri(config);
+    Preconditions.checkArgument(StringUtils.isNotBlank(uploaderUri),
+        HttpUploaderContext.HERON_UPLOADER_HTTP_URI + " property must be set");
+
+    String topologyPackageFile = Context.topologyPackageFile(config);
+    Preconditions.checkArgument(StringUtils.isNotBlank(topologyPackageFile),
+        Key.TOPOLOGY_PACKAGE_FILE + " property must be set");
+
     this.config = config;
-    this.topologyPackageLocation = Context.topologyPackageFile(config);
+    this.topologyPackageLocation = topologyPackageFile;
   }
 
   @Override
   public URI uploadPackage() throws UploaderException {
-    CloseableHttpClient httpclient = HttpClients.createDefault();
-    URI uri;
-
-    try {
-      HttpClient client = HttpClients.custom().build();
-
-      File file = new File(this.topologyPackageLocation);
-      String uploaderUri = HttpUploaderContext.getHeronUploaderHttpUri(this.config);
-      post = new HttpPost(uploaderUri);
-      FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
-      MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-      builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-      builder.addPart("file", fileBody);
-      HttpEntity entity = builder.build();
-      post.setEntity(entity);
-      HttpResponse response = execute(client);
-      String responseString = EntityUtils.toString(response.getEntity(),
-          StandardCharsets.UTF_8.name());
-      LOG.fine("Topology package download URI: " + responseString);
-      uri = new URI(responseString);
+    try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
+      return uploadPackageAndGetURI(httpclient);
     } catch (IOException | URISyntaxException e) {
-      String msg = "Error uploading package " + this.topologyPackageLocation;
+      String msg = "Error uploading package to location: " + this.topologyPackageLocation;
       LOG.log(Level.SEVERE, msg, e);
       throw new UploaderException(msg, e);
-    } finally {
-      try {
-        httpclient.close();
-      } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Error closing http client", e);
-      }
     }
-
-    return uri;
   }
 
-  protected HttpResponse execute(HttpClient client) throws IOException {
+  private URI uploadPackageAndGetURI(final CloseableHttpClient httpclient)
+      throws IOException, URISyntaxException {
+    File file = new File(this.topologyPackageLocation);
+    String uploaderUri = HttpUploaderContext.getHeronUploaderHttpUri(this.config);
+    post = new HttpPost(uploaderUri);
+    FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+    builder.addPart(FILE, fileBody);
+    HttpEntity entity = builder.build();
+    post.setEntity(entity);
+    HttpResponse response = execute(httpclient);
+    String responseString = EntityUtils.toString(response.getEntity(),
+        StandardCharsets.UTF_8.name());
+    LOG.fine("Topology package download URI: " + responseString);
+
+    return new URI(responseString);
+  }
+
+  protected HttpResponse execute(final HttpClient client) throws IOException {
     return client.execute(post);
   }
 
