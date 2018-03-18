@@ -8,6 +8,7 @@ scala_binary(
     deps = [
             "//heron/api/src/java:api-java",
             "//heron/api/src/scala:api-scala",
+            "@org_apache_commons_commons_lang3//jar"
         ],
     main_class = "com.twitter.heron.examples.streamlet.scala.ScalaIntegerProcessingTopology"
 )

@@ -82,8 +82,7 @@ object ScalaIntegerProcessingTopology {
     */
   private def getTopologyName(args: Array[String]) = {
     require(args.length > 0, "A Topology name should be supplied")
-    require(StringUtils.isNotBlank(args(0)),
-            "A Topology name must not be blank")
+    require(StringUtils.isNotBlank(args(0)), "Topology name must not be blank")
     args(0)
   }
 
