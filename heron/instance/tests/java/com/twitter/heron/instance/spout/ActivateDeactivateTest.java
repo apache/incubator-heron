@@ -80,7 +80,7 @@ public class ActivateDeactivateTest {
   }
 
   private InstanceControlMsg buildMessage(TopologyAPI.TopologyState state) {
-    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, state);
+    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, 100, state);
     PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     return InstanceControlMsg.newBuilder()
         .setNewPhysicalPlanHelper(physicalPlanHelper)

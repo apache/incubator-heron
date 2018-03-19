@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
@@ -42,8 +43,9 @@ public class BoltInstance
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
+                      RateLimiter outputRateLimiter,
                       SlaveLooper looper) {
-    super(helper, streamInQueue, streamOutQueue, looper);
+    super(helper, streamInQueue, streamOutQueue, outputRateLimiter, looper);
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 

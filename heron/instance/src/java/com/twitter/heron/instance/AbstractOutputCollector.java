@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
@@ -39,6 +40,8 @@ public class AbstractOutputCollector {
   protected final boolean ackEnabled;
   private long totalTuplesEmitted;
   private PhysicalPlanHelper helper;
+  // Rate limiter for outgoing data tuples
+  private RateLimiter rateLimiter;
 
   /**
    * The SuppressWarnings is only until TOPOLOGY_ENABLE_ACKING exists.
@@ -48,6 +51,7 @@ public class AbstractOutputCollector {
   public AbstractOutputCollector(IPluggableSerializer serializer,
                                  PhysicalPlanHelper helper,
                                  Communicator<Message> streamOutQueue,
+                                 RateLimiter rateLimiter,
                                  ComponentMetrics metrics) {
     this.serializer = serializer;
     this.metrics = metrics;
@@ -71,6 +75,7 @@ public class AbstractOutputCollector {
       }
     }
 
+    this.rateLimiter = rateLimiter;
     this.outputter = new OutgoingTupleCollection(helper, streamOutQueue);
   }
 
@@ -165,6 +170,13 @@ public class AbstractOutputCollector {
 
     long latency = System.nanoTime() - startTime;
     metrics.serializeDataTuple(streamId, latency);
+
+    // For data tuple, apply rate limiter before sending tuple to outputter
+    long rateLimitStartTime = System.nanoTime();
+    rateLimiter.acquire();
+    long rateLimitLatency = System.nanoTime() - rateLimitStartTime;
+    metrics.rateLimitLatency(streamId, rateLimitLatency);
+
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
     totalTuplesEmitted++;

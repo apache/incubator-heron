@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
@@ -49,6 +51,12 @@ import com.twitter.heron.proto.system.Metrics;
 public class Slave implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Slave.class.getName());
 
+  private static double maxOutputTuplePerSecond = Double.MAX_VALUE;
+  // Minimal 1 tuple per second. Rate limiter would cause emit() to wait when the tuple per second
+  // rate is higher than expected, which may block other operations. Therefore it is safer to make
+  // sure the rate is higher than a threshold.
+  private static double minOutputTuplePerSecond = 1;
+
   private final SlaveLooper slaveLooper;
   private MetricsCollector metricsCollector;
   // Communicator
@@ -65,6 +73,8 @@ public class Slave implements Runnable, AutoCloseable {
 
   private State<Serializable, Serializable> instanceState;
   private boolean isStatefulProcessingStarted;
+  // Rate limiter for output data tuples
+  private RateLimiter outputRateLimiter;
 
   public Slave(SlaveLooper slaveLooper,
                final Communicator<Message> streamInCommunicator,
@@ -87,6 +97,8 @@ public class Slave implements Runnable, AutoCloseable {
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
+
+    this.outputRateLimiter = RateLimiter.create(maxOutputTuplePerSecond);
 
     handleControlMessage();
   }
@@ -127,8 +139,10 @@ public class Slave implements Runnable, AutoCloseable {
   private void resetCurrentAssignment() {
     helper.setTopologyContext(metricsCollector);
     instance = helper.getMySpout() != null
-        ? new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper)
-        : new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+        ? new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator,
+                            outputRateLimiter, slaveLooper)
+        : new BoltInstance(helper, streamInCommunicator, streamOutCommunicator,
+                           outputRateLimiter, slaveLooper);
 
     startInstanceIfNeeded();
   }
@@ -146,7 +160,8 @@ public class Slave implements Runnable, AutoCloseable {
     // we would add a bunch of tasks to slaveLooper's tasksOnWakeup
     if (helper.getMySpout() != null) {
       instance =
-          new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+          new SpoutInstance(helper, streamInCommunicator, streamOutCommunicator,
+                            outputRateLimiter, slaveLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalSpoutReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedSpoutReadQueueSize(),
@@ -156,7 +171,8 @@ public class Slave implements Runnable, AutoCloseable {
           systemConfig.getInstanceTuningCurrentSampleWeight());
     } else {
       instance =
-          new BoltInstance(helper, streamInCommunicator, streamOutCommunicator, slaveLooper);
+          new BoltInstance(helper, streamInCommunicator, streamOutCommunicator,
+                           outputRateLimiter, slaveLooper);
 
       streamInCommunicator.init(systemConfig.getInstanceInternalBoltReadQueueCapacity(),
           systemConfig.getInstanceTuningExpectedBoltReadQueueSize(),
@@ -200,6 +216,11 @@ public class Slave implements Runnable, AutoCloseable {
       LOG.info("Setting topology environment: " + envProps);
       System.getProperties().putAll(envProps);
     }
+
+    // Update rate limiter config before starting
+    double rate = getOutputRate(topoConf);
+    LOG.info("Setting output TPS to " + String.valueOf(rate));
+    outputRateLimiter.setRate(rate);
 
     if (helper.isTopologyStateful()) {
       // For stateful topology, `init(state)` will be invoked
@@ -375,5 +396,25 @@ public class Slave implements Runnable, AutoCloseable {
         LOG.info("Topology state remains the same in Slave: " + oldTopologyState);
       }
     }
+  }
+
+  @VisibleForTesting
+  protected static double getOutputRate(Map<String, Object> topoConf) {
+    if (topoConf.containsKey(Config.TOPOLOGY_COMPONENT_OUTPUT_TPS)
+        && topoConf.containsKey(Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
+      String tpsString = (String) topoConf.get(Config.TOPOLOGY_COMPONENT_OUTPUT_TPS);
+      String parallelsmString = (String) topoConf.get(Config.TOPOLOGY_COMPONENT_PARALLELISM);
+
+      try {
+        double rate = Double.parseDouble(tpsString);
+        double parallelsm = Double.parseDouble(parallelsmString);
+        // Assuming traffic is evenly distributed to all instances.
+        double perInstanceRate = rate / parallelsm;
+        double validated = Math.max(minOutputTuplePerSecond,
+                                    Math.min(maxOutputTuplePerSecond, perInstanceRate));
+        return validated;
+      } catch (NumberFormatException e) { }
+    }
+    return outputRateLimiter.getRate();  // Use the current rate as fallback
   }
 }

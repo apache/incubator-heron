@@ -9,6 +9,7 @@ simulator_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
+        "@com_google_guava_guava//jar",
         "@org_yaml_snakeyaml//jar",
     ]
 

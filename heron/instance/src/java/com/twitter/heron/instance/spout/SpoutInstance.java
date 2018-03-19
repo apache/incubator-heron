@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
@@ -78,6 +79,7 @@ public class SpoutInstance implements IInstance {
   public SpoutInstance(PhysicalPlanHelper helper,
                        Communicator<Message> streamInQueue,
                        Communicator<Message> streamOutQueue,
+                       RateLimiter outputRateLimiter,
                        SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
@@ -119,7 +121,8 @@ public class SpoutInstance implements IInstance {
     }
 
     IPluggableSerializer serializer = SerializeDeSerializeHelper.getSerializer(config);
-    collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, spoutMetrics);
+    collector = new SpoutOutputCollectorImpl(serializer, helper, streamOutQueue, outputRateLimiter,
+                                             spoutMetrics);
     this.ackEnabled = collector.isAckEnabled();
 
     LOG.info("Enable Ack: " + this.ackEnabled);

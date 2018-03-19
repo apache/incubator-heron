@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.Config;
@@ -73,6 +74,7 @@ public class BoltInstance implements IInstance {
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
+                      RateLimiter outputRateLimiter,
                       SlaveLooper looper) {
     this.helper = helper;
     this.looper = looper;
@@ -112,7 +114,8 @@ public class BoltInstance implements IInstance {
     } else {
       throw new RuntimeException("Neither java_object nor java_class_name set for bolt");
     }
-    collector = new BoltOutputCollectorImpl(serializer, helper, streamOutQueue, boltMetrics);
+    collector = new BoltOutputCollectorImpl(serializer, helper, streamOutQueue, outputRateLimiter,
+                                            boltMetrics);
   }
 
   @Override

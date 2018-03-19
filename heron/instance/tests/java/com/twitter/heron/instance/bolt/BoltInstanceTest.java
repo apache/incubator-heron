@@ -85,7 +85,7 @@ public class BoltInstanceTest {
    */
   @Test
   public void testReadTupleAndExecute() {
-    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
+    PhysicalPlans.PhysicalPlan physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1, 1000);
 
     PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, BOLT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
