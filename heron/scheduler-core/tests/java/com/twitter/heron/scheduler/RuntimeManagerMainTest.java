@@ -272,7 +272,7 @@ public class RuntimeManagerMainTest {
     when(config.getStringValue(Key.STATE_MANAGER_CLASS))
         .thenReturn(IStateManager.class.getName());
     when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
-    when(config.getStringValue(RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY))
+    when(config.getStringValue(RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY))
         .thenReturn("testSpout:4,testBolt:5");
     // mock dry-run mode
     when(config.getBooleanValue(Key.DRY_RUN)).thenReturn(true);
