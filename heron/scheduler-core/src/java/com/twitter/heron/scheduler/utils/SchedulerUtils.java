@@ -293,6 +293,9 @@ public final class SchedulerUtils {
 
     args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerClasspath,
         Context.metricsCacheManagerClassPath(config)));
+    String metricscacheMgrMode = Context.metricscacheMgrMode(config)
+        == null ? "disabled" : Context.metricscacheMgrMode(config);
+    args.add(createCommandArg(ExecutorFlag.MetricsCacheManagerMode, metricscacheMgrMode));
 
     Boolean ckptMgrEnabled = TopologyUtils.shouldStartCkptMgr(topology);
     args.add(createCommandArg(ExecutorFlag.IsStateful, Boolean.toString(ckptMgrEnabled)));
@@ -442,22 +445,27 @@ public final class SchedulerUtils {
    * Encode the JVM options
    * <br> 1. Convert it into Base64 format
    * <br> 2. Add \" at the start and at the end
-   * <br> 3. replace "=" with "&amp;equals;"
+   * <br> 3. replace "=" with "(61)" and "&amp;equals;"
+   * '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
    *
    * @return encoded string
    */
   public static String encodeJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
         javaOpts.getBytes(StandardCharsets.UTF_8));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
+    return String.format("\"%s\"", javaOptsBase64.replace("=", "(61)"));
   }
 
   /**
    * Decode the JVM options
    * <br> 1. strip \" at the start and at the end
-   * <br> 2. replace "&amp;equals;" with "="
+   * <br> 2. replace "(61)" and "&amp;equals;" with "="
    * <br> 3. Revert from Base64 format
+   * Note that '=' is escaped in two different ways. '(61)' is the new escaping.
+   * '&equals;' was the original replacement but it is not friendly to bash and
+   * was causing issues. The original escaping is still left there for reference
+   * and backward compatibility purposes (to be removed after no topology needs
+   * it)
    *
    * @return decoded string
    */
@@ -466,6 +474,7 @@ public final class SchedulerUtils {
         encodedJavaOpts.
             replaceAll("^\"+", "").
             replaceAll("\\s+$", "").
+            replace("(61)", "=").
             replace("&equals;", "=");
 
     return new String(

@@ -129,7 +129,8 @@ public class HealthManager {
     HERON_HOME("heron_home"),
     CONFIG_PATH("config_path"),
     MODE("mode"),
-    VERBOSE("verbose");
+    VERBOSE("verbose"),
+    METRICSMGR_PORT("metricsmgr_port");
 
     private String text;
 
@@ -210,14 +211,26 @@ public class HealthManager {
     LOG.info("Initializing health manager");
     healthManager.initialize();
 
-    LOG.info("Starting Health Manager");
+    LOG.info("Starting Health Manager metirc posting thread");
+    HealthManagerMetrics publishingMetricsRunnable = null;
+    if (hasOption(cmd, CliArgs.METRICSMGR_PORT)) {
+      publishingMetricsRunnable = new HealthManagerMetrics(
+          Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+    }
 
+    LOG.info("Starting Health Manager");
     PoliciesExecutor policyExecutor = new PoliciesExecutor(healthManager.healthPolicies);
     ScheduledFuture<?> future = policyExecutor.start();
+    if (publishingMetricsRunnable != null) {
+      new Thread(publishingMetricsRunnable).start();
+    }
     try {
       future.get();
     } finally {
       policyExecutor.destroy();
+      if (publishingMetricsRunnable != null) {
+        publishingMetricsRunnable.close();
+      }
     }
   }
 

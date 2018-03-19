@@ -17,7 +17,6 @@ import com.twitter.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
-  SerializableTransformer,
   WindowConfig
 }
 
