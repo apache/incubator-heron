@@ -181,9 +181,14 @@ class HeronExecutor(object):
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
     self.metricscache_manager_classpath = parsed_args.metricscache_manager_classpath
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
-                         rstrip('"').replace('&equals;', '='))
+                         rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
     # Needed for Docker environments since the hostname of a docker container is the container's
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
@@ -207,10 +212,15 @@ class HeronExecutor(object):
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
-    # First we need to decode the base64 string back to a json map string
+    # First we need to decode the base64 string back to a json map string.
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
-                         lstrip('"').rstrip('"').replace('&equals;', '='))
+                         lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
         # In json, the component name and jvm options are still in base64 encoding
