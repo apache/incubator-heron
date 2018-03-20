@@ -464,7 +464,7 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
 // For every existing config, update the value; for every non-existing config, add it.
 void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
     const std::map<std::string, std::string>& _kv_map) {
-  std::set<const std::string> updated;
+  std::set<std::string> updated;
   for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
     // Runtime config has a postfix
     const std::string key = _config->mutable_kvs(i)->key();
