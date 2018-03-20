@@ -62,9 +62,9 @@ public final class ExclamationTopology {
         ExampleResources.getComponentRam());
 
     conf.setContainerDiskRequested(
-        ExampleResources.getContainerDisk(spouts + bolts, parallelism));
+        ExampleResources.getContainerDisk(spouts + bolts, parallelism).increaseBy(20));
     conf.setContainerRamRequested(
-        ExampleResources.getContainerRam(spouts + bolts, parallelism));
+        ExampleResources.getContainerRam(spouts + bolts, parallelism).increaseBy(20));
     conf.setContainerCpuRequested(10);
 
     if (args != null && args.length > 0) {
