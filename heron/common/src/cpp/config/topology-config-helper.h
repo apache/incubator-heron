@@ -50,6 +50,8 @@ class TopologyConfigHelper {
   // The number of workers needed for this component's config
   // Essentially plucks the value of the TOPOLOGY_COMPONENT_PARALLELISM
   static sp_int32 GetComponentParallelism(const proto::api::Config& _config);
+  static sp_int32 GetComponentParallelism(const proto::api::Topology& _topology,
+                                          const std::string& _component);
 
   // The total number of workers needed accross all components for
   // this topology

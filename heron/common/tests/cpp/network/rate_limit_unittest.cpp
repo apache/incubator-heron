@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Twitter, Inc.
+ * Copyright 2018 Twitter, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include <thread>
 #include <vector>
 #include <chrono>
@@ -67,15 +66,14 @@ class Terminate : public Client {
 
 class RateLimitTestServer : public TestServer {
  public:
-  RateLimitTestServer(EventLoopImpl* ss, const NetworkOptions& options)
+  RateLimitTestServer(EventLoopImpl* ss, const NetworkOptions& options, sp_int64 rate)
       : TestServer(ss, options) {
-    rate_ = 10; 
+    rate_ = rate;
   }
 
   void HandleNewConnection(Connection* _conn) {
     TestServer::HandleNewConnection(_conn);
-    _conn->applyRateLimit(rate_, rate_);
-    rate_ *= 2; // double rate limit for every new connection
+    _conn->setRateLimit(rate_, rate_);
   }
  private:
   sp_int64 rate_;
@@ -91,7 +89,7 @@ void start_server(sp_uint32* port, CountDownLatch* latch, sp_int64 rate) {
   options.set_socket_family(PF_INET);
 
   EventLoopImpl ss;
-  server_ = new RateLimitTestServer(&ss, options);
+  server_ = new RateLimitTestServer(&ss, options, rate);
   EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
   *port = server_->get_serveroptions().get_port();
@@ -125,12 +123,15 @@ void terminate_server(sp_uint32 port) {
   ss.loop();
 }
 
-void start_test(sp_int32 nclients, sp_uint64 requests) {
+void start_test(sp_int32 nclients,
+                sp_uint64 requests,
+                sp_int64 rate,
+                sp_int64 expected_threshold) {
   sp_uint32 server_port = 0;
   CountDownLatch* latch = new CountDownLatch(1);
 
   // start the server thread
-  std::thread sthread(start_server, &server_port, latch);
+  std::thread sthread(start_server, &server_port, latch, rate);
   latch->wait();
   std::cout << "server port " << server_port << std::endl;
 
@@ -149,8 +150,6 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
 
   auto stop = std::chrono::high_resolution_clock::now();
 
-  
-
   // now send a terminate message to server
   terminate_server(server_port);
   sthread.join();
@@ -158,20 +157,25 @@ void start_test(sp_int32 nclients, sp_uint64 requests) {
   ASSERT_TRUE(server_->sent_pkts() == server_->recv_pkts());
   ASSERT_TRUE(server_->sent_pkts() == nclients * requests);
 
+  auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
   std::cout << nclients << " client(s) exchanged a total of " << requests << " in "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << " ms."
+            <<  delay << " ms."
             << std::endl;
+  // because of rate limiting, the process time should be longer than the expected threshold
+  ASSERT_TRUE(delay > expected_threshold);
 
   delete server_;
   delete latch;
 }
 
-// Test rate limit with 1 client and 1 server
-TEST(NetworkTest, test_rate_limit_1) { start_test(1, 100); }
+// Without rate limiting, the process last about 10~20ms on my laptop. The process time relies
+// on the hardware and os the tests are running on. However with rate limiting, the process time
+// should be more stable/predictable
+TEST(NetworkTest, test_rate_limit_1) { start_test(1, 100, 50000, 1500); }
 
-TEST(NetworkTest, test_rate_limit_2) { start_test(1, 1000); }
+TEST(NetworkTest, test_rate_limit_2) { start_test(1, 100, 75000, 700); }
 
-TEST(NetworkTest, test_rate_limit_3) { start_test(1, 10000); }
+TEST(NetworkTest, test_rate_limit_3) { start_test(1, 100, 100000, 500); }
 
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);

@@ -181,7 +181,7 @@ sp_int32 BaseConnection::getOutstandingBytes() const {
   return evbuffer_get_length(bufferevent_get_output(buffer_));
 }
 
-bool BaseConnection::applyRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps) {
+bool BaseConnection::setRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps) {
   if (_read_bps > 0 && _burst_read_bps > 0) {
     if (_read_bps != read_bps_ || _burst_read_bps != burst_read_bps_) {
       // Create new config

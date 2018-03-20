@@ -100,11 +100,24 @@ sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topolog
 }
 
 sp_int32 TopologyConfigHelper::GetComponentParallelism(const proto::api::Config& _config) {
-  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
-    if (_config.kvs(i).key() == TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM) {
-      return atoi(_config.kvs(i).value().c_str());
-    }
+  std::string parallelism = GetConfigValue(_config,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
   }
+
+  CHECK(false) << "Topology config - no component parallelism hints";
+  return -1;  // keep compiler happy
+}
+
+sp_int32 TopologyConfigHelper::GetComponentParallelism(
+    const proto::api::Topology& _topology, const std::string& _component) {
+  std::string parallelism = GetComponentConfigValue(_topology, _component,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
+  }
+
   CHECK(false) << "Topology config - no component parallelism hints";
   return -1;  // keep compiler happy
 }

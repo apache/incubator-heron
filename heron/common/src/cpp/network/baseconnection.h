@@ -133,7 +133,7 @@ class BaseConnection {
    * The function can be called multiple times. Return false when it fails to
    * apply the new rate limit.
    */
-  bool applyRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps);
+  bool setRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps);
 
   /**
    * Disable rate limiting.

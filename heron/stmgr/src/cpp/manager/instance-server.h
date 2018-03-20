@@ -125,9 +125,9 @@ class InstanceServer : public Server {
   void ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan);
 
   // Read config from Physical Plan and apply rate limit to connection
-  void ApplyRateLimit(const proto::system::PhysicalPlan& _pplan,
-                      const std::string& component,
-                      Connection* conn) const;
+  void SetRateLimit(const proto::system::PhysicalPlan& _pplan,
+                    const std::string& component,
+                    Connection* conn) const;
 
   class InstanceData {
    public:

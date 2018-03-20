@@ -319,6 +319,11 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
       response.mutable_pplan()->CopyFrom(*pplan);
     }
     SendResponse(_reqid, _conn, response);
+    // Apply rate limit to the connection
+    if (pplan) {
+      const std::string component = instance_info_[task_id]->instance_->info().component_name();
+      SetRateLimit(*pplan, component, _conn);
+    }
 
     // Have all the instances connected to us?
     if (HaveAllInstancesConnectedToUs()) {
@@ -427,18 +432,23 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
     // Update connection's rate limiting base on component config
     sp_int32 id = iter->second;
     const std::string component = instance_info_[id]->instance_->info().component_name();
-    ApplyRateLimit(_pplan, component, conn);
+    SetRateLimit(_pplan, component, conn);
   }
 }
 
-void InstanceServer::ApplyRateLimit(const proto::system::PhysicalPlan& _pplan,
-                                    const std::string& _component,
-                                    Connection* _conn) const {
+void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
+                                  const std::string& _component,
+                                  Connection* _conn) const {
   sp_int64 read_bsp =
       config::TopologyConfigHelper::GetComponentOutputBPS(_pplan.topology(), _component);
-  if (read_bsp > 0) {
-    sp_int64 burst_read_bsp = read_bsp + read_bsp / 2;
-    _conn->applyRateLimit(read_bsp, burst_read_bsp);
+  sp_int32 parallelism =
+      config::TopologyConfigHelper::GetComponentParallelism(_pplan.topology(), _component);
+  sp_int64 burst_read_bsp = read_bsp + read_bsp / 2;
+
+  // There should be parallelism hint and the per instance rate limit should be at least
+  // one byte per second
+  if (parallelism > 0 && read_bsp > parallelism && burst_read_bsp > parallelism) {
+    _conn->setRateLimit(read_bsp / parallelism, burst_read_bsp / parallelism);
   } else {
     _conn->disableRateLimit();
   }
