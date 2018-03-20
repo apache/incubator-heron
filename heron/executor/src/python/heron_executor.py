@@ -840,7 +840,7 @@ class HeronExecutor(object):
 
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
-      Log.info("Exception running command %:", cmd)
+      Log.info("Exception running command %s", cmd)
       traceback.print_exc()
 
     return process
@@ -856,7 +856,7 @@ class HeronExecutor(object):
       # wait for termination
       self._wait_process_std_out_err(cmd, process)
     except Exception:
-      Log.info("Exception running command %:", cmd)
+      Log.info("Exception running command %s", cmd)
       traceback.print_exc()
 
     # return the exit code
