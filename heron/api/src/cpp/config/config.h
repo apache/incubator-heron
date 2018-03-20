@@ -73,7 +73,7 @@ class Config {
   static const std::string TOPOLOGY_MESSAGE_TIMEOUT_SECS;
 
   /**
-   * The per componentparallelism for a component in this topology.
+   * The per component parallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
   static const std::string TOPOLOGY_COMPONENT_PARALLELISM;
