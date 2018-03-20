@@ -64,7 +64,7 @@ public final class PackingUtils {
       throw new PackingException(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"
               + "size is %s cores",
-          instanceCpu > maxContainerResources.getCpu(), maxContainerResources.getCpu()));
+          instanceCpu, maxContainerResources.getCpu()));
     }
 
     ByteAmount instanceDisk = instanceResources.getDisk().increaseBy(paddingPercentage);

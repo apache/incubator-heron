@@ -19,6 +19,4 @@ import org.scalatest.FunSuite
   * Base abstract class for all unit tests in Heron Streamlet Scala API
   * in order to keep common test functionality.
   */
-private[scala] abstract class BaseFunSuite extends FunSuite {
-
-}
+private[scala] abstract class BaseFunSuite extends FunSuite

@@ -15,9 +15,26 @@ package com.twitter.heron.streamlet.scala.converter
 
 import org.junit.Assert.assertTrue
 
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.Sink
-import com.twitter.heron.streamlet.scala.common.BaseFunSuite
+import scala.collection.mutable.ListBuffer
+
+import com.twitter.heron.streamlet.{
+  Context,
+  SerializableBiFunction,
+  SerializableBinaryOperator,
+  SerializableConsumer,
+  SerializableFunction,
+  SerializablePredicate,
+  SerializableSupplier,
+  SerializableTransformer,
+  Sink => JavaSink
+}
+
+import com.twitter.heron.streamlet.scala.{Sink, Source}
+
+import com.twitter.heron.streamlet.scala.common.{
+  BaseFunSuite,
+  TestIncrementSerializableTransformer
+}
 
 /**
   * Tests for Streamlet APIs' Scala to Java Conversion functionality
@@ -30,7 +47,7 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
       ScalaToJavaConverter.toSerializableSupplier[String](testFunction)
     assertTrue(
       serializableSupplier
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableSupplier[_]])
+        .isInstanceOf[SerializableSupplier[String]])
   }
 
   test("ScalaToJavaConverterTest should support SerializableFunction") {
@@ -40,21 +57,90 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
         stringToIntFunction)
     assertTrue(
       serializableFunction
-        .isInstanceOf[com.twitter.heron.streamlet.SerializableFunction[_, _]])
+        .isInstanceOf[SerializableFunction[String, Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableBiFunction") {
+    def numbersToStringFunction(number1: Int, number2: Long): String =
+      (number1.toLong + number2).toString
+    val serializableBiFunction =
+      ScalaToJavaConverter.toSerializableBiFunction[Int, Long, String](
+        numbersToStringFunction)
+    assertTrue(
+      serializableBiFunction
+        .isInstanceOf[SerializableBiFunction[Int, Long, String]])
   }
 
   test("ScalaToJavaConverterTest should support Java Sink") {
     val javaSink =
-      ScalaToJavaConverter.toJavaSink[Int](new TestSink())
+      ScalaToJavaConverter.toJavaSink[Int](new TestSink[Int]())
     assertTrue(
       javaSink
-        .isInstanceOf[com.twitter.heron.streamlet.Sink[Int]])
+        .isInstanceOf[JavaSink[Int]])
   }
 
-  private class TestSink() extends Sink[Int] {
+  test("ScalaToJavaConverterTest should support Java Source") {
+    val javaSource =
+      ScalaToJavaConverter.toJavaSource[Int](new TestSource())
+    assertTrue(
+      javaSource
+        .isInstanceOf[com.twitter.heron.streamlet.Source[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializablePredicate") {
+    def intToBooleanFunction(number: Int) = number.<(5)
+    val serializablePredicate =
+      ScalaToJavaConverter.toSerializablePredicate[Int](intToBooleanFunction)
+    assertTrue(
+      serializablePredicate
+        .isInstanceOf[SerializablePredicate[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableConsumer") {
+    def consumerFunction(number: Int): Unit = number * 10
+    val serializableConsumer =
+      ScalaToJavaConverter.toSerializableConsumer[Int](consumerFunction)
+    assertTrue(
+      serializableConsumer
+        .isInstanceOf[SerializableConsumer[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableBinaryOperator") {
+    def addNumbersFunction(number1: Int, number2: Int): Int =
+      number1 + number2
+    val serializableBinaryOperator =
+      ScalaToJavaConverter.toSerializableBinaryOperator[Int](addNumbersFunction)
+    assertTrue(
+      serializableBinaryOperator
+        .isInstanceOf[SerializableBinaryOperator[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableTransformer") {
+    val serializableTransformer =
+      new TestIncrementSerializableTransformer(factor = 100)
+
+    val javaSerializableTransformer =
+      ScalaToJavaConverter.toSerializableTransformer[Int, Int](
+        serializableTransformer)
+    assertTrue(
+      javaSerializableTransformer
+        .isInstanceOf[SerializableTransformer[Int, Int]])
+  }
+
+  private class TestSink[T] extends Sink[T] {
     override def setup(context: Context): Unit = {}
-    override def put(tuple: Int): Unit = {}
+    override def put(tuple: T): Unit = {}
     override def cleanup(): Unit = {}
+  }
+
+  private class TestSource() extends Source[Int] {
+    private val numbers = ListBuffer[Int]()
+    override def setup(context: Context): Unit = {
+      numbers += (1, 2, 3, 4, 5)
+    }
+    override def get(): Iterable[Int] = numbers
+
+    override def cleanup(): Unit = numbers.clear()
   }
 
 }

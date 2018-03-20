@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +33,8 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 public final class TMasterUtils {
   public enum TMasterCommand {
     ACTIVATE,
-    DEACTIVATE
+    DEACTIVATE,
+    RUNTIME_CONFIG_UPDATE
   }
 
   private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
@@ -45,9 +48,21 @@ public final class TMasterUtils {
    * @param command the command requested to TMaster, activate or deactivate.
    */
   @VisibleForTesting
-  public static void sendToTMaster(String command, String topologyName,
-                                      SchedulerStateManagerAdaptor stateManager,
-                                      NetworkUtils.TunnelConfig tunnelConfig)
+  public static void sendToTMaster(String command,
+                                   String topologyName,
+                                   SchedulerStateManagerAdaptor stateManager,
+                                   NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
+    final List<String> empty = new ArrayList<String>();
+    sendToTMasterWithArguments(command, topologyName, empty, stateManager, tunnelConfig);
+  }
+
+  @VisibleForTesting
+  public static void sendToTMasterWithArguments(String command,
+                                                String topologyName,
+                                                List<String> arguments,
+                                                SchedulerStateManagerAdaptor stateManager,
+                                                NetworkUtils.TunnelConfig tunnelConfig)
       throws TMasterException {
     // fetch the TMasterLocation for the topology
     LOG.fine("Fetching TMaster location for topology: " + topologyName);
@@ -63,6 +78,12 @@ public final class TMasterUtils {
     // for the url request to be sent to TMaster
     String url = String.format("http://%s:%d/%s?topologyid=%s",
         location.getHost(), location.getControllerPort(), command, location.getTopologyId());
+    // Append extra url arguments
+    for (String arg: arguments) {
+      url += "&";
+      url += arg;
+    }
+
     try {
       URL endpoint = new URL(url);
       LOG.fine("HTTP URL for TMaster: " + endpoint);
@@ -73,7 +94,7 @@ public final class TMasterUtils {
   }
 
   private static void sendGetRequest(URL endpoint, String command,
-                                        NetworkUtils.TunnelConfig tunnelConfig)
+                                     NetworkUtils.TunnelConfig tunnelConfig)
       throws TMasterException {
     // create a URL connection
     HttpURLConnection connection =
@@ -83,7 +104,6 @@ public final class TMasterUtils {
           "Failed to get a HTTP connection to TMaster: %s", endpoint));
     }
     LOG.fine("Successfully opened HTTP connection to TMaster");
-
     // now sent the http request
     NetworkUtils.sendHttpGetRequest(connection);
     LOG.fine("Sent the HTTP payload to TMaster");
@@ -147,8 +167,29 @@ public final class TMasterUtils {
           "Topology '%s' is not in state '%s'", topologyName, startState));
     }
 
-    TMasterUtils.sendToTMaster(
-        topologyStateControlCommand.name().toLowerCase(), topologyName, statemgr, tunnelConfig);
+    String command = topologyStateControlCommand.name().toLowerCase();
+    TMasterUtils.sendToTMaster(command, topologyName, statemgr, tunnelConfig);
+
+    LOG.log(Level.INFO,
+        "Topology command {0} completed successfully.", topologyStateControlCommand);
+  }
+
+  public static void sendRuntimeConfig(String topologyName,
+                                       TMasterCommand topologyStateControlCommand,
+                                       SchedulerStateManagerAdaptor statemgr,
+                                       String[] configs,
+                                       NetworkUtils.TunnelConfig tunnelConfig)
+      throws TMasterException {
+    final String runtimeConfigKey = "runtime-config";
+    final String runtimeConfigUpdateEndpoint = "runtime_config/update";
+
+    List<String> arguments = new ArrayList<String>();
+    for (String config: configs) {
+      arguments.add(runtimeConfigKey + "=" + config);
+    }
+
+    TMasterUtils.sendToTMasterWithArguments(
+        runtimeConfigUpdateEndpoint, topologyName, arguments, statemgr, tunnelConfig);
 
     LOG.log(Level.INFO,
         "Topology command {0} completed successfully.", topologyStateControlCommand);

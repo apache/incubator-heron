@@ -11,24 +11,20 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.streamlet.scala
+package com.twitter.heron.streamlet.scala.common
 
-import java.io.Serializable
+import scala.collection.mutable.ListBuffer
 
 import com.twitter.heron.streamlet.Context
+import com.twitter.heron.streamlet.scala.Sink
 
 /**
-  * Source is how Streamlet's originate. The get method
-  * invocation returns new element that form the tuples of the streamlet.
-  * setup/cleanup is where the generator can do any one time setup work, like
-  * establishing/closing connection to sources, etc.
+  * Test ListBuffer Sink for Scala Streamlet API Unit Tests' general usage.
   */
-trait Source[T] extends Serializable {
-
-  def setup(context: Context): Unit
-
-  def get(): scala.Iterable[T]
-
-  def cleanup(): Unit
-
+private[scala] class TestListBufferSink(
+    numbers: ListBuffer[Int] = ListBuffer[Int]())
+    extends Sink[Int] {
+  override def setup(context: Context): Unit = numbers += (1, 2)
+  override def put(tuple: Int): Unit = numbers += tuple
+  override def cleanup(): Unit = numbers.clear()
 }

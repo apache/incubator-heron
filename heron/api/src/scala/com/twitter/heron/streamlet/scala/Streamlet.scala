@@ -13,10 +13,12 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala
 
-import com.twitter.heron.streamlet.{KeyValue, KeyedWindow}
-
-// TODO: This Java Streamlet API references will be changed with Scala versions when they are ready
-import com.twitter.heron.streamlet.{JoinType, SerializableTransformer, WindowConfig}
+import com.twitter.heron.streamlet.{
+  JoinType,
+  KeyValue,
+  KeyedWindow,
+  WindowConfig
+}
 
 /**
   * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -74,7 +76,7 @@ trait Streamlet[R] {
     *
     * @param mapFn The Map Function that should be applied to each element
     */
-  def map[T](mapFn: R => _ <: T): Streamlet[T]
+  def map[T](mapFn: R => T): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
@@ -105,7 +107,8 @@ trait Streamlet[R] {
     * return 0 or more unique numbers between 0 and npartitions to indicate which partitions
     * this element should be routed to.
     */
-  def repartition(numPartitions: Int, partitionFn: (R, Int) => Seq[Int]): Streamlet[R]
+  def repartition(numPartitions: Int,
+                  partitionFn: (R, Int) => Seq[Int]): Streamlet[R]
 
   /**
     * Clones the current Streamlet. It returns an array of numClones Streamlets where each
@@ -128,11 +131,12 @@ trait Streamlet[R] {
     * have. Typical windowing strategies are sliding windows and tumbling windows
     * @param joinFunction      The join function that needs to be applied
     */
-  def join[K, S, T](other: Streamlet[S],
-                    thisKeyExtractor: R => K,
-                    otherKeyExtractor: S => K,
-                    windowCfg: WindowConfig,
-                    joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  def join[K, S, T](
+      other: Streamlet[S],
+      thisKeyExtractor: R => K,
+      otherKeyExtractor: S => K,
+      windowCfg: WindowConfig,
+      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]]
 
   /**
     * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
@@ -150,12 +154,13 @@ trait Streamlet[R] {
     * @param joinType          Type of Join. Options { @link JoinType}
     * @param joinFunction The join function that needs to be applied
     */
-  def join[K, S, T](other: Streamlet[S],
-                    thisKeyExtractor: R => K,
-                    otherKeyExtractor: S => K,
-                    windowCfg: WindowConfig,
-                    joinType: JoinType,
-                    joinFunction: (R, S) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  def join[K, S, T](
+      other: Streamlet[S],
+      thisKeyExtractor: R => K,
+      otherKeyExtractor: S => K,
+      windowCfg: WindowConfig,
+      joinType: JoinType,
+      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]]
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -168,10 +173,11 @@ trait Streamlet[R] {
     *                       Typical windowing strategies are sliding windows and tumbling windows
     * @param reduceFn       The reduce function that you want to apply to all the values of a key.
     */
-  def reduceByKeyAndWindow[K, V](keyExtractor: R => K,
-                                 valueExtractor: R => V,
-                                 windowCfg: WindowConfig,
-                                 reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]]
+  def reduceByKeyAndWindow[K, V](
+      keyExtractor: R => K,
+      valueExtractor: R => V,
+      windowCfg: WindowConfig,
+      reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]]
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -187,10 +193,11 @@ trait Streamlet[R] {
     * @param reduceFn     The reduce function takes two parameters: a partial result of the reduction
     *                     and the next element of the stream. It returns a new partial result.
     */
-  def reduceByKeyAndWindow[K, T](keyExtractor: R => K,
-                                 windowCfg: WindowConfig,
-                                 identity: T,
-                                 reduceFn: (T, R) => _ <: T): Streamlet[KeyValue[KeyedWindow[K], T]]
+  def reduceByKeyAndWindow[K, T](
+      keyExtractor: R => K,
+      windowCfg: WindowConfig,
+      identity: T,
+      reduceFn: (T, R) => T): Streamlet[KeyValue[KeyedWindow[K], T]]
 
   /**
     * Returns a new Streamlet that is the union of this and the ‘other’ streamlet. Essentially
@@ -207,7 +214,8 @@ trait Streamlet[R] {
     * @param <                       T> The return type of the transform
     * @return Streamlet containing the output of the transformFunction
     */
-  def transform[T](serializableTransformer: SerializableTransformer[R, _ <: T]): Streamlet[T]
+  def transform[T](
+      serializableTransformer: SerializableTransformer[R, _ <: T]): Streamlet[T]
 
   /**
     * Logs every element of the streamlet using String.valueOf function

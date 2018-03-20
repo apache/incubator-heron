@@ -13,8 +13,25 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.Sink
+import java.util.Collection
+import java.util.function.Consumer
+
+import scala.collection.JavaConverters
+
+import com.twitter.heron.streamlet.{
+  Context,
+  SerializableBiFunction,
+  SerializableBinaryOperator,
+  SerializableConsumer,
+  SerializableFunction,
+  SerializablePredicate,
+  SerializableSupplier,
+  SerializableTransformer => JavaSerializableTransformer,
+  Sink => JavaSink,
+  Source => JavaSource
+}
+
+import com.twitter.heron.streamlet.scala.{SerializableTransformer, Sink, Source}
 
 /**
   * This class transforms passed User defined Scala Functions, Sources, Sinks
@@ -23,22 +40,73 @@ import com.twitter.heron.streamlet.scala.Sink
 object ScalaToJavaConverter {
 
   def toSerializableSupplier[T](f: () => T) =
-    new com.twitter.heron.streamlet.SerializableSupplier[T] {
+    new SerializableSupplier[T] {
       override def get(): T = f()
     }
 
-  def toSerializableFunction[R, T](f: R => _ <: T) =
-    new com.twitter.heron.streamlet.SerializableFunction[R, T] {
+  def toSerializableFunction[R, T](f: R => T) =
+    new SerializableFunction[R, T] {
+
       override def apply(r: R): T = f(r)
     }
 
-  def toJavaSink[T](sink: Sink[T]): com.twitter.heron.streamlet.Sink[T] = {
-    new com.twitter.heron.streamlet.Sink[T] {
+  def toSerializablePredicate[R](f: R => Boolean) =
+    new SerializablePredicate[R] {
+      override def test(r: R): Boolean = f(r)
+    }
+
+  def toSerializableConsumer[R](f: R => Unit) =
+    new SerializableConsumer[R] {
+      override def accept(r: R): Unit = f(r)
+    }
+
+  def toSerializableBiFunction[R, S, T](f: (R, S) => T) =
+    new SerializableBiFunction[R, S, T] {
+      override def apply(r: R, s: S): T = f(r, s)
+    }
+
+  def toSerializableBinaryOperator[T](f: (T, T) => T) =
+    new SerializableBinaryOperator[T] {
+      override def apply(t1: T, t2: T): T = f(t1, t2)
+    }
+
+  def toJavaSink[T](sink: Sink[T]): JavaSink[T] = {
+    new JavaSink[T] {
       override def setup(context: Context): Unit = sink.setup(context)
 
       override def put(tuple: T): Unit = sink.put(tuple)
 
       override def cleanup(): Unit = sink.cleanup()
+    }
+  }
+
+  def toJavaSource[T](source: Source[T]): JavaSource[T] = {
+    new JavaSource[T] {
+      override def setup(context: Context): Unit = source.setup(context)
+
+      override def get(): Collection[T] =
+        JavaConverters
+          .asJavaCollectionConverter(source.get)
+          .asJavaCollection
+
+      override def cleanup(): Unit = source.cleanup()
+    }
+  }
+
+  def toSerializableTransformer[R, T](
+      transformer: SerializableTransformer[R, _ <: T])
+    : JavaSerializableTransformer[R, _ <: T] = {
+
+    def toScalaConsumerFunction[T](consumer: Consumer[T]): T => Unit =
+      (t: T) => consumer.accept(t)
+
+    new JavaSerializableTransformer[R, T] {
+      override def setup(context: Context): Unit = transformer.setup(context)
+
+      override def transform(r: R, consumer: Consumer[T]): Unit =
+        transformer.transform(r, toScalaConsumerFunction[T](consumer))
+
+      override def cleanup(): Unit = transformer.cleanup()
     }
   }
 
