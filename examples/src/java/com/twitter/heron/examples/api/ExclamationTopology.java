@@ -65,7 +65,7 @@ public final class ExclamationTopology {
         ExampleResources.getContainerDisk(spouts + bolts, parallelism));
     conf.setContainerRamRequested(
         ExampleResources.getContainerRam(spouts + bolts, parallelism));
-    conf.setContainerCpuRequested(1);
+    conf.setContainerCpuRequested(10);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(parallelism);
