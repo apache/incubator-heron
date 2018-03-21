@@ -37,6 +37,9 @@ import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_CPU;
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_DISK;
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_RAM;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED;
 import static com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
@@ -116,10 +119,15 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
     this.numContainers = TopologyUtils.getNumContainers(topology);
+
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     this.defaultInstanceResources = new Resource(
-        Context.instanceCpu(config),
-        Context.instanceRam(config),
-        Context.instanceDisk(config));
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_CPU,
+            Context.instanceCpu(config)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_RAM,
+            Context.instanceRam(config)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_DISK,
+            Context.instanceDisk(config)));
     resetToFirstContainer();
 
     LOG.info(String.format("Initalizing ResourceCompliantRRPacking. "

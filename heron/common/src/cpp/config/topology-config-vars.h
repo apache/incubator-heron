@@ -60,6 +60,9 @@ class TopologyConfigVars {
   static const sp_string TOPOLOGY_CAP_TICKET;
   static const sp_string TOPOLOGY_PROJECT_NAME;
   static const sp_string TOPOLOGY_COMPONENT_OUTPUT_BPS;
+  static const sp_string TOPOLOGY_COMPONENT_DEFAULT_CPU;
+  static const sp_string TOPOLOGY_COMPONENT_DEFAULT_RAM;
+  static const sp_string TOPOLOGY_COMPONENT_DEFAULT_DISK;
 };
 }  // namespace config
 }  // namespace heron

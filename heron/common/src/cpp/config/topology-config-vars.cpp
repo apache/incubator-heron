@@ -52,5 +52,11 @@ const sp_string TopologyConfigVars::TOPOLOGY_TEAM_EMAIL = "topology.team.email";
 const sp_string TopologyConfigVars::TOPOLOGY_CAP_TICKET = "topology.cap.ticket";
 const sp_string TopologyConfigVars::TOPOLOGY_PROJECT_NAME = "topology.project.name";
 const sp_string TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
+const sp_string TopologyConfigVars::TOPOLOGY_COMPONENT_DEFAULT_CPU =
+    "topology.component.default.cpu";
+const sp_string TopologyConfigVars::TOPOLOGY_COMPONENT_DEFAULT_RAM =
+    "topology.component.default.ram";
+const sp_string TopologyConfigVars::TOPOLOGY_COMPONENT_DEFAULT_DISK =
+    "topology.component.default.disk";
 }  // namespace config
 }  // namespace heron
