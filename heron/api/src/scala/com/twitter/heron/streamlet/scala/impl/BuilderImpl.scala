@@ -13,23 +13,28 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.impl
 
+import com.twitter.heron.api.topology.TopologyBuilder
+import com.twitter.heron.streamlet.impl.{BuilderImpl => JavaBuilderImpl}
+
 import com.twitter.heron.streamlet.scala.{Builder, Source, Streamlet}
-import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter
+import com.twitter.heron.streamlet.scala.converter.ScalaToJavaConverter._
 
 class BuilderImpl(builder: com.twitter.heron.streamlet.Builder)
     extends Builder {
 
-  override def newSource[R](supplierFn: () => R): Streamlet[R] = {
-    val serializableSupplier =
-      ScalaToJavaConverter.toSerializableSupplier[R](supplierFn)
+  override def newSource[R](supplier: () => R): Streamlet[R] = {
+    val serializableSupplier = toSerializableSupplier[R](supplier)
     val newJavaStreamlet = builder.newSource(serializableSupplier)
     StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
   }
 
-  override def newSource[R](sourceFn: Source[R]): Streamlet[R] = {
-    val javaSourceObj = ScalaToJavaConverter.toJavaSource[R](sourceFn)
+  override def newSource[R](generator: Source[R]): Streamlet[R] = {
+    val javaSourceObj = toJavaSource[R](generator)
     val newJavaStreamlet = builder.newSource(javaSourceObj)
     StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
   }
+
+  def build(): TopologyBuilder =
+    builder.asInstanceOf[JavaBuilderImpl].build()
 
 }
