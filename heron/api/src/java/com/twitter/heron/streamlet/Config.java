@@ -87,7 +87,7 @@ public final class Config implements Serializable {
     return new Builder();
   }
 
-  com.twitter.heron.api.Config getHeronConfig() {
+  public com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
   }
 

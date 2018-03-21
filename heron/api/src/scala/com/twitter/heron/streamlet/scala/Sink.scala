@@ -14,6 +14,7 @@
 package com.twitter.heron.streamlet.scala
 
 import java.io.Serializable
+
 import com.twitter.heron.streamlet.Context
 
 /**

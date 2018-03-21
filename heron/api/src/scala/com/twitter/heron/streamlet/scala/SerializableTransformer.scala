@@ -18,17 +18,16 @@ import java.io.Serializable
 import com.twitter.heron.streamlet.Context
 
 /**
-  * Source is how Streamlet's originate. The get method
-  * invocation returns new element that form the tuples of the streamlet.
-  * setup/cleanup is where the generator can do any one time setup work, like
-  * establishing/closing connection to sources, etc.
+  * All user supplied transformation functions have to be serializable.
+  * Thus all Streamlet transformation definitions take Serializable
+  * Functions as their input. We simply decorate java.util. function
+  * definitions with a Serializable tag to ensure that any supplied
+  * lambda functions automatically become serializable.
   */
-trait Source[T] extends Serializable {
-
+trait SerializableTransformer[I, O] extends Serializable {
   def setup(context: Context): Unit
 
-  def get(): scala.Iterable[T]
+  def transform(i: I, f: O => Unit): Unit
 
   def cleanup(): Unit
-
 }

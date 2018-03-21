@@ -51,5 +51,6 @@ const sp_string TopologyConfigVars::TOPOLOGY_TEAM_NAME = "topology.team.name";
 const sp_string TopologyConfigVars::TOPOLOGY_TEAM_EMAIL = "topology.team.email";
 const sp_string TopologyConfigVars::TOPOLOGY_CAP_TICKET = "topology.cap.ticket";
 const sp_string TopologyConfigVars::TOPOLOGY_PROJECT_NAME = "topology.project.name";
+const sp_string TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
 }  // namespace config
 }  // namespace heron

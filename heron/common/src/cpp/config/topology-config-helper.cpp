@@ -98,11 +98,24 @@ sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topolog
 }
 
 sp_int32 TopologyConfigHelper::GetComponentParallelism(const proto::api::Config& _config) {
-  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
-    if (_config.kvs(i).key() == TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM) {
-      return atoi(_config.kvs(i).value().c_str());
-    }
+  std::string parallelism = GetConfigValue(_config,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
   }
+
+  CHECK(false) << "Topology config - no component parallelism hints";
+  return -1;  // keep compiler happy
+}
+
+sp_int32 TopologyConfigHelper::GetComponentParallelism(
+    const proto::api::Topology& _topology, const std::string& _component) {
+  std::string parallelism = GetComponentConfigValue(_topology, _component,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
+  }
+
   CHECK(false) << "Topology config - no component parallelism hints";
   return -1;  // keep compiler happy
 }
@@ -376,11 +389,12 @@ sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
                                const proto::api::Topology& _topology,
                                sp_int64 _default) {
   const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
-      return atol(cfg.kvs(i).value().c_str());
-    }
+  const std::string value = GetConfigValue(cfg,
+      TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, "");
+  if (!value.empty()) {
+    return atol(value.c_str());
   }
+
   // There was no value specified. Return the default
   return _default;
 }
@@ -485,15 +499,25 @@ void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
   }
 }
 
+const std::string TopologyConfigHelper::GetConfigValue(const proto::api::Config& _config,
+                                                       const std::string& _key,
+                                                       const std::string& _default) {
+  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
+    if (_config.kvs(i).key() == _key) {
+      return _config.kvs(i).value();
+    }
+  }
+  return _default;
+}
+
 bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
                                                  const std::string& _config_name,
                                                  bool _default_value) {
   static const std::string value_true_ = "true";
-  const proto::api::Config& config = _topology.topology_config();
-  for (sp_int32 i = 0; i < config.kvs_size(); ++i) {
-    if (config.kvs(i).key() == _config_name) {
-      return value_true_.compare(config.kvs(i).value().c_str()) == 0;
-    }
+  const proto::api::Config& cfg = _topology.topology_config();
+  const std::string value = GetConfigValue(cfg, _config_name, "");
+  if (!value.empty()) {
+    return value_true_.compare(value.c_str()) == 0;
   }
   return _default_value;
 }
@@ -504,6 +528,37 @@ void TopologyConfigHelper::ConvertConfigToKVMap(const proto::api::Config& _confi
   for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
     retval[_config.kvs(i).key()] = _config.kvs(i).value();
   }
+}
+
+const std::string TopologyConfigHelper::GetComponentConfigValue(
+    const proto::api::Topology& _topology,
+    const std::string& _component,
+    const std::string& _key,
+    const std::string& _default) {
+  for (auto spout : _topology.spouts()) {
+    if (spout.comp().name() == _component) {  // Found the component
+      const proto::api::Config& config = spout.comp().config();
+      return GetConfigValue(config, _key, _default);
+    }
+  }
+  for (auto bolt : _topology.bolts()) {  // Found the component
+    if (bolt.comp().name() == _component) {
+      const proto::api::Config& config = bolt.comp().config();
+      return GetConfigValue(config, _key, _default);
+    }
+  }
+  return _default;
+}
+
+sp_int64 TopologyConfigHelper::GetComponentOutputBPS(const proto::api::Topology& _topology,
+                                                     const std::string& _component) {
+  const std::string value = GetComponentConfigValue(_topology, _component,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS, "");
+
+  if (!value.empty()) {
+    return atol(value.c_str());
+  }
+  return -1;  // default to -1 (no rate limit)
 }
 }  // namespace config
 }  // namespace heron

@@ -339,4 +339,9 @@ public class Context {
     Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
     return o == null ? "" : (String) o;
   }
+
+  public static String metricscacheMgrMode(Config cfg) {
+    return cfg.getStringValue(Key.METRICSCACHEMGR_MODE);
+  }
+
 }

@@ -50,6 +50,8 @@ class TopologyConfigHelper {
   // The number of workers needed for this component's config
   // Essentially plucks the value of the TOPOLOGY_COMPONENT_PARALLELISM
   static sp_int32 GetComponentParallelism(const proto::api::Config& _config);
+  static sp_int32 GetComponentParallelism(const proto::api::Topology& _topology,
+                                          const std::string& _component);
 
   // The total number of workers needed accross all components for
   // this topology
@@ -152,6 +154,21 @@ class TopologyConfigHelper {
   static void SetComponentConfig(proto::api::Topology* _topology,
                                  const std::string& _component_name,
                                  const std::map<std::string, std::string>& config);
+
+  // Get the config value given component name and config key
+  static const std::string GetComponentConfigValue(const proto::api::Topology& _topology,
+                                                   const std::string& _component,
+                                                   const std::string& _key,
+                                                   const std::string& _default);
+
+  // Get the value for a key in a config
+  static const std::string GetConfigValue(const proto::api::Config& _config,
+                                          const std::string& _key,
+                                          const std::string& _default);
+
+  // The output BPS of this component. Return -1 if not found
+  static sp_int64 GetComponentOutputBPS(const proto::api::Topology& _topology,
+                                        const std::string& _component);
 
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,

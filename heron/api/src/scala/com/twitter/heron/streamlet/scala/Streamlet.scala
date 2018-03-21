@@ -17,7 +17,6 @@ import com.twitter.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
-  SerializableTransformer,
   WindowConfig
 }
 
@@ -85,7 +84,7 @@ trait Streamlet[R] {
     *
     * @param flatMapFn The FlatMap Function that should be applied to each element
     */
-  def flatMap[T](flatMapFn: R => _ <: Iterable[_ <: T]): Streamlet[T]
+  def flatMap[T](flatMapFn: R => Iterable[_ <: T]): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet

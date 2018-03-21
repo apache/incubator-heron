@@ -125,7 +125,6 @@ echo "Uncompressing."
 untar ${base}/dist/heron-core.tar.gz ${base}/dist
 
 rm "${base}/heron.tar.gz"
-rm "${base}/dist/heron-core.tar.gz"
 rm -f "${base}/dist/release.yaml"
 
 cat <<EOF

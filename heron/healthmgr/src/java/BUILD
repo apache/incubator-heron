@@ -7,6 +7,7 @@ healthmgr_deps_files = [
     "//heron/api/src/java:classification",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
+    "//heron/common/src/java:network-java",
     "//heron/common/src/java:utils-java",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:packing-spi-java",

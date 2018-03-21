@@ -21,9 +21,13 @@ import com.twitter.heron.streamlet.WindowConfig
 import com.twitter.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
   FilterStreamlet,
+  FlatMapStreamlet,
   LogStreamlet,
   JoinStreamlet,
   MapStreamlet,
+  ReduceByKeyAndWindowStreamlet,
+  RemapStreamlet,
+  TransformStreamlet,
   SinkStreamlet,
   UnionStreamlet
 }
@@ -31,6 +35,7 @@ import com.twitter.heron.streamlet.impl.streamlets.{
 import com.twitter.heron.streamlet.scala.Streamlet
 import com.twitter.heron.streamlet.scala.common.{
   BaseFunSuite,
+  TestIncrementSerializableTransformer,
   TestListBufferSink
 }
 
@@ -89,6 +94,33 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, mapStreamlet.getChildren.size())
   }
 
+  test("StreamletImpl should support flatMap transformation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(20)
+
+    supplierStreamlet
+      .flatMap[String] { num: Double =>
+        List((num * 10).toString)
+      }
+      .setName("FlatMap_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[FlatMapStreamlet[_, _]])
+    val flatMapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[FlatMapStreamlet[Double, String]]
+    assertEquals("FlatMap_Streamlet_1", flatMapStreamlet.getName)
+    assertEquals(0, flatMapStreamlet.getChildren.size())
+  }
+
   test("StreamletImpl should support filter transformation") {
     val supplierStreamlet = StreamletImpl
       .createSupplierStreamlet(() => Math.random)
@@ -138,6 +170,38 @@ class StreamletImplTest extends BaseFunSuite {
     val repartitionedStreamlet = supplierStreamletImpl
       .getChildren(0)
       .asInstanceOf[MapStreamlet[String, String]]
+    assertEquals("Repartitioned_Streamlet_1", repartitionedStreamlet.getName)
+    assertEquals(0, repartitionedStreamlet.getChildren.size())
+    assertEquals(10, repartitionedStreamlet.getNumPartitions)
+  }
+
+  test(
+    "StreamletImpl should support repartition transformation with partition function") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => "aa bb cc dd ee")
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(5)
+
+    def partitionFunction(number1: String, number2: Int): Seq[Int] =
+      Seq(number1.toInt + number2)
+
+    supplierStreamlet
+      .repartition(10, partitionFunction)
+      .setName("Repartitioned_Streamlet_1")
+
+    assertEquals(5, supplierStreamlet.getNumPartitions)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[String]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[RemapStreamlet[_]])
+
+    val repartitionedStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[RemapStreamlet[String]]
     assertEquals("Repartitioned_Streamlet_1", repartitionedStreamlet.getName)
     assertEquals(0, repartitionedStreamlet.getChildren.size())
     assertEquals(10, repartitionedStreamlet.getNumPartitions)
@@ -275,6 +339,81 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(3, clonedStreamlets.size)
 
     verifyClonedStreamlets[Double](supplierStreamlet, numClones = 3)
+  }
+
+  test("StreamletImpl should support transform operation") {
+    val incrementTransformer =
+      new TestIncrementSerializableTransformer(factor = 100)
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .map[Int] { num: Int =>
+        num * 10
+      }
+      .setName("Map_Streamlet_1")
+      .setNumPartitions(2)
+      .transform[Int](incrementTransformer)
+      .setName("Transformer_Streamlet_1")
+      .setNumPartitions(7)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    val mapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[MapStreamlet[Int, Int]]
+    assertEquals("Map_Streamlet_1", mapStreamlet.getName)
+    assertEquals(2, mapStreamlet.getNumPartitions)
+    assertEquals(1, mapStreamlet.getChildren.size())
+
+    assertTrue(
+      mapStreamlet
+        .getChildren()
+        .get(0)
+        .isInstanceOf[TransformStreamlet[_, _]])
+    val transformStreamlet = mapStreamlet
+      .getChildren()
+      .get(0)
+      .asInstanceOf[TransformStreamlet[Int, Int]]
+    assertEquals("Transformer_Streamlet_1", transformStreamlet.getName)
+    assertEquals(7, transformStreamlet.getNumPartitions)
+    assertEquals(0, transformStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support reduce operation") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .reduceByKeyAndWindow[Int, Int]((key: Int) => key * 100,
+                                      (value: Int) => 1,
+                                      WindowConfig.TumblingCountWindow(10),
+                                      (x: Int, y: Int) => x + y)
+      .setName("Reduce_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[ReduceByKeyAndWindowStreamlet[_, _, _]])
+    val mapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[ReduceByKeyAndWindowStreamlet[Int, Int, Int]]
+    assertEquals("Reduce_Streamlet_1", mapStreamlet.getName)
+    assertEquals(5, mapStreamlet.getNumPartitions)
+    assertEquals(0, mapStreamlet.getChildren.size())
   }
 
   private def verifyClonedStreamlets[R](supplierStreamlet: Streamlet[R],
