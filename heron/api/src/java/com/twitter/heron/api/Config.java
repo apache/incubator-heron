@@ -770,5 +770,4 @@ public class Config extends HashMap<String, Object> {
   public void setTopologyComponentOutputBPS(long bps) {
     this.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
-
 }

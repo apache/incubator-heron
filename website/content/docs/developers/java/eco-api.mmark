@@ -299,6 +299,7 @@ underlying TopologyReliabilityMode value.
 * `"topology.component.default.ram"` : Default ram size in bytes for each component
 * `"topology.component.default.disk"` : Default disk size in bytes for each component
 
+
 ### Components
 
 `components` are a list of instances that would be used as configuration objects for other components in your ECO file defined in the YAML DSL.
