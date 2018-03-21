@@ -253,6 +253,8 @@ class StMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  sp_string metricscachemgr_mode_;
 };
 
 }  // namespace stmgr
