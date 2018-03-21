@@ -53,6 +53,7 @@ public class AbstractOutputCollector {
     this.serializer = serializer;
     this.metrics = metrics;
     this.totalTuplesEmitted = 0;
+    this.totalBytesEmitted = 0;
     this.helper = helper;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
@@ -116,6 +117,10 @@ public class AbstractOutputCollector {
 
   public long getTotalTuplesEmitted() {
     return totalTuplesEmitted;
+  }
+
+  public long getTotalBytesEmitted() {
+    return totalBytesEmitted;
   }
 
   protected HeronTuples.HeronDataTuple.Builder initTupleBuilder(String streamId,
