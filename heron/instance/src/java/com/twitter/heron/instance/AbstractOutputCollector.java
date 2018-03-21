@@ -38,6 +38,7 @@ public class AbstractOutputCollector {
   protected final ComponentMetrics metrics;
   protected final boolean ackEnabled;
   private long totalTuplesEmitted;
+  private long totalBytesEmitted;
   private PhysicalPlanHelper helper;
 
   /**
@@ -168,6 +169,7 @@ public class AbstractOutputCollector {
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
     totalTuplesEmitted++;
+    totalBytesEmitted += tupleSizeInBytes;
 
     // Update metrics
     metrics.emittedTuple(streamId);
