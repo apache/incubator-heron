@@ -70,7 +70,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
              const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
              sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
-             sp_int64 _high_watermark, sp_int64 _low_watermark, sp_string& _metricscachemgr_mode)
+             sp_int64 _high_watermark, sp_int64 _low_watermark,
+             const sp_string& _metricscachemgr_mode)
 
     : pplan_(NULL),
       topology_name_(_topology_name),

@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
                           FLAGS_topology_name, FLAGS_topology_id, topology, FLAGS_stmgr_id,
                           instances, FLAGS_zkhostportlist, FLAGS_zkroot, FLAGS_metricsmgr_port,
                           FLAGS_shell_port, FLAGS_ckptmgr_port, FLAGS_ckptmgr_id,
-                          high_watermark, low_watermark, metricscachemgr_mode);
+                          high_watermark, low_watermark, FLAGS_metricscachemgr_mode);
   mgr.Init();
   ss.loop();
   return 0;
