@@ -120,7 +120,7 @@ void StMgr::Init() {
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-  if (0 != metricscachemgr_mode_.compare()) {
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
     state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
   }
@@ -159,7 +159,7 @@ void StMgr::Init() {
   // constructor needs actual stmgr ports, thus put FetchTMasterLocation()
   // has to be after after StartStmgrServer and StartInstanceServer()
   FetchTMasterLocation();
-  if (0 != metricscachemgr_mode_.compare()) {
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
     FetchMetricsCacheLocation();
   }
 
