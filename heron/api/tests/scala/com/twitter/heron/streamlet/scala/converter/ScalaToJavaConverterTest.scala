@@ -13,9 +13,12 @@
 //  limitations under the License.
 package com.twitter.heron.streamlet.scala.converter
 
-import org.junit.Assert.assertTrue
+import java.util.stream.{Collectors, StreamSupport}
+import java.util.{List => JavaList}
 
 import scala.collection.mutable.ListBuffer
+
+import org.junit.Assert.{assertEquals, assertTrue}
 
 import com.twitter.heron.streamlet.{
   Context,
@@ -30,7 +33,6 @@ import com.twitter.heron.streamlet.{
 }
 
 import com.twitter.heron.streamlet.scala.{Sink, Source}
-
 import com.twitter.heron.streamlet.scala.common.{
   BaseFunSuite,
   TestIncrementSerializableTransformer
@@ -58,6 +60,24 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
     assertTrue(
       serializableFunction
         .isInstanceOf[SerializableFunction[String, Int]])
+  }
+
+  test(
+    "ScalaToJavaConverterTest should support SerializableFunctionWithIterable") {
+    def stringToListOfIntFunction(number: String) = List(number.toInt)
+    val serializableFunction =
+      ScalaToJavaConverter.toSerializableFunctionWithIterable[String, Int](
+        stringToListOfIntFunction)
+    assertTrue(
+      serializableFunction
+        .isInstanceOf[SerializableFunction[String, _]])
+
+    val iterable = serializableFunction.apply("123")
+    val list = StreamSupport
+      .stream(iterable.spliterator(), false)
+      .collect(Collectors.toList())
+    assertEquals(1, list.size())
+    assertTrue(list.contains(123))
   }
 
   test("ScalaToJavaConverterTest should support SerializableBiFunction") {
@@ -113,6 +133,20 @@ class ScalaToJavaConverterTest extends BaseFunSuite {
     assertTrue(
       serializableBinaryOperator
         .isInstanceOf[SerializableBinaryOperator[Int]])
+  }
+
+  test("ScalaToJavaConverterTest should support SerializableBiFunctionWithSeq") {
+    def numbersToSeqOfIntFunction(number1: String, number2: Int): Seq[Int] =
+      Seq(number1.toInt + number2)
+    val serializableBiFunction =
+      ScalaToJavaConverter.toSerializableBiFunctionWithSeq[String](
+        numbersToSeqOfIntFunction)
+    assertTrue(serializableBiFunction
+      .isInstanceOf[SerializableBiFunction[String, Integer, JavaList[Integer]]])
+
+    val list = serializableBiFunction.apply("12", 3)
+    assertEquals(1, list.size())
+    assertTrue(list.contains(15))
   }
 
   test("ScalaToJavaConverterTest should support SerializableTransformer") {

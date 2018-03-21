@@ -113,8 +113,12 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     *
     * @param flatMapFn The FlatMap Function that should be applied to each element
     */
-  override def flatMap[T](flatMapFn: R => _ <: Iterable[_ <: T]): Streamlet[T] =
-    ???
+  override def flatMap[T](flatMapFn: R => Iterable[_ <: T]): Streamlet[T] = {
+    val serializableFunction =
+      toSerializableFunctionWithIterable[R, T](flatMapFn)
+    val newJavaStreamlet = javaStreamlet.flatMap[T](serializableFunction)
+    fromJavaStreamlet[T](newJavaStreamlet)
+  }
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet
@@ -145,8 +149,12 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * this element should be routed to.
     */
   override def repartition(numPartitions: Int,
-                           partitionFn: (R, Int) => Seq[Int]): Streamlet[R] =
-    ???
+                           partitionFn: (R, Int) => Seq[Int]): Streamlet[R] = {
+    val partitionFunction = toSerializableBiFunctionWithSeq[R](partitionFn)
+    val newJavaStreamlet =
+      javaStreamlet.repartition(numPartitions, partitionFunction)
+    fromJavaStreamlet[R](newJavaStreamlet)
+  }
 
   /**
     * Clones the current Streamlet. It returns an array of numClones Streamlets where each
