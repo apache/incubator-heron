@@ -87,8 +87,8 @@ TOPOLOGY_PROJECT_NAME = "topology.project.name"
 # Any user defined classpath that needs to be passed to instances should be set in to config
 # through this key.
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
-# The per component output bytes per second in this topology.
-TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps"
+# The per component output tuple per second in this topology.
+TOPOLOGY_COMPONENT_OUTPUT_TPS = "topology.component.output.tps"
 # Default number of cpu for each component
 TOPOLOGY_COMPONENT_DEFAULT_CPU = "topology.component.default.cpu"
 # Default ram size in bytes for each component
