@@ -284,52 +284,41 @@ class Config {
     config_[Config::TOPOLOGY_SERIALIZER_CLASSNAME] = className;
   }
 
+  template<typename T>
+  void appendComponentConfig(const std::string& key,
+                             const std::string& componentName,
+                             const T& val) {
+    if (config_.find(key) != config_.end()) {
+      std::ostringstream value;
+      value << config_[key];
+      value << "," << componentName << ":" << val;
+      config_[key] = value.str();
+    } else {
+      std::ostringstream value;
+      value << componentName << ":" << val;
+      config_[key] = value.str();
+    }
+  }
+
   void setComponentCpu(const std::string& componentName, float_t cpu) {
     if (cpu < 0) {
       throw std::runtime_error("Invalid Cpu specified for component");
     }
-    if (config_.find(Config::TOPOLOGY_COMPONENT_CPUMAP) != config_.end()) {
-      std::ostringstream value;
-      value << config_[Config::TOPOLOGY_COMPONENT_CPUMAP];
-      value << "," << componentName << ":" << cpu;
-      config_[Config::TOPOLOGY_COMPONENT_CPUMAP] = value.str();
-    } else {
-      std::ostringstream value;
-      value << componentName << ":" << cpu;
-      config_[Config::TOPOLOGY_COMPONENT_CPUMAP] = value.str();
-    }
+    appendComponentConfig<float_t>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
   }
 
   void setComponentRam(const std::string& componentName, int64_t bytes) {
     if (bytes < 0) {
       throw std::runtime_error("Invalid Ram specified for component");
     }
-    if (config_.find(Config::TOPOLOGY_COMPONENT_RAMMAP) != config_.end()) {
-      std::ostringstream value;
-      value << config_[Config::TOPOLOGY_COMPONENT_RAMMAP];
-      value << "," << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_RAMMAP] = value.str();
-    } else {
-      std::ostringstream value;
-      value << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_RAMMAP] = value.str();
-    }
+    appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_RAMMAP, componentName, bytes);
   }
 
   void setComponentDisk(const std::string& componentName, int64_t bytes) {
     if (bytes < 0) {
       throw std::runtime_error("Invalid Disk specified for component");
     }
-    if (config_.find(Config::TOPOLOGY_COMPONENT_DISKMAP) != config_.end()) {
-      std::ostringstream value;
-      value << config_[Config::TOPOLOGY_COMPONENT_DISKMAP];
-      value << "," << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_DISKMAP] = value.str();
-    } else {
-      std::ostringstream value;
-      value << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_DISKMAP] = value.str();
-    }
+    appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_DISKMAP, componentName, bytes);
   }
 
   bool hasConfig(const std::string& name) {
