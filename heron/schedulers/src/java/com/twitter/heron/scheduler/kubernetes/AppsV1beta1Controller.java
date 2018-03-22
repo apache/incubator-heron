@@ -408,7 +408,8 @@ public class AppsV1beta1Controller extends KubernetesController {
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
     final Map<String, String> requests = new HashMap<>();
-    requests.put(KubernetesConstants.MEMORY, Long.toString(resource.getRam().asMegabytes()));
+    requests.put(KubernetesConstants.MEMORY,
+        KubernetesUtils.Megabytes(resource.getRam()));
     requests.put(KubernetesConstants.CPU, Double.toString(resource.getCpu()));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
