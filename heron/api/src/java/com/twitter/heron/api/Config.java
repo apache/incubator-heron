@@ -493,11 +493,11 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setComponentDefaultCpu(Map<String, Object> conf, float cpu) {
-    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_RAM, Float.toString(cpu));
+    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_CPU, Float.toString(cpu));
   }
 
   public static void setComponentDefaultRam(Map<String, Object> conf, ByteAmount ram) {
-    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_CPU, Long.toString(ram.asBytes()));
+    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_RAM, Long.toString(ram.asBytes()));
   }
 
   public static void setComponentDefaultDisk(Map<String, Object> conf, ByteAmount disk) {

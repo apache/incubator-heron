@@ -14,12 +14,14 @@
 package com.twitter.heron.packing.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.utils.topology.TopologyTests;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -33,6 +35,44 @@ public class PackingUtilsTest {
       com.twitter.heron.api.Config topologyConfig) {
     return TopologyTests.createTopology("testTopology", topologyConfig, "spout", "bolt",
         spoutParallelism, boltParallelism);
+  }
+
+  /**
+   * Tests get default instance resources
+   */
+  @Test
+  public void testDefaultInstanceResource() {
+    int noSpouts = 6;
+    int noBolts = 3;
+    int boltScalingDown = 2;
+    // Without component default resource config
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    TopologyAPI.Topology topology1 = getTopology(noSpouts, noBolts, topologyConfig);
+    Config config1 = PackingTestUtils.newTestConfig(topology1);
+
+    List<TopologyAPI.Config.KeyValue> confList1 = topology1.getTopologyConfig().getKvsList();
+    Resource defaultInstanceResources1 =
+        PackingUtils.getDefaultInstanceResources(confList1, config1);
+
+    double instanceCpu = Context.instanceCpu(config1);
+    Assert.assertEquals(defaultInstanceResources1.getCpu(), instanceCpu, 0.0001);
+    Assert.assertEquals(defaultInstanceResources1.getRam(), Context.instanceRam(config1));
+    Assert.assertEquals(defaultInstanceResources1.getDisk(), Context.instanceDisk(config1));
+
+    // With component default resource config
+    topologyConfig.setComponentDefaultCpu(111);
+    topologyConfig.setComponentDefaultRam(ByteAmount.fromMegabytes(222));
+    topologyConfig.setComponentDefaultDisk(ByteAmount.fromMegabytes(333));
+    TopologyAPI.Topology topology2 = getTopology(noSpouts, noBolts, topologyConfig);
+    Config config2 = PackingTestUtils.newTestConfig(topology2);
+
+    List<TopologyAPI.Config.KeyValue> confList2 = topology2.getTopologyConfig().getKvsList();
+    Resource defaultInstanceResources2 =
+        PackingUtils.getDefaultInstanceResources(confList2, config2);
+
+    Assert.assertEquals(defaultInstanceResources2.getCpu(), 111, 0.0001);
+    Assert.assertEquals(defaultInstanceResources2.getRam(), ByteAmount.fromMegabytes(222));
+    Assert.assertEquals(defaultInstanceResources2.getDisk(), ByteAmount.fromMegabytes(333));
   }
 
   /**

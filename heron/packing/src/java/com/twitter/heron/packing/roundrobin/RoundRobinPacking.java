@@ -27,8 +27,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.InstanceId;
@@ -91,23 +91,22 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
   private TopologyAPI.Topology topology;
 
-  private ByteAmount instanceRamDefault;
-  private double instanceCpuDefault;
-  private ByteAmount instanceDiskDefault;
+  private Resource defaultInstanceResources;
   private ByteAmount containerRamPadding = DEFAULT_RAM_PADDING_PER_CONTAINER;
 
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
-    this.instanceCpuDefault = Context.instanceCpu(config);
-    this.instanceRamDefault = Context.instanceRam(config);
-    this.instanceDiskDefault = Context.instanceDisk(config);
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    this.defaultInstanceResources =
+        PackingUtils.getDefaultInstanceResources(topologyConfig, config);
+
     this.containerRamPadding = getContainerRamPadding(topology.getTopologyConfig().getKvsList());
     LOG.info(String.format("Initalizing RoundRobinPacking. "
         + "CPU default: %f, RAM default: %s, DISK default: %s, RAM padding: %s.",
-        this.instanceCpuDefault,
-        this.instanceRamDefault.toString(),
-        this.instanceDiskDefault.toString(),
+        this.defaultInstanceResources.getCpu(),
+        this.defaultInstanceResources.getRam().toString(),
+        this.defaultInstanceResources.getDisk().toString(),
         this.containerRamPadding.toString()));
   }
 
@@ -150,8 +149,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
         // Currently not yet support disk or cpu config for different components,
         // so just use the default value.
-        ByteAmount instanceDisk = instanceDiskDefault;
-        double instanceCpu = instanceCpuDefault;
+        ByteAmount instanceDisk = defaultInstanceResources.getDisk();
+        double instanceCpu = defaultInstanceResources.getCpu();
 
         Resource resource = new Resource(instanceCpu, instanceRam, instanceDisk);
 
@@ -222,7 +221,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       int instancesToAllocate = instancesToBeAccounted.size();
 
       if (instancesToAllocate != 0) {
-        ByteAmount individualInstanceRam = instanceRamDefault;
+        ByteAmount individualInstanceRam = defaultInstanceResources.getRam();
 
         // The ram map is partially set. We need to calculate ram for the rest
 
@@ -319,7 +318,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    * @return disk per container.
    */
   private ByteAmount getContainerDiskHint(Map<Integer, List<InstanceId>> allocation) {
-    ByteAmount defaultContainerDisk = instanceDiskDefault
+    ByteAmount defaultContainerDisk = defaultInstanceResources.getDisk()
         .multiply(getLargestContainerSize(allocation))
         .plus(DEFAULT_DISK_PADDING_PER_CONTAINER);
 

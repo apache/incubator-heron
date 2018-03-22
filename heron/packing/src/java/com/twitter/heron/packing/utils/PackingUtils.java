@@ -14,14 +14,21 @@
 package com.twitter.heron.packing.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.TopologyUtils;
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingException;
 import com.twitter.heron.spi.packing.Resource;
+
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_CPU;
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_DISK;
+import static com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_DEFAULT_RAM;
 
 /**
  * Shared utilities for packing algorithms
@@ -98,6 +105,20 @@ public final class PackingUtils {
     return value + (paddingPercentage * value) / 100;
   }
 
+  /**
+   * Get default instance resources from component default resource configs and heron
+   * internal instance resource configs
+   */
+  public static Resource getDefaultInstanceResources(
+      List<TopologyAPI.Config.KeyValue> topologyConfig, Config config) {
+    return new Resource(
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_CPU,
+            Context.instanceCpu(config)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_RAM,
+            Context.instanceRam(config)),
+        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_COMPONENT_DEFAULT_DISK,
+            Context.instanceDisk(config)));
+  }
   /**
    * Identifies which components need to be scaled given specific scaling direction
    *
