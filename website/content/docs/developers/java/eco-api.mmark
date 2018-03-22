@@ -296,6 +296,9 @@ underlying TopologyReliabilityMode value.
 * `"topology.remote.debugging.enable"` : Enable Remote debugging for java heron instances
 * `"topology.droptuples.upon.backpressure"` : Do we want to drop tuples instead of initiating Spout BackPressure
 * `"topology.component.output.bps"` : The per component output bytes per second in this topology
+* `"topology.component.default.cpu"` : Default number of cpu for each component
+* `"topology.component.default.ram"` : Default ram size in bytes for each component
+* `"topology.component.default.disk"` : Default disk size in bytes for each component
 
 
 ### Components

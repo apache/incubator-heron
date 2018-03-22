@@ -89,3 +89,9 @@ TOPOLOGY_PROJECT_NAME = "topology.project.name"
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
 # The per component output bytes per second in this topology.
 TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps"
+# Default number of cpu for each component
+TOPOLOGY_COMPONENT_DEFAULT_CPU = "topology.component.default.cpu"
+# Default ram size in bytes for each component
+TOPOLOGY_COMPONENT_DEFAULT_RAM = "topology.component.default.ram"
+# Default disk size in bytes for each component
+TOPOLOGY_COMPONENT_DEFAULT_DISK = "topology.component.default.disk"

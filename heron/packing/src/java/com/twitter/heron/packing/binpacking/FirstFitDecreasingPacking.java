@@ -34,7 +34,6 @@ import com.twitter.heron.packing.builder.PackingPlanBuilder;
 import com.twitter.heron.packing.builder.Scorer;
 import com.twitter.heron.packing.utils.PackingUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingException;
@@ -127,10 +126,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private void setPackingConfigs(Config config) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    this.defaultInstanceResources = new Resource(
-        Context.instanceCpu(config),
-        Context.instanceRam(config),
-        Context.instanceDisk(config));
+    this.defaultInstanceResources =
+        PackingUtils.getDefaultInstanceResources(topologyConfig, config);
 
     this.paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
         TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);

@@ -295,6 +295,22 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
 
+  /**
+   * Default number of cpu cores per component to be reserved for this topology
+   */
+  public static final String TOPOLOGY_COMPONENT_DEFAULT_CPU = "topology.component.default.cpu";
+  /**
+   * Default amount of ram per component to be reserved for this topology.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_COMPONENT_DEFAULT_RAM = "topology.component.default.ram";
+  /**
+   * Default amount of disk per component to be reserved for this topology.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_COMPONENT_DEFAULT_DISK = "topology.component.default.disk";
+
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -333,6 +349,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
     apiVars.add(TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE);
     apiVars.add(TOPOLOGY_COMPONENT_OUTPUT_BPS);
+    apiVars.add(TOPOLOGY_COMPONENT_DEFAULT_CPU);
+    apiVars.add(TOPOLOGY_COMPONENT_DEFAULT_RAM);
+    apiVars.add(TOPOLOGY_COMPONENT_DEFAULT_DISK);
   }
 
   public Config() {
@@ -471,6 +490,18 @@ public class Config extends HashMap<String, Object> {
 
   public static void setTopologyComponentOutputBPS(Map<String, Object> conf, long bps) {
     conf.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
+  }
+
+  public static void setComponentDefaultCpu(Map<String, Object> conf, float cpu) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_CPU, Float.toString(cpu));
+  }
+
+  public static void setComponentDefaultRam(Map<String, Object> conf, ByteAmount ram) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_RAM, Long.toString(ram.asBytes()));
+  }
+
+  public static void setComponentDefaultDisk(Map<String, Object> conf, ByteAmount disk) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DEFAULT_DISK, Long.toString(disk.asBytes()));
   }
 
   @SuppressWarnings("unchecked")
@@ -641,6 +672,18 @@ public class Config extends HashMap<String, Object> {
 
   public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
+  }
+
+  public void setComponentDefaultCpu(float cpu) {
+    setComponentDefaultCpu(this, cpu);
+  }
+
+  public void setComponentDefaultRam(ByteAmount ram) {
+    setComponentDefaultRam(this, ram);
+  }
+
+  public void setComponentDefaultDisk(ByteAmount disk) {
+    setComponentDefaultDisk(this, disk);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {
