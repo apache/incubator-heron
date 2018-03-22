@@ -240,6 +240,7 @@ public class NomadScheduler implements IScheduler {
     } else if (nomadDriver.equals(NomadConstants.NomadDriver.DOCKER.getName())) {
 
       getTaskSpecDockerDriver(task, taskName, containerIndex);
+
     } else {
       throw new IllegalArgumentException("Invalid Nomad driver specified: " + nomadDriver);
     }
@@ -515,7 +516,6 @@ public class NomadScheduler implements IScheduler {
   }
 
   Resource getHomogeneousContainerResource(PackingPlan homogeneousPackingPlan) {
-    PackingPlan.ContainerPlan containerPlan = homogeneousPackingPlan.getContainers().iterator().next();
     return homogeneousPackingPlan.getContainers().iterator().next().getRequiredResource();
   }
 }
