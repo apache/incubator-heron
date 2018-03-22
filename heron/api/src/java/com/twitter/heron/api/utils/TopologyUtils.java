@@ -211,6 +211,26 @@ public final class TopologyUtils {
     return getConfigWithDefault(topologyConfig, Config.TOPOLOGY_ADDITIONAL_CLASSPATH, "");
   }
 
+  /**
+   * Parses the value in Config.TOPOLOGY_COMPONENT_CPUMAP,
+   * and returns a map containing only component specified.
+   * Returns a empty map if the Config is not set
+   *
+   * @param topology the topology def
+   * @return a map (componentName -&gt; cpu required)
+   */
+  public static Map<String, Float> getComponentCpuMapConfig(TopologyAPI.Topology topology)
+      throws RuntimeException {
+    Map<String, String> configMap =
+        getComponentConfigMap(topology, Config.TOPOLOGY_COMPONENT_CPUMAP);
+    Map<String, Float> cpuMap = new HashMap<>();
+
+    for (Map.Entry<String, String> entry : configMap.entrySet()) {
+      Float requiredCpu = Float.parseFloat(entry.getValue());
+      cpuMap.put(entry.getKey(), requiredCpu);
+    }
+    return cpuMap;
+  }
 
   /**
    * Parses the value in Config.TOPOLOGY_COMPONENT_RAMMAP,
@@ -231,6 +251,27 @@ public final class TopologyUtils {
       ramMap.put(entry.getKey(), ByteAmount.fromBytes(requiredRam));
     }
     return ramMap;
+  }
+
+  /**
+   * Parses the value in Config.TOPOLOGY_COMPONENT_DISKMAP,
+   * and returns a map containing only component specified.
+   * Returns a empty map if the Config is not set
+   *
+   * @param topology the topology def
+   * @return a map (componentName -&gt; disk required)
+   */
+  public static Map<String, ByteAmount> getComponentDiskMapConfig(TopologyAPI.Topology topology)
+      throws RuntimeException {
+    Map<String, String> configMap =
+        getComponentConfigMap(topology, Config.TOPOLOGY_COMPONENT_DISKMAP);
+    Map<String, ByteAmount> diskMap = new HashMap<>();
+
+    for (Map.Entry<String, String> entry : configMap.entrySet()) {
+      long requiredDisk = Long.parseLong(entry.getValue());
+      diskMap.put(entry.getKey(), ByteAmount.fromBytes(requiredDisk));
+    }
+    return diskMap;
   }
 
   /**

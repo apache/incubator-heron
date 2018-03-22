@@ -682,12 +682,28 @@ public class Config extends HashMap<String, Object> {
     setContainerRamPadding(this, nbytes);
   }
 
+  public void setComponentCpuMap(String cpuMap) {
+    setComponentCpuMap(this, cpuMap);
+  }
+
   public void setComponentRamMap(String ramMap) {
     setComponentRamMap(this, ramMap);
   }
 
+  public void setComponentDiskMap(String diskMap) {
+    setComponentDiskMap(this, diskMap);
+  }
+
+  public void setComponentCpu(String component, float cpu) {
+    setComponentCpu(this, component, cpu);
+  }
+
   public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
+  }
+
+  public void setComponentDisk(String component, ByteAmount diskInBytes) {
+    setComponentDisk(this, component, diskInBytes);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {
