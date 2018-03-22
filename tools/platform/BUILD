@@ -7,7 +7,15 @@ config_setting(
 )
 
 config_setting(
-    name = "k8",
+    name = "ubuntu",
+    values = {
+        "cpu": "k8",
+    },
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "centos",
     values = {
         "cpu": "k8",
     },
