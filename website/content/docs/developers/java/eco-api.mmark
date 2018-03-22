@@ -295,6 +295,7 @@ underlying TopologyReliabilityMode value.
 * `"topology.timer.events"` : Timer events registered for a topology.  This is a Map<String, Pair<Duration, Runnable>>.  Where the key is the name and the value contains the frequency of the event and the task to run.
 * `"topology.remote.debugging.enable"` : Enable Remote debugging for java heron instances
 * `"topology.droptuples.upon.backpressure"` : Do we want to drop tuples instead of initiating Spout BackPressure
+* `"topology.component.output.bps"` : The per component output bytes per second in this topology
 
 
 ### Components

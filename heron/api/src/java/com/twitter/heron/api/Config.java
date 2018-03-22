@@ -291,7 +291,7 @@ public class Config extends HashMap<String, Object> {
       "topology.droptuples.upon.backpressure";
 
   /**
-   * The per component output tuple per second in this topology.
+   * The per component output bytes per second in this topology.
    */
   public static final String TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
 
