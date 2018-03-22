@@ -90,6 +90,7 @@ public class NomadSchedulerTest {
         .put(Key.CORE_PACKAGE_URI, CORE_PACKAGE_URI)
         .put(Key.USE_CORE_PACKAGE_URI, USE_CORE_PACKAGE_URI)
         .put(Key.EXECUTOR_BINARY, EXECUTOR_BINARY)
+        .put(NomadContext.HERON_NOMAD_DRIVER, NomadConstants.NomadDriver.RAW_EXEC.getName())
         .build();
 
     this.mockRuntime = config;
@@ -260,11 +261,13 @@ public class NomadSchedulerTest {
         CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
     Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
 
+    Resource resource = new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE);
+
     scheduler.initialize(this.mockConfig, this.mockRuntime);
     Mockito.doReturn(new TaskGroup()).when(scheduler).getTaskGroup(
         Mockito.anyString(), Mockito.anyInt(), Mockito.any());
 
-    Job job = scheduler.getJob(CONTAINER_INDEX, plan);
+    Job job = scheduler.getJob(CONTAINER_INDEX, plan, resource);
     LOG.info("job: " + job);
 
     Assert.assertEquals(TOPOLOGY_ID + "-" + CONTAINER_INDEX, job.getId());
@@ -279,16 +282,16 @@ public class NomadSchedulerTest {
   public void testGetTaskGroup() {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
+    Resource resource = new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE);
 
     PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
         CONTAINER_INDEX, new HashSet<>(), Mockito.mock(Resource.class));
-    Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
 
     scheduler.initialize(this.mockConfig, this.mockRuntime);
     Mockito.doReturn(new Task()).when(scheduler).getTask(
         Mockito.anyString(), Mockito.anyInt(), Mockito.any());
 
-    TaskGroup taskGroup = scheduler.getTaskGroup(GROUP_NAME, CONTAINER_INDEX, plan);
+    TaskGroup taskGroup = scheduler.getTaskGroup(GROUP_NAME, CONTAINER_INDEX, resource);
     LOG.info("taskGroup: " + taskGroup);
 
     Assert.assertEquals(GROUP_NAME, taskGroup.getName());
@@ -298,17 +301,13 @@ public class NomadSchedulerTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testGetTask() {
-
+  public void testGetTaskRawExec() {
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
     containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
 
-
-    PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(CONTAINER_INDEX,
-        new HashSet<>(), new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE));
-    Optional<PackingPlan.ContainerPlan> plan = Optional.of(containerPlan);
-
     PowerMockito.mockStatic(SchedulerUtils.class);
+
+    Resource resource = new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE);
 
     PowerMockito.when(SchedulerUtils.executorCommandArgs(
         Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyString()))
@@ -326,11 +325,11 @@ public class NomadSchedulerTest {
 
     scheduler.initialize(this.mockConfig, this.mockRuntime);
 
-    Task task = scheduler.getTask(TASK_NAME, CONTAINER_INDEX, plan);
+    Task task = scheduler.getTask(TASK_NAME, CONTAINER_INDEX, resource);
     LOG.info("task: " + task);
 
     Assert.assertEquals(TASK_NAME, task.getName());
-    Assert.assertEquals(NomadConstants.NOMAD_RAW_EXEC, task.getDriver());
+    Assert.assertEquals(NomadConstants.NomadDriver.RAW_EXEC.getName(), task.getDriver());
     Assert.assertTrue(task.getConfig().containsKey(NomadConstants.NOMAD_TASK_COMMAND));
     Assert.assertEquals(NomadConstants.SHELL_CMD,
         task.getConfig().get(NomadConstants.NOMAD_TASK_COMMAND));
@@ -365,5 +364,61 @@ public class NomadSchedulerTest {
         task.getEnv().get(NomadConstants.HERON_TOPOLOGY_DOWNLOAD_CMD));
     Assert.assertEquals("./heron-core/bin/heron-executor args1 args2",
         task.getEnv().get(NomadConstants.HERON_EXECUTOR_CMD));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testGetTaskDocker() {
+
+    this.mockRuntime = this.mockRuntime.newBuilder()
+        .put(NomadContext.HERON_NOMAD_DRIVER, NomadConstants.NomadDriver.DOCKER.getName())
+        .build();
+
+    this.mockConfig = this.mockConfig.newBuilder()
+        .put(NomadContext.HERON_NOMAD_DRIVER, NomadConstants.NomadDriver.DOCKER.getName())
+        .build();
+
+    Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
+    containers.add(Mockito.mock(PackingPlan.ContainerPlan.class));
+
+    PowerMockito.mockStatic(SchedulerUtils.class);
+
+    Resource resource = new Resource(CPU_RESOURCE, MEMORY_RESOURCE, DISK_RESOURCE);
+
+    PowerMockito.when(SchedulerUtils.executorCommandArgs(
+        Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyString()))
+        .thenReturn(EXECUTOR_CMD_ARGS);
+
+    PowerMockito.mockStatic(NomadScheduler.class);
+    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any()))
+        .thenReturn(TOPOLOGY_DOWNLOAD_CMD);
+    PowerMockito.when(NomadScheduler.getHeronNomadScript(this.mockConfig))
+        .thenReturn(HERON_NOMAD_SCRIPT);
+    PowerMockito.when(NomadScheduler.longToInt(MEMORY_RESOURCE.asMegabytes()))
+        .thenReturn((int) MEMORY_RESOURCE.asMegabytes());
+    PowerMockito.when(NomadScheduler.longToInt(DISK_RESOURCE.asMegabytes()))
+        .thenReturn((int) DISK_RESOURCE.asMegabytes());
+
+    scheduler.initialize(this.mockConfig, this.mockRuntime);
+
+    Task task = scheduler.getTask(TASK_NAME, CONTAINER_INDEX, resource);
+    LOG.info("task: " + task);
+
+    Assert.assertEquals(TASK_NAME, task.getName());
+    Assert.assertEquals(NomadConstants.NomadDriver.DOCKER.getName(), task.getDriver());
+    Assert.assertTrue(task.getConfig().containsKey(NomadConstants.NOMAD_TASK_COMMAND));
+    Assert.assertEquals(NomadConstants.SHELL_CMD,
+        task.getConfig().get(NomadConstants.NOMAD_TASK_COMMAND));
+
+    Assert.assertEquals((int) CPU_RESOURCE * HERON_NOMAD_CORE_FREQ_MAPPING,
+        task.getResources().getCpu().intValue());
+    Assert.assertEquals((int) MEMORY_RESOURCE.asMegabytes(),
+        task.getResources().getMemoryMb().intValue());
+    Assert.assertEquals((int) DISK_RESOURCE.asMegabytes(),
+        task.getResources().getDiskMb().intValue());
+    Assert.assertTrue(task.getEnv().containsKey(NomadConstants.HOST));
+
+    Assert.assertEquals("${attr.unique.network.ip-address}",
+        task.getEnv().get(NomadConstants.HOST));
   }
 }
