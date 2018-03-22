@@ -21,6 +21,7 @@ container_image(
         "/heron/heron-tools/lib/scheduler"       : "/heron/heron-core/lib/scheduler", 
         "/heron/heron-tools/lib/statemgr"        : "/heron/heron-core/lib/statemgr", 
     },
+    stamp = 1,
     directory = "/heron",
     workdir = "/heron",
     cmd = ["supervisord", "-n"]
