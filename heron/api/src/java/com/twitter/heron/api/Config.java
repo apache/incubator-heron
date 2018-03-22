@@ -207,9 +207,19 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
   /**
    * Per component ram requirement.  The format of this flag is something like
+   * spout0:0.2,spout1:0.2,bolt1:0.5.
+   */
+  public static final String TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
+   * spout0:12434,spout1:345353,bolt1:545356.
+   */
+  public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";
   /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
@@ -318,7 +328,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
+    apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
+    apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_RELIABILITY_MODE);
@@ -461,8 +473,16 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
   }
 
+  public static void setComponentCpuMap(Map<String, Object> conf, String cpuMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_CPUMAP, cpuMap);
+  }
+
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
+  }
+
+  public static void setComponentDiskMap(Map<String, Object> conf, String diskMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DISKMAP, diskMap);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
@@ -489,15 +509,42 @@ public class Config extends HashMap<String, Object> {
     setComponentRam(conf, component, ByteAmount.fromBytes(ramInBytes));
   }
 
+  public static void setComponentCpu(Map<String, Object> conf,
+                                     String component, float cpu) {
+    String key = Config.TOPOLOGY_COMPONENT_CPUMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%f", oldEntry, component, cpu);
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%f", component, cpu);
+      conf.put(key, newEntry);
+    }
+  }
+
   public static void setComponentRam(Map<String, Object> conf,
                                      String component, ByteAmount ramInBytes) {
-    if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-      String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
+    String key = Config.TOPOLOGY_COMPONENT_RAMMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
       String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes.asBytes());
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(key, newEntry);
     } else {
       String newEntry = String.format("%s:%d", component, ramInBytes.asBytes());
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(key, newEntry);
+    }
+  }
+
+  public static void setComponentDisk(Map<String, Object> conf,
+                                      String component, ByteAmount diskInBytes) {
+    String key = Config.TOPOLOGY_COMPONENT_DISKMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%d", component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
     }
   }
 

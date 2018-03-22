@@ -220,35 +220,52 @@ public final class TopologyUtils {
    * @param topology the topology def
    * @return a map (componentName -&gt; ram required)
    */
-  public static Map<String, ByteAmount> getComponentRamMapConfig(TopologyAPI.Topology topology) {
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+  public static Map<String, ByteAmount> getComponentRamMapConfig(TopologyAPI.Topology topology)
+      throws RuntimeException {
+    Map<String, String> configMap =
+        getComponentConfigMap(topology, Config.TOPOLOGY_COMPONENT_RAMMAP);
     Map<String, ByteAmount> ramMap = new HashMap<>();
+
+    for (Map.Entry<String, String> entry : configMap.entrySet()) {
+      long requiredRam = Long.parseLong(entry.getValue());
+      ramMap.put(entry.getKey(), ByteAmount.fromBytes(requiredRam));
+    }
+    return ramMap;
+  }
+
+  /**
+   * This is a util function to parse cpumap, rammap and diskmap. A config example:
+   * "spout1:1,spout2:1,bolt1:5". The function validates component name and throws exception
+   * if any component name is wrong in the config.
+   */
+  protected static Map<String, String> getComponentConfigMap(TopologyAPI.Topology topology,
+                                                             String key) throws RuntimeException {
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    Map<String, String> configMap = new HashMap<>();
 
     // Get the set of component names to make sure the config only specifies valid component name
     Set<String> componentNames = getComponentParallelism(topology).keySet();
 
     // Parse the config value
-    String ramMapStr = getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_COMPONENT_RAMMAP, (String) null);
-    if (ramMapStr != null) {
-      String[] ramMapTokens = ramMapStr.split(",");
-      for (String token : ramMapTokens) {
+    String mapStr = getConfigWithDefault(topologyConfig, key, (String) null);
+    if (mapStr != null) {
+      String[] mapTokens = mapStr.split(",");
+      // Each token should be in this format: component:value
+      for (String token : mapTokens) {
         if (token.trim().isEmpty()) {
           continue;
         }
-        String[] componentAndRam = token.split(":");
-        if (componentAndRam.length != 2) {
-          throw new RuntimeException("Malformed component rammap");
+        String[] componentAndValue = token.split(":");
+        if (componentAndValue.length != 2) {
+          throw new RuntimeException("Malformed component config " + key);
         }
-        if (!componentNames.contains(componentAndRam[0])) {
-          throw new RuntimeException("Invalid component. " + componentAndRam[0] + " not found");
+        if (!componentNames.contains(componentAndValue[0])) {
+          throw new RuntimeException("Invalid component. " + componentAndValue[0] + " not found");
         }
-        long requiredRam = Long.parseLong(componentAndRam[1]);
-
-        ramMap.put(componentAndRam[0], ByteAmount.fromBytes(requiredRam));
+        configMap.put(componentAndValue[0], componentAndValue[1]);
       }
     }
-    return ramMap;
+    return configMap;
   }
 
   // TODO: in a PR of it's own rename this to getNumStreamManagers to be correct
