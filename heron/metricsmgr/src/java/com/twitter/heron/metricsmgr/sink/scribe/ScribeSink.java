@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.metricsmgr.sink;
+package com.twitter.heron.metricsmgr.sink.scribe;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
