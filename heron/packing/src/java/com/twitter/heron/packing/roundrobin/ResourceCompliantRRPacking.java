@@ -143,7 +143,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
     Resource maxContainerResources = new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
-            (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
+            PackingUtils.increaseBy(defaultCpu, paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
             defaultRam.increaseBy(paddingPercentage)),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
