@@ -300,11 +300,11 @@ class Config {
     }
   }
 
-  void setComponentCpu(const std::string& componentName, float_t cpu) {
+  void setComponentCpu(const std::string& componentName, double cpu) {
     if (cpu < 0) {
       throw std::runtime_error("Invalid Cpu specified for component");
     }
-    appendComponentConfig<float_t>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
+    appendComponentConfig<double>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
   }
 
   void setComponentRam(const std::string& componentName, int64_t bytes) {

@@ -219,14 +219,14 @@ public final class TopologyUtils {
    * @param topology the topology def
    * @return a map (componentName -&gt; cpu required)
    */
-  public static Map<String, Float> getComponentCpuMapConfig(TopologyAPI.Topology topology)
+  public static Map<String, Double> getComponentCpuMapConfig(TopologyAPI.Topology topology)
       throws RuntimeException {
     Map<String, String> configMap =
         getComponentConfigMap(topology, Config.TOPOLOGY_COMPONENT_CPUMAP);
-    Map<String, Float> cpuMap = new HashMap<>();
+    Map<String, Double> cpuMap = new HashMap<>();
 
     for (Map.Entry<String, String> entry : configMap.entrySet()) {
-      Float requiredCpu = Float.parseFloat(entry.getValue());
+      Double requiredCpu = Double.parseDouble(entry.getValue());
       cpuMap.put(entry.getKey(), requiredCpu);
     }
     return cpuMap;

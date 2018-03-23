@@ -421,8 +421,8 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
   }
 
-  public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
+  public static void setContainerCpuRequested(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(ncpus));
   }
 
   /**
@@ -453,8 +453,8 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
+  public static void setContainerMaxCpuHint(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Double.toString(ncpus));
   }
 
   public static void setContainerMaxDiskHint(Map<String, Object> conf, ByteAmount nbytes) {
@@ -510,7 +510,7 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setComponentCpu(Map<String, Object> conf,
-                                     String component, float cpu) {
+                                     String component, double cpu) {
     String key = Config.TOPOLOGY_COMPONENT_CPUMAP;
     if (conf.containsKey(key)) {
       String oldEntry = (String) conf.get(key);
@@ -650,7 +650,7 @@ public class Config extends HashMap<String, Object> {
     setTickTupleFrequency(this, seconds);
   }
 
-  public void setContainerCpuRequested(float ncpus) {
+  public void setContainerCpuRequested(double ncpus) {
     setContainerCpuRequested(this, ncpus);
   }
 
@@ -662,7 +662,7 @@ public class Config extends HashMap<String, Object> {
     setContainerRamRequested(this, nbytes);
   }
 
-  public void setContainerMaxCpuHint(float ncpus) {
+  public void setContainerMaxCpuHint(double ncpus) {
     setContainerMaxCpuHint(this, ncpus);
   }
 
@@ -694,7 +694,7 @@ public class Config extends HashMap<String, Object> {
     setComponentDiskMap(this, diskMap);
   }
 
-  public void setComponentCpu(String component, float cpu) {
+  public void setComponentCpu(String component, double cpu) {
     setComponentCpu(this, component, cpu);
   }
 

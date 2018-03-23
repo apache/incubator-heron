@@ -70,10 +70,10 @@ public class HeronSubmitterTest {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // component resource configuration
-    conf.setComponentCpu("word", 0.5f);
+    conf.setComponentCpu("word", 0.5);
     conf.setComponentRam("word", ByteAmount.fromMegabytes(10));
     conf.setComponentDisk("word", ByteAmount.fromMegabytes(10));
-    conf.setComponentCpu("exclaim1", 0.5f);
+    conf.setComponentCpu("exclaim1", 0.5);
     conf.setComponentRam("exclaim1", ByteAmount.fromMegabytes(10));
     conf.setComponentDisk("exclaim1", ByteAmount.fromMegabytes(10));
 

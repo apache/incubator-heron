@@ -68,7 +68,7 @@ public class TopologyUtilsTest {
     bolts.put("bolt", componentParallelism);
 
     // sort the component cpu map
-    Map<String, Float> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     // Component cpu map is not set, the cpuMap size should be 0
     Assert.assertEquals(0, cpuMap.size());
@@ -82,16 +82,16 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    float boltCpu = 1.0f;
-    float spoutCpu = 2.0f;
+    double boltCpu = 1.0;
+    double spoutCpu = 2.0;
     topologyConfig.setComponentCpu("spout", spoutCpu);
     topologyConfig.setComponentCpu("bolt", boltCpu);
 
     // sort the component cpu map
-    Map<String, Float> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, cpuMap.keySet().toArray());
-    Assert.assertArrayEquals(new Float[]{boltCpu, spoutCpu}, cpuMap.values().toArray());
+    Assert.assertArrayEquals(new Double[]{boltCpu, spoutCpu}, cpuMap.values().toArray());
   }
 
   @Test
@@ -102,15 +102,15 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    float spoutCpu = 2.0f;
+    double spoutCpu = 2.0f;
     topologyConfig.setComponentCpu("spout", spoutCpu);
 
     // sort the component cpu map
-    Map<String, Float> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
     // Component cpu map sets only spout's cpu
     Assert.assertArrayEquals(new String[]{"spout"}, cpuMap.keySet().toArray());
-    Assert.assertArrayEquals(new Float[]{spoutCpu}, cpuMap.values().toArray());
+    Assert.assertArrayEquals(new Double[]{spoutCpu}, cpuMap.values().toArray());
   }
 
   @Test
