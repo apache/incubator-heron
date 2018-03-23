@@ -78,6 +78,16 @@ public final class LoggingHelper {
       Logger.getLogger("org.apache.zookeeper").setLevel(Level.WARNING);
     }
 
+    // setting logging for http client to be error level
+    System.setProperty(
+        "org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.httpclient.wire", "ERROR");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.org.apache.http", "ERROR");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.org.apache.http.headers", "ERROR");
+
     if (isRedirectStdOutErr) {
 
       // Remove ConsoleHandler if present, to avoid StackOverflowError.
