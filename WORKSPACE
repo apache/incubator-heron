@@ -845,8 +845,8 @@ new_http_archive(
 # for docker image building
 http_archive(
     name = "io_bazel_rules_docker",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.3.0.tar.gz"],
-    strip_prefix = "rules_docker-0.3.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.4.0.tar.gz"],
+    strip_prefix = "rules_docker-0.4.0",
 )
 
 load(
