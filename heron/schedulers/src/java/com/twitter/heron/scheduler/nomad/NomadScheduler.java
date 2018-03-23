@@ -49,6 +49,7 @@ import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -71,6 +72,7 @@ public class NomadScheduler implements IScheduler {
         .putAll(ConfigLoader.loadConfig(
             Context.heronHome(config), Context.heronConf(config),
             null, Context.overrideFile(config)))
+        .put(Key.HERON_CLUSTER_JAVA_HOME, NomadContext.clusterJavaHome(config))
         .build());
     this.runtimeConfig = runtime;
     this.updateTopologyManager =
