@@ -274,7 +274,6 @@ public class NomadScheduler implements IScheduler {
     return task;
   }
 
-
   /**
    * Get the task spec for using the docker driver in Noad
    * In docker mode, Heron will be use in docker containers
@@ -287,7 +286,6 @@ public class NomadScheduler implements IScheduler {
         this.clusterConfig, this.runtimeConfig, NomadConstants.EXECUTOR_PORTS,
         String.valueOf(containerIndex));
 
-    LOG.info("executorArgs: " + Arrays.asList(executorArgs));
     // get complete heron executor command
     String executorCmd = executorBinary + " " + String.join(" ", executorArgs);
     // get heron_downloader command for downloading topology package
