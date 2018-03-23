@@ -58,8 +58,8 @@ public final class PackingUtils {
           instanceRam, maxContainerResources.getRam()));
     }
 
-    double instanceCpu = Math.round(PackingUtils.increaseBy(
-        instanceResources.getCpu(), paddingPercentage));
+    double instanceCpu = PackingUtils.increaseBy(
+        instanceResources.getCpu(), paddingPercentage);
     if (instanceCpu > maxContainerResources.getCpu()) {
       throw new PackingException(String.format(
           "This instance requires containers with at least %s cpu cores. The current max container"

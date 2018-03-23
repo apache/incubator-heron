@@ -151,8 +151,8 @@ public class Container {
     Resource usedResources = this.getTotalUsedResources();
     ByteAmount newRam =
         usedResources.getRam().plus(resource.getRam()).increaseBy(paddingPercentage);
-    double newCpu = Math.round(
-        PackingUtils.increaseBy(usedResources.getCpu() + resource.getCpu(), paddingPercentage));
+    double newCpu =
+        PackingUtils.increaseBy(usedResources.getCpu() + resource.getCpu(), paddingPercentage);
     ByteAmount newDisk =
         usedResources.getDisk().plus(resource.getDisk()).increaseBy(paddingPercentage);
 

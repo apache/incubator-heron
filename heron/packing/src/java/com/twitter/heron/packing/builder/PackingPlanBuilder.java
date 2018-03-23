@@ -352,12 +352,12 @@ public class PackingPlanBuilder {
             new Resource(instanceCpu, instanceRam, instanceDisk)));
       }
 
-      containerCpu += (paddingPercentage * containerCpu) / 100;
+      containerCpu = PackingUtils.increaseBy(containerCpu, paddingPercentage);
       containerRam = containerRam.increaseBy(paddingPercentage);
       containerDiskInBytes = containerDiskInBytes.increaseBy(paddingPercentage);
 
       Resource resource =
-          new Resource(Math.round(containerCpu), containerRam, containerDiskInBytes);
+          new Resource(containerCpu, containerRam, containerDiskInBytes);
 
       PackingPlan.ContainerPlan containerPlan =
           new PackingPlan.ContainerPlan(containerId, instancePlans, resource);
