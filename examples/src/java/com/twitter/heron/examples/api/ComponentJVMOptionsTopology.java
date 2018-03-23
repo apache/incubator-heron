@@ -60,8 +60,12 @@ public final class ComponentJVMOptionsTopology {
     conf.setComponentJvmOptions("exclaim1", "-XX:NewSize=300m");
 
     // component resource configuration
+    conf.setComponentCpu("word", 0.5);
     conf.setComponentRam("word", ByteAmount.fromMegabytes(512));
+    conf.setComponentDisk("word", ByteAmount.fromMegabytes(512));
+    conf.setComponentCpu("exclaim1", 0.5);
     conf.setComponentRam("exclaim1", ByteAmount.fromMegabytes(512));
+    conf.setComponentDisk("exclaim1", ByteAmount.fromMegabytes(512));
 
     // container resource configuration
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(2));

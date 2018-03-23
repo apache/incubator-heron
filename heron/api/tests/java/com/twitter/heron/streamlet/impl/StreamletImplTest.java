@@ -296,13 +296,13 @@ public class StreamletImplTest {
   public void testConfigBuilder() {
     Config defaultConfig = Config.defaultConfig();
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
-    assertEquals(0, Float.compare(defaultConfig.getPerContainerCpu(), 1.0f));
+    assertEquals(0, Double.compare(defaultConfig.getPerContainerCpu(), 1.0));
     assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100).asBytes());
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
     Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setSerializer(Config.Serializer.JAVA)
-        .setPerContainerCpu(3.5f)
+        .setPerContainerCpu(3.5)
         .setPerContainerRamInGigabytes(10)
         .build();
     assertEquals(nonDefaultConfig.getDeliverySemantics(),
@@ -310,7 +310,7 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getSerializer(), Config.Serializer.JAVA);
     assertEquals(nonDefaultConfig.getPerContainerRamAsGigabytes(), 10);
     assertEquals(nonDefaultConfig.getPerContainerRamAsMegabytes(), 1024 * 10);
-    assertEquals(0, Float.compare(nonDefaultConfig.getPerContainerCpu(), 3.5f));
+    assertEquals(0, Double.compare(nonDefaultConfig.getPerContainerCpu(), 3.5));
   }
 
   @Test
