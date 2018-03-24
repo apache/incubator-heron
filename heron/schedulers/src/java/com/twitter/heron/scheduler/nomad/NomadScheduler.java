@@ -72,7 +72,6 @@ public class NomadScheduler implements IScheduler {
         .putAll(ConfigLoader.loadConfig(
             Context.heronHome(config), Context.heronConf(config),
             null, Context.overrideFile(config)))
-        .put(Key.HERON_CLUSTER_JAVA_HOME, NomadContext.clusterJavaHome(config))
         .build());
     this.runtimeConfig = runtime;
     this.updateTopologyManager =
