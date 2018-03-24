@@ -231,6 +231,11 @@ maven_jar(
 )
 
 maven_jar(
+   name = "org_apache_samoa_samoa_storm",
+   artifact = "org.apache.samoa:samoa-storm:0.4.0-incubating",
+)
+
+maven_jar(
    name = "javax_annotation_javax_annotation_api",
    artifact = "javax.annotation:javax.annotation-api:1.2",
 )
