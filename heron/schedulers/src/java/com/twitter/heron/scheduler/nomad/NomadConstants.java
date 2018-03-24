@@ -23,15 +23,30 @@ public final class NomadConstants {
   private NomadConstants() {
   }
 
+  public enum NomadDriver {
+    RAW_EXEC("raw_exec"),
+    DOCKER("docker");
+
+    private String name;
+    NomadDriver(String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+  }
+
   public static final String NOMAD_TOPOLOGY_ID = "topology.id";
   public static final String NOMAD_TOPOLOGY_NAME = "topology.name";
   public static final String NOMAD_TOPOLOGY_CONTAINER_INDEX = "container.index";
 
   public static final String JOB_LINK = "/ui/jobs";
+  public static final String HOST = "HOST";
 
-  public static final String NOMAD_RAW_EXEC = "raw_exec";
   public static final String NOMAD_TASK_COMMAND = "command";
   public static final String NOMAD_TASK_COMMAND_ARGS = "args";
+  public static final String NOMAD_IMAGE = "image";
 
   public static final String NOMAD_DEFAULT_DATACENTER = "dc1";
   public static final String SHELL_CMD = "/bin/sh";
