@@ -15,8 +15,7 @@ package com.twitter.heron.examples.streamlet.scala
 
 import java.util.concurrent.ThreadLocalRandom
 
-import org.apache.commons.lang3.StringUtils
-
+import com.twitter.heron.examples.streamlet.scala.common.ScalaTopologyExampleUtils
 import com.twitter.heron.streamlet.Config
 import com.twitter.heron.streamlet.scala.{Builder, Runner}
 
@@ -60,23 +59,11 @@ object ScalaIntegerProcessingTopology {
       .build
 
     // Fetches the topology name from the first command-line argument
-    val topologyName = getTopologyName(args)
+    val topologyName = ScalaTopologyExampleUtils.getTopologyName(args)
 
     // Finally, the processing graph and configuration are passed to the Runner, which converts
     // the graph into a Heron topology that can be run in a Heron cluster.
     new Runner().run(topologyName, config, builder)
   }
 
-  /**
-    * Fetches the topology's name from the first command-line argument or
-    * throws an exception if not present.
-    */
-  private def getTopologyName(args: Array[String]) = {
-    require(args.length > 0, "A Topology name should be supplied")
-    require(StringUtils.isNotBlank(args(0)), "Topology name must not be blank")
-    args(0)
-  }
-
 }
-
-final class ScalaIntegerProcessingTopology private () {}
