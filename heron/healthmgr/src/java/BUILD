@@ -41,6 +41,9 @@ healthmgr_deps_files = [
     "@com_microsoft_dhalion//jar",
     "@aopalliance_aopalliance//jar",
     "@org_apache_commons_commons_math3//jar",
+    "@tech_tablesaw//jar",
+    "@it_unimi_dsi_fastutil//jar",
+    "@org_roaringbitmap//jar",
 ]
 
 java_library(

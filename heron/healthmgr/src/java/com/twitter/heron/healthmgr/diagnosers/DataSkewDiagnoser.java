@@ -25,7 +25,7 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
@@ -40,7 +40,7 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
 
-    SymptomsTable bp = symptomsTable.type(SYMPTOM_BACK_PRESSURE.text());
+    SymptomsTable bp = symptomsTable.type(SYMPTOM_COMP_BACK_PRESSURE.text());
     if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
@@ -80,7 +80,7 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
     }
 
     if (assignments.size() > 0) {
-      diagnoses.add(new Diagnosis(DIAGNOSIS_DATA_SKEW.text(), Instant.now(), assignments));
+      diagnoses.add(new Diagnosis(DIAGNOSIS_DATA_SKEW.text(), context.checkpoint(), assignments));
     }
 
     return diagnoses;

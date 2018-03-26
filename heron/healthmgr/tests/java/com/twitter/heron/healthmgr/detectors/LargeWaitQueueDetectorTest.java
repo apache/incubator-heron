@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -49,6 +50,9 @@ public class LargeWaitQueueDetectorTest {
     metrics.add(measurement2);
 
     LargeWaitQueueDetector detector = new LargeWaitQueueDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
     Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(1, symptoms.size());

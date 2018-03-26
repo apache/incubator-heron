@@ -16,7 +16,7 @@ package com.twitter.heron.healthmgr.resolvers;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,22 +26,21 @@ import javax.inject.Named;
 import com.microsoft.dhalion.api.IResolver;
 import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
-import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.SymptomsTable;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
-import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
-  private final PhysicalPlanProvider physicalPlanProvider;
   private final EventManager eventManager;
   private final String topologyName;
   private final ISchedulerClient schedulerClient;
@@ -49,11 +48,9 @@ public class RestartContainerResolver implements IResolver {
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
-                                  PhysicalPlanProvider physicalPlanProvider,
                                   EventManager eventManager,
                                   ISchedulerClient schedulerClient) {
     this.topologyName = topologyName;
-    this.physicalPlanProvider = physicalPlanProvider;
     this.eventManager = eventManager;
     this.schedulerClient = schedulerClient;
   }
@@ -70,42 +67,41 @@ public class RestartContainerResolver implements IResolver {
     // find all back pressure measurements reported in this execution cycle
     Instant current = context.checkpoint();
     Instant previous = context.previousCheckpoint();
-    MeasurementsTable bpMeasurements = context.measurements()
-        .type(METRIC_BACK_PRESSURE.text())
+    SymptomsTable bpSymptoms = context.symptoms()
+        .type(SYMPTOM_INSTANCE_BACK_PRESSURE.text())
         .between(previous, current);
 
-    if (bpMeasurements.size() == 0) {
+    if (bpSymptoms.size() == 0) {
       LOG.fine("No back-pressure measurements found, ending as there's nothing to fix");
       return actions;
     }
 
-    Collection<String> allBpInstances = bpMeasurements.uniqueInstances();
+    Collection<String> allBpInstances = new HashSet<>();
+    bpSymptoms.get().forEach(symptom -> allBpInstances.addAll(symptom.assignments()));
 
-    // find instance with the highest total back pressure
-    MeasurementsTable maxBpTable = null;
-    for (String bpInstance : allBpInstances) {
-      MeasurementsTable instanceTable = bpMeasurements.instance(bpInstance);
-      if (maxBpTable == null || maxBpTable.sum() < instanceTable.sum()) {
-        maxBpTable = instanceTable;
-      }
-    }
+    LOG.info(String.format("%d instances caused back-pressure", allBpInstances.size()));
 
-    // want to know which stream manager starts back-pressure
-    String instanceId = maxBpTable.first().instance();
-    int fromIndex = instanceId.indexOf('_') + 1;
-    int toIndex = instanceId.indexOf('_', fromIndex);
-    String stmgrId = instanceId.substring(fromIndex, toIndex);
+    Collection<String> stmgrIds = new HashSet<>();
+    allBpInstances.forEach(instanceId -> {
+      LOG.info("Id of instance causing back-pressure: " + instanceId);
+      int fromIndex = instanceId.indexOf('_') + 1;
+      int toIndex = instanceId.indexOf('_', fromIndex);
+      String stmgrId = instanceId.substring(fromIndex, toIndex);
+      stmgrIds.add(stmgrId);
+    });
 
-    LOG.info("Restarting container: " + stmgrId);
-    boolean b = schedulerClient.restartTopology(
-        RestartTopologyRequest.newBuilder()
-            .setContainerIndex(Integer.valueOf(stmgrId))
-            .setTopologyName(topologyName)
-            .build());
-    LOG.info("Restarted container result: " + b);
+    stmgrIds.forEach(stmgrId -> {
+      LOG.info("Restarting container: " + stmgrId);
+      boolean b = schedulerClient.restartTopology(
+          RestartTopologyRequest.newBuilder()
+              .setContainerIndex(Integer.valueOf(stmgrId))
+              .setTopologyName(topologyName)
+              .build());
+      LOG.info("Restarted container result: " + b);
+    });
 
     LOG.info("Broadcasting container restart event");
-    ContainerRestart action = new ContainerRestart(current, Collections.singletonList(instanceId));
+    ContainerRestart action = new ContainerRestart(current, stmgrIds);
     eventManager.onEvent(action);
     actions.add(action);
     return actions;

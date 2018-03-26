@@ -21,7 +21,7 @@ import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
 public class WaitQueueSkewDetector extends SkewDetector {
-  public static final String CONF_SKEW_RATIO = "WaitQueueSkewDetector.skewRatio";
+  static final String CONF_SKEW_RATIO = "WaitQueueSkewDetector.skewRatio";
 
   @Inject
   WaitQueueSkewDetector(HealthPolicyConfig policyConfig) {

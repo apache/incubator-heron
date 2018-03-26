@@ -14,11 +14,13 @@
 
 package com.twitter.heron.healthmgr.sensors;
 
+import java.time.Instant;
 import java.util.Collection;
 
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -58,6 +60,10 @@ public class BufferSizeSensorTest {
 
     BufferSizeSensor bufferSizeSensor =
         new BufferSizeSensor(null, packingPlanProvider, topologyProvider, metricsProvider);
+
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    bufferSizeSensor.initialize(context);
 
     Collection<Measurement> componentMetrics = bufferSizeSensor.fetch();
     assertEquals(3, componentMetrics.size());

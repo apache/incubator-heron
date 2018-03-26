@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
@@ -64,7 +64,7 @@ public class DataSkewDiagnoserTest {
 
   @Test
   public void failsIfNoDataSkewSymptom() {
-    Symptom symptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), Instant.now(), null);
+    Symptom symptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), Instant.now(), null);
     Collection<Symptom> symptoms = Collections.singletonList(symptom);
     Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
     assertEquals(0, result.size());
@@ -78,7 +78,7 @@ public class DataSkewDiagnoserTest {
     when(context.measurements()).thenReturn(MeasurementsTable.of(measurements));
 
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom skewSymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
     Collection<Symptom> symptoms = Arrays.asList(bpSymptom, skewSymptom, qDisparitySymptom);
@@ -101,7 +101,7 @@ public class DataSkewDiagnoserTest {
     when(context.measurements()).thenReturn(MeasurementsTable.of(measurements));
 
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom skewSymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
 
@@ -118,7 +118,7 @@ public class DataSkewDiagnoserTest {
     when(context.measurements()).thenReturn(MeasurementsTable.of(measurements));
 
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom skewSymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
 

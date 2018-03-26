@@ -15,15 +15,14 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
@@ -36,8 +35,9 @@ import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYM
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 
-public class GrowingWaitQueueDetector implements IDetector {
-  static final String CONF_LIMIT = GrowingWaitQueueDetector.class.getSimpleName() + ".limit";
+public class GrowingWaitQueueDetector extends BaseDetector {
+  static final String CONF_LIMIT
+      = GrowingWaitQueueDetector.class.getSimpleName() + ".limit";
 
   private static final Logger LOG = Logger.getLogger(GrowingWaitQueueDetector.class.getName());
   private final double rateLimit;
@@ -68,14 +68,14 @@ public class GrowingWaitQueueDetector implements IDetector {
         LOG.info(String.format("Detected growing wait queues for %s, max rate %f",
             component, maxSlope));
         addresses.add(component);
-        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), Instant.now(), addresses));
+        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), context.checkpoint(), addresses));
       }
     }
     return result;
   }
 
 
-  public double computeWaitQueueSizeTrend(MeasurementsTable metrics) {
+  private double computeWaitQueueSizeTrend(MeasurementsTable metrics) {
     double maxSlope = 0;
     for (String instance : metrics.uniqueInstances()) {
 

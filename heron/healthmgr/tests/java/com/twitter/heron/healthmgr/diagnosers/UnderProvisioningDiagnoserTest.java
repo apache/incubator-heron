@@ -27,7 +27,7 @@ import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
@@ -55,7 +55,7 @@ public class UnderProvisioningDiagnoserTest {
   @Test
   public void diagnosisWhen1Of1InstanceInBP() {
     Collection<String> assign = Collections.singleton(comp);
-    Symptom symptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom symptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Collection<Symptom> symptoms = Collections.singletonList(symptom);
     Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
     validateDiagnosis(result);
@@ -64,7 +64,7 @@ public class UnderProvisioningDiagnoserTest {
   @Test
   public void diagnosisFailsNotSimilarQueueSizes() {
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
     Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
 
@@ -76,7 +76,7 @@ public class UnderProvisioningDiagnoserTest {
   public void diagnosisFailsNotSimilarProcessingRates() {
     // TODO BP instance should be same as the one with high processing rate
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
     Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
 

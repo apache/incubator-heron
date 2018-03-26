@@ -23,6 +23,7 @@ import java.util.Collections;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.when;
 public class ExecuteCountSensorTest {
   @Test
   public void providesBoltExecutionCountMetrics() {
+    Instant now = Instant.now();
     String metric = METRIC_EXE_COUNT.text();
     TopologyProvider topologyProvider = mock(TopologyProvider.class);
     when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
@@ -46,10 +48,10 @@ public class ExecuteCountSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     Collection<Measurement> result = new ArrayList<>();
-    result.add(new Measurement("bolt-1", "container_1_bolt-1_1", metric, Instant.now(), 123));
-    result.add(new Measurement("bolt-1", "container_1_bolt-1_2", metric, Instant.now(), 345));
-    result.add(new Measurement("bolt-2", "container_1_bolt-2_3", metric, Instant.now(), 321));
-    result.add(new Measurement("bolt-2", "container_1_bolt-2_4", metric, Instant.now(), 543));
+    result.add(new Measurement("bolt-1", "container_1_bolt-1_1", metric, now, 123));
+    result.add(new Measurement("bolt-1", "container_1_bolt-1_2", metric, now, 345));
+    result.add(new Measurement("bolt-2", "container_1_bolt-2_3", metric, now, 321));
+    result.add(new Measurement("bolt-2", "container_1_bolt-2_4", metric, now, 543));
 
     Collection<String> comps = Arrays.asList("bolt-1", "bolt-2");
     when(metricsProvider.getMeasurements(
@@ -58,6 +60,9 @@ public class ExecuteCountSensorTest {
 
     ExecuteCountSensor executeCountSensor
         = new ExecuteCountSensor(topologyProvider, null, metricsProvider);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(now);
+    executeCountSensor.initialize(context);
 
     Collection<Measurement> componentMetrics = executeCountSensor.fetch();
     assertEquals(4, componentMetrics.size());

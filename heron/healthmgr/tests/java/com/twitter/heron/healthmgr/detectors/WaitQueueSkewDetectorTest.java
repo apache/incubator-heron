@@ -21,6 +21,7 @@ import java.util.Collection;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -48,7 +49,11 @@ public class WaitQueueSkewDetectorTest {
     Collection<Measurement> metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
+
     WaitQueueSkewDetector detector = new WaitQueueSkewDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
     Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(3, symptoms.size());
@@ -73,7 +78,9 @@ public class WaitQueueSkewDetectorTest {
     metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
+
     detector = new WaitQueueSkewDetector(config);
+    detector.initialize(context);
     symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());

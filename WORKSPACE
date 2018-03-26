@@ -461,6 +461,21 @@ maven_jar(
   artifact = "org.apache.commons:commons-math3:3.6.1"
 )
 
+maven_jar(
+  name = "tech_tablesaw",
+  artifact = "tech.tablesaw:tablesaw-core:0.11.4"
+)
+
+maven_jar(
+  name = "it_unimi_dsi_fastutil",
+  artifact = "it.unimi.dsi:fastutil:8.1.1"
+)
+
+maven_jar(
+  name = "org_roaringbitmap",
+  artifact = "org.roaringbitmap:RoaringBitmap:0.6.51"
+)
+
 # Google Cloud
 maven_jar(
   name = "google_api_services_storage",

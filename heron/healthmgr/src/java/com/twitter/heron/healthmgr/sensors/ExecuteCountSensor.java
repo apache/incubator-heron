@@ -33,6 +33,7 @@ import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_E
 public class ExecuteCountSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
   private final MetricsProvider metricsProvider;
+  private Instant now;
 
   @Inject
   ExecuteCountSensor(TopologyProvider topologyProvider,
@@ -46,6 +47,7 @@ public class ExecuteCountSensor extends BaseSensor {
   @Override
   public Collection<Measurement> fetch() {
     List<String> bolts = Arrays.asList(topologyProvider.getBoltNames());
-    return metricsProvider.getMeasurements(Instant.now(), getDuration(), getMetricTypes(), bolts);
+    now = context.checkpoint();
+    return metricsProvider.getMeasurements(now, getDuration(), getMetricTypes(), bolts);
   }
 }

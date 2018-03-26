@@ -27,7 +27,7 @@ import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 public abstract class BaseSensor implements ISensor {
   static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(300);
   static final String COMPONENT_STMGR = "__stmgr__";
-  private ExecutionContext context;
+  protected ExecutionContext context;
 
   public enum MetricName {
     METRIC_EXE_COUNT("__execute-count/default"),

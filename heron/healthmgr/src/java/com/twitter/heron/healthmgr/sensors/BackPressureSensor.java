@@ -56,6 +56,7 @@ public class BackPressureSensor extends BaseSensor {
   @Override
   public Collection<Measurement> fetch() {
     Collection<Measurement> result = new ArrayList<>();
+    Instant now = context.checkpoint();
 
     String[] boltComponents = topologyProvider.getBoltNames();
     Duration duration = getDuration();
@@ -66,7 +67,7 @@ public class BackPressureSensor extends BaseSensor {
         String metric = getMetricName() + instance;
 
         Collection<Measurement> stmgrResult
-            = metricsProvider.getMeasurements(Instant.now(), duration, metric, COMPONENT_STMGR);
+            = metricsProvider.getMeasurements(now, duration, metric, COMPONENT_STMGR);
         if (stmgrResult.isEmpty()) {
           continue;
         }
@@ -83,7 +84,7 @@ public class BackPressureSensor extends BaseSensor {
         averageBp = averageBp > 1000 ? 1000 : averageBp;
 
         Measurement measurement
-            = new Measurement(component, instance, getMetricName(), Instant.now(), averageBp);
+            = new Measurement(component, instance, getMetricName(), now, averageBp);
         result.add(measurement);
       }
     }

@@ -21,8 +21,11 @@ import java.util.Collections;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
@@ -61,8 +64,13 @@ public class BackPressureSensorTest {
           boltId.length() * DEFAULT_METRIC_DURATION.getSeconds());
     }
 
+
     BackPressureSensor backPressureSensor =
         new BackPressureSensor(packingPlanProvider, topologyProvider, null, metricsProvider);
+
+    ExecutionContext context = mock(ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    backPressureSensor.initialize(context);
 
     Collection<Measurement> componentMetrics = backPressureSensor.fetch();
     assertEquals(3, componentMetrics.size());

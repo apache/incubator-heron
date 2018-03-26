@@ -23,6 +23,7 @@ import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -87,6 +88,10 @@ public class ProcessingRateSkewDetectorTest {
     metrics.add(measurement2);
 
     ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
+
     Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(3, symptoms.size());
@@ -112,6 +117,7 @@ public class ProcessingRateSkewDetectorTest {
     metrics.add(measurement2);
 
     detector = new ProcessingRateSkewDetector(config);
+    detector.initialize(context);
     symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());
@@ -155,6 +161,10 @@ public class ProcessingRateSkewDetectorTest {
     metrics.add(measurement6);
 
     ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
+
     Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(6, symptoms.size());

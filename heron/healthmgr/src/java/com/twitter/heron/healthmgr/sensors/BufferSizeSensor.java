@@ -56,6 +56,7 @@ public class BufferSizeSensor extends BaseSensor {
   @Override
   public Collection<Measurement> fetch() {
     Collection<Measurement> result = new ArrayList<>();
+    Instant now = context.checkpoint();
 
     String[] boltComponents = topologyProvider.getBoltNames();
     Duration duration = getDuration();
@@ -66,7 +67,7 @@ public class BufferSizeSensor extends BaseSensor {
         String metric = getMetricName() + instance + MetricName.METRIC_WAIT_Q_SIZE_SUFFIX;
 
         Collection<Measurement> stmgrResult
-            = metricsProvider.getMeasurements(Instant.now(), duration, metric, COMPONENT_STMGR);
+            = metricsProvider.getMeasurements(now, duration, metric, COMPONENT_STMGR);
         if (stmgrResult.isEmpty()) {
           continue;
         }
@@ -78,7 +79,7 @@ public class BufferSizeSensor extends BaseSensor {
         double totalSize = table.type(metric).sum();
 
         Measurement measurement
-            = new Measurement(component, instance, getMetricName(), Instant.now(), totalSize);
+            = new Measurement(component, instance, getMetricName(), now, totalSize);
         result.add(measurement);
       }
     }

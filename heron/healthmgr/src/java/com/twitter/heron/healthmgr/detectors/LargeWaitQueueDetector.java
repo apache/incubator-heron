@@ -15,26 +15,24 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_LARGE_WAIT_Q;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
-public class LargeWaitQueueDetector implements IDetector {
+public class LargeWaitQueueDetector extends BaseDetector {
   static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
 
   private static final Logger LOG = Logger.getLogger(LargeWaitQueueDetector.class.getName());
@@ -70,7 +68,7 @@ public class LargeWaitQueueDetector implements IDetector {
         }
       }
       if (addresses.size() > 0) {
-        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q.text(), Instant.now(), addresses));
+        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q.text(), context.checkpoint(), addresses));
       }
     }
 

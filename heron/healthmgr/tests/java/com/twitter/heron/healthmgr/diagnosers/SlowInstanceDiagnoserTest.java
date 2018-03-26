@@ -32,7 +32,8 @@ import org.junit.Test;
 
 import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
 import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
@@ -62,7 +63,7 @@ public class SlowInstanceDiagnoserTest {
 
   @Test
   public void failsIfNoBufferSizeDisparity() {
-    Symptom symptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), Instant.now(), null);
+    Symptom symptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), Instant.now(), null);
     Collection<Symptom> symptoms = Collections.singletonList(symptom);
 
     Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
@@ -76,7 +77,7 @@ public class SlowInstanceDiagnoserTest {
     when(context.measurements()).thenReturn(MeasurementsTable.of(measurements));
 
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
     Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
 
@@ -93,14 +94,11 @@ public class SlowInstanceDiagnoserTest {
 
   @Test
   public void failIfInstanceWithBpHasSmallBuffer() {
-    addMeasurements(METRIC_BACK_PRESSURE, 123, 0, 0);
-    addMeasurements(METRIC_WAIT_Q_SIZE, 100, 500, 500);
-    when(context.measurements()).thenReturn(MeasurementsTable.of(measurements));
-
     Collection<String> assign = Collections.singleton(comp);
-    Symptom bpSymptom = new Symptom(SYMPTOM_BACK_PRESSURE.text(), now, assign);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
     Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
-    Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
+    Symptom exeDisparitySymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
+    Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom, exeDisparitySymptom);
 
     Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
     assertEquals(0, result.size());
