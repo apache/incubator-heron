@@ -41,9 +41,11 @@ object ScalaIntegerProcessingTopology {
 
     val zeroes = builder.newSource(() => 0).setName("zeroes")
 
-    builder
+    val numbers = builder
       .newSource(() => ThreadLocalRandom.current.nextInt(1, 11))
       .setName("random-numbers")
+
+    numbers
       .map[Int]((i: Int) => i * 10)
       .setNumPartitions(2)
       .filter((i: Int) => i >= 50)

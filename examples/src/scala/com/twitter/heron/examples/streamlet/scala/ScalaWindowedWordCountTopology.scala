@@ -45,9 +45,11 @@ object ScalaWindowedWordCountTopology {
   def main(args: Array[String]): Unit = {
     val builder = Builder.newBuilder()
 
-    builder
+    val sentenceSource = builder
       .newSource(() => getRandomSentence())
       .setName("random-sentences-source")
+
+    sentenceSource
       .map[String](_.toLowerCase)
       .setName("sentences-with-lower-case")
       .flatMap[String](_.split(" "))

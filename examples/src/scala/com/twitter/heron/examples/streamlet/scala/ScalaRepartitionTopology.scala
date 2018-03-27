@@ -39,10 +39,12 @@ object ScalaRepartitionTopology {
   def main(args: Array[String]): Unit = {
     val builder = Builder.newBuilder
 
-    builder
+    val numbers = builder
       .newSource(() => Random.nextInt(100))
       .setNumPartitions(2)
       .setName("numbers-lower-than-100")
+
+    numbers
       .repartition(5, repartitionFn)
       .setName("repartitioned-incoming-values")
       .repartition(2)
@@ -67,11 +69,7 @@ object ScalaRepartitionTopology {
     */
   private def repartitionFn(incomingInteger: Int, numPartitions: Int) = {
     val partitionIndex = incomingInteger match {
-      case x if (0 to 19).contains(x)  => 1
-      case x if (20 to 39).contains(x) => 2
-      case x if (40 to 59).contains(x) => 3
-      case x if (60 to 79).contains(x) => 4
-      case x if (80 to 99).contains(x) => 5
+      case x if (x >= 0 && x <= 99) => x / 20 + 1
       case x =>
         throw new IllegalArgumentException(
           s"Incoming number($x) must not be higher than 100")

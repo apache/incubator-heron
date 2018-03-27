@@ -69,9 +69,11 @@ object ScalaClassicalMusicTopology {
         getRandomClassicalMusic(classicalMusics2))
       .setName("classical-music-source-2")
 
-    builder
+    val musicSource = builder
       .newSource[ClassicalMusic](() => getRandomClassicalMusic(classicalMusics))
       .setName("classical-music-source-1")
+
+    musicSource
       .filter(_.year <= 1850)
       .setName("classical-musics-older-than-1850")
       .join[Int, ClassicalMusic, String](
