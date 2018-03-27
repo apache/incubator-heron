@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import com.squareup.okhttp.Response;
 
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -60,5 +61,11 @@ final class KubernetesUtils {
       details = ioe.getMessage();
     }
     return message + "\ndetails:\n" + details;
+  }
+
+  // https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  // #meaning-of-memory
+  static String Megabytes(ByteAmount amount) {
+    return String.format("%sMi", Long.toString(amount.asMegabytes()));
   }
 }

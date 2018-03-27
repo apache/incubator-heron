@@ -120,7 +120,7 @@ public class RoundRobinPackingTest {
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
     ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
-    float containerCpu = 30;
+    double containerCpu = 30;
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setContainerDiskRequested(containerDisk);
@@ -175,7 +175,7 @@ public class RoundRobinPackingTest {
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
     ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     ByteAmount containerRamPadding = ByteAmount.fromMegabytes(512);
-    float containerCpu = 30;
+    double containerCpu = 30;
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setContainerDiskRequested(containerDisk);
