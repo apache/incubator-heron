@@ -841,7 +841,7 @@ new_http_archive(
 
 new_http_archive(
     name = "helm_linux",
-    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz",
     strip_prefix = "linux-amd64",
     build_file = "third_party/helm/helm.BUILD",
 )
