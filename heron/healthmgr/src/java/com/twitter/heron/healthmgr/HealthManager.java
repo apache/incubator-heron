@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -45,6 +46,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.classification.InterfaceStability.Evolving;
 import com.twitter.heron.classification.InterfaceStability.Unstable;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
@@ -89,8 +91,8 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * <li>health manager mode: <code> -m local</code>, default cluster
  * <li>heron home directory: <code> -d ~/.heron</code>, required if mode is local
  * <li>config directory: <code> -p ~/.heron/conf</code>, required if mode is local
- * <li>metrics type: <code>-s f.q.class.name</code>,
- * default: <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
+ * <li>metrics type: <code>-s f.q.class.name</code>, default:
+ * <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
  * <li>metrics source: <code>-t http://host:port</code>, default: <code>http://127.0.0.1:8888</code>
  * <li>enable verbose mode: <code> -v</code>
  * </ul>
@@ -115,8 +117,7 @@ public class HealthManager {
   private HealthPolicyConfigReader policyConfigReader;
 
   public enum HealthManagerMode {
-    cluster,
-    local
+    cluster, local
   }
 
   private enum CliArgs {
@@ -130,7 +131,9 @@ public class HealthManager {
     CONFIG_PATH("config_path"),
     MODE("mode"),
     VERBOSE("verbose"),
-    METRICSMGR_PORT("metricsmgr_port");
+    METRICSMGR_PORT("metricsmgr_port"),
+    SYSTEM_CONFIG_FILEPATH("system_config_file"),
+    OVERRIDE_CONFIG_FILEPATH("override_config_file");
 
     private String text;
 
@@ -171,10 +174,8 @@ public class HealthManager {
     Config config;
     switch (mode) {
       case cluster:
-        config = Config.toClusterMode(Config.newBuilder()
-            .putAll(ConfigLoader.loadClusterConfig())
-            .putAll(commandLineConfigs(cmd))
-            .build());
+        config = Config.toClusterMode(Config.newBuilder().putAll(ConfigLoader.loadClusterConfig())
+            .putAll(commandLineConfigs(cmd)).build());
         break;
 
       case local:
@@ -183,10 +184,9 @@ public class HealthManager {
         }
         String heronHome = getOptionValue(cmd, CliArgs.HERON_HOME);
         String configPath = getOptionValue(cmd, CliArgs.CONFIG_PATH);
-        config = Config.toLocalMode(Config.newBuilder()
-            .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
-            .putAll(commandLineConfigs(cmd))
-            .build());
+        config = Config.toLocalMode(
+            Config.newBuilder().putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
+                .putAll(commandLineConfigs(cmd)).build());
         break;
 
       default:
@@ -194,6 +194,14 @@ public class HealthManager {
     }
 
     setupLogging(cmd, config);
+
+    LOG.fine(Arrays.toString(cmd.getOptions()));
+
+    // Add the SystemConfig into SingletonRegistry
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(getOptionValue(cmd, CliArgs.SYSTEM_CONFIG_FILEPATH), true)
+        .putAll(getOptionValue(cmd, CliArgs.OVERRIDE_CONFIG_FILEPATH), true).build();
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
@@ -214,8 +222,8 @@ public class HealthManager {
     HealthManagerMetrics publishingMetricsRunnable = null;
     if (hasOption(cmd, CliArgs.METRICSMGR_PORT)) {
       LOG.info("Starting Health Manager metirc posting thread");
-      publishingMetricsRunnable = new HealthManagerMetrics(
-          Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+      publishingMetricsRunnable =
+          new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
     }
 
     LOG.info("Starting Health Manager");
@@ -237,9 +245,8 @@ public class HealthManager {
   private static void setupLogging(CommandLine cmd, Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigFile(config);
 
-    SystemConfig systemConfig = SystemConfig.newBuilder(true)
-        .putAll(systemConfigFilename, true)
-        .build();
+    SystemConfig systemConfig =
+        SystemConfig.newBuilder(true).putAll(systemConfigFilename, true).build();
 
     Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
     Level loggingLevel = Level.INFO;
@@ -251,10 +258,8 @@ public class HealthManager {
     LoggingHelper.loggerInit(loggingLevel, true);
 
     String fileName = String.format("%s-%s-%s", "heron", Context.topologyName(config), "healthmgr");
-    LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(fileName, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSize(),
-            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(LoggingHelper.getFileHandler(fileName, loggingDir, true,
+        systemConfig.getHeronLoggingMaximumSize(), systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");
   }
@@ -276,10 +281,8 @@ public class HealthManager {
 
     stateMgrAdaptor = createStateMgrAdaptor();
 
-    this.runtime = Config.newBuilder()
-        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
-        .put(Key.TOPOLOGY_NAME, Context.topologyName(config))
-        .build();
+    this.runtime = Config.newBuilder().put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
+        .put(Key.TOPOLOGY_NAME, Context.topologyName(config)).build();
 
     this.schedulerClient = createSchedulerClient();
 
@@ -300,8 +303,8 @@ public class HealthManager {
 
       String policyClassName = policyConfig.getPolicyClass();
       LOG.info(String.format("Initializing %s with class %s", policyId, policyClassName));
-      Class<IHealthPolicy> policyClass
-          = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
+      Class<IHealthPolicy> policyClass =
+          (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
 
       AbstractModule module = constructPolicySpecificModule(policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
@@ -312,8 +315,8 @@ public class HealthManager {
 
   @VisibleForTesting
   HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
-    String policyConfigFile
-        = Paths.get(Context.heronConf(config), PolicyConfigKey.CONF_FILE_NAME.key()).toString();
+    String policyConfigFile =
+        Paths.get(Context.heronConf(config), PolicyConfigKey.CONF_FILE_NAME.key()).toString();
     HealthPolicyConfigReader configReader = new HealthPolicyConfigReader(policyConfigFile);
     configReader.loadConfig();
     return configReader;
@@ -324,19 +327,15 @@ public class HealthManager {
     return new AbstractModule() {
       @Override
       protected void configure() {
-        bind(String.class)
-            .annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
+        bind(String.class).annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
             .toInstance(sourceUrl);
-        bind(String.class)
-            .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
-            .toInstance(type);
+        bind(String.class).annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE)).toInstance(type);
       }
     };
   }
 
   private AbstractModule buildCommonConfigModule() throws ReflectiveOperationException {
-    String metricSourceClassName
-        = injector.getInstance(
+    String metricSourceClassName = injector.getInstance(
         com.google.inject.Key.get(String.class, Names.named(CONF_METRICS_SOURCE_TYPE)));
 
     Class<? extends MetricsProvider> metricsProviderClass =
@@ -345,14 +344,11 @@ public class HealthManager {
     return new AbstractModule() {
       @Override
       protected void configure() {
-        bind(String.class)
-            .annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
+        bind(String.class).annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
-        bind(String.class)
-            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_CLUSTER))
+        bind(String.class).annotatedWith(Names.named(TrackerMetricsProvider.CONF_CLUSTER))
             .toInstance(Context.cluster(config));
-        bind(String.class)
-            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
+        bind(String.class).annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
         bind(Config.class).toInstance(config);
         bind(EventManager.class).in(Singleton.class);
@@ -398,12 +394,9 @@ public class HealthManager {
     String topologyName = getOptionValue(cmd, CliArgs.TOPOLOGY_NAME);
     Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
 
-    Config.Builder commandLineConfig = Config.newBuilder()
-        .put(Key.CLUSTER, cluster)
-        .put(Key.ROLE, role)
-        .put(Key.ENVIRON, environ)
-        .put(Key.TOPOLOGY_NAME, topologyName)
-        .put(Key.VERBOSE, verbose);
+    Config.Builder commandLineConfig =
+        Config.newBuilder().put(Key.CLUSTER, cluster).put(Key.ROLE, role).put(Key.ENVIRON, environ)
+            .put(Key.TOPOLOGY_NAME, topologyName).put(Key.VERBOSE, verbose);
 
     return commandLineConfig.build();
   }
@@ -417,10 +410,8 @@ public class HealthManager {
   // construct command line help options
   private static Options constructHelpOptions() {
     Options options = new Options();
-    Option help = Option.builder("h")
-        .desc("List all options and their description")
-        .longOpt("help")
-        .build();
+    Option help =
+        Option.builder("h").desc("List all options and their description").longOpt("help").build();
 
     options.addOption(help);
     return options;
@@ -502,6 +493,27 @@ public class HealthManager {
         .argName("process mode")
         .build();
 
+    Option metricsMgrPort = Option.builder("m")
+        .desc("Port of local MetricsManager")
+        .longOpt(CliArgs.METRICSMGR_PORT.text)
+        .hasArgs()
+        .argName("metrics_manager port")
+        .build();
+
+    Option systemConfig = Option.builder("y")
+        .desc("System configuration file path")
+        .longOpt(CliArgs.SYSTEM_CONFIG_FILEPATH.text)
+        .hasArgs()
+        .argName("metrics_manager port")
+        .build();
+
+    Option overrideConfig = Option.builder("v")
+        .desc("Override configuration file path")
+        .longOpt(CliArgs.OVERRIDE_CONFIG_FILEPATH.text)
+        .hasArgs()
+        .argName("metrics_manager port")
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt(CliArgs.VERBOSE.text)
@@ -516,6 +528,9 @@ public class HealthManager {
     options.addOption(metricsSourceType);
     options.addOption(metricsSourceURL);
     options.addOption(mode);
+    options.addOption(metricsMgrPort);
+    options.addOption(systemConfig);
+    options.addOption(overrideConfig);
     options.addOption(verbose);
 
     return options;
