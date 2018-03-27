@@ -59,6 +59,61 @@ public class TopologyUtilsTest {
   }
 
   @Test
+  public void testGetComponentCpuMapDefaultValue() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+
+    // sort the component cpu map
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    // Component cpu map is not set, the cpuMap size should be 0
+    Assert.assertEquals(0, cpuMap.size());
+  }
+
+  @Test
+  public void testGetComponentCpuMapAllCpuSpecified() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+    double boltCpu = 1.0;
+    double spoutCpu = 2.0;
+    topologyConfig.setComponentCpu("spout", spoutCpu);
+    topologyConfig.setComponentCpu("bolt", boltCpu);
+
+    // sort the component cpu map
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    Assert.assertArrayEquals(new String[]{"bolt", "spout"}, cpuMap.keySet().toArray());
+    Assert.assertArrayEquals(new Double[]{boltCpu, spoutCpu}, cpuMap.values().toArray());
+  }
+
+  @Test
+  public void testGetComponentCpuMapSomeCpuSpecified() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+    double spoutCpu = 2.0f;
+    topologyConfig.setComponentCpu("spout", spoutCpu);
+
+    // sort the component cpu map
+    Map<String, Double> cpuMap = new TreeMap<>(TopologyUtils.getComponentCpuMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    // Component cpu map sets only spout's cpu
+    Assert.assertArrayEquals(new String[]{"spout"}, cpuMap.keySet().toArray());
+    Assert.assertArrayEquals(new Double[]{spoutCpu}, cpuMap.values().toArray());
+  }
+
+  @Test
   public void testGetComponentRamMapDefaultValue() {
     int componentParallelism = 2;
     Config topologyConfig = new Config();
@@ -111,7 +166,61 @@ public class TopologyUtilsTest {
     // Component ram map sets only spout's ram
     Assert.assertArrayEquals(new String[]{"spout"}, ramMap.keySet().toArray());
     Assert.assertArrayEquals(new ByteAmount[]{spoutRam}, ramMap.values().toArray());
+  }
 
+  @Test
+  public void testGetComponentDiskMapDefaultValue() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+
+    // sort the component disk map
+    Map<String, ByteAmount> diskMap = new TreeMap<>(TopologyUtils.getComponentDiskMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    // Component disk map is not set, the diskMap size should be 0
+    Assert.assertEquals(0, diskMap.size());
+  }
+
+  @Test
+  public void testGetComponentDiskMapAllDiskSpecified() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+    ByteAmount boltDisk = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutDisk = ByteAmount.fromGigabytes(2);
+    topologyConfig.setComponentDisk("spout", spoutDisk);
+    topologyConfig.setComponentDisk("bolt", boltDisk);
+
+    // sort the component disk map
+    Map<String, ByteAmount> diskMap = new TreeMap<>(TopologyUtils.getComponentDiskMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    Assert.assertArrayEquals(new String[]{"bolt", "spout"}, diskMap.keySet().toArray());
+    Assert.assertArrayEquals(new ByteAmount[]{boltDisk, spoutDisk}, diskMap.values().toArray());
+  }
+
+  @Test
+  public void testGetComponentDiskMapSomeDiskSpecified() {
+    int componentParallelism = 2;
+    Config topologyConfig = new Config();
+    Map<String, Integer> spouts = new HashMap<>();
+    spouts.put("spout", componentParallelism);
+    Map<String, Integer> bolts = new HashMap<>();
+    bolts.put("bolt", componentParallelism);
+    ByteAmount spoutDisk = ByteAmount.fromGigabytes(2);
+    topologyConfig.setComponentDisk("spout", spoutDisk);
+
+    // sort the component disk map
+    Map<String, ByteAmount> diskMap = new TreeMap<>(TopologyUtils.getComponentDiskMapConfig(
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
+    // Component disk map sets only spout's disk
+    Assert.assertArrayEquals(new String[]{"spout"}, diskMap.keySet().toArray());
+    Assert.assertArrayEquals(new ByteAmount[]{spoutDisk}, diskMap.values().toArray());
   }
 
   @Test

@@ -34,7 +34,7 @@ public final class IntegerProcessingTopology {
   }
 
   // Heron resources to be applied to the topology
-  private static final float CPU = 1.5f;
+  private static final double CPU = 1.5;
   private static final int GIGABYTES_OF_RAM = 8;
   private static final int NUM_CONTAINERS = 2;
 
