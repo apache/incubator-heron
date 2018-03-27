@@ -62,6 +62,7 @@ public final class HeronSubmitter {
   private static final String CMD_TOPOLOGY_DEFN_TEMPDIR = "cmdline.topologydefn.tmpdirectory";
   private static final String CMD_TOPOLOGY_ROLE = "cmdline.topology.role";
   private static final String CMD_TOPOLOGY_ENVIRONMENT = "cmdline.topology.environment";
+  private static final String CMD_TOPOLOGY_TAG = "cmdline.topology.tag";
 
   private HeronSubmitter() {
   }
@@ -101,6 +102,11 @@ public final class HeronSubmitter {
     final String environment = heronCmdOptions.get(CMD_TOPOLOGY_ENVIRONMENT);
     if (environment != null) {
       heronConfig.putIfAbsent(Config.TOPOLOGY_TEAM_ENVIRONMENT, environment);
+    }
+
+    final String tag = heronCmdOptions.get(CMD_TOPOLOGY_TAG);
+    if (tag != null) {
+      heronConfig.putIfAbsent(Config.TOPOLOGY_TAG, tag);
     }
 
     TopologyAPI.Topology fTopology =
