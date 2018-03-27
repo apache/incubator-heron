@@ -211,9 +211,9 @@ public class HealthManager {
     LOG.info("Initializing health manager");
     healthManager.initialize();
 
-    LOG.info("Starting Health Manager metirc posting thread");
     HealthManagerMetrics publishingMetricsRunnable = null;
     if (hasOption(cmd, CliArgs.METRICSMGR_PORT)) {
+      LOG.info("Starting Health Manager metirc posting thread");
       publishingMetricsRunnable = new HealthManagerMetrics(
           Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
     }

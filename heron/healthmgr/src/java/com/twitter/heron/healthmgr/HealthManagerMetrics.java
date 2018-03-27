@@ -76,7 +76,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
             systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSize(),
             systemConfig.getInstanceNetworkOptionsMaximumPacketSize());
     metricsMgrClient =
-        new MetricsMgrClient(looper, METRICS_MGR_HOST, metricsMgrPort, socketOptions);
+        new SimpleMetricsManagerClient(looper, METRICS_MGR_HOST, metricsMgrPort, socketOptions);
 
     outMetricsQueues = new Communicator<Metrics.MetricPublisherPublishMessage>(null, looper);
     outMetricsQueues.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
@@ -139,9 +139,9 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     outMetricsQueues.clear();
   }
 
-  class MetricsMgrClient extends HeronClient {
+  class SimpleMetricsManagerClient extends HeronClient {
 
-    MetricsMgrClient(NIOLooper s, String host, int port, HeronSocketOptions options) {
+    SimpleMetricsManagerClient(NIOLooper s, String host, int port, HeronSocketOptions options) {
       super(s, host, port, options);
       // TODO Auto-generated constructor stub
     }
