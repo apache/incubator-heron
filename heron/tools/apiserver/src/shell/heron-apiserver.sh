@@ -22,8 +22,8 @@ else
   JAVA=${JAVA_HOME}/bin/java
 fi
 
-if [[ "$HERON_APISERVER_MEM_DIRECT" != "" ]]; then
-  OPTS = "$OPTS -XX:MaxDirectMemorySize=$HERON_APISERVER_MEM_DIREC"
+if [[ -n $HERON_APISERVER_MEM_DIRECT ]]; then
+  OPTS="-XX:MaxDirectMemorySize=$HERON_APISERVER_MEM_DIRECT"
 fi
 
 exec $JAVA -jar -Xms${MEM_MIN} -Xmx${MEM_MAX} $OPTS $HERON_APISERVER_JAR $@
