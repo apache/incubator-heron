@@ -131,7 +131,7 @@ heron.tmaster.metrics.network.bindallinterfaces: False
 heron.tmaster.stmgr.state.timeout.sec: 60
 
 ################################################################################
-# Configs related to Topology Master, starts with heron.metricsmgr.*
+# Configs related to Metrics Manager, starts with heron.metricsmgr.*
 ################################################################################
 
 # The size of packets to read from socket will be determined by the minimal of:
