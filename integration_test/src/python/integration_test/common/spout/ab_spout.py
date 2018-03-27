@@ -17,6 +17,7 @@
 '''ABSpout for integration test'''
 
 from heronpy.api.spout.spout import Spout
+from ..core import constants as integ_const
 
 #pylint: disable=unused-argument
 class ABSpout(Spout):
@@ -25,8 +26,11 @@ class ABSpout(Spout):
   def initialize(self, config, context):
     self.to_send = ["A", "B"]
     self.emitted = 0
+    self.append_stream_id = config[integ_const.USER_APPEND_STREAM_ID]
 
   def next_tuple(self):
     word = self.to_send[self.emitted % len(self.to_send)]
+    if self.append_stream_id:
+      word = word + "_" + self.emitted
     self.emitted += 1
     self.emit([word])

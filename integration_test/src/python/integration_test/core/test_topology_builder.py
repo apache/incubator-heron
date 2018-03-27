@@ -49,7 +49,8 @@ class TestTopologyBuilder(TopologyBuilder):
     self.prev = {}
 
   def add_spout(self, name, spout_cls, par, config=None,
-                optional_outputs=None, max_executions=None):
+                optional_outputs=None, max_executions=None,
+                append_sequence_id=False):
     """Add an integration_test spout"""
     user_spec = spout_cls.spec(name)
     spout_classpath = user_spec.python_class_path
@@ -69,6 +70,8 @@ class TestTopologyBuilder(TopologyBuilder):
 
     if max_executions is not None:
       _config[integ_const.USER_MAX_EXECUTIONS] = max_executions
+
+    _config[integ_const.USER_APPEND_STREAM_ID] = append_sequence_id
 
     test_spec = IntegrationTestSpout.spec(name, par, _config,
                                           user_spout_classpath=spout_classpath,
