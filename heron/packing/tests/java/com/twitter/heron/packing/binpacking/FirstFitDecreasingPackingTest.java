@@ -100,7 +100,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
     ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
-    float containerCpu = 30;
+    double containerCpu = 30;
 
     topologyConfig.setContainerMaxRamHint(containerRam);
     topologyConfig.setContainerMaxDiskHint(containerDisk);
@@ -154,7 +154,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     // the value should be ignored, since we set the complete component ram map
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(15);
     ByteAmount maxContainerDisk = ByteAmount.fromGigabytes(20);
-    float maxContainerCpu = 30;
+    double maxContainerCpu = 30;
 
     // Explicit set component ram map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);

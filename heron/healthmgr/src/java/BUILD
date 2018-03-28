@@ -7,6 +7,7 @@ healthmgr_deps_files = [
     "//heron/api/src/java:classification",
     "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
+    "//heron/common/src/java:network-java",
     "//heron/common/src/java:utils-java",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:packing-spi-java",
@@ -46,11 +47,14 @@ healthmgr_deps_files = [
     "@org_roaringbitmap//jar",
 ]
 
+filegroup(
+    name = "exported-healthmgr-java-src",
+    srcs = glob(["**/*.java"]),
+)
+
 java_library(
     name = "healthmgr-java",
-    srcs = glob(
-        ["**/*.java"],
-         ),
+    srcs = glob(["**/*.java"]),
     deps = heron_java_proto_files() + healthmgr_deps_files,
 )
 

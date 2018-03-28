@@ -50,6 +50,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 @SuppressWarnings("IllegalCatch")
@@ -192,14 +193,20 @@ public class NomadScheduler implements IScheduler {
 
   List<Job> getJobs(PackingPlan packing) {
     List<Job> ret = new LinkedList<>();
+
+    PackingPlan homogeneousPackingPlan = getHomogeneousPackingPlan(packing);
+
+    Resource resource = getHomogeneousContainerResource(homogeneousPackingPlan);
+
     for (int i = 0; i < Runtime.numContainers(this.runtimeConfig); i++) {
-      Optional<PackingPlan.ContainerPlan> containerPlan = packing.getContainer(i);
-      ret.add(getJob(i, containerPlan));
+      Optional<PackingPlan.ContainerPlan> containerPlan = homogeneousPackingPlan.getContainer(i);
+      ret.add(getJob(i, containerPlan, resource));
     }
     return ret;
   }
 
-  Job getJob(int containerIndex, Optional<PackingPlan.ContainerPlan> containerPlan) {
+  Job getJob(int containerIndex, Optional<PackingPlan.ContainerPlan> containerPlan,
+             Resource containerResource) {
 
     String topologyName = Runtime.topologyName(this.runtimeConfig);
     String topologyId = Runtime.topologyId(this.runtimeConfig);
@@ -207,24 +214,108 @@ public class NomadScheduler implements IScheduler {
     job.setId(getJobId(topologyId, containerIndex));
     job.setName(getJobId(topologyName, containerIndex));
     job.addTaskGroups(getTaskGroup(getJobId(topologyName, containerIndex),
-        containerIndex, containerPlan));
+        containerIndex, containerResource));
     job.setDatacenters(Arrays.asList(NomadConstants.NOMAD_DEFAULT_DATACENTER));
     job.setMeta(getMetaData(this.runtimeConfig, containerPlan));
     return job;
   }
 
-  TaskGroup getTaskGroup(String groupName, int containerIndex,
-                         Optional<PackingPlan.ContainerPlan> containerPlan) {
+  TaskGroup getTaskGroup(String groupName, int containerIndex, Resource containerResource) {
     TaskGroup taskGroup = new TaskGroup();
     taskGroup.setCount(1);
     taskGroup.setName(groupName);
-    taskGroup.addTasks(getTask(groupName, containerIndex, containerPlan));
+    taskGroup.addTasks(getTask(groupName, containerIndex, containerResource));
     return taskGroup;
   }
 
-  Task getTask(String taskName, int containerIndex,
-               Optional<PackingPlan.ContainerPlan> containerPlan) {
+  Task getTask(String taskName, int containerIndex, Resource containerResource) {
 
+    String nomadDriver = NomadContext.getHeronNomadDriver(this.localConfig);
+    Task task = new Task();
+
+    if (nomadDriver.equals(NomadConstants.NomadDriver.RAW_EXEC.getName())) {
+
+      getTaskSpecRawDriver(task, taskName, containerIndex);
+
+    } else if (nomadDriver.equals(NomadConstants.NomadDriver.DOCKER.getName())) {
+
+      getTaskSpecDockerDriver(task, taskName, containerIndex);
+
+    } else {
+      throw new IllegalArgumentException("Invalid Nomad driver specified: " + nomadDriver);
+    }
+
+    // set resources requests
+    Resources resourceReqs = new Resources();
+    // configure nomad to allocate dynamic ports
+    Port[] ports = new Port[NomadConstants.EXECUTOR_PORTS.size()];
+    int i = 0;
+    for (SchedulerUtils.ExecutorPort port : NomadConstants.EXECUTOR_PORTS.keySet()) {
+      ports[i] = new Port().setLabel(port.getName().replace("-", "_"));
+      i++;
+    }
+
+    resourceReqs.addNetworks(new NetworkResource().addDynamicPorts(ports));
+
+    // set memory requirements
+    long memoryReqMb = containerResource.getRam().asMegabytes();
+    resourceReqs.setMemoryMb(longToInt(memoryReqMb));
+
+    // set cpu requirements
+    double coresReq = containerResource.getCpu();
+    double coresReqFreq = NomadContext.getCoreFreqMapping(this.localConfig) * coresReq;
+    resourceReqs.setCpu(Integer.valueOf((int) Math.round(coresReqFreq)));
+
+    // set disk requirements
+    long diskReqMb = containerResource.getDisk().asMegabytes();
+    resourceReqs.setDiskMb(longToInt(diskReqMb));
+    task.setResources(resourceReqs);
+
+    return task;
+  }
+
+  /**
+   * Get the task spec for using the docker driver in Noad
+   * In docker mode, Heron will be use in docker containers
+   */
+  Task getTaskSpecDockerDriver(Task task, String taskName, int containerIndex) {
+
+    String executorBinary = Context.executorBinary(this.clusterConfig);
+    // get arguments for heron executor command
+    String[] executorArgs = SchedulerUtils.executorCommandArgs(
+        this.clusterConfig, this.runtimeConfig, NomadConstants.EXECUTOR_PORTS,
+        String.valueOf(containerIndex));
+
+    // get complete heron executor command
+    String executorCmd = executorBinary + " " + String.join(" ", executorArgs);
+    // get heron_downloader command for downloading topology package
+    String topologyDownloadCmd = getFetchCommand(this.clusterConfig, this.runtimeConfig);
+
+    task.setName(taskName);
+    // use nomad driver
+    task.setDriver(NomadConstants.NomadDriver.DOCKER.getName());
+
+    // set docker image to use
+    task.addConfig(NomadConstants.NOMAD_IMAGE,
+        NomadContext.getHeronExecutorDockerImage(this.localConfig));
+
+    task.addConfig(NomadConstants.NOMAD_TASK_COMMAND, NomadConstants.SHELL_CMD);
+    String[] args = {"-c", String.format("%s && %s", topologyDownloadCmd, executorCmd)};
+
+    task.addConfig(NomadConstants.NOMAD_TASK_COMMAND_ARGS, args);
+
+    Map<String, String> envVars = new HashMap<>();
+    envVars.put(NomadConstants.HOST, "${attr.unique.network.ip-address}");
+    task.setEnv(envVars);
+
+    return task;
+  }
+
+  /**
+   * Get the task spec for using raw_exec driver in Nomad
+   * In raw exec mode, Heron will be run directly on the machine
+   */
+  Task getTaskSpecRawDriver(Task task, String taskName, int containerIndex) {
     String executorBinary = Context.executorBinary(this.clusterConfig);
     // get arguments for heron executor command
     String[] executorArgs = SchedulerUtils.executorCommandArgs(
@@ -237,9 +328,9 @@ public class NomadScheduler implements IScheduler {
     // read nomad heron executor start up script from file
     String heronNomadScript = getHeronNomadScript(this.localConfig);
 
-    Task task = new Task();
     task.setName(taskName);
-    task.setDriver(NomadConstants.NOMAD_RAW_EXEC);
+    // use raw_exec driver
+    task.setDriver(NomadConstants.NomadDriver.RAW_EXEC.getName());
     // call nomad heron start up script
     task.addConfig(NomadConstants.NOMAD_TASK_COMMAND, NomadConstants.SHELL_CMD);
     String[] args = {NomadConstants.NOMAD_HERON_SCRIPT_NAME};
@@ -258,25 +349,6 @@ public class NomadScheduler implements IScheduler {
       i++;
     }
 
-    resourceReqs.addNetworks(new NetworkResource().addDynamicPorts(ports));
-    // set resources requests
-    if (containerPlan.isPresent()) {
-      // set memory requirements
-      long memoryReqMb = containerPlan.get().getRequiredResource().getRam().asMegabytes();
-      resourceReqs.setMemoryMb(longToInt(memoryReqMb));
-
-      // set cpu requirements
-      double coresReq = containerPlan.get().getRequiredResource().getCpu();
-      double coresReqFreq = NomadContext.getCoreFreqMapping(this.localConfig) * coresReq;
-      resourceReqs.setCpu(Integer.valueOf((int) Math.round(coresReqFreq)));
-
-      // set disk requirements
-      long diskReqMb = containerPlan.get().getRequiredResource().getDisk().asMegabytes();
-      resourceReqs.setDiskMb(longToInt(diskReqMb));
-    }
-
-    task.setResources(resourceReqs);
-
     // set enviroment variables used int the heron nomad start up script
     Map<String, String> envVars = new HashMap<>();
     envVars.put(NomadConstants.HERON_NOMAD_WORKING_DIR,
@@ -286,17 +358,16 @@ public class NomadScheduler implements IScheduler {
     if (NomadContext.useCorePackageUri(this.localConfig)) {
       envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "true");
       envVars.put(NomadConstants.HERON_CORE_PACKAGE_URI,
-            NomadContext.corePackageUri(this.localConfig));
+          NomadContext.corePackageUri(this.localConfig));
     } else {
       envVars.put(NomadConstants.HERON_USE_CORE_PACKAGE_URI, "false");
       envVars.put(NomadConstants.HERON_CORE_PACKAGE_DIR,
-            NomadContext.corePackageDirectory(this.localConfig));
+          NomadContext.corePackageDirectory(this.localConfig));
     }
 
     envVars.put(NomadConstants.HERON_TOPOLOGY_DOWNLOAD_CMD, topologyDownloadCmd);
     envVars.put(NomadConstants.HERON_EXECUTOR_CMD, executorCmd);
     task.setEnv(envVars);
-
     return task;
   }
 
@@ -385,7 +456,7 @@ public class NomadScheduler implements IScheduler {
     }
   }
 
-  public static Map<String, String> getMetaData(
+  static Map<String, String> getMetaData(
       Config runtimeConfig,
       Optional<PackingPlan.ContainerPlan> containerPlan) {
     String topologyName = Runtime.topologyName(runtimeConfig);
@@ -431,5 +502,18 @@ public class NomadScheduler implements IScheduler {
       throw new IllegalArgumentException(val + " is too large and cannot be cast to an Integer");
     }
     return (int) val;
+  }
+
+  PackingPlan getHomogeneousPackingPlan(PackingPlan packingPlan) {
+    // Align resources to maximal requested resource
+    PackingPlan updatedPackingPlan = packingPlan.cloneWithHomogeneousScheduledResource();
+    SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(this.runtimeConfig),
+        updatedPackingPlan, Runtime.schedulerStateManagerAdaptor(this.runtimeConfig));
+
+    return updatedPackingPlan;
+  }
+
+  Resource getHomogeneousContainerResource(PackingPlan homogeneousPackingPlan) {
+    return homogeneousPackingPlan.getContainers().iterator().next().getRequiredResource();
   }
 }

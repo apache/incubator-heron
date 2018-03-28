@@ -73,7 +73,7 @@ class Config {
   static const std::string TOPOLOGY_MESSAGE_TIMEOUT_SECS;
 
   /**
-   * The per componentparallelism for a component in this topology.
+   * The per component parallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
   static const std::string TOPOLOGY_COMPONENT_PARALLELISM;
@@ -174,10 +174,22 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_RAM_PADDING;
 
   /**
+   * Per component cpu requirement.  The format of this flag is something like
+   * spout0:0.2,spout1:0.2,bolt1:0.5.
+   */
+  static const std::string TOPOLOGY_COMPONENT_CPUMAP;
+
+  /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   static const std::string TOPOLOGY_COMPONENT_RAMMAP;
+
+  /**
+   * Per component disk requirement.  The format of this flag is something like
+   * spout0:12434,spout1:345353,bolt1:545356.
+   */
+  static const std::string TOPOLOGY_COMPONENT_DISKMAP;
 
   /**
    * Name of the serializer classname. Only 'cereal', or 'string' are supported
@@ -256,28 +268,57 @@ class Config {
     config_[Config::TOPOLOGY_CONTAINER_RAM_PADDING] = std::to_string(bytes);
   }
 
+  void setComponentCpuMap(const std::string& cpumap) {
+    config_[Config::TOPOLOGY_COMPONENT_CPUMAP] = cpumap;
+  }
+
   void setComponentRamMap(const std::string& rammap) {
     config_[Config::TOPOLOGY_COMPONENT_RAMMAP] = rammap;
+  }
+
+  void setComponentDiskMap(const std::string& diskmap) {
+    config_[Config::TOPOLOGY_COMPONENT_DISKMAP] = diskmap;
   }
 
   void setSerializerClassName(const std::string& className) {
     config_[Config::TOPOLOGY_SERIALIZER_CLASSNAME] = className;
   }
 
+  template<typename T>
+  void appendComponentConfig(const std::string& key,
+                             const std::string& componentName,
+                             const T& val) {
+    if (config_.find(key) != config_.end()) {
+      std::ostringstream value;
+      value << config_[key];
+      value << "," << componentName << ":" << val;
+      config_[key] = value.str();
+    } else {
+      std::ostringstream value;
+      value << componentName << ":" << val;
+      config_[key] = value.str();
+    }
+  }
+
+  void setComponentCpu(const std::string& componentName, double cpu) {
+    if (cpu < 0) {
+      throw std::runtime_error("Invalid Cpu specified for component");
+    }
+    appendComponentConfig<double>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
+  }
+
   void setComponentRam(const std::string& componentName, int64_t bytes) {
     if (bytes < 0) {
       throw std::runtime_error("Invalid Ram specified for component");
     }
-    if (config_.find(Config::TOPOLOGY_COMPONENT_RAMMAP) != config_.end()) {
-      std::ostringstream oldValue;
-      oldValue << config_[Config::TOPOLOGY_COMPONENT_RAMMAP];
-      oldValue << "," << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_RAMMAP] = oldValue.str();
-    } else {
-      std::ostringstream oldValue;
-      oldValue << componentName << ":" << bytes;
-      config_[Config::TOPOLOGY_COMPONENT_RAMMAP] = oldValue.str();
+    appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_RAMMAP, componentName, bytes);
+  }
+
+  void setComponentDisk(const std::string& componentName, int64_t bytes) {
+    if (bytes < 0) {
+      throw std::runtime_error("Invalid Disk specified for component");
     }
+    appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_DISKMAP, componentName, bytes);
   }
 
   bool hasConfig(const std::string& name) {

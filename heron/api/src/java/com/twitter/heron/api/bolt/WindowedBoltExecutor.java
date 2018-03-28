@@ -269,14 +269,9 @@ public class WindowedBoltExecutor implements IRichBolt,
     if (this.state != null
         && this.state.get(WINDOWING_INTERNAL_STATE) != null
         && !((HashMapState) this.state.get(WINDOWING_INTERNAL_STATE)).isEmpty()) {
-      restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
+      manager.restoreState((Map<String, Serializable>) state.get(WINDOWING_INTERNAL_STATE));
     }
     return manager;
-  }
-
-  @SuppressWarnings("HiddenField")
-  protected void restoreState(Map<String, Serializable> state) {
-    windowManager.restoreState(state);
   }
 
   protected Map<String, Serializable> getState() {

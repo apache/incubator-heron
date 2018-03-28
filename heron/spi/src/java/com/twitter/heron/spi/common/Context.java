@@ -325,6 +325,10 @@ public class Context {
     return cfg.getStringValue(Key.DOWNLOADER_BINARY);
   }
 
+  public static String updatePrompt(Config cfg) {
+    return cfg.getStringValue(Key.UPDATE_PROMPT);
+  }
+
   @SuppressWarnings("unchecked")
   public static final String statefulStorageCustomClassPath(Config cfg) {
     Map<String, Object> statefulStorageConfig =
@@ -335,4 +339,9 @@ public class Context {
     Object o = statefulStorageConfig.get(Key.STATEFUL_STORAGE_CUSTOM_CLASSPATH.value());
     return o == null ? "" : (String) o;
   }
+
+  public static String metricscacheMgrMode(Config cfg) {
+    return cfg.getStringValue(Key.METRICSCACHEMGR_MODE);
+  }
+
 }

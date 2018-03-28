@@ -26,6 +26,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.squareup.okhttp.Response;
 
 import com.twitter.heron.api.utils.TopologyUtils;
@@ -146,7 +149,7 @@ public class AppsV1beta1Controller extends KubernetesController {
       doPatch(newSpec);
     } catch (ApiException ae) {
       throw new TopologyRuntimeManagementException(
-          ae.getMessage() + "\netails\n" + ae.getResponseBody());
+          ae.getMessage() + "\ndetails\n" + ae.getResponseBody());
     }
 
     return containersToAdd;
@@ -176,9 +179,21 @@ public class AppsV1beta1Controller extends KubernetesController {
   }
 
   private void doPatch(V1beta1StatefulSetSpec patchedSpec) throws ApiException {
-    client.patchNamespacedStatefulSet(getTopologyName(), getNamespace(), patchedSpec, null);
+    final String body =
+        String.format(JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT,
+            patchedSpec.getReplicas().toString());
+    final ArrayList<JsonObject> arr = new ArrayList<>();
+    arr.add(((JsonElement) deserialize(body, JsonElement.class)).getAsJsonObject());
+    LOG.fine("Update body: " + arr);
+    client.patchNamespacedStatefulSet(getTopologyName(), getNamespace(), arr, null);
   }
 
+  private static final String JSON_PATCH_STATEFUL_SET_REPLICAS_FORMAT =
+      "{\"op\":\"replace\",\"path\":\"/spec/replicas\",\"value\":%s}";
+
+  private Object deserialize(String jsonStr, Class<?> targetClass) {
+    return (new Gson()).fromJson(jsonStr, targetClass);
+  }
 
   V1beta1StatefulSet getStatefulSet() throws ApiException {
     return client.readNamespacedStatefulSet(getTopologyName(), getNamespace(), null, null, null);
@@ -393,7 +408,8 @@ public class AppsV1beta1Controller extends KubernetesController {
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
     final Map<String, String> requests = new HashMap<>();
-    requests.put(KubernetesConstants.MEMORY, Long.toString(resource.getRam().asMegabytes()));
+    requests.put(KubernetesConstants.MEMORY,
+        KubernetesUtils.Megabytes(resource.getRam()));
     requests.put(KubernetesConstants.CPU, Double.toString(resource.getCpu()));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);

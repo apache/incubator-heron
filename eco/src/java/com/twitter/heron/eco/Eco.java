@@ -23,9 +23,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.BuilderUtility;
 import com.twitter.heron.eco.builder.ComponentBuilder;
@@ -46,6 +46,9 @@ import com.twitter.heron.eco.submit.EcoSubmitter;
 public class Eco {
 
   private static final Logger LOG = Logger.getLogger(Eco.class.getName());
+  private static final String PROPS = "props";
+  private static final String ENV_PROPS = "env-props";
+  private static final String ECO_CONFIG_FILE = "eco-config-file";
 
   private EcoBuilder ecoBuilder;
   private EcoParser ecoParser;
@@ -57,8 +60,11 @@ public class Eco {
     this.ecoSubmitter = ecoSubmitter;
   }
 
-  public void submit(FileInputStream fileInputStream) throws Exception {
-    EcoTopologyDefinition topologyDefinition = ecoParser.parseFromInputStream(fileInputStream);
+  public void submit(FileInputStream fileInputStream,
+                     FileInputStream propertiesFile, boolean envFilter)
+      throws Exception {
+    EcoTopologyDefinition topologyDefinition = ecoParser
+        .parseFromInputStream(fileInputStream, propertiesFile, envFilter);
 
     String topologyName = topologyDefinition.getName();
 
@@ -90,7 +96,18 @@ public class Eco {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
-    FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue("eco-config-file")));
+
+    FileInputStream fin = new FileInputStream(new File(cmd.getOptionValue(ECO_CONFIG_FILE)));
+
+    String propsFile = cmd.getOptionValue(PROPS);
+    FileInputStream propsInputStream = null;
+
+    if (propsFile != null) {
+      propsInputStream = new FileInputStream(new File(propsFile));
+    }
+
+
+    Boolean filterFromEnv = cmd.hasOption(ENV_PROPS);
 
     Eco eco = new Eco(
         new EcoBuilder(
@@ -102,19 +119,39 @@ public class Eco {
         new EcoParser(),
         new EcoSubmitter());
 
-    eco.submit(fin);
+    eco.submit(fin, propsInputStream, filterFromEnv);
   }
 
   private static Options constructOptions() {
     Options options = new Options();
     Option ecoConfig = Option.builder("eco")
         .desc("Yaml config file for specifying topology definitions")
-        .longOpt("eco-config-file")
+        .longOpt(ECO_CONFIG_FILE)
         .hasArgs()
-        .argName("eco-config-file")
+        .argName(ECO_CONFIG_FILE)
         .required()
         .build();
+
+
+    Option filterOption = Option.builder(PROPS)
+        .desc("properties file for property substitution")
+        .longOpt(PROPS)
+        .hasArgs()
+        .required(false)
+        .argName(PROPS)
+        .build();
+
+    Option envSubOption = Option.builder("envFilter")
+        .desc("Perform environment variable substitution.")
+        .longOpt(ENV_PROPS)
+        .numberOfArgs(0)
+        .required(false)
+        .build();
+
+    options.addOption(filterOption);
     options.addOption(ecoConfig);
+    options.addOption(envSubOption);
+
     return options;
   }
 

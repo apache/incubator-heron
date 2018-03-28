@@ -111,7 +111,7 @@ class InstanceServer : public Server {
                                      proto::stmgr::RegisterInstanceRequest* _request);
   void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
   void HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
-                                         proto::ckptmgr::StoreInstanceStateCheckpoint* _message);
+      proto::ckptmgr::StoreInstanceStateCheckpoint* _message);
   void HandleRestoreInstanceStateResponse(Connection* _conn,
                                           proto::ckptmgr::RestoreInstanceStateResponse* _message);
 
@@ -123,6 +123,11 @@ class InstanceServer : public Server {
 
   // Compute the LocalSpouts from Physical Plan
   void ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan);
+
+  // Read config from Physical Plan and apply rate limit to connection
+  void SetRateLimit(const proto::system::PhysicalPlan& _pplan,
+                    const std::string& component,
+                    Connection* conn) const;
 
   class InstanceData {
    public:

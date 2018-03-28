@@ -41,7 +41,9 @@ java_library(
 java_binary(
     name="storm-compatibility-unshaded",
     srcs = glob(["**/*.java"]),
-    deps = storm_deps_files,
+    deps = storm_deps_files + [
+        "//eco/src/java:eco-java",
+    ],
 )
 
 jarjar_binary(

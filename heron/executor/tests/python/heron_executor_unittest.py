@@ -237,7 +237,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--tmaster-binary", "tmaster_binary"),
       ("--stmgr-binary", "stmgr_binary"),
       ("--metrics-manager-classpath", "metricsmgr_classpath"),
-      ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;"),
+      ("--instance-jvm-opts", "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg(61)(61)"),
       ("--classpath", "classpath"),
       ("--master-port", "master_port"),
       ("--tmaster-controller-port", "tmaster_controller_port"),
@@ -269,7 +269,8 @@ class HeronExecutorTest(unittest.TestCase):
       ("--checkpoint-manager-port", "ckptmgr-port"),
       ("--stateful-config-file", "stateful_config_file"),
       ("--health-manager-mode", "healthmgr_mode"),
-      ("--health-manager-classpath", "healthmgr_classpath")
+      ("--health-manager-classpath", "healthmgr_classpath"),
+      ("--metricscache-manager-mode", "metricscache_mode")
     ]
 
     args = ("%s=%s" % (arg[0], (str(arg[1]))) for arg in executor_args)

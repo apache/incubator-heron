@@ -15,12 +15,13 @@ def heron_examples_conf_files():
 
 def heron_examples_yaml_files():
     return [
-        "//eco-examples/src/java:heron-eco-examples-yaml",
+        "//eco-examples/src/java:heron-eco-examples-support",
     ]
 
 def heron_examples_lib_files():
     return [
         "//examples/src/java:heron-api-examples",
         "//examples/src/java:heron-streamlet-examples",
+        "//examples/src/scala:heron-streamlet-scala-examples",
         "//eco-examples/src/java:heron-eco-examples",
     ]

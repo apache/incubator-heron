@@ -52,6 +52,7 @@ public enum ExecutorFlag {
   MetricsCacheManagerClasspath("metricscache-manager-classpath"),
   MetricsCacheManagerMasterPort("metricscache-manager-master-port"),
   MetricsCacheManagerStatsPort("metricscache-manager-stats-port"),
+  MetricsCacheManagerMode("metricscache-manager-mode"),
   IsStateful("is-stateful"),
   CheckpointManagerClasspath("checkpoint-manager-classpath"),
   CheckpointManagerPort("checkpoint-manager-port"),

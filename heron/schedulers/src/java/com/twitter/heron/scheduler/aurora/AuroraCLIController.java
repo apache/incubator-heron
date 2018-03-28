@@ -112,6 +112,9 @@ class AuroraCLIController implements AuroraController {
     }
   }
 
+  private static final String ERR_PROMPT =
+      "The topology can be in a strange stage. Please check carefully or redeploy the topology !!";
+
   @Override
   public Set<Integer> addContainers(Integer count) {
     //aurora job add <cluster>/<role>/<env>/<name>/<instance_id> <count>
@@ -123,11 +126,12 @@ class AuroraCLIController implements AuroraController {
     LOG.info(String.format("Requesting %s new aurora containers %s", count, auroraCmd));
     StringBuilder stderr = new StringBuilder();
     if (!runProcess(auroraCmd, null, stderr)) {
-      throw new RuntimeException("Failed to create " + count + " new aurora instances");
+      throw new RuntimeException(
+          "Failed to create " + count + " new aurora instances. " + ERR_PROMPT);
     }
 
     if (stderr.length() <= 0) { // no container was added
-      throw new RuntimeException("empty output by Aurora");
+      throw new RuntimeException("Empty output by Aurora. " + ERR_PROMPT);
     }
     return extractContainerIds(stderr.toString());
   }

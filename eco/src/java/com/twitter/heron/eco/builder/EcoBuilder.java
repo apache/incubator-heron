@@ -15,10 +15,11 @@ package com.twitter.heron.eco.builder;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Logger;
 
-import org.apache.storm.Config;
 import org.apache.storm.topology.TopologyBuilder;
 
+import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
@@ -34,6 +35,8 @@ public class EcoBuilder {
   private ComponentBuilder componentBuilder;
 
   private ConfigBuilder configBuilder;
+
+  private static final Logger LOG = Logger.getLogger(EcoBuilder.class.getName());
 
   public EcoBuilder(SpoutBuilder spoutBuilder, BoltBuilder boltBuilder,
                     StreamBuilder streamBuilder, ComponentBuilder componentBuilder,
@@ -52,15 +55,20 @@ public class EcoBuilder {
       NoSuchFieldException, InvocationTargetException {
 
     TopologyBuilder builder = new TopologyBuilder();
+    LOG.info("Building components");
     componentBuilder.buildComponents(executionContext, objectBuilder);
+    LOG.info("Building spouts");
     spoutBuilder.buildSpouts(executionContext, builder, objectBuilder);
+    LOG.info("Building bolts");
     boltBuilder.buildBolts(executionContext, objectBuilder);
+    LOG.info("Building streams");
     streamBuilder.buildStreams(executionContext, builder, objectBuilder);
 
     return builder;
   }
 
-  public Config buildConfig(EcoTopologyDefinition topologyDefinition) {
+  public Config buildConfig(EcoTopologyDefinition topologyDefinition) throws Exception {
+    LOG.info("Building topology config");
     return this.configBuilder.buildConfig(topologyDefinition);
   }
 }

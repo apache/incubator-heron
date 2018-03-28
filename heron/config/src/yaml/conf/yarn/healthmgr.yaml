@@ -7,6 +7,9 @@ heron.topology.healthmgr.mode: disabled
 heron.healthmgr.metricsource.type: com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider
 heron.healthmgr.metricsource.url: http://localhost:8888
 
+# Enable MetricsCache if MetricsCache is chosen as metrics provider
+#heron.topology.metricscachemgr.mode: cluster
+
 ## list of policies to be executed for self regulation
 #heron.class.health.policies:
 #  - dynamic-resource-allocation
