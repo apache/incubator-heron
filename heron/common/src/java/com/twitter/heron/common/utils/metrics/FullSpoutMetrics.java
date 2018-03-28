@@ -110,19 +110,25 @@ public class FullSpoutMetrics extends SpoutMetrics {
   public void ackedTuple(String streamId, long latency) {
     ackCount.scope(streamId).incr();
     completeLatency.scope(streamId).update(latency);
+
+    ackCount.scope(ALL_STREAMS_AGGREGATED).incr();
   }
 
   public void failedTuple(String streamId, long latency) {
     failCount.scope(streamId).incr();
     failLatency.scope(streamId).update(latency);
+
+    failCount.scope(ALL_STREAMS_AGGREGATED).incr();
   }
 
   public void timeoutTuple(String streamId) {
     timeoutCount.scope(streamId).incr();
+    timeoutCount.scope(ALL_STREAMS_AGGREGATED).incr();
   }
 
   public void emittedTuple(String streamId) {
     emitCount.scope(streamId).incr();
+    emitCount.scope(ALL_STREAMS_AGGREGATED).incr();
   }
 
   public void nextTuple(long latency) {
@@ -140,6 +146,7 @@ public class FullSpoutMetrics extends SpoutMetrics {
 
   public void serializeDataTuple(String streamId, long latency) {
     serializationTimeNs.scope(streamId).incrBy(latency);
+    serializationTimeNs.scope(ALL_STREAMS_AGGREGATED).incrBy(latency);
   }
 }
 

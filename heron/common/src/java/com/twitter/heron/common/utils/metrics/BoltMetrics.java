@@ -32,7 +32,7 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
  * 4. Expose methods which could be called externally to change the value of metrics
  */
 
-public class BoltMetrics implements ComponentMetrics {
+public class BoltMetrics extends ComponentMetrics {
   private final CountMetric ackCount;
   private final ReducedMetric<MeanReducerState, Number, Double> processLatency;
   private final ReducedMetric<MeanReducerState, Number, Double> failLatency;

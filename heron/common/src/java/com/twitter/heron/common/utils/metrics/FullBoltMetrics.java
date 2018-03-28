@@ -54,7 +54,6 @@ public class FullBoltMetrics extends BoltMetrics {
   // so instance could not produce more tuples
   private final CountMetric outQueueFullCount;
 
-
   public FullBoltMetrics() {
     ackCount = new MultiCountMetric();
     processLatency = new MultiReducedMetric<>(new MeanReducer());
@@ -126,6 +125,8 @@ public class FullBoltMetrics extends BoltMetrics {
     ackCount.scope(streamId).incr();
     processLatency.scope(streamId).update(latency);
 
+    ackCount.scope(ALL_STREAMS_AGGREGATED).incr();
+
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
     String globalStreamId =
@@ -137,6 +138,8 @@ public class FullBoltMetrics extends BoltMetrics {
   public void failedTuple(String streamId, String sourceComponent, long latency) {
     failCount.scope(streamId).incr();
     failLatency.scope(streamId).update(latency);
+
+    failCount.scope(ALL_STREAMS_AGGREGATED).incr();
 
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
@@ -150,6 +153,9 @@ public class FullBoltMetrics extends BoltMetrics {
     executeCount.scope(streamId).incr();
     executeLatency.scope(streamId).update(latency);
     executeTimeNs.scope(streamId).incrBy(latency);
+
+    executeCount.scope(ALL_STREAMS_AGGREGATED).incr();
+    executeTimeNs.scope(ALL_STREAMS_AGGREGATED).incrBy(latency);
 
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
@@ -170,6 +176,7 @@ public class FullBoltMetrics extends BoltMetrics {
 
   public void deserializeDataTuple(String streamId, String sourceComponent, long latency) {
     deserializationTimeNs.scope(streamId).incrBy(latency);
+    deserializationTimeNs.scope(ALL_STREAMS_AGGREGATED).incrBy(latency);
 
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
@@ -180,6 +187,7 @@ public class FullBoltMetrics extends BoltMetrics {
 
   public void serializeDataTuple(String streamId, long latency) {
     serializationTimeNs.scope(streamId).incrBy(latency);
+    serializationTimeNs.scope(ALL_STREAMS_AGGREGATED).incrBy(latency);
   }
 }
 
