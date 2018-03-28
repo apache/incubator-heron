@@ -43,7 +43,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(HealthManagerMetrics.class.getName());
   private static final String METRICS_MGR_HOST = "127.0.0.1";
 
-  private final String metricsPrefix = "healthmgr/";
+  private final String metricsPrefix = "__healthmgr/";
   private final String metricsSensor = metricsPrefix + "sensor/";
   private final String metricsDetector = metricsPrefix + "detector/";
   private final String metricsDiagnoser = metricsPrefix + "diagnoser/";
@@ -105,7 +105,9 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
         addMetrics(builder, executeDetectorCount, metricsDetector);
         addMetrics(builder, executeDiagnoserCount, metricsDiagnoser);
         addMetrics(builder, executeResolverCount, metricsResolver);
-        metricsMgrClient.sendMessage(builder.build());
+        Metrics.MetricPublisherPublishMessage msg = builder.build();
+        LOG.fine(msg.toString());
+        metricsMgrClient.sendMessage(msg);
       }
     });
   }
@@ -191,7 +193,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     private void sendRegisterRequest() {
       Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().setHostname(hostname)
           .setPort(getSocketChannel().socket().getPort()).setComponentName("__healthmgr__")
-          .setInstanceId("0").setInstanceIndex(-1).build();
+          .setInstanceId("healthmgr-0").setInstanceIndex(-1).build();
       Metrics.MetricPublisherRegisterRequest request =
           Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
 
