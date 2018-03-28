@@ -27,6 +27,8 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.healthmgr.HealthManagerMetrics;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.PackingPlanProvider;
 import com.twitter.heron.healthmgr.common.TopologyProvider;
@@ -34,6 +36,7 @@ import com.twitter.heron.healthmgr.common.TopologyProvider;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureSensor extends BaseSensor {
+  public static final String BACKPRESSURE_SENSOR = "BackPressureSensor";
   private static final Logger LOG = Logger.getLogger(BackPressureSensor.class.getName());
 
   private final MetricsProvider metricsProvider;
@@ -62,6 +65,10 @@ public class BackPressureSensor extends BaseSensor {
    * @return the average value
    */
   public Map<String, ComponentMetrics> get() {
+    ((HealthManagerMetrics) SingletonRegistry.INSTANCE
+        .getSingleton(HealthManagerMetrics.METRICS_THREAD))
+            .executeDiagnoserIncr(BACKPRESSURE_SENSOR);
+
     Map<String, ComponentMetrics> result = new HashMap<>();
 
     String[] boltComponents = topologyProvider.getBoltNames();

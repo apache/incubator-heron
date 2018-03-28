@@ -16,12 +16,12 @@ package com.twitter.heron.healthmgr;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -36,9 +36,15 @@ import com.twitter.heron.proto.system.Metrics;
  */
 
 public class HealthManagerMetrics implements Runnable, AutoCloseable {
+  public static final String METRICS_THREAD = "HealthManagerMetrics";
   private static final Logger LOG = Logger.getLogger(HealthManagerMetrics.class.getName());
   private static final String METRICS_MGR_HOST = "127.0.0.1";
 
+  private final String metricsPrefix = "healthmgr/";
+  private final String metricsSensor = metricsPrefix + "sensor/";
+  private final String metricsDetector = metricsPrefix + "detector/";
+  private final String metricsDiagnoser = metricsPrefix + "diagnoser/";
+  private final String metricsResolver = metricsPrefix + "resolver/";
   private final JVMMetrics jvmMetrics;
   private final MultiCountMetric executeSensorCount;
   private final MultiCountMetric executeDetectorCount;
@@ -47,7 +53,6 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
 
   private NIOLooper looper;
   private HeronClient metricsMgrClient;
-  private Communicator<Metrics.MetricPublisherPublishMessage> outMetricsQueues;
 
   /**
    * constructor to expose healthmgr metrics to local metricsmgr
@@ -78,11 +83,6 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     metricsMgrClient =
         new SimpleMetricsManagerClient(looper, METRICS_MGR_HOST, metricsMgrPort, socketOptions);
 
-    outMetricsQueues = new Communicator<Metrics.MetricPublisherPublishMessage>(null, looper);
-    outMetricsQueues.init(systemConfig.getInstanceInternalMetricsWriteQueueCapacity(),
-        systemConfig.getInstanceTuningExpectedMetricsWriteQueueSize(),
-        systemConfig.getInstanceTuningCurrentSampleWeight());
-
     int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
     looper.registerTimerEvent(Duration.ofSeconds(interval), new Runnable() {
@@ -90,24 +90,28 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
       public void run() {
         jvmMetrics.getJVMSampleRunnable().run();
 
-        // push to container 0 metricsMgr
         if (!metricsMgrClient.isConnected()) {
           return;
         }
 
-        LOG.info("Flushing all pending data in MetricsManagerClient");
-        // Collect all tuples in queue
-        int size = outMetricsQueues.size();
-        for (int i = 0; i < size; i++) {
-          Metrics.MetricPublisherPublishMessage m = outMetricsQueues.poll();
-          metricsMgrClient.sendMessage(m);
-        }
+        LOG.info("Flushing sensor/detector/diagnoser/resolver metrics");
+        Metrics.MetricPublisherPublishMessage.Builder builder =
+            Metrics.MetricPublisherPublishMessage.newBuilder();
+        addMetrics(builder, executeSensorCount, metricsSensor);
+        addMetrics(builder, executeDetectorCount, metricsDetector);
+        addMetrics(builder, executeDiagnoserCount, metricsDiagnoser);
+        addMetrics(builder, executeResolverCount, metricsResolver);
+        metricsMgrClient.sendMessage(builder.build());
       }
     });
   }
 
-  public Communicator<Metrics.MetricPublisherPublishMessage> getMetricsQueue() {
-    return outMetricsQueues;
+  private void addMetrics(Metrics.MetricPublisherPublishMessage.Builder b, MultiCountMetric m,
+      String prefix) {
+    for (Entry<String, Long> e : m.getValueAndReset().entrySet()) {
+      b.addMetrics(Metrics.MetricDatum.newBuilder().setName(prefix + e.getKey())
+          .setValue(e.getValue().toString()));
+    }
   }
 
   public synchronized void executeSensorIncr(String sensor) {
@@ -136,7 +140,6 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   public void close() throws Exception {
     looper.exitLoop();
     metricsMgrClient.stop();
-    outMetricsQueues.clear();
   }
 
   class SimpleMetricsManagerClient extends HeronClient {

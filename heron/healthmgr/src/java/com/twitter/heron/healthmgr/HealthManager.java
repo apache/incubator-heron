@@ -224,6 +224,8 @@ public class HealthManager {
       LOG.info("Starting Health Manager metirc posting thread");
       publishingMetricsRunnable =
           new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+      SingletonRegistry.INSTANCE.registerSingleton(HealthManagerMetrics.METRICS_THREAD,
+          publishingMetricsRunnable);
     }
 
     LOG.info("Starting Health Manager");

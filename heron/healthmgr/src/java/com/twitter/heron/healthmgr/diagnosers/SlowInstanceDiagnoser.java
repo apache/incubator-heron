@@ -23,6 +23,8 @@ import com.microsoft.dhalion.diagnoser.Diagnosis;
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.healthmgr.HealthManagerMetrics;
 import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
 import com.twitter.heron.healthmgr.common.MetricsStats;
 
@@ -32,10 +34,15 @@ import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_B
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
 
 public class SlowInstanceDiagnoser extends BaseDiagnoser {
+  public static final String SLOW_INSTANCE_DIAGNOSER = "SlowInstanceDiagnoser";
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
   @Override
   public Diagnosis diagnose(List<Symptom> symptoms) {
+    ((HealthManagerMetrics) SingletonRegistry.INSTANCE
+        .getSingleton(HealthManagerMetrics.METRICS_THREAD))
+            .executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
+
     List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
     Map<String, ComponentMetrics> processingRateSkewComponents =
         getProcessingRateSkewComponents(symptoms);
