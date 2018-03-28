@@ -587,11 +587,34 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
+bool TMaster::UpdateRuntimeConfig(const ComponentConfigMap& _config,
+                                  VCallback<proto::system::StatusCode> cb) {
+  DCHECK(current_pplan_->topology().IsInitialized());
+
+  // Parse and set the new configs
+  proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
+  new_pplan->CopyFrom(*current_pplan_);
+  proto::api::Topology* topology = new_pplan->mutable_topology();
+  if (!UpdateRuntimeConfigInTopology(topology, _config)) {
+    LOG(ERROR) << "Fail to update runtime config in topology";
+    delete new_pplan;
+    return false;
+  }
+
+  auto callback = [new_pplan, this, cb](proto::system::StatusCode code) {
+    cb(code);
+    this->SetPhysicalPlanDone(new_pplan, code);
+  };
+
+  state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
+  return true;
+}
+
 void TMaster::CleanAllStatefulCheckpoint() {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest("", true);
 }
 
-void TMaster::HandleStatefulCheckpointSave(std::string _oldest_ckpt) {
+void TMaster::HandleStatefulCheckpointSave(const std::string& _oldest_ckpt) {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest(_oldest_ckpt, false);
 }
 
@@ -600,8 +623,34 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
   tmaster_controller_->HandleCleanStatefulCheckpointResponse(_status);
 }
 
+// Update configurations in physical plan.
+// Return false if a config doesn't exist, but this shouldn't happen if the config has been
+// validated using ValidateRuntimeConig() function.
+bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
+                                            const ComponentConfigMap& _config) {
+  DCHECK(_topology->IsInitialized());
+
+  ComponentConfigMap::const_iterator iter;
+  for (iter = _config.begin(); iter != _config.end(); ++iter) {
+    // Get config for topology or component.
+    std::map<std::string, std::string> runtime_config;
+    AppendPostfix(iter->second, RUNTIME_CONFIG_POSTFIX, runtime_config);
+    if (iter->first == TOPOLOGY_CONFIG_KEY) {
+      config::TopologyConfigHelper::SetTopologyConfig(_topology, runtime_config);
+    } else {
+      config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, runtime_config);
+    }
+  }
+
+  return true;
+}
+
+bool TMaster::ValidateRuntimeConfig(const ComponentConfigMap& _config) const {
+  return ValidateRuntimeConfigNames(_config);
+}
+
 void TMaster::KillContainer(const std::string& host_name,
-    sp_int32 shell_port, sp_string stmgr_id) {
+    sp_int32 shell_port, const std::string& stmgr_id) {
   LOG(INFO) << "Start killing " << stmgr_id << " on " <<
     host_name << ":" << shell_port;
   HTTPKeyValuePairs kvs;
@@ -639,9 +688,9 @@ proto::system::Status* TMaster::RegisterStMgr(
                  << stmgrs_[stmgr_id]->get_connection()->getPort()
                  << " with the same id and it hasn't timed out";
       LOG(INFO) << "Potential zombie host exists. Start killing both containers";
-      sp_string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
+      std::string zombie_host_name = stmgrs_[stmgr_id]->get_stmgr()->host_name();
       sp_int32 zombie_port = stmgrs_[stmgr_id]->get_stmgr()->shell_port();
-      sp_string new_host_name = _stmgr.host_name();
+      std::string new_host_name = _stmgr.host_name();
       sp_int32 new_port = _stmgr.shell_port();
       KillContainer(zombie_host_name, zombie_port, stmgr_id);
       KillContainer(new_host_name, new_port, stmgr_id);
@@ -663,7 +712,7 @@ proto::system::Status* TMaster::RegisterStMgr(
       connection_to_stmgr_id_[_conn] = stmgr_id;
     }
   } else if (absent_stmgrs_.find(stmgr_id) == absent_stmgrs_.end()) {
-    // Check to see if we were expecting this guy
+    // Check to see if we were expecting this guy and it is not expected
     LOG(ERROR) << "We were not expecting stream manager " << stmgr_id;
     proto::system::Status* status = new proto::system::Status();
     status->set_status(proto::system::INVALID_STMGR);
@@ -677,6 +726,7 @@ proto::system::Status* TMaster::RegisterStMgr(
   }
 
   if (absent_stmgrs_.empty()) {
+    // All stmgrs are ready
     if (assignment_in_progress_) {
       do_reassign_ = true;
     } else {
@@ -770,6 +820,7 @@ bool TMaster::DistributePhysicalPlan() {
     // First valid the physical plan to distribute
     LOG(INFO) << "To distribute new physical plan:" << std::endl;
     config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
+    config::TopologyConfigHelper::LogTopology(current_pplan_->topology());
 
     // Distribute physical plan to all active stmgrs
     StMgrMapIter iter;
@@ -803,7 +854,7 @@ proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
     // we need to just adjust the stmgrs mapping
     // First lets verify that our original pplan and instances
     // all match up
-    CHECK(ValidateStMgrsWithPhysicalPlan(*current_pplan_));
+    CHECK(ValidateStMgrsWithPhysicalPlan(current_pplan_));
     proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
     new_pplan->mutable_topology()->CopyFrom(current_pplan_->topology());
 
@@ -844,7 +895,7 @@ proto::system::Status* TMaster::UpdateStMgrHeartbeat(Connection* _conn, sp_int64
     retval->set_message("Unknown connection doing stmgr heartbeat");
     return retval;
   }
-  const sp_string& stmgr = connection_to_stmgr_id_[_conn];
+  const std::string& stmgr = connection_to_stmgr_id_[_conn];
   // TODO(kramasamy): Maybe do more checks?
   if (stmgrs_.find(stmgr) == stmgrs_.end()) {
     retval->set_status(proto::system::INVALID_STMGR);
@@ -865,7 +916,7 @@ proto::system::StatusCode TMaster::RemoveStMgrConnection(Connection* _conn) {
   if (connection_to_stmgr_id_.find(_conn) == connection_to_stmgr_id_.end()) {
     return proto::system::INVALID_STMGR;
   }
-  const sp_string& stmgr_id = connection_to_stmgr_id_[_conn];
+  const std::string& stmgr_id = connection_to_stmgr_id_[_conn];
   if (stmgrs_.find(stmgr_id) == stmgrs_.end()) {
     return proto::system::INVALID_STMGR;
   }
@@ -882,7 +933,7 @@ proto::system::StatusCode TMaster::RemoveStMgrConnection(Connection* _conn) {
 ////////////////////////////////////////////////////////////////////////////////
 // Below are valid checking functions
 ////////////////////////////////////////////////////////////////////////////////
-bool TMaster::ValidateTopology(proto::api::Topology _topology) {
+bool TMaster::ValidateTopology(const proto::api::Topology& _topology) {
   if (tmaster_location_->topology_name() != _topology.name()) {
     LOG(ERROR) << "topology name mismatch! Expected topology name is "
                << tmaster_location_->topology_name() << " but found in zk " << _topology.name()
@@ -932,10 +983,10 @@ bool TMaster::ValidateStMgrsWithPackingPlan() {
   return ninstances == ntasks;
 }
 
-bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan) {
+bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   std::map<std::string, std::vector<proto::system::Instance*> > stmgr_to_instance_map;
-  for (sp_int32 i = 0; i < _pplan.instances_size(); ++i) {
-    proto::system::Instance* instance = _pplan.mutable_instances(i);
+  for (sp_int32 i = 0; i < _pplan->instances_size(); ++i) {
+    proto::system::Instance* instance = _pplan->mutable_instances(i);
     if (stmgr_to_instance_map.find(instance->stmgr_id()) == stmgr_to_instance_map.end()) {
       std::vector<proto::system::Instance*> instances;
       instances.push_back(instance);
@@ -958,5 +1009,39 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan)
   }
   return true;
 }
+
+/**
+ * Make sure component names exist
+ */
+bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) const {
+  LOG(INFO) << "Validating runtime configs.";
+  const proto::api::Topology& topology = current_pplan_->topology();
+  DCHECK(topology.IsInitialized());
+
+  std::unordered_set<std::string> components;
+  config::TopologyConfigHelper::GetAllComponentNames(topology, components);
+
+  ComponentConfigMap::const_iterator iter;
+  for (iter = _config.begin(); iter != _config.end(); ++iter) {
+    if (iter->first != TOPOLOGY_CONFIG_KEY) {
+      // It is a component, search for it
+      if (components.find(iter->first) == components.end()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+void TMaster::AppendPostfix(const ConfigValueMap& _origin,
+                            const std::string& post_fix,
+                            ConfigValueMap& _retval) {
+  ConfigValueMap::const_iterator it;
+  for (it = _origin.begin(); it != _origin.end(); ++it) {
+    _retval[it->first + post_fix] = it->second;
+  }
+}
+
 }  // namespace tmaster
 }  // namespace heron
