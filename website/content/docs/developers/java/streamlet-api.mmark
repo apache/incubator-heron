@@ -205,7 +205,7 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .filter((i) -> i < 7);
 ```
 
-In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a `filter` operation that removes all streamlet elements that are lower than 7.
+In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a `filter` operation that removes all streamlet elements that are greater than 6.
 
 ### Union operations
 
