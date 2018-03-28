@@ -89,27 +89,41 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
 
     int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
+
     looper.registerTimerEvent(Duration.ofSeconds(interval), new Runnable() {
       @Override
       public void run() {
-        jvmMetrics.getJVMSampleRunnable().run();
-
-        if (!metricsMgrClient.isConnected()) {
-          return;
+        sendMetrics();
+        // next timer task
+        if (looper != null) {
+          looper.registerTimerEvent(Duration.ofSeconds(interval), new Runnable() {
+            @Override
+            public void run() {
+              sendMetrics();
+            }
+          });
         }
-
-        LOG.info("Flushing sensor/detector/diagnoser/resolver metrics");
-        Metrics.MetricPublisherPublishMessage.Builder builder =
-            Metrics.MetricPublisherPublishMessage.newBuilder();
-        addMetrics(builder, executeSensorCount, metricsSensor);
-        addMetrics(builder, executeDetectorCount, metricsDetector);
-        addMetrics(builder, executeDiagnoserCount, metricsDiagnoser);
-        addMetrics(builder, executeResolverCount, metricsResolver);
-        Metrics.MetricPublisherPublishMessage msg = builder.build();
-        LOG.fine(msg.toString());
-        metricsMgrClient.sendMessage(msg);
       }
     });
+  }
+
+  private void sendMetrics() {
+    jvmMetrics.getJVMSampleRunnable().run();
+
+    if (!metricsMgrClient.isConnected()) {
+      return;
+    }
+
+    LOG.info("Flushing sensor/detector/diagnoser/resolver metrics");
+    Metrics.MetricPublisherPublishMessage.Builder builder =
+        Metrics.MetricPublisherPublishMessage.newBuilder();
+    addMetrics(builder, executeSensorCount, metricsSensor);
+    addMetrics(builder, executeDetectorCount, metricsDetector);
+    addMetrics(builder, executeDiagnoserCount, metricsDiagnoser);
+    addMetrics(builder, executeResolverCount, metricsResolver);
+    Metrics.MetricPublisherPublishMessage msg = builder.build();
+    LOG.fine(msg.toString());
+    metricsMgrClient.sendMessage(msg);
   }
 
   private void addMetrics(Metrics.MetricPublisherPublishMessage.Builder b, MultiCountMetric m,
