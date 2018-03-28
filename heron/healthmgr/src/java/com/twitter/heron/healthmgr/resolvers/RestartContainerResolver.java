@@ -27,6 +27,8 @@ import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 import com.microsoft.dhalion.resolver.Action;
 
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.healthmgr.HealthManagerMetrics;
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import com.twitter.heron.healthmgr.common.PhysicalPlanProvider;
@@ -39,6 +41,7 @@ import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
+  public static final String RESTART_CONTAINER_RESOLVER = "RestartContainerResolver";
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
   private final PhysicalPlanProvider physicalPlanProvider;
@@ -60,6 +63,10 @@ public class RestartContainerResolver implements IResolver {
 
   @Override
   public List<Action> resolve(List<Diagnosis> diagnosis) {
+    HealthManagerMetrics hmm = (HealthManagerMetrics) SingletonRegistry.INSTANCE
+        .getSingleton(HealthManagerMetrics.METRICS_THREAD);
+    hmm.executeResolver(RESTART_CONTAINER_RESOLVER);
+
     List<Action> actions = new ArrayList<>();
 
     for (Diagnosis diagnoses : diagnosis) {
@@ -91,6 +98,7 @@ public class RestartContainerResolver implements IResolver {
           .setTopologyName(topologyName)
           .build());
       LOG.info("Restarted container result: " + b);
+      hmm.executeIncr("RestartContainer");
 
       ContainerRestart action = new ContainerRestart();
       LOG.info("Broadcasting container restart event");

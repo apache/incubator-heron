@@ -67,7 +67,7 @@ public class BackPressureSensor extends BaseSensor {
   public Map<String, ComponentMetrics> get() {
     ((HealthManagerMetrics) SingletonRegistry.INSTANCE
         .getSingleton(HealthManagerMetrics.METRICS_THREAD))
-            .executeDiagnoserIncr(BACKPRESSURE_SENSOR);
+            .executeSensorIncr(BACKPRESSURE_SENSOR);
 
     Map<String, ComponentMetrics> result = new HashMap<>();
 

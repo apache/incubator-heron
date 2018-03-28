@@ -48,11 +48,13 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   private final String metricsDetector = metricsPrefix + "detector/";
   private final String metricsDiagnoser = metricsPrefix + "diagnoser/";
   private final String metricsResolver = metricsPrefix + "resolver/";
+  private final String metricsName = metricsPrefix + "customized/";
   private final JVMMetrics jvmMetrics;
   private final MultiCountMetric executeSensorCount;
   private final MultiCountMetric executeDetectorCount;
   private final MultiCountMetric executeDiagnoserCount;
   private final MultiCountMetric executeResolverCount;
+  private final MultiCountMetric executeCount;
 
   private NIOLooper looper;
   private HeronClient metricsMgrClient;
@@ -70,6 +72,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     executeDetectorCount = new MultiCountMetric();
     executeDiagnoserCount = new MultiCountMetric();
     executeResolverCount = new MultiCountMetric();
+    executeCount = new MultiCountMetric();
 
     looper = new NIOLooper();
 
@@ -121,6 +124,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     addMetrics(builder, executeDetectorCount, metricsDetector);
     addMetrics(builder, executeDiagnoserCount, metricsDiagnoser);
     addMetrics(builder, executeResolverCount, metricsResolver);
+    addMetrics(builder, executeCount, metricsName);
     Metrics.MetricPublisherPublishMessage msg = builder.build();
     LOG.fine(msg.toString());
     metricsMgrClient.sendMessage(msg);
@@ -134,6 +138,10 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     }
   }
 
+  public synchronized void executeIncr(String metricName) {
+    executeCount.scope(metricName).incr();
+  }
+  
   public synchronized void executeSensorIncr(String sensor) {
     executeSensorCount.scope(sensor).incr();
   }
