@@ -485,7 +485,7 @@ class HeronExecutor(object):
                      "--cluster", self.cluster,
                      "--role", self.role,
                      "--environment", self.environment,
-                     "--topology_name", self.topology_name, "--verbose"]
+                     "--topology_name", self.topology_name]
 
     return healthmgr_cmd
 

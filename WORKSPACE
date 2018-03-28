@@ -453,7 +453,7 @@ maven_jar(
 
 maven_jar(
   name = "com_microsoft_dhalion",
-  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+  artifact = "com.microsoft.dhalion:dhalion:0.2.1",
 )
 
 maven_jar(
