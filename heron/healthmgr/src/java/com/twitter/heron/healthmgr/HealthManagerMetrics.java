@@ -15,12 +15,14 @@
 package com.twitter.heron.healthmgr;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
-
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -29,6 +31,7 @@ import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
+import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 
 /**
@@ -56,6 +59,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
 
   /**
    * constructor to expose healthmgr metrics to local metricsmgr
+   * 
    * @param metricsMgrPort local MetricsMgr port
    * @throws IOException
    */
@@ -143,40 +147,89 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   }
 
   class SimpleMetricsManagerClient extends HeronClient {
+    private SystemConfig systemConfig;
+    private String hostname;
 
     SimpleMetricsManagerClient(NIOLooper s, String host, int port, HeronSocketOptions options) {
       super(s, host, port, options);
-      // TODO Auto-generated constructor stub
+      systemConfig =
+          (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+      try {
+        this.hostname = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException e) {
+        throw new RuntimeException("GetHostName failed");
+      }
     }
 
     @Override
     public void onError() {
-      // TODO Auto-generated method stub
+      LOG.severe("Disconnected from Metrics Manager.");
 
+      // Dispatch to onConnect(...)
+      onConnect(StatusCode.CONNECT_ERROR);
     }
 
     @Override
     public void onConnect(StatusCode status) {
-      // TODO Auto-generated method stub
+      if (status != StatusCode.OK) {
+        LOG.log(Level.WARNING,
+            "Cannot connect to the local metrics mgr with status: {0}, Will Retry..", status);
+        Runnable r = new Runnable() {
+          public void run() {
+            start();
+          }
+        };
 
+        getNIOLooper().registerTimerEvent(systemConfig.getInstanceReconnectMetricsmgrInterval(), r);
+        return;
+      }
+
+      LOG.info("Connected to Metrics Manager. Ready to send register request");
+      sendRegisterRequest();
+    }
+
+    private void sendRegisterRequest() {
+      Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().setHostname(hostname)
+          .setPort(getSocketChannel().socket().getPort()).setComponentName("__healthmgr__")
+          .setInstanceId("0").setInstanceIndex(-1).build();
+      Metrics.MetricPublisherRegisterRequest request =
+          Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
+
+      // The timeout would be the reconnect-interval-seconds
+      sendRequest(request, null, Metrics.MetricPublisherRegisterResponse.newBuilder(),
+          systemConfig.getInstanceReconnectMetricsmgrInterval());
     }
 
     @Override
     public void onResponse(StatusCode status, Object ctx, Message response) {
-      // TODO Auto-generated method stub
+      if (status != StatusCode.OK) {
+        // TODO:- is this a good thing?
+        throw new RuntimeException("Response from Metrics Manager not ok");
+      }
+      if (Metrics.MetricPublisherRegisterResponse.class.isInstance(response)) {
+        handleRegisterResponse((Metrics.MetricPublisherRegisterResponse) response);
+      } else {
+        throw new RuntimeException("Unknown kind of response received from Metrics Manager");
+      }
+    }
 
+    private void handleRegisterResponse(Metrics.MetricPublisherRegisterResponse response) {
+      if (response.getStatus().getStatus() != Common.StatusCode.OK) {
+        throw new RuntimeException("Metrics Manager returned a not ok response for register");
+      }
+
+      LOG.info("We registered ourselves to the Metrics Manager");
     }
 
     @Override
     public void onIncomingMessage(Message message) {
-      // TODO Auto-generated method stub
-
+      throw new RuntimeException(
+          "SimpleMetricsManagerClient got an unknown message from Metrics Manager");
     }
 
     @Override
     public void onClose() {
-      // TODO Auto-generated method stub
-
+      LOG.info("SimpleMetricsManagerClient exits");
     }
 
   }
