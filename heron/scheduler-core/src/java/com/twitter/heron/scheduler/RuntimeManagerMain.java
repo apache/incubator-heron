@@ -115,7 +115,7 @@ public class RuntimeManagerMain {
         .argName("component parallelism")
         .build();
 
-    Option runtimeConfig = Option.builder("f")
+    Option runtimeConfig = Option.builder("rc")
         .desc("Runtime config to update: [comp:]<name>:<value>,[comp:]<name>:<value>,...")
         .longOpt("runtime_config")
         .hasArgs()
