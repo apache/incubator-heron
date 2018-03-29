@@ -1,3 +1,4 @@
+{{- $jsFilename := cond (eq (getenv "ENV") "development") (index .Site.Data.assetHashes "app.js") "app.js" }}
 = doctype html
 html lang={{.Site.LanguageCode}}
   head
@@ -22,7 +23,7 @@ html lang={{.Site.LanguageCode}}
     script src=https://code.jquery.com/jquery-2.2.1.min.js
     script src=/js/bootstrap.js
     script src=/js/jquery.scrollTo.js
-    script src=/js/{{ index .Site.Data.assetHashes "app.js" }}
+    script src=/js/{{ $jsFilename }}
     = javascript
       $('pre code').each(function() {
         console.log(this);

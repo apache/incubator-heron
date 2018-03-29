@@ -10,7 +10,7 @@ clean:
 	rm -rf public/* static/api static/style.css static/style*.css
 
 develop-content: build-static-assets
-	@hugo serve --buildDrafts --disableFastRender
+	@ENV=development hugo serve --buildDrafts --disableFastRender
 
 serve:
 	$(CONCURRENTLY) "make develop-content" "make develop-static-assets"
@@ -22,7 +22,7 @@ build-static-assets:
 	@$(GULP) build
 
 pages:
-	@hugo
+	@ENV=production hugo
 
 linkchecker:
 	@scripts/linkchecker.sh
