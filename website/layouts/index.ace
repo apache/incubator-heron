@@ -69,4 +69,4 @@ html lang={{.Site.LanguageCode}}
       {{partial "index/google-analytics.html" .}}
 
       script src=https://code.jquery.com/jquery-2.2.1.min.js
-      script src=/js/app.min.js
+      script src=/js/{{ index .Site.Data.assetHashes "app.js" }}

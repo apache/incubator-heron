@@ -1,5 +1,7 @@
 HERONPY_VERSION := $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
-GULP            = node_modules/.bin/gulp
+NODE_BIN        = node_modules/.bin
+GULP            = $(NODE_BIN)/gulp
+CONCURRENTLY    = $(NODE_BIN)/concurrently
 
 setup:
 	scripts/setup.sh
@@ -7,8 +9,11 @@ setup:
 clean:
 	rm -rf public/* static/api static/style.css static/style*.css
 
+develop-content: build-static-assets
+	@hugo serve --buildDrafts --disableFastRender
+
 serve:
-	@hugo serve --buildDrafts
+	$(CONCURRENTLY) "make develop-content" "make develop-static-assets"
 
 develop-static-assets:
 	@$(GULP) dev
