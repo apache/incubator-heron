@@ -236,6 +236,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_NAME = "topology.name";
   /**
+   * Tag for the topology.
+   */
+  public static final String TOPOLOGY_TAG = "topology.tag";
+  /**
    * Name of the team which owns this topology.
    */
   public static final String TOPOLOGY_TEAM_NAME = "topology.team.name";
