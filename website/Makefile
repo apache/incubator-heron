@@ -5,7 +5,7 @@ setup:
 	scripts/setup.sh
 
 clean:
-	rm -rf public/* static/api static/style.css static/style*.css node_modules
+	rm -rf public/* static/api static/style.css static/style*.css
 
 serve:
 	@hugo serve --buildDrafts
