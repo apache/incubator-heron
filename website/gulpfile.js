@@ -6,9 +6,9 @@ const gulp     = require("gulp"),
       del      = require("del");
 
 const SRCS = {
-  sass: 'assets/sass/**/*.scss',
-  js: 'assets/js/app.js',
-  hash: 'hash.json'
+  sass: 'assets/sass/style.scss',
+  sassWatch: 'assets/sass/**/*.scss',
+  js: 'assets/js/app.js'
 }
 
 const DIST = {
@@ -26,16 +26,6 @@ const prefixerConfig = {
 }
 
 gulp.task('sass', (done) => {
-  del(['static/css/style-*.css']);
-
-  gulp.src(SRCS.sass)
-    .pipe(sass(sassConfig).on('error', sass.logError))
-    .pipe(prefixer(prefixerConfig))
-    .pipe(gulp.dest(DIST.css));
-  done();
-});
-
-gulp.task('sass-dev', (done) => {
   del([`${DIST.css}/style-*.css`]);
 
   gulp.src(SRCS.sass)
@@ -43,13 +33,13 @@ gulp.task('sass-dev', (done) => {
     .pipe(hash())
     .pipe(prefixer(prefixerConfig))
     .pipe(gulp.dest(DIST.css))
-    .pipe(hash.manifest(DIST.hash))
-    .pipe(gulp.dest('data/css'));
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
   done();
 });
 
 gulp.task('sass:watch', () => {
-  gulp.watch(SRCS.sass, gulp.series('sass-dev'));
+  gulp.watch(SRCS.sassWatch, gulp.series('sass'));
 });
 
 gulp.task('js', (done) => {
@@ -59,21 +49,21 @@ gulp.task('js', (done) => {
   done();
 });
 
-gulp.task('js-dev', (done) => {
+gulp.task('js', (done) => {
   del([`${DIST.js}/app-*.js`]);
 
   gulp.src(SRCS.js)
     .pipe(hash())
     .pipe(gulp.dest(DIST.js))
-    .pipe(hash.manifest(DIST.hash))
-    .pipe(gulp.dest('data/js'));
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
   done();
 });
 
 gulp.task('js:watch', () => {
-  gulp.watch(SRCS.js, gulp.series('js-dev'));
+  gulp.watch(SRCS.js, gulp.series('js'));
 });
 
 gulp.task('build', gulp.series('sass', 'js'));
 
-gulp.task('dev', gulp.series('sass-dev', 'js-dev', gulp.parallel('sass:watch', 'js:watch')));
+gulp.task('dev', gulp.series('build', gulp.parallel('sass:watch', 'js:watch')));
