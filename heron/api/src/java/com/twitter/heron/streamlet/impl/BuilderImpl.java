@@ -11,9 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-
 package com.twitter.heron.streamlet.impl;
-
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -60,6 +58,10 @@ public final class BuilderImpl implements Builder {
    */
   public TopologyBuilder build() {
     TopologyBuilder builder = new TopologyBuilder();
+    return build(builder);
+  }
+
+  public TopologyBuilder build(TopologyBuilder builder) {
     Set<String> stageNames = new HashSet<>();
     for (StreamletImpl<?> streamlet : sources) {
       streamlet.build(builder, stageNames);
