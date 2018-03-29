@@ -39,6 +39,7 @@ site:
 	@make javadocs
 	@make python-docs
 	@make pages
+	@rm static/css/style-*.css static/js/app-*.js
 
 publish:
 	@scripts/publish.sh
