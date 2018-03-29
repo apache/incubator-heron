@@ -74,7 +74,7 @@ def create_parser(subparsers):
       action='append',
       type=runtime_config_type,
       required=False,
-      help='Runtime configurations for topology and/or components'
+      help='Runtime configurations for topology and components '
       + 'colon-delimited: [component:]<name>:<value>')
 
   parser.set_defaults(subcommand='update')
