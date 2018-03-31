@@ -102,7 +102,7 @@ def build_extra_args_dict(cl_args):
   if cl_args['dry_run']:
     dict_extra_args.update({'dry_run': True})
     if 'dry_run_format' in cl_args:
-      dict_extra_args.update({'dry_run_format', cl_args["dry_run_format"]})
+      dict_extra_args.update({'dry_run_format': cl_args["dry_run_format"]})
 
   return dict_extra_args
 
@@ -117,7 +117,7 @@ def convert_args_dict_to_list(dict_extra_args):
     list_extra_args += ["--runtime_config",
                         ','.join(dict_extra_args['runtime_config'])]
   if 'dry_run' in dict_extra_args and dict_extra_args['dry_run']:
-    list_extra_args += '--dry_run'
+    list_extra_args += ['--dry_run']
   if 'dry_run_format' in dict_extra_args:
     list_extra_args += ['--dry_run_format', dict_extra_args['dry_run_format']]
 
