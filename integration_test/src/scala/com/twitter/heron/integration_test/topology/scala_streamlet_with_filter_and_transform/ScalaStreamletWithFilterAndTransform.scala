@@ -57,15 +57,15 @@ class ScalaStreamletWithFilterAndTransform(args: Array[String])
     build(testTopologyBuilder, streamletBuilder)
   }
 
-  private class TextTransformer extends SerializableTransformer[Int, String] {
-    private val alphabet = List("a", "b", "c", "d", "e", "f", "g", "h")
+}
 
-    override def setup(context: Context): Unit = {}
+private class TextTransformer extends SerializableTransformer[Int, String] {
+  private val alphabet = List("a", "b", "c", "d", "e", "f", "g", "h")
 
-    override def transform(i: Int, fun: String => Unit): Unit =
-      fun(s"${alphabet(i)}-$i".toUpperCase)
+  override def setup(context: Context): Unit = {}
 
-    override def cleanup(): Unit = {}
-  }
+  override def transform(i: Int, fun: String => Unit): Unit =
+    fun(s"${alphabet(i)}-$i".toUpperCase)
 
+  override def cleanup(): Unit = {}
 }
