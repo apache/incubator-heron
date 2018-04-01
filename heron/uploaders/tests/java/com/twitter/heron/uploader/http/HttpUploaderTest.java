@@ -16,6 +16,7 @@ package com.twitter.heron.uploader.http;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHost;
@@ -119,11 +120,107 @@ public class HttpUploaderTest extends LocalServerTestBase {
     httpUploader.uploadPackage();
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testInitializeWhenTopologyPackageLocationIsNull() throws IOException {
+    testInitialize(tempFile.getCanonicalPath(), null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInitializeWhenTopologyPackageLocationIsBlank() throws IOException {
+    testInitialize(tempFile.getCanonicalPath(), "   ");
+  }
+
+  @Test(expected = UploaderException.class)
+  public void testUploadPackageWhenTopologyPackageIsInvalid() throws URISyntaxException {
+    final URI uri = new URIBuilder()
+        .setScheme("http")
+        .setHost(httpHost.getHostName())
+        .setPort(httpHost.getPort())
+        .setPath(EXPECTED_URI)
+        .build();
+
+    config = Config.newBuilder()
+        .put(Key.CLUSTER, "cluster")
+        .put(Key.ROLE, "role")
+        .put(Key.TOPOLOGY_NAME, "topology")
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, "invalid_topology_file")
+        .put(HttpUploaderContext.HERON_UPLOADER_HTTP_URI, uri.getPath())
+        .build();
+
+    HttpUploader httpUploader = new TestHttpUploader();
+    httpUploader.initialize(config);
+    httpUploader.uploadPackage();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInitializeWhenTopologyPackageFileIsNull() throws URISyntaxException {
+    final URI uri = new URIBuilder()
+        .setScheme("http")
+        .setHost(httpHost.getHostName())
+        .setPort(httpHost.getPort())
+        .setPath(EXPECTED_URI)
+        .build();
+
+    testInitialize(null, uri.getPath());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInitializeWhenTopologyPackageFileIsBlank() throws URISyntaxException {
+    final URI uri = new URIBuilder()
+        .setScheme("http")
+        .setHost(httpHost.getHostName())
+        .setPort(httpHost.getPort())
+        .setPath(EXPECTED_URI)
+        .build();
+
+    testInitialize("   ", uri.getPath());
+  }
+
+  @Test
+  public void testUploadPackageWhenTopologyPackageLocationIsInvalid() throws IOException {
+    config = Config.newBuilder()
+        .put(Key.CLUSTER, "cluster")
+        .put(Key.ROLE, "role")
+        .put(Key.TOPOLOGY_NAME, "topology")
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, tempFile.getCanonicalPath())
+        .put(HttpUploaderContext.HERON_UPLOADER_HTTP_URI, "invalid_uri")
+        .build();
+
+    HttpUploader httpUploader = new TestHttpUploaderWithHttp501();
+    httpUploader.initialize(config);
+    httpUploader.uploadPackage();
+  }
+
+  private void testInitialize(final String topologyPackageFile, final String uri) {
+    config = Config.newBuilder()
+        .put(Key.CLUSTER, "cluster")
+        .put(Key.ROLE, "role")
+        .put(Key.TOPOLOGY_NAME, "topology")
+        .put(Key.TOPOLOGY_PACKAGE_TYPE, PackageType.TAR)
+        .put(Key.TOPOLOGY_PACKAGE_FILE, topologyPackageFile)
+        .put(HttpUploaderContext.HERON_UPLOADER_HTTP_URI, uri)
+        .build();
+
+    HttpUploader httpUploader = new TestHttpUploader();
+    httpUploader.initialize(config);
+  }
+
   private class TestHttpUploader extends HttpUploader {
     @Override
     protected HttpResponse execute(HttpClient client) throws IOException {
       HttpResponse httpResponse = client.execute(httpHost, getPost());
       assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+      return httpResponse;
+    }
+  }
+
+  private class TestHttpUploaderWithHttp501 extends HttpUploader {
+    @Override
+    protected HttpResponse execute(HttpClient client) throws IOException {
+      HttpResponse httpResponse = client.execute(httpHost, getPost());
+      assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, httpResponse.getStatusLine().getStatusCode());
       return httpResponse;
     }
   }

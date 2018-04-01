@@ -100,7 +100,7 @@ metricscache-sink:
 
 ### Config for scribe-sink
 # scribe-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
+#   class: "com.twitter.heron.metricsmgr.sink.scribe.ScribeSink"
 #   flush-frequency-ms: 60000
 #   sink-restart-attempts: -1 # Forever
 #   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to

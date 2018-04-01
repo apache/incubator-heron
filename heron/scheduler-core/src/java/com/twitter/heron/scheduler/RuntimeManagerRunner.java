@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -42,7 +45,13 @@ import com.twitter.heron.spi.utils.TMasterException;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
 public class RuntimeManagerRunner {
-  public static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
+  // Internal config keys. They are used internally only to pass command line arguments
+  // into handlers.
+  public static final String RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY =
+      "RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY";
+  public static final String RUNTIME_MANAGER_RUNTIME_CONFIG_KEY =
+      "RUNTIME_MANAGER_RUNTIME_CONFIG_KEY";
+
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
   private final Config config;
   private final Config runtime;
@@ -83,8 +92,7 @@ public class RuntimeManagerRunner {
         killTopologyHandler(topologyName);
         break;
       case UPDATE:
-        updateTopologyHandler(topologyName,
-            config.getStringValue(NEW_COMPONENT_PARALLELISM_KEY));
+        updateTopologyHandler(topologyName, config);
         break;
       default:
         LOG.severe("Unknown command for topology: " + command);
@@ -177,9 +185,35 @@ public class RuntimeManagerRunner {
    * Handler to update a topology
    */
   @VisibleForTesting
-  void updateTopologyHandler(String topologyName, String newParallelism)
+  void updateTopologyHandler(String topologyName, Config updateConfig)
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     assert !potentialStaleExecutionData;
+    String newParallelism = updateConfig.getStringValue(RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY);
+    String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_RUNTIME_CONFIG_KEY);
+
+    // parallelism and runtime config can not be updated at the same time.
+    if (newParallelism != null && !newParallelism.isEmpty()
+        && userRuntimeConfig != null && !userRuntimeConfig.isEmpty()) {
+      throw new TopologyRuntimeManagementException(
+          "parallelism and runtime config can not be updated at the same time.");
+    }
+
+    if (newParallelism != null && !newParallelism.isEmpty()) {
+      // Update parallelism if newParallelism parameter is available
+      updateTopologyComponentParallelism(topologyName, newParallelism);
+    } else if (userRuntimeConfig != null && !userRuntimeConfig.isEmpty()) {
+      // Update user runtime config if userRuntimeConfig parameter is available
+      updateTopologyUserRuntimeConfig(topologyName, userRuntimeConfig);
+    } else {
+      throw new TopologyRuntimeManagementException("Missing arguments. Not taking action.");
+    }
+    // Clean the connection when we are done.
+    LOG.fine("Scheduler updated topology successfully.");
+  }
+
+  @VisibleForTesting
+  void updateTopologyComponentParallelism(String topologyName, String  newParallelism)
+      throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
@@ -216,9 +250,24 @@ public class RuntimeManagerRunner {
               + updateTopologyRequest + "The topology can be in a strange stage. "
                   + "Please check carefully or redeploy the topology !!");
     }
+  }
 
-    // Clean the connection when we are done.
-    LOG.fine("Scheduler updated topology successfully.");
+  @VisibleForTesting
+  void updateTopologyUserRuntimeConfig(String topologyName, String userRuntimeConfig)
+      throws TopologyRuntimeManagementException, TMasterException {
+    String[] runtimeConfigs = parseUserRuntimeConfigParam(userRuntimeConfig);
+    if (runtimeConfigs.length == 0) {
+      throw new TopologyRuntimeManagementException("No user config is found");
+    }
+
+    // Send user runtime config to TMaster
+    NetworkUtils.TunnelConfig tunnelConfig =
+        NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.SCHEDULER);
+    TMasterUtils.sendRuntimeConfig(topologyName,
+                                   TMasterUtils.TMasterCommand.RUNTIME_CONFIG_UPDATE,
+                                   Runtime.schedulerStateManagerAdaptor(runtime),
+                                   runtimeConfigs,
+                                   tunnelConfig);
   }
 
   /**
@@ -340,7 +389,8 @@ public class RuntimeManagerRunner {
   }
 
   @VisibleForTesting
-  Map<String, Integer> parseNewParallelismParam(String newParallelism) {
+  Map<String, Integer> parseNewParallelismParam(String newParallelism)
+      throws IllegalArgumentException {
     Map<String, Integer> changes = new HashMap<>();
     try {
       for (String componentValuePair : newParallelism.split(",")) {
@@ -355,6 +405,28 @@ public class RuntimeManagerRunner {
           + "<component>:<parallelism>[,<component>:<parallelism>], Found: " + newParallelism);
     }
     return changes;
+  }
+
+  @VisibleForTesting
+  String[] parseUserRuntimeConfigParam(String userRuntimeConfig)
+      throws IllegalArgumentException {
+    // Regex for "[component_name:]<config>:<value>[,[component_name>:]<config>:<value>]"
+    final Pattern pattern = Pattern.compile("^([\\w\\.-]+:){1,2}[\\w\\.-]+$");
+    if (userRuntimeConfig.isEmpty()) {
+      return new String[0];
+    }
+
+    String[] configs = userRuntimeConfig.split(",");
+    for (String configValuePair: configs) {
+      Matcher matcher = pattern.matcher(configValuePair);
+      if (!matcher.find()) {
+        throw new IllegalArgumentException("Invalid user config found. Expected: "
+            + "[component_name:]<config>:<value>"
+            + "[,[component_name>:]<config>:<value>], Found: " + userRuntimeConfig);
+      }
+    }
+
+    return configs;
   }
 
   private static boolean changeDetected(PackingPlans.PackingPlan currentProtoPlan,

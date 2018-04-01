@@ -1,104 +1,69 @@
-var gulp = require('gulp'),
-    // Pulls in any Gulp-related metadata
-    pkg = require('./package.json'),
-    hash = require('gulp-hash'),
-    // Use $ to invoke Gulp plugins
-    $ = require('gulp-load-plugins')(),
-    // All non-Gulp modules here
-    del = require('del');
+const gulp     = require("gulp"),
+      sass     = require("gulp-sass"),
+      hash     = require("gulp-hash"),
+      prefixer = require("gulp-autoprefixer"),
+      uglify   = require("gulp-uglify"),
+      del      = require("del");
 
-// Define the source and distribution directories
-var srcDir = './assets';
-var distDir = './static';
-
-// Define asset sources
-var SRC = {
-  js: srcDir + '/js/**/*.js',
-  sass: srcDir + '/sass/**/*.scss'
+const SRCS = {
+  sass: 'assets/sass/style.scss',
+  sassWatch: 'assets/sass/**/*.scss',
+  js: 'assets/js/app.js'
 }
 
-// Define asset distribution destination
-var DIST = {
-  js: distDir + '/js',
-  css: distDir + '/css',
-  all: distDir
+const DIST = {
+  css: 'static/css',
+  js: 'static/js'
 }
 
-// JavaScript assets
-gulp.task('js', function(done) {
-  gulp.src(SRC.js)
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
-    .pipe($.concat('app.min.js'))
-    .pipe(gulp.dest(DIST.js));
-  done();
-});
+const sassConfig = {
+  outputStyle: 'compressed'
+}
 
-gulp.task('js-dev', function(done) {
-  del(['static/js/app*.js']);
+const prefixerConfig = {
+  browsers: ['last 2 versions'],
+	cascade: false
+}
 
-  gulp.src(SRC.js)
+gulp.task('sass', (done) => {
+  del([`${DIST.css}/style-*.css`]);
+
+  gulp.src(SRCS.sass)
+    .pipe(sass(sassConfig).on('error', sass.logError))
     .pipe(hash())
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
-    .pipe(gulp.dest(DIST.js))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/js'));
-  done();
-});
-
-gulp.task('js:watch', function() {
-  gulp.watch(SRC.js, gulp.series('js-dev'));
-});
-
-// Sass assets (dev mode)
-gulp.task('sass-dev', function(done) {
-  del(['static/css/style*.css']);
-
-  gulp.src(SRC.sass)
-    .pipe($.sass({
-      outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe(hash())
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: false
-    }))
-    .pipe($.cleanCss())
+    .pipe(prefixer(prefixerConfig))
     .pipe(gulp.dest(DIST.css))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/css'));
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
   done();
 });
 
-// Sass assets
-gulp.task('sass', function(done) {
-  gulp.src(SRC.sass)
-    .pipe($.sass({
-      outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: true
-    }))
-    .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css));
+gulp.task('sass:watch', () => {
+  gulp.watch(SRCS.sassWatch, gulp.series('sass'));
+});
+
+gulp.task('js', (done) => {
+  gulp.src(SRCS.js)
+    .pipe(gulp.dest(DIST.js));
+
   done();
 });
 
-gulp.task('sass:watch', function() {
-  gulp.watch(SRC.sass, gulp.series('sass-dev'));
-});
+gulp.task('js', (done) => {
+  del([`${DIST.js}/app-*.js`]);
 
-// One-time build; doesn't watch for changes
-gulp.task('build', gulp.series('js', 'sass'));
-
-// Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js-dev', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
-
-// Help => list tasks
-gulp.task('help', function(done) {
-  $.taskListing.withFilters(null, 'help')
+  gulp.src(SRCS.js)
+    .pipe(hash())
+    .pipe(gulp.dest(DIST.js))
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
   done();
 });
 
-// Default
-gulp.task('default', gulp.series('help'));
+gulp.task('js:watch', () => {
+  gulp.watch(SRCS.js, gulp.series('js'));
+});
+
+gulp.task('build', gulp.series('sass', 'js'));
+
+gulp.task('dev', gulp.series('build', gulp.parallel('sass:watch', 'js:watch')));

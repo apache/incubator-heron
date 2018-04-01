@@ -115,6 +115,13 @@ public class RuntimeManagerMain {
         .argName("component parallelism")
         .build();
 
+    Option runtimeConfig = Option.builder("rc")
+        .desc("Runtime config to update: [comp:]<name>:<value>,[comp:]<name>:<value>,...")
+        .longOpt("runtime_config")
+        .hasArgs()
+        .argName("runtime config")
+        .build();
+
     Option configFile = Option.builder("p")
         .desc("Path of the config files")
         .longOpt("config_path")
@@ -182,6 +189,7 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(runtimeConfig);
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
     options.addOption(verbose);
@@ -244,7 +252,6 @@ public class RuntimeManagerMain {
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
-    String componentParallelism = cmd.getOptionValue("component_parallelism");
 
     // Optional argument in the case of restart
     // TODO(karthik): convert into CLI
@@ -280,10 +287,7 @@ public class RuntimeManagerMain {
         .put(Key.TOPOLOGY_CONTAINER_ID, containerId);
 
     // This is a command line option, but not a valid config key. Hence we don't use Keys
-    if (componentParallelism != null) {
-      commandLineConfig.put(
-          RuntimeManagerRunner.NEW_COMPONENT_PARALLELISM_KEY, componentParallelism);
-    }
+    translateCommandLineConfig(cmd, commandLineConfig);
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Key.TOPOLOGY_NAME, topologyName);
@@ -485,5 +489,18 @@ public class RuntimeManagerMain {
   protected ISchedulerClient getSchedulerClient(Config runtime)
       throws SchedulerException {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
+  }
+
+  protected static void translateCommandLineConfig(CommandLine cmd, Config.Builder config) {
+    String componentParallelism = cmd.getOptionValue("component_parallelism");
+    if (componentParallelism != null && !componentParallelism.isEmpty()) {
+      config.put(
+          RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY, componentParallelism);
+    }
+    String runtimeConfigurations = cmd.getOptionValue("runtime_config");
+    if (runtimeConfigurations != null && !runtimeConfigurations.isEmpty()) {
+      config.put(
+          RuntimeManagerRunner.RUNTIME_MANAGER_RUNTIME_CONFIG_KEY, runtimeConfigurations);
+    }
   }
 }

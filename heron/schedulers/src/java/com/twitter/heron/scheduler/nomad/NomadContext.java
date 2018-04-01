@@ -26,6 +26,10 @@ public class NomadContext extends Context {
 
   public static final String HERON_NOMAD_CORE_FREQ_MAPPING = "heron.nomad.core.freq.mapping";
 
+  public static final String HERON_NOMAD_DRIVER = "heron.nomad.driver";
+
+  public static final String HERON_EXECUTOR_DOCKER_IMAGE = "heron.executor.docker.image";
+
   public static String workingDirectory(Config config) {
     return config.getStringValue(
         NomadKey.WORKING_DIRECTORY.value(), NomadKey.WORKING_DIRECTORY.getDefaultString());
@@ -43,5 +47,13 @@ public class NomadContext extends Context {
 
   public static int getCoreFreqMapping(Config config) {
     return config.getIntegerValue(HERON_NOMAD_CORE_FREQ_MAPPING, 1000);
+  }
+
+  public static String getHeronNomadDriver(Config config) {
+    return config.getStringValue(HERON_NOMAD_DRIVER);
+  }
+
+  public static String getHeronExecutorDockerImage(Config config) {
+    return config.getStringValue(HERON_EXECUTOR_DOCKER_IMAGE);
   }
 }

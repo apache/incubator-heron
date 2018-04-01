@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(function() {
   var LS = window.localStorage;
   var selected = LS['sidebar-selected'] || null;
 

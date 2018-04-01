@@ -26,7 +26,7 @@ import com.twitter.heron.streamlet.impl.KryoSerializer;
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
-  private final float cpu;
+  private final double cpu;
   private final long ram;
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
@@ -56,7 +56,7 @@ public final class Config implements Serializable {
   private static class Defaults {
     static final boolean USE_KRYO = true;
     static final com.twitter.heron.api.Config CONFIG = new com.twitter.heron.api.Config();
-    static final float CPU = 1.0f;
+    static final double CPU = 1.0;
     static final long RAM = 100 * MB;
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
     static final Serializer SERIALIZER = Serializer.KRYO;
@@ -87,15 +87,15 @@ public final class Config implements Serializable {
     return new Builder();
   }
 
-  com.twitter.heron.api.Config getHeronConfig() {
+  public com.twitter.heron.api.Config getHeronConfig() {
     return heronConfig;
   }
 
   /**
    * Gets the CPU used per topology container
-   * @return the per-container CPU as a float
+   * @return the per-container CPU as a double
    */
-  public float getPerContainerCpu() {
+  public double getPerContainerCpu() {
     return cpu;
   }
 
@@ -163,7 +163,7 @@ public final class Config implements Serializable {
 
   public static final class Builder {
     private com.twitter.heron.api.Config config;
-    private float cpu;
+    private double cpu;
     private long ram;
     private DeliverySemantics deliverySemantics;
     private Serializer serializer;
@@ -178,9 +178,9 @@ public final class Config implements Serializable {
 
     /**
      * Sets the per-container (per-instance) CPU to be used by this topology
-     * @param perContainerCpu Per-container (per-instance) CPU as a float
+     * @param perContainerCpu Per-container (per-instance) CPU as a double
      */
-    public Builder setPerContainerCpu(float perContainerCpu) {
+    public Builder setPerContainerCpu(double perContainerCpu) {
       this.cpu = perContainerCpu;
       return this;
     }

@@ -1,4 +1,7 @@
-HERONPY_VERSION = $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+HERONPY_VERSION := $(shell python -c "import yaml; print yaml.load(open('config.yaml', 'r'))['params']['versions']['heronpy']")
+NODE_BIN        = node_modules/.bin
+GULP            = $(NODE_BIN)/gulp
+CONCURRENTLY    = $(NODE_BIN)/concurrently
 
 setup:
 	scripts/setup.sh
@@ -6,17 +9,20 @@ setup:
 clean:
 	rm -rf public/* static/api static/style.css static/style*.css
 
+develop-content: build-static-assets
+	@ENV=development hugo serve --buildDrafts --disableFastRender
+
 serve:
-	@hugo serve --buildDrafts
+	$(CONCURRENTLY) "make develop-content" "make develop-static-assets"
 
 develop-static-assets:
-	@npm run develop
+	@$(GULP) dev
 
 build-static-assets:
-	@npm run build
+	@$(GULP) build
 
 pages:
-	@hugo
+	@ENV=production hugo
 
 linkchecker:
 	@scripts/linkchecker.sh
@@ -33,6 +39,7 @@ site:
 	@make javadocs
 	@make python-docs
 	@make pages
+	@rm static/css/style-*.css static/js/app-*.js
 
 publish:
 	@scripts/publish.sh

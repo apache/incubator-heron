@@ -96,7 +96,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
   /**
-   * The per componentparallelism for a component in this topology.
+   * The per component parallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
   public static final String TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
@@ -207,9 +207,19 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
   /**
    * Per component ram requirement.  The format of this flag is something like
+   * spout0:0.2,spout1:0.2,bolt1:0.5.
+   */
+  public static final String TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
+   * spout0:12434,spout1:345353,bolt1:545356.
+   */
+  public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";
   /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
@@ -233,6 +243,10 @@ public class Config extends HashMap<String, Object> {
    * Email of the team which owns this topology.
    */
   public static final String TOPOLOGY_TEAM_EMAIL = "topology.team.email";
+  /**
+   * Name of the of the environment this topology should run in.
+   */
+  public static final String TOPOLOGY_TEAM_ENVIRONMENT = "topology.team.environment";
   /**
    * Cap ticket (if filed) for the topology. If the topology is in prod this has to be set or it
    * cannot be deployed.
@@ -286,6 +300,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE =
       "topology.droptuples.upon.backpressure";
 
+  /**
+   * The per component output bytes per second in this topology.
+   */
+  public static final String TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -309,7 +328,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
+    apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
+    apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_RELIABILITY_MODE);
@@ -323,6 +344,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
     apiVars.add(TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE);
+    apiVars.add(TOPOLOGY_COMPONENT_OUTPUT_BPS);
   }
 
   public Config() {
@@ -399,8 +421,8 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
   }
 
-  public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
+  public static void setContainerCpuRequested(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(ncpus));
   }
 
   /**
@@ -431,8 +453,8 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
+  public static void setContainerMaxCpuHint(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Double.toString(ncpus));
   }
 
   public static void setContainerMaxDiskHint(Map<String, Object> conf, ByteAmount nbytes) {
@@ -451,12 +473,24 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
   }
 
+  public static void setComponentCpuMap(Map<String, Object> conf, String cpuMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_CPUMAP, cpuMap);
+  }
+
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
   }
 
+  public static void setComponentDiskMap(Map<String, Object> conf, String diskMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DISKMAP, diskMap);
+  }
+
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
+  }
+
+  public static void setTopologyComponentOutputBPS(Map<String, Object> conf, long bps) {
+    conf.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
 
   @SuppressWarnings("unchecked")
@@ -475,15 +509,42 @@ public class Config extends HashMap<String, Object> {
     setComponentRam(conf, component, ByteAmount.fromBytes(ramInBytes));
   }
 
+  public static void setComponentCpu(Map<String, Object> conf,
+                                     String component, double cpu) {
+    String key = Config.TOPOLOGY_COMPONENT_CPUMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%f", oldEntry, component, cpu);
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%f", component, cpu);
+      conf.put(key, newEntry);
+    }
+  }
+
   public static void setComponentRam(Map<String, Object> conf,
                                      String component, ByteAmount ramInBytes) {
-    if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-      String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
+    String key = Config.TOPOLOGY_COMPONENT_RAMMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
       String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes.asBytes());
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(key, newEntry);
     } else {
       String newEntry = String.format("%s:%d", component, ramInBytes.asBytes());
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(key, newEntry);
+    }
+  }
+
+  public static void setComponentDisk(Map<String, Object> conf,
+                                      String component, ByteAmount diskInBytes) {
+    String key = Config.TOPOLOGY_COMPONENT_DISKMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%d", component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
     }
   }
 
@@ -589,7 +650,7 @@ public class Config extends HashMap<String, Object> {
     setTickTupleFrequency(this, seconds);
   }
 
-  public void setContainerCpuRequested(float ncpus) {
+  public void setContainerCpuRequested(double ncpus) {
     setContainerCpuRequested(this, ncpus);
   }
 
@@ -601,7 +662,7 @@ public class Config extends HashMap<String, Object> {
     setContainerRamRequested(this, nbytes);
   }
 
-  public void setContainerMaxCpuHint(float ncpus) {
+  public void setContainerMaxCpuHint(double ncpus) {
     setContainerMaxCpuHint(this, ncpus);
   }
 
@@ -621,12 +682,28 @@ public class Config extends HashMap<String, Object> {
     setContainerRamPadding(this, nbytes);
   }
 
+  public void setComponentCpuMap(String cpuMap) {
+    setComponentCpuMap(this, cpuMap);
+  }
+
   public void setComponentRamMap(String ramMap) {
     setComponentRamMap(this, ramMap);
   }
 
+  public void setComponentDiskMap(String diskMap) {
+    setComponentDiskMap(this, diskMap);
+  }
+
+  public void setComponentCpu(String component, double cpu) {
+    setComponentCpu(this, component, cpu);
+  }
+
   public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
+  }
+
+  public void setComponentDisk(String component, ByteAmount diskInBytes) {
+    setComponentDisk(this, component, diskInBytes);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {
@@ -708,5 +785,9 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyDropTuplesUponBackpressure(boolean dropTuples) {
     this.put(Config.TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, String.valueOf(dropTuples));
+  }
+
+  public void setTopologyComponentOutputBPS(long bps) {
+    this.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
 }

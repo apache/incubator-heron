@@ -71,8 +71,12 @@ TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
 # Amount of ram padding per container.
 TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding"
 
+# Per component cpu requirement.
+TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap"
 # Per component ram requirement.
 TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
+# Per component disk requirement.
+TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap"
 # Name of the topology, automatically set by Heron when the topology is submitted.
 TOPOLOGY_NAME = "topology.name"
 # Name of the team which owns this topology.
@@ -87,3 +91,5 @@ TOPOLOGY_PROJECT_NAME = "topology.project.name"
 # Any user defined classpath that needs to be passed to instances should be set in to config
 # through this key.
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
+# The per component output bytes per second in this topology.
+TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps"

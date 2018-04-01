@@ -2,7 +2,7 @@ languageCode: en-us
 title: Heron
 author: Luc Perkins
 canonifyurls: true
-baseurl: https://twitter.github.io/heron
+baseurl: https://apache.github.io/incubator-heron
 
 # Site-level config
 metadataformat: yaml
@@ -11,7 +11,6 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsUseClassic: true
 pygmentsUseClasses: true
 pygmentsCodeFences: true
 

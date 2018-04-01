@@ -15,6 +15,7 @@ package com.twitter.heron.examples.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
@@ -42,6 +43,7 @@ public final class WindowedWordCountTopology {
   private static class SentenceSpout extends BaseRichSpout {
     private static final long serialVersionUID = 2879005791639364028L;
     private SpoutOutputCollector collector;
+    private Random rand = new Random();
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
@@ -57,7 +59,16 @@ public final class WindowedWordCountTopology {
 
     @Override
     public void nextTuple() {
-      collector.emit(new Values("Mary had a little lamb"));
+
+      String[] sentences = {
+          "Mary had a little lamb",
+          "The quick brown fox jumps over the lazy dog",
+          "The book is in front of the table",
+          "Mary plays the piano"
+      };
+
+      int n = rand.nextInt(sentences.length);
+      collector.emit(new Values(sentences[n]));
     }
   }
 
@@ -81,7 +92,6 @@ public final class WindowedWordCountTopology {
   private static class WindowSumBolt extends BaseWindowedBolt {
     private static final long serialVersionUID = 8458595466693183050L;
     private OutputCollector collector;
-    private Map<String, Integer> counts = new HashMap<String, Integer>();
 
     @Override
     @SuppressWarnings("HiddenField")
@@ -92,17 +102,18 @@ public final class WindowedWordCountTopology {
 
     @Override
     public void execute(TupleWindow inputWindow) {
-      int sum = counts.get("sum");
-      for (Tuple tuple : inputWindow.get()) {
-        sum += tuple.getIntegerByField("value");
-      }
-      counts.put("sum", sum);
-      collector.emit(new Values(sum));
-    }
+      Map<String, Integer> counts = new HashMap<String, Integer>();
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      declarer.declare(new Fields("sum"));
+      for (Tuple tuple : inputWindow.get()) {
+        String word = tuple.getStringByField("word");
+        if (!counts.containsKey(word)) {
+          counts.put(word, 0);
+        }
+        int previousCount = counts.get(word);
+        counts.put(word, previousCount + 1);
+      }
+
+      System.out.println("Word Counts for window: " + counts);
     }
   }
 
@@ -113,9 +124,10 @@ public final class WindowedWordCountTopology {
     builder.setSpout("sentence", new SentenceSpout(), parallelism);
     builder.setBolt("split", new SplitSentence(), parallelism).shuffleGrouping("sentence");
     builder.setBolt("consumer", new WindowSumBolt()
-        .withWindow(BaseWindowedBolt.Count.of(10)), parallelism)
+        .withWindow(BaseWindowedBolt.Count.of(10000), BaseWindowedBolt.Count.of(5000)), parallelism)
         .fieldsGrouping("split", new Fields("word"));
     Config conf = new Config();
+    conf.setMaxSpoutPending(1000000);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

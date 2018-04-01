@@ -14,6 +14,8 @@
 
 package com.twitter.heron.scheduler;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Map;
 
 import org.junit.Before;
@@ -27,11 +29,13 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -198,17 +202,18 @@ public class RuntimeManagerRunnerTest {
   @Test
   public void testUpdateTopologyHandler() throws Exception {
     String newParallelism = "testSpout:1,testBolt:4";
-    doUpdateTopologyHandlerTest(newParallelism, true);
+    doupdateTopologyComponentParallelismTest(newParallelism, true);
   }
 
   @PrepareForTest(Runtime.class)
   @Test(expected = TopologyRuntimeManagementException.class)
   public void testUpdateTopologyHandlerWithSameParallelism() throws Exception {
     String newParallelism = "testSpout:2,testBolt:3"; // same as current test packing plan
-    doUpdateTopologyHandlerTest(newParallelism, false);
+    doupdateTopologyComponentParallelismTest(newParallelism, false);
   }
 
-  private void doUpdateTopologyHandlerTest(String newParallelism, boolean expectedResult) {
+  private void doupdateTopologyComponentParallelismTest(String newParallelism,
+                                                        boolean expectedResult) {
     ISchedulerClient client = mock(ISchedulerClient.class);
     SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
@@ -236,11 +241,39 @@ public class RuntimeManagerRunnerTest {
 
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
     try {
-      runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism);
+      runner.updateTopologyComponentParallelism(TOPOLOGY_NAME, newParallelism);
     } finally {
       int expectedClientUpdateCalls = expectedResult ? 1 : 0;
       verify(client, times(expectedClientUpdateCalls)).updateTopology(updateTopologyRequest);
     }
+  }
+
+  @PrepareForTest({NetworkUtils.class, Runtime.class})
+  @Test
+  public void testUpdateTopologyUserRuntimeConfig() throws Exception {
+    String testConfig = "topology.user:test,testSpout:topology.user:1,testBolt:topology.user:4";
+    URL expectedURL = new URL("http://host:1/runtime_config/update?topologyid=topology-id&"
+        + "runtime-config=topology.user:test&runtime-config=testSpout:topology.user:1&"
+        + "runtime-config=testBolt:topology.user:4");
+
+    // Success case
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
+    HttpURLConnection connection = mock(HttpURLConnection.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
+    TopologyMaster.TMasterLocation location = TopologyMaster.TMasterLocation.newBuilder().
+              setTopologyName("topology-name").setTopologyId("topology-id").
+              setHost("host").setControllerPort(1).setMasterPort(2).build();
+    when(manager.getTMasterLocation(TOPOLOGY_NAME)).thenReturn(location);
+    when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+
+    PowerMockito.mockStatic(Runtime.class);
+    PowerMockito.when(Runtime.schedulerStateManagerAdaptor(runtime)).thenReturn(manager);
+    PowerMockito.mockStatic(NetworkUtils.class);
+    PowerMockito.when(NetworkUtils.getProxiedHttpConnectionIfNeeded(
+        eq(expectedURL), any(NetworkUtils.TunnelConfig.class))).thenReturn(connection);
+
+    runner.updateTopologyUserRuntimeConfig(TOPOLOGY_NAME, testConfig);
   }
 
   @Test
@@ -299,5 +332,28 @@ public class RuntimeManagerRunnerTest {
 
     assertEquals(runner.parseNewParallelismParam(delta),
         runner.parallelismDelta(initialCounts, changeRequest));
+  }
+
+  @Test
+  public void testParseUserRuntimeConfigParam() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+    String[] configs = runner.parseUserRuntimeConfigParam("foo:1,bolt:bar:2");
+    assertEquals(2, configs.length);
+    assertEquals("foo:1", configs[0]);
+    assertEquals("bolt:bar:2", configs[1]);
+  }
+
+  @Test
+  public void testparseUserRuntimeConfigParamEmpty() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+    String[] configs = runner.parseUserRuntimeConfigParam("");
+    assertEquals(0, configs.length);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testparseUserRuntimeConfigParamInvalid1() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+
+    runner.parseUserRuntimeConfigParam(":foo:1,bolt:bar2");
   }
 }

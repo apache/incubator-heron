@@ -50,6 +50,8 @@ class TopologyConfigHelper {
   // The number of workers needed for this component's config
   // Essentially plucks the value of the TOPOLOGY_COMPONENT_PARALLELISM
   static sp_int32 GetComponentParallelism(const proto::api::Config& _config);
+  static sp_int32 GetComponentParallelism(const proto::api::Topology& _topology,
+                                          const std::string& _component);
 
   // The total number of workers needed accross all components for
   // this topology
@@ -62,11 +64,11 @@ class TopologyConfigHelper {
   static void SetComponentParallelism(proto::api::Config* _config, sp_int32 _parallelism);
 
   // Gets the topology specific JVM childopts if any
-  static sp_string GetWorkerChildOpts(const proto::api::Topology& _topology);
+  static std::string GetWorkerChildOpts(const proto::api::Topology& _topology);
 
   // Gets the TOPOLOGY_RELEASE_OVERRIDES for this topology if any
   // Returns empty string otherwise
-  static sp_string GetTopologyReleaseOverrides(const proto::api::Topology& _topology);
+  static std::string GetTopologyReleaseOverrides(const proto::api::Topology& _topology);
 
   // Does some sanity checking on the topology structure.
   // returns true if the structure is sane. False otherwise
@@ -129,15 +131,55 @@ class TopologyConfigHelper {
 
   // Gets the list of all spout component names
   static void GetSpoutComponentNames(const proto::api::Topology& _topology,
-                                     std::unordered_set<std::string> spouts);
+                                     std::unordered_set<std::string>& spouts);
 
   // Do we want to drop tuples upon backpressure detection
   static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
+
+  // Return topology level config
+  static void GetTopologyConfig(const proto::api::Topology& _topology,
+                                std::map<std::string, std::string>& retval);
+
+  // Update topology level config
+  static void SetTopologyConfig(proto::api::Topology* _topology,
+                                const std::map<std::string, std::string>& retval);
+
+
+  // Return component level config
+  static void GetComponentConfig(const proto::api::Topology& _topology,
+                                 const std::string& _component_name,
+                                 std::map<std::string, std::string>& config);
+
+  // Update component level config
+  static void SetComponentConfig(proto::api::Topology* _topology,
+                                 const std::string& _component_name,
+                                 const std::map<std::string, std::string>& config);
+
+  // Get the config value given component name and config key
+  static const std::string GetComponentConfigValue(const proto::api::Topology& _topology,
+                                                   const std::string& _component,
+                                                   const std::string& _key,
+                                                   const std::string& _default);
+
+  // Get the value for a key in a config
+  static const std::string GetConfigValue(const proto::api::Config& _config,
+                                          const std::string& _key,
+                                          const std::string& _default);
+
+  // The output BPS of this component. Return -1 if not found
+  static sp_int64 GetComponentOutputBPS(const proto::api::Topology& _topology,
+                                        const std::string& _component);
 
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
                                     const std::string& _config_name,
                                     bool _default_value);
+  // Convert topology config to a key value map
+  static void ConvertConfigToKVMap(const proto::api::Config& _config,
+                                   std::map<std::string, std::string>& retval);
+  // Update topology config from a key value map
+  static void UpdateConfigFromKVMap(proto::api::Config* _config,
+                                    const std::map<std::string, std::string>& _kv_map);
 };
 }  // namespace config
 }  // namespace heron
