@@ -1,17 +1,19 @@
-load("/tools/rules/java_tests", "java_tests")
-
 java_library(
     name = "metricsmgr-tests",
     srcs = glob(["**/*.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
+        "//heron/api/src/java:api-java-low-level",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:network-java",
+        "//heron/common/src/java:config-java",
+        "//heron/common/src/java:test-helpers-java",
         "//heron/metricsmgr/src/java:metricsmgr-java",
         "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_guava_guava//jar",
+        "@com_google_protobuf//:protobuf_java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",
     ],
@@ -19,14 +21,19 @@ java_library(
 
 java_tests(
     test_classes = [
+        "com.twitter.heron.metricsmgr.MetricsUtilTests",
         "com.twitter.heron.metricsmgr.HandleTMasterLocationTest",
         "com.twitter.heron.metricsmgr.MetricsManagerServerTest",
         "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
         "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSinkTest",
+        "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
         "com.twitter.heron.metricsmgr.sink.FileSinkTest",
+        "com.twitter.heron.metricsmgr.sink.WebSinkTest",
+        "com.twitter.heron.metricsmgr.sink.PrometheusSinkTests",
     ],
     runtime_deps = [
         ":metricsmgr-tests",
     ],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )

@@ -33,18 +33,17 @@
 namespace heron {
 namespace common {
 
-MetricsMgrSt::MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port,
-                           sp_int32 _metricsmgr_port, const sp_string& _component,
-                           const sp_string& _task_id, sp_int32 _interval, EventLoop* eventLoop) {
-  NetworkOptions options;
-  options.set_host("localhost");
-  options.set_port(_metricsmgr_port);
-  options.set_max_packet_size(1024 * 1024);
-  options.set_socket_family(PF_INET);
-  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component, _task_id, eventLoop, options);
+MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
+  options_.set_host("127.0.0.1");
+  options_.set_port(_metricsmgr_port);
+  options_.set_max_packet_size(1024 * 1024);
+  options_.set_socket_family(PF_INET);
+  // client_ will be initialized in Start()
+  client_ = nullptr;
   timer_cb_ = [this](EventLoop::Status status) { this->gather_metrics(status); };
   timerid_ = eventLoop->registerTimer(timer_cb_, true, _interval * 1000000);
   CHECK_GE(timerid_, 0);
+  eventLoop_ = eventLoop;
 }
 
 MetricsMgrSt::~MetricsMgrSt() {
@@ -55,8 +54,21 @@ MetricsMgrSt::~MetricsMgrSt() {
   }
 }
 
+void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
+     const sp_string& _component_id, const sp_string& _instance_id) {
+  CHECK(client_ == nullptr) << "MetricsMgrClient started already";
+  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component_id, _instance_id,
+                                 -1, eventLoop_, options_);
+}
+
 void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
   client_->SendTMasterLocation(location);
+}
+
+void MetricsMgrSt::RefreshMetricsCacheLocation(
+    const proto::tmaster::MetricsCacheLocation& location) {
+  LOG(INFO) << "RefreshMetricsCacheLocation";
+  client_->SendMetricsCacheLocation(location);
 }
 
 void MetricsMgrSt::register_metric(const sp_string& _metric_name, IMetric* _metric) {

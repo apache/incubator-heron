@@ -82,18 +82,20 @@ const sp_string HeronInternalsConfigVars::HERON_TMASTER_STMGR_STATE_TIMEOUT_SEC 
     "heron.tmaster.stmgr.state.timeout.sec";
 
 // heron.streammgr.* configs are for the stream manager
-const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES =
-    "heron.streammgr.packet.maximum.size.bytes";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS =
     "heron.streammgr.cache.drain.frequency.ms";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB =
     "heron.streammgr.cache.drain.size.mb";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_MEMPOOL_MAX_MESSAGE_NUMBER =
+    "heron.streammgr.mempool.max.message.number";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS =
     "heron.streammgr.xormgr.rotatingmap.nbuckets";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC =
     "heron.streammgr.client.reconnect.interval.sec";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC =
     "heron.streammgr.client.reconnect.tmaster.interval.sec";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS =
+    "heron.streammgr.client.reconnect.tmaster.max.attempts";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB =
     "heron.streammgr.network.options.maximum.packet.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_TMASTER_HEARTBEAT_INTERVAL_SEC =
@@ -108,5 +110,31 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_H
     "heron.streammgr.network.backpressure.highwatermark.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB =
     "heron.streammgr.network.backpressure.lowwatermark.mb";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB =
+    "heron.streammgr.stateful.buffer.size.mb";
+
+// heron.instance.* configs are for the instance
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC =
+    "heron.instance.reconnect.streammgr.interval.sec";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_TIMES =
+    "heron.instance.reconnect.streammgr.times";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY =
+    "heron.instance.internal.bolt.read.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY =
+    "heron.instance.internal.bolt.write.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY =
+    "heron.instance.internal.spout.read.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY =
+    "heron.instance.internal.spout.write.queue.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_TIME_MS =
+    "heron.instance.emit.batch.time.ms";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY =
+    "heron.instance.set.data.tuple.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES =
+    "heron.instance.set.data.tuple.size.bytes";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_CONTROL_TUPLE_CAPACITY =
+    "heron.instance.set.control.tuple.capacity";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_ACKNOWLEDGEMENT_NBUCKETS =
+    "heron.instance.acknowledgement.nbuckets";
 }  // namespace config
 }  // namespace heron

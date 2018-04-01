@@ -48,12 +48,12 @@ limitations under the License.
 -->
 
 <module name="Checker">
-	  <!--
+    <!--
         If you set the basedir property below, then all reported file
         names will be relative to the specified directory. See
         http://checkstyle.sourceforge.net/config.html#Checker
         <property name="basedir" value="${basedir}"/>
-          -->
+    -->
 
     <!-- We use this to turn off specific checks for specific file types.
     -->
@@ -62,12 +62,11 @@ limitations under the License.
     </module>
 
     <!-- Verify that all Java classes have a header -->
-    <module name="Header">
+    <module name="RegexpHeader">
       <property name="headerFile" value="tools/java/src/com/twitter/bazel/checkstyle/heron_header.txt"/>
       <property name="fileExtensions" value="java"/>
-      <property name="ignoreLines" value="2,6,8"/>
       <message key="header.mismatch"
-               value="Line does not match expected header line of ''{0}''. See header template in tools/java/src/com/twitter/bazel/checkstyle/header.txt"/>
+               value="Invalid header. See header template in tools/java/src/com/twitter/bazel/checkstyle/heron_header.txt"/>
     </module>
 
     <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method

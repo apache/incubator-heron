@@ -8,13 +8,27 @@ filegroup(
 )
 
 filegroup(
+    name = "test-config-metrics-sinks-yaml",
+    srcs = ["conf/test/test_metrics_sinks.yaml"],
+)
+
+filegroup(
     name = "conf-yaml",
-    srcs = glob(["conf/*.yaml"]),
+    srcs = glob(
+        ["conf/**/*.aurora"]
+        + ["conf/**/*.hcl"]
+        + ["conf/**/*.sh"]
+        + ["conf/**/*.yaml"]),
 )
 
 filegroup(
     name = "conf-local-yaml",
     srcs = glob(["conf/local/*.yaml"]),
+)
+
+filegroup(
+    name = "conf-sandbox-yaml",
+    srcs = glob(["conf/sandbox/*.yaml"]),
 )
 
 filegroup(
@@ -40,6 +54,11 @@ filegroup(
 filegroup(
     name = "conf-marathon-yaml",
     srcs = glob(["conf/marathon/*"]),
+)
+
+filegroup(
+    name = "conf-kubernetes-yaml",
+    srcs = glob(["conf/kubernetes/*"]),
 )
 
 filegroup(

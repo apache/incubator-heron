@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' activate '''
+from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.cli_helper as cli_helper
 
 def create_parser(subparsers):
@@ -31,4 +35,5 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  return cli_helper.run(command, parser, cl_args, unknown_args, "activate topology")
+  Log.debug("Activate Args: %s", cl_args)
+  return cli_helper.run(command, cl_args, "activate topology")

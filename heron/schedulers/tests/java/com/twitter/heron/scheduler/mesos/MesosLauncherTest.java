@@ -22,8 +22,7 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 
@@ -40,12 +39,12 @@ public class MesosLauncherTest {
         .thenReturn("working-dir");
     Mockito.when(config.getStringValue(MesosContext.HERON_MESOS_NATIVE_LIBRARY_PATH))
         .thenReturn(NATIVE_LIBRARY_PATH);
-    Mockito.when(config.getStringValue(ConfigKeys.get("JAVA_HOME")))
+    Mockito.when(config.getStringValue(Key.JAVA_HOME))
         .thenReturn(JAVA_HOME);
 
 
     Config runtime = Mockito.mock(Config.class);
-    Mockito.when(runtime.get(Keys.topologyPackageUri())).thenReturn(mockURI);
+    Mockito.when(runtime.get(Key.TOPOLOGY_PACKAGE_URI)).thenReturn(mockURI);
 
     MesosLauncher launcher = Mockito.spy(MesosLauncher.class);
     String[] mockCommand = new String[]{"mock", "scheduler", "command"};

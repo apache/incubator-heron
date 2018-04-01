@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.twitter.heron.api;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +43,7 @@ import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.basics.ByteAmount;
 
 /**
  * Topology configs are specified as a plain old map. This class provides a
@@ -50,10 +70,10 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts";
   /**
-   * How often a tick tuple from the "__system" component and "__tick" stream should be sent
+   * How often (in milliseconds) a tick tuple from the "__system" component and "__tick" stream should be sent
    * to tasks. Meant to be used as a component-specific configuration.
    */
-  public static final String TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+  public static final String TOPOLOGY_TICK_TUPLE_FREQ_MS = "topology.tick.tuple.freq.ms";
   /**
    * True if Heron should timeout messages or not. Defaults to true. This is meant to be used
    * in unit tests to prevent tuples from being accidentally timed out during the test.
@@ -76,7 +96,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
   /**
-   * The per componentparallelism for a component in this topology.
+   * The per component parallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
   public static final String TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
@@ -100,12 +120,52 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
   /**
-   * How many executors to spawn for ackers.
+   * Is the topology running in atleast-once mode?
    * <p>
-   * <p>If this is set to 0, then Heron will immediately ack tuples as soon
+   * <p>If this is set to false, then Heron will immediately ack tuples as soon
    * as they come off the spout, effectively disabling reliability.</p>
+   * @deprecated use {@link #TOPOLOGY_RELIABILITY_MODE} instead.
    */
+  @Deprecated
   public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
+  /**
+   * What is the reliability mode under which we are running this topology
+   * Topology writers must set TOPOLOGY_RELIABILITY_MODE to one
+   * one of the following modes
+   */
+  public enum TopologyReliabilityMode {
+    /**
+     * Heron provides no guarantees wrt tuple delivery. Tuples emitted by
+     * components can get lost for any reason(network issues, component failures,
+     * overloaded downstream component, etc).
+     */
+    ATMOST_ONCE,
+    /**
+     * Heron guarantees that each emitted tuple is seen by the downstream components
+     * atleast once. This is achieved via the anchoring process where emitted tuples
+     * are anchored based on input tuples. Note that in failure scenarios, downstream
+     * components can see the same tuple multiple times.
+     */
+    ATLEAST_ONCE,
+    /**
+     * Heron guarantees that each emitted tuple is seen by the downstream components
+     * effectively once. This is achieved via distributed snapshotting approach is described at
+     * https://docs.google.com/document/d/1pNuE77diSrYHb7vHPuPO3DZqYdcxrhywH_f7loVryCI/edit
+     * In this mode Heron will try to take the snapshots of
+     * all of the components of the topology every
+     * TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS seconds. Upon failure of
+     * any component or detection of any network failure, Heron will initiate a recovery
+     * mechanism to revert the topology to the last globally consistent checkpoint
+     */
+    EFFECTIVELY_ONCE;
+  }
+  /**
+   * A Heron topology can be run in any one of the TopologyReliabilityMode
+   * mode. The format of this flag is the string encoded values of the
+   * underlying TopologyReliabilityMode value.
+   */
+  public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
+
   /**
    * Number of cpu cores per container to be reserved for this topology
    */
@@ -141,10 +201,36 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
   /**
+   * Amount of ram to pad each container.
+   * In bytes.
+   */
+  public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
+   * spout0:0.2,spout1:0.2,bolt1:0.5.
+   */
+  public static final String TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap";
+  /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+  /**
+   * Per component ram requirement.  The format of this flag is something like
+   * spout0:12434,spout1:345353,bolt1:545356.
+   */
+  public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";
+  /**
+   * What's the checkpoint interval for stateful topologies in seconds
+   */
+  public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
+                             "topology.stateful.checkpoint.interval.seconds";
+  /**
+   * Boolean flag that says that the stateful topology should start from
+   * clean state, i.e. ignore any checkpoint state
+   */
+  public static final String TOPOLOGY_STATEFUL_START_CLEAN =
+                             "topology.stateful.start.clean";
   /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
@@ -157,6 +243,10 @@ public class Config extends HashMap<String, Object> {
    * Email of the team which owns this topology.
    */
   public static final String TOPOLOGY_TEAM_EMAIL = "topology.team.email";
+  /**
+   * Name of the of the environment this topology should run in.
+   */
+  public static final String TOPOLOGY_TEAM_ENVIRONMENT = "topology.team.environment";
   /**
    * Cap ticket (if filed) for the topology. If the topology is in prod this has to be set or it
    * cannot be deployed.
@@ -184,6 +274,37 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS =
       "topology.update.reactivate.wait.secs";
 
+  /**
+   * Topology-specific environment properties to be added to an Heron instance.
+   * This is added to the existing environment (that of the Heron instance).
+   * This variable contains Map<String, String>
+   */
+  public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
+
+  /**
+   * Timer events registered for a topology.
+   * This is a Map<String, Pair<Duration, Runnable>>.
+   * Where the key is the name and the value contains the frequency of the event
+   * and the task to run.
+   */
+  public static final String TOPOLOGY_TIMER_EVENTS = "topology.timer.events";
+
+  /**
+   * Enable Remote debugging for java heron instances
+   */
+  public static final String TOPOLOGY_REMOTE_DEBUGGING_ENABLE = "topology.remote.debugging.enable";
+
+  /**
+   * Do we want to drop tuples instead of initiating Spout BackPressure
+   */
+  public static final String TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE =
+      "topology.droptuples.upon.backpressure";
+
+  /**
+   * The per component output bytes per second in this topology.
+   */
+  public static final String TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
+
   private static final long serialVersionUID = 2550967708478837032L;
   // We maintain a list of all user exposed vars
   private static Set<String> apiVars = new HashSet<>();
@@ -197,9 +318,8 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_WORKER_CHILDOPTS);
     apiVars.add(TOPOLOGY_COMPONENT_JVMOPTS);
     apiVars.add(TOPOLOGY_SERIALIZER_CLASSNAME);
-    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+    apiVars.add(TOPOLOGY_TICK_TUPLE_FREQ_MS);
     apiVars.add(TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS);
-    apiVars.add(TOPOLOGY_ENABLE_ACKING);
     apiVars.add(TOPOLOGY_CONTAINER_CPU_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_DISK_REQUESTED);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_REQUESTED);
@@ -207,7 +327,13 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_DISK_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
+    apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
+    apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
+    apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
+    apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
+    apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
+    apiVars.add(TOPOLOGY_RELIABILITY_MODE);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
     apiVars.add(TOPOLOGY_TEAM_EMAIL);
@@ -216,6 +342,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
     apiVars.add(TOPOLOGY_UPDATE_DEACTIVATE_WAIT_SECS);
     apiVars.add(TOPOLOGY_UPDATE_REACTIVATE_WAIT_SECS);
+    apiVars.add(TOPOLOGY_REMOTE_DEBUGGING_ENABLE);
+    apiVars.add(TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE);
+    apiVars.add(TOPOLOGY_COMPONENT_OUTPUT_BPS);
   }
 
   public Config() {
@@ -254,8 +383,17 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
+  /**
+   * Is topology running with acking enabled?
+   * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead.
+   */
+  @Deprecated
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
-    conf.put(Config.TOPOLOGY_ENABLE_ACKING, String.valueOf(acking));
+    if (acking) {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATLEAST_ONCE);
+    } else {
+      setTopologyReliabilityMode(conf, Config.TopologyReliabilityMode.ATMOST_ONCE);
+    }
   }
 
   public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
@@ -271,57 +409,142 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+    setTickTupleFrequencyMs(conf, (long) (seconds * 1000));
   }
 
-  public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
+  public static void setTickTupleFrequencyMs(Map<String, Object> conf, long millis) {
+    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_MS, millis);
   }
 
+  public static void setTopologyReliabilityMode(Map<String, Object> conf,
+                                                Config.TopologyReliabilityMode mode) {
+    conf.put(Config.TOPOLOGY_RELIABILITY_MODE, String.valueOf(mode));
+  }
+
+  public static void setContainerCpuRequested(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(ncpus));
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerDiskRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
+   */
+  @Deprecated
   public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
+    setContainerDiskRequested(conf, ByteAmount.fromBytes(nbytes));
   }
 
+  public static void setContainerDiskRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes.asBytes()));
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setContainerRamRequested(Map&lt;String, Object&gt; conf, ByteAmount nbytes)
+   */
+  @Deprecated
   public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
+    setContainerRamRequested(conf, ByteAmount.fromBytes(nbytes));
   }
 
-  public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
+  public static void setContainerRamRequested(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes.asBytes()));
   }
 
-  public static void setContainerMaxDiskHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes));
+  public static void setContainerMaxCpuHint(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Double.toString(ncpus));
   }
 
-  public static void setContainerMaxRamHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes));
+  public static void setContainerMaxDiskHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes.asBytes()));
+  }
+
+  public static void setContainerMaxRamHint(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes.asBytes()));
   }
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
     conf.put(Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, Integer.toString(percentage));
   }
 
+  public static void setContainerRamPadding(Map<String, Object> conf, ByteAmount nbytes) {
+    conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
+  }
+
+  public static void setComponentCpuMap(Map<String, Object> conf, String cpuMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_CPUMAP, cpuMap);
+  }
+
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
+  }
+
+  public static void setComponentDiskMap(Map<String, Object> conf, String diskMap) {
+    conf.put(Config.TOPOLOGY_COMPONENT_DISKMAP, diskMap);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
-  public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
-    return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+  public static void setTopologyComponentOutputBPS(Map<String, Object> conf, long bps) {
+    conf.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
 
-  public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {
-    if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-      String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+  @SuppressWarnings("unchecked")
+  public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
+    return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
+  }
+
+  /**
+   * Users should use the version of this method at uses ByteAmount
+   * @deprecated use
+   * setComponentRam(Map&lt;String, Object&gt; conf, String component, ByteAmount ramInBytes)
+   */
+  @Deprecated
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, long ramInBytes) {
+    setComponentRam(conf, component, ByteAmount.fromBytes(ramInBytes));
+  }
+
+  public static void setComponentCpu(Map<String, Object> conf,
+                                     String component, double cpu) {
+    String key = Config.TOPOLOGY_COMPONENT_CPUMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%f", oldEntry, component, cpu);
+      conf.put(key, newEntry);
     } else {
-      String newEntry = String.format("%s:%d", component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      String newEntry = String.format("%s:%f", component, cpu);
+      conf.put(key, newEntry);
+    }
+  }
+
+  public static void setComponentRam(Map<String, Object> conf,
+                                     String component, ByteAmount ramInBytes) {
+    String key = Config.TOPOLOGY_COMPONENT_RAMMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes.asBytes());
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%d", component, ramInBytes.asBytes());
+      conf.put(key, newEntry);
+    }
+  }
+
+  public static void setComponentDisk(Map<String, Object> conf,
+                                      String component, ByteAmount diskInBytes) {
+    String key = Config.TOPOLOGY_COMPONENT_DISKMAP;
+    if (conf.containsKey(key)) {
+      String oldEntry = (String) conf.get(key);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
+    } else {
+      String newEntry = String.format("%s:%d", component, diskInBytes.asBytes());
+      conf.put(key, newEntry);
     }
   }
 
@@ -355,6 +578,19 @@ public class Config extends HashMap<String, Object> {
 
   }
 
+  public static void setTopologyStatefulCheckpointIntervalSecs(Map<String, Object> conf, int secs) {
+    conf.put(Config.TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, Integer.toString(secs));
+  }
+
+  public static void setTopologyStatefulStartClean(Map<String, Object> conf, boolean clean) {
+    conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static void setEnvironment(Map<String, Object> conf, Map env) {
+    conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
+  }
+
   public void setDebug(boolean isOn) {
     setDebug(this, isOn);
   }
@@ -383,12 +619,23 @@ public class Config extends HashMap<String, Object> {
     setSerializationClassName(this, className);
   }
 
+  /**
+   * Is topology running with acking enabled?
+   * The SupressWarning will be removed once TOPOLOGY_ENABLE_ACKING is removed
+   * @deprecated use {@link #setTopologyReliabilityMode(TopologyReliabilityMode)} instead
+   */
+  @Deprecated
+  @SuppressWarnings("deprecation")
   public void setEnableAcking(boolean acking) {
     setEnableAcking(this, acking);
   }
 
   public void setMessageTimeoutSecs(int secs) {
     setMessageTimeoutSecs(this, secs);
+  }
+
+  public void setTopologyReliabilityMode(Config.TopologyReliabilityMode mode) {
+    setTopologyReliabilityMode(this, mode);
   }
 
   public void setComponentParallelism(int parallelism) {
@@ -403,27 +650,27 @@ public class Config extends HashMap<String, Object> {
     setTickTupleFrequency(this, seconds);
   }
 
-  public void setContainerCpuRequested(float ncpus) {
+  public void setContainerCpuRequested(double ncpus) {
     setContainerCpuRequested(this, ncpus);
   }
 
-  public void setContainerDiskRequested(long nbytes) {
+  public void setContainerDiskRequested(ByteAmount nbytes) {
     setContainerDiskRequested(this, nbytes);
   }
 
-  public void setContainerRamRequested(long nbytes) {
+  public void setContainerRamRequested(ByteAmount nbytes) {
     setContainerRamRequested(this, nbytes);
   }
 
-  public void setContainerMaxCpuHint(float ncpus) {
+  public void setContainerMaxCpuHint(double ncpus) {
     setContainerMaxCpuHint(this, ncpus);
   }
 
-  public void setContainerMaxDiskHint(long nbytes) {
+  public void setContainerMaxDiskHint(ByteAmount nbytes) {
     setContainerMaxDiskHint(this, nbytes);
   }
 
-  public void setContainerMaxRamHint(long nbytes) {
+  public void setContainerMaxRamHint(ByteAmount nbytes) {
     setContainerMaxRamHint(this, nbytes);
   }
 
@@ -431,12 +678,32 @@ public class Config extends HashMap<String, Object> {
     setContainerPaddingPercentage(this, percentage);
   }
 
+  public void setContainerRamPadding(ByteAmount nbytes) {
+    setContainerRamPadding(this, nbytes);
+  }
+
+  public void setComponentCpuMap(String cpuMap) {
+    setComponentCpuMap(this, cpuMap);
+  }
+
   public void setComponentRamMap(String ramMap) {
     setComponentRamMap(this, ramMap);
   }
 
-  public void setComponentRam(String component, long ramInBytes) {
+  public void setComponentDiskMap(String diskMap) {
+    setComponentDiskMap(this, diskMap);
+  }
+
+  public void setComponentCpu(String component, double cpu) {
+    setComponentCpu(this, component, cpu);
+  }
+
+  public void setComponentRam(String component, ByteAmount ramInBytes) {
     setComponentRam(this, component, ramInBytes);
+  }
+
+  public void setComponentDisk(String component, ByteAmount diskInBytes) {
+    setComponentDisk(this, component, diskInBytes);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {
@@ -475,5 +742,52 @@ public class Config extends HashMap<String, Object> {
 
   public Set<String> getApiVars() {
     return apiVars;
+  }
+
+  public void setTopologyStatefulCheckpointIntervalSecs(int secs) {
+    setTopologyStatefulCheckpointIntervalSecs(this, secs);
+  }
+
+  public void setTopologyStatefulStartClean(boolean clean) {
+    setTopologyStatefulStartClean(this, clean);
+  }
+
+  /**
+   * Registers a timer event that executes periodically
+   * @param conf the map with the existing topology configs
+   * @param name the name of the timer
+   * @param interval the frequency in which to run the task
+   * @param task the task to run
+   */
+  @SuppressWarnings("unchecked")
+  public static void registerTopologyTimerEvents(Map<String, Object> conf,
+                                                 String name, Duration interval,
+                                                 Runnable task) {
+    if (interval.isZero() || interval.isNegative()) {
+      throw new IllegalArgumentException("Timer duration needs to be positive");
+    }
+    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
+      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
+    }
+
+    Map<String, Pair<Duration, Runnable>> timers
+        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timers.containsKey(name)) {
+      throw new IllegalArgumentException("Timer with name " + name + " already exists");
+    }
+    timers.put(name, Pair.of(interval, task));
+  }
+
+  public void setTopologyRemoteDebugging(boolean isOn) {
+    this.put(Config.TOPOLOGY_REMOTE_DEBUGGING_ENABLE, String.valueOf(isOn));
+  }
+
+  public void setTopologyDropTuplesUponBackpressure(boolean dropTuples) {
+    this.put(Config.TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, String.valueOf(dropTuples));
+  }
+
+  public void setTopologyComponentOutputBPS(long bps) {
+    this.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
 }

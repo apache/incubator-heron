@@ -1,13 +1,11 @@
-
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 packing_deps_files = [
     ":packing-utils",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:packing-spi-java",
     "//heron/packing/src/java:roundrobin-packing",
     "//heron/packing/src/java:binpacking-packing",
-    "//heron/common/src/java:basics-java"
+    "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java"
 ]
 
 test_deps_files = [
@@ -19,7 +17,7 @@ roundrobin_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files + \
     test_deps_files + [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/spi/src/java:utils-spi-java",
     ]
 
@@ -27,7 +25,7 @@ binpacking_deps_files = \
     heron_java_proto_files() + \
     packing_deps_files + \
     test_deps_files + [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/spi/src/java:utils-spi-java",
     ]
 
@@ -35,7 +33,7 @@ packing_utils_deps_files = \
      heron_java_proto_files() + \
         packing_deps_files + \
         test_deps_files + [
-            "//heron/api/src/java:api-java",
+            "//heron/api/src/java:api-java-low-level",
             "//heron/spi/src/java:utils-spi-java",
         ]
 
@@ -45,11 +43,15 @@ java_library(
         ["com/twitter/heron/packing/*.java"]
     ),
     deps = [
-        "//heron/packing/src/java:roundrobin-packing",
+        "//heron/common/src/java:basics-java",
+        "//heron/common/src/java:utils-java",
         "//heron/packing/src/java:binpacking-packing",
+        "//heron/packing/src/java:builder",
+        "//heron/packing/src/java:roundrobin-packing",
+        "//heron/packing/src/java:utils",
         "//heron/spi/src/java:packing-spi-java",
         "//third_party/java:junit4",
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/proto:proto_topology_java",
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:utils-spi-java",
@@ -70,7 +72,8 @@ java_test(
     srcs = glob(
        ["**/roundrobin/ResourceCompliantRRPackingTest.java"]
     ),
-    deps = roundrobin_deps_files,
+    deps = roundrobin_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
@@ -79,7 +82,8 @@ java_test(
     srcs = glob(
         ["**/binpacking/FirstFitDecreasingPackingTest.java"]
     ),
-    deps = binpacking_deps_files,
+    deps = binpacking_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
@@ -88,7 +92,27 @@ java_test(
     srcs = glob(
         ["**/PackingUtilsTest.java"]
     ),
-    deps = packing_utils_deps_files,
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:utils"],
     size = "small",
 )
 
+java_test(
+    name = "PackingPlanBuilderTest",
+    srcs = glob(
+        ["**/PackingPlanBuilderTest.java"]
+    ),
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:builder"],
+    size = "small",
+)
+
+java_test(
+    name = "ScorerTest",
+    srcs = glob(
+        ["**/ScorerTest.java"]
+    ),
+    deps = packing_utils_deps_files +
+           ["//heron/packing/src/java:builder"],
+    size = "small",
+)

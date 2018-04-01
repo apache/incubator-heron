@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +16,7 @@
 # limitations under the License.
 ''' help.py '''
 from heron.common.src.python.utils.log import Log
+from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.common.src.python.utils.config as config
 
 def create_parser(subparsers):
@@ -23,7 +27,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
       'help',
       help='Prints help for commands',
-      add_help=False)
+      add_help=True)
 
   # pylint: disable=protected-access
   parser._positionals.title = "Required arguments"
@@ -39,7 +43,7 @@ def create_parser(subparsers):
   return parser
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, args, unknown_args):
   '''
   :param command:
@@ -54,13 +58,13 @@ def run(command, parser, args, unknown_args):
   # if no command is provided, just print main help
   if command_help == 'help':
     parser.print_help()
-    return True
+    return SimpleResult(Status.Ok)
 
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
-    print subparser.format_help()
-    return True
+    print(subparser.format_help())
+    return SimpleResult(Status.Ok)
   else:
-    Log.error("Unknown subcommand \'%s\'" % command_help)
-    return False
+    Log.error("Unknown subcommand \'%s\'", command_help)
+    return SimpleResult(Status.InvocationError)

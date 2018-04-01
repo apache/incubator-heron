@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +45,7 @@ def get_time_ranges(ranges):
   # form the new
   time_slots = dict()
 
-  for key, value in ranges.iteritems():
+  for key, value in ranges.items():
     time_slots[key] = (now - value[0], now - value[1], value[2])
 
   return (now, time_slots)

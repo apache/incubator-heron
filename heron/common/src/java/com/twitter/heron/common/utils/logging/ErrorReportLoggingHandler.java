@@ -16,6 +16,7 @@ package com.twitter.heron.common.utils.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,17 +67,16 @@ public class ErrorReportLoggingHandler extends Handler {
     }
   }
 
-  public static void init(String instanceId, MetricsCollector collector, int interval) {
-    init(instanceId, collector, interval, Integer.MAX_VALUE);
-  }
-
-  public static synchronized void init(String instanceId, MetricsCollector collector,
-                                       int interval, int maxExceptions) {
+  public static synchronized void init(MetricsCollector collector,
+                                       Duration interval, int maxExceptions) {
     if (!initialized) {
-      collector.registerMetric("exception_info", ExceptionRepositoryAsMetrics.INSTANCE, interval);
-      collector.registerMetric("dropped_exceptions_count", droppedExceptionsCount, interval);
+      collector.registerMetric(
+          "exception_info", ExceptionRepositoryAsMetrics.INSTANCE, (int) interval.getSeconds());
+      collector.registerMetric(
+          "dropped_exceptions_count", droppedExceptionsCount, (int) interval.getSeconds());
       exceptionsLimit = maxExceptions;
     }
+
     initialized = true;
   }
 
@@ -104,7 +104,15 @@ public class ErrorReportLoggingHandler extends Handler {
         exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
         exceptionDataBuilder.setLasttime(new Date().toString());
         exceptionDataBuilder.setStacktrace(trace);
-        exceptionDataBuilder.setLogging(record.getMessage());
+
+        // Can cause NPE and crash HI
+        //exceptionDataBuilder.setLogging(record.getMessage());
+
+        if (record.getMessage() == null) {
+          exceptionDataBuilder.setLogging("");
+        } else {
+          exceptionDataBuilder.setLogging(record.getMessage());
+        }
       }
     }
   }

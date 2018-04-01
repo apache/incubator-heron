@@ -29,7 +29,7 @@ public class CommunicatorTest {
   private WakeableLooper consumer;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     producer = new SlaveLooper();
     consumer = new SlaveLooper();
     communicator = new Communicator<Integer>(producer, consumer);
@@ -37,7 +37,7 @@ public class CommunicatorTest {
   }
 
   @After
-  public void after() throws Exception {
+  public void after() {
     communicator = null;
     producer = null;
     consumer = null;
@@ -47,14 +47,15 @@ public class CommunicatorTest {
    * Method: size()
    */
   @Test
-  public void testSize() throws Exception {
-    for (int i = 0; i < 1024 * 1024; i++) {
-      if (i % QUEUE_BUFFER_SIZE == 0) {
-        communicator = new Communicator<Integer>(producer, consumer);
-        communicator.init(QUEUE_BUFFER_SIZE, QUEUE_BUFFER_SIZE, 0.5);
-      }
+  public void testSize() {
+    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
       communicator.offer(i);
-      Assert.assertEquals((i % QUEUE_BUFFER_SIZE) + 1, communicator.size());
+      Assert.assertEquals(i + 1, communicator.size());
+    }
+
+    for (int i = QUEUE_BUFFER_SIZE; i > 0; --i) {
+      communicator.poll();
+      Assert.assertEquals(i - 1, communicator.size());
     }
   }
 
@@ -62,15 +63,15 @@ public class CommunicatorTest {
    * Method: remainingCapacity()
    */
   @Test
-  public void testRemainingCapacity() throws Exception {
-    for (int i = 0; i < 1024 * 1024; i++) {
-      if (i % QUEUE_BUFFER_SIZE == 0) {
-        communicator = new Communicator<Integer>(producer, consumer);
-        communicator.init(QUEUE_BUFFER_SIZE, QUEUE_BUFFER_SIZE, 0.5);
-      }
+  public void testRemainingCapacity() {
+    for (int i = QUEUE_BUFFER_SIZE; i > 0; --i) {
       communicator.offer(i);
-      Assert.assertEquals(QUEUE_BUFFER_SIZE - (i % QUEUE_BUFFER_SIZE) - 1,
-          communicator.remainingCapacity());
+      Assert.assertEquals(i - 1, communicator.remainingCapacity());
+    }
+
+    for (int i = 0; i < QUEUE_BUFFER_SIZE; ++i) {
+      communicator.poll();
+      Assert.assertEquals(i + 1, communicator.remainingCapacity());
     }
   }
 
@@ -78,10 +79,11 @@ public class CommunicatorTest {
    * Method: poll()
    */
   @Test
-  public void testPoll() throws Exception {
+  public void testPoll() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
+
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       Assert.assertEquals(i, communicator.poll().intValue());
     }
@@ -93,7 +95,7 @@ public class CommunicatorTest {
    * Method: offer(E e)
    */
   @Test
-  public void testOffer() throws Exception {
+  public void testOffer() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
@@ -101,14 +103,25 @@ public class CommunicatorTest {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       Assert.assertEquals(i, communicator.poll().intValue());
     }
+  }
 
+  @Test
+  public void testOverOffer() {
+    // The queue is soft bounded, hence over offer is allowed.
+    for (int i = 0; i < QUEUE_BUFFER_SIZE + 2; i++) {
+      communicator.offer(i);
+    }
+
+    for (int i = 0; i < QUEUE_BUFFER_SIZE + 2; i++) {
+      Assert.assertEquals(i, communicator.poll().intValue());
+    }
   }
 
   /**
    * Method: peek()
    */
   @Test
-  public void testPeek() throws Exception {
+  public void testPeek() {
     for (int i = 0; i < QUEUE_BUFFER_SIZE; i++) {
       communicator.offer(i);
     }
@@ -122,7 +135,7 @@ public class CommunicatorTest {
    * Method: isEmpty()
    */
   @Test
-  public void testIsEmpty() throws Exception {
+  public void testIsEmpty() {
     Assert.assertTrue(communicator.isEmpty());
     communicator.offer(1);
     Assert.assertFalse(communicator.isEmpty());
@@ -134,7 +147,9 @@ public class CommunicatorTest {
    * Method: getCapacity()
    */
   @Test
-  public void testGetCapacity() throws Exception {
+  public void testGetCapacity() {
+    Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
+    communicator.offer(1);
     Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
   }
 }

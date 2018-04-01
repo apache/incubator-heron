@@ -1,11 +1,10 @@
-load("/tools/rules/java_tests", "java_tests")
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = [
     "@com_google_guava_guava//jar",
     "//third_party/java:powermock",
-    "//heron/api/src/java:api-java",
+    "//heron/api/src/java:api-java-low-level",
     "//heron/common/src/java:basics-java",
+    "//heron/common/src/java:utils-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "//third_party/java:junit4",
     "//third_party/java:mockito",
 ]
@@ -61,17 +60,43 @@ marathon_deps_files = [
     "//heron/schedulers/src/java:marathon-scheduler-java",
 ]
 
+kubernetes_deps_files = [
+    "//heron/schedulers/src/java:kubernetes-scheduler-java",
+    "//heron/schedulers/src/java:scheduler-utils-java",
+    "//third_party/java:kubernetes-java-client",
+]
+
+nomad_sdk_deps = [
+    "@com_hashicorp_nomad//jar",
+    "@com_fasterxml_jackson_core_jackson_annotations//jar",
+    "@com_fasterxml_jackson_core_jackson_core//jar",
+    "@com_fasterxml_jackson_core_jackson_databind//jar",
+    "@com_google_code_findbugs_jsr305//jar",
+    "@commons_codec_commons_codec//jar",
+    "@commons_logging_commons_logging//jar",
+    "@org_apache_httpcomponents_http_client//jar",
+    "@org_apache_httpcomponents_http_core//jar",
+    "@org_bouncycastle_bcpkix_jdk15on//jar",
+    "@org_bouncycastle_bcprov_jdk15on//jar",
+]
+    
+nomad_deps_files = \
+    nomad_sdk_deps +[
+        "//heron/schedulers/src/java:nomad-scheduler-java",
+        "//heron/schedulers/src/java:scheduler-utils-java",
+    ]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
-  deps = scheduler_deps_files + aurora_deps_files,
+  deps = scheduler_deps_files + aurora_deps_files + ["@commons_cli_commons_cli//jar"],
 )
 
 java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
     "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
-    "com.twitter.heron.scheduler.aurora.AuroraControllerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraCLIControllerTest",
     "com.twitter.heron.scheduler.aurora.AuroraContextTest",
   ],
   runtime_deps = [ ":aurora-tests" ],
@@ -88,7 +113,6 @@ java_tests(
   test_classes = [
     "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
     "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
-    "com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest",
     "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
     "com.twitter.heron.scheduler.yarn.YarnLauncherTest",
   ],
@@ -159,5 +183,36 @@ java_tests(
     "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
   ],
   runtime_deps = [ ":marathon-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "kubernetes-tests",
+  srcs = glob(["**/kubernetes/*.java"]),
+  deps = scheduler_deps_files + kubernetes_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
+    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest",
+    "com.twitter.heron.scheduler.kubernetes.VolumesTests",
+  ],
+  runtime_deps = [ ":kubernetes-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "nomad-tests",
+  srcs = glob(["**/nomad/*.java"]),
+  deps = scheduler_deps_files + nomad_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.nomad.NomadSchedulerTest",
+  ],
+  runtime_deps = [ ":nomad-tests" ],
   size = "small",
 )

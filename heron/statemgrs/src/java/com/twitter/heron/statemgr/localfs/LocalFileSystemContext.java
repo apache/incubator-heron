@@ -25,8 +25,8 @@ public class LocalFileSystemContext extends Context {
    * @param config the config map
    * @return true if config does not exist, else the specified value
    */
-  public static boolean initLocalFileTree(Config config) {
+  static boolean initLocalFileTree(Config config) {
     return config.getBooleanValue(
-        LocalFileSystemKeys.initializeFileTree(), true);
+        LocalFileSystemKey.IS_INITIALIZE_FILE_TREE.value(), true);
   }
 }

@@ -45,13 +45,19 @@ const sp_string CONTAINER_INDEX = "0";
 const sp_string STMGR_NAME = "stmgr";
 const sp_string MESSAGE_TIMEOUT = "30";  // seconds
 const sp_string LOCALHOST = "127.0.0.1";
-sp_string heron_internals_config_filename =
+const sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
-sp_string metrics_sinks_config_filename = "../../../../../../../../heron/config/metrics_sinks.yaml";
+const sp_string metrics_sinks_config_filename =
+    "../../../../../../../../heron/config/metrics_sinks.yaml";
+
+const sp_string topology_runtime_config_1 = "topology.runtime.test_config";
+const sp_string topology_runtime_config_2 = "topology.runtime.test_config2";
+const sp_string spout_runtime_config = "topology.runtime.spout.test_config";
+const sp_string bolt_runtime_config = "topology.runtime.bolt.test_config";
 
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
-    const sp_string& topology_name, const sp_string& topology_id, int num_spouts,
+    const std::string& topology_name, const std::string& topology_id, int num_spouts,
     int num_spout_instances, int num_bolts, int num_bolt_instances,
     const heron::proto::api::Grouping& grouping) {
   heron::proto::api::Topology* topology = new heron::proto::api::Topology();
@@ -64,7 +70,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     heron::proto::api::Spout* spout = topology->add_spouts();
     // Set the component information
     heron::proto::api::Component* component = spout->mutable_comp();
-    sp_string compname = SPOUT_NAME;
+    std::string compname = SPOUT_NAME;
     compname += std::to_string(i);
     component->set_name(compname);
     heron::proto::api::ComponentObjectSpec compspec = heron::proto::api::JAVA_CLASS_NAME;
@@ -72,7 +78,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     // Set the stream information
     heron::proto::api::OutputStream* ostream = spout->add_outputs();
     heron::proto::api::StreamId* tstream = ostream->mutable_stream();
-    sp_string streamid = STREAM_NAME;
+    std::string streamid = STREAM_NAME;
     streamid += std::to_string(i);
     tstream->set_id(streamid);
     tstream->set_component_name(compname);
@@ -85,13 +91,17 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     heron::proto::api::Config::KeyValue* kv = config->add_kvs();
     kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM);
     kv->set_value(std::to_string(num_spout_instances));
+    // Add runtime config
+    heron::proto::api::Config::KeyValue* kv1 = config->add_kvs();
+    kv1->set_key(spout_runtime_config);
+    kv1->set_value("-1");
   }
   // Set bolts
   for (size_t i = 0; i < bolts_size; ++i) {
     heron::proto::api::Bolt* bolt = topology->add_bolts();
     // Set the component information
     heron::proto::api::Component* component = bolt->mutable_comp();
-    sp_string compname = BOLT_NAME;
+    std::string compname = BOLT_NAME;
     compname += std::to_string(i);
     component->set_name(compname);
     heron::proto::api::ComponentObjectSpec compspec = heron::proto::api::JAVA_CLASS_NAME;
@@ -99,10 +109,10 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     // Set the stream information
     heron::proto::api::InputStream* istream = bolt->add_inputs();
     heron::proto::api::StreamId* tstream = istream->mutable_stream();
-    sp_string streamid = STREAM_NAME;
+    std::string streamid = STREAM_NAME;
     streamid += std::to_string(i);
     tstream->set_id(streamid);
-    sp_string input_compname = SPOUT_NAME;
+    std::string input_compname = SPOUT_NAME;
     input_compname += std::to_string(i);
     tstream->set_component_name(input_compname);
     istream->set_gtype(grouping);
@@ -111,12 +121,23 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     heron::proto::api::Config::KeyValue* kv = config->add_kvs();
     kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM);
     kv->set_value(std::to_string(num_bolt_instances));
+    // Add runtime config
+    heron::proto::api::Config::KeyValue* kv1 = config->add_kvs();
+    kv1->set_key(bolt_runtime_config);
+    kv1->set_value("-1");
   }
   // Set message timeout
   heron::proto::api::Config* topology_config = topology->mutable_topology_config();
   heron::proto::api::Config::KeyValue* kv = topology_config->add_kvs();
   kv->set_key(heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS);
   kv->set_value(MESSAGE_TIMEOUT);
+  // Add runtime config
+  heron::proto::api::Config::KeyValue* kv1 = topology_config->add_kvs();
+  kv1->set_key(topology_runtime_config_1);
+  kv1->set_value("-1");
+  heron::proto::api::Config::KeyValue* kv2 = topology_config->add_kvs();
+  kv2->set_key(topology_runtime_config_2);
+  kv2->set_value("-1");
 
   // Set state
   topology->set_state(heron::proto::api::RUNNING);
@@ -124,8 +145,78 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   return topology;
 }
 
+static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgrs_, int num_spouts,
+    int num_spout_instances, int num_bolts, int num_bolt_instances) {
+  size_t spouts_size = num_spouts * num_spout_instances;
+  size_t bolts_size = num_bolts * num_bolt_instances;
+
+  heron::proto::system::Resource* instanceResource = new heron::proto::system::Resource();
+  instanceResource->set_ram(1);
+  instanceResource->set_cpu(1);
+  instanceResource->set_disk(1);
+
+  heron::proto::system::Resource* containerRequiredResource = new heron::proto::system::Resource();
+  containerRequiredResource->set_ram(10);
+  containerRequiredResource->set_cpu(10);
+  containerRequiredResource->set_disk(10);
+
+  sp_int32 task_id = 0;
+  sp_int32 component_index = 0;
+  sp_int32 container_index = 0;
+
+  heron::proto::system::PackingPlan* packingPlan = new heron::proto::system::PackingPlan();
+  packingPlan->set_id("dummy_packing_plan_id");
+
+  std::map<size_t, heron::proto::system::ContainerPlan*> container_map_;
+  for (size_t i = 0; i < num_stmgrs_; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = packingPlan->add_container_plans();
+    containerPlan->set_id(i);
+    heron::proto::system::Resource* requiredResource = containerPlan->mutable_requiredresource();
+    requiredResource->set_cpu(containerRequiredResource->cpu());
+    requiredResource->set_ram(containerRequiredResource->ram());
+    requiredResource->set_disk(containerRequiredResource->disk());
+    container_map_[i] = containerPlan;
+  }
+
+  // Set spouts
+  for (size_t i = 0; i < spouts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("spout_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  // Set bolts
+  component_index = 0;
+  for (size_t i = 0; i < bolts_size; ++i) {
+    heron::proto::system::ContainerPlan* containerPlan = container_map_[container_index];
+    heron::proto::system::InstancePlan* instancePlan = containerPlan->add_instance_plans();
+    instancePlan->set_component_name("bolt_x");
+    instancePlan->set_task_id(task_id++);
+    instancePlan->set_component_index(component_index++);
+    heron::proto::system::Resource* resource = instancePlan->mutable_resource();
+    resource->set_cpu(instanceResource->cpu());
+    resource->set_ram(instanceResource->ram());
+    resource->set_disk(instanceResource->disk());
+    if (++container_index == num_stmgrs_) {
+      container_index = 0;
+    }
+  }
+
+  return packingPlan;
+}
+
 // Method to create the local zk state on the filesystem
-const sp_string CreateLocalStateOnFS(heron::proto::api::Topology* topology) {
+const std::string CreateLocalStateOnFS(heron::proto::api::Topology* topology,
+                                       heron::proto::system::PackingPlan* packingPlan) {
   EventLoopImpl ss;
 
   // Create a temporary directory to write out the state
@@ -137,12 +228,13 @@ const sp_string CreateLocalStateOnFS(heron::proto::api::Topology* topology) {
   // via thestate mgr
   heron::common::HeronLocalFileStateMgr state_mgr(dpath, &ss);
   state_mgr.CreateTopology(*topology, NULL);
+  state_mgr.CreatePackingPlan(topology->name(), *packingPlan, NULL);
 
   // Return the root path
-  return sp_string(dpath);
+  return std::string(dpath);
 }
 
-const sp_string CreateInstanceId(sp_int8 type, sp_int8 instance, bool spout) {
+const std::string CreateInstanceId(sp_int8 type, sp_int8 instance, bool spout) {
   std::ostringstream instanceid_stream;
   if (spout) {
     instanceid_stream << CONTAINER_INDEX << "_" << SPOUT_NAME << static_cast<int>(type);
@@ -153,12 +245,12 @@ const sp_string CreateInstanceId(sp_int8 type, sp_int8 instance, bool spout) {
   return instanceid_stream.str();
 }
 
-heron::proto::system::Instance* CreateInstanceMap(sp_int8 type, sp_int8 instance, sp_int32 stmgr_id,
-                                                  sp_int32 global_index, bool spout) {
+heron::proto::system::Instance* CreateInstanceMap(sp_int8 type, sp_int8 instance,
+    sp_int32 stmgr_id, sp_int32 global_index, bool spout) {
   heron::proto::system::Instance* imap = new heron::proto::system::Instance();
   imap->set_instance_id(CreateInstanceId(type, instance, spout));
 
-  imap->set_stmgr_id(STMGR_NAME + std::to_string(stmgr_id));
+  imap->set_stmgr_id(STMGR_NAME + "-" + std::to_string(stmgr_id));
   heron::proto::system::InstanceInfo* inst = imap->mutable_info();
   inst->set_task_id(global_index);
   inst->set_component_index(instance);
@@ -185,22 +277,22 @@ void StartServer(EventLoopImpl* ss) {
 }
 
 void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
-                  std::thread*& tmaster_thread, const sp_string& zkhostportlist,
-                  const sp_string& topology_name, const sp_string& topology_id,
-                  const sp_string& dpath, const std::vector<sp_string>& stmgrs_id_list,
-                  sp_int32 tmaster_port, sp_int32 tmaster_controller_port) {
+                  std::thread*& tmaster_thread, const std::string& zkhostportlist,
+                  const std::string& topology_name, const std::string& topology_id,
+                  const std::string& dpath, const std::string& tmaster_host, sp_int32 tmaster_port,
+                  sp_int32 tmaster_controller_port, sp_int32 ckptmgr_port) {
   ss = new EventLoopImpl();
-  tmaster =
-      new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath, stmgrs_id_list,
+  tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_port + 2,
-                                  tmaster_port + 3, metrics_sinks_config_filename, LOCALHOST, ss);
+                                  tmaster_port + 3, ckptmgr_port,
+                                  metrics_sinks_config_filename, LOCALHOST, ss);
   tmaster_thread = new std::thread(StartServer, ss);
   // tmaster_thread->start();
 }
 
 void StartDummyStMgr(EventLoopImpl*& ss, heron::testing::DummyStMgr*& mgr,
-                     std::thread*& stmgr_thread, const sp_string tmaster_host,
-                     sp_int32 tmaster_port, const sp_string& stmgr_id, sp_int32 stmgr_port,
+                     std::thread*& stmgr_thread, const std::string tmaster_host,
+                     sp_int32 tmaster_port, const std::string& stmgr_id, sp_int32 stmgr_port,
                      const std::vector<heron::proto::system::Instance*>& instances) {
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
@@ -220,12 +312,14 @@ void StartDummyStMgr(EventLoopImpl*& ss, heron::testing::DummyStMgr*& mgr,
 
 struct CommonResources {
   // arguments
+  std::string tmaster_host_;
   sp_int32 tmaster_port_;
   sp_int32 tmaster_controller_port_;
+  sp_int32 ckptmgr_port_;
   sp_int32 stmgr_baseport_;
-  sp_string zkhostportlist_;
-  sp_string topology_name_;
-  sp_string topology_id_;
+  std::string zkhostportlist_;
+  std::string topology_name_;
+  std::string topology_id_;
   sp_int32 num_stmgrs_;
   sp_int32 num_spouts_;
   sp_int32 num_spout_instances_;
@@ -235,10 +329,11 @@ struct CommonResources {
   heron::proto::api::Grouping grouping_;
 
   // returns - filled in by init
-  sp_string dpath_;
+  std::string dpath_;
   std::vector<EventLoopImpl*> ss_list_;
-  std::vector<sp_string> stmgrs_id_list_;
+  std::vector<std::string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
+  heron::proto::system::PackingPlan* packing_plan_;
 
   heron::tmaster::TMaster* tmaster_;
   std::thread* tmaster_thread_;
@@ -248,20 +343,21 @@ struct CommonResources {
   std::vector<std::thread*> stmgrs_threads_list_;
 
   // Stmgr to instance ids
-  std::map<sp_int32, std::vector<sp_string> > stmgr_instance_id_list_;
+  std::map<sp_int32, std::vector<std::string> > stmgr_instance_id_list_;
 
   // Stmgr to Instance
   std::map<sp_int32, std::vector<heron::proto::system::Instance*> > stmgr_instance_list_;
 
   // Instanceid to instance
-  std::map<sp_string, heron::proto::system::Instance*> instanceid_instance_;
+  std::map<std::string, heron::proto::system::Instance*> instanceid_instance_;
 
-  std::map<sp_string, sp_int32> instanceid_stmgr_;
+  std::map<std::string, sp_int32> instanceid_stmgr_;
+
   CommonResources() : topology_(NULL), tmaster_(NULL), tmaster_thread_(NULL) {
     // Create the sington for heron_internals_config_reader
     // if it does not exist
     if (!heron::config::HeronInternalsConfigReader::Exists()) {
-      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+      heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename, "");
     }
   }
 };
@@ -271,13 +367,15 @@ void StartTMaster(CommonResources& common) {
   common.topology_ = GenerateDummyTopology(
       common.topology_name_, common.topology_id_, common.num_spouts_, common.num_spout_instances_,
       common.num_bolts_, common.num_bolt_instances_, common.grouping_);
+  common.packing_plan_ = GenerateDummyPackingPlan(common.num_stmgrs_, common.num_spouts_,
+      common.num_spout_instances_, common.num_bolts_, common.num_bolt_instances_);
 
   // Create the zk state on the local file system
-  common.dpath_ = CreateLocalStateOnFS(common.topology_);
+  common.dpath_ = CreateLocalStateOnFS(common.topology_, common.packing_plan_);
 
-  // Poulate the list of stmgrs
+  // Populate the list of stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
-    sp_string id = STMGR_NAME;
+    std::string id = STMGR_NAME + "-";
     id += std::to_string(i);
     common.stmgrs_id_list_.push_back(id);
   }
@@ -286,8 +384,9 @@ void StartTMaster(CommonResources& common) {
   EventLoopImpl* tmaster_eventLoop;
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
-               common.topology_name_, common.topology_id_, common.dpath_, common.stmgrs_id_list_,
-               common.tmaster_port_, common.tmaster_controller_port_);
+               common.topology_name_, common.topology_id_, common.dpath_,
+               common.tmaster_host_, common.tmaster_port_, common.tmaster_controller_port_,
+               common.ckptmgr_port_);
   common.ss_list_.push_back(tmaster_eventLoop);
 }
 
@@ -348,8 +447,10 @@ void StartStMgrs(CommonResources& common) {
 
 void SetUpCommonResources(CommonResources& common) {
   // Initialize dummy params
+  common.tmaster_host_ = LOCALHOST;
   common.tmaster_port_ = 53001;
   common.tmaster_controller_port_ = 53002;
+  common.ckptmgr_port_ = 53003;
   common.stmgr_baseport_ = 53001;
   common.topology_name_ = "mytopology";
   common.topology_id_ = "abcd-9999";
@@ -366,6 +467,7 @@ void SetUpCommonResources(CommonResources& common) {
 
 void TearCommonResources(CommonResources& common) {
   delete common.topology_;
+  delete common.packing_plan_;
   delete common.tmaster_thread_;
   delete common.tmaster_;
 
@@ -377,7 +479,7 @@ void TearCommonResources(CommonResources& common) {
 
   for (size_t i = 0; i < common.ss_list_.size(); ++i) delete common.ss_list_[i];
 
-  for (std::map<sp_string, heron::proto::system::Instance*>::iterator itr =
+  for (std::map<std::string, heron::proto::system::Instance*>::iterator itr =
            common.instanceid_instance_.begin();
        itr != common.instanceid_instance_.end(); ++itr)
     delete itr->second;
@@ -388,20 +490,22 @@ void TearCommonResources(CommonResources& common) {
 
 void ControlTopologyDone(HTTPClient* client, IncomingHTTPResponse* response) {
   if (response->response_code() != 200) {
-    FAIL() << "Error while controlling topology " << response->response_code();
+    FAIL() << "Error while controlling topology " << response->response_code()
+           << " " << response->body();
   } else {
     client->getEventLoop()->loopExit();
   }
+
   delete response;
 }
 
-void ControlTopology(sp_string topology_id, sp_int32 port, bool activate) {
+void ControlTopology(std::string topology_id, sp_int32 port, bool activate) {
   EventLoopImpl ss;
   AsyncDNS dns(&ss);
   HTTPClient* client = new HTTPClient(&ss, &dns);
   HTTPKeyValuePairs kvs;
   kvs.push_back(make_pair("topologyid", topology_id));
-  sp_string requesturl = activate ? "/activate" : "/deactivate";
+  std::string requesturl = activate ? "/activate" : "/deactivate";
   OutgoingHTTPRequest* request =
       new OutgoingHTTPRequest(LOCALHOST, port, requesturl, BaseHTTPRequest::GET, kvs);
   auto cb = [client](IncomingHTTPResponse* response) { ControlTopologyDone(client, response); };
@@ -411,6 +515,49 @@ void ControlTopology(sp_string topology_id, sp_int32 port, bool activate) {
   }
   ss.loop();
 }
+
+void UpdateRuntimeConfigDone(HTTPClient* client,
+                             IncomingHTTPResponse* response,
+                             sp_int32 code,
+                             const std::string& message) {
+  client->getEventLoop()->loopExit();
+  if (response->response_code() != code) {
+    FAIL() << "Got unexected result while runtime config topology for " << message
+           << ". Expected: " << code << ". Got " << response->response_code()
+           << ". " << response->body();
+  }
+
+  delete response;
+}
+
+void UpdateRuntimeConfig(std::string topology_id,
+                         sp_int32 port,
+                         std::vector<std::string> configs,
+                         sp_int32 code,
+                         const std::string& message) {
+  EventLoopImpl ss;
+  AsyncDNS dns(&ss);
+  HTTPClient* client = new HTTPClient(&ss, &dns);
+  HTTPKeyValuePairs kvs;
+  kvs.push_back(make_pair("topologyid", topology_id));
+  for (std::vector<std::string>::iterator iter = configs.begin(); iter != configs.end(); ++iter) {
+    kvs.push_back(make_pair("runtime-config", *iter));
+  }
+
+  std::string requesturl = "/runtime_config/update";
+  OutgoingHTTPRequest* request =
+      new OutgoingHTTPRequest(LOCALHOST, port, requesturl, BaseHTTPRequest::GET, kvs);
+
+  auto cb = [client, code, message](IncomingHTTPResponse* response) {
+    UpdateRuntimeConfigDone(client, response, code, message);
+  };
+
+  if (client->SendRequest(request, std::move(cb)) != SP_OK) {
+    FAIL() << "Unable to send the runtime config request\n";
+  }
+  ss.loop();
+}
+
 
 // Test to make sure that the tmaster forms the right pplan
 // and sends it to all stmgrs
@@ -448,7 +595,7 @@ TEST(StMgr, test_pplan_distribute) {
   const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
   EXPECT_EQ(pplan0->instances_size(), common.num_stmgrs_ * num_workers_per_stmgr_);
-  std::map<sp_string, heron::config::PhysicalPlanHelper::TaskData> tasks;
+  std::map<std::string, heron::config::PhysicalPlanHelper::TaskData> tasks;
   heron::config::PhysicalPlanHelper::GetLocalTasks(*pplan0, common.stmgrs_id_list_[0], tasks);
   EXPECT_EQ((int)tasks.size(), (common.num_spouts_ * common.num_spout_instances_ +
                                 common.num_bolts_ * common.num_bolt_instances_) /
@@ -503,7 +650,7 @@ TEST(StMgr, test_activate_deactivate) {
   activate_thread->join();
   delete activate_thread;
 
-  // Wait for some time and check that the topology is in deactivated state
+  // Wait for some time and check that the topology is in activated state
   sleep(1);
   for (size_t i = 0; i < common.stmgrs_list_.size(); ++i) {
     EXPECT_EQ(common.stmgrs_list_[i]->GetPhysicalPlan()->topology().state(),
@@ -525,7 +672,7 @@ TEST(StMgr, test_activate_deactivate) {
   const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
   EXPECT_EQ(pplan0->instances_size(), common.num_stmgrs_ * num_workers_per_stmgr_);
-  std::map<sp_string, heron::config::PhysicalPlanHelper::TaskData> tasks;
+  std::map<std::string, heron::config::PhysicalPlanHelper::TaskData> tasks;
   heron::config::PhysicalPlanHelper::GetLocalTasks(*pplan0, common.stmgrs_id_list_[0], tasks);
   EXPECT_EQ((int)tasks.size(), (common.num_spouts_ * common.num_spout_instances_ +
                                 common.num_bolts_ * common.num_bolt_instances_) /
@@ -535,19 +682,171 @@ TEST(StMgr, test_activate_deactivate) {
   TearCommonResources(common);
 }
 
+// Test to see if runtime_config works
+TEST(StMgr, test_runtime_config) {
+  std::string runtime_test_spout = "spout3";
+  std::string runtime_test_bolt = "bolt4";
+
+  CommonResources common;
+  SetUpCommonResources(common);
+
+  // Start the tmaster etc.
+  StartTMaster(common);
+
+  // Distribute workers across stmgrs
+  DistributeWorkersAcrossStmgrs(common);
+
+  // Start the stream managers
+  StartStMgrs(common);
+
+  // Wait till we get the physical plan populated on the stmgrs, then
+  // verify current config values in tmaster as well as stream managers.
+  // common.tmaster_->FetchPhysicalPlan();
+  // auto t = init_pplan->topology();
+  // auto c = t.topology_config();
+  for (size_t i = 0; i < common.stmgrs_list_.size(); ++i) {
+    while (!common.stmgrs_list_[i]->GetPhysicalPlan()) sleep(1);
+    std::map<std::string, std::string> init_config, init_spout_config, init_bolt_config;
+    const heron::proto::system::PhysicalPlan* pplan = common.stmgrs_list_[i]->GetPhysicalPlan();
+    heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), init_config);
+    EXPECT_EQ(init_config[topology_runtime_config_1], "-1");
+    EXPECT_EQ(init_config[topology_runtime_config_2], "-1");
+    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+        runtime_test_spout, init_spout_config);
+    EXPECT_EQ(init_spout_config[spout_runtime_config], "-1");
+    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+        runtime_test_bolt, init_bolt_config);
+    EXPECT_EQ(init_bolt_config[bolt_runtime_config], "-1");
+  }
+  std::map<std::string, std::string> init_config, init_spout_config, init_bolt_config;
+  const heron::proto::system::PhysicalPlan* init_pplan = common.tmaster_->getPhysicalPlan();
+  heron::config::TopologyConfigHelper::GetTopologyConfig(init_pplan->topology(), init_config);
+  EXPECT_EQ(init_config[topology_runtime_config_1], "-1");
+  EXPECT_EQ(init_config[topology_runtime_config_2], "-1");
+  heron::config::TopologyConfigHelper::GetComponentConfig(init_pplan->topology(),
+      runtime_test_spout, init_spout_config);
+  EXPECT_EQ(init_spout_config[spout_runtime_config], "-1");
+  heron::config::TopologyConfigHelper::GetComponentConfig(init_pplan->topology(),
+      runtime_test_bolt, init_bolt_config);
+  EXPECT_EQ(init_bolt_config[bolt_runtime_config], "-1");
+
+  // Test ValidateRuntimeConfig()
+  heron::tmaster::ComponentConfigMap validate_good_config_map;
+  std::map<std::string, std::string> validate_good_config;
+  validate_good_config[topology_runtime_config_1] = "1";
+  validate_good_config[topology_runtime_config_2] = "2";
+  validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
+  validate_good_config_map["spout1"] = validate_good_config;
+  EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
+
+  heron::tmaster::ComponentConfigMap validate_bad_config_map;
+  std::map<std::string, std::string> validate_bad_config;
+  validate_good_config[topology_runtime_config_1] = "1";
+  validate_bad_config_map["unknown_component"] = validate_good_config;
+  EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_bad_config_map), false);
+
+  // Post runtime config request with no configs and expect 400 response.
+  std::vector<std::string> no_config;
+  std::thread* no_config_update_thread = new std::thread(UpdateRuntimeConfig,
+      common.topology_id_, common.tmaster_controller_port_, no_config, 400, "no_config");
+  no_config_update_thread->join();
+  delete no_config_update_thread;
+
+  // Post runtime config request with unavailable configs and expect 400 response.
+  std::vector<std::string> wrong_config1;
+  wrong_config1.push_back("badformat");  // Bad format
+  std::thread* wrong_config1_update_thread = new std::thread(UpdateRuntimeConfig,
+      common.topology_id_, common.tmaster_controller_port_, wrong_config1, 400, "wrong_config1");
+  wrong_config1_update_thread->join();
+  delete wrong_config1_update_thread;
+
+  std::vector<std::string> wrong_config2;
+  wrong_config2.push_back("topology.runtime.test_config:1");
+  // Component doesn't exist
+  wrong_config2.push_back("bad_component:topology.runtime.bolt.test_config:1");
+  std::thread* wrong_config2_update_thread = new std::thread(UpdateRuntimeConfig,
+      common.topology_id_, common.tmaster_controller_port_, wrong_config2, 400, "wrong_config2");
+  wrong_config2_update_thread->join();
+  delete wrong_config2_update_thread;
+
+  // Post runtime config request with good configs and expect 200 response.
+  std::vector<std::string> good_config;
+  good_config.push_back(topology_runtime_config_1 + ":1");
+  good_config.push_back(topology_runtime_config_2 + ":2");
+  good_config.push_back(runtime_test_spout + ":" + spout_runtime_config + ":3");
+  good_config.push_back(runtime_test_bolt + ":" + bolt_runtime_config + ":4");
+  std::thread* good_config_update_thread = new std::thread(UpdateRuntimeConfig,
+      common.topology_id_, common.tmaster_controller_port_, good_config, 200, "good_config");
+  good_config_update_thread->join();
+  delete good_config_update_thread;
+
+  // Wait till we get the physical plan populated on the stmgrs
+  // and lets check that the topology has the updated configs.
+  sleep(1);
+  for (size_t i = 0; i < common.stmgrs_list_.size(); ++i) {
+    std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
+    const heron::proto::system::PhysicalPlan* pplan = common.stmgrs_list_[i]->GetPhysicalPlan();
+    heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
+    EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
+    EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
+    EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
+    EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
+    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+        runtime_test_spout, updated_spout_config);
+    EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
+    EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
+    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+        runtime_test_bolt, updated_bolt_config);
+    EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
+    EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
+  }
+  std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
+  const heron::proto::system::PhysicalPlan* pplan = common.tmaster_->getPhysicalPlan();
+  heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
+  EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
+  EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
+  EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
+  EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
+  heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+      runtime_test_spout, updated_spout_config);
+  EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
+  EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
+  heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+      runtime_test_bolt, updated_bolt_config);
+  EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
+  EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
+
+  // Stop the schedulers
+  for (size_t i = 0; i < common.ss_list_.size(); ++i) {
+    common.ss_list_[i]->loopExit();
+  }
+
+  // Wait for the threads to terminate
+  common.tmaster_thread_->join();
+  for (size_t i = 0; i < common.stmgrs_threads_list_.size(); ++i) {
+    common.stmgrs_threads_list_[i]->join();
+  }
+
+  // Delete the common resources
+  TearCommonResources(common);
+}
+
 // TODO(vikasr): Add unit tests for metrics manager connection
 
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
+  std::cout << "Current working directory (to find tmaster logs) "
+      << ProcessUtils::getCurrentWorkingDirectory() << std::endl;
   testing::InitGoogleTest(&argc, argv);
+  sp_string configFile = heron_internals_config_filename;
   if (argc > 1) {
     std::cerr << "Using config file " << argv[1] << std::endl;
-    heron_internals_config_filename = argv[1];
+    configFile = argv[1];
   }
 
   // Create the sington for heron_internals_config_reader, if it does not exist
   if (!heron::config::HeronInternalsConfigReader::Exists()) {
-    heron::config::HeronInternalsConfigReader::Create(heron_internals_config_filename);
+    heron::config::HeronInternalsConfigReader::Create(configFile, "");
   }
   return RUN_ALL_TESTS();
 }

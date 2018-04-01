@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +37,8 @@ class StateManager:
   """
 
   __metaclass__ = abc.ABCMeta
+
+  TIMEOUT_SECONDS = 5
 
   @property
   def name(self):
@@ -81,7 +86,7 @@ class StateManager:
     """
     for hostport in self.hostportlist:
       try:
-        socket.create_connection(hostport, 2)
+        socket.create_connection(hostport, StateManager.TIMEOUT_SECONDS)
         return True
       except:
         LOG.info("StateManager %s Unable to connect to host: %s port %i"

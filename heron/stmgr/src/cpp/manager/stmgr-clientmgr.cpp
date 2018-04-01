@@ -16,8 +16,8 @@
 
 #include "manager/stmgr-clientmgr.h"
 #include <iostream>
-#include <set>
 #include <map>
+#include <unordered_set>
 #include "manager/stmgr.h"
 #include "manager/stmgr-client.h"
 #include "proto/messages.h"
@@ -37,13 +37,18 @@ const sp_string METRIC_STMGR_NEW_CONNECTIONS = "__stmgr_new_connections";
 StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
                                const sp_string& _topology_id, const sp_string& _stmgr_id,
                                StMgr* _stream_manager,
-                               heron::common::MetricsMgrSt* _metrics_manager_client)
+                               heron::common::MetricsMgrSt* _metrics_manager_client,
+                               sp_int64 _high_watermark, sp_int64 _low_watermark,
+                               bool _droptuples_upon_backpressure)
     : topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
       eventLoop_(eventLoop),
       stream_manager_(_stream_manager),
-      metrics_manager_client_(_metrics_manager_client) {
+      metrics_manager_client_(_metrics_manager_client),
+      high_watermark_(_high_watermark),
+      low_watermark_(_low_watermark),
+      droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
   stmgr_clientmgr_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__clientmgr", stmgr_clientmgr_metrics_);
 }
@@ -54,10 +59,10 @@ StMgrClientMgr::~StMgrClientMgr() {
   delete stmgr_clientmgr_metrics_;
 }
 
-void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) {
+void StMgrClientMgr::StartConnections(const proto::system::PhysicalPlan* _pplan) {
   // TODO(vikasr) : Currently we establish connections with all streammanagers
   // In the next iteration we might want to make it better
-  std::set<sp_string> all_stmgrs;
+  std::unordered_set<sp_string> all_stmgrs;
   for (sp_int32 i = 0; i < _pplan->stmgrs_size(); ++i) {
     const proto::system::StMgr& s = _pplan->stmgrs(i);
     if (s.id() == stmgr_id_) {
@@ -85,7 +90,7 @@ void StMgrClientMgr::NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan) 
   }
 
   // We need to remove any unused ports
-  std::set<sp_string> to_remove;
+  std::unordered_set<sp_string> to_remove;
   for (auto iter = clients_.begin(); iter != clients_.end(); ++iter) {
     if (all_stmgrs.find(iter->first) == all_stmgrs.end()) {
       // This stmgr is no longer there in the physical map
@@ -112,29 +117,42 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   options.set_host(_hostname);
   options.set_port(_port);
   options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
-                                  ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() *
-                              1024 * 1024);
+                                  ->GetHeronStreammgrNetworkOptionsMaximumPacketMb() * 1_MB);
+  options.set_high_watermark(high_watermark_);
+  options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
   StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
-                                        stmgr_id_, _other_stmgr_id, this, metrics_manager_client_);
+                                        stmgr_id_, _other_stmgr_id, this, metrics_manager_client_,
+                                        droptuples_upon_backpressure_);
   client->Start();
   return client;
 }
 
-void StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
+bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
                                             const proto::system::HeronTupleSet2& _msg) {
   auto iter = clients_.find(_stmgr_id);
   CHECK(iter != clients_.end());
 
   // Acquire the message
-  proto::stmgr::TupleStreamMessage2* out = clients_[_stmgr_id]->acquire(out);
+  proto::stmgr::TupleStreamMessage* out = nullptr;
+  out = __global_protobuf_pool_acquire__(out);
   out->set_task_id(_task_id);
+  out->set_src_task_id(_msg.src_task_id());
   _msg.SerializePartialToString(out->mutable_set());
 
-  clients_[_stmgr_id]->SendTupleStreamMessage(*out);
+  bool retval = clients_[_stmgr_id]->SendTupleStreamMessage(*out);
 
   // Release the message
-  clients_[_stmgr_id]->release(out);
+  __global_protobuf_pool_release__(out);
+
+  return retval;
+}
+
+void StMgrClientMgr::SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
+                           proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+  auto iter = clients_.find(_stmgr_id);
+  CHECK(iter != clients_.end());
+  iter->second->SendDownstreamStatefulCheckpoint(_message);
 }
 
 void StMgrClientMgr::StartBackPressureOnServer(const sp_string& _other_stmgr_id) {
@@ -158,5 +176,33 @@ void StMgrClientMgr::SendStopBackPressureToOtherStMgrs() {
   }
 }
 
+void StMgrClientMgr::HandleDeadStMgrConnection(const sp_string& _dead_stmgr) {
+  stream_manager_->HandleDeadStMgrConnection(_dead_stmgr);
+}
+
+void StMgrClientMgr::HandleStMgrClientRegistered() {
+  if (AllStMgrClientsRegistered()) {
+    stream_manager_->HandleAllStMgrClientsRegistered();
+  }
+}
+
+void StMgrClientMgr::CloseConnectionsAndClear() {
+  for (auto kv : clients_) {
+    kv.second->Quit();  // It will delete itself
+  }
+  clients_.clear();
+}
+
+bool StMgrClientMgr::AllStMgrClientsRegistered() {
+  for (auto kv : clients_) {
+    if (!kv.second->IsConnected()) {
+      return false;
+    }
+    if (!kv.second->IsRegistered()) {
+      return false;
+    }
+  }
+  return true;
+}
 }  // namespace stmgr
 }  // namespace heron

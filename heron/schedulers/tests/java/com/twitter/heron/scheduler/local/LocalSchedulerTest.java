@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.PackingTestUtils;
 
-
+@SuppressWarnings("unchecked")
 public class LocalSchedulerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private static final int MAX_WAITING_SECOND = 10;
@@ -44,9 +44,22 @@ public class LocalSchedulerTest {
   public void before() throws Exception {
     scheduler = Mockito.spy(LocalScheduler.class);
     config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
     runtime = Mockito.mock(Config.class);
+
+    scheduler.initialize(config, runtime);
+    Mockito.when(runtime.get(Key.TOPOLOGY_DEFINITION)).thenReturn(TopologyAPI.Topology
+        .newBuilder()
+        .setId("a")
+        .setName("a")
+        .setState(TopologyAPI.TopologyState.RUNNING)
+        .setTopologyConfig(
+            TopologyAPI.Config.newBuilder()
+                .addKvs(TopologyAPI.Config.KeyValue.newBuilder()
+                    .setKey(com.twitter.heron.api.Config.TOPOLOGY_REMOTE_DEBUGGING_ENABLE)
+                    .setValue("false"))).build());
+
     scheduler.initialize(config, runtime);
   }
 
@@ -72,11 +85,14 @@ public class LocalSchedulerTest {
   @Test
   public void testOnSchedule() throws Exception {
     Mockito.doNothing().
-        when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class));
+        when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class),
+        Mockito.anySet());
     Process[] mockProcesses = new Process[4];
     for (int i = 0; i < 4; i++) {
       mockProcesses[i] = Mockito.mock(Process.class);
-      Mockito.doReturn(mockProcesses[i]).when(scheduler).startExecutorProcess(i);
+      Set<PackingPlan.InstancePlan> instances
+          = (i == 0) ?  null : PackingTestUtils.testContainerPlan(i).getInstances();
+      Mockito.doReturn(mockProcesses[i]).when(scheduler).startExecutorProcess(i, instances);
     }
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
@@ -93,25 +109,31 @@ public class LocalSchedulerTest {
         // id 2 was not in the container plan
         continue;
       }
-      Mockito.verify(scheduler).startExecutor(i);
-      Mockito.verify(scheduler).startExecutorProcess(i);
-      Mockito.verify(scheduler).startExecutorMonitor(i, mockProcesses[i]);
+
+      Set<PackingPlan.InstancePlan> instances
+          = (i == 0) ?  null : PackingTestUtils.testContainerPlan(i).getInstances();
+      Mockito.verify(scheduler).startExecutor(i, instances);
+      Mockito.verify(scheduler).startExecutorProcess(i, instances);
+      Mockito.verify(scheduler).startExecutorMonitor(i, mockProcesses[i], instances);
     }
   }
 
   @Test
   public void testAddContainer() throws Exception {
-    Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(2L);
+    Mockito.when(runtime.getLongValue(Key.NUM_CONTAINERS)).thenReturn(2L);
     scheduler.initialize(config, runtime);
 
     //verify plan is deployed and containers are created
     Mockito.doNothing().
-        when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class));
+        when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class),
+        Mockito.anySet());
     Process mockProcessTM = Mockito.mock(Process.class);
-    Mockito.doReturn(mockProcessTM).when(scheduler).startExecutorProcess(0);
+    Mockito.doReturn(mockProcessTM).when(scheduler).startExecutorProcess(
+        0, null);
 
     Process mockProcessWorker1 = Mockito.mock(Process.class);
-    Mockito.doReturn(mockProcessWorker1).when(scheduler).startExecutorProcess(1);
+    Mockito.doReturn(mockProcessWorker1).when(scheduler).startExecutorProcess(
+        1,  PackingTestUtils.testContainerPlan(1).getInstances());
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
@@ -119,24 +141,30 @@ public class LocalSchedulerTest {
     Mockito.when(packingPlan.getContainers()).thenReturn(containers);
     Assert.assertTrue(scheduler.onSchedule(packingPlan));
 
-    Mockito.verify(scheduler, Mockito.times(2)).startExecutor(Mockito.anyInt());
+    Mockito.verify(scheduler, Mockito.times(2)).startExecutor(Mockito.anyInt(),
+        Mockito.anySet());
 
     //now verify add container adds new container
     Process mockProcessWorker2 = Mockito.mock(Process.class);
-    Mockito.doReturn(mockProcessWorker2).when(scheduler).startExecutorProcess(3);
+    Mockito.doReturn(mockProcessWorker2).when(scheduler).startExecutorProcess(
+        3, PackingTestUtils.testContainerPlan(3).getInstances());
     containers.clear();
     containers.add(PackingTestUtils.testContainerPlan(3));
     scheduler.addContainers(containers);
-    Mockito.verify(scheduler).startExecutor(3);
+    Mockito.verify(scheduler).startExecutor(3,
+        PackingTestUtils.testContainerPlan(3).getInstances());
 
     Process mockProcess = Mockito.mock(Process.class);
-    Mockito.doReturn(mockProcess).when(scheduler).startExecutorProcess(Mockito.anyInt());
+    Mockito.doReturn(mockProcess).when(scheduler).startExecutorProcess(
+        Mockito.anyInt(), Mockito.anySet());
     containers.clear();
     containers.add(PackingTestUtils.testContainerPlan(4));
     containers.add(PackingTestUtils.testContainerPlan(5));
     scheduler.addContainers(containers);
-    Mockito.verify(scheduler).startExecutor(4);
-    Mockito.verify(scheduler).startExecutor(5);
+    Mockito.verify(scheduler).startExecutor(4,
+        PackingTestUtils.testContainerPlan(4).getInstances());
+    Mockito.verify(scheduler).startExecutor(5,
+        PackingTestUtils.testContainerPlan(5).getInstances());
   }
 
   /**
@@ -148,13 +176,17 @@ public class LocalSchedulerTest {
 
     //verify plan is deployed and containers are created
     Mockito.doNothing().
-        when(scheduler).startExecutorMonitor(Mockito.anyInt(), Mockito.any(Process.class));
+        when(scheduler).startExecutorMonitor(Mockito.anyInt(),
+        Mockito.any(Process.class), Mockito.anySet());
 
     Process[] processes = new Process[LOCAL_NUM_CONTAINER];
     Set<PackingPlan.ContainerPlan> existingContainers = new HashSet<>();
     for (int i = 0; i < LOCAL_NUM_CONTAINER; i++) {
       processes[i] = Mockito.mock(Process.class);
-      Mockito.doReturn(processes[i]).when(scheduler).startExecutorProcess(i);
+      Set<PackingPlan.InstancePlan> instances
+          = (i == 0) ?  null : PackingTestUtils.testContainerPlan(i).getInstances();
+      Mockito.doReturn(processes[i]).when(scheduler)
+          .startExecutorProcess(i,  instances);
       if (i > 0) {
         // ignore the container for TMaster. existing containers simulate the containers created
         // by packing plan
@@ -166,7 +198,8 @@ public class LocalSchedulerTest {
     Mockito.when(packingPlan.getContainers()).thenReturn(existingContainers);
     Assert.assertTrue(scheduler.onSchedule(packingPlan));
     verifyIdsOfLaunchedContainers(0, 1, 2, 3, 4, 5);
-    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
+    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(
+        Mockito.anyInt(), Mockito.anySet());
 
     Set<PackingPlan.ContainerPlan> containersToRemove = new HashSet<>();
     PackingPlan.ContainerPlan containerToRemove =
@@ -176,7 +209,8 @@ public class LocalSchedulerTest {
     verifyIdsOfLaunchedContainers(0, 1, 2, 3, 4);
     Mockito.verify(processes[LOCAL_NUM_CONTAINER - 1]).destroy();
     // verify no new process restarts
-    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
+    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(
+        Mockito.anyInt(), Mockito.anySet());
 
     containersToRemove.clear();
     containersToRemove.add(PackingTestUtils.testContainerPlan(1));
@@ -186,7 +220,8 @@ public class LocalSchedulerTest {
     Mockito.verify(processes[1]).destroy();
     Mockito.verify(processes[2]).destroy();
     // verify no new process restarts
-    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(Mockito.anyInt());
+    Mockito.verify(scheduler, Mockito.times(LOCAL_NUM_CONTAINER)).startExecutor(
+        Mockito.anyInt(), Mockito.anySet());
   }
 
   private void verifyIdsOfLaunchedContainers(int... ids) {
@@ -250,17 +285,21 @@ public class LocalSchedulerTest {
     int exitValue = 1;
     Process containerExecutor = Mockito.mock(Process.class);
     Mockito.doReturn(exitValue).when(containerExecutor).exitValue();
-    Mockito.doNothing().when(scheduler).startExecutor(Mockito.anyInt());
+    Mockito.doNothing().when(scheduler).startExecutor(
+        Mockito.anyInt(), Mockito.anySet());
 
     // Start the process
     scheduler.getProcessToContainer().put(containerExecutor, containerId);
-    scheduler.startExecutorMonitor(containerId, containerExecutor);
+    scheduler.startExecutorMonitor(
+        containerId, containerExecutor,
+        PackingTestUtils.testContainerPlan(containerId).getInstances());
 
     // Shut down the MonitorService
     scheduler.getMonitorService().shutdown();
     scheduler.getMonitorService().awaitTermination(MAX_WAITING_SECOND, TimeUnit.SECONDS);
     // The dead process should be restarted
-    Mockito.verify(scheduler).startExecutor(containerId);
+    Mockito.verify(scheduler).startExecutor(containerId,
+        PackingTestUtils.testContainerPlan(containerId).getInstances());
     Assert.assertFalse(scheduler.isTopologyKilled());
   }
 
@@ -271,20 +310,22 @@ public class LocalSchedulerTest {
 
     Process containerExecutor = Mockito.mock(Process.class);
     Mockito.doReturn(exitValue).when(containerExecutor).exitValue();
-    Mockito.doNothing().when(scheduler).startExecutor(Mockito.anyInt());
+    Mockito.doNothing().when(scheduler).startExecutor(Mockito.anyInt(), Mockito.anySet());
 
     // Set the killed flag and the dead process should not be restarted
     scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance());
 
     // Start the process
     scheduler.getProcessToContainer().put(containerExecutor, containerId);
-    scheduler.startExecutorMonitor(containerId, containerExecutor);
+    scheduler.startExecutorMonitor(containerId, containerExecutor,
+        PackingTestUtils.testContainerPlan(containerId).getInstances());
 
     // Shut down the MonitorService
     scheduler.getMonitorService().shutdown();
     scheduler.getMonitorService().awaitTermination(MAX_WAITING_SECOND, TimeUnit.SECONDS);
     // The dead process should not be restarted
-    Mockito.verify(scheduler, Mockito.never()).startExecutor(Mockito.anyInt());
+    Mockito.verify(scheduler, Mockito.never())
+        .startExecutor(Mockito.anyInt(), Mockito.anySet());
     Assert.assertTrue(scheduler.isTopologyKilled());
   }
 }

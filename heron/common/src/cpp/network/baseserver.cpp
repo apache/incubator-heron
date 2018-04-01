@@ -37,6 +37,8 @@ void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   options_ = _options;
   listen_fd_ = -1;
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
+  connection_options_.high_watermark_ = options_.get_high_watermark();
+  connection_options_.low_watermark_ = options_.get_low_watermark();
   on_new_connection_callback_ = [this](EventLoop::Status status) { this->OnNewConnection(status); };
 }
 
@@ -102,6 +104,17 @@ sp_int32 BaseServer::Start_Base() {
     LOG(ERROR) << "register for read of the socket failed in server\n";
     close(listen_fd_);
     return -1;
+  }
+
+  // fetch the port after bind/listen port 0
+  if (AF_INET == options_.get_sin_family() && 0 == options_.get_port()) {
+    if (getsockname(listen_fd_, serv_addr, &sockaddr_len) != 0)  {
+      LOG(ERROR) << "getsockname() error: " << strerror(errno);
+      close(listen_fd_);
+      return SP_NOTOK;
+    } else {
+      options_.set_port(ntohs(in_addr.sin_port));
+    }
   }
 
   return 0;

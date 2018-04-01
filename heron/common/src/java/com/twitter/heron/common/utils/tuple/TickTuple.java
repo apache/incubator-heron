@@ -16,6 +16,7 @@ package com.twitter.heron.common.utils.tuple;
 
 import java.util.List;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 
@@ -31,6 +32,8 @@ import com.twitter.heron.api.tuple.Tuple;
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TickTuple implements Tuple {
+  private static final long serialVersionUID = -7405457325549296084L;
+
   public TickTuple() {
   }
 
@@ -164,12 +167,10 @@ public class TickTuple implements Tuple {
     return null;
   }
 
-  /*
-   * TODO:- Is this needed
-    public GlobalStreamId getSourceGlobalStreamid() {
-        return new GlobalStreamId(getSourceComponent(), streamId);
-    }
-  */
+  @Override
+  public TopologyAPI.StreamId getSourceGlobalStreamId() {
+    throw new RuntimeException("Cannot call getSourceGlobalStreamId for TickTuple");
+  }
 
   @Override
   public String getSourceComponent() {

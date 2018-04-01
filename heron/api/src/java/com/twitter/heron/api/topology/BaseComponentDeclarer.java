@@ -1,4 +1,4 @@
-// Copyright 2016 Twitter. All rights reserved.
+// Copyright 2017 Twitter. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.twitter.heron.api.topology;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.protobuf.ByteString;
@@ -27,21 +45,20 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     extends BaseConfigurationDeclarer<T> {
   private String name;
   private IComponent component;
-  private Map<String, Object> componentConfiguration;
+  private Config componentConfiguration;
 
   public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
     this.name = name;
     this.component = comp;
-    this.componentConfiguration = comp.getComponentConfiguration();
-    if (this.componentConfiguration == null) {
-      this.componentConfiguration = new HashMap<>();
+    if (comp.getComponentConfiguration() != null) {
+      this.componentConfiguration = new Config(comp.getComponentConfiguration());
+    } else {
+      this.componentConfiguration = new Config();
     }
     if (taskParallelism != null) {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-          taskParallelism.toString());
+      Config.setComponentParallelism(this.componentConfiguration, taskParallelism.intValue());
     } else {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-          "1");
+      Config.setComponentParallelism(this.componentConfiguration, 1);
     }
   }
 
@@ -61,15 +78,6 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     bldr.setName(name);
     bldr.setSpec(TopologyAPI.ComponentObjectSpec.JAVA_SERIALIZED_OBJECT);
     bldr.setSerializedObject(ByteString.copyFrom(Utils.serialize(component)));
-
-    TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
-    for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
-      TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
-      kvBldr.setKey(entry.getKey());
-      kvBldr.setValue(entry.getValue().toString());
-      kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
-      cBldr.addKvs(kvBldr);
-    }
-    bldr.setConfig(cBldr);
+    bldr.setConfig(Utils.getConfigBuilder(componentConfiguration));
   }
 }

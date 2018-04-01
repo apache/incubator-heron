@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.mesos.framework;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,8 +25,9 @@ import java.util.logging.Logger;
 
 import org.apache.mesos.Protos;
 
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * A structure to group container info and mesos info,
@@ -205,8 +207,19 @@ public class LaunchableTask {
 
   protected String executorCommand(
       Config config, Config runtime, int containerIndex) {
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    ports.put(ExecutorPort.MASTER_PORT, String.valueOf(freePorts.get(0)));
+    ports.put(ExecutorPort.TMASTER_CONTROLLER_PORT, String.valueOf(freePorts.get(1)));
+    ports.put(ExecutorPort.TMASTER_STATS_PORT, String.valueOf(freePorts.get(2)));
+    ports.put(ExecutorPort.SHELL_PORT, String.valueOf(freePorts.get(3)));
+    ports.put(ExecutorPort.METRICS_MANAGER_PORT, String.valueOf(freePorts.get(4)));
+    ports.put(ExecutorPort.SCHEDULER_PORT, String.valueOf(freePorts.get(5)));
+    ports.put(ExecutorPort.METRICS_CACHE_MASTER_PORT, String.valueOf(freePorts.get(6)));
+    ports.put(ExecutorPort.METRICS_CACHE_STATS_PORT, String.valueOf(freePorts.get(7)));
+    ports.put(ExecutorPort.CHECKPOINT_MANAGER_PORT, String.valueOf(freePorts.get(8)));
+
     String[] executorCmd =
-        SchedulerUtils.executorCommand(config, runtime, containerIndex, freePorts);
+        SchedulerUtils.getExecutorCommand(config, runtime, containerIndex, ports);
     return join(executorCmd, " ");
   }
 }

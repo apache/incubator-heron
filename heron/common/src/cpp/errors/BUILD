@@ -41,7 +41,6 @@ cc_library(
         "sys-einfo-bakw-gen.h",
         "sys-einfo-gen.h",
         "sys-error-enum-gen.h",
-        "spin.h",
         "sperrimpl.h",
 
         "gexception.h",

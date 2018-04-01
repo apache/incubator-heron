@@ -20,13 +20,20 @@ CountDownLatch::CountDownLatch(sp_uint32 count) : count_(count) {}
 
 CountDownLatch::~CountDownLatch() {}
 
-void CountDownLatch::wait() {
+bool CountDownLatch::wait(sp_uint32 target, const std::chrono::seconds& duration) {
   std::unique_lock<std::mutex> m(mutex_);
-  // If count is greater than 0, then wait until it is 0.
+  // If the count is greater than target, then wait until the count reaches the value of target.
   // Else return immediately.
-  while (count_ > 0) {
-    cond_.wait(m);
+  if (std::chrono::seconds::zero() == duration) {
+    while (count_ > target) {
+      cond_.wait(m);
+    }
+  } else {
+    if (count_ > target) {
+      return cond_.wait_for(m, duration, [this, &target]{return count_ <= target;});
+    }
   }
+  return true;
 }
 
 void CountDownLatch::countDown() {
@@ -35,10 +42,10 @@ void CountDownLatch::countDown() {
   // Nothing to do if count is already 0
   if (count_ == 0) return;
 
-  // Decrement count. If it is 0 after that, notify all blocked threads.
-  if (--count_ == 0) {
-    cond_.notify_all();
-  }
+  // Decrement count.
+  count_--;
+  //  Notify all blocked threads: give them a chance to compare (count_ and target)
+  cond_.notify_all();
 }
 
 sp_uint32 CountDownLatch::getCount() {

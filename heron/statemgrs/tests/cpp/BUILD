@@ -7,8 +7,7 @@ cc_test(
     ],
     deps = [
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
-        "//third_party/gmock:gmock-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",

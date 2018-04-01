@@ -14,7 +14,7 @@
 
 package com.twitter.heron.simulator.utils;
 
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
 
 /**
@@ -40,14 +39,15 @@ public class XORManagerTest {
 
   private static List<Integer> taskIds = new LinkedList<>();
   private static TopologyAPI.Topology topology;
-  private static int timeoutSec = 1;
+  private static TopologyManager topologyManager;
+  private static Duration timeout = Duration.ofSeconds(1);
   private static int nBuckets = 3;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    topology = PhysicalPlanUtilTest.getTestTopology();
-    taskIds.add(1);
-    taskIds.add(2);
+    topology = TopologyManagerTest.getTestTopology();
+    topologyManager = new TopologyManager(topology);
+    taskIds = topologyManager.getComponentToTaskIds().get(TopologyManagerTest.STREAM_ID);
   }
 
   @AfterClass
@@ -68,78 +68,79 @@ public class XORManagerTest {
    */
   @Test
   public void testXORManagerMethods() throws Exception {
-    long rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
-        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
+    Duration rotateInterval = timeout.dividedBy(nBuckets).plusNanos(timeout.getNano() % nBuckets);
 
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
-    XORManager g = new XORManager(looper, timeoutSec, taskIds, nBuckets);
+    XORManager g = new XORManager(looper, topologyManager, nBuckets);
 
-    Mockito.verify(looper).registerTimerEventInNanoSeconds(
-        Mockito.eq(Constants.SECONDS_TO_NANOSECONDS * timeoutSec), Mockito.any(Runnable.class));
+    Mockito.verify(looper).registerTimerEvent(Mockito.eq(timeout), Mockito.any(Runnable.class));
+
+    Integer targetTaskId1 = taskIds.get(0);
+    Integer targetTaskId2 = taskIds.get(1);
 
     // Create some items
     for (int i = 0; i < 100; ++i) {
-      g.create(1, i, 1);
+      g.create(targetTaskId1, i, 1);
     }
 
     // basic Anchor works
     for (int i = 0; i < 100; ++i) {
-      Assert.assertEquals(g.anchor(1, i, 1), true);
-      Assert.assertEquals(g.remove(1, i), true);
+      Assert.assertTrue(g.anchor(targetTaskId1, i, 1));
+      Assert.assertTrue(g.remove(targetTaskId1, i));
     }
 
     // layered anchoring
     List<Long> thingsAdded = new LinkedList<>();
     Random random = new Random();
     Long firstKey = random.nextLong();
-    g.create(1, 1, firstKey);
+    g.create(targetTaskId1, 1, firstKey);
     thingsAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
       thingsAdded.add(key);
-      Assert.assertEquals(g.anchor(1, 1, key), false);
+      Assert.assertFalse(g.anchor(targetTaskId1, 1, key));
     }
 
     // xor ing works
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, 1, thingsAdded.get(j)), false);
+      Assert.assertFalse(g.anchor(targetTaskId1, 1, thingsAdded.get(j)));
     }
 
-    Assert.assertEquals(g.anchor(1, 1, thingsAdded.get(99)), true);
-    Assert.assertEquals(g.remove(1, 1), true);
+    Assert.assertTrue(g.anchor(targetTaskId1, 1, thingsAdded.get(99)));
+    Assert.assertTrue(g.remove(targetTaskId1, 1));
 
     // Same test with some rotation
     List<Long> oneAdded = new LinkedList<>();
     firstKey = random.nextLong();
-    g.create(1, 1, firstKey);
+    g.create(targetTaskId1, 1, firstKey);
     oneAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
       oneAdded.add(key);
-      Assert.assertEquals(g.anchor(1, 1, key), false);
+      Assert.assertFalse(g.anchor(targetTaskId1, 1, key));
     }
 
     g.rotate();
-    Mockito.verify(looper).registerTimerEventInNanoSeconds(Mockito.eq(rotateIntervalNs),
+    Mockito.verify(looper).registerTimerEvent(Mockito.eq(rotateInterval),
         Mockito.any(Runnable.class));
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, 1, oneAdded.get(j)), false);
+      Assert.assertFalse(g.anchor(targetTaskId1, 1, oneAdded.get(j)));
     }
 
-    Assert.assertEquals(g.anchor(1, 1, oneAdded.get(99)), true);
-    Assert.assertEquals(g.remove(1, 1), true);
+    Assert.assertTrue(g.anchor(targetTaskId1, 1, oneAdded.get(99)));
+    Assert.assertTrue(g.remove(targetTaskId1, 1));
 
 
     // Same test with too much rotation
     List<Long> twoAdded = new LinkedList<>();
     firstKey = random.nextLong();
-    g.create(2, 1, firstKey);
+    g.create(targetTaskId2, 1, firstKey);
     twoAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
       twoAdded.add(key);
-      Assert.assertEquals(g.anchor(2, 1, key), false);
+      Assert.assertFalse(g.anchor(targetTaskId2, 1, key));
     }
 
     // We do #nBuckets rotate()
@@ -147,30 +148,24 @@ public class XORManagerTest {
       g.rotate();
     }
     // We expected (nBuckets+1) since we have done one rotate earlier
-    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEventInNanoSeconds(
-        Mockito.eq(rotateIntervalNs), Mockito.any(Runnable.class));
+    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEvent(
+        Mockito.eq(rotateInterval), Mockito.any(Runnable.class));
 
     for (int j = 0; j < 100; ++j) {
-      Assert.assertEquals(g.anchor(2, 1, twoAdded.get(j)), false);
+      Assert.assertFalse(g.anchor(targetTaskId2, 1, twoAdded.get(j)));
     }
 
-    Assert.assertEquals(g.remove(2, 1), false);
+    Assert.assertFalse(g.remove(targetTaskId2, 1));
   }
 
   /**
-   * Method: populateXORManager(WakeableLooper looper, TopologyAPI.Topology topology, int nBuckets, Map&lt;String, List&lt;Integer&gt;&gt; componentToTaskIds)
+   * Method: XORManager(WakeableLooper looper, TopologyManager topologyManager, int nBuckets)
    */
   @Test
-  public void testPopulateXORManager() throws Exception {
-    Map<String, List<Integer>> componentToTaskIds =
-        new HashMap<>();
+  public void testXORManager() throws Exception {
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
-    componentToTaskIds.put("word", taskIds);
-    XORManager manager = XORManager.populateXORManager(looper,
-        topology,
-        3,
-        componentToTaskIds);
+    XORManager manager = new XORManager(looper, topologyManager, 3);
 
     Map<Integer, RotatingMap> spoutTasksToRotatingMap = manager.getSpoutTasksToRotatingMap();
     Assert.assertEquals(taskIds.size(), spoutTasksToRotatingMap.size());

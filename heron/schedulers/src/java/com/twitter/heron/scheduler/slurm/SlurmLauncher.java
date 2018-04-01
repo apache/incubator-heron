@@ -18,13 +18,13 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.scheduler.utils.LauncherUtils;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * Launches the Slurm Scheduler. The launcher assumes a shared directory between the nodes.
@@ -92,12 +92,17 @@ public class SlurmLauncher implements ILauncher {
     String topologyPackageDestination = Paths.get(
         topologyWorkingDirectory, "topology.tar.gz").toString();
 
-    return SchedulerUtils.setupWorkingDirectory(
-        topologyWorkingDirectory,
-        coreReleasePackageURI,
-        coreReleaseFileDestination,
-        topologyPackageURI,
-        topologyPackageDestination,
-        Context.verbose(config));
+    if (!SchedulerUtils.createOrCleanDirectory(topologyWorkingDirectory)) {
+      return false;
+    }
+
+    final boolean isVerbose = Context.verbose(config);
+    if (!SchedulerUtils.extractPackage(topologyWorkingDirectory, coreReleasePackageURI,
+        coreReleaseFileDestination, true, isVerbose)) {
+      return false;
+    }
+
+    return SchedulerUtils.extractPackage(topologyWorkingDirectory, topologyPackageURI,
+        topologyPackageDestination, true, isVerbose);
   }
 }

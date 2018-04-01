@@ -16,8 +16,16 @@ package com.twitter.heron.spi.packing;
 import java.util.Map;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.classification.InterfaceAudience;
+import com.twitter.heron.classification.InterfaceStability;
 import com.twitter.heron.spi.common.Config;
 
+/**
+ * Packing algorithm for adding and/or removing component instances from an existing packing plan
+ * Packing hints like number of containers may be passed through scheduler config.
+ */
+@InterfaceAudience.LimitedPrivate
+@InterfaceStability.Unstable
 public interface IRepacking extends AutoCloseable {
 
   /**
@@ -34,8 +42,10 @@ public interface IRepacking extends AutoCloseable {
    * @param componentChanges Map &lt; componentName, new component parallelism &gt;
    * that contains the parallelism for each component whose parallelism has changed.
    * @return PackingPlan describing the new packing plan.
+   * @throws PackingException if the packing plan can not be generated
    */
-  PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges);
+  PackingPlan repack(PackingPlan currentPackingPlan,
+                     Map<String, Integer> componentChanges) throws PackingException;
 
   /**
    * This is to for disposing or cleaning up any internal state.

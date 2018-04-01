@@ -36,7 +36,7 @@ TestHttpServer::TestHttpServer(EventLoopImpl* eventLoop, NetworkOptions& _option
   server_->InstallGenericCallBack(
       [this](IncomingHTTPRequest* request) { this->HandleGenericRequest(request); });
 
-  server_->Start();
+  EXPECT_EQ(SP_OK, server_->Start());
 }
 
 TestHttpServer::~TestHttpServer() { delete server_; }
@@ -82,7 +82,7 @@ void TestHttpServer::HandleTerminateRequest(IncomingHTTPRequest* _request) {
   server_->getEventLoop()->loopExit();
 }
 
-void start_http_server(sp_uint32 _port, sp_uint32 _nkeys) {
+void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd) {
   nkeys = _nkeys;
 
   EventLoopImpl ss;
@@ -95,5 +95,10 @@ void start_http_server(sp_uint32 _port, sp_uint32 _nkeys) {
 
   // start the server
   TestHttpServer http_server(&ss, options);
+
+  // use pipe to block clients before server enters event loop
+  int sent;
+  write(fd, &sent, sizeof(int));
+
   ss.loop();
 }

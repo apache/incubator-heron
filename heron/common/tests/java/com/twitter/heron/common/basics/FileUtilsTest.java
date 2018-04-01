@@ -14,20 +14,21 @@
 
 package com.twitter.heron.common.basics;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.mockito.Mockito.times;
 
 /**
  * FileUtils Tester.
@@ -36,19 +37,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(FileUtils.class)
 public class FileUtilsTest {
 
-  @Before
-  public void before() throws Exception {
-  }
-
-  @After
-  public void after() throws Exception {
-  }
-
   /**
    * Method: deleteFile(String filename)
    */
   @Test
-  public void testDeleteFile() throws Exception {
+  public void testDeleteFile() {
     PowerMockito.mockStatic(Files.class);
 
     Assert.assertTrue(FileUtils.deleteFile(""));
@@ -58,7 +51,7 @@ public class FileUtilsTest {
    * Method: copyFile(String source, String target)
    */
   @Test
-  public void testCopyFile() throws Exception {
+  public void testCopyFile() {
     PowerMockito.mockStatic(Files.class);
 
     Assert.assertTrue(FileUtils.copyFile("", ""));
@@ -68,7 +61,7 @@ public class FileUtilsTest {
    * Method: writeToFile(String filename, byte[] contents)
    */
   @Test
-  public void testWriteToFile() throws Exception {
+  public void testWriteToFile() {
     String currentWorkingDir = Paths.get("").toAbsolutePath().normalize().toString();
     Assert.assertFalse(FileUtils.writeToFile(currentWorkingDir, new byte[]{}, false));
 
@@ -84,7 +77,7 @@ public class FileUtilsTest {
    * Method: readFromFile(String filename)
    */
   @Test
-  public void testReadFromFile() throws Exception {
+  public void testReadFromFile() throws IOException {
     String toRead = "abc";
     PowerMockito.mockStatic(Files.class);
     PowerMockito.when(Files.readAllBytes(Matchers.any(Path.class))).thenReturn(toRead.getBytes());
@@ -96,7 +89,7 @@ public class FileUtilsTest {
    * Method: createDirectory(String directory)
    */
   @Test
-  public void testCreateDirectory() throws Exception {
+  public void testCreateDirectory() {
     String currentWorkingDir = Paths.get("").toAbsolutePath().normalize().toString();
     Assert.assertFalse(FileUtils.createDirectory(currentWorkingDir));
 
@@ -110,7 +103,7 @@ public class FileUtilsTest {
    * Method: isDirectoryExists(String directory)
    */
   @Test
-  public void testIsDirectoryExists() throws Exception {
+  public void testIsDirectoryExists() {
     PowerMockito.mockStatic(Files.class);
     PowerMockito.when(Files.isDirectory(Matchers.any(Path.class))).thenReturn(true);
 
@@ -122,26 +115,76 @@ public class FileUtilsTest {
   }
 
   /**
-   * Method: isOriginalPackageJar(String packageFilename)
-   */
-  @Test
-  public void testIsOriginalPackageJar() throws Exception {
-    String jarFile = "a.jar";
-    Assert.assertTrue(FileUtils.isOriginalPackageJar(jarFile));
-
-    String notJarFile = "b.tar";
-    Assert.assertFalse(FileUtils.isOriginalPackageJar(notJarFile));
-  }
-
-  /**
    * Method: getBaseName(String file)
    */
   @Test
-  public void testGetBaseName() throws Exception {
+  public void testGetBaseName() {
     String filename = "a/b";
     Assert.assertEquals("b", FileUtils.getBaseName(filename));
 
     filename = "b";
     Assert.assertEquals("b", FileUtils.getBaseName(filename));
   }
+
+  /**
+   * Method: deleteDir(File file)
+   */
+  @Test
+  public void testDeleteDirWithFile() throws IOException {
+    // Test delete a file
+    Path file = Files.createTempFile("testDeleteFile", "txt");
+    Assert.assertEquals(true, FileUtils.deleteDir(file.toFile(), true));
+    Assert.assertFalse(file.toFile().exists());
+  }
+
+  /**
+   * Method: deleteDir(File dir)
+   */
+  @Test
+  public void testDeleteDirWithDirs() throws IOException {
+    // Test delete dirs recursively,
+    //  parent/ -- child1/ -- child3/
+    //          |
+    //          -- child2/
+    Path parent = Files.createTempDirectory("testDeleteDir");
+    Path child1 = Files.createTempDirectory(parent, "child1");
+    Path child2 = Files.createTempDirectory(parent, "child2");
+    Path child3 = Files.createTempDirectory(child1, "child3");
+
+    PowerMockito.spy(FileUtils.class);
+
+    FileUtils.deleteDir(parent.toFile(), true);
+
+    PowerMockito.verifyStatic(times(4));
+
+    Assert.assertFalse(parent.toFile().exists());
+    Assert.assertFalse(child1.toFile().exists());
+    Assert.assertFalse(child2.toFile().exists());
+    Assert.assertFalse(child3.toFile().exists());
+  }
+
+  /**
+   * Method: cleanDir(String dir)
+   */
+  @Test
+  public void testCleanDir() throws IOException {
+    // Test clean dirs,
+    //  parent/ -- child1/ -- child3/
+    //          |
+    //          -- child2/
+    Path parent = Files.createTempDirectory("testDeleteDir");
+    Path child1 = Files.createTempDirectory(parent, "child1");
+    Path child2 = Files.createTempDirectory(parent, "child2");
+    Path child3 = Files.createTempDirectory(child1, "child3");
+
+    PowerMockito.spy(FileUtils.class);
+
+    FileUtils.cleanDir(parent.toString());
+
+    Assert.assertTrue(parent.toFile().exists());
+    Assert.assertFalse(child1.toFile().exists());
+    Assert.assertFalse(child2.toFile().exists());
+    Assert.assertFalse(child3.toFile().exists());
+  }
+
 }

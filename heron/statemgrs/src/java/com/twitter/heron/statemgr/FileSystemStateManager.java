@@ -19,9 +19,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -29,23 +31,38 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public abstract class FileSystemStateManager implements IStateManager {
   private static final Logger LOG = Logger.getLogger(FileSystemStateManager.class.getName());
+
+  protected static <V> void safeSetFuture(SettableFuture<V> future, V result) {
+    if (!future.set(result)) {
+      LOG.warning("Unexpected - a local settable future is set twice!");
+    }
+  }
+
+  protected static <V> void safeSetException(SettableFuture<V> future, Throwable cause) {
+    if (!future.setException(cause)) {
+      LOG.warning("Unexpected - a local settable future is set twice!");
+    }
+  }
 
   // Store the root address of the hierarchical file system
   protected String rootAddress;
 
   protected enum StateLocation {
     TMASTER_LOCATION("tmasters", "TMaster location"),
+    METRICSCACHE_LOCATION("metricscaches", "MetricsCache location"),
     TOPOLOGY("topologies", "Topologies"),
     PACKING_PLAN("packingplans", "Packing plan"),
     PHYSICAL_PLAN("pplans", "Physical plan"),
     EXECUTION_STATE("executionstate", "Execution state"),
     SCHEDULER_LOCATION("schedulers", "Scheduler location"),
+    STATEFUL_CHECKPOINT("statefulcheckpoints", "Stateful checkpoints"),
     LOCKS("locks", "Distributed locks");
 
     private final String dir;
@@ -79,11 +96,14 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   protected abstract ListenableFuture<Boolean> nodeExists(String path);
 
-  protected abstract ListenableFuture<Boolean> deleteNode(String path);
+  protected abstract ListenableFuture<Boolean> deleteNode(String path,
+                                                          boolean deleteChildrenIfNecessary);
 
   protected abstract <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
                                                                          String path,
                                                                          Message.Builder builder);
+
+  protected abstract Lock getLock(String path);
 
   protected String getStateDirectory(StateLocation location) {
     return location.getDirectory(rootAddress);
@@ -100,33 +120,14 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
+  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
+    return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteNode(StateLocation.EXECUTION_STATE, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteNode(StateLocation.TOPOLOGY, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
-    return deleteNode(StateLocation.PACKING_PLAN, topologyName);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteNode(StateLocation.PHYSICAL_PLAN, topologyName);
+  public Lock getLock(String topologyName, LockName lockName) {
+    return getLock(
+        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName.getName()));
   }
 
   @Override
@@ -172,12 +173,81 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
+  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, StateLocation.METRICSCACHE_LOCATION, topologyName,
+        TopologyMaster.MetricsCacheLocation.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoints(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, StateLocation.STATEFUL_CHECKPOINT, topologyName,
+        CheckpointManager.StatefulConsistentCheckpoints.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return deleteNode(StateLocation.METRICSCACHE_LOCATION, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
+    return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
+    return deleteNode(StateLocation.EXECUTION_STATE, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
+    return deleteNode(StateLocation.TOPOLOGY, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
+    return deleteNode(StateLocation.PACKING_PLAN, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
+    return deleteNode(StateLocation.PHYSICAL_PLAN, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName) {
+    return deleteNode(StateLocation.STATEFUL_CHECKPOINT, topologyName);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteLocks(String topologyName) {
+    boolean result = true;
+    for (LockName lockName : LockName.values()) {
+      String path =
+          StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName.getName());
+      ListenableFuture<Boolean> thisResult = deleteNode(path, true);
+      try {
+        if (!thisResult.get()) {
+          result = false;
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        LOG.log(Level.WARNING, "Error while waiting on result of delete lock at " + thisResult, e);
+      }
+    }
+    final SettableFuture<Boolean> future = SettableFuture.create();
+    safeSetFuture(future, result);
+    return future;
   }
 
   private ListenableFuture<Boolean> deleteNode(StateLocation location, String topologyName) {
-    return deleteNode(getStatePath(location, topologyName));
+    return deleteNode(getStatePath(location, topologyName), false);
   }
 
   private <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
@@ -212,22 +282,52 @@ public abstract class FileSystemStateManager implements IStateManager {
     }
 
     String topologyName = args[0];
-    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+    print("==> State Manager root path: %s",
+        config.getStringValue(Key.STATEMGR_ROOT_PATH));
 
     initialize(config);
 
     if (isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
-      print("==> Topology %s:", getTopology(null, topologyName).get());
-      print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
-      print("==> SchedulerLocation:\n%s",
-          getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
-      print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+      try {
+        print("==> Topology %s:", getTopology(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("Topology node not found %s", e.getMessage());
+      }
+      try {
+        print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("ExecutionState node not found %s", e.getMessage());
+      }
+      try {
+        print("==> SchedulerLocation:\n%s",
+                getSchedulerLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("SchedulerLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("TMasterLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> MetricsCacheLocation:\n%s", getMetricsCacheLocation(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("MetricsCacheLocation node not found %s", e.getMessage());
+      }
+      try {
+        print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("PackingPlan node not found %s", e.getMessage());
+      }
+      try {
+        print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+      } catch (ExecutionException e) {
+        print("PhysicalPlan node not found %s", e.getMessage());
+      }
     } else {
       print("==> Topology %s not found under %s",
-          topologyName, config.get(Keys.stateManagerRootPath()));
+          topologyName, config.getStringValue(Key.STATEMGR_ROOT_PATH));
     }
   }
 

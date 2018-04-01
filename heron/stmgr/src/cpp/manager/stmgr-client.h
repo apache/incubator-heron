@@ -38,14 +38,18 @@ class StMgrClient : public Client {
   StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _topology_name,
               const sp_string& _topology_id, const sp_string& _our_id, const sp_string& _other_id,
               StMgrClientMgr* _client_manager,
-              heron::common::MetricsMgrSt* _metrics_manager_client);
+              heron::common::MetricsMgrSt* _metrics_manager_client,
+              bool _droptuples_upon_backpressure);
   virtual ~StMgrClient();
 
   void Quit();
 
-  void SendTupleStreamMessage(proto::stmgr::TupleStreamMessage2& _msg);
+  // Return true if successful in sending the message. false otherwise
+  bool SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg);
   void SendStartBackPressureMessage();
   void SendStopBackPressureMessage();
+  void SendDownstreamStatefulCheckpoint(proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+  bool IsRegistered() const { return is_registered_; }
 
  protected:
   virtual void HandleConnect(NetworkErrorCode status);
@@ -53,7 +57,7 @@ class StMgrClient : public Client {
 
  private:
   void HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response, NetworkErrorCode);
-  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage2* _message);
+  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message);
 
   void OnReConnectTimer();
   void SendHelloRequest();
@@ -75,9 +79,16 @@ class StMgrClient : public Client {
 
   // Configs to be read
   sp_int32 reconnect_other_streammgrs_interval_sec_;
+  sp_int32 reconnect_other_streammgrs_max_attempt_;
 
   // Counters
   sp_int64 ndropped_messages_;
+  sp_int32 reconnect_attempts_;
+
+  // Have we registered ourselves
+  bool is_registered_;
+  // Do we drop tuples upon backpressure
+  bool droptuples_upon_backpressure_;
 };
 
 }  // namespace stmgr

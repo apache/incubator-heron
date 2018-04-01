@@ -4,6 +4,7 @@
 def heron_examples_files():
     return heron_examples_bin_files() + \
         heron_examples_conf_files() + \
+        heron_examples_yaml_files() + \
         heron_examples_lib_files()
 
 def heron_examples_bin_files():
@@ -12,7 +13,15 @@ def heron_examples_bin_files():
 def heron_examples_conf_files():
     return []
 
+def heron_examples_yaml_files():
+    return [
+        "//eco-examples/src/java:heron-eco-examples-support",
+    ]
+
 def heron_examples_lib_files():
     return [
-        "//heron/examples/src/java:heron-examples",
+        "//examples/src/java:heron-api-examples",
+        "//examples/src/java:heron-streamlet-examples",
+        "//examples/src/scala:heron-streamlet-scala-examples",
+        "//eco-examples/src/java:heron-eco-examples",
     ]

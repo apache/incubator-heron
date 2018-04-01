@@ -17,11 +17,11 @@ html lang={{.Site.LanguageCode}}
               p.hn-tagline {{.Site.Params.tagline}}
             .hn-button-row.row
               a.btn.btn-default href=docs/getting-started Get Started
-              a.btn.btn-default href=docs/upgrade-storm-to-heron Upgrade From Storm
-        .row
+              a.btn.btn-default href=docs/migrate-storm-to-heron Migrate From Storm
+        section.main-page-lower-section.container
           .col-xs-12.col-sm-9.col-md-9.col-lg-9
             .landing-feature-2.text-left
-              h2 Why Heron?
+              h2.text-center Why Heron?
               br
               .row
                 .col-sm-6
@@ -51,10 +51,6 @@ html lang={{.Site.LanguageCode}}
                     .panel-heading Scalability and Reliability
                     .panel-body Heron is highly scalable both in the ability to execute large number of components for each topology and the ability to launch and track large numbers of topologies.
             hr
-            .landing-feature-1.text-left
-              h2 Heron is in Beta
-              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use. The Heron team monitors and responds actively to <a href="{{.Site.Params.github.issues}}">bug reports</a> from users.
-            hr
             .landing-feature-2.text-left
               h2 Get Started
               .row
@@ -62,8 +58,8 @@ html lang={{.Site.LanguageCode}}
                   h4 Run Topologies using pre-compiled Heron binaries
                   a.btn.btn-default href=docs/getting-started Get Started
                 .col-sm-6
-                  h4 Upgrade Existing Storm Topologies
-                  a.btn.btn-default href=docs/upgrade-storm-to-heron Upgrade From Storm
+                  h4 Migrate Existing Storm Topologies
+                  a.btn.btn-default href=docs/migrate-storm-to-heron Migrate Storm topologies
 
           .hn-twitter-feed.hidden-xs.col-sm-3.col-md-3.col-lg-3
             {{partial "index/feed.html" .}}
@@ -73,4 +69,3 @@ html lang={{.Site.LanguageCode}}
       {{partial "index/google-analytics.html" .}}
 
       script src=https://code.jquery.com/jquery-2.2.1.min.js
-      script src=/js/app.min.js

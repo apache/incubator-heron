@@ -39,6 +39,7 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -57,7 +58,8 @@ public class HeronExecutorTaskTest {
     // only two configs; state manager root and url should be null.
     int nullCounter = 2;
     for (String subCommand : command) {
-      if (subCommand == null) {
+      String[] flagArg = SchedulerUtils.splitCommandArg(subCommand);
+      if (flagArg.length > 1 && flagArg[1].equals("null")) {
         nullCounter--;
       }
     }
@@ -116,7 +118,7 @@ public class HeronExecutorTaskTest {
         "env",
         "package",
         "core",
-        "jar",
+        "topology.jar",
         "componentRamMap",
         false);
     return Mockito.spy(task);

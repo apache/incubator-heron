@@ -12,8 +12,8 @@ cc_library(
         "randutils.cpp",
         "ridgen.cpp",
         "sockutils.cpp",
-        "sptime.cpp",
         "strutils.cpp",
+        "mempool.cpp",
 
         "callback.h",
         "callback1.h",
@@ -32,9 +32,9 @@ cc_library(
         "sphash.h",
         "sprcodes.h",
         "sptest.h",
-        "sptime.h",
         "sptypes.h",
         "strutils.h",
+        "mempool.h",
     ],
     hdrs = [ 
         "basics.h",
@@ -47,10 +47,13 @@ cc_library(
     deps = [
         "//config:config-cxx",
         "//third_party/glog:glog-cxx",
+        "@com_github_gflags_gflags//:gflags",
         "//third_party/gperftools:tcmalloc-cxx",
-        "//third_party/jansson:jansson-cxx",
         "//third_party/kashmir:kashmir-cxx",
-        "//third_party/protobuf:protobuf-cxx",
-    ],
+        "@com_google_protobuf//:protobuf",
+    ] + select({
+        "//tools/platform:darwin": [], 
+        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
+    }),
     linkstatic = 1,
 )

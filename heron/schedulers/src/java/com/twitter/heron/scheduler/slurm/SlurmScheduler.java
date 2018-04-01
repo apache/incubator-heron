@@ -17,18 +17,21 @@ package com.twitter.heron.scheduler.slurm;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
+import com.twitter.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * Schedules a Heron topology in a HPC cluster using the Slurm Scheduler.
@@ -51,7 +54,7 @@ public class SlurmScheduler implements IScheduler {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = mConfig;
+    this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     this.controller = getController();
 
@@ -82,7 +85,7 @@ public class SlurmScheduler implements IScheduler {
     LOG.info("Launching topology in Slurm scheduler");
     long containers = Runtime.numContainers(runtime);
     boolean jobCreated = controller.createJob(getHeronSlurmPath(),
-        SlurmContext.executorSandboxBinary(this.config),
+        SlurmContext.executorBinary(this.config),
         getExecutorCommand(packing),
         this.workingDirectory, containers);
     if (!jobCreated) {
@@ -125,12 +128,17 @@ public class SlurmScheduler implements IScheduler {
   }
 
   protected String[] getExecutorCommand(PackingPlan packing) {
-    List<String> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(Integer.toString(SysUtils.getFreePort()));
+    Map<ExecutorPort, String> ports = new HashMap<>();
+    for (ExecutorPort executorPort : ExecutorPort.getRequiredPorts()) {
+      int port = SysUtils.getFreePort();
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+      ports.put(executorPort, String.valueOf(port));
     }
 
-    String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime, freePorts);
+    String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime,
+        ports, null);
 
     LOG.log(Level.FINE, "Executor command line: ", Arrays.toString(executorCmd));
     return executorCmd;

@@ -22,6 +22,7 @@ import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.UploaderException;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 public class HdfsUploader implements IUploader {
@@ -65,33 +66,38 @@ public class HdfsUploader implements IUploader {
   }
 
   @Override
-  public URI uploadPackage() {
+  public URI uploadPackage() throws UploaderException {
     // first, check if the topology package exists
     if (!isLocalFileExists(topologyPackageLocation)) {
-      LOG.info("Topology file " + topologyPackageLocation + " does not exist.");
-      return null;
+      throw new UploaderException(
+        String.format("Expected topology package file to be uploaded does not exist at '%s'",
+            topologyPackageLocation));
     }
 
     // if the dest directory does not exist, create it.
     if (!controller.exists(destTopologyDirectoryURI)) {
-      LOG.info("The destination directory does not exist; creating it.");
+      LOG.info(String.format(
+          "The destination directory does not exist. Creating it now at URI '%s'",
+          destTopologyDirectoryURI));
       if (!controller.mkdirs(destTopologyDirectoryURI)) {
-        LOG.severe("Failed to create directory: " + destTopologyDirectoryURI);
-        return null;
+        throw new UploaderException(
+            String.format("Failed to create directory for topology package at URI '%s'",
+                destTopologyDirectoryURI));
       }
     } else {
       // if the destination file exists, write a log message
-      LOG.info("Target topology file " + packageURI.toString() + " exists, overwriting...");
-
+      LOG.info(String.format("Target topology file already exists at '%s'. Overwriting it now",
+          packageURI.toString()));
     }
 
     // copy the topology package to target working directory
-    LOG.info("Uploading topology " + topologyPackageLocation
-        + " package to target hdfs " + packageURI.toString());
+    LOG.info(String.format("Uploading topology package at '%s' to target HDFS at '%s'",
+        topologyPackageLocation, packageURI.toString()));
 
     if (!controller.copyFromLocalFile(topologyPackageLocation, packageURI.toString())) {
-      LOG.severe("Failed to upload the package to:" + packageURI.toString());
-      return null;
+      throw new UploaderException(
+          String.format("Failed to upload the topology package at '%s' to: '%s'",
+              topologyPackageLocation, packageURI.toString()));
     }
 
     return packageURI;

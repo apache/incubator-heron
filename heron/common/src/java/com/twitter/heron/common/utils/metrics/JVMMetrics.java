@@ -24,6 +24,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.time.Duration;
 import java.util.List;
 
 import com.twitter.heron.api.metric.AssignableMetric;
@@ -31,7 +32,7 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.MultiAssignableMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
-import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.ThreadNames;
@@ -208,7 +209,7 @@ public class JVMMetrics {
     SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
 
-    int interval = systemConfig.getHeronMetricsExportIntervalSec();
+    int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
 
     metricsCollector.registerMetric("__jvm-gc-collection-time-ms", jvmGCTimeMs, interval);
     metricsCollector.registerMetric("__jvm-gc-collection-count", jvmGCCount, interval);
@@ -263,7 +264,7 @@ public class JVMMetrics {
       public void run() {
         updateGcMetrics();
 
-        jvmUpTimeSecs.setValue(runtimeMXBean.getUptime() / Constants.SECONDS_TO_MILLISECONDS);
+        jvmUpTimeSecs.setValue(Duration.ofMillis(runtimeMXBean.getUptime()).getSeconds());
 
         processCPUTimeNs.setValue(getProcessCPUTimeNs());
         getThreadsMetrics();
@@ -277,23 +278,23 @@ public class JVMMetrics {
         updateMemoryPoolMetrics();
         updateBufferPoolMetrics();
 
-        long freeMemory = runtime.freeMemory();
-        long totalMemory = runtime.totalMemory();
-        jvmMemoryFreeMB.update(freeMemory / Constants.MB_TO_BYTES);
-        jvmMemoryTotalMB.update(totalMemory / Constants.MB_TO_BYTES);
-        jvmMemoryUsedMB.update((totalMemory - freeMemory) / Constants.MB_TO_BYTES);
+        ByteAmount freeMemory = ByteAmount.fromBytes(runtime.freeMemory());
+        ByteAmount totalMemory = ByteAmount.fromBytes(runtime.totalMemory());
+        jvmMemoryFreeMB.update(freeMemory.asMegabytes());
+        jvmMemoryTotalMB.update(totalMemory.asMegabytes());
+        jvmMemoryUsedMB.update(totalMemory.asMegabytes() - freeMemory.asMegabytes());
         jvmMemoryHeapUsedMB.update(
-            memoryBean.getHeapMemoryUsage().getUsed() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getHeapMemoryUsage().getUsed()).asMegabytes());
         jvmMemoryHeapCommittedMB.update(
-            memoryBean.getHeapMemoryUsage().getCommitted() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getHeapMemoryUsage().getCommitted()).asMegabytes());
         jvmMemoryHeapMaxMB.update(
-            memoryBean.getHeapMemoryUsage().getMax() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getHeapMemoryUsage().getMax()).asMegabytes());
         jvmMemoryNonHeapUsedMB.update(
-            memoryBean.getNonHeapMemoryUsage().getUsed() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getNonHeapMemoryUsage().getUsed()).asMegabytes());
         jvmMemoryNonHeapCommittedMB.update(
-            memoryBean.getNonHeapMemoryUsage().getCommitted() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getNonHeapMemoryUsage().getCommitted()).asMegabytes());
         jvmMemoryNonHeapMaxMB.update(
-            memoryBean.getNonHeapMemoryUsage().getMax() / Constants.MB_TO_BYTES);
+            ByteAmount.fromBytes(memoryBean.getNonHeapMemoryUsage().getMax()).asMegabytes());
       }
     };
     return sampleRunnable;
@@ -305,19 +306,21 @@ public class JVMMetrics {
     for (BufferPoolMXBean bufferPoolMXBean : bufferPoolMXBeanList) {
       String normalizedKeyName = bufferPoolMXBean.getName().replaceAll("[^\\w]", "-");
 
-      final long memoryUsedMB = bufferPoolMXBean.getMemoryUsed() / Constants.MB_TO_BYTES;
-      final long totalCapacityMB = bufferPoolMXBean.getTotalCapacity() / Constants.MB_TO_BYTES;
-      final long countMB = bufferPoolMXBean.getCount() / Constants.MB_TO_BYTES;
+      final ByteAmount memoryUsed = ByteAmount.fromBytes(bufferPoolMXBean.getMemoryUsed());
+      final ByteAmount totalCapacity = ByteAmount.fromBytes(bufferPoolMXBean.getTotalCapacity());
+      final ByteAmount count = ByteAmount.fromBytes(bufferPoolMXBean.getCount());
 
       // The estimated memory the JVM is using for this buffer pool
-      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-memory-used").setValue(memoryUsedMB);
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-memory-used")
+          .setValue(memoryUsed.asMegabytes());
 
       // The estimated total capacity of the buffers in this pool
-      jvmBufferPoolMemoryUsage.safeScope(
-          normalizedKeyName + "-total-capacity").setValue(totalCapacityMB);
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-total-capacity")
+          .setValue(totalCapacity.asMegabytes());
 
       // THe estimated number of buffers in this pool
-      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-count").setValue(countMB);
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-count")
+          .setValue(count.asMegabytes());
     }
   }
 
@@ -328,37 +331,32 @@ public class JVMMetrics {
       String normalizedKeyName = memoryPoolMXBean.getName().replaceAll("[^\\w]", "-");
       MemoryUsage peakUsage = memoryPoolMXBean.getPeakUsage();
       if (peakUsage != null) {
-        jvmPeakUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-used").setValue(peakUsage.getUsed() / Constants.MB_TO_BYTES);
-        jvmPeakUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-committed").setValue(
-                peakUsage.getCommitted() / Constants.MB_TO_BYTES);
-        jvmPeakUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-max").setValue(peakUsage.getMax() / Constants.MB_TO_BYTES);
+        jvmPeakUsagePerMemoryPool.safeScope(normalizedKeyName + "-used")
+            .setValue(ByteAmount.fromBytes(peakUsage.getUsed()).asMegabytes());
+        jvmPeakUsagePerMemoryPool.safeScope(normalizedKeyName + "-committed")
+            .setValue(ByteAmount.fromBytes(peakUsage.getCommitted()).asMegabytes());
+        jvmPeakUsagePerMemoryPool.safeScope(normalizedKeyName + "-max")
+            .setValue(ByteAmount.fromBytes(peakUsage.getMax()).asMegabytes());
       }
 
       MemoryUsage collectionUsage = memoryPoolMXBean.getCollectionUsage();
       if (collectionUsage != null) {
-        jvmCollectionUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-used").setValue(
-                collectionUsage.getUsed() / Constants.MB_TO_BYTES);
-        jvmCollectionUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-committed").setValue(
-                collectionUsage.getCommitted() / Constants.MB_TO_BYTES);
-        jvmCollectionUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-max").setValue(
-                collectionUsage.getMax() / Constants.MB_TO_BYTES);
+        jvmCollectionUsagePerMemoryPool.safeScope(normalizedKeyName + "-used")
+            .setValue(ByteAmount.fromBytes(collectionUsage.getUsed()).asMegabytes());
+        jvmCollectionUsagePerMemoryPool.safeScope(normalizedKeyName + "-committed")
+            .setValue(ByteAmount.fromBytes(collectionUsage.getCommitted()).asMegabytes());
+        jvmCollectionUsagePerMemoryPool.safeScope(normalizedKeyName + "-max")
+            .setValue(ByteAmount.fromBytes(collectionUsage.getMax()).asMegabytes());
       }
 
       MemoryUsage estimatedUsage = memoryPoolMXBean.getUsage();
       if (estimatedUsage != null) {
-        jvmEstimatedUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-used").setValue(estimatedUsage.getUsed() / Constants.MB_TO_BYTES);
-        jvmEstimatedUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-committed").setValue(
-                estimatedUsage.getCommitted() / Constants.MB_TO_BYTES);
-        jvmEstimatedUsagePerMemoryPool.safeScope(
-            normalizedKeyName + "-max").setValue(estimatedUsage.getMax() / Constants.MB_TO_BYTES);
+        jvmEstimatedUsagePerMemoryPool.safeScope(normalizedKeyName + "-used")
+            .setValue(ByteAmount.fromBytes(estimatedUsage.getUsed()).asMegabytes());
+        jvmEstimatedUsagePerMemoryPool.safeScope(normalizedKeyName + "-committed")
+            .setValue(ByteAmount.fromBytes(estimatedUsage.getCommitted()).asMegabytes());
+        jvmEstimatedUsagePerMemoryPool.safeScope(normalizedKeyName + "-max")
+            .setValue(ByteAmount.fromBytes(estimatedUsage.getMax()).asMegabytes());
       }
     }
   }

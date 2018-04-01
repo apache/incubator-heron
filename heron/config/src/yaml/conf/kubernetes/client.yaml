@@ -1,0 +1,3 @@
+# Whether role/env is required to submit a topology. Default value is False.
+heron.config.is.role.required:               False
+heron.config.is.env.required:                False

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +16,9 @@
 # limitations under the License.
 ''' tracker.py '''
 import json
+import sys
+import traceback
+import collections
 
 from functools import partial
 
@@ -21,7 +27,63 @@ from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
+from heron.tools.tracker.src.python import pyutils
 from heron.tools.tracker.src.python import utils
+
+
+def convert_pb_kvs(kvs, include_non_primitives=True):
+  """
+  converts pb kvs to dict
+  """
+  config = {}
+  for kv in kvs:
+    if kv.value:
+      config[kv.key] = kv.value
+    elif kv.serialized_value:
+      # add serialized_value support for python values (fixme)
+
+      # is this a serialized java object
+      if topology_pb2.JAVA_SERIALIZED_VALUE == kv.type:
+        jv = _convert_java_value(kv, include_non_primitives=include_non_primitives)
+        if jv is not None:
+          config[kv.key] = jv
+      else:
+        config[kv.key] = _raw_value(kv)
+  return config
+
+
+def _convert_java_value(kv, include_non_primitives=True):
+  try:
+    pobj = javaobj.loads(kv.serialized_value)
+    if pyutils.is_str_instance(pobj):
+      return pobj
+
+    if pobj.is_primitive():
+      return pobj.value
+
+    if include_non_primitives:
+      # java objects that are not strings return value and encoded value
+      # Hexadecimal byte array for Serialized objects that
+      return {
+          'value' : json.dumps(pobj,
+                               default=lambda custom_field: custom_field.__dict__,
+                               sort_keys=True,
+                               indent=2),
+          'raw' : utils.hex_escape(kv.serialized_value)}
+
+    return None
+  except Exception:
+    Log.exception("Failed to parse data as java object")
+    if include_non_primitives:
+      return _raw_value(kv)
+    else:
+      return None
+
+def _raw_value(kv):
+  return {
+      # The value should be a valid json object
+      'value' : '{}',
+      'raw' : utils.hex_escape(kv.serialized_value)}
 
 
 class Tracker(object):
@@ -54,6 +116,13 @@ class Tracker(object):
     Sync the topologies with the statemgrs.
     """
     self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
+    try:
+      for state_manager in self.state_managers:
+        state_manager.start()
+    except Exception as ex:
+      Log.error("Found exception while initializing state managers: %s. Bailing out..." % ex)
+      traceback.print_exc()
+      sys.exit(1)
 
     # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
@@ -90,10 +159,10 @@ class Tracker(object):
     an optional role.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = filter(lambda t: t.name == topologyName
-                        and t.cluster == cluster
-                        and (not role or t.execution_state.role == role)
-                        and t.environ == environ, self.topologies)
+    topologies = list(filter(lambda t: t.name == topologyName
+                             and t.cluster == cluster
+                             and (not role or t.execution_state.role == role)
+                             and t.environ == environ, self.topologies))
     if not topologies or len(topologies) > 1:
       if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
@@ -201,6 +270,44 @@ class Tracker(object):
     executionState["viz"] = viz_url
     return executionState
 
+  def extract_metadata(self, topology):
+    """
+    Returns metadata that will
+    be returned from Tracker.
+    """
+    execution_state = topology.execution_state
+    metadata = {
+        "cluster": execution_state.cluster,
+        "environ": execution_state.environ,
+        "role": execution_state.role,
+        "jobname": topology.name,
+        "submission_time": execution_state.submission_time,
+        "submission_user": execution_state.submission_user,
+        "release_username": execution_state.release_state.release_username,
+        "release_tag": execution_state.release_state.release_tag,
+        "release_version": execution_state.release_state.release_version,
+    }
+    # refactor get_formatteed_viz_url
+    viz_url = self.config.get_formatted_viz_url(metadata)
+    metadata["viz"] = viz_url
+    return metadata
+
+  @staticmethod
+  def extract_runtime_state(topology):
+    runtime_state = {}
+    runtime_state["has_physical_plan"] = \
+      True if topology.physical_plan else False
+    runtime_state["has_tmaster_location"] = \
+      True if topology.tmaster else False
+    runtime_state["has_scheduler_location"] = \
+      True if topology.scheduler_location else False
+    # "stmgrs" listed runtime state for each stream manager
+    # however it is possible that physical plan is not complete
+    # yet and we do not know how many stmgrs there are. That said,
+    # we should not set any key below (stream manager name)
+    runtime_state["stmgrs"] = {}
+    return runtime_state
+
   # pylint: disable=no-self-use
   def extract_scheduler_location(self, topology):
     """
@@ -264,12 +371,13 @@ class Tracker(object):
       spoutConfigs = spout.comp.config.kvs
       for kvs in spoutConfigs:
         if kvs.key == "spout.type":
-          spoutType = kvs.value
+          spoutType = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.source":
-          spoutSource = kvs.value
+          spoutSource = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
-          spoutVersion = kvs.value
+          spoutVersion = javaobj.loads(kvs.serialized_value)
       spoutPlan = {
+          "config": convert_pb_kvs(spoutConfigs, include_non_primitives=False),
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
@@ -286,6 +394,7 @@ class Tracker(object):
     for bolt in topology.bolts():
       boltName = bolt.comp.name
       boltPlan = {
+          "config": convert_pb_kvs(bolt.comp.config.kvs, include_non_primitives=False),
           "outputs": [],
           "inputs": []
       }
@@ -312,6 +421,7 @@ class Tracker(object):
     """
     physicalPlan = {
         "instances": {},
+        "instance_groups": {},
         "stmgrs": {},
         "spouts": {},
         "bolts": {},
@@ -332,28 +442,7 @@ class Tracker(object):
 
     # Configs
     if topology.physical_plan.topology.topology_config:
-      for kvs in topology.physical_plan.topology.topology_config.kvs:
-        if kvs.value:
-          physicalPlan["config"][kvs.key] = kvs.value
-        elif kvs.serialized_value:
-          # currently assumes that serialized_value is Java serialization
-          # when multi-language support is added later, ConfigValueType should be checked
-
-          # Hexadecimal byte array for Serialized objects
-          try:
-            pobj = javaobj.loads(kvs.serialized_value)
-            physicalPlan["config"][kvs.key] = {
-                'value' : json.dumps(pobj,
-                                     default=lambda custom_field: custom_field.__dict__,
-                                     sort_keys=True,
-                                     indent=2),
-                'raw' : utils.hex_escape(kvs.serialized_value)}
-          except Exception:
-            Log.exception("Failed to parse data as java object")
-            physicalPlan["config"][kvs.key] = {
-                # The value should be a valid json object
-                'value' : '{}',
-                'raw' : utils.hex_escape(kvs.serialized_value)}
+      physicalPlan["config"] = convert_pb_kvs(topology.physical_plan.topology.topology_config.kvs)
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []
@@ -377,6 +466,7 @@ class Tracker(object):
           "instance_ids": []
       }
 
+    instance_groups = collections.OrderedDict()
     for instance in instances:
       instance_id = instance.instance_id
       stmgrId = instance.stmgr_id
@@ -385,6 +475,14 @@ class Tracker(object):
       host = stmgrInfo["host"]
       cwd = stmgrInfo["cwd"]
       shell_port = stmgrInfo["shell_port"]
+
+
+      # instance_id format container_<index>_component_1
+      # group name is container_<index>
+      group_name = instance_id.rsplit("_", 2)[0]
+      igroup = instance_groups.get(group_name, list())
+      igroup.append(instance_id)
+      instance_groups[group_name] = igroup
 
       physicalPlan["instances"][instance_id] = {
           "id": instance_id,
@@ -397,6 +495,8 @@ class Tracker(object):
         physicalPlan["spouts"][name].append(instance_id)
       else:
         physicalPlan["bolts"][name].append(instance_id)
+
+    physicalPlan["instance_groups"] = instance_groups
 
     return physicalPlan
 
@@ -430,7 +530,7 @@ class Tracker(object):
     if not topology.scheduler_location:
       has_scheduler_location = False
 
-    top = {
+    topologyInfo = {
         "name": topology.name,
         "id": topology.id,
         "logical_plan": None,
@@ -444,14 +544,18 @@ class Tracker(object):
     executionState["has_physical_plan"] = has_physical_plan
     executionState["has_tmaster_location"] = has_tmaster_location
     executionState["has_scheduler_location"] = has_scheduler_location
+    executionState["status"] = topology.get_status()
 
-    top["execution_state"] = executionState
-    top["logical_plan"] = self.extract_logical_plan(topology)
-    top["physical_plan"] = self.extract_physical_plan(topology)
-    top["tmaster_location"] = self.extract_tmaster(topology)
-    top["scheduler_location"] = self.extract_scheduler_location(topology)
+    topologyInfo["metadata"] = self.extract_metadata(topology)
+    topologyInfo["runtime_state"] = self.extract_runtime_state(topology)
 
-    self.topologyInfos[(topology.name, topology.state_manager_name)] = top
+    topologyInfo["execution_state"] = executionState
+    topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
+    topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
+    topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
+    topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
+
+    self.topologyInfos[(topology.name, topology.state_manager_name)] = topologyInfo
 
   def getTopologyInfo(self, topologyName, cluster, role, environ):
     """
@@ -460,7 +564,7 @@ class Tracker(object):
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
-    for (topology_name, _), topologyInfo in self.topologyInfos.iteritems():
+    for (topology_name, _), topologyInfo in self.topologyInfos.items():
       executionState = topologyInfo["execution_state"]
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and

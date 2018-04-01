@@ -31,10 +31,10 @@ containers are allocated for each topology.
 ### Configuring the Heron client classpath
 
 **Under 0.14.2 version (including 0.14.2)**
+
   1. Command `hadoop classpath` provides a list of jars needed to submit a hadoop job. Copy all jars to `HERON_INSTALL_DIR/lib/scheduler`.
-   * Do not copy commons-cli jar if it is older than version 1.3.1.
-  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
- -`HERON_INSTALL_DIR/lib/scheduler` too.
+     * Do not copy commons-cli jar if it is older than version 1.3.1.
+  1. Create a jar containing core-site.xml and yarn-site.xml. Add this jar to `HERON_INSTALL_DIR/lib/scheduler` too.
 
 **After 0.14.3 version released**
 
@@ -90,7 +90,7 @@ deployment on a multi-node YARN cluster.
 
 **Sample Output**
 
-```
+```bash
 INFO: Launching topology 'AckingTopology'
 ...
 ...
@@ -111,7 +111,7 @@ com.twitter.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTo
 
 Visit the YARN http console or execute command `yarn application -list` on a yarn client host.
 
-```
+```bash
 Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
                 Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
 application_1466548964728_0004	      AckingTopology	                YARN	     heron	   default	           RUNNING	         UNDEFINED	             0%	                                N/A

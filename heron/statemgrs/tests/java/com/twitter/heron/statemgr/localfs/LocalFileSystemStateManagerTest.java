@@ -35,7 +35,8 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.Lock;
 
 import static org.junit.Assert.assertEquals;
@@ -60,19 +61,19 @@ import static org.mockito.Mockito.verify;
 public class LocalFileSystemStateManagerTest {
 
   private static final String TOPOLOGY_NAME = "topologyName";
-  private static final String LOCK_NAME = "lockName";
+  private static final IStateManager.LockName LOCK_NAME = IStateManager.LockName.UPDATE_TOPOLOGY;
   private static final String ROOT_ADDR = "/";
   private LocalFileSystemStateManager manager;
 
   @Before
   public void before() throws Exception {
-    manager = initMockManager(ROOT_ADDR, false);
+    manager = initSpyManager(ROOT_ADDR, false);
   }
 
-  private static LocalFileSystemStateManager initMockManager(String rootPath, boolean initTree) {
+  private static LocalFileSystemStateManager initSpyManager(String rootPath, boolean initTree) {
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), rootPath)
-        .put(LocalFileSystemKeys.initializeFileTree(), initTree)
+        .put(Key.STATEMGR_ROOT_PATH, rootPath)
+        .put(LocalFileSystemKey.IS_INITIALIZE_FILE_TREE.value(), initTree)
         .build();
     LocalFileSystemStateManager manager = spy(new LocalFileSystemStateManager());
     manager.initialize(config);
@@ -86,6 +87,7 @@ public class LocalFileSystemStateManagerTest {
   private void initMocks() throws Exception {
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).when(FileUtils.class, "createDirectory", anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "isFileExists", anyString());
 
     assertTrue(manager.initTree());
 
@@ -214,7 +216,7 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testGetLock() throws Exception {
     initMocks();
-    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME);
+    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME.getName());
     byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
 
     Lock lock = manager.getLock(TOPOLOGY_NAME, LOCK_NAME);
@@ -229,7 +231,7 @@ public class LocalFileSystemStateManagerTest {
   @Test
   public void testGetFilesystemLock() throws Exception {
     Path tempDir = Files.createTempDirectory("heron-testGetFilesystemLock");
-    LocalFileSystemStateManager fsBackedManager = initMockManager(tempDir.toString(), true);
+    LocalFileSystemStateManager fsBackedManager = initSpyManager(tempDir.toString(), true);
     Lock lock = fsBackedManager.getLock(TOPOLOGY_NAME, LOCK_NAME);
     assertTrue("Failed to get lock", lock.tryLock(0, TimeUnit.MILLISECONDS));
     lock.unlock();
@@ -237,7 +239,7 @@ public class LocalFileSystemStateManagerTest {
 
   @Test
   public void testLockTaken() throws Exception {
-    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME);
+    String expectedLockPath = String.format("//locks/%s__%s", TOPOLOGY_NAME, LOCK_NAME.getName());
     byte[] expectedContents = Thread.currentThread().getName().getBytes(Charset.defaultCharset());
 
     PowerMockito.spy(FileUtils.class);

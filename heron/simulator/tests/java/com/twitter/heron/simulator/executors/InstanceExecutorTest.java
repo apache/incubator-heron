@@ -25,10 +25,12 @@ import org.mockito.Mockito;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.instance.IInstance;
 import com.twitter.heron.proto.system.PhysicalPlans;
-import com.twitter.heron.simulator.instance.IInstance;
-import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
-import com.twitter.heron.simulator.utils.PhysicalPlanUtilTest;
+import com.twitter.heron.simulator.utils.TopologyManager;
+
+import com.twitter.heron.simulator.utils.TopologyManagerTest;
+
 
 /**
  * InstanceExecutor Tester.
@@ -41,8 +43,8 @@ public class InstanceExecutorTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    topology = PhysicalPlanUtilTest.getTestTopology();
-    plan = PhysicalPlanUtil.getPhysicalPlan(topology);
+    topology = TopologyManagerTest.getTestTopology();
+    plan = new TopologyManager(topology).getPhysicalPlan();
     instanceId = plan.getInstances(0).getInstanceId();
     instanceExecutor = Mockito.spy(new InstanceExecutor(plan, instanceId));
     Mockito.doReturn(Mockito.mock(IInstance.class)).when(instanceExecutor).createInstance();

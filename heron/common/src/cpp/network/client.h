@@ -46,7 +46,6 @@
 #include "network/networkoptions.h"
 #include "network/network_error.h"
 #include "network/packet.h"
-#include "network/mempool.h"
 
 /*
  * Client class definition
@@ -122,6 +121,9 @@ class Client : public BaseClient {
   // Tells if we are connected
   inline bool IsConnected() const { return state_ == CONNECTED; }
 
+  // Tells us if we have caused backpressure
+  bool HasCausedBackPressure() const;
+
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
   void InstallResponseHandler(S* _request,
@@ -135,16 +137,6 @@ class Client : public BaseClient {
     delete _request;
   }
 
-  // Register a handler for a particular request type
-  template <typename T, typename M>
-  void InstallRequestHandler(void (T::*method)(REQID id, M*)) {
-    google::protobuf::Message* m = new M();
-    T* t = static_cast<T*>(this);
-    requestHandlers[m->GetTypeName()] =
-        std::bind(&Client::dispatchRequest<T, M>, this, t, method, std::placeholders::_1);
-    delete m;
-  }
-
   // Register a handler for a particular message type
   template <typename T, typename M>
   void InstallMessageHandler(void (T::*method)(M* _message)) {
@@ -155,17 +147,9 @@ class Client : public BaseClient {
     delete m;
   }
 
-  sp_int64 getOutstandingPackets() const {
-    if (conn_) {
-      return (reinterpret_cast<Connection*>(conn_))->getOutstandingPackets();
-    } else {
-      return 0;
-    }
-  }
-
   sp_int64 getOutstandingBytes() const {
     if (conn_) {
-      return (reinterpret_cast<Connection*>(conn_))->getOutstandingBytes();
+      return conn_->getOutstandingBytes();
     } else {
       return 0;
     }
@@ -173,19 +157,6 @@ class Client : public BaseClient {
 
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
-
-  // TODO(mfu):
-  MemPool<google::protobuf::Message> _heron_message_pool;
-
-  template<typename M>
-  void release(M* m) {
-    _heron_message_pool.release(m);
-  }
-
-  template<typename M>
-  M* acquire(M* m) {
-    return _heron_message_pool.acquire(m);
-  }
 
  protected:
   // Derived class should implement this method to handle Connection
@@ -238,8 +209,8 @@ class Client : public BaseClient {
   template <typename T, typename M>
   void dispatchResponse(T* _t, void (T::*method)(void* _ctx, M*, NetworkErrorCode),
                         IncomingPacket* _ipkt, NetworkErrorCode _code) {
-    void* ctx = NULL;
-    M* m = NULL;
+    void* ctx = nullptr;
+    M* m = nullptr;
     NetworkErrorCode status = _code;
     if (status == OK && _ipkt) {
       REQID rid;
@@ -247,7 +218,7 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = new M();
+        m = __global_protobuf_pool_acquire__(m);
         context_map_.erase(rid);
         _ipkt->UnPackProtocolBuffer(m);
       } else {
@@ -265,31 +236,13 @@ class Client : public BaseClient {
   }
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
-    REQID rid;
-    CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-
-    M* m = _heron_message_pool.acquire(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
-      // We could not decode the pb properly
-      std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      release(m);
-      return;
-    }
-    CHECK(m->IsInitialized());
-
-    std::function<void()> cb = std::bind(method, _t, rid, m);
-
-    cb();
-  }
-
-  template <typename T, typename M>
   void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = new M();
+    M* m = nullptr;
+    m = __global_protobuf_pool_acquire__(m);
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      __global_protobuf_pool_release__(m);
       return;
     }
     CHECK(m->IsInitialized());
@@ -303,7 +256,6 @@ class Client : public BaseClient {
   std::unordered_map<REQID, std::pair<sp_string, void*> > context_map_;
 
   typedef std::function<void(IncomingPacket*)> handler;
-  std::unordered_map<std::string, handler> requestHandlers;
   std::unordered_map<std::string, handler> messageHandlers;
   typedef std::function<void(IncomingPacket*, NetworkErrorCode)> res_handler;
   std::unordered_map<std::string, res_handler> responseHandlers;

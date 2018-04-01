@@ -5,77 +5,88 @@ aliases:
   - /docs/install.html
 ---
 
-The easiest way to get started learning Heron is to install and run pre-compiled
-Heron binaries, which are currently available for:
+> The current version of Heron is **{{% heronVersion %}}**
 
-* Mac OS X
-* Ubuntu >= 14.04
+The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
-For other platforms, you need to build from source. Please refer to [Heron Developers]
+* [MacOS](#macos-homebrew)
+* [Ubuntu >= 14.04](#using-installation-scripts)
+* [CentOS](#using-installation-scripts)
+
+For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
 (../developers/compiling/compiling).
 
-## Step 1 --- Download Heron binaries using installation scripts
+## Step 1 --- Download the Heron tools
 
-Go to the [releases page](https://github.com/twitter/heron/releases) for Heron
-and download two installation scripts for your platform. The names of the
-scripts have this form:
+Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
 
-* `heron-client-install-{{% heronVersion %}}-PLATFORM.sh`
-* `heron-tools-install-{{% heronVersion %}}-PLATFORM.sh`
+> You can install using [installation scripts](#using-installation-scripts) on macOS as well.
 
-The installation scripts for Mac OS X (`darwin`), for example, would be named
-`heron-client-install-{{% heronVersion %}}-darwin.sh` and
-`heron-tools-install-{{% heronVersion %}}-darwin.sh`.
+## macOS/Homebrew
 
-Once you've downloaded the scripts, run the Heron client script with the
-`--user` flag set:
+The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh):
 
 ```bash
-$ chmod +x heron-client-install-VERSION-PLATFORM.sh
-$ ./heron-client-install-VERSION-PLATFORM.sh --user
-Heron client installer
-----------------------
+$ brew install heron
+```
 
-Uncompressing......
+This will install a variety of executables and other resources by default in `/usr/local/opt/heron`.
+
+> Homebrew may use a different folder than `/usr/local/opt/heron`. To check which folder is being used, run `brew --prefix heron`.
+
+## Using installation scripts
+
+To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
+`heron-install-{{% heronVersion %}}-darwin.sh`.
+
+Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
+
+```bash
+$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
+```
+
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+
+```bash
+$ chmod +x heron-*.sh
+```
+
+> The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
+
+Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
+
+```bash
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
+Heron installer
+---------------
+
+Uncompressing...done
+...
 Heron is now installed!
-
-Make sure you have "${HOME}/bin" in your path.
-...
 ```
 
-To add `~/bin` to your path, run:
-
-```bash
-$ export PATH=$PATH:~/bin
-```
-
-Now run the script for Heron tools (setting the `--user` flag):
-
-```bash
-$ chmod +x heron-tools-install-VERSION-PLATFORM.sh
-$ ./heron-tools-install-VERSION-PLATFORM.sh --user
-Heron tools installer
----------------------
-
-Uncompressing......
-Heron Tools is now installed!
-...
-```
-
-To check Heron is successfully installed, run:
+To check that Heron is successfully installed, run `heron version`:
 
 ```bash
 $ heron version
-heron.build.version : {{% heronVersion %}}
-heron.build.time : Sat Aug  6 12:35:47 PDT 2016
-heron.build.timestamp : 1470512147000
-heron.build.host : ${HOSTNAME}
-heron.build.user : ${USERNAME}
 heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
 heron.build.git.status : Clean
+heron.build.host : ...
+heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
+heron.build.timestamp : 1470512147000
+heron.build.user : ...
+heron.build.version : {{% heronVersion %}}
 ```
 
 ## Step 2 --- Launch an example topology
+
+> #### Note for macOS users
+
+> If you want to run topologies locally on macOS, you may need to add your
+> hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
+> `127.0.0.1 localhost My-Mac-Laptop.local`. You can fetch your hostname by simply
+> running `hostname` in your shell.
 
 If you set the `--user` flag when running the installation scripts, some example
 topologies will be installed in your `~/.heron/examples` directory. You can
@@ -83,65 +94,51 @@ launch an example [topology](../concepts/topologies) locally (on your machine)
 using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
-# Submit ExclamationTopology locally in deactivated mode.
 $ heron submit local \
-~/.heron/examples/heron-examples.jar \
-com.twitter.heron.examples.ExclamationTopology \
-ExclamationTopology \
---deploy-deactivated
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCountTopology \
+  --deploy-deactivated
+```
 
-INFO: Launching topology 'ExclamationTopology'
+The output should look something like this:
+
+```bash
+INFO: Launching topology 'WindowedWordCountTopology'
+
 ...
-[2016-06-07 16:44:07 -0700] com.twitter.heron.scheduler.local.LocalLauncher INFO: \
-For checking the status and logs of the topology, use the working directory \
-$HOME/.herondata/topologies/local/${ROLE}/ExclamationTopology # working directory
 
-INFO: Topology 'ExclamationTopology' launched successfully
+INFO: Topology 'WindowedWordCountTopology' launched successfully
 INFO: Elapsed time: 3.409s.
 ```
 
 This will *submit* the topology to your locally running Heron cluster but it
-won't *activate* the topology. That will be explored in step 5 below.
+won't *activate* the topology because the `--deploy-deactivated` flag was set.
+Activating the topology will be explored in [step
+5](#step-5-explore-topology-management-commands) below.
 
-Note the output shows if the topology has been launched successfully and the working directory.
+Note that the output shows whether the topology has been launched successfully as well
+the working directory for the topology.
 
 To check what's under the working directory, run:
+
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology
--rw-r--r--   1 username  role     2299 Jun  7 16:44 ExclamationTopology.defn
--rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_exclaim1_1.pid
--rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_word_2.pid
-drwxr-xr-x  11 username  role      374 Jun  7 16:44 heron-conf
-drwxr-xr-x   4 username  role      136 Dec 31  1969 heron-core
--rwxr-xr-x   1 username  role  2182564 Dec 31  1969 heron-examples.jar
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-executor-0.pid
--rw-r--r--   1 username  role        0 Jun  6 13:33 heron-executor.stderr
--rw-r--r--   1 username  role    17775 Jun  7 16:44 heron-executor.stdout
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-shell-0.pid
--rw-r--r--   1 username  role        5 Jun  7 16:44 heron-tmaster.pid
-drwxr-xr-x  25 username  role      850 Jun  7 16:44 log-files
--r--r--r--   1 username  role     4506 Jun  8 12:05 metrics.json.metricsmgr-0.0
--rw-r--r--   1 username  role        5 Jun  7 16:44 metricsmgr-0.pid
--r-xr-xr-x   1 username  role      279 Dec 31  1969 release.yaml
--rw-r--r--   1 username  role        5 Jun  7 16:44 stmgr-1.pid
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology
+-rw-r--r--   1 username  staff     6141 Oct 12 09:58 WindowedWordCountTopology.defn
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_flatmap1_4.pid
+-rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_logger1_3.pid
+# etc.
 ```
 
 All instances' log files can be found in `log-files` under the working directory:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology/log-files
-total 1018440
--rw-r--r--   1 username  role   94145427 Jun  8 12:06 container_1_exclaim1_1.log.0
--rw-r--r--   1 username  role   75675435 Jun  7 16:44 container_1_word_2.log.0
--rw-r--r--   1 username  role  187401024 Jun  8 12:06 gc.container_1_exclaim1_1.log
--rw-r--r--   1 username  role  136318451 Jun  8 12:06 gc.container_1_word_2.log
--rw-r--r--   1 username  role      11039 Jun  8 11:16 gc.metricsmgr.log
--rw-r--r--   1 username  role        300 Jun  7 16:44 heron-shell.log
--rw-r--r--   1 username  role      29631 Jun  7 16:44 heron-ExclamationTopology-scheduler.log.0
--rw-r--r--   1 username  role    2382215 Jun  7 15:16 heron-stmgr-stmgr-1.username.log.INFO
--rw-r--r--   1 username  role       5976 Jun  7 16:44 heron-tmaster-ExclamationTopology2da9ee6b-c919-4e59-8cb0-20a865f6fd7e.username.log.INFO
--rw-r--r--   1 username  role   12023368 Jun  8 12:06 metricsmgr-0.log.0
-
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology/log-files
+total 408
+-rw-r--r--   1 username  staff   5055 Oct 12 09:58 container_1_flatmap1_4.log.0
+-rw-r--r--   1 username  staff      0 Oct 12 09:58 container_1_flatmap1_4.log.0.lck
+-rw-r--r--   1 username  staff   5052 Oct 12 09:58 container_1_logger1_3.log.0
+# etc.
 ```
 
 ## Step 3 --- Start Heron Tracker
@@ -158,7 +155,7 @@ $ heron-tracker
 
 You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
 and see something like the following upon successful submission of the topology:
-![alt tag](/img/heron-tracker.png)
+![Heron Tracker](/img/heron-tracker.png)
 
 To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
 
@@ -176,24 +173,25 @@ $ heron-ui
 
 You can open Heron UI in your browser at [http://localhost:8889](http://localhost:8889)
 and see something like this upon successful submission of the topology:
-![alt tag](/img/heron-ui.png)
+![Heron UI](/img/heron-ui.png)
 
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
+
 ## Step 5 --- Explore topology management commands
 
 In step 2 you submitted a topology to your local cluster. The `heron` CLI tool
 also enables you to activate, deactivate, and kill topologies and more.
 
 ```bash
-$ heron activate local ExclamationTopology
-$ heron deactivate local ExclamationTopology
-$ heron kill local ExclamationTopology
+$ heron activate local WindowedWordCountTopology
+$ heron deactivate local WindowedWordCountTopology
+$ heron kill local WindowedWordCountTopology
 ```
 
 Upon successful actions, a message similar to the following will appear:
 
 ```bash
-INFO: Successfully activated topology 'ExclamationTopology'
+INFO: Successfully activated topology 'WindowedWordCountTopology'
 INFO: Elapsed time: 1.980s.
 ```
 
@@ -242,7 +240,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/heron/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.
@@ -262,7 +260,7 @@ In case of any issues, please refer to [Quick Start Troubleshooting](../getting-
 
 ### Next Steps
 
-* [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
+* [Migrate Storm topologies](../migrate-storm-to-heron) to Heron with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
   environments (such as on [Aurora](../operators/deployment/schedulers/aurora)

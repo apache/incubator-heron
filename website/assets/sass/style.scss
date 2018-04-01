@@ -1,7 +1,6 @@
+@import "variables";
 @import "bootstrap";
-
-// Import Open Sans font
-@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+@import "typography";
 
 // Helpers
 div[class^="landing-feature"] {
@@ -19,9 +18,30 @@ div[class^="landing-feature"] {
   }
 }
 
+section.main-page-lower-section {
+  width: 95%;
+}
+
 // Set global attributes
 html, body {
-  font-family: "Open Sans", sans-serif;
+  font-family: $font-family-sans-serif;
+  font-size: 1rem;
+}
+
+pre, code {
+  font-family: $font-family-monospaced;
+}
+
+// This set of parameters ensures a "sticky" footer at the bottom
+// of the page using flexbox
+body.body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+
+  main.main {
+    flex: 1;
+  }
 }
 
 a:hover {
@@ -128,112 +148,24 @@ aside.hn-sidebar {
   }
 }
 
-// Hide sidebar for mobile, show later
-@media (min-width: 768px) {
-  .hn-sidebar {
-    position: fixed;
-    top: $navbar-height;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    display: block;
-    padding: 20px;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: white;/*#f5f5f5;*/
-    border-right: 1px solid #eee;
-  }
+.hn-sidebar {
+  position: fixed;
+  top: $navbar-height;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  background-color: white;/*#f5f5f5;*/
+  border-right: 1px solid #eee;
 }
 
 // Main content on docs pages
 section.hn-docs-main {
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-top: 0;
-
-  header.hn-docs-header {
-    .hn-docs-description {
-      font-weight: bolder;
-    }
-  }
-
-  article.hn-docs-content {
-    code {
-      padding: 2px;
-      border-radius: 2px;
-    }
-
-    p {
-      font-size: 1.2em;
-    }
-
-    ul li, ul li p, ol p {
-      font-size: 1.1em;
-    }
-
-    h1 {
-      font-size: 1.8em;
-      padding-bottom: 5px;
-    }
-
-    h2 {
-      font-size: 1.5em;
-      padding-bottom: 5px;
-    }
-
-    h3 {
-      font-size: 1.3em;
-      padding-bottom: 5px;
-    }
-
-    h4 {
-      font-size: 1.2em;
-      padding-bottom: 3px;
-    }
-
-    .highlight {
-      border-radius: 10px;
-
-      pre {
-        color: lighten($light-gray, 15%);
-      }
-    }
-
-    img {
-      max-width: 90%;
-    }
-
-    table {
-      thead {
-        font-size: 16px;
-        border-bottom: 1px solid gray;
-      }
-
-      tr {
-        margin-right: 5px;
-      }
-
-      tbody {
-        font-size: 12px;
-      }
-    }
-  }
-}
-
-@media (min-width: 768px) {
-  .hn-docs-main {
-    max-width: 70%;
-    padding-right: 40px;
-    padding-left: 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hn-docs-main {
-    padding: 40px;
-    max-width: 100%;
-    margin-left: 0;
-  }
+  max-width: 100%;
+  margin-bottom: $docs-main-bottom-margin;
 }
 
 // Footer on the index page

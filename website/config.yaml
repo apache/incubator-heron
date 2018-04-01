@@ -2,7 +2,7 @@ languageCode: en-us
 title: Heron
 author: Luc Perkins
 canonifyurls: true
-baseurl: /heron
+baseurl: https://apache.github.io/incubator-heron
 
 # Site-level config
 metadataformat: yaml
@@ -11,17 +11,17 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsstyle: monokai
-pygmentsuseclasses: false
-pygmentscodefences: true
+pygmentsUseClasses: true
+pygmentsCodeFences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
   author: Twitter, Inc.
   description: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   versions:
-    heron: 0.14.3
-    bazel: 0.3.1
+    heron: 0.17.5
+    bazel: 0.5.4
+    heronpy: 0.17.5
   assets:
     favicon:
       small: /img/favicon-16x16.png
@@ -29,10 +29,6 @@ params:
     logo: /img/logo54x54.png #logo.png
     textlogo: /img/HeronTextLogo.png #logo.png
     textLogoSmall: /img/HeronTextLogo-small.png #logo.png
-    css:
-      - /css/style.min.css
-      - /css/font-awesome.min.css
-      - /css/pygments.css
     js:
       - https://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js

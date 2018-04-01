@@ -17,8 +17,9 @@
 #ifndef HERON_COMMON_SRC_CPP_NETWORK_CONNECTION_H_
 #define HERON_COMMON_SRC_CPP_NETWORK_CONNECTION_H_
 
+#include <deque>
 #include <functional>
-#include <list>
+#include <queue>
 #include <utility>
 #include "network/packet.h"
 #include "network/event_loop.h"
@@ -74,20 +75,9 @@ class Connection : public BaseConnection {
   /**
    * Add this packet to the list of packets to be sent. The packet in itself can be sent
    * later. A zero return value indicates that the packet has been successfully queued to be
-   * sent. It does not indicate that the packet was sent successfully. When the packet is
-   * actually sent(or determined that it cannot be sent), the callback cb will be called
-   * with appropriate status message.
+   * sent. It does not indicate that the packet was sent successfully.
    * A negative value of sendPacket indicates an error. The most likely error is improperly
    * formatted packet.
-   * packet should not be touched by the caller until the callback cb has been called.
-   */
-  sp_int32 sendPacket(OutgoingPacket* packet, VCallback<NetworkErrorCode> cb);
-
-  /**
-   * This is the same as above except that we dont need any callback to confirm packet
-   * delivery status.
-   * packet is owned by the Connection object. It will be deleted after the packet has been
-   * written down the wire.
    */
   sp_int32 sendPacket(OutgoingPacket* packet);
 
@@ -104,15 +94,7 @@ class Connection : public BaseConnection {
    */
   sp_int32 registerForBackPressure(VCallback<Connection*> cbStarter,
                                    VCallback<Connection*> cbReliever);
-  /**
-   * Invoke this callback when the connection buffer size changes.
-   */
-  void registerForBufferChange(VCallback<Connection*> cb);
 
-  sp_int32 getOutstandingPackets() const { return mNumOutstandingPackets; }
-  sp_int32 getOutstandingBytes() const { return mNumOutstandingBytes; }
-
-  sp_int32 getWriteBatchSize() const { return mWriteBatchsize; }
   void setCausedBackPressure() { mCausedBackPressure = true; }
   void unsetCausedBackPressure() { mCausedBackPressure = false; }
   bool hasCausedBackPressure() const { return mCausedBackPressure; }
@@ -121,37 +103,9 @@ class Connection : public BaseConnection {
   sp_int32 putBackPressure();
   sp_int32 removeBackPressure();
 
- public:
-  // This is the high water mark on the num of bytes that can be left outstanding on a connection
-  static sp_int64 systemHWMOutstandingBytes;
-  // This is the low water mark on the num of bytes that can be left outstanding on a connection
-  static sp_int64 systemLWMOutstandingBytes;
-
  private:
-  virtual sp_int32 writeIntoEndPoint(sp_int32 fd);
-
-  sp_int32 writeIntoIOVector(sp_int32 maxWrite, sp_int32* toWrite);
-
-  void afterWriteIntoIOVector(sp_int32 simumWrites, ssize_t numWritten);
-
-  virtual bool stillHaveDataToWrite();
-
-  virtual void handleDataWritten();
-
-  virtual sp_int32 readFromEndPoint(sp_int32 _fd);
-
-  virtual void handleDataRead();
-
-  // The list of outstanding packets that need to be sent.
-  std::list<std::pair<OutgoingPacket*, VCallback<NetworkErrorCode>>> mOutstandingPackets;
-  sp_int64 mNumOutstandingPackets;  // primarily because list's size is linear
-  sp_int64 mNumOutstandingBytes;
-
-  // The list of packets that have been sent but not yet been reported to the higher layer
-  std::list<std::pair<OutgoingPacket*, VCallback<NetworkErrorCode>>> mSentPackets;
-
-  // The list of packets that have been received but not yet delivered to the higher layer
-  std::list<IncomingPacket*> mReceivedPackets;
+  virtual sp_int32 readFromEndPoint(bufferevent* _buffer);
+  virtual void releiveBackPressure();
 
   // Incompletely read next packet
   IncomingPacket* mIncomingPacket;
@@ -165,13 +119,6 @@ class Connection : public BaseConnection {
   // becomes full (outstanding bytes exceed threshold)
   VCallback<Connection*> mOnConnectionBufferFull;
 
-  VCallback<Connection*> mOnConnectionBufferChange;
-
-  sp_int32 mIOVectorSize;
-  struct iovec* mIOVector;
-
-  // How many bytes do we want to write in one batch
-  sp_int32 mWriteBatchsize;
   // Have we caused back pressure?
   bool mCausedBackPressure;
   // Are our reads being throttled?

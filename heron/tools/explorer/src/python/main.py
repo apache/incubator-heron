@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#!/usr/bin/env python2.7
 ''' main.py '''
 import argparse
 import sys
@@ -123,6 +124,7 @@ def run(command, *args):
   return 1
 
 
+# pylint: disable=superfluous-parens
 def extract_common_args(command, parser, cl_args):
   """ extract common args """
   try:
@@ -132,7 +134,7 @@ def extract_common_args(command, parser, cl_args):
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
-    print subparser.format_help()
+    print(subparser.format_help())
     return dict()
   cluster = config.get_heron_cluster(cluster_role_env)
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)

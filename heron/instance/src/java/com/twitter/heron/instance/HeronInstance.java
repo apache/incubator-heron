@@ -15,6 +15,7 @@
 package com.twitter.heron.instance;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -25,8 +26,17 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.Message;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
@@ -35,7 +45,6 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
-import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
@@ -52,11 +61,11 @@ public class HeronInstance {
   private final SlaveLooper slaveLooper;
 
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  private final Communicator<Message> outStreamQueue;
 
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private final Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private final Communicator<Message> inStreamQueue;
 
   // This queue is used to pass Control Message from Gateway to Slave
   // TODO:- currently it would just pass the PhysicalPlanHelper
@@ -74,6 +83,21 @@ public class HeronInstance {
   private final ExecutorService threadsPool;
 
   private final SystemConfig systemConfig;
+
+  private static class CommandLineOptions {
+    private static final String TOPOLOGY_NAME_OPTION = "topology_name";
+    private static final String TOPOLOGY_ID_OPTION = "topology_id";
+    private static final String INSTANCE_ID_OPTION = "instance_id";
+    private static final String COMPONENT_NAME_OPTION = "component_name";
+    private static final String TASK_ID_OPTION = "task_id";
+    private static final String COMPONENT_INDEX_OPTION = "component_index";
+    private static final String STMGR_ID_OPTION = "stmgr_id";
+    private static final String STMGR_PORT_OPTION = "stmgr_port";
+    private static final String METRICS_MGR_PORT_OPTION = "metricsmgr_port";
+    private static final String SYSTEM_CONFIG_FILE = "system_config_file";
+    private static final String OVERRIDE_CONFIG_FILE = "override_config_file";
+    private static final String REMOTE_DEBUGGER_PORT = "remote_debugger_port";
+  }
 
   /**
    * Heron instance constructor
@@ -93,8 +117,8 @@ public class HeronInstance {
     slaveLooper.addTasksOnExit(new SlaveExitTask());
 
     // For stream
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(gatewayLooper, slaveLooper);
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, gatewayLooper);
+    inStreamQueue = new Communicator<Message>(gatewayLooper, slaveLooper);
+    outStreamQueue = new Communicator<Message>(slaveLooper, gatewayLooper);
     inControlQueue = new Communicator<InstanceControlMsg>(gatewayLooper, slaveLooper);
 
     // Now for metrics
@@ -127,32 +151,137 @@ public class HeronInstance {
     threadsPool = Executors.newFixedThreadPool(NUM_THREADS);
   }
 
+  private static CommandLine parseCommandLineArgs(String[] args) {
+    Options options = new Options();
+
+    Option topologyNameOption = new Option(
+        CommandLineOptions.TOPOLOGY_NAME_OPTION, true, "Topology Name");
+    topologyNameOption.setRequired(true);
+    topologyNameOption.setType(String.class);
+    options.addOption(topologyNameOption);
+
+    Option topologyIdOption = new Option(
+        CommandLineOptions.TOPOLOGY_ID_OPTION, true, "Topology ID");
+    topologyIdOption.setRequired(true);
+    topologyIdOption.setType(String.class);
+    options.addOption(topologyIdOption);
+
+    Option instanceIdOption = new Option(
+        CommandLineOptions.INSTANCE_ID_OPTION, true, "Instance ID");
+    instanceIdOption.setRequired(true);
+    instanceIdOption.setType(String.class);
+    options.addOption(instanceIdOption);
+
+    Option componentNameOption = new Option(
+        CommandLineOptions.COMPONENT_NAME_OPTION, true, "Component Name");
+    componentNameOption.setRequired(true);
+    componentNameOption.setType(String.class);
+    options.addOption(componentNameOption);
+
+    Option taskIdOption = new Option(CommandLineOptions.TASK_ID_OPTION, true, "Task ID");
+    taskIdOption.setRequired(true);
+    taskIdOption.setType(Integer.class);
+    options.addOption(taskIdOption);
+
+    Option componentIndexOption = new Option(
+        CommandLineOptions.COMPONENT_INDEX_OPTION, true, "Component Index");
+    componentIndexOption.setRequired(true);
+    componentIndexOption.setType(Integer.class);
+    options.addOption(componentIndexOption);
+
+    Option stmgrIdOption = new Option(
+        CommandLineOptions.STMGR_ID_OPTION, true, "Stream Manager ID");
+    stmgrIdOption.setType(String.class);
+    stmgrIdOption.setRequired(true);
+    options.addOption(stmgrIdOption);
+
+    Option stmgrPortOption = new Option(
+        CommandLineOptions.STMGR_PORT_OPTION, true, "Stream Manager Port");
+    stmgrPortOption.setType(Integer.class);
+    stmgrPortOption.setRequired(true);
+    options.addOption(stmgrPortOption);
+
+    Option metricsmgrPortOption = new Option(
+        CommandLineOptions.METRICS_MGR_PORT_OPTION, true, "Metrics Manager Port");
+    metricsmgrPortOption.setType(Integer.class);
+    metricsmgrPortOption.setRequired(true);
+    options.addOption(metricsmgrPortOption);
+
+    Option systemConfigFileOption = new Option(
+        CommandLineOptions.SYSTEM_CONFIG_FILE, true, "Heron Internals Config Filename");
+    systemConfigFileOption.setType(String.class);
+    systemConfigFileOption.setRequired(true);
+    options.addOption(systemConfigFileOption);
+
+    Option overrideConfigFileOption
+        = new Option(CommandLineOptions.OVERRIDE_CONFIG_FILE,
+        true, "Override Config File");
+    overrideConfigFileOption.setType(String.class);
+    overrideConfigFileOption.setRequired(true);
+    options.addOption(overrideConfigFileOption);
+
+    Option remoteDebuggerPortOption = new Option(
+        CommandLineOptions.REMOTE_DEBUGGER_PORT, true, "Remote Debugger Port");
+    remoteDebuggerPortOption.setType(Integer.class);
+    options.addOption(remoteDebuggerPortOption);
+
+    CommandLineParser parser = new DefaultParser();
+    HelpFormatter formatter = new HelpFormatter();
+    CommandLine cmd = null;
+    try {
+      cmd = parser.parse(options, args);
+    } catch (ParseException e) {
+      System.out.println(e.getMessage());
+      formatter.printHelp("Heron Instance", options);
+      throw new RuntimeException("Incorrect Usage");
+    }
+    return cmd;
+  }
+
   public static void main(String[] args) throws IOException {
-    if (args.length < 10) {
-      throw new RuntimeException(
-          "Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance "
-              + "<topology_name> <topology_id> <instance_id> <component_name> <task_id> "
-              + "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
-              + "<heron_internals_config_filename>");
+    CommandLine commandLine = parseCommandLineArgs(args);
+
+    String topologyName = commandLine.getOptionValue(CommandLineOptions.TOPOLOGY_NAME_OPTION);
+    String topologyId = commandLine.getOptionValue(CommandLineOptions.TOPOLOGY_ID_OPTION);
+    String instanceId = commandLine.getOptionValue(CommandLineOptions.INSTANCE_ID_OPTION);
+    String componentName = commandLine.getOptionValue(CommandLineOptions.COMPONENT_NAME_OPTION);
+    Integer taskId = Integer.parseInt(
+        commandLine.getOptionValue(CommandLineOptions.TASK_ID_OPTION));
+    Integer componentIndex
+        = Integer.parseInt(commandLine.getOptionValue(CommandLineOptions.COMPONENT_INDEX_OPTION));
+    String streamId = commandLine.getOptionValue(CommandLineOptions.STMGR_ID_OPTION);
+    Integer streamPort
+        = Integer.parseInt(commandLine.getOptionValue(CommandLineOptions.STMGR_PORT_OPTION));
+    Integer metricsPort
+        = Integer.parseInt(
+        commandLine.getOptionValue(CommandLineOptions.METRICS_MGR_PORT_OPTION));
+    String systemConfigFile
+        = commandLine.getOptionValue(CommandLineOptions.SYSTEM_CONFIG_FILE);
+    String overrideConfigFile
+        = commandLine.getOptionValue(CommandLineOptions.OVERRIDE_CONFIG_FILE);
+
+    Integer remoteDebuggerPort = null;
+    if (commandLine.hasOption(CommandLineOptions.REMOTE_DEBUGGER_PORT)) {
+      remoteDebuggerPort = Integer.parseInt(
+          commandLine.getOptionValue(CommandLineOptions.REMOTE_DEBUGGER_PORT));
     }
 
-    String topologyName = args[0];
-    String topologyId = args[1];
-    String instanceId = args[2];
-    String componentName = args[3];
-    int taskId = Integer.parseInt(args[4]);
-    int componentIndex = Integer.parseInt(args[5]);
-    String streamId = args[6];
-    int streamPort = Integer.parseInt(args[7]);
-    int metricsPort = Integer.parseInt(args[8]);
-    SystemConfig systemConfig = new SystemConfig(args[9], true);
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFile, true)
+        .putAll(overrideConfigFile, true)
+        .build();
 
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Create the protobuf Instance
-    PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
-        setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
+    PhysicalPlans.InstanceInfo.Builder instanceInfoBuilder
+        = PhysicalPlans.InstanceInfo.newBuilder().setTaskId(taskId)
+        .setComponentIndex(componentIndex).setComponentName(componentName);
+    if (remoteDebuggerPort != null) {
+      instanceInfoBuilder.setRemoteDebuggerPort(remoteDebuggerPort);
+    }
+    PhysicalPlans.InstanceInfo instanceInfo = instanceInfoBuilder.build();
 
     PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
         setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
@@ -166,17 +295,23 @@ public class HeronInstance {
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(instanceId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
+    String logMsg = "\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName
         + " with taskId " + taskId + " and componentIndex " + componentIndex
         + " and stmgrId " + streamId + " and stmgrPort " + streamPort
-        + " and metricsManagerPort " + metricsPort);
+        + " and metricsManagerPort " + metricsPort;
 
-    LOG.info("System Config: " + systemConfig);
+    if (remoteDebuggerPort != null) {
+      logMsg += " and remoteDebuggerPort " + remoteDebuggerPort;
+    }
+
+    LOG.info(logMsg);
+
+    LOG.info("System Config: " + systemConfig.toString());
 
     HeronInstance heronInstance =
         new HeronInstance(topologyName, topologyId, instance, streamPort, metricsPort);
@@ -233,6 +368,18 @@ public class HeronInstance {
 
     // The actual uncaught exceptions handing logic
     private void handleException(Thread thread, Throwable exception) {
+      // We would fail fast when errors occur to avoid unexpected bad situations
+      if (exception instanceof Error) {
+        try {
+          LOG.log(Level.SEVERE, "Error caught in thread: " + thread.getName()
+                + " with thread id: " + thread.getId() + ". Process halting...", exception);
+        } finally {
+          // If an OOM happens, it is likely that logging above will
+          // cause another OOM.
+          Runtime.getRuntime().halt(1);
+        }
+      }
+
       LOG.log(Level.SEVERE,
           String.format("Exception caught in thread: %s with id: %d",
               thread.getName(), thread.getId()), exception);
@@ -240,8 +387,7 @@ public class HeronInstance {
       // CountDownLatch to notify ForceExitTask whether exit is done
       final CountDownLatch exited = new CountDownLatch(1);
       final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
-      exitExecutor.execute(
-          new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
+      exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeout()));
 
       // Clean up
       if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
@@ -289,19 +435,19 @@ public class HeronInstance {
   // this Runnable would forcibly halt the process
   public class ForceExitTask implements Runnable {
     private final CountDownLatch exited;
-    private final long timeoutInMs;
+    private final Duration timeout;
 
-    public ForceExitTask(CountDownLatch exited, long timeoutInMs) {
+    public ForceExitTask(CountDownLatch exited, Duration timeout) {
       this.exited = exited;
-      this.timeoutInMs = timeoutInMs;
+      this.timeout = timeout;
     }
 
     @Override
     public void run() {
-      LOG.info(String.format("Waiting for process exit in %d ms...", timeoutInMs));
+      LOG.info(String.format("Waiting for process exit in %s", timeout));
       boolean ret = false;
       try {
-        ret = exited.await(timeoutInMs, TimeUnit.MILLISECONDS);
+        ret = exited.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
         LOG.log(Level.SEVERE, "ForceExitTask is interrupted:", e);
       }

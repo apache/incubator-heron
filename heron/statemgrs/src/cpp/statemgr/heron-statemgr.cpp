@@ -93,15 +93,25 @@ void HeronStateMgr::ListExecutionStateDone(std::vector<proto::system::ExecutionS
 }
 
 std::string HeronStateMgr::GetTMasterLocationDir() { return topleveldir_ + "/tmasters"; }
+std::string HeronStateMgr::GetMetricsCacheLocationDir() { return topleveldir_ + "/metricscaches"; }
 
 std::string HeronStateMgr::GetTopologyDir() { return topleveldir_ + "/topologies"; }
 
 std::string HeronStateMgr::GetPhysicalPlanDir() { return topleveldir_ + "/pplans"; }
 
+std::string HeronStateMgr::GetPackingPlanDir() { return topleveldir_ + "/packingplans"; }
+
 std::string HeronStateMgr::GetExecutionStateDir() { return topleveldir_ + "/executionstate"; }
+
+std::string HeronStateMgr::GetStatefulCheckpointsDir() {
+  return topleveldir_ + "/statefulcheckpoints";
+}
 
 std::string HeronStateMgr::GetTMasterLocationPath(const std::string& _topname) {
   return GetTMasterLocationDir() + "/" + _topname;
+}
+std::string HeronStateMgr::GetMetricsCacheLocationPath(const std::string& _topname) {
+  return GetMetricsCacheLocationDir() + "/" + _topname;
 }
 
 std::string HeronStateMgr::GetTopologyPath(const std::string& _topname) {
@@ -112,8 +122,16 @@ std::string HeronStateMgr::GetPhysicalPlanPath(const std::string& _topname) {
   return GetPhysicalPlanDir() + "/" + _topname;
 }
 
+std::string HeronStateMgr::GetPackingPlanPath(const std::string& _topname) {
+  return GetPackingPlanDir() + "/" + _topname;
+}
+
 std::string HeronStateMgr::GetExecutionStatePath(const std::string& _topname) {
   return GetExecutionStateDir() + "/" + _topname;
+}
+
+std::string HeronStateMgr::GetStatefulCheckpointsPath(const std::string& _topname) {
+  return GetStatefulCheckpointsDir() + "/" + _topname;
 }
 }  // namespace common
 }  // namespace heron

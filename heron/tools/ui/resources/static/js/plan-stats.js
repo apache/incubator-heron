@@ -2,7 +2,7 @@
  * Generate the stats rollup table.
  */
 (function (global) {
-  function drawStatsTable(planController, cluster, environ, toponame, physicalPlan, logicalPlan) {
+  function drawStatsTable(planController, baseUrl, cluster, environ, toponame, physicalPlan, logicalPlan) {
     var NO_DATA_COLOR = "#f0f5fa";
 
     var table = d3.selectAll('.stat-rollup-table tbody.stats');
@@ -60,6 +60,16 @@
         scaleTicks: [0, 500, 1000, 1500, 2000],
         format: function (d) { return d.toFixed(0); }
       },
+      {
+        name: 'Back Pressure',
+        metricName: 'backpressure',
+        get: getAndRenderStats,
+        tooltip: 'Milliseconds spent in back pressure per minute.',
+        legendDescription: 'ms in back pressure per minute',
+        loMedHi: [3000, 12000, 30000],
+        scaleTicks: [0, 7500, 15000, 22500, 30000],
+        format: function (d) { return d.toFixed(0); }
+      }
     ];
 
     var colData = [
@@ -330,7 +340,7 @@
     function colorTopLevel(value, statTableCell) {
       topLevelStatus.filter(function (d) {
         return d === statTableCell;
-      }).style('color', function (d) {
+      }).style('fill', function (d) {
         return d.color = !_.isNumber(value) || isNaN(value) ? NO_DATA_COLOR : statTableCell.metric.colorScale(value);
       }).style('visibility', null);
     }
@@ -346,7 +356,7 @@
     }
 
     function createMetricsUrl(metric, component, instance, start, end) {
-      var url = '/topologies/metrics/timeline?';
+      var url = baseUrl + '/topologies/metrics/timeline?';
       return [
         url + 'cluster=' + cluster,
         'environ=' + environ,

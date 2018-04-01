@@ -92,11 +92,11 @@ class TopologyTest(unittest.TestCase):
 
     scope["is_called"] = False
     self.assertFalse(scope["is_called"])
-    print scope
+    print(scope)
     self.topology.set_physical_plan(None)
-    print scope
+    print(scope)
     self.assertTrue(scope["is_called"])
-    print scope
+    print(scope)
 
     scope["is_called"] = False
     self.assertFalse(scope["is_called"])

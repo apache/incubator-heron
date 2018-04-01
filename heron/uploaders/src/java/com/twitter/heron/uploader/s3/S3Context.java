@@ -14,16 +14,22 @@
 
 package com.twitter.heron.uploader.s3;
 
+import com.amazonaws.regions.Regions;
+
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
 public class S3Context extends Context {
+  public static final String HERON_UPLOADER_S3_AWS_PROFILE = "heron.uploader.s3.aws_profile";
   public static final String HERON_UPLOADER_S3_ACCESS_KEY = "heron.uploader.s3.access_key";
   public static final String HERON_UPLOADER_S3_SECRET_KEY = "heron.uploader.s3.secret_key";
   public static final String HERON_UPLOADER_S3_BUCKET = "heron.uploader.s3.bucket";
   public static final String HERON_UPLOADER_S3_PATH_PREFIX = "heron.uploader.s3.path_prefix";
+  public static final String HERON_UPLOADER_S3_PROXY_URI = "heron.uploader.s3.proxy_uri";
   public static final String HERON_UPLOADER_S3_URI = "heron.uploader.s3.uri";
   public static final String HERON_UPLOADER_S3_REGION = "heron.uploader.s3.region";
+
+
 
   public static String pathPrefix(Config config) {
     return config.getStringValue(HERON_UPLOADER_S3_PATH_PREFIX, "/");
@@ -31,6 +37,10 @@ public class S3Context extends Context {
 
   public static String bucket(Config config) {
     return config.getStringValue(HERON_UPLOADER_S3_BUCKET);
+  }
+
+  public static String awsProfile(Config config) {
+    return config.getStringValue(HERON_UPLOADER_S3_AWS_PROFILE);
   }
 
   public static String accessKey(Config config) {
@@ -42,10 +52,16 @@ public class S3Context extends Context {
   }
 
   public static String region(Config config) {
-    return config.getStringValue(HERON_UPLOADER_S3_REGION);
+    return config.getStringValue(HERON_UPLOADER_S3_REGION, Regions.DEFAULT_REGION.getName());
   }
 
   public static String uri(Config config) {
     return config.getStringValue(HERON_UPLOADER_S3_URI);
   }
+
+  public static String proxyUri(Config config) {
+    return config.getStringValue(HERON_UPLOADER_S3_PROXY_URI);
+  }
+
 }
+

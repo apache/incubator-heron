@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +19,7 @@ import os
 import heron.tools.common.src.python.utils.config as config
 
 # default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://localhost:8888"
+DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
 
 
 # add argument for config file path

@@ -110,11 +110,6 @@ BaseConnection* Server::CreateConnection(ConnectionEndPoint* _endpoint, Connecti
   conn->registerForBackPressure(std::move(backpressure_starter_),
                                 std::move(backpressure_reliever_));
 
-  auto buffer_size_change_ = [this](Connection* conn) {
-    this->ConnectionBufferChangeCb(conn);
-  };
-
-  conn->registerForBufferChange(std::move(buffer_size_change_));
   return conn;
 }
 
@@ -180,7 +175,7 @@ void Server::InternalSendResponse(Connection* _connection, OutgoingPacket* _pack
     delete _packet;
     return;
   }
-  if (_connection->sendPacket(_packet, NULL) != 0) {
+  if (_connection->sendPacket(_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping... " << std::endl;
     delete _packet;
     return;
@@ -221,7 +216,7 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   // delete the request
   delete _request;
 
-  if (_conn->sendPacket(opkt, NULL) != 0) {
+  if (_conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
     delete opkt;
     auto cb = [_response_placeholder, _ctx, this]() {
@@ -260,8 +255,4 @@ void Server::StartBackPressureConnectionCb(Connection* conn) {
 
 void Server::StopBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
-}
-
-void Server::ConnectionBufferChangeCb(Connection* conn) {
-  // Nothing to be done here. Should be handled by inheritors if they care about buffer size change
 }

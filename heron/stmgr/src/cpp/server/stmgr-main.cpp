@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "gflags/gflags.h"
 #include "manager/stmgr.h"
 #include "statemgr/heron-statemgr.h"
 #include "proto/messages.h"
@@ -26,52 +27,59 @@
 #include "network/network.h"
 #include "config/heron-internals-config-reader.h"
 
-int main(int argc, char* argv[]) {
-  if (argc != 12) {
-    std::cout << "Usage: " << argv[0] << " "
-              << "<topname> <topid> <topdefnfile> "
-              << "<zknode> <zkroot> <stmgrid> "
-              << "<instanceids> <myport> <metricsmgrport> <shellport> "
-                 "<heron_internals_config_filename>"
-              << std::endl;
-    std::cout << "If zknode is empty please say LOCALMODE\n";
-    ::exit(1);
-  }
+DEFINE_string(topology_name, "", "Name of the topology");
+DEFINE_string(topology_id, "", "Id of the topology");
+DEFINE_string(topologydefn_file, "", "Name of the topology defn file");
+DEFINE_string(zkhostportlist, "", "Location of the zk");
+DEFINE_string(zkroot, "", "Root of the zk");
+DEFINE_string(stmgr_id, "", "My Id");
+DEFINE_string(instance_ids, "", "Comma seperated list of instance ids in my container");
+DEFINE_string(myhost, "", "The hostname that I'm running");
+DEFINE_int32(data_port, 0, "The port used for inter-container traffic");
+DEFINE_int32(local_data_port, 0, "The port used for intra-container traffic");
+DEFINE_int32(metricsmgr_port, 0, "The port of the local metricsmgr");
+DEFINE_int32(shell_port, 0, "The port of the local heron shell");
+DEFINE_string(config_file, "", "The heron internals config file");
+DEFINE_string(override_config_file, "", "The override heron internals config file");
+DEFINE_string(ckptmgr_id, "", "The id of the local ckptmgr");
+DEFINE_int32(ckptmgr_port, 0, "The port of the local ckptmgr");
 
-  std::string topology_name = argv[1];
-  std::string topology_id = argv[2];
-  std::string topdefn_file = argv[3];
-  std::string zkhostportlist = argv[4];
-  if (zkhostportlist == "LOCALMODE") {
-    zkhostportlist = "";
+int main(int argc, char* argv[]) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+  if (FLAGS_zkhostportlist == "LOCALMODE") {
+    FLAGS_zkhostportlist = "";
   }
-  std::string topdir = argv[5];
-  std::string myid = argv[6];
-  std::string instanceids = argv[7];
-  std::vector<std::string> instances = StrUtils::split(instanceids, ",");
-  sp_int32 myport = atoi(argv[8]);
-  sp_int32 metricsmgr_port = atoi(argv[9]);
-  sp_int32 shell_port = atoi(argv[10]);
-  sp_string heron_internals_config_filename = argv[11];
+  std::vector<std::string> instances = StrUtils::split(FLAGS_instance_ids, ",");
 
   EventLoopImpl ss;
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss, heron_internals_config_filename);
+  heron::config::HeronInternalsConfigReader::Create(&ss,
+    FLAGS_config_file, FLAGS_override_config_file);
 
-  heron::common::Initialize(argv[0], myid.c_str());
+  heron::common::Initialize(argv[0], FLAGS_stmgr_id.c_str());
 
   // Lets first read the top defn file
   heron::proto::api::Topology* topology = new heron::proto::api::Topology();
-  sp_string contents = FileUtils::readAll(topdefn_file);
+  sp_string contents = FileUtils::readAll(FLAGS_topologydefn_file);
   topology->ParseFromString(contents);
   if (!topology->IsInitialized()) {
-    LOG(FATAL) << "Corrupt topology defn file" << std::endl;
+    LOG(FATAL) << "Corrupt topology defn file " << FLAGS_topologydefn_file;
   }
 
-  heron::stmgr::StMgr mgr(&ss, myport, topology_name, topology_id, topology, myid, instances,
-                          zkhostportlist, topdir, metricsmgr_port, shell_port);
+  sp_int64 high_watermark = heron::config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureHighwatermarkMb() *
+                                1_MB;
+  sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
+                              ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
+                                1_MB;
+  heron::stmgr::StMgr mgr(&ss, FLAGS_myhost, FLAGS_data_port, FLAGS_local_data_port,
+                          FLAGS_topology_name, FLAGS_topology_id, topology, FLAGS_stmgr_id,
+                          instances, FLAGS_zkhostportlist, FLAGS_zkroot, FLAGS_metricsmgr_port,
+                          FLAGS_shell_port, FLAGS_ckptmgr_port, FLAGS_ckptmgr_id,
+                          high_watermark, low_watermark);
   mgr.Init();
   ss.loop();
   return 0;

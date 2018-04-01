@@ -11,6 +11,18 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 heron.scheduler.is.service:                  False
 
 ####################################################################
+# Following are Aurora-specific
+####################################################################
+# The maximum retry attempts when trying to kill an Aurora job
+heron.scheduler.job.max.kill.attempts:       5
+
+# The interval in ms between two retry-attempts to kill an Aurora job
+heron.scheduler.job.kill.retry.interval.ms:  2000
+
+# Aurora Controller Class
+# heron.class.scheduler.aurora.controller.cli:     False
+
+####################################################################
 # Following are config for tunneling
 ####################################################################
 # Whether we should attempt to tunnel if there is no direct access to a remote host (e.g. TMaster)

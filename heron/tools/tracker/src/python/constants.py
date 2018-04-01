@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +23,11 @@ import heron.tools.common.src.python.utils.config as common_config
 
 # Version Information
 
-API_VERSION = common_config.get_version_number()
+try:
+  API_VERSION = common_config.get_version_number()
+except:
+  API_VERSION = ""
+
 
 
 # Handler Constants
@@ -50,7 +57,7 @@ RESPONSE_KEY_EXECUTION_TIME = "executiontime"
 RESPONSE_KEY_MESSAGE = "message"
 RESPONSE_KEY_RESULT = "result"
 RESPONSE_KEY_STATUS = "status"
-RESPONSE_KEY_VERSION = "version"
+RESPONSE_KEY_VERSION = "tracker_version"
 
 # These are the values of the status
 # in the JSON repsonse.
@@ -67,3 +74,18 @@ DEFAULT_PORT = 8888
 
 # default config file to read
 DEFAULT_CONFIG_FILE = "heron_tracker.yaml"
+
+# default paramater - type of state manaager
+DEFAULT_STATE_MANAGER_TYPE = "file"
+
+# default parameter - name to be used for the state manager
+DEFAULT_STATE_MANAGER_NAME = "local"
+
+# default parameter - where all the states are stored
+DEFAULT_STATE_MANAGER_ROOTPATH = "~/.herondata/repository/state/local"
+
+# default parameter - if ssh tunneling needs to be established to connect to it
+DEFAULT_STATE_MANAGER_TUNNELHOST = "127.0.0.1"
+
+# default parameter - only used to connect to zk, must be of the form host:port
+DEFAULT_STATE_MANAGER_HOSTPORT = "127.0.0.1:2181"

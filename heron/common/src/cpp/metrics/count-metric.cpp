@@ -22,7 +22,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "metrics/count-metric.h"
-#include <sstream>
+#include <string>
 #include "metrics/imetric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -43,12 +43,10 @@ void CountMetric::incr_by(sp_int64 _by) { value_ += _by; }
 
 void CountMetric::GetAndReset(const sp_string& _prefix,
                               proto::system::MetricPublisherPublishMessage* _message) {
-  std::ostringstream o;
-  o << value_;
-  value_ = 0;
   proto::system::MetricDatum* d = _message->add_metrics();
   d->set_name(_prefix);
-  d->set_value(o.str());
+  d->set_value(std::to_string(value_));
+  value_ = 0;
 }
 }  // namespace common
 }  // namespace heron

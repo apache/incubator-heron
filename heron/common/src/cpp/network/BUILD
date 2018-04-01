@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/genproto", "proto_library")
-
 cc_library(
     name = "network-cxx",
     srcs = [
@@ -19,6 +17,7 @@ cc_library(
         "networkoptions.cpp",
         "packet.cpp",
         "server.cpp",
+        "piper.cpp",
 
         "regevent.h",
         "asyncdns.h",
@@ -36,7 +35,7 @@ cc_library(
         "packet.h",
         "event_loop_impl.h",
         "server.h",
-        "mempool.h",
+        "piper.h",
     ],
     hdrs = [
         "network.h",

@@ -15,6 +15,7 @@
 package com.twitter.heron.statemgr.zookeeper;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.Test;
@@ -25,7 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +70,7 @@ public class ZkUtilsTest {
         host0, port0, host1, port1, host2, port2);
 
     Config config = mock(Config.class);
-    when(config.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING")))
+    when(config.getStringValue(Key.STATEMGR_CONNECTION_STRING))
         .thenReturn(connectionString);
     NetworkUtils.TunnelConfig tunnelConfig =
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.STATE_MANAGER);
@@ -82,16 +83,16 @@ public class ZkUtilsTest {
     PowerMockito.spy(NetworkUtils.class);
     PowerMockito.doReturn(new Pair<>(address0, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address0), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address0), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
     PowerMockito.doReturn(new Pair<>(address1, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address1), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address1), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
     PowerMockito.doReturn(new Pair<>(tunnelAddress, process))
         .when(NetworkUtils.class, "establishSSHTunnelIfNeeded",
-            eq(address2), anyString(), any(NetworkUtils.TunnelType.class), anyInt(),
-            anyInt(), anyInt(), anyInt());
+            eq(address2), anyString(), any(NetworkUtils.TunnelType.class), any(Duration.class),
+            anyInt(), any(Duration.class), anyInt());
 
     Pair<String, List<Process>> ret = ZkUtils.setupZkTunnel(config, tunnelConfig);
 

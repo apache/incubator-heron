@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +22,8 @@
 # pylint: disable=invalid-name,global-variable-not-assigned,global-statement
 config_opts = dict()
 verbose_flag = False
-trace_execution_flag = False
+
+cleaned_up_files = []
 
 
 ################################################################################
@@ -44,7 +48,7 @@ def get_config(k):
   :return:
   '''
   global config_opts
-  if config_opts.has_key(k):
+  if k in config_opts:
     return config_opts[k]
   return None
 
@@ -69,21 +73,3 @@ def clear_config():
   '''
   global config_opts
   config_opts = dict()
-
-
-################################################################################
-def set_trace_execution():
-  '''
-  Methods to get and set trace execution
-  :return:
-  '''
-  global trace_execution_flag
-  trace_execution_flag = True
-
-
-def trace_execution():
-  '''
-  :return:
-  '''
-  global trace_execution_flag
-  return trace_execution_flag

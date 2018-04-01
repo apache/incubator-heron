@@ -14,34 +14,35 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.api.utils.TopologyUtils;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.UpdateTopologyManager;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.Key;
+import com.twitter.heron.spi.common.TokenSub;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScalable;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class AuroraScheduler implements IScheduler, IScalable {
   private static final Logger LOG = Logger.getLogger(AuroraLauncher.class.getName());
@@ -53,25 +54,44 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    this.config = mConfig;
+    this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
-    this.controller = getController();
+    try {
+      this.controller = getController();
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      LOG.severe("AuroraController initialization failed " + e.getMessage());
+    }
     this.updateTopologyManager =
         new UpdateTopologyManager(config, runtime, Optional.<IScalable>of(this));
   }
 
   /**
-   * Get an AuroraControl basing on the config and runtime
+   * Get an AuroraController based on the config and runtime
    *
-   * @return AuroraControl
+   * @return AuroraController
    */
-  protected AuroraController getController() {
-    return new AuroraController(
-        Runtime.topologyName(runtime),
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
-        Context.verbose(config));
+  protected AuroraController getController()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    Boolean cliController = config.getBooleanValue(Key.AURORA_CONTROLLER_CLASS);
+    Config localConfig = Config.toLocalMode(this.config);
+    if (cliController) {
+      return new AuroraCLIController(
+          Runtime.topologyName(runtime),
+          Context.cluster(localConfig),
+          Context.role(localConfig),
+          Context.environ(localConfig),
+          AuroraContext.getHeronAuroraPath(localConfig),
+          Context.verbose(localConfig));
+    } else {
+      return new AuroraHeronShellController(
+          Runtime.topologyName(runtime),
+          Context.cluster(localConfig),
+          Context.role(localConfig),
+          Context.environ(localConfig),
+          AuroraContext.getHeronAuroraPath(localConfig),
+          Context.verbose(localConfig),
+          localConfig);
+    }
   }
 
   @Override
@@ -90,14 +110,19 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     LOG.info("Launching topology in aurora");
 
-    // Align the cpu, ram, disk to the maximal one
+    // Align the cpu, ram, disk to the maximal one, and set them to ScheduledResource
     PackingPlan updatedPackingPlan = packing.cloneWithHomogeneousScheduledResource();
     SchedulerUtils.persistUpdatedPackingPlan(Runtime.topologyName(runtime), updatedPackingPlan,
         Runtime.schedulerStateManagerAdaptor(runtime));
 
-    Map<String, String> auroraProperties = createAuroraProperties(updatedPackingPlan);
+    // Use the ScheduledResource to create aurora properties
+    // the ScheduledResource is guaranteed to be set after calling
+    // cloneWithHomogeneousScheduledResource in the above code
+    Resource containerResource =
+        updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
+    Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
 
-    return controller.createJob(AuroraContext.getHeronAuroraPath(config), auroraProperties);
+    return controller.createJob(auroraProperties);
   }
 
   @Override
@@ -107,7 +132,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
     //Only the aurora job page is returned
     String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
     if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
-      String jobLink = Misc.substitute(config, jobLinkFormat);
+      String jobLink = TokenSub.substitute(config, jobLinkFormat);
       jobLinks.add(jobLink);
     }
 
@@ -116,13 +141,36 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    return controller.killJob();
+    // The aurora service can be unavailable or unstable for a while,
+    // we will try to kill the job with multiple attempts
+    int attempts = AuroraContext.getJobMaxKillAttempts(config);
+    long retryIntervalMs = AuroraContext.getJobKillRetryIntervalMs(config);
+    LOG.info("Will try " + attempts + " attempts at interval: " + retryIntervalMs + " ms");
+
+    // First attempt
+    boolean res = controller.killJob();
+    attempts--;
+
+    // Failure retry
+    while (!res && attempts > 0) {
+      LOG.warning("Failed to kill the topology. Will retry in " + retryIntervalMs + " ms...");
+      Utils.sleep(retryIntervalMs);
+
+      // Retry the killJob()
+      res = controller.killJob();
+      attempts--;
+    }
+
+    return res;
   }
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    int containerId = request.getContainerIndex();
-    return controller.restartJob(containerId);
+    Integer containerId = null;
+    if (request.getContainerIndex() != -1) {
+      containerId = request.getContainerIndex();
+    }
+    return controller.restart(containerId);
   }
 
   @Override
@@ -137,9 +185,45 @@ public class AuroraScheduler implements IScheduler, IScalable {
     return true;
   }
 
+  private static final String CONFIRMED_YES = "y";
+  boolean hasConfirmedWithUser(int newContainerCount) {
+    LOG.info(String.format("After update there will be %d more containers. "
+        + "Please make sure there are sufficient resources to update this job. "
+        + "Continue update? [y/N]: ", newContainerCount));
+    Scanner scanner = new Scanner(System.in);
+    String userInput = scanner.nextLine();
+    return CONFIRMED_YES.equalsIgnoreCase(userInput);
+  }
+
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
-    controller.addContainers(containersToAdd.size());
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
+    Set<PackingPlan.ContainerPlan> remapping = new HashSet<>();
+    if ("prompt".equalsIgnoreCase(Context.updatePrompt(config))
+        && !hasConfirmedWithUser(containersToAdd.size())) {
+      LOG.warning("Scheduler updated topology canceled.");
+      return remapping;
+    }
+
+    // Do the actual containers adding
+    LinkedList<Integer> newAddedContainerIds = new LinkedList<>(
+        controller.addContainers(containersToAdd.size()));
+    if (newAddedContainerIds.size() != containersToAdd.size()) {
+      throw new RuntimeException(
+          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          + "; input count was " + containersToAdd.size());
+    }
+    // Do the remapping:
+    // use the `newAddedContainerIds` to replace the container id in the `containersToAdd`
+    for (PackingPlan.ContainerPlan cp : containersToAdd) {
+      PackingPlan.ContainerPlan newContainerPlan =
+          new PackingPlan.ContainerPlan(
+              newAddedContainerIds.pop(), cp.getInstances(),
+              cp.getRequiredResource(), cp.getScheduledResource().orNull());
+      remapping.add(newContainerPlan);
+    }
+    LOG.info("The remapping structure: " + remapping);
+    return remapping;
   }
 
   @Override
@@ -147,86 +231,49 @@ public class AuroraScheduler implements IScheduler, IScalable {
     controller.removeContainers(containersToRemove);
   }
 
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  protected Map<String, String> createAuroraProperties(PackingPlan packing) {
-    Map<String, String> auroraProperties = new HashMap<>();
+  protected Map<AuroraField, String> createAuroraProperties(Resource containerResource) {
+    Map<AuroraField, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-    Resource containerResource = packing.getContainers().iterator().next().getRequiredResource();
 
-    auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
-    auroraProperties.put("TOPOLOGY_NAME", topology.getName());
-    auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
-        FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("STATEMGR_CONNECTION_STRING",
-        Context.stateManagerConnectionString(config));
-    auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
-    auroraProperties.put("SANDBOX_TMASTER_BINARY", Context.tmasterSandboxBinary(config));
-    auroraProperties.put("SANDBOX_STMGR_BINARY", Context.stmgrSandboxBinary(config));
-    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH",
-        Context.metricsManagerSandboxClassPath(config));
-    auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_CLASSPATH",
-        TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
+    auroraProperties.put(AuroraField.EXECUTOR_BINARY,
+        Context.executorBinary(config));
 
-    auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
-    auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
-    auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
-    auroraProperties.put("TOPOLOGY_BINARY_FILE",
-        FileUtils.getBaseName(Context.topologyBinaryFile(config)));
-    auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
+    List<String> topologyArgs = new ArrayList<>();
+    SchedulerUtils.addExecutorTopologyArgs(topologyArgs, config, runtime);
+    String args = String.join(" ", topologyArgs);
+    auroraProperties.put(AuroraField.TOPOLOGY_ARGUMENTS, args);
 
-    auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
-    auroraProperties.put("SANDBOX_PYTHON_INSTANCE_BINARY",
-        Context.pythonInstanceSandboxBinary(config));
+    auroraProperties.put(AuroraField.CLUSTER, Context.cluster(config));
+    auroraProperties.put(AuroraField.ENVIRON, Context.environ(config));
+    auroraProperties.put(AuroraField.ROLE, Context.role(config));
+    auroraProperties.put(AuroraField.TOPOLOGY_NAME, topology.getName());
 
-    auroraProperties.put("CPUS_PER_CONTAINER", Double.toString(containerResource.getCpu()));
-    auroraProperties.put("DISK_PER_CONTAINER", Long.toString(containerResource.getDisk()));
-    auroraProperties.put("RAM_PER_CONTAINER", Long.toString(containerResource.getRam()));
+    auroraProperties.put(AuroraField.CPUS_PER_CONTAINER,
+        Double.toString(containerResource.getCpu()));
+    auroraProperties.put(AuroraField.DISK_PER_CONTAINER,
+        Long.toString(containerResource.getDisk().asBytes()));
+    auroraProperties.put(AuroraField.RAM_PER_CONTAINER,
+        Long.toString(containerResource.getRam().asBytes()));
 
-    auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
+    auroraProperties.put(AuroraField.NUM_CONTAINERS,
+        Integer.toString(1 + TopologyUtils.getNumContainers(topology)));
 
-    auroraProperties.put("CLUSTER", Context.cluster(config));
-    auroraProperties.put("ENVIRON", Context.environ(config));
-    auroraProperties.put("ROLE", Context.role(config));
-    auroraProperties.put("ISPRODUCTION", isProduction() + "");
-
-    auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
-    auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
-
-    String completeSchedulerClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
+    // Job configuration attribute 'production' is deprecated.
+    // Use 'tier' attribute instead
+    // See: http://aurora.apache.org/documentation/latest/reference/configuration/#job-objects
+    if ("prod".equals(Context.environ(config))) {
+      auroraProperties.put(AuroraField.TIER, "preferred");
+    } else {
+      auroraProperties.put(AuroraField.TIER, "preemptible");
+    }
 
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
 
-    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
-    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
+    auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
+    auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
     return auroraProperties;
-  }
-
-  protected boolean isProduction() {
-    // TODO (nlu): currently enforce environment to be "prod" for a Production job
-    return "prod".equals(Context.environ(config));
   }
 }

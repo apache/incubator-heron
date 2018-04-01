@@ -35,38 +35,40 @@ import com.twitter.heron.proto.system.HeronTuples;
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TupleImpl implements Tuple {
-  private final TopologyContext context;
+  private static final long serialVersionUID = -5524957157094337394L;
+  private final Fields fields;
   private final TopologyAPI.StreamId stream;
   private final long tupleKey;
   private final List<HeronTuples.RootId> roots;
   private final long creationTime;
+  private final int sourceTaskId;
 
   private List<Object> values;
 
   public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
                    long tupleKey, List<HeronTuples.RootId> roots,
-                   List<Object> values) {
-    this(context, stream, tupleKey, roots, values, System.nanoTime(), true);
+                   List<Object> values, int sourceTaskId) {
+    this(context, stream, tupleKey, roots, values, System.nanoTime(), true, sourceTaskId);
   }
 
   public TupleImpl(TopologyContext context, TopologyAPI.StreamId stream,
                    long tupleKey, List<HeronTuples.RootId> roots,
-                   List<Object> values, long creationTime, boolean isCheckRequired) {
-    this.context = context;
+                   List<Object> values, long creationTime, boolean isCheckRequired,
+                   int sourceTaskId) {
     this.stream = stream;
     this.tupleKey = tupleKey;
     this.roots = roots;
     this.values = values;
     this.creationTime = creationTime;
+    this.sourceTaskId = sourceTaskId;
+    this.fields = context.getComponentOutputFields(
+        this.stream.getComponentName(), this.stream.getId());
 
     if (isCheckRequired) {
-      Fields schema = context.getComponentOutputFields(stream.getComponentName(),
-          stream.getId());
-
-      if (values.size() != schema.size()) {
+      if (values.size() != this.fields.size()) {
         throw new IllegalArgumentException(
             "Tuple created with wrong number of fields. "
-                + "Expected " + schema.size() + " fields but got "
+                + "Expected " + this.fields.size() + " fields but got "
                 + values.size() + " fields"
         );
       }
@@ -203,7 +205,7 @@ public class TupleImpl implements Tuple {
 
   @Override
   public Fields getFields() {
-    return context.getComponentOutputFields(getSourceComponent(), getSourceStreamId());
+    return this.fields;
   }
 
   @Override
@@ -211,22 +213,19 @@ public class TupleImpl implements Tuple {
     return getFields().select(selector, values);
   }
 
-  /*
-   * TODO:- Is this needed
-    public GlobalStreamId getSourceGlobalStreamid() {
-        return new GlobalStreamId(getSourceComponent(), streamId);
-    }
-  */
+  @Override
+  public TopologyAPI.StreamId getSourceGlobalStreamId() {
+    return stream;
+  }
 
   @Override
   public String getSourceComponent() {
     return stream.getComponentName();
   }
 
-  // TODO:- Is this needed
   @Override
   public int getSourceTask() {
-    throw new RuntimeException("Tuple no longer supports getSourceTask");
+    return sourceTaskId;
   }
 
   @Override

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,13 +32,13 @@ class TopologiesHandler(BaseHandler):
   {
     <cluster1>: {
       <default>: [
-        top1,
-        top2,
+        topology1,
+        topology2,
         ...
       ],
       <environ1>: [
-        top1,
-        top2,
+        topology1,
+        topology2,
         ...
       ],
       <environ2>: [...],
@@ -64,8 +67,13 @@ class TopologiesHandler(BaseHandler):
     for topology in topologies:
       cluster = topology.cluster
       environ = topology.environ
-      topo_role = topology.execution_state.role
-      if not cluster or not topo_role or not environ:
+      execution_state = topology.execution_state
+
+      if not cluster or not execution_state or not environ:
+        continue
+
+      topo_role = execution_state.role
+      if not topo_role:
         continue
 
       # This cluster is not asked for.

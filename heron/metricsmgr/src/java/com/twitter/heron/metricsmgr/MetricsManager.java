@@ -17,6 +17,7 @@ package com.twitter.heron.metricsmgr;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -25,9 +26,16 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
@@ -93,8 +101,11 @@ public class MetricsManager {
   private final Communicator<Metrics.MetricPublisherPublishMessage> metricsQueue;
   private final Metrics.MetricPublisher metricsManagerPublisher;
 
-  private final int heronMetricsExportIntervalSec;
+  private final Duration heronMetricsExportInterval;
   private final String topologyName;
+  private final String cluster;
+  private final String role;
+  private final String environment;
   private final String metricsmgrId;
 
   private final long mainThreadId;
@@ -102,11 +113,14 @@ public class MetricsManager {
   /**
    * Metrics manager constructor
    */
-  public MetricsManager(String topologyName, String serverHost,
-                        int serverPort, String metricsmgrId,
+  public MetricsManager(String topologyName, String cluster, String role, String environment,
+                        String serverHost, int serverPort, String metricsmgrId,
                         SystemConfig systemConfig, MetricsSinksConfig config)
       throws IOException {
     this.topologyName = topologyName;
+    this.cluster = cluster;
+    this.role = role;
+    this.environment = environment;
     this.metricsmgrId = metricsmgrId;
     this.config = config;
     this.metricsManagerServerLoop = new NIOLooper();
@@ -123,13 +137,12 @@ public class MetricsManager {
         new Communicator<Metrics.MetricPublisherPublishMessage>(null,
             this.metricsManagerServerLoop);
     this.metricsCollector = new MetricsCollector(metricsManagerServerLoop, metricsQueue);
-    this.heronMetricsExportIntervalSec = systemConfig.getHeronMetricsExportIntervalSec();
+    this.heronMetricsExportInterval = systemConfig.getHeronMetricsExportInterval();
 
     this.mainThreadId = Thread.currentThread().getId();
 
     // Init the ErrorReportHandler
-    ErrorReportLoggingHandler.init(
-        metricsmgrId, metricsCollector, heronMetricsExportIntervalSec,
+    ErrorReportLoggingHandler.init(metricsCollector, heronMetricsExportInterval,
         systemConfig.getHeronMetricsMaxExceptionsPerMessageCount());
 
     // Set up the internal Metrics Export routine
@@ -137,21 +150,22 @@ public class MetricsManager {
 
     // Set up JVM metrics
     // TODO -- change the config name
-    setupJVMMetrics(systemConfig.getInstanceMetricsSystemSampleIntervalSec());
+    setupJVMMetrics(systemConfig.getInstanceMetricsSystemSampleInterval());
 
     // Init the HeronSocketOptions
     HeronSocketOptions serverSocketOptions =
-        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSizeBytes(),
-            systemConfig.getMetricsMgrNetworkWriteBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkReadBatchSizeBytes(),
-            systemConfig.getMetricsMgrNetworkReadBatchTimeMs(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes(),
-            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes());
+        new HeronSocketOptions(systemConfig.getMetricsMgrNetworkWriteBatchSize(),
+            systemConfig.getMetricsMgrNetworkWriteBatchTime(),
+            systemConfig.getMetricsMgrNetworkReadBatchSize(),
+            systemConfig.getMetricsMgrNetworkReadBatchTime(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketSendBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsSocketReceivedBufferSize(),
+            systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
     // Set the MultiCountMetric for MetricsManagerServer
     MultiCountMetric serverCounters = new MultiCountMetric();
-    metricsCollector.registerMetric(
-        METRICS_MANAGER_COMPONENT_NAME, serverCounters, heronMetricsExportIntervalSec);
+    metricsCollector.registerMetric(METRICS_MANAGER_COMPONENT_NAME,
+        serverCounters, (int) heronMetricsExportInterval.getSeconds());
 
     // Construct the MetricsManagerServer
     metricsManagerServer = new MetricsManagerServer(metricsManagerServerLoop, serverHost,
@@ -197,22 +211,156 @@ public class MetricsManager {
     return hostName;
   }
 
-  public static void main(String[] args) throws IOException {
-    if (args.length != 6) {
-      throw new RuntimeException(
-          "Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager "
-              + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
-              + "<metrics_sinks_config_filename>");
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Option id = Option.builder()
+        .desc("Metrics manager id")
+        .longOpt("id")
+        .hasArgs()
+        .argName("id")
+        .required()
+        .build();
+
+    Option port = Option.builder()
+        .desc("Metrics manager port")
+        .longOpt("port")
+        .hasArgs()
+        .argName("port")
+        .required()
+        .build();
+
+    Option topology = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("topology")
+        .hasArgs()
+        .argName("topology")
+        .required()
+        .build();
+
+    Option topologyId = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("topology-id")
+        .hasArgs()
+        .argName("topologyId")
+        .required()
+        .build();
+
+    Option cluster = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option sinkConfig = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("sink-config-file")
+        .hasArgs()
+        .argName("sink config file")
+        .required()
+        .build();
+
+    Option systemConfig = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("system-config-file")
+        .hasArgs()
+        .argName("system config file")
+        .required()
+        .build();
+
+    Option overrideConfig = Option.builder()
+        .desc("The name of the topology to collect metrics from")
+        .longOpt("override-config-file")
+        .hasArgs()
+        .argName("override config file")
+        .required()
+        .build();
+
+    return new Options()
+        .addOption(id)
+        .addOption(port)
+        .addOption(topology)
+        .addOption(topologyId)
+        .addOption(cluster)
+        .addOption(role)
+        .addOption(environment)
+        .addOption(systemConfig)
+        .addOption(overrideConfig)
+        .addOption(sinkConfig);
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
+
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp("MetricsManager", options);
+  }
+
+  public static void main(String[] args) throws Exception {
+    final Options options = constructOptions();
+    final Options helpOptions = constructHelpOptions();
+
+    final CommandLineParser parser = new DefaultParser();
+
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+    if (cmd.hasOption("h")) {
+      usage(options);
+      return;
     }
 
-    String metricsmgrId = args[0];
-    int metricsPort = Integer.parseInt(args[1]);
-    String topologyName = args[2];
-    String topologyId = args[3];
-    String systemConfigFilename = args[4];
-    String metricsSinksConfigFilename = args[5];
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch (ParseException pe) {
+      usage(options);
+      throw new RuntimeException("Error parsing command line options: ", pe);
+    }
 
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+    String metricsmgrId = cmd.getOptionValue("id");
+    int metricsPort = Integer.parseInt(cmd.getOptionValue("port"));
+    String topologyName = cmd.getOptionValue("topology");
+    String topologyId = cmd.getOptionValue("topology-id");
+    String systemConfigFilename = cmd.getOptionValue("system-config-file");
+    String overrideConfigFilename = cmd.getOptionValue("override-config-file");
+    String metricsSinksConfigFilename = cmd.getOptionValue("sink-config-file");
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environment = cmd.getOptionValue("environment");
+
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .putAll(overrideConfigFilename, true)
+        .build();
+
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
@@ -225,13 +373,14 @@ public class MetricsManager {
     LoggingHelper.loggerInit(loggingLevel, true);
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumSize(),
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
-            + "Metrics Manager Id %s, Merics Manager Port: %d.",
-        topologyName, topologyId, metricsmgrId, metricsPort));
+            + "Metrics Manager Id %s, Merics Manager Port: %d, for cluster/role/env %s.",
+        topologyName, topologyId, metricsmgrId, metricsPort,
+        String.format("%s/%s/%s", cluster, role, environment)));
 
     LOG.info("System Config: " + systemConfig);
 
@@ -240,19 +389,20 @@ public class MetricsManager {
 
     LOG.info("Sinks Config:" + sinksConfig.toString());
 
-    MetricsManager metricsManager = new MetricsManager(
-        topologyName, METRICS_MANAGER_HOST, metricsPort, metricsmgrId, systemConfig, sinksConfig);
+    MetricsManager metricsManager =
+        new MetricsManager(topologyName, cluster, role, environment,
+            METRICS_MANAGER_HOST, metricsPort, metricsmgrId, systemConfig, sinksConfig);
     metricsManager.start();
 
     LOG.info("Loops terminated. Metrics Manager exits.");
   }
 
-  private void setupJVMMetrics(int systemMetricsSampleIntervalSec) {
+  private void setupJVMMetrics(Duration systemMetricsSampleInterval) {
     this.jvmMetrics.registerMetrics(metricsCollector);
 
     // Attach sample Runnable to gatewayMetricsCollector
     this.metricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
-        systemMetricsSampleIntervalSec);
+        systemMetricsSampleInterval);
   }
 
   private void setupInternalMetricsExport() {
@@ -265,12 +415,12 @@ public class MetricsManager {
         }
 
         // It schedules itself in future
-        metricsManagerServerLoop.registerTimerEventInSeconds(heronMetricsExportIntervalSec,
+        metricsManagerServerLoop.registerTimerEvent(heronMetricsExportInterval,
             this);
       }
     };
 
-    metricsManagerServerLoop.registerTimerEventInSeconds(heronMetricsExportIntervalSec,
+    metricsManagerServerLoop.registerTimerEvent(heronMetricsExportInterval,
         gatherInternalMetrics);
   }
 
@@ -296,11 +446,13 @@ public class MetricsManager {
     // for different SinkExecutor
     MetricsCollector sinkMetricsCollector = new MetricsCollector(sinkExecutorLoop, metricsQueue);
     MultiCountMetric internalCounters = new MultiCountMetric();
-    sinkMetricsCollector.registerMetric(sinkId, internalCounters, heronMetricsExportIntervalSec);
+    sinkMetricsCollector
+        .registerMetric(sinkId, internalCounters, (int) heronMetricsExportInterval.getSeconds());
 
     // Set up the SinkContext
     SinkContext sinkContext =
-        new SinkContextImpl(topologyName, metricsmgrId, sinkId, internalCounters);
+        new SinkContextImpl(topologyName, cluster, role, environment,
+            metricsmgrId, sinkId, internalCounters);
 
     SinkExecutor sinkExecutor =
         new SinkExecutor(sinkId, sink, sinkExecutorLoop, executorInMetricsQueue, sinkContext);

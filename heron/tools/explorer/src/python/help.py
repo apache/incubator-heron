@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +40,7 @@ def create_parser(subparsers):
   return parser
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,superfluous-parens
 def run(command, parser, args, unknown_args):
   """ run command """
   # get the command for detailed help
@@ -51,7 +54,7 @@ def run(command, parser, args, unknown_args):
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
-    print subparser.format_help()
+    print(subparser.format_help())
     return True
   else:
     Log.error("Unknown subcommand \'%s\'" % command_help)

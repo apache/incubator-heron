@@ -23,4 +23,6 @@ The files are
 
  * roundrobin_packing.yaml
    - this file contains the configuration for a round robin packing algorithm
-
+ 
+ * local_stateful.yaml
+   - this file contains the configuration for a local file system stateful storage

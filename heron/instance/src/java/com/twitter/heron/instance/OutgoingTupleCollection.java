@@ -14,10 +14,21 @@
 
 package com.twitter.heron.instance;
 
+import java.io.Serializable;
+
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
@@ -29,10 +40,16 @@ import com.twitter.heron.proto.system.HeronTuples;
  * In fact, when talking about to send out tuples, we mean we push them to the out queues.
  */
 public class OutgoingTupleCollection {
-  protected final String componentName;
+  protected PhysicalPlanHelper helper;
   // We have just one outQueue responsible for both control tuples and data tuples
-  private final Communicator<HeronTuples.HeronTupleSet> outQueue;
-  private final SystemConfig systemConfig;
+  private final Communicator<Message> outQueue;
+
+  // Maximum data tuple size in bytes we can put in one HeronTupleSet
+  private final ByteAmount maxDataTupleSize;
+  private final int dataTupleSetCapacity;
+  private final int controlTupleSetCapacity;
+
+  private final IPluggableSerializer serializer;
 
   private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
@@ -42,19 +59,17 @@ public class OutgoingTupleCollection {
 
   // Current size in bytes for data types to pack into the HeronTupleSet
   private long currentDataTupleSizeInBytes;
-  // Maximum data tuple size in bytes we can put in one HeronTupleSet
-  private long maxDataTupleSizeInBytes;
-
-  private int dataTupleSetCapacity;
-  private int controlTupleSetCapacity;
 
   public OutgoingTupleCollection(
-      String componentName,
-      Communicator<HeronTuples.HeronTupleSet> outQueue) {
+      PhysicalPlanHelper helper,
+      Communicator<Message> outQueue) {
     this.outQueue = outQueue;
-    this.componentName = componentName;
-    this.systemConfig =
+    this.helper = helper;
+    SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+
+    this.serializer =
+        SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // Initialize the values in constructor
     this.totalDataEmittedInBytes = 0;
@@ -62,7 +77,7 @@ public class OutgoingTupleCollection {
 
     // Read the config values
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
-    this.maxDataTupleSizeInBytes = systemConfig.getInstanceSetDataTupleSizeBytes();
+    this.maxDataTupleSize = systemConfig.getInstanceSetDataTupleSize();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
 
@@ -70,14 +85,48 @@ public class OutgoingTupleCollection {
     flushRemaining();
   }
 
+  /**
+   * Send out the instance's state with corresponding checkpointId
+   * @param state instance's state
+   * @param checkpointId the checkpointId
+   */
+  public void sendOutState(State<Serializable, Serializable> state,
+                           String checkpointId) {
+    // flush all the current data before sending the state
+    flushRemaining();
+
+    // Serialize the state
+    byte[] serializedState = serializer.serialize(state);
+
+    // Construct the instance state checkpoint
+    CheckpointManager.InstanceStateCheckpoint instanceState =
+        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+          .setCheckpointId(checkpointId)
+          .setState(ByteString.copyFrom(serializedState))
+          .build();
+
+    CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
+        CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
+            .setState(instanceState)
+            .build();
+
+    // Put the checkpoint to out stream queue
+    outQueue.offer(storeRequest);
+  }
+
   public void addDataTuple(
       String streamId,
       HeronTuples.HeronDataTuple.Builder newTuple,
       long tupleSizeInBytes) {
+    if (tupleSizeInBytes > maxDataTupleSize.asBytes()) {
+      throw new RuntimeException(
+          String.format("Data tuple (stream id: %s) is too large: %d bytes", streamId,
+              tupleSizeInBytes));
+    }
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)
         || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
-        || currentDataTupleSizeInBytes >= maxDataTupleSizeInBytes) {
+        || currentDataTupleSizeInBytes >= maxDataTupleSize.asBytes()) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);
@@ -118,7 +167,7 @@ public class OutgoingTupleCollection {
 
     TopologyAPI.StreamId.Builder sbldr = TopologyAPI.StreamId.newBuilder();
     sbldr.setId(streamId);
-    sbldr.setComponentName(componentName);
+    sbldr.setComponentName(helper.getMyComponent());
     currentDataTuple = HeronTuples.HeronDataTupleSet.newBuilder();
     currentDataTuple.setStream(sbldr);
   }
@@ -131,6 +180,7 @@ public class OutgoingTupleCollection {
   private void flushRemaining() {
     if (currentDataTuple != null) {
       HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setData(currentDataTuple);
 
       pushTupleToQueue(bldr, outQueue);
@@ -139,7 +189,9 @@ public class OutgoingTupleCollection {
     }
     if (currentControlTuple != null) {
       HeronTuples.HeronTupleSet.Builder bldr = HeronTuples.HeronTupleSet.newBuilder();
+      bldr.setSrcTaskId(helper.getMyTaskId());
       bldr.setControl(currentControlTuple);
+
       pushTupleToQueue(bldr, outQueue);
 
       currentControlTuple = null;
@@ -147,7 +199,7 @@ public class OutgoingTupleCollection {
   }
 
   private void pushTupleToQueue(HeronTuples.HeronTupleSet.Builder bldr,
-                                Communicator<HeronTuples.HeronTupleSet> out) {
+                                Communicator<Message> out) {
     // The Communicator has un-bounded capacity so the offer will always be successful
     out.offer(bldr.build());
   }
@@ -167,5 +219,9 @@ public class OutgoingTupleCollection {
     currentDataTuple = null;
 
     outQueue.clear();
+  }
+
+  public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+    this.helper = physicalPlanHelper;
   }
 }

@@ -1,3 +1,4 @@
+syntax = "proto2";
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
@@ -62,4 +63,8 @@ message MetricPublisherPublishMessage {
 // by the stmgrs to the metricsmgrs
 message TMasterLocationRefreshMessage {
   required heron.proto.tmaster.TMasterLocation tmaster = 1;
+}
+
+message MetricsCacheLocationRefreshMessage {
+  required heron.proto.tmaster.MetricsCacheLocation metricscache = 1;
 }

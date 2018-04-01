@@ -1,0 +1,44 @@
+load(
+    "@//tools/rules:genproto.bzl",
+    "proto_library",
+)
+
+load(
+    "@//tools/rules:genthrift.bzl",
+    "thrift_library",
+)
+
+load(
+    "@//tools/rules/pex:pex_rules.bzl",
+    "pex_binary",
+    "pex_library",
+    "pex_test",
+    "pex_pytest",
+)
+
+load(
+    "@//tools/rules:jarjar_rules.bzl",
+    "jarjar_binary",
+)
+
+load(
+    "@//tools/rules:heron_deps.bzl",
+    "heron_java_proto_files",
+    "heron_java_api_proto_files",
+)
+
+load(
+    "@//tools/rules:java_tests.bzl",
+    "java_tests",
+)
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+    "container_push",
+)
+
+load("@io_bazel_rules_scala//scala:scala.bzl",
+    "scala_binary",
+    "scala_library",
+    "scala_test")

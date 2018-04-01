@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,6 +67,11 @@ def dumps(obj):
   marshaller = JavaObjectMarshaller()
   return marshaller.dump(obj)
 
+_java_primitives = set([
+    "java.lang.Double",
+    "java.lang.Float",
+    "java.lang.Integer",
+    "java.lang.Long"])
 
 class JavaClass(object):
   """Java class representation"""
@@ -102,6 +110,15 @@ class JavaObject(object):
     if self.classdesc:
       name = self.classdesc.name
     return "<javaobj:%s>" % name
+
+  def classname(self):
+    name = "UNKNOWN"
+    if self.classdesc:
+      name = self.classdesc.name
+    return name
+
+  def is_primitive(self):
+    return self.classname() in _java_primitives
 
   def copy(self, new_object):
     """copy an object"""

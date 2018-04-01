@@ -81,7 +81,7 @@ public class SchedulerStateManagerAdaptor {
     }
   }
 
-  public Lock getLock(String topologyName, String lockName) {
+  public Lock getLock(String topologyName, IStateManager.LockName lockName) {
     return delegate.getLock(topologyName, lockName);
   }
 
@@ -173,6 +173,15 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Delete the metricscache location for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  public Boolean deleteMetricsCacheLocation(String topologyName) {
+    return awaitResult(delegate.deleteMetricsCacheLocation(topologyName));
+  }
+
+  /**
    * Delete the execution state for the given topology
    *
    * @return Boolean - Success or Failure
@@ -217,6 +226,14 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.deleteSchedulerLocation(topologyName));
   }
 
+  public Boolean deleteLocks(String topologyName) {
+    return awaitResult(delegate.deleteLocks(topologyName));
+  }
+
+  public Boolean deleteStatefulCheckpoint(String topologyName) {
+    return awaitResult(delegate.deleteStatefulCheckpoints(topologyName));
+  }
+
   /**
    * Get the tmaster location for the given topology
    *
@@ -235,7 +252,17 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.getSchedulerLocation(null, topologyName));
   }
 
- /**
+  /**
+   * Get the metricscache location for the given topology
+   *
+   * @return MetricsCacheLocation
+   */
+  public TopologyMaster.MetricsCacheLocation getMetricsCacheLocation(String topologyName) {
+    return awaitResult(delegate.getMetricsCacheLocation(null, topologyName));
+  }
+
+
+  /**
    * Get the topology definition for the given topology
    *
    * @return Topology

@@ -1,0 +1,4 @@
+cluster:
+- 127.0.0.1
+zookeepers:
+- 127.0.0.1

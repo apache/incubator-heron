@@ -19,12 +19,15 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import com.twitter.heron.common.basics.ByteAmount;
 
 /**
  * A helper class to init corresponding LOGGER setting
@@ -33,8 +36,8 @@ import java.util.logging.SimpleFormatter;
  * Credits: https://blogs.oracle.com/nickstephen/entry/java_redirecting_system_out_and
  */
 public final class LoggingHelper {
-  public static final String FORMAT_PROP_KEY = "java.util.logging.SimpleFormatter.format";
-  public static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] %3$s %4$s:  %5$s %6$s %n";
+  private static final String FORMAT_PROP_KEY = "java.util.logging.SimpleFormatter.format";
+  private static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] [%4$s] %3$s: %5$s %6$s %n";
 
   private LoggingHelper() {
   }
@@ -70,11 +73,26 @@ public final class LoggingHelper {
 
     rootLogger.setLevel(level);
 
+    if (rootLogger.getLevel().intValue() < Level.WARNING.intValue()) {
+      // zookeeper logging scares me. if people want this, we can patch to config-drive this
+      Logger.getLogger("org.apache.zookeeper").setLevel(Level.WARNING);
+    }
+
+    // setting logging for http client to be error level
+    System.setProperty(
+        "org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.httpclient.wire", "ERROR");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.org.apache.http", "ERROR");
+    System.setProperty(
+        "org.apache.commons.logging.simplelog.log.org.apache.http.headers", "ERROR");
+
     if (isRedirectStdOutErr) {
 
       // Remove ConsoleHandler if present, to avoid StackOverflowError.
       // ConsoleHandler writes to System.err and since we are redirecting
-      // System.err to Logger, it results in an infinte loop.
+      // System.err to Logger, it results in an infinite loop.
       for (Handler handler : rootLogger.getHandlers()) {
         if (handler instanceof ConsoleHandler) {
           rootLogger.removeHandler(handler);
@@ -95,7 +113,7 @@ public final class LoggingHelper {
     }
   }
 
-  protected static void setLoggingFormat(String format) {
+  public static void setLoggingFormat(String format) {
     System.setProperty(FORMAT_PROP_KEY, format);
   }
 
@@ -131,15 +149,15 @@ public final class LoggingHelper {
   public static FileHandler getFileHandler(String processId,
                                            String loggingDir,
                                            boolean append,
-                                           int limit,
+                                           ByteAmount limit,
                                            int count) throws IOException, SecurityException {
 
     String pattern = loggingDir + "/" + processId + ".log.%g";
 
 
-    FileHandler fileHandler = new FileHandler(pattern, limit, count, append);
+    FileHandler fileHandler = new FileHandler(pattern, (int) limit.asBytes(), count, append);
     fileHandler.setFormatter(new SimpleFormatter());
-    fileHandler.setEncoding("UTF-8");
+    fileHandler.setEncoding(StandardCharsets.UTF_8.toString());
 
     return fileHandler;
   }

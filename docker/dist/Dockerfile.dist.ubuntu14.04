@@ -1,0 +1,66 @@
+FROM ubuntu:14.04
+
+RUN apt-get -y update && apt-get -y install \
+    python \
+    unzip \
+    software-properties-common \
+    supervisor \
+    curl && \
+    apt-get clean all
+
+RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
+    apt-get -y install openjdk-8-jdk && apt-get clean all
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+RUN update-ca-certificates -f
+
+ADD artifacts /heron
+
+WORKDIR /heron
+
+# run heron installers
+RUN /heron/heron-client-install.sh && /heron/heron-tools-install.sh
+
+RUN tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron
+
+RUN rm -f /heron/heron-tools-install.sh && \
+    rm -f /heron/heron-client-install.sh && \
+    rm -f /heron/heron-core.tar.gz
+
+ENV HERON_HOME /heron/heron-core/
+
+# install zookeeper
+ARG ZK_DIST=zookeeper-3.4.10
+
+RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
+    && tar -xzf /heron/$ZK_DIST.tar.gz -C /opt \
+    && rm -r /heron/$ZK_DIST.tar.gz \
+    && mv /opt/$ZK_DIST /opt/zookeeper \
+    && rm -rf /opt/zookeeper/CHANGES.txt \
+    /opt/zookeeper/README.txt \
+    /opt/zookeeper/NOTICE.txt \
+    /opt/zookeeper/CHANGES.txt \
+    /opt/zookeeper/README_packaging.txt \
+    /opt/zookeeper/build.xml \
+    /opt/zookeeper/config \
+    /opt/zookeeper/contrib \
+    /opt/zookeeper/dist-maven \
+    /opt/zookeeper/docs \
+    /opt/zookeeper/ivy.xml \
+    /opt/zookeeper/ivysettings.xml \
+    /opt/zookeeper/recipes \
+    /opt/zookeeper/src \
+    /opt/zookeeper/$ZK_DIST.jar.asc \
+    /opt/zookeeper/$ZK_DIST.jar.md5 \
+    /opt/zookeeper/$ZK_DIST.jar.sha1
+
+ADD dist/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
+ADD dist/conf/sandbox.conf /etc/supervisor/conf.d/
+
+RUN mkdir -p /opt/zookeeper/scripts
+ADD dist/scripts /opt/zookeeper/scripts
+RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
+    && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
+    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
+
+CMD ["supervisord", "-n"]

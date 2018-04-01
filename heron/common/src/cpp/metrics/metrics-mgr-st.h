@@ -46,14 +46,24 @@ class IMetric;
 
 class MetricsMgrSt {
  public:
-  MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port, sp_int32 _metricsmgr_port,
-               const sp_string& _component, const sp_string& _task_id, sp_int32 _interval,
-               EventLoop* eventLoop);
+  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop);
   virtual ~MetricsMgrSt();
 
   void register_metric(const sp_string& _metric_name, IMetric* _metric);
   void unregister_metric(const sp_string& _metric_name);
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
+  void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
+
+  /**
+      Start MetricsMgrClient object
+
+      @param _my_hostname to build message proto::system::MetricPublisher.
+      @param _my_port to build message proto::system::MetricPublisher.
+      @param _component to build message proto::system::MetricPublisher.
+      @param _instance_id to build message proto::system::MetricPublisher.
+  */
+  void Start(const sp_string& _my_hostname, sp_int32 _my_port,
+             const sp_string& _component_id, const sp_string& _instance_id);
 
  private:
   void gather_metrics(EventLoop::Status);
@@ -61,7 +71,9 @@ class MetricsMgrSt {
   VCallback<EventLoop::Status> timer_cb_;
   std::map<sp_string, IMetric*> metrics_;
   MetricsMgrClient* client_;
+  NetworkOptions options_;
   sp_int64 timerid_;
+  EventLoop* eventLoop_;
 };
 }  // namespace common
 }  // namespace heron

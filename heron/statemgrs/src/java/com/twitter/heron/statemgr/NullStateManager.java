@@ -14,12 +14,15 @@
 
 package com.twitter.heron.statemgr;
 
+import java.util.logging.Logger;
+
 import javax.naming.OperationNotSupportedException;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -31,11 +34,16 @@ import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public class NullStateManager implements IStateManager {
-  public SettableFuture<Boolean> nullFuture = SettableFuture.create();
+
+  private static final Logger LOG = Logger.getLogger(NullStateManager.class.getName());
+
+  public final SettableFuture<Boolean> nullFuture = SettableFuture.create();
 
   @Override
   public void initialize(Config config) {
-    nullFuture.set(null);
+    if (!nullFuture.set(null)) {
+      LOG.warning("Unexpected - NullStateManager is initialized twice!");
+    }
   }
 
   @Override
@@ -44,7 +52,12 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public Lock getLock(String topologyName, String lockName) {
+  public Lock getLock(String topologyName, LockName lockName) {
+    throw new RuntimeException(new OperationNotSupportedException());
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteLocks(String topologyName) {
     throw new RuntimeException(new OperationNotSupportedException());
   }
 
@@ -56,6 +69,13 @@ public class NullStateManager implements IStateManager {
   @Override
   public ListenableFuture<Boolean> setTMasterLocation(
       TopologyMaster.TMasterLocation location,
+      String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
       String topologyName) {
     return nullFuture;
   }
@@ -101,6 +121,11 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
   public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
     return nullFuture;
   }
@@ -127,6 +152,13 @@ public class NullStateManager implements IStateManager {
 
   @Override
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+      WatchCallback watcher,
+      String topologyName) {
+    return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<TopologyMaster.MetricsCacheLocation> getMetricsCacheLocation(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();
@@ -165,5 +197,24 @@ public class NullStateManager implements IStateManager {
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint,
+      String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<CheckpointManager.StatefulConsistentCheckpoints> getStatefulCheckpoints(
+      WatchCallback watcher,
+      String topologyName) {
+    return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteStatefulCheckpoints(String topologyName) {
+    return nullFuture;
   }
 }

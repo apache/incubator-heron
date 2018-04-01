@@ -14,13 +14,10 @@
 
 package com.twitter.heron.simulator.utils;
 
+import java.time.Duration;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
 
 public class XORManager {
@@ -30,61 +27,29 @@ public class XORManager {
   private final Map<Integer, RotatingMap> spoutTasksToRotatingMap;
 
   // The rotate interval in nano-seconds
-  private final long rotateIntervalNs;
+  private final Duration rotateInterval;
 
-  public XORManager(WakeableLooper looper,
-                    int timeoutSec,
-                    List<Integer> taskIds,
-                    int nBuckets) {
+  /**
+   * Get an XORManager for all spouts for the topology.
+   *
+   * @param looper The WakeableLooper to execute timer event
+   * @param topologyManager The manager which contains a topology protobuf
+   * @param nBuckets number of buckets to divide the message timeout seconds
+   */
+  public XORManager(WakeableLooper looper, TopologyManager topologyManager, int nBuckets) {
     this.looper = looper;
     this.spoutTasksToRotatingMap = new HashMap<>();
 
-    // We would do the first rotate after timeoutSec seconds,
-    // And then would do the rotate at every rotateIntervalNs nano-second
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        rotate();
-      }
-    };
-    looper.registerTimerEventInNanoSeconds(timeoutSec * Constants.SECONDS_TO_NANOSECONDS, r);
-
-    this.rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
-        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
-
-    for (Integer taskId : taskIds) {
+    for (Integer taskId : topologyManager.getSpoutTasks()) {
       spoutTasksToRotatingMap.put(taskId, new RotatingMap(nBuckets));
     }
-  }
 
-  /**
-   * Populate the XORManager for all spouts for the topology.
-   *
-   * @param looper The WakeableLooper to execute timer event
-   * @param topology The given topology protobuf
-   * @param nBuckets number of buckets to divide the message timeout seconds
-   * @param componentToTaskIds the map of componentName to its list of taskIds in the topology
-   * @return the XORManager for all spouts' task for the topology
-   */
-  public static XORManager populateXORManager(WakeableLooper looper,
-                                              TopologyAPI.Topology topology,
-                                              int nBuckets,
-                                              Map<String, List<Integer>> componentToTaskIds) {
-    List<Integer> allSpoutTasks = new LinkedList<>();
+    Duration timeout = topologyManager.extractTopologyTimeout();
 
-    // Only spouts need acking management, i.e. xor maintenance
-    for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
-      for (TopologyAPI.OutputStream outputStream : spout.getOutputsList()) {
-        List<Integer> spoutTaskIds =
-            componentToTaskIds.get(outputStream.getStream().getComponentName());
-        allSpoutTasks.addAll(spoutTaskIds);
-      }
-    }
+    // TODO Is this correct?
+    this.rotateInterval = timeout.dividedBy(nBuckets).plusNanos(timeout.getNano());
 
-    return new XORManager(looper,
-        PhysicalPlanUtil.extractTopologyTimeout(topology),
-        allSpoutTasks,
-        nBuckets);
+    looper.registerTimerEvent(timeout, this::rotate);
   }
 
   // Create a new entry for the tuple.
@@ -122,14 +87,13 @@ public class XORManager {
       map.rotate();
     }
 
-    // Plan itself in rotateIntervalNs interval
     Runnable r = new Runnable() {
       @Override
       public void run() {
         rotate();
       }
     };
-    looper.registerTimerEventInNanoSeconds(rotateIntervalNs, r);
+    looper.registerTimerEvent(rotateInterval, r);
   }
 
   // For unit test

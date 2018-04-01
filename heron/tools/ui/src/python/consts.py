@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +24,8 @@ DEFAULT_ADDRESS = "0.0.0.0"
 DEFAULT_PORT = 8889
 
 # default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://localhost:8888"
+DEFAULT_TRACKER_URL = "http://127.0.0.1:8888"
+
+DEFAULT_BASE_URL = ""
 
 VERSION = common_config.get_version_number(zipped_pex=True)

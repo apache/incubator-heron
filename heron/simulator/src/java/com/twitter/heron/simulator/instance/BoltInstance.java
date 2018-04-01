@@ -14,43 +14,47 @@
 
 package com.twitter.heron.simulator.instance;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.ByteAmount;
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
+import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class BoltInstance
     extends com.twitter.heron.instance.bolt.BoltInstance implements IInstance {
 
-  private final long instanceExecuteBatchTime;
-  private final long instanceExecuteBatchSize;
+  private final Duration instanceExecuteBatchTime;
+  private final ByteAmount instanceExecuteBatchSize;
 
   public BoltInstance(PhysicalPlanHelper helper,
-                      Communicator<HeronTuples.HeronTupleSet> streamInQueue,
-                      Communicator<HeronTuples.HeronTupleSet> streamOutQueue,
+                      Communicator<Message> streamInQueue,
+                      Communicator<Message> streamOutQueue,
                       SlaveLooper looper) {
     super(helper, streamInQueue, streamOutQueue, looper);
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
-    this.instanceExecuteBatchTime
-        = systemConfig.getInstanceExecuteBatchTimeMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
-    this.instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSizeBytes();
+    this.instanceExecuteBatchTime = systemConfig.getInstanceExecuteBatchTime();
+    this.instanceExecuteBatchSize = systemConfig.getInstanceExecuteBatchSize();
 
   }
 
   private void handleDataTuple(HeronTuples.HeronDataTuple dataTuple,
-                               TopologyAPI.StreamId stream) {
+                               TopologyAPI.StreamId stream,
+                               int srcTaskId) {
     long startTime = System.nanoTime();
 
     List<Object> values = new ArrayList<>();
@@ -60,14 +64,14 @@ public class BoltInstance
 
     // Decode the tuple
     TupleImpl t = new TupleImpl(helper.getTopologyContext(), stream, dataTuple.getKey(),
-        dataTuple.getRootsList(), values);
+        dataTuple.getRootsList(), values, srcTaskId);
 
     long deserializedTime = System.nanoTime();
 
     // Delegate to the use defined bolt
     bolt.execute(t);
 
-    long executeLatency = System.nanoTime() - deserializedTime;
+    Duration executeLatency = Duration.ofNanos(System.nanoTime()).minusNanos(deserializedTime);
 
     // Invoke user-defined execute task hook
     helper.getTopologyContext().invokeHookBoltExecute(t, executeLatency);
@@ -76,38 +80,46 @@ public class BoltInstance
         deserializedTime - startTime);
 
     // Update metrics
-    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency);
+    boltMetrics.executeTuple(stream.getId(), stream.getComponentName(), executeLatency.toNanos());
   }
 
   @Override
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue) {
+  public void readTuplesAndExecute(Communicator<Message> inQueue) {
     long startOfCycle = System.nanoTime();
 
     long totalDataEmittedInBytesBeforeCycle = collector.getTotalDataEmittedInBytes();
 
     // Read data from in Queues
     while (!inQueue.isEmpty()) {
-      HeronTuples.HeronTupleSet tuples = inQueue.poll();
+      Message msg = inQueue.poll();
 
-      // Handle the tuples
-      if (tuples.hasControl()) {
-        throw new RuntimeException("Bolt cannot get acks/fails from other components");
-      }
-      TopologyAPI.StreamId stream = tuples.getData().getStream();
-
-      for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
-        handleDataTuple(dataTuple, stream);
+      if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
+        persistState(((CheckpointManager.InitiateStatefulCheckpoint) msg).getCheckpointId());
       }
 
-      // To avoid spending too much time
-      if (System.nanoTime() - startOfCycle - instanceExecuteBatchTime > 0) {
-        break;
-      }
+      if (msg instanceof HeronTuples.HeronTupleSet) {
+        HeronTuples.HeronTupleSet tuples = (HeronTuples.HeronTupleSet) msg;
 
-      // To avoid emitting too much data
-      if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
-          > instanceExecuteBatchSize) {
-        break;
+        // Handle the tuples
+        if (tuples.hasControl()) {
+          throw new RuntimeException("Bolt cannot get acks/fails from other components");
+        }
+        TopologyAPI.StreamId stream = tuples.getData().getStream();
+
+        for (HeronTuples.HeronDataTuple dataTuple : tuples.getData().getTuplesList()) {
+          handleDataTuple(dataTuple, stream, tuples.getSrcTaskId());
+        }
+
+        // To avoid spending too much time
+        if (System.nanoTime() - startOfCycle - instanceExecuteBatchTime.toNanos() > 0) {
+          break;
+        }
+
+        // To avoid emitting too much data
+        if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
+            > instanceExecuteBatchSize.asBytes()) {
+          break;
+        }
       }
     }
   }

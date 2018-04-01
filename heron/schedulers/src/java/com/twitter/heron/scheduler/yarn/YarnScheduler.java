@@ -49,12 +49,11 @@ public class YarnScheduler implements IScheduler, IScalable {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.getId());
+    LOG.log(Level.INFO, "Launching topology for packing: {0}", packing.getId());
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
-
     try {
-      driver.scheduleTMasterContainer();
       driver.scheduleHeronWorkers(packing);
+      driver.launchTMaster();
       return true;
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       LOG.log(Level.ALL, "Failed to allocate containers for topology", e);
@@ -109,12 +108,14 @@ public class YarnScheduler implements IScheduler, IScalable {
   }
 
   @Override
-  public void addContainers(Set<PackingPlan.ContainerPlan> containersToAdd) {
+  public Set<PackingPlan.ContainerPlan> addContainers(
+      Set<PackingPlan.ContainerPlan> containersToAdd) {
     try {
       HeronMasterDriverProvider.getInstance().scheduleHeronWorkers(containersToAdd);
     } catch (HeronMasterDriver.ContainerAllocationException e) {
       throw new RuntimeException("Failed to launch new yarn containers", e);
     }
+    return containersToAdd;
   }
 
   @Override

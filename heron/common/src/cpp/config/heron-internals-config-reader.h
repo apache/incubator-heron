@@ -42,10 +42,11 @@ class HeronInternalsConfigReader : public YamlFileReader {
   static bool Exists();
   // Create a singleton reader from a config file,
   // which will check and reload the config change
-  static void Create(EventLoop* eventLoop, const sp_string& _defaults_file);
+  static void Create(EventLoop* eventLoop,
+                     const sp_string& _defaults_file, const sp_string& _override_file);
   // Create a singleton reader from a config file,
   // which will not check or reload the config change
-  static void Create(const sp_string& _defaults_file);
+  static void Create(const sp_string& _defaults_file, const sp_string& _override_file);
 
   virtual void OnConfigFileLoad();
 
@@ -143,14 +144,18 @@ class HeronInternalsConfigReader : public YamlFileReader {
   /**
   * Stream manager Config Getters
   **/
-  // Maximum size in bytes of a packet to be send out from stream manager
-  sp_int32 GetHeronStreammgrPacketMaximumSizeBytes();
-
   // The frequency in ms to drain the tuple cache in stream manager
   sp_int32 GetHeronStreammgrCacheDrainFrequencyMs();
 
   // The sized based threshold in MB for draining the tuple cache
   sp_int32 GetHeronStreammgrCacheDrainSizeMb();
+
+  // The size based threshold in MB for buffering data tuples waiting for
+  // checkpoint markers to arrive before giving up
+  sp_int32 GetHeronStreammgrStatefulBufferSizeMb();
+
+  // The max number of messages in the memory pool for each message type
+  sp_int32 GetHeronStreammgrMempoolMaxMessageNumber();
 
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
@@ -160,6 +165,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
 
   // The reconnect interval to tamster in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectTmasterIntervalSec();
+
+  // The max reconnect attempts to tmaster for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectTmasterMaxAttempts();
 
   // The maximum packet size in MB of stream manager's network options
   sp_int32 GetHeronStreammgrNetworkOptionsMaximumPacketMb();
@@ -183,10 +191,50 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // Low water mark on the num in MB that can be left outstanding on a connection
   sp_int32 GetHeronStreammgrNetworkBackpressureLowwatermarkMb();
 
- protected:
-  HeronInternalsConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
-  virtual ~HeronInternalsConfigReader();
+  /**
+  * Instance Config Getters
+  **/
 
+  // Interval in seconds to reconnect to the stream manager
+  int GetHeronInstanceReconnectStreammgrIntervalSec();
+
+  // Number of attempts to connect to stream manager before giving up
+  int GetHeronInstanceReconnectStreammgrTimes();
+
+  // The queue capacity (num of items) in bolt for buffer packets to read from stream manager
+  int GetHeronInstanceInternalBoltReadQueueCapacity();
+
+  // The queue capacity (num of items) in bolt for buffer packets to write to stream manager
+  int GetHeronInstanceInternalBoltWriteQueueCapacity();
+
+  // The queue capacity (num of items) in spout for buffer packets to read from stream manager
+  int GetHeronInstanceInternalSpoutReadQueueCapacity();
+
+  // The queue capacity (num of items) in spout for buffer packets to write to stream manager
+  int GetHeronInstanceInternalSpoutWriteQueueCapacity();
+
+  // The maximum time in ms for an spout instance to emit tuples per attempt
+  int GetHeronInstanceEmitBatchTimeMs();
+
+  // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
+  int GetHeronInstanceSetDataTupleCapacity();
+
+  // The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+  int GetHeronInstanceSetDataTupleSizeBytes();
+
+  // The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
+  int GetHeronInstanceSetControlTupleCapacity();
+
+  // For efficient acknowledgement
+  int GetHeronInstanceAcknowledgementNbuckets();
+
+ protected:
+  HeronInternalsConfigReader(EventLoop* eventLoop,
+                             const sp_string& _defaults_file,
+                             const sp_string& _override_file);
+  virtual ~HeronInternalsConfigReader();
+  sp_string override_file_;
+  void LoadOverrideConfig();
   static HeronInternalsConfigReader* heron_internals_config_reader_;
 };
 }  // namespace config

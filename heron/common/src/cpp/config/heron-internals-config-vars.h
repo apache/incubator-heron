@@ -25,6 +25,9 @@
 
 #ifndef HERON_INTERNALS_COFNIG_VARS_H_
 #define HERON_INTERNALS_COFNIG_VARS_H_
+
+#include <string>
+
 #include "basics/basics.h"
 
 namespace heron {
@@ -130,15 +133,15 @@ class HeronInternalsConfigVars {
   * HERON_STREAMMGR_* configs are for the stream manager
   **/
 
-  // Maximum size in bytes of a packet to be send out from stream manager
-  static const sp_string HERON_STREAMMGR_PACKET_MAXIMUM_SIZE_BYTES;
-
   // The tuple cache (used for batching) can be drained in two ways: (a) Time based (b) size based
   // The frequency in ms to drain the tuple cache in stream manager
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_FREQUENCY_MS;
 
   // The sized based threshold in MB for draining the tuple cache
   static const sp_string HERON_STREAMMGR_CACHE_DRAIN_SIZE_MB;
+
+  // The max number of messages in the memory pool for each message type
+  static const sp_string HERON_STREAMMGR_MEMPOOL_MAX_MESSAGE_NUMBER;
 
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
@@ -148,6 +151,9 @@ class HeronInternalsConfigVars {
 
   // The reconnect interval to tamster in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC;
+
+  // The max reconnect attempts to tmaster for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS;
 
   // The maximum packet size in MB of stream manager's network options
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
@@ -170,6 +176,47 @@ class HeronInternalsConfigVars {
 
   // Low water mark on the num in MB that can be left outstanding on a connection
   static const sp_string HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB;
+
+  // The size based threshold in MB for buffering data tuples waiting for
+  // checkpoint markers to arrive before giving up
+  static const sp_string HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB;
+
+  /**
+  * HERON_INSTANCE_* configs are for the instance
+  **/
+
+  // Interval in seconds to reconnect to the stream manager
+  static const sp_string HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC;
+
+  // Number of attempts to connect to stream manager before giving up
+  static const sp_string HERON_INSTANCE_RECONNECT_STREAMMGR_TIMES;
+
+  // The queue capacity (num of items) in bolt for buffer packets to read from stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in bolt for buffer packets to write to stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in spout for buffer packets to read from stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY;
+
+  // The queue capacity (num of items) in spout for buffer packets to write to stream manager
+  static const sp_string HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY;
+
+  // The maximum time in ms for an spout instance to emit tuples per attempt
+  static const sp_string HERON_INSTANCE_EMIT_BATCH_TIME_MS;
+
+  // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY;
+
+  // The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES;
+
+  // The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
+  static const sp_string HERON_INSTANCE_SET_CONTROL_TUPLE_CAPACITY;
+
+  // For efficient acknowledgement
+  static const sp_string HERON_INSTANCE_ACKNOWLEDGEMENT_NBUCKETS;
 };
 }  // namespace config
 }  // namespace heron

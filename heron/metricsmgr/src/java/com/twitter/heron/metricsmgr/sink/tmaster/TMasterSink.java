@@ -15,6 +15,8 @@
 package com.twitter.heron.metricsmgr.sink.tmaster;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -27,12 +29,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.metricsmgr.MetricsUtil;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
@@ -180,16 +183,17 @@ public class TMasterSink implements IMetricsSink {
 
     // First Entry
     tMasterLocationStarter.schedule(runnable, checkIntervalSec, TimeUnit.SECONDS);
+    LOG.info("TMasterChecker started with interval: " + checkIntervalSec);
   }
 
   @Override
   public void processRecord(MetricsRecord record) {
     // Format it into TopologyMaster.PublishMetrics
 
-    // The format of source is "host:port/componentName/instanceId"
-    // So source.split("/") would be an array with 3 elements:
+    // The format of record is "host:port/componentName/instanceId"
+    // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
     // ["host:port", componentName, instanceId]
-    String[] sources = record.getSource().split("/");
+    String[] sources = MetricsUtil.splitRecordSource(record);
     String hostPort = sources[0];
     String componentName = sources[1];
     String instanceId = sources[2];
@@ -332,14 +336,19 @@ public class TMasterSink implements IMetricsSink {
         throw new RuntimeException("Could not create the NIOLooper", e);
       }
 
+      SystemConfig systemConfig =
+          (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
+              TypeUtils.getDuration(
+                  tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS), ChronoUnit.MILLIS),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
+              TypeUtils.getDuration(
+                  tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS), ChronoUnit.MILLIS),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getByteAmount(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)),
+              systemConfig.getMetricsMgrNetworkOptionsMaximumPacketSize());
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);
@@ -348,13 +357,12 @@ public class TMasterSink implements IMetricsSink {
           new TMasterClient(looper,
               currentTMasterLocation.getHost(),
               currentTMasterLocation.getMasterPort(),
-              socketOptions, metricsCommunicator);
-      tMasterClient.
-          setReconnectIntervalSec(
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
+              socketOptions, metricsCommunicator,
+              TypeUtils.getDuration(
+                  tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS));
 
-      LOG.severe(String.format("Starting TMasterClient for the %d time.",
-          startedAttempts.incrementAndGet()));
+      int attempts = startedAttempts.incrementAndGet();
+      LOG.severe(String.format("Starting TMasterClient for the %d time.", attempts));
       tmasterClientExecutor.execute(tMasterClient);
     }
 
@@ -395,9 +403,9 @@ public class TMasterSink implements IMetricsSink {
         public void uncaughtException(Thread t, Throwable e) {
           LOG.log(Level.SEVERE, "TMasterClient dies in thread: " + t, e);
 
-          long reconnectInterval =
-              TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC));
-          SysUtils.sleep(reconnectInterval * Constants.SECONDS_TO_MILLISECONDS);
+          Duration reconnectInterval = TypeUtils.getDuration(
+              tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC), ChronoUnit.SECONDS);
+          SysUtils.sleep(reconnectInterval);
           LOG.info("Restarting TMasterClient");
 
           // We would use the TMasterLocation in cache, since

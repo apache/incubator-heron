@@ -8,5 +8,5 @@ def heron_api_lib_files():
     return [
         "//heron/api/src/java:heron-api",
         "//heron/spi/src/java:heron-spi-jar",
-        "//heron/storm/src/java:heron-storm",
+        "//storm-compatibility/src/java:heron-storm",
     ] 

@@ -25,8 +25,10 @@
 #ifndef SVCS_COMMON_CONFIG_PHYSICAL_PLAN_HELPER_H_
 #define SVCS_COMMON_CONFIG_PHYSICAL_PLAN_HELPER_H_
 
+#include <list>
 #include <map>
-#include <set>
+#include <string>
+#include <unordered_set>
 #include "basics/basics.h"
 #include "proto/messages.h"
 
@@ -48,9 +50,35 @@ class PhysicalPlanHelper {
   // Returns the map of <worker_id, task_id> of the spouts
   // that belong to the _stmgr
   static void GetLocalSpouts(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
-                             std::set<sp_int32>& _return);
+                             std::unordered_set<sp_int32>& _return);
+
+  // Return the list of all task_ids that are serviced by the stmgr
+  static void GetTasks(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
+                       std::unordered_set<sp_int32>& _return);
+
+  // Return the list of all task_ids that belong to this component
+  static void GetComponentTasks(const proto::system::PhysicalPlan& _pplan,
+                                const sp_string& _component,
+                                std::unordered_set<sp_int32>& _return);
+
+  // Return the set of all task_ids across the entire topology
+  static void GetAllTasks(const proto::system::PhysicalPlan& _pplan,
+                          std::unordered_set<sp_int32>& _return);
 
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
+
+  // Returns the component name for the specified _task_id
+  // If the _task_id is not part of the _pplan, return empty string
+  static const std::string& GetComponentName(const proto::system::PhysicalPlan& _pplan,
+                                             int _task_id);
+
+  // For a particular _component, returns all the task_ids
+  static void GetComponentTaskIds(const proto::system::PhysicalPlan& _pplan,
+                                  const std::string& _component, std::list<int>& _retval);
+
+  // Return a mapping from task id -> component name
+  static void GetTaskIdToComponentName(const proto::system::PhysicalPlan& _pplan,
+                                       std::map<int, std::string>& retval);
 };
 }  // namespace config
 }  // namespace heron

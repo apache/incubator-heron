@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
-import traceback
 from heron.common.src.python.utils.log import Log
 import heron.tools.cli.src.python.args as args
-import heron.tools.cli.src.python.execute as execute
-import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.cli_helper as cli_helper
 import heron.tools.common.src.python.utils.config as config
-
 
 def create_parser(subparsers):
   '''
@@ -29,7 +29,7 @@ def create_parser(subparsers):
       'restart',
       help='Restart a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> [container-id]",
-      add_help=False)
+      add_help=True)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
@@ -43,6 +43,7 @@ def create_parser(subparsers):
       help='Identifier of the container to be restarted')
 
   args.add_config(parser)
+  args.add_service_url(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='restart')
@@ -58,37 +59,12 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  topology_name = cl_args['topology-name']
-  try:
-    container_id = cl_args['container-id']
+  Log.debug("Restart Args: %s", cl_args)
+  container_id = cl_args['container-id']
 
-    new_args = [
-        "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'],
-        "--environment", cl_args['environ'],
-        "--heron_home", config.get_heron_dir(),
-        "--config_path", cl_args['config_path'],
-        "--override_config_file", cl_args['override_config_file'],
-        "--release_file", config.get_heron_release_file(),
-        "--topology_name", topology_name,
-        "--command", command,
-        "--container_id", str(container_id)
-    ]
-
-    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
-
-    # invoke the runtime manager to kill the topology
-    execute.heron_class(
-        'com.twitter.heron.scheduler.RuntimeManagerMain',
-        lib_jars,
-        extra_jars=[],
-        args=new_args
-    )
-
-  except Exception as ex:
-    Log.debug(traceback.format_exc(ex))
-    Log.error('Failed to restart topology \'%s\'' % topology_name)
-    return False
-
-  Log.info('Successfully restarted topology \'%s\'' % topology_name)
-  return True
+  if cl_args['deploy_mode'] == config.SERVER_MODE:
+    dict_extra_args = {"container_id": str(container_id)}
+    return cli_helper.run_server(command, cl_args, "restart topology", extra_args=dict_extra_args)
+  else:
+    list_extra_args = ["--container_id", str(container_id)]
+    return cli_helper.run_direct(command, cl_args, "restart topology", extra_args=list_extra_args)

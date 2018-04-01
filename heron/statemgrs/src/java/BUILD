@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron_deps", "heron_java_proto_files")
-
 common_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:common-spi-java",
@@ -12,11 +10,11 @@ common_deps_files = \
 
 localfs_deps_files = \
     common_deps_files + [
-        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/spi/src/java:heron-spi",
     ]
-    
+
 zookeeper_deps_files = \
     localfs_deps_files + [
         "@org_apache_curator_curator_client//jar",
@@ -31,7 +29,7 @@ java_library(
     srcs = glob(
         ["**/*.java"],
     ),
-    deps = zookeeper_deps_files, 
+    deps = zookeeper_deps_files,
 )
 
 java_library(

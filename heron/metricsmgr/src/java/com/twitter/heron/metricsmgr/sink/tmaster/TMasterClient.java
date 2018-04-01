@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr.sink.tmaster;
 
+import java.time.Duration;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -32,7 +33,7 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 public class TMasterClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(TMasterClient.class.getName());
   private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
-  private long reconnectIntervalSec = -1;
+  private final Duration reconnectInterval;
 
   /**
    * Constructor
@@ -43,13 +44,11 @@ public class TMasterClient extends HeronClient implements Runnable {
    * @param publishMetricsCommunicator the queue to read PublishMetrics from and send to TMaster
    */
   public TMasterClient(NIOLooper s, String host, int port, HeronSocketOptions options,
-                       Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator) {
+                       Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator,
+                       Duration reconnectInterval) {
     super(s, host, port, options);
     this.publishMetricsCommunicator = publishMetricsCommunicator;
-  }
-
-  public void setReconnectIntervalSec(long interval) {
-    this.reconnectIntervalSec = interval;
+    this.reconnectInterval = reconnectInterval;
   }
 
   @Override
@@ -64,13 +63,13 @@ public class TMasterClient extends HeronClient implements Runnable {
   public void onConnect(StatusCode status) {
     if (status != StatusCode.OK) {
       LOG.severe("Cannot connect to the TMaster port, Will Retry..");
-      if (reconnectIntervalSec > 0) {
+      if (reconnectInterval != Duration.ZERO) {
         Runnable r = new Runnable() {
           public void run() {
             start();
           }
         };
-        getNIOLooper().registerTimerEventInSeconds(reconnectIntervalSec, r);
+        getNIOLooper().registerTimerEvent(reconnectInterval, r);
       }
       return;
     }

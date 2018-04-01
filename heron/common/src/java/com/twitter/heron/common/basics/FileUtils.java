@@ -108,15 +108,47 @@ public final class FileUtils {
     return Files.exists(new File(file).toPath());
   }
 
-  public static boolean isOriginalPackageJar(String packageFilename) {
-    return packageFilename.endsWith(".jar");
-  }
-
-  public static boolean isOriginalPackagePex(String packageFilename) {
-    return packageFilename.endsWith(".pex");
+  public static boolean hasChildren(String file) {
+    return isDirectoryExists(file) && new File(file).list().length > 0;
   }
 
   public static String getBaseName(String file) {
     return new File(file).getName();
+  }
+
+  public static boolean deleteDir(String dir) {
+    return deleteDir(new File(dir), true);
+  }
+
+  public static boolean deleteDir(File dir, boolean deleteSelf) {
+    if (Files.isSymbolicLink(dir.toPath())) {
+      try {
+        Files.delete(dir.toPath());
+        return true;
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+
+      for (String child : children) {
+        boolean success = deleteDir(new File(dir, child), true);
+        if (!success) {
+          return false;
+        }
+      }
+    }
+
+    if (deleteSelf) {
+      return dir.delete();
+    } else {
+      return true;
+    }
+  }
+
+  public static boolean cleanDir(String dir) {
+    return deleteDir(new File(dir), false);
   }
 }

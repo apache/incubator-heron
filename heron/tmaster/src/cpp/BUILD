@@ -9,6 +9,10 @@ cc_library(
         "manager/tmaster.cpp",
         "manager/tmasterserver.cpp",
         "manager/tmetrics-collector.cpp",
+        "manager/ckptmgr-client.cpp",
+        "manager/stateful-restorer.cpp",
+        "manager/stateful-checkpointer.cpp",
+        "manager/stateful-controller.cpp",
 
         "processor/stmgr-heartbeat-processor.cpp",
         "processor/stmgr-register-processor.cpp",
@@ -19,6 +23,10 @@ cc_library(
         "manager/tcontroller.h",
         "manager/tmasterserver.h",
         "manager/tmetrics-collector.h",
+        "manager/ckptmgr-client.h",
+        "manager/stateful-restorer.h",
+        "manager/stateful-checkpointer.h",
+        "manager/stateful-controller.h",
 
         "processor/stmgr-heartbeat-processor.h",
         "processor/stmgr-register-processor.h",
@@ -42,7 +50,7 @@ cc_library(
         "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/proto:proto-cxx",
-        "//third_party/yaml-cpp:yaml-cxx",
+        "@com_github_jbeder_yaml_cpp//:yaml-cxx",
     ],
     linkstatic = 1,
 )

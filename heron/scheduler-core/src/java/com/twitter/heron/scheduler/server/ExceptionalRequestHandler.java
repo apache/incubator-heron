@@ -21,11 +21,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.utils.Runtime;
+import com.twitter.heron.scheduler.utils.SchedulerUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * {@code HttpHandler} decorator that returns an OK response unless an exception is caught, in

@@ -1,4 +1,5 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
 # Is so creates scripts/compile/env_exec.sh containing environment used
@@ -72,13 +73,15 @@ def discover_os_version():
 # Get the git sha of the branch - you are working
 ######################################################################
 def discover_git_sha():
-  return subprocess.check_output("git rev-parse HEAD", shell=True).strip("\n")
+  output = subprocess.check_output("git rev-parse HEAD", shell=True)
+  return output.decode('ascii', 'ignore').strip("\n")
 
 ######################################################################
 # Get the name of branch - you are working on
 ######################################################################
 def discover_git_branch():
-  return subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True).strip("\n")
+  output = subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True)
+  return output.decode('ascii', 'ignore').strip("\n")
 
 ######################################################################
 # Utility functions for system defines
@@ -141,7 +144,7 @@ def discover_version(path):
     version_flag = "--version"
   command = "%s %s" % (path, version_flag)
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-  first_line = version_output.split("\n")[0]
+  first_line = version_output.decode('ascii', 'ignore').split("\n")[0]
   version = get_trailing_version(first_line)
   if version:
     return version
@@ -175,14 +178,6 @@ def discover_version(path):
   mac_line = re.search('^(Apple LLVM version\s+[\d\.]+)\s+\(clang.*', first_line)
   if mac_line:
     version = get_trailing_version(mac_line.group(1))
-    if version:
-      return version
-
-  # on some centos versions, cmake --version returns this
-  #   cmake version 2.6-patch 4
-  centos_line = re.search('^cmake version\s+(\d.\d)-patch\s+(\d)', first_line)
-  if centos_line:
-    version = ".".join([centos_line.group(1), centos_line.group(2)])
     if version:
       return version
 
@@ -265,7 +260,7 @@ variable to specify the full path to yours.'""" % (program, program, program, en
     version = assert_min_version(VALUE, min_version)
     print_value = "%s (%s)" % (VALUE, version)
 
-  print 'Using %s:\t%s' % (msg.ljust(20), print_value)
+  print('Using %s:\t%s' % (msg.ljust(20), print_value))
   return VALUE
 
 ######################################################################
@@ -282,9 +277,9 @@ def discover_tool_default(program, msg, envvar, defvalue):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     VALUE = defvalue
-    print '%s:\tnot found, but ok' % (program.ljust(26))
+    print('%s:\tnot found, but ok' % (program.ljust(26)))
   else:
-    print 'Using %s:\t%s' % (msg.ljust(20), VALUE)
+    print('Using %s:\t%s' % (msg.ljust(20), VALUE))
   return VALUE
 
 def export_env_to_file(out_file, env):
@@ -313,15 +308,12 @@ def write_env_exec_file(platform, environ):
   for env in ['LDFLAGS', 'LIBS']:
     export_env_to_file(out_file, env)
 
-  if 'CMAKE' in os.environ:
-    out_file.write('export PATH=' + os.path.dirname(os.environ['CMAKE']) + ':$PATH\n')
-
   # Invoke the programs
   out_file.write('# Execute the input programs\n')
   out_file.write('$*')
 
   make_executable(env_exec_file)
-  print 'Wrote the environment exec file %s' % (env_exec_file)
+  print('Wrote the environment exec file %s' % (env_exec_file))
 
 
 ######################################################################
@@ -358,7 +350,7 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('GIT_BRANCH', discover_git_branch()))
   out_file.write(generate_system_defines())
   out_file.close()
-  print 'Wrote the heron config header file: \t"%s"' % (config_file)
+  print('Wrote the heron config header file: \t"%s"' % (config_file))
 
 ######################################################################
 # MAIN program that sets up your workspace for bazel
@@ -368,7 +360,7 @@ def main():
 
   # Discover the platform
   platform = discover_platform()
-  print "Platform %s" % platform
+  print("Platform %s" % platform)
 
   # do differently on mac
   if platform == "Darwin":
@@ -390,14 +382,14 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE', '2.6.4')
-  env_map['PYTHON2'] = discover_tool('python2.7', 'Python2', 'PYTHON2', '2.7')
+  env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
 
   if platform == 'Darwin':
-    env_map['AR'] = discover_tool('libtool', 'archiver', 'AR')
+    env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')
   else:
-    env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
+    env_map['LIBTOOL'] = discover_tool('libtool', 'Libtool', 'LIBTOOL', '2.4.2')
 
+  env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
   env_map['GCOV']= discover_tool('gcov','coverage tool', 'GCOV')
   env_map['DWP'] = discover_tool_default('dwp', 'dwp', 'DWP', '/usr/bin/dwp')
   env_map['NM'] = discover_tool_default('nm', 'nm', 'NM', '/usr/bin/nm')
@@ -406,7 +398,7 @@ def main():
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
 
   # write the environment executable file
-  write_env_exec_file(platform, env_map)
+  # write_env_exec_file(platform, env_map)
 
 if __name__ == '__main__':
   main()

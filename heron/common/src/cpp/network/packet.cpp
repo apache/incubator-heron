@@ -23,9 +23,10 @@
 #include <google/protobuf/message.h>
 #include <string>
 #include "glog/logging.h"
+#include "network/regevent.h"
 
 // PacketHeader static methods
-void PacketHeader::set_packet_size(char* header, sp_uint32 _size) {
+void PacketHeader::set_packet_size(unsigned char* header, sp_uint32 _size) {
   sp_uint32 network_order = htonl(_size);
   memcpy(header, &network_order, sizeof(sp_uint32));
 }
@@ -46,7 +47,7 @@ IncomingPacket::IncomingPacket(sp_uint32 _max_packet_size) {
 }
 
 // Construct an incoming from a raw data buffer - used for tests only
-IncomingPacket::IncomingPacket(char* _data) {
+IncomingPacket::IncomingPacket(unsigned char* _data) {
   memcpy(header_, _data, PacketHeader::header_size());
   data_ = new char[PacketHeader::get_packet_size(header_)];
   memcpy(data_, _data + PacketHeader::header_size(), PacketHeader::get_packet_size(header_));
@@ -96,16 +97,15 @@ sp_uint32 IncomingPacket::GetTotalPacketSize() const {
 
 void IncomingPacket::Reset() { position_ = 0; }
 
-sp_int32 IncomingPacket::Read(sp_int32 _fd) {
+sp_int32 IncomingPacket::Read(struct bufferevent* _buf) {
   if (data_ == NULL) {
     // We are still reading the header
     sp_int32 read_status =
-        InternalRead(_fd, header_ + position_, PacketHeader::header_size() - position_);
+        InternalRead(_buf, header_, PacketHeader::header_size());
 
     if (read_status != 0) {
       // Header read is either partial or had an error
       return read_status;
-
     } else {
       // Header just completed - some sanity checking of the header
       if (max_packet_size_ != 0 && PacketHeader::get_packet_size(header_) > max_packet_size_) {
@@ -114,22 +114,19 @@ sp_int32 IncomingPacket::Read(sp_int32 _fd) {
                    << ". We only accept packet sizes <= " << max_packet_size_ << "\n";
 
         return -1;
-
       } else {
         // Create the data
         data_ = new char[PacketHeader::get_packet_size(header_)];
 
         // bzero(data_, PacketHeader::get_packet_size(header_));
         // reset the position to refer to the data_
-
-        position_ = 0;
       }
     }
   }
 
   // The header has been completely read. Read the data
   sp_int32 retval =
-      InternalRead(_fd, data_ + position_, PacketHeader::get_packet_size(header_) - position_);
+      InternalRead(_buf, data_, PacketHeader::get_packet_size(header_));
   if (retval == 0) {
     // Successfuly read the packet.
     position_ = 0;
@@ -138,49 +135,35 @@ sp_int32 IncomingPacket::Read(sp_int32 _fd) {
   return retval;
 }
 
-sp_int32 IncomingPacket::InternalRead(sp_int32 _fd, char* _buffer, sp_uint32 _size) {
-  char* current = _buffer;
-  sp_uint32 to_read = _size;
-  while (to_read > 0) {
-    ssize_t num_read = read(_fd, current, to_read);
-    if (num_read > 0) {
-      current = current + num_read;
-      to_read = to_read - num_read;
-      position_ = position_ + num_read;
-    } else if (num_read == 0) {
-      // remote end has done a shutdown.
-      LOG(ERROR) << "Remote end has done a shutdown\n";
-      return -1;
-    } else {
-      // read returned negative value.
-      if (errno == EAGAIN) {
-        // The read would block.
-        // cout << "read syscall returned the EAGAIN errno " << errno << "\n";
-        return 1;
-      } else if (errno == EINTR) {
-        // cout << "read syscall returned the EINTR errno " << errno << "\n";
-        // the syscall encountered a signal before reading anything.
-        // try again
-        continue;
-      } else {
-        // something really bad happened. Bail out
-        // try again
-        LOG(ERROR) << "Something really bad happened while reading " << errno << "\n";
-        return -1;
-      }
-    }
+sp_int32 IncomingPacket::InternalRead(struct bufferevent* _buf, char* _buffer, sp_uint32 _size) {
+  if (evbuffer_get_length(bufferevent_get_input(_buf)) < _size) {
+    // We dont have all the data needed
+    return 1;
+  }
+  int removed = evbuffer_remove(bufferevent_get_input(_buf), _buffer, _size);
+  if (removed != _size) {
+    LOG(ERROR) << "evbuffer remove failed. Expected to remove " << _size
+               << " but removed only " << removed;
+    return -1;
   }
   return 0;
 }
 
 OutgoingPacket::OutgoingPacket(sp_uint32 _packet_size) {
   total_packet_size_ = _packet_size + PacketHeader::header_size();
-  data_ = new char[total_packet_size_];
-  PacketHeader::set_packet_size(data_, _packet_size);
+  buffer_ = evbuffer_new();
+  struct evbuffer_iovec iovec;
+  CHECK_EQ(evbuffer_reserve_space(buffer_, total_packet_size_, &iovec, 1), 1);
+  underlying_data_ = (unsigned char*) iovec.iov_base;
+  PacketHeader::set_packet_size(underlying_data_, _packet_size);
   position_ = PacketHeader::header_size();
 }
 
-OutgoingPacket::~OutgoingPacket() { delete[] data_; }
+OutgoingPacket::~OutgoingPacket() {
+  if (buffer_) {
+    evbuffer_free(buffer_);
+  }
+}
 
 sp_uint32 OutgoingPacket::GetTotalPacketSize() const { return total_packet_size_; }
 
@@ -193,7 +176,7 @@ sp_int32 OutgoingPacket::PackInt(const sp_int32& i) {
     return -1;
   }
   sp_int32 network_order = htonl(i);
-  memcpy(data_ + position_, &network_order, sizeof(sp_int32));
+  memcpy(underlying_data_ + position_, &network_order, sizeof(sp_int32));
   position_ += sizeof(sp_int32);
   return 0;
 }
@@ -208,7 +191,9 @@ sp_int32 OutgoingPacket::PackProtocolBuffer(const google::protobuf::Message& _pr
   if (_byte_size + position_ > total_packet_size_) {
     return -1;
   }
-  if (!_proto.SerializeWithCachedSizesToArray((unsigned char*)(data_ + position_))) return -1;
+  if (!_proto.SerializeWithCachedSizesToArray((underlying_data_ + position_))) {
+    return -1;
+  }
   position_ += _byte_size;
   return 0;
 }
@@ -220,7 +205,7 @@ sp_int32 OutgoingPacket::PackProtocolBuffer(const char* _message,
     return -1;
   }
 
-  memcpy(data_ + position_, _message, _byte_size);
+  memcpy(underlying_data_ + position_, _message, _byte_size);
   position_ += _byte_size;
   return 0;
 }
@@ -229,7 +214,7 @@ sp_int32 OutgoingPacket::PackREQID(const REQID& _rid) {
   if (REQID_size + position_ > total_packet_size_) {
     return -1;
   }
-  memcpy(data_ + position_, _rid.c_str(), REQID_size);
+  memcpy(underlying_data_ + position_, _rid.c_str(), REQID_size);
   position_ += REQID_size;
   return 0;
 }
@@ -243,34 +228,19 @@ sp_int32 OutgoingPacket::PackString(const sp_string& i) {
     return -1;
   }
   PackInt(i.size());
-  memcpy(data_ + position_, i.c_str(), i.size());
+  memcpy(underlying_data_ + position_, i.c_str(), i.size());
   position_ += i.size();
   return 0;
 }
 
-void OutgoingPacket::PrepareForWriting() {
-  CHECK(position_ == total_packet_size_);
+struct evbuffer* OutgoingPacket::release_buffer() {
+  struct evbuffer_iovec iovec;
+  iovec.iov_base = underlying_data_;
+  iovec.iov_len = total_packet_size_;
+  CHECK_EQ(evbuffer_commit_space(buffer_, &iovec, 1), 0);
+  auto retval = buffer_;
+  buffer_ = NULL;
+  underlying_data_ = NULL;
   position_ = 0;
-}
-
-sp_int32 OutgoingPacket::Write(sp_int32 _fd) {
-  while (position_ < total_packet_size_) {
-    ssize_t num_written = write(_fd, data_ + position_, total_packet_size_ - position_);
-    if (num_written > 0) {
-      position_ = position_ + num_written;
-    } else {
-      if (errno == EAGAIN) {
-        LOG(INFO) << "syscall write returned EAGAIN errno " << errno << "\n";
-        return 1;
-      } else if (errno == EINTR) {
-        LOG(INFO) << "syscall write returned EINTR errno " << errno << "\n";
-        continue;
-      } else {
-        LOG(ERROR) << "syscall write returned errno " << errno << "\n";
-        return -1;
-      }
-    }
-  }
-
-  return 0;
+  return retval;
 }

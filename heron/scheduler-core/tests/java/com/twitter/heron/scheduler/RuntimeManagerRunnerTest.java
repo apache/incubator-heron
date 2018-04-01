@@ -14,6 +14,8 @@
 
 package com.twitter.heron.scheduler;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Map;
 
 import org.junit.Before;
@@ -27,20 +29,20 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.packing.roundrobin.RoundRobinPacking;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.spi.common.Command;
+import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.PackingTestUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -57,7 +59,7 @@ public class RuntimeManagerRunnerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    when(config.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
   }
 
   private RuntimeManagerRunner newRuntimeManagerRunner(Command command) {
@@ -65,26 +67,29 @@ public class RuntimeManagerRunnerTest {
   }
 
   private RuntimeManagerRunner newRuntimeManagerRunner(Command command, ISchedulerClient client) {
-    return spy(new RuntimeManagerRunner(config, runtime, command, client));
+    return spy(new RuntimeManagerRunner(config, runtime, command, client, false));
   }
 
   @Test
-  public void testCall() throws Exception {
+  public void testCallRestart() throws Exception {
     // Restart Runner
     RuntimeManagerRunner restartRunner = newRuntimeManagerRunner(Command.RESTART);
-    doReturn(true).when(restartRunner).restartTopologyHandler(TOPOLOGY_NAME);
-    assertTrue(restartRunner.call());
+    doNothing().when(restartRunner).restartTopologyHandler(TOPOLOGY_NAME);
+    restartRunner.call();
     verify(restartRunner).restartTopologyHandler(TOPOLOGY_NAME);
+  }
 
+  @Test
+  public void testCallKill() throws Exception {
     // Kill Runner
     RuntimeManagerRunner killRunner = newRuntimeManagerRunner(Command.KILL);
-    doReturn(true).when(killRunner).killTopologyHandler(TOPOLOGY_NAME);
-    assertTrue(killRunner.call());
+    doNothing().when(killRunner).killTopologyHandler(TOPOLOGY_NAME);
+    killRunner.call();
     verify(killRunner).killTopologyHandler(TOPOLOGY_NAME);
   }
 
-  @Test
-  public void testRestartTopologyHandler() throws Exception {
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testRestartTopologyHandlerFailRestartTopology() {
     ISchedulerClient client = mock(ISchedulerClient.class);
     SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
@@ -93,31 +98,59 @@ public class RuntimeManagerRunnerTest {
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(1);
-
-    // Failure case
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
     when(client.restartTopology(restartTopologyRequest)).thenReturn(false);
-    assertFalse(runner.restartTopologyHandler(TOPOLOGY_NAME));
-    // Should not invoke DeleteTMasterLocation
-    verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
-    // Success case
-    when(client.restartTopology(restartTopologyRequest)).thenReturn(true);
-    assertTrue(runner.restartTopologyHandler(TOPOLOGY_NAME));
-    // Should not invoke DeleteTMasterLocation
-    verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
-
-
-    // Restart container 0, containing TMaster
-    when(config.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"))).thenReturn(0);
-    when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
-    when(adaptor.deleteTMasterLocation(TOPOLOGY_NAME)).thenReturn(false);
-    assertFalse(runner.restartTopologyHandler(TOPOLOGY_NAME));
-    // DeleteTMasterLocation should be invoked
-    verify(adaptor).deleteTMasterLocation(TOPOLOGY_NAME);
+    try {
+      runner.restartTopologyHandler(TOPOLOGY_NAME);
+    } finally {
+      verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
+    }
   }
 
   @Test
-  public void testKillTopologyHandler() throws Exception {
+  public void testRestartTopologyHandlerSuccRestartTopology() {
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
+
+    // Restart container 1, not containing TMaster
+    Scheduler.RestartTopologyRequest restartTopologyRequest =
+        Scheduler.RestartTopologyRequest.newBuilder()
+            .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
+
+    // Success case
+    when(client.restartTopology(restartTopologyRequest)).thenReturn(true);
+    runner.restartTopologyHandler(TOPOLOGY_NAME);
+    // Should not invoke DeleteTMasterLocation
+    verify(adaptor, never()).deleteTMasterLocation(TOPOLOGY_NAME);
+  }
+
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testRestartTopologyHandlerFailDeleteTMasterLoc() {
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    SchedulerStateManagerAdaptor adaptor = mock(SchedulerStateManagerAdaptor.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.RESTART, client);
+
+    // Restart container 1, not containing TMaster
+    Scheduler.RestartTopologyRequest restartTopologyRequest =
+        Scheduler.RestartTopologyRequest.newBuilder()
+            .setTopologyName(TOPOLOGY_NAME).setContainerIndex(1).build();
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(1);
+    // Restart container 0, containing TMaster
+    when(config.getIntegerValue(Key.TOPOLOGY_CONTAINER_ID)).thenReturn(0);
+    when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(adaptor);
+    when(adaptor.deleteTMasterLocation(TOPOLOGY_NAME)).thenReturn(false);
+    try {
+      runner.restartTopologyHandler(TOPOLOGY_NAME);
+    } finally {
+      // DeleteTMasterLocation should be invoked
+      verify(adaptor).deleteTMasterLocation(TOPOLOGY_NAME);
+    }
+  }
+
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testKillTopologyHandlerClientCantKill() {
     Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(TOPOLOGY_NAME).build();
     ISchedulerClient client = mock(ISchedulerClient.class);
@@ -125,38 +158,62 @@ public class RuntimeManagerRunnerTest {
 
     // Failed to invoke client's killTopology
     when(client.killTopology(killTopologyRequest)).thenReturn(false);
-    assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
-    verify(client).killTopology(killTopologyRequest);
+    try {
+      runner.killTopologyHandler(TOPOLOGY_NAME);
+    } finally {
+      verify(client).killTopology(killTopologyRequest);
+    }
+  }
 
-    // Failed to clean states
+  @Test(expected = TopologyRuntimeManagementException.class)
+  public void testKillTopologyHandlerFailCleanState() {
+    Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
+        .setTopologyName(TOPOLOGY_NAME).build();
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.KILL, client);
+
+    // Failed to invoke client's killTopology
     when(client.killTopology(killTopologyRequest)).thenReturn(true);
-    doReturn(false).when(runner).cleanState(
+    doThrow(new TopologyRuntimeManagementException("")).when(runner).cleanState(
         eq(TOPOLOGY_NAME), any(SchedulerStateManagerAdaptor.class));
-    assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
-    verify(client, times(2)).killTopology(killTopologyRequest);
+    try {
+      runner.killTopologyHandler(TOPOLOGY_NAME);
+    } finally {
+      verify(client).killTopology(killTopologyRequest);
+    }
+  }
 
+  @Test
+  public void testKillTopologyHandlerOk() {
+    Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
+        .setTopologyName(TOPOLOGY_NAME).build();
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.KILL, client);
+
+    when(client.killTopology(killTopologyRequest)).thenReturn(true);
     // Success case
-    doReturn(true).when(runner).cleanState(
+    doNothing().when(runner).cleanState(
         eq(TOPOLOGY_NAME), any(SchedulerStateManagerAdaptor.class));
-    assertTrue(runner.killTopologyHandler(TOPOLOGY_NAME));
-    verify(client, times(3)).killTopology(killTopologyRequest);
+    runner.killTopologyHandler(TOPOLOGY_NAME);
+    verify(client).killTopology(killTopologyRequest);
   }
 
   @PrepareForTest(Runtime.class)
   @Test
   public void testUpdateTopologyHandler() throws Exception {
     String newParallelism = "testSpout:1,testBolt:4";
-    doUpdateTopologyHandlerTest(newParallelism, true);
+    doupdateTopologyComponentParallelismTest(newParallelism, true);
   }
 
   @PrepareForTest(Runtime.class)
-  @Test
+  @Test(expected = TopologyRuntimeManagementException.class)
   public void testUpdateTopologyHandlerWithSameParallelism() throws Exception {
     String newParallelism = "testSpout:2,testBolt:3"; // same as current test packing plan
-    doUpdateTopologyHandlerTest(newParallelism, false);
+    doupdateTopologyComponentParallelismTest(newParallelism, false);
   }
 
-  private void doUpdateTopologyHandlerTest(String newParallelism, boolean expectedResult) {
+  private void doupdateTopologyComponentParallelismTest(String newParallelism,
+                                                        boolean expectedResult) {
     ISchedulerClient client = mock(ISchedulerClient.class);
     SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
     RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
@@ -183,12 +240,40 @@ public class RuntimeManagerRunnerTest {
             .build();
 
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
-    boolean result = runner.updateTopologyHandler(TOPOLOGY_NAME, newParallelism);
-    assertEquals("Unexpected result when calling updateTopologyHandler with newParallelism="
-        + newParallelism, expectedResult, result);
+    try {
+      runner.updateTopologyComponentParallelism(TOPOLOGY_NAME, newParallelism);
+    } finally {
+      int expectedClientUpdateCalls = expectedResult ? 1 : 0;
+      verify(client, times(expectedClientUpdateCalls)).updateTopology(updateTopologyRequest);
+    }
+  }
 
-    int expectedClientUpdateCalls = expectedResult ? 1 : 0;
-    verify(client, times(expectedClientUpdateCalls)).updateTopology(updateTopologyRequest);
+  @PrepareForTest({NetworkUtils.class, Runtime.class})
+  @Test
+  public void testUpdateTopologyUserRuntimeConfig() throws Exception {
+    String testConfig = "topology.user:test,testSpout:topology.user:1,testBolt:topology.user:4";
+    URL expectedURL = new URL("http://host:1/runtime_config/update?topologyid=topology-id&"
+        + "runtime-config=topology.user:test&runtime-config=testSpout:topology.user:1&"
+        + "runtime-config=testBolt:topology.user:4");
+
+    // Success case
+    ISchedulerClient client = mock(ISchedulerClient.class);
+    SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
+    HttpURLConnection connection = mock(HttpURLConnection.class);
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE, client);
+    TopologyMaster.TMasterLocation location = TopologyMaster.TMasterLocation.newBuilder().
+              setTopologyName("topology-name").setTopologyId("topology-id").
+              setHost("host").setControllerPort(1).setMasterPort(2).build();
+    when(manager.getTMasterLocation(TOPOLOGY_NAME)).thenReturn(location);
+    when(connection.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+
+    PowerMockito.mockStatic(Runtime.class);
+    PowerMockito.when(Runtime.schedulerStateManagerAdaptor(runtime)).thenReturn(manager);
+    PowerMockito.mockStatic(NetworkUtils.class);
+    PowerMockito.when(NetworkUtils.getProxiedHttpConnectionIfNeeded(
+        eq(expectedURL), any(NetworkUtils.TunnelConfig.class))).thenReturn(connection);
+
+    runner.updateTopologyUserRuntimeConfig(TOPOLOGY_NAME, testConfig);
   }
 
   @Test
@@ -247,5 +332,28 @@ public class RuntimeManagerRunnerTest {
 
     assertEquals(runner.parseNewParallelismParam(delta),
         runner.parallelismDelta(initialCounts, changeRequest));
+  }
+
+  @Test
+  public void testParseUserRuntimeConfigParam() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+    String[] configs = runner.parseUserRuntimeConfigParam("foo:1,bolt:bar:2");
+    assertEquals(2, configs.length);
+    assertEquals("foo:1", configs[0]);
+    assertEquals("bolt:bar:2", configs[1]);
+  }
+
+  @Test
+  public void testparseUserRuntimeConfigParamEmpty() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+    String[] configs = runner.parseUserRuntimeConfigParam("");
+    assertEquals(0, configs.length);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testparseUserRuntimeConfigParamInvalid1() {
+    RuntimeManagerRunner runner = newRuntimeManagerRunner(Command.UPDATE);
+
+    runner.parseUserRuntimeConfigParam(":foo:1,bolt:bar2");
   }
 }

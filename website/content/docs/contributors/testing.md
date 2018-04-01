@@ -68,7 +68,6 @@ Integration tests are divided into two categories:
     To run the failure integration tests on a Mac OS X, do the following:
 
     ```bash
-    $ bazel build --config=darwin integration-test/src/...
-
-    $ python integration-test/src/python/local_test_runner/main.py
+    $ bazel build --config=darwin integration_test/src/...
+    $ ./bazel-bin/integration_test/src/python/local_test_runner/local-test-runner
     ```

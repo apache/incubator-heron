@@ -17,6 +17,9 @@
 #ifndef _CORE_SRC_CPP_NEWTORK_NETWORK_ERROR_H_
 #define _CORE_SRC_CPP_NEWTORK_NETWORK_ERROR_H_
 
+#include <ostream>
+#include <string>
+
 enum NetworkErrorCode {
   OK = 0,
   CONNECT_ERROR,
@@ -29,5 +32,13 @@ enum NetworkErrorCode {
   DUPLICATE_PACKET_ID,
   TIMEOUT
 };
+
+static inline std::ostream& operator<<(std::ostream& os, const NetworkErrorCode code) {
+  std::string strs[] = { "OK", "Connection error", "Read error", "Write error",
+                         "Close error", "Invalid connection", "Duplicate start",
+                         "Invalid packet", "Duplicate packet ID", "Timeout" };
+  os << strs[code];
+  return os;
+}
 
 #endif  // _CORE_SRC_CPP_NEWTORK_NETWORK_ERROR_H_

@@ -17,7 +17,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_CLIENTMGR_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_CLIENTMGR_H_
 
-#include <map>
+#include <unordered_map>
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -38,11 +38,14 @@ class StMgrClientMgr {
  public:
   StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_name,
                  const sp_string& _topology_id, const sp_string& _stmgr_id, StMgr* _stream_manager,
-                 heron::common::MetricsMgrSt* _metrics_manager_client);
+                 heron::common::MetricsMgrSt* _metrics_manager_client, sp_int64 _high_watermark,
+                 sp_int64 _low_watermark, bool _droptuples_upon_backpressure);
   virtual ~StMgrClientMgr();
 
-  void NewPhysicalPlan(const proto::system::PhysicalPlan* _pplan);
-  void SendTupleStreamMessage(sp_int32 _task_id,
+  // Start the appropriate clients based on a new physical plan
+  virtual void StartConnections(const proto::system::PhysicalPlan* _pplan);
+  // return true if we are successful in sending the message. false otherwise
+  bool SendTupleStreamMessage(sp_int32 _task_id,
                               const sp_string& _stmgr_id,
                               const proto::system::HeronTupleSet2& _msg);
 
@@ -55,13 +58,25 @@ class StMgrClientMgr {
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
   bool DidAnnounceBackPressure();
+  // Called by StMgrClient when its connection closes
+  void HandleDeadStMgrConnection(const sp_string& _stmgr_id);
+  // Called by StMgrClient when it successfully registers
+  void HandleStMgrClientRegistered();
+  void SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
+                                        proto::ckptmgr::DownstreamStatefulCheckpoint* _message);
+
+  // Interface to close all connections
+  virtual void CloseConnectionsAndClear();
+
+  // Check if all clients are registered
+  virtual bool AllStMgrClientsRegistered();
 
  private:
   StMgrClient* CreateClient(const sp_string& _other_stmgr_id, const sp_string& _host_name,
                             sp_int32 _port);
 
   // map of stmgrid to its client
-  std::map<sp_string, StMgrClient*> clients_;
+  std::unordered_map<sp_string, StMgrClient*> clients_;
 
   sp_string topology_name_;
   sp_string topology_id_;
@@ -72,6 +87,11 @@ class StMgrClientMgr {
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
   heron::common::MultiCountMetric* stmgr_clientmgr_metrics_;
+
+  sp_int64 high_watermark_;
+  sp_int64 low_watermark_;
+
+  bool droptuples_upon_backpressure_;
 };
 
 }  // namespace stmgr

@@ -10,8 +10,7 @@ var AllExceptions = React.createClass({
   },
   fetchExceptionSummary: function() {
     var compName = this.props.info.comp_name ? this.props.info.comp_name : 'All';
-    var fetchUrl = '/topologies/' + this.props.info.cluster
-        + '/' + this.props.info.environ + '/' + this.props.info.topology
+    var fetchUrl = './' + this.props.info.topology
         + '/' + compName + '/exceptionsummary.json'
     console.log('fetching url ' + fetchUrl);
     $.ajax({
@@ -42,8 +41,7 @@ var AllExceptions = React.createClass({
     }
     var compName = this.props.info.comp_name ? this.props.info.comp_name : 'All';
     var exceptionTable = this.state.summary;
-    var allExceptionsUrl = '/topologies/' + this.props.info.cluster
-        + '/' + this.props.info.environ + '/' + this.props.info.topology
+    var allExceptionsUrl = './' + this.props.info.topology
         + '/' + compName + '/All/exceptions';
     var allExceptionsStyle = {
       color: 'black',
@@ -246,7 +244,8 @@ var AllMetrics = React.createClass({
 
   fetchLplan: function () {
     if (this.state.lplan === undefined) {
-      var fetch_url = "/topologies/" +
+      var fetch_url = this.props.baseUrl + 
+       "/topologies/" +
         this.props.cluster + "/" +
         this.props.environ + "/" +
         this.props.topology + "/" +
@@ -346,7 +345,8 @@ var AllMetrics = React.createClass({
   },
 
   fetchPplan: function () {
-    url = "/topologies/" +
+    url = this.props.baseUrl +
+      "/topologies/" +
       this.props.cluster + "/" +
       this.props.environ + "/" +
       this.props.topology + "/" +
@@ -367,9 +367,8 @@ var AllMetrics = React.createClass({
 
   fetchCounters: function() {
     var fetch_url = "";
-
     if (this.props.hasOwnProperty("comp_name")) {
-      fetch_url = "/topologies/metrics?" +
+      fetch_url = this.props.baseUrl + "/topologies/metrics?" +
         "cluster=" + this.props.cluster + "&" +
         "environ=" + this.props.environ + "&" +
         "topology=" + this.props.topology + "&" +
@@ -432,7 +431,7 @@ var AllMetrics = React.createClass({
             spoutNames.push(name);
           }
         }
-        fetch_url = "/topologies/metrics?" +
+        fetch_url = this.props.baseUrl + "/topologies/metrics?" +
           "cluster=" + this.props.cluster + "&" +
           "environ=" + this.props.environ + "&" +
           "topology=" + this.props.topology;
@@ -519,6 +518,7 @@ var AllMetrics = React.createClass({
     }
     var info = {
       topology: this.props.topology,
+      baseUrl: this.props.baseUrl,
       comp_type: this.props.comp_type,
       comp_name: this.props.comp_name,
       comp_spout_type: this.props.comp_spout_type,
@@ -528,8 +528,6 @@ var AllMetrics = React.createClass({
       metrics: this.state.metrics,
       pplan: this.state.pplan,
       instance: this.props.instance,
-      hoverOverInstance: this.props.hoverOverInstance,
-      hoverOutInstance: this.props.hoverOutInstance
     };
     return (
       <div>
@@ -911,25 +909,25 @@ var InstanceCounters = React.createClass({
         if (instanceInfo) {
           var stmgrId = instanceInfo.stmgrId;
           var container = stmgrId.split("-")[1]
-          var logfileUrl = '/topologies/' + this.props.info.cluster
+          var logfileUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + container + '/file?path=./log-files/' + instanceInfo.id + '.log.0'
-          var jobUrl = '/topologies/filestats/' + this.props.info.cluster
+          var jobUrl = this.props.info.baseUrl + '/topologies/filestats/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + container;
-          var exceptionsUrl = '/topologies/' + this.props.info.cluster
+          var exceptionsUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + this.props.info.comp_name + '/' + instance + '/exceptions';
-          var pidUrl = '/topologies/' + this.props.info.cluster
+          var pidUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + instanceInfo.id + '/pid'
-          var jstackUrl = '/topologies/' + this.props.info.cluster
+          var jstackUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + instanceInfo.id + '/jstack'
-          var jmapUrl = '/topologies/' + this.props.info.cluster
+          var jmapUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + instanceInfo.id + '/jmap'
-          var histoUrl = '/topologies/' + this.props.info.cluster
+          var histoUrl = this.props.info.baseUrl + '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + instanceInfo.id + '/histo'
           var links = [['Logs', logfileUrl, "_blank"],
@@ -952,8 +950,6 @@ var InstanceCounters = React.createClass({
     });
 
     var instanceId = this.props.info.instance;
-    var hoverOverInstance = this.props.info.hoverOverInstance;
-    var hoverOutInstance = this.props.info.hoverOutInstance;
     var compName = this.props.info.comp_name;
     var reverse = this.state.reverse;
     var sortKey = this.state.sortBy;
@@ -1013,10 +1009,7 @@ var InstanceCounters = React.createClass({
           <tbody className="list">
             {rows.slice(0, maxRows).map(function (row) {
               var highlighted = row[0] === instanceId;
-              function hoverOver() {
-                hoverOverInstance({id: row[0], name: compName });
-              }
-              return <InstanceRow key={row[0]} row={row} headings={headingSortClass} highlighted={highlighted} hoverOver={hoverOver} hoverOut={hoverOutInstance}/>;
+              return <InstanceRow key={row[0]} row={row} headings={headingSortClass} highlighted={highlighted}/>;
             })}
           </tbody>
         </table>

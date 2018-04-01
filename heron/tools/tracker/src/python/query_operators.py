@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 # Copyright 2016 Twitter. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' query_operators.py '''
+import sys
 import math
 import tornado.httpclient
 import tornado.gen
 
 from heron.tools.tracker.src.python.metricstimeline import getMetricsTimeline
+
+isPY3 = sys.version_info >= (3, 0, 0)
+
+# helper method to support python 2 and 3
+def is_str_instance(obj):
+  if isPY3:
+    return isinstance(obj, str)
+  else:
+    return str(type(obj)) == "<type 'unicode'>" or str(type(obj)) == "<type 'str'>"
 
 #####################################################################
 # Data Structure for fetched Metrics
@@ -37,7 +50,7 @@ class Metrics(object):
   def floorTimestamps(self, start, end, timeline):
     """ floor timestamp """
     ret = {}
-    for timestamp, value in timeline.iteritems():
+    for timestamp, value in timeline.items():
       ts = timestamp / 60 * 60
       if start <= ts <= end:
         ret[ts] = value
@@ -93,17 +106,17 @@ class TS(Operator):
     if len(children) != 3:
       raise Exception("TS format error, expects 3 arguments")
     self.component = children[0]
-    if not isinstance(self.component, basestring):
+    if not is_str_instance(self.component):
       raise Exception("TS expects component name as first argument")
     # A '*' represents all instances, which is represented by empty array.
     # Otherwise, it represents a single instance
     self.instances = []
     if children[1] != "*":
-      if not isinstance(children[1], basestring):
+      if not is_str_instance(children[1]):
         raise Exception("Second argument of TS must be * or instance name")
       self.instances.append(children[1])
     self.metricName = children[2]
-    if not isinstance(self.metricName, basestring):
+    if not is_str_instance(self.metricName):
       raise Exception("TS expects metric name as third argument")
 
   @tornado.gen.coroutine
@@ -126,9 +139,9 @@ class TS(Operator):
       }
     timelines = metrics["timeline"][self.metricName]
     allMetrics = []
-    for instance, timeline in timelines.iteritems():
+    for instance, timeline in timelines.items():
       toBeDeletedKeys = []
-      for key, value in timeline.iteritems():
+      for key, value in timeline.items():
         floatValue = float(value)
         # Check if the value is really float or not.
         # In python, float("nan") returns "nan" which is actually a float value,
@@ -168,7 +181,7 @@ class Default(Operator):
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     allMetrics = yield self.timeseries.execute(tracker, tmaster, start, end)
-    if isinstance(allMetrics, basestring):
+    if is_str_instance(allMetrics):
       raise Exception(allMetrics)
     for metric in allMetrics:
       metric.setDefault(self.constant, start, end)
@@ -202,13 +215,13 @@ class Sum(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, basestring):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if timestamp in retMetrics.timeline:
           retMetrics.timeline[timestamp] += value
     raise tornado.gen.Return([retMetrics])
@@ -246,13 +259,13 @@ class Max(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, basestring):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if start <= timestamp <= end:
           if timestamp not in retMetrics.timeline:
             retMetrics.timeline[timestamp] = value
@@ -296,7 +309,7 @@ class Percentile(Operator):
     # Get all the timeseries metrics
     allMetrics = []
     for met in metrics:
-      if isinstance(met, basestring):
+      if is_str_instance(met):
         raise Exception(met)
       allMetrics.extend(met)
 
@@ -306,14 +319,14 @@ class Percentile(Operator):
 
     # Aggregate all of the them
     for metric in allMetrics:
-      for timestamp, value in metric.timeline.iteritems():
+      for timestamp, value in metric.timeline.items():
         if start <= timestamp <= end:
           if timestamp not in timeline:
             timeline[timestamp] = []
           timeline[timestamp].append(value)
 
     retTimeline = {}
-    for timestamp, values in timeline.iteritems():
+    for timestamp, values in timeline.items():
       if not values:
         continue
       index = int(self.quantile * 1.0 * (len(values) - 1) / 100.0)
@@ -423,7 +436,7 @@ class Divide(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -437,7 +450,7 @@ class Divide(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():
@@ -548,7 +561,7 @@ class Multiply(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -562,7 +575,7 @@ class Multiply(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():
@@ -671,7 +684,7 @@ class Subtract(Operator):
     # If first is univariate
     elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
-      for key, metric in metrics2.iteritems():
+      for key, metric in metrics2.items():
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
@@ -685,7 +698,7 @@ class Subtract(Operator):
     # If second is univariate
     else:
       allMetrics = []
-      for key, metric in metrics.iteritems():
+      for key, metric in metrics.items():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
         for timestamp in met.timeline.keys():

@@ -14,12 +14,13 @@
 
 package com.twitter.heron.metricsmgr.executor;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.Communicator;
-import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
@@ -125,20 +126,19 @@ public class SinkExecutor implements Runnable, AutoCloseable {
 
     // If the config is not set, we consider the flush() would never be invoked
     if (flushIntervalObj != null) {
-      final long flushIntervalNs =
-          TypeUtils.getLong(flushIntervalObj) * Constants.MILLISECONDS_TO_NANOSECONDS;
+      final Duration flushInterval = TypeUtils.getDuration(flushIntervalObj, ChronoUnit.MILLIS);
 
       Runnable flushSink = new Runnable() {
         @Override
         public void run() {
           metricsSink.flush();
           //Plan itself in future
-          slaveLooper.registerTimerEventInNanoSeconds(flushIntervalNs, this);
+          slaveLooper.registerTimerEvent(flushInterval, this);
         }
       };
 
       // Plan the runnable explicitly at the first time
-      slaveLooper.registerTimerEventInNanoSeconds(flushIntervalNs, flushSink);
+      slaveLooper.registerTimerEvent(flushInterval, flushSink);
     }
   }
 }

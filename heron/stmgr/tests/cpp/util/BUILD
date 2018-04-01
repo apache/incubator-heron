@@ -7,7 +7,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:util-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     copts = [
         "-Iheron",
@@ -28,7 +28,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:util-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
@@ -50,7 +50,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:util-cxx",
-        "//third_party/gtest:gtest-cxx",
+        "@com_google_googletest//:gtest",
     ],
     data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
@@ -61,5 +61,28 @@ cc_test(
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
     size = "small",
+    linkstatic = 1,
+)
+
+cc_test(
+    name = "neighbour_calculator_unittest",
+    srcs = [
+        "neighbour_calculator_unittest.cpp",
+    ],
+    deps = [
+        "//heron/stmgr/src/cpp:manager-cxx",
+        "//heron/stmgr/src/cpp:grouping-cxx",
+        "//heron/stmgr/src/cpp:util-cxx",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/stmgr/src/cpp",
+        "-Iheron/stmgr/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
     linkstatic = 1,
 )

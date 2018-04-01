@@ -29,13 +29,18 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
 import org.apache.curator.framework.api.CuratorEvent;
+import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Pair;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -43,7 +48,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Key;
 import com.twitter.heron.spi.statemgr.Lock;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -54,6 +59,7 @@ import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
+
   private CuratorFramework client;
   private String connectionString;
   private boolean isSchedulerService;
@@ -77,8 +83,8 @@ public class CuratorStateManager extends FileSystemStateManager {
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
-        throw new IllegalArgumentException("Cannot connect to tunnelHost: "
-            + tunnelConfig.getTunnelHost() + " Bad connectionString: " + connectionString);
+        throw new IllegalArgumentException("Failed to connect to tunnel host '"
+            + tunnelConfig.getTunnelHost() + "'");
       }
 
       // Use the new connection string
@@ -88,7 +94,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     // Start it
     client = getCuratorClient();
-    LOG.info("Starting client to: " + connectionString);
+    LOG.info("Starting Curator client connecting to: " + connectionString);
     client.start();
 
     try {
@@ -168,7 +174,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   protected void initTree() {
     // Make necessary directories
     for (StateLocation location : StateLocation.values()) {
-      LOG.info(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
+      LOG.fine(String.format("%s directory: %s", location.getName(), getStateDirectory(location)));
     }
 
     try {
@@ -194,8 +200,10 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     // Close the tunneling
     LOG.info("Closing the tunnel processes");
-    for (Process process : tunnelProcesses) {
-      process.destroy();
+    if (tunnelProcesses != null) {
+      for (Process process : tunnelProcesses) {
+        process.destroy();
+      }
     }
   }
 
@@ -210,12 +218,12 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     try {
       LOG.info("Checking existence of path: " + path);
-      result.set(client.checkExists().forPath(path) != null);
+      safeSetFuture(result, client.checkExists().forPath(path) != null);
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not check Exist", e));
+      safeSetException(result, new RuntimeException("Could not check Exist", e));
     }
 
     return result;
@@ -240,29 +248,40 @@ public class CuratorStateManager extends FileSystemStateManager {
           withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
           .forPath(path, data);
       LOG.info("Created node for path: " + path);
-      result.set(true);
+      safeSetFuture(result, true);
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not createNode:", e));
+      safeSetException(result, new RuntimeException("Could not createNode:", e));
     }
     return result;
   }
 
   @Override
-  protected ListenableFuture<Boolean> deleteNode(String path) {
+  protected ListenableFuture<Boolean> deleteNode(String path, boolean deleteChildrenIfNecessary) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
-      client.delete().withVersion(-1).forPath(path);
+      DeleteBuilder deleteBuilder = client.delete();
+      if (deleteChildrenIfNecessary) {
+        deleteBuilder = (DeleteBuilder) deleteBuilder.deletingChildrenIfNeeded();
+      }
+      deleteBuilder.withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
-      result.set(true);
+      safeSetFuture(result, true);
+
+    } catch (KeeperException e) {
+      if (KeeperException.Code.NONODE.equals(e.code())) {
+        safeSetFuture(result, true);
+      } else {
+        safeSetException(result, new RuntimeException("Could not deleteNode", e));
+      }
 
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      result.setException(new RuntimeException("Could not deleteNode", e));
+      safeSetException(result, new RuntimeException("Could not deleteNode", e));
     }
 
     return result;
@@ -284,9 +303,9 @@ public class CuratorStateManager extends FileSystemStateManager {
         byte[] data;
         if (event != null & (data = event.getData()) != null) {
           builder.mergeFrom(data);
-          future.set((M) builder.build());
+          safeSetFuture(future, (M) builder.build());
         } else {
-          future.setException(new RuntimeException("Failed to fetch data from path: "
+          safeSetException(future, new RuntimeException("Failed to fetch data from path: "
               + event.getPath()));
         }
       }
@@ -298,16 +317,15 @@ public class CuratorStateManager extends FileSystemStateManager {
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      future.setException(new RuntimeException("Could not getNodeData", e));
+      safeSetException(future, new RuntimeException("Could not getNodeData", e));
     }
 
     return future;
   }
 
   @Override
-  public Lock getLock(String topologyName, String lockName) {
-    return new DistributedLock(this.client,
-        StateLocation.LOCKS.getNodePath(this.rootAddress, topologyName, lockName));
+  protected Lock getLock(String path) {
+    return new DistributedLock(this.client, path);
   }
 
   @Override
@@ -315,6 +333,23 @@ public class CuratorStateManager extends FileSystemStateManager {
       TopologyMaster.TMasterLocation location,
       String topologyName) {
     return createNode(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setMetricsCacheLocation(
+      TopologyMaster.MetricsCacheLocation location,
+      String topologyName) {
+    client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+      @Override
+      public void stateChanged(CuratorFramework arg0, ConnectionState arg1) {
+        if (arg1 != ConnectionState.CONNECTED) {
+          // if not the first time successful connection, fail fast
+          throw new RuntimeException("Unexpected state change to: " + arg1.name());
+        }
+      }
+    });
+    return createNode(
+        StateLocation.METRICSCACHE_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
@@ -347,6 +382,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setStatefulCheckpoints(
+      CheckpointManager.StatefulConsistentCheckpoints checkpoint,
+      String topologyName) {
+    return createNode(StateLocation.STATEFUL_CHECKPOINT, topologyName,
+        checkpoint.toByteArray(), false);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
       String topologyName) {
@@ -360,7 +403,15 @@ public class CuratorStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
     // It is a EPHEMERAL node and would be removed automatically
     final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
+    safeSetFuture(result, true);
+    return result;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> deleteMetricsCacheLocation(String topologyName) {
+    // It is a EPHEMERAL node and would be removed automatically
+    final SettableFuture<Boolean> result = SettableFuture.create();
+    safeSetFuture(result, true);
     return result;
   }
 
@@ -369,10 +420,10 @@ public class CuratorStateManager extends FileSystemStateManager {
     // if scheduler is service, the znode is ephemeral and it's deleted automatically
     if (isSchedulerService) {
       final SettableFuture<Boolean> result = SettableFuture.create();
-      result.set(true);
+      safeSetFuture(result, true);
       return result;
     } else {
-      return deleteNode(getStatePath(StateLocation.SCHEDULER_LOCATION, topologyName));
+      return deleteNode(getStatePath(StateLocation.SCHEDULER_LOCATION, topologyName), false);
     }
   }
 
@@ -384,8 +435,9 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     String zookeeperHostname = args[1];
     Config config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), "/storm/heron/states")
-        .put(Keys.stateManagerConnectionString(), zookeeperHostname)
+        .put(Key.STATEMGR_ROOT_PATH, "/storm/heron/states")
+        .put(Key.STATEMGR_CONNECTION_STRING, zookeeperHostname)
+        .put(Key.SCHEDULER_IS_SERVICE, false)
         .build();
     CuratorStateManager stateManager = new CuratorStateManager();
     stateManager.doMain(args, config);

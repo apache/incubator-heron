@@ -17,7 +17,6 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_GROUPING_GROUPING_H_
 #define SRC_CPP_SVCS_STMGR_SRC_GROUPING_GROUPING_H_
 
-#include <list>
 #include <vector>
 #include "proto/messages.h"
 #include "basics/basics.h"

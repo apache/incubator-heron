@@ -15,10 +15,12 @@
  */
 
 #include "grouping/grouping.h"
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <list>
 #include <vector>
+#include "grouping/direct-grouping.h"
 #include "grouping/shuffle-grouping.h"
 #include "grouping/fields-grouping.h"
 #include "grouping/all-grouping.h"
@@ -33,7 +35,10 @@
 namespace heron {
 namespace stmgr {
 
-Grouping::Grouping(const std::vector<sp_int32>& _task_ids) : task_ids_(_task_ids) {}
+Grouping::Grouping(const std::vector<sp_int32>& _task_ids)
+  : task_ids_(_task_ids) {
+  sort(task_ids_.begin(), task_ids_.end());
+}
 
 Grouping::~Grouping() {}
 
@@ -68,8 +73,7 @@ Grouping* Grouping::Create(proto::api::Grouping grouping_, const proto::api::Inp
     }
 
     case proto::api::DIRECT: {
-      LOG(FATAL) << "Direct grouping not supported";
-      return NULL;  // keep compiler happy
+      return new DirectGrouping(_task_ids);
       break;
     }
 
