@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 exports_files([
     "libunwind-1.1-cache.patch",
     "libunwind-1.1-config.patch",
