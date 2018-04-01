@@ -41,7 +41,7 @@ genrule(
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t libunwind.XXXXX)",
         "mkdir -p $$TMP_DIR",
-        "cp -LR $$(pwd)/external/org_savannah_libunwind/* $$TMP_DIR",
+        "cp -LR $$(pwd)/external/org_nongnu_libunwind/* $$TMP_DIR",
         "cd $$TMP_DIR",
         "patch -p1 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-lzma-link.patch)",
         "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-config.patch)",
