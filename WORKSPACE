@@ -810,6 +810,34 @@ http_archive(
 )
 
 new_http_archive(
+    name = "org_libevent_libevent",
+    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz"],
+    strip_prefix = "libevent-2.1.8-stable",
+    build_file = "third_party/libevent/libevent.BUILD",
+)
+
+new_http_archive(
+    name = "org_apache_zookeeper",
+    urls = ["http://apache.cs.utah.edu/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
+    strip_prefix = "zookeeper-3.4.10",
+    build_file = "third_party/zookeeper/zookeeper.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_gperftools_gperftools",
+    urls = ["https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz"],
+    strip_prefix = "gperftools-2.4",
+    build_file = "third_party/gperftools/gperftools.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_google_glog",
+    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    strip_prefix = "glog-0.3.5",
+    build_file = "third_party/glog/glog.BUILD",
+)
+
+new_http_archive(
     name = "com_google_googletest",
     urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
     strip_prefix = "googletest-release-1.8.0",
