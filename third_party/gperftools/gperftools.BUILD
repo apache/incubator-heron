@@ -21,6 +21,8 @@ config_setting(
 common_script = [
     "echo $$(pwd)",
     "export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind",
+    "echo $$UNWIND_DIR",
+    "ls -l $$UNWIND_DIR",
     "export INSTALL_DIR=$$(pwd)/$(@D)",
     "export TMP_DIR=$$(mktemp -d -t gperftools.XXXXX)",
     "mkdir -p $$TMP_DIR",
@@ -44,7 +46,7 @@ genrule(
     name = "gperftools-srcs",
     srcs = select({
         ":darwin": [],
-        "//conditions:default": ["//third_party/libunwind:libunwind-files"]
+        "//conditions:default": ["@org_apache_heron//third_party/libunwind:libunwind-files"]
     }),
     outs = [
         "bin/pprof",

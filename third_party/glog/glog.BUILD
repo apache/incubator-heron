@@ -58,11 +58,11 @@ linux_script = "\n".join(common_script + [
 
 genrule(
     name = "glog-srcs",
-    outs = include_files + lib_files,
     srcs = select({
         ":darwin": [],
-        "//conditions:default": ["//third_party/libunwind:libunwind-files"]
+        "//conditions:default": ["@org_apache_heron//third_party/libunwind:libunwind-files"]
     }),
+    outs = include_files + lib_files,
     cmd = select({
         ":darwin": mac_script,
         "//conditions:default": linux_script,

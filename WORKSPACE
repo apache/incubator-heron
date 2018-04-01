@@ -1,3 +1,5 @@
+workspace(name = "org_apache_heron")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 curator_version = "2.9.0"
