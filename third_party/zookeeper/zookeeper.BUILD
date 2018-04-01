@@ -26,7 +26,7 @@ genrule(
         "export TMP_DIR=$$(mktemp -d -t zookeeper.XXXXX)",
         "mkdir -p $$TMP_DIR",
         "cp -R $$(pwd)/external/org_apache_zookeeper/* $$TMP_DIR",
-        "cd $$TMP_DIR",
+        "cd $$TMP_DIR/src/c",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
         "rm -rf $$TMP_DIR",
@@ -53,7 +53,7 @@ cc_library(
 )
 
 cc_library(
-    name = "zookeeper-cxx",
+    name = "zookeeper",
     srcs = [
         "lib/libzookeeper_mt.a",
         "include/zookeeper/proto.h",

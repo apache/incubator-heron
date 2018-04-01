@@ -817,6 +817,13 @@ new_http_archive(
 )
 
 new_http_archive(
+    name = "org_nongnu_libunwind",
+    urls = ["http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
+    strip_prefix = "libunwind-1.1",
+    build_file = "third_party/libunwind/libunwind.BUILD",
+)
+
+new_http_archive(
     name = "org_apache_zookeeper",
     urls = ["http://apache.cs.utah.edu/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
     strip_prefix = "zookeeper-3.4.10",

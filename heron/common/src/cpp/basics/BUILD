@@ -53,7 +53,7 @@ cc_library(
         "@com_google_protobuf//:protobuf",
     ] + select({
         "//tools/platform:darwin": [], 
-        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
+        "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
     }),
     linkstatic = 1,
 )
