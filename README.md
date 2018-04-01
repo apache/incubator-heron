@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/twitter/heron.svg?&branch=master)](https://travis-ci.org/twitter/heron)
+[![Build Status](https://travis-ci.org/apache/incubator-heron.svg?&branch=master)](https://travis-ci.org/apache/incubator-heron)
 
 ![logo](website/static/img/HeronTextLogo.png)
 
@@ -39,6 +39,9 @@ Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 heron slack channel at https://heronstreaming.slack.com/
 
 You can self-register at http://heronstreaming.herokuapp.com/
+
+#### Meetup Group
+https://www.meetup.com/Apache-Heron-Bay-Area
 
 
 ## For more information:
