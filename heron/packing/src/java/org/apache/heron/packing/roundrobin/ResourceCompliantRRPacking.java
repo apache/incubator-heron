@@ -122,7 +122,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         Context.instanceDisk(config));
     resetToFirstContainer();
 
-    LOG.info(String.format("Initalizing ResourceCompliantRRPacking. "
+    LOG.info(String.format("Initializing ResourceCompliantRRPacking. "
         + "CPU default: %f, RAM default: %s, DISK default: %s.",
         this.defaultInstanceResources.getCpu(),
         this.defaultInstanceResources.getRam().toString(),
@@ -308,7 +308,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * Attempts to place the instance the current containerId.
    *
    * @param planBuilder packing plan builder
-   * @param componentName the componet name of the instance that needs to be placed in the container
+   * @param componentName the component name of the instance that needs to be placed in the container
    * @throws ResourceExceededException if there is no room on the current container for the instance
    */
   private void strictRRpolicy(PackingPlanBuilder planBuilder,
