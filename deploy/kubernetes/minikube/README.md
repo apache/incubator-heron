@@ -4,7 +4,7 @@
 ### Requirements:
 * [minikube](https://kubernetes.io/docs/getting-started-guides/minikube/#installation)
 * [kubectl](https://kubernetes.io/docs/tasks/kubectl/install/)
-* [heron client](https://twitter.github.io/heron/docs/getting-started/)
+* [heron client](https://apache.github.io/incubator-heron/docs/getting-started/)
 
 
 ### Start minkube
@@ -19,7 +19,7 @@ $ minikube start --memory=7168 --cpus=5 --disk-size=20g
 1. Start zookeeper:
 
 ```shell
-$ kubectl create -f https://raw.githubusercontent.org/apache/heron/master/deploy/kubernetes/minikube/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/zookeeper.yaml
 
 $ kubectl get pods
 NAME                                  READY     STATUS    RESTARTS   AGE
@@ -31,17 +31,17 @@ zk-0                                  1/1       Running   0          1m
 
 2. Start bookkeeper:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.org/apache/heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
 ```
 
 3. Start heron tools:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.org/apache/heron/master/deploy/kubernetes/minikube/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
 ```
 
 4. Start heron apiserver:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.org/apache/heron/master/deploy/kubernetes/minikube/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/apiserver.yaml
 ```
 
 ### Deploy via heron apiserver

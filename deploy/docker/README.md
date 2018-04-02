@@ -8,7 +8,7 @@ It is recommended that docker gets 4 or more cores and 2 GB or more memory
 ### Download heron sandbox script
 
 ```shell
-$ curl -O https://raw.githubusercontent.org/apache/heron/master/deploy/docker/sandbox.sh
+$ curl -O https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/docker/sandbox.sh
 $ chmod +x sandbox.sh
 ```
 
