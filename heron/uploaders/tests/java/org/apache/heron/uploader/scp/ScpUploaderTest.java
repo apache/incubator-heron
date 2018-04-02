@@ -22,7 +22,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 
 public class ScpUploaderTest {
   private Config config;
@@ -32,7 +40,7 @@ public class ScpUploaderTest {
 
   @Before
   public void setUp() throws Exception {
-    config = Mockito.mock(Config.class);
+    config = mock(Config.class);
   }
 
   @After
@@ -42,34 +50,34 @@ public class ScpUploaderTest {
   @Test
   public void testConfiguration() throws Exception {
     // Insert mock ScpUploader
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
+    ScpUploader uploader = spy(new ScpUploader());
 
     // exception
-    Mockito.doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SCP_OPTIONS);
+    doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SCP_OPTIONS);
     exception.expect(RuntimeException.class);
     uploader.getScpController();
 
     // exception
-    Mockito.doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SSH_OPTIONS);
+    doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SSH_OPTIONS);
     exception.expect(RuntimeException.class);
     uploader.getScpController();
     // exception
-    Mockito.doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SCP_CONNECTION);
+    doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SCP_CONNECTION);
     exception.expect(RuntimeException.class);
     uploader.getScpController();
     // exception
-    Mockito.doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SSH_CONNECTION);
+    doReturn(null).when(config).getStringValue(ScpContext.HERON_UPLOADER_SSH_CONNECTION);
     exception.expect(RuntimeException.class);
     uploader.getScpController();
 
     // happy path
-    Mockito.doReturn(Mockito.anyString()).when(config).getStringValue(
+    doReturn(anyString()).when(config).getStringValue(
         ScpContext.HERON_UPLOADER_SCP_OPTIONS);
-    Mockito.doReturn(Mockito.anyString()).when(config).getStringValue(
+    doReturn(anyString()).when(config).getStringValue(
         ScpContext.HERON_UPLOADER_SCP_CONNECTION);
-    Mockito.doReturn(Mockito.anyString()).when(config).getStringValue(
+    doReturn(anyString()).when(config).getStringValue(
         ScpContext.HERON_UPLOADER_SSH_OPTIONS);
-    Mockito.doReturn(Mockito.anyString()).when(config).getStringValue(
+    doReturn(anyString()).when(config).getStringValue(
         ScpContext.HERON_UPLOADER_SSH_CONNECTION);
     Assert.assertNotNull(uploader.getScpController());
   }
@@ -77,73 +85,68 @@ public class ScpUploaderTest {
   // Local file not exist
   @Test(expected = UploaderException.class)
   public void testUploadPackageLocalFileDoesNotExist() throws Exception {
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
-    ScpController controller = Mockito.mock(ScpController.class);
-    Mockito.doReturn(controller).when(uploader).getScpController();
+    ScpUploader uploader = spy(new ScpUploader());
+    ScpController controller = mock(ScpController.class);
+    doReturn(controller).when(uploader).getScpController();
     uploader.initialize(config);
-    Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
+    doReturn(false).when(uploader).isLocalFileExists(anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, never()).copyFromLocalFile(anyString(), anyString());
   }
 
   // Failed to create folder on remote
   @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCreateRemoteFolder() throws Exception {
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
-    ScpController controller = Mockito.mock(ScpController.class);
-    Mockito.doReturn(controller).when(uploader).getScpController();
+    ScpUploader uploader = spy(new ScpUploader());
+    ScpController controller = mock(ScpController.class);
+    doReturn(controller).when(uploader).getScpController();
     uploader.initialize(config);
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
-    Mockito.doReturn(false).when(controller).mkdirsIfNotExists(Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
+    doReturn(false).when(controller).mkdirsIfNotExists(anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, never()).copyFromLocalFile(anyString(), anyString());
   }
 
   // Failed to copy file from local to remote
   @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCopyFromLocalToRemote() throws Exception {
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
-    ScpController controller = Mockito.mock(ScpController.class);
-    Mockito.doReturn(controller).when(uploader).getScpController();
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
+    ScpUploader uploader = spy(new ScpUploader());
+    ScpController controller = mock(ScpController.class);
+    doReturn(controller).when(uploader).getScpController();
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
     uploader.initialize(config);
-    Mockito.doReturn(true).when(controller).mkdirsIfNotExists(Mockito.anyString());
-    Mockito.doReturn(false).when(controller).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    doReturn(true).when(controller).mkdirsIfNotExists(anyString());
+    doReturn(false).when(controller).copyFromLocalFile(anyString(), anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller).copyFromLocalFile(Mockito.anyString(), Mockito.anyString());
+    verify(controller).copyFromLocalFile(anyString(), anyString());
   }
 
   // Happy path
   @Test
   public void testUploadPackage() {
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
-    ScpController controller = Mockito.mock(ScpController.class);
-    Mockito.doReturn(controller).when(uploader).getScpController();
-    Mockito.doReturn(true).when(controller).mkdirsIfNotExists(Mockito.anyString());
+    ScpUploader uploader = spy(new ScpUploader());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
+    ScpController controller = mock(ScpController.class);
+    doReturn(controller).when(uploader).getScpController();
+    doReturn(true).when(controller).mkdirsIfNotExists(anyString());
     uploader.initialize(config);
-    Mockito.doReturn(true).when(controller).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    doReturn(true).when(controller).copyFromLocalFile(anyString(), anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.atLeastOnce()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, atLeastOnce()).copyFromLocalFile(anyString(), anyString());
   }
 
   @Test
   public void testUndo() throws Exception {
-    ScpUploader uploader = Mockito.spy(new ScpUploader());
-    ScpController controller = Mockito.mock(ScpController.class);
-    Mockito.doReturn(controller).when(uploader).getScpController();
+    ScpUploader uploader = spy(new ScpUploader());
+    ScpController controller = mock(ScpController.class);
+    doReturn(controller).when(uploader).getScpController();
     uploader.initialize(config);
 
-    Mockito.doReturn(false).when(controller).delete(Mockito.anyString());
+    doReturn(false).when(controller).delete(anyString());
     Assert.assertFalse(uploader.undo());
-    Mockito.verify(controller).delete(Mockito.anyString());
+    verify(controller).delete(anyString());
 
-    Mockito.doReturn(true).when(controller).delete(Mockito.anyString());
+    doReturn(true).when(controller).delete(anyString());
     Assert.assertTrue(uploader.undo());
   }
 }

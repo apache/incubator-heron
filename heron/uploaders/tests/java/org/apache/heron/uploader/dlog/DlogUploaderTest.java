@@ -27,14 +27,22 @@ import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class DlogUploaderTest {
 
@@ -97,7 +105,7 @@ public class DlogUploaderTest {
   public void testUndoFailure() throws Exception {
     Namespace ns = mock(Namespace.class);
     when(nsBuilder.build()).thenReturn(ns);
-    Mockito.doThrow(new IOException("test")).when(ns).deleteLog(anyString());
+    doThrow(new IOException("test")).when(ns).deleteLog(anyString());
 
     uploader.initialize(config);
     assertFalse(uploader.undo());
@@ -118,11 +126,11 @@ public class DlogUploaderTest {
 
   @Test
   public void testUploadPackageLocalFileNotExist() throws Exception {
-    uploader = Mockito.spy(uploader);
+    uploader = spy(uploader);
 
     Namespace ns = mock(Namespace.class);
     when(nsBuilder.build()).thenReturn(ns);
-    Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
+    doReturn(false).when(uploader).isLocalFileExists(anyString());
 
     uploader.initialize(config);
     try {
@@ -136,7 +144,7 @@ public class DlogUploaderTest {
 
   @Test
   public void testUploadPackage() throws Exception {
-    uploader = Mockito.spy(uploader);
+    uploader = spy(uploader);
 
     Namespace ns = mock(Namespace.class);
     when(nsBuilder.build()).thenReturn(ns);
@@ -146,7 +154,7 @@ public class DlogUploaderTest {
     AppendOnlyStreamWriter asw = mock(AppendOnlyStreamWriter.class);
     when(dlm.getAppendOnlyStreamWriter()).thenReturn(asw);
 
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
 
     uploader.initialize(config);
     uploader.uploadPackage();
@@ -160,7 +168,7 @@ public class DlogUploaderTest {
 
   @Test
   public void testUploadPackageExisting() throws Exception {
-    uploader = Mockito.spy(uploader);
+    uploader = spy(uploader);
 
     Namespace ns = mock(Namespace.class);
     when(nsBuilder.build()).thenReturn(ns);
@@ -170,7 +178,7 @@ public class DlogUploaderTest {
     AppendOnlyStreamWriter asw = mock(AppendOnlyStreamWriter.class);
     when(dlm.getAppendOnlyStreamWriter()).thenReturn(asw);
 
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
 
     uploader.initialize(config);
     uploader.uploadPackage();

@@ -27,10 +27,15 @@ import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class S3UploaderTest {
   private S3Uploader uploader;
@@ -93,8 +98,7 @@ public class S3UploaderTest {
 
     URI uri = uploader.uploadPackage();
 
-    verify(mockS3Client).putObject(Mockito.eq(expectedBucket),
-        Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+    verify(mockS3Client).putObject(eq(expectedBucket), eq(expectedRemotePath), any(File.class));
 
     verify(mockS3Client).getUrl(expectedBucket, expectedRemotePath);
 
@@ -115,8 +119,7 @@ public class S3UploaderTest {
     verify(mockS3Client).copyObject(expectedBucket, expectedRemotePath, expectedBucket,
         expectedPreviousVersionPath);
 
-    verify(mockS3Client).putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
-        Mockito.any(File.class));
+    verify(mockS3Client).putObject(eq(expectedBucket), eq(expectedRemotePath), any(File.class));
 
     verify(mockS3Client).getUrl(expectedBucket, expectedRemotePath);
 
@@ -130,8 +133,7 @@ public class S3UploaderTest {
     String expectedBucket = "bucket";
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
-    when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
-        Mockito.any(File.class))).thenThrow(SdkClientException.class);
+    when(mockS3Client.putObject(eq(expectedBucket), eq(expectedRemotePath), any(File.class))).thenThrow(SdkClientException.class);
     uploader.uploadPackage();
   }
 
@@ -160,8 +162,7 @@ public class S3UploaderTest {
 
     uploader.undo();
 
-    verify(mockS3Client, never()).copyObject(Mockito.anyString(),
-        Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    verify(mockS3Client, never()).copyObject(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -187,8 +188,7 @@ public class S3UploaderTest {
 
     uploader.uploadPackage();
 
-    verify(mockS3Client).putObject(Mockito.eq("bucket"),
-        Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+    verify(mockS3Client).putObject(eq("bucket"), eq(expectedRemotePath), any(File.class));
   }
 
 }

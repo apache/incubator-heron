@@ -26,9 +26,6 @@ import java.util.concurrent.Executors;
 
 import com.google.protobuf.Message;
 
-import org.junit.After;
-import org.junit.Before;
-
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
@@ -41,6 +38,8 @@ import org.apache.heron.instance.CommunicatorTester;
 import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.metrics.GatewayMetrics;
 import org.apache.heron.resource.UnitTestHelper;
+import org.junit.After;
+import org.junit.Before;
 
 import static org.junit.Assert.assertEquals;
 

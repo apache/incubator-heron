@@ -19,10 +19,6 @@ import java.util.concurrent.CountDownLatch;
 
 import com.google.protobuf.Message;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.topology.TopologyBuilder;
@@ -35,6 +31,9 @@ import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.TestBolt;
 import org.apache.heron.resource.TestSpout;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

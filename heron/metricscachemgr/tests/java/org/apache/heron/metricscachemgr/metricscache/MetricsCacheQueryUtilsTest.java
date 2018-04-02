@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-
 import org.apache.heron.metricscachemgr.metricscache.query.ExceptionDatum;
 import org.apache.heron.metricscachemgr.metricscache.query.ExceptionRequest;
 import org.apache.heron.metricscachemgr.metricscache.query.ExceptionResponse;
@@ -33,9 +31,12 @@ import org.apache.heron.metricscachemgr.metricscache.query.MetricResponse;
 import org.apache.heron.metricscachemgr.metricscache.query.MetricTimeRangeValue;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.tmaster.TopologyMaster;
+import org.junit.Test;
 
 import static org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.toProtobuf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class MetricsCacheQueryUtilsTest {
   private static void assertMetricRequest(

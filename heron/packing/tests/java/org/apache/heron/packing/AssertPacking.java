@@ -25,11 +25,13 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.PackingPlan.InstancePlan;
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 /**
  * Utility methods for common test assertions related to packing
@@ -43,7 +45,7 @@ public final class AssertPacking {
    * expectedBoltRam and likewise for spouts. If notExpectedContainerRam is not null, verifies that
    * the container ram is not that.
    */
-  public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
+  public static void assertContainers(Set<ContainerPlan> containerPlans,
                                       String boltName, String spoutName,
                                       ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam,
                                       ByteAmount notExpectedContainerRam) {
@@ -53,12 +55,12 @@ public final class AssertPacking {
     List<Integer> foundInstanceIndecies = new ArrayList<>();
     int expectedInstanceIndex = 1;
     // Ram for bolt should be the value in component ram map
-    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+    for (ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         assertNotEquals(
             notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
       }
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndecies.add(expectedInstanceIndex++);
         foundInstanceIndecies.add(instancePlan.getTaskId());
         if (instancePlan.getComponentName().equals(boltName)) {
@@ -83,11 +85,11 @@ public final class AssertPacking {
   /**
    * Verifies that the containerPlan contains a specific number of instances for the given component.
    */
-  public static void assertNumInstances(Set<PackingPlan.ContainerPlan> containerPlans,
+  public static void assertNumInstances(Set<ContainerPlan> containerPlans,
                                         String component, int numInstances) {
     int instancesFound = 0;
-    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+    for (ContainerPlan containerPlan : containerPlans) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(component)) {
           instancesFound++;
         }
@@ -100,9 +102,9 @@ public final class AssertPacking {
    * Verifies that the RAM allocated for every container in a packing plan is less than a given
    * maximum value.
    */
-  public static void assertContainerRam(Set<PackingPlan.ContainerPlan> containerPlans,
+  public static void assertContainerRam(Set<ContainerPlan> containerPlans,
                                         ByteAmount maxRamforResources) {
-    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+    for (ContainerPlan containerPlan : containerPlans) {
       assertTrue(String.format("Container with id %d requires more RAM (%s) than"
               + " the maximum RAM allowed (%s)", containerPlan.getId(),
           containerPlan.getRequiredResource().getRam(), maxRamforResources),
@@ -129,8 +131,8 @@ public final class AssertPacking {
 
       // and that the instance exists on it
       boolean instanceFound = false;
-      PackingPlan.ContainerPlan containerPlan = plan.getContainer(containerId).get();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+      ContainerPlan containerPlan = plan.getContainer(containerId).get();
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getTaskId() == instanceId.getTaskId()) {
           instanceFound = true;
           assertEquals("Wrong componentName for task " + instancePlan.getTaskId(),
@@ -144,22 +146,22 @@ public final class AssertPacking {
           containerPlan, instanceId.getTaskId()), instanceFound);
     }
 
-    Map<Integer, PackingPlan.InstancePlan> taskIds = new HashMap<>();
-    Map<String, Set<PackingPlan.InstancePlan>> componentInstances = new HashMap<>();
-    for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+    Map<Integer, InstancePlan> taskIds = new HashMap<>();
+    Map<String, Set<InstancePlan>> componentInstances = new HashMap<>();
+    for (ContainerPlan containerPlan : plan.getContainers()) {
+      for (InstancePlan instancePlan : containerPlan.getInstances()) {
 
         // check for taskId collisions
-        PackingPlan.InstancePlan collisionInstance =  taskIds.get(instancePlan.getTaskId());
+        InstancePlan collisionInstance =  taskIds.get(instancePlan.getTaskId());
         assertNull(String.format("Task id collision between instance %s and %s",
             instancePlan, collisionInstance), collisionInstance);
         taskIds.put(instancePlan.getTaskId(), instancePlan);
 
         // check for componentIndex collisions
-        Set<PackingPlan.InstancePlan> instances =
+        Set<InstancePlan> instances =
             componentInstances.get(instancePlan.getComponentName());
         if (instances != null) {
-          for (PackingPlan.InstancePlan instance : instances) {
+          for (InstancePlan instance : instances) {
             assertTrue(String.format(
                 "Component index collision between instance %s and %s", instance, instancePlan),
                 instance.getComponentIndex() != instancePlan.getComponentIndex());
@@ -167,7 +169,7 @@ public final class AssertPacking {
         }
         if (componentInstances.get(instancePlan.getComponentName()) == null) {
           componentInstances.put(instancePlan.getComponentName(),
-              new HashSet<PackingPlan.InstancePlan>());
+              new HashSet<InstancePlan>());
         }
         componentInstances.get(instancePlan.getComponentName()).add(instancePlan);
       }

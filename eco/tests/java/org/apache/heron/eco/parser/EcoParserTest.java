@@ -18,10 +18,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.api.mockito.PowerMockito;
-
 import org.apache.heron.eco.definition.BeanDefinition;
 import org.apache.heron.eco.definition.BeanReference;
 import org.apache.heron.eco.definition.BoltDefinition;
@@ -29,12 +25,16 @@ import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.definition.GroupingDefinition;
 import org.apache.heron.eco.definition.PropertyDefinition;
 import org.apache.heron.eco.definition.StreamDefinition;
+import org.junit.Before;
+import org.junit.Test;
 
-import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link EcoParser}
@@ -343,7 +343,7 @@ public class EcoParserTest {
   public void testParseFromInputStream_VerifyComponents_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR_1.getBytes());
-    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = mock(FileInputStream.class);
     EcoTopologyDefinition topologyDefinition =
         subject.parseFromInputStream(inputStream, mockPropsStream, false);
     List<BeanDefinition> components = topologyDefinition.getComponents();
@@ -391,7 +391,7 @@ public class EcoParserTest {
   public void testParseFromInputStream_VerifyAllButComponents_MapsAsExpected() throws Exception {
 
     InputStream inputStream = new ByteArrayInputStream(YAML_STR.getBytes());
-    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = mock(FileInputStream.class);
     EcoTopologyDefinition topologyDefinition = subject.parseFromInputStream(inputStream,
         mockPropsStream, false);
 
@@ -437,7 +437,7 @@ public class EcoParserTest {
   @Test
   public void testPartFromInputStream_NoConfigSpecified_ConfigMapIsEmpty() throws Exception {
     InputStream inputStream = new ByteArrayInputStream(YAML_NO_CONFIG_STR.getBytes());
-    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = mock(FileInputStream.class);
 
     EcoTopologyDefinition topologyDefinition =
         subject.parseFromInputStream(inputStream, mockPropsStream, false);
@@ -450,7 +450,7 @@ public class EcoParserTest {
   public void testParseFromInputStream_StreamIsNull_ExceptionThrown() throws Exception {
     InputStream inputStream = null;
     EcoTopologyDefinition ecoTopologyDefinition = null;
-    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = mock(FileInputStream.class);
     try {
       ecoTopologyDefinition = subject.parseFromInputStream(inputStream,
           mockPropsStream, false);

@@ -17,10 +17,6 @@ package org.apache.heron.instance.spout;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
@@ -29,6 +25,9 @@ import org.apache.heron.instance.SlaveTester;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
 import org.apache.heron.resource.UnitTestHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

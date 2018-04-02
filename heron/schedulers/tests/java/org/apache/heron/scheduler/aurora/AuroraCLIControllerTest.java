@@ -24,19 +24,27 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
+import org.apache.heron.spi.utils.PackingTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.spi.utils.PackingTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyListOf;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class AuroraCLIControllerTest {
   private static final String JOB_NAME = "jobName";
@@ -62,7 +70,7 @@ public class AuroraCLIControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    controller = Mockito.spy(
+    controller = spy(
         new AuroraCLIController(JOB_NAME, CLUSTER, ROLE, ENV, AURORA_FILENAME, IS_VERBOSE));
   }
 
@@ -77,14 +85,14 @@ public class AuroraCLIControllerTest {
         JOB_SPEC, AURORA_FILENAME, VERBOSE_CONFIG);
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.createJob(bindings));
-    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+    doReturn(false).when(controller).runProcess(anyListOf(String.class));
+    assertFalse(controller.createJob(bindings));
+    verify(controller).runProcess(eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.createJob(bindings));
-    Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
+    doReturn(true).when(controller).runProcess(anyListOf(String.class));
+    assertTrue(controller.createJob(bindings));
+    verify(controller, times(2)).runProcess(expectedCommand);
   }
 
   @Test
@@ -93,14 +101,14 @@ public class AuroraCLIControllerTest {
         JOB_SPEC, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.killJob());
-    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+    doReturn(false).when(controller).runProcess(anyListOf(String.class));
+    assertFalse(controller.killJob());
+    verify(controller).runProcess(eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.killJob());
-    Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
+    doReturn(true).when(controller).runProcess(anyListOf(String.class));
+    assertTrue(controller.killJob());
+    verify(controller, times(2)).runProcess(expectedCommand);
   }
 
   @Test
@@ -110,34 +118,34 @@ public class AuroraCLIControllerTest {
         JOB_SPEC, containerId, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertFalse(controller.restart(containerId));
-    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+    doReturn(false).when(controller).runProcess(anyListOf(String.class));
+    assertFalse(controller.restart(containerId));
+    verify(controller).runProcess(eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
-    Assert.assertTrue(controller.restart(containerId));
-    Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
+    doReturn(true).when(controller).runProcess(anyListOf(String.class));
+    assertTrue(controller.restart(containerId));
+    verify(controller, times(2)).runProcess(expectedCommand);
   }
 
   @Test
   public void testRemoveContainers() {
-    class ContainerPlanComparator implements Comparator<PackingPlan.ContainerPlan> {
+    class ContainerPlanComparator implements Comparator<ContainerPlan> {
       @Override
-      public int compare(PackingPlan.ContainerPlan o1, PackingPlan.ContainerPlan o2) {
-        return ((Integer) o1.getId()).compareTo(o2.getId());
+      public int compare(ContainerPlan o1, ContainerPlan o2) {
+        return Integer.compare(o1.getId(), o2.getId());
       }
     }
-    SortedSet<PackingPlan.ContainerPlan> containers = new TreeSet<>(new ContainerPlanComparator());
+    SortedSet<ContainerPlan> containers = new TreeSet<>(new ContainerPlanComparator());
     containers.add(PackingTestUtils.testContainerPlan(3));
     containers.add(PackingTestUtils.testContainerPlan(5));
 
     List<String> expectedCommand = asList("aurora job kill %s/3,5 %s %s %d",
         JOB_SPEC, VERBOSE_CONFIG, BATCH_CONFIG, Integer.MAX_VALUE);
 
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
+    doReturn(true).when(controller).runProcess(anyListOf(String.class));
     controller.removeContainers(containers);
-    Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
+    verify(controller).runProcess(eq(expectedCommand));
   }
 
   @Test
@@ -147,7 +155,7 @@ public class AuroraCLIControllerTest {
         "aurora job add --wait-until RUNNING %s/0 %s %s",
         JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
 
-    Mockito.doAnswer(new Answer<Boolean>() {
+    doAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock arg0) throws Throwable {
         final StringBuilder originalArgument = (StringBuilder) (arg0.getArguments())[2];
@@ -155,13 +163,12 @@ public class AuroraCLIControllerTest {
         return true;
       }
     }).when(controller).runProcess(
-                    Matchers.anyListOf(String.class),
-                    Matchers.any(StringBuilder.class),
-                    Matchers.any(StringBuilder.class));
+                    anyListOf(String.class),
+                    any(StringBuilder.class),
+                    any(StringBuilder.class));
     Set<Integer> ret = controller.addContainers(containersToAdd);
-    Assert.assertEquals(containersToAdd.intValue(), ret.size());
-    Mockito.verify(controller)
-        .runProcess(Matchers.eq(expectedCommand), Matchers.any(), Matchers.any());
+    assertEquals(containersToAdd.intValue(), ret.size());
+    verify(controller).runProcess(eq(expectedCommand), any(), any());
   }
 
   @Test
@@ -171,21 +178,17 @@ public class AuroraCLIControllerTest {
         "aurora job add --wait-until RUNNING %s/0 %s %s",
         JOB_SPEC, containersToAdd.toString(), VERBOSE_CONFIG);
 
-    Mockito.doAnswer(new Answer<Boolean>() {
+    doAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock arg0) throws Throwable {
         final StringBuilder originalArgument = (StringBuilder) (arg0.getArguments())[2];
         originalArgument.append("Querying instance statuses: x");
         return true;
       }
-    }).when(controller).runProcess(
-                    Matchers.anyListOf(String.class),
-                    Matchers.any(StringBuilder.class),
-                    Matchers.any(StringBuilder.class));
+    }).when(controller).runProcess(anyListOf(String.class), any(StringBuilder.class), any(StringBuilder.class));
     Set<Integer> ret = controller.addContainers(containersToAdd);
-    Assert.assertEquals(0, ret.size());
-    Mockito.verify(controller)
-        .runProcess(Matchers.eq(expectedCommand), Matchers.any(), Matchers.any());
+    assertEquals(0, ret.size());
+    verify(controller).runProcess(eq(expectedCommand), any(), any());
   }
 
   private static List<String> asList(String command, Object... values) {

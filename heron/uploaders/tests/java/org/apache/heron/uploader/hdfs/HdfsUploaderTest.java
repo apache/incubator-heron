@@ -17,10 +17,18 @@ package org.apache.heron.uploader.hdfs;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class HdfsUploaderTest {
   private HdfsUploader uploader;
@@ -28,12 +36,12 @@ public class HdfsUploaderTest {
 
   @Before
   public void setUp() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    Config config = mock(Config.class);
 
     // Insert mock HdfsController
-    uploader = Mockito.spy(new HdfsUploader());
-    controller = Mockito.mock(HdfsController.class);
-    Mockito.doReturn(controller).when(uploader).getHdfsController();
+    uploader = spy(new HdfsUploader());
+    controller = mock(HdfsController.class);
+    doReturn(controller).when(uploader).getHdfsController();
 
     uploader.initialize(config);
   }
@@ -44,51 +52,46 @@ public class HdfsUploaderTest {
 
   @Test(expected = UploaderException.class)
   public void testUploadPackageLocalFileNotExist() throws Exception {
-    Mockito.doReturn(false).when(uploader).isLocalFileExists(Mockito.anyString());
+    doReturn(false).when(uploader).isLocalFileExists(anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, never()).copyFromLocalFile(anyString(), anyString());
   }
 
   @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCreateFolderOnHDFS() throws Exception {
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
-    Mockito.doReturn(false).when(controller).exists(Mockito.anyString());
-    Mockito.doReturn(false).when(controller).mkdirs(Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
+    doReturn(false).when(controller).exists(anyString());
+    doReturn(false).when(controller).mkdirs(anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.never()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, never()).copyFromLocalFile(anyString(), anyString());
   }
 
   @Test(expected = UploaderException.class)
   public void testUploadPackageFailToCopyFromLocalToHDFS() throws Exception {
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
-    Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
-    Mockito.doReturn(false).when(controller).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
+    doReturn(true).when(controller).mkdirs(anyString());
+    doReturn(false).when(controller).copyFromLocalFile(anyString(), anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller).copyFromLocalFile(Mockito.anyString(), Mockito.anyString());
+    verify(controller).copyFromLocalFile(anyString(), anyString());
   }
 
   @Test
   public void testUploadPackage() {
     // Happy path
-    Mockito.doReturn(true).when(uploader).isLocalFileExists(Mockito.anyString());
-    Mockito.doReturn(true).when(controller).mkdirs(Mockito.anyString());
-    Mockito.doReturn(true).when(controller).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    doReturn(true).when(uploader).isLocalFileExists(anyString());
+    doReturn(true).when(controller).mkdirs(anyString());
+    doReturn(true).when(controller).copyFromLocalFile(anyString(), anyString());
     uploader.uploadPackage();
-    Mockito.verify(controller, Mockito.atLeastOnce()).copyFromLocalFile(
-        Mockito.anyString(), Mockito.anyString());
+    verify(controller, atLeastOnce()).copyFromLocalFile(anyString(), anyString());
   }
 
   @Test
   public void testUndo() throws Exception {
-    Mockito.doReturn(false).when(controller).delete(Mockito.anyString());
-    Assert.assertFalse(uploader.undo());
-    Mockito.verify(controller).delete(Mockito.anyString());
+    doReturn(false).when(controller).delete(anyString());
+    assertFalse(uploader.undo());
+    verify(controller).delete(anyString());
 
-    Mockito.doReturn(true).when(controller).delete(Mockito.anyString());
-    Assert.assertTrue(uploader.undo());
+    doReturn(true).when(controller).delete(anyString());
+    assertTrue(uploader.undo());
   }
 }

@@ -17,8 +17,9 @@ import java.nio.file.Paths;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class LocalFileSystemContextTest {
 
@@ -36,7 +37,7 @@ public class LocalFileSystemContextTest {
     String defaultFileSystemDirectory = Paths.get("${HOME}",
         ".herondata", "repository", "${CLUSTER}", "${ROLE}", "${TOPOLOGY}").toString();
 
-    Assert.assertEquals(defaultFileSystemDirectory, actualFileSystemDirectory);
+    assertEquals(defaultFileSystemDirectory, actualFileSystemDirectory);
   }
 
   @Test
@@ -55,7 +56,7 @@ public class LocalFileSystemContextTest {
     String expectedFileSystemDirectory = Paths.get("${HOME}",
         ".herondata", "topologies", "${CLUSTER}").toString();
 
-    Assert.assertEquals(expectedFileSystemDirectory, actualFileSystemDirectory);
+    assertEquals(expectedFileSystemDirectory, actualFileSystemDirectory);
   }
 
 }

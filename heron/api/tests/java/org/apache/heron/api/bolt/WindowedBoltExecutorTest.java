@@ -21,10 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.topology.TopologyBuilder;
@@ -36,8 +32,15 @@ import org.apache.heron.api.windowing.TupleWindow;
 import org.apache.heron.api.windowing.WindowingConfigs;
 import org.apache.heron.common.utils.topology.TopologyContextImpl;
 import org.apache.heron.common.utils.tuple.TupleImpl;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link WindowedBoltExecutor}
@@ -91,16 +94,16 @@ public class WindowedBoltExecutorTest {
   }
 
   private OutputCollector getOutputCollector() {
-    return Mockito.mock(OutputCollector.class);
+    return mock(OutputCollector.class);
   }
 
   private TopologyContext getTopologyContext() {
-    TopologyContext context = Mockito.mock(TopologyContext.class);
+    TopologyContext context = mock(TopologyContext.class);
 
     Map<TopologyAPI.StreamId, TopologyAPI.Grouping> sources =
         Collections.singletonMap(TopologyAPI.StreamId.newBuilder()
             .setComponentName("s1").setId("default").build(), null);
-    Mockito.when(context.getThisSources()).thenReturn(sources);
+    when(context.getThisSources()).thenReturn(sources);
     return context;
   }
 
@@ -168,7 +171,7 @@ public class WindowedBoltExecutorTest {
     executor = new WindowedBoltExecutor(testWindowedBolt);
     TopologyContext context = getTopologyContext();
     // emulate the call of withLateTupleStream method
-    Mockito.when(context.getThisStreams()).thenReturn(new HashSet<>(Arrays.asList("default",
+    when(context.getThisStreams()).thenReturn(new HashSet<>(Arrays.asList("default",
         "$late")));
     try {
       executor.prepare(conf, context, getOutputCollector());
@@ -209,10 +212,10 @@ public class WindowedBoltExecutorTest {
     testWindowedBolt.withTimestampField("ts");
     executor = new WindowedBoltExecutor(testWindowedBolt);
     TopologyContext context = getTopologyContext();
-    Mockito.when(context.getThisStreams()).thenReturn(new HashSet<>(Arrays.asList("default",
+    when(context.getThisStreams()).thenReturn(new HashSet<>(Arrays.asList("default",
         "$late")));
 
-    OutputCollector outputCollector = Mockito.mock(OutputCollector.class);
+    OutputCollector outputCollector = mock(OutputCollector.class);
     Map<String, Object> conf = new HashMap<>();
     conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, 100000);
     conf.put(WindowingConfigs.TOPOLOGY_BOLTS_WINDOW_LENGTH_DURATION_MS, 20L);
@@ -236,6 +239,6 @@ public class WindowedBoltExecutorTest {
     }
     System.out.println(testWindowedBolt.tupleWindows);
     Tuple tuple = tuples.get(tuples.size() - 1);
-    Mockito.verify(outputCollector).emit("$late", Arrays.asList(tuple), new Values(tuple));
+    verify(outputCollector).emit("$late", Arrays.asList(tuple), new Values(tuple));
   }
 }

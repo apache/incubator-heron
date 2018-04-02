@@ -23,9 +23,13 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class LocalFileSystemUploaderTest {
 
@@ -71,11 +75,11 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newConfig);
-    Assert.assertNotNull(uploader.uploadPackage());
+    assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
-    Assert.assertTrue(new File(destFile).isFile());
+    assertTrue(new File(destFile).isFile());
   }
 
   @Test(expected = UploaderException.class)
@@ -105,15 +109,15 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newConfig);
-    Assert.assertNotNull(uploader.uploadPackage());
+    assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
-    Assert.assertTrue(new File(destFile).isFile());
+    assertTrue(new File(destFile).isFile());
 
     // now undo the file
-    Assert.assertTrue(uploader.undo());
-    Assert.assertFalse(new File(destFile).isFile());
+    assertTrue(uploader.undo());
+    assertFalse(new File(destFile).isFile());
   }
 
   @Test
@@ -140,8 +144,8 @@ public class LocalFileSystemUploaderTest {
     String destFile = uploader.getTopologyFile();
 
     // verify usage of default file system directory for destination directory and file
-    Assert.assertEquals(destDirectory, defaultFileSystemDirectory);
-    Assert.assertTrue(destFile.contains(defaultFileSystemDirectory));
+    assertEquals(destDirectory, defaultFileSystemDirectory);
+    assertTrue(destFile.contains(defaultFileSystemDirectory));
   }
 
   @Test
@@ -156,19 +160,19 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newConfig);
-    Assert.assertNotNull(uploader.uploadPackage());
+    assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
-    Assert.assertTrue(new File(destFile).isFile());
+    assertTrue(new File(destFile).isFile());
 
     // load same package again by overriding existing one
-    Assert.assertNotNull(uploader.uploadPackage());
+    assertNotNull(uploader.uploadPackage());
     String destFile2 = uploader.getTopologyFile();
-    Assert.assertTrue(new File(destFile2).isFile());
+    assertTrue(new File(destFile2).isFile());
 
     // verify that existing file is overridden
-    Assert.assertEquals(destFile, destFile2);
+    assertEquals(destFile, destFile2);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -194,7 +198,7 @@ public class LocalFileSystemUploaderTest {
   @Test
   public void testGetUri() {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
-    Assert.assertEquals(uploader.getUri("testFileName").toString(), "file://testFileName");
+    assertEquals(uploader.getUri("testFileName").toString(), "file://testFileName");
   }
 
   @Test(expected = IllegalArgumentException.class)
