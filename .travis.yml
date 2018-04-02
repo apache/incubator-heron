@@ -29,11 +29,13 @@ env:
 before_install:
   - sudo apt-get install texlive-extra-utils -y
   - sudo apt-get install curl -y
-  - sudo add-apt-repository ppa:webupd8team/java
-  - sudo apt-get update && sudo apt-get install oracle-java8-installer
+  - sudo add-apt-repository ppa:webupd8team/java -y
+  - sudo apt-get update -y
+  - sudo apt-get install oracle-java8-installer -y
   - echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
   - curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-  - sudo apt-get update && sudo apt-get install bazel
+  - sudo apt-get update -y
+  - sudo apt-get install bazel -y
   # download and install bazel
   #- wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.9.0/bazel-0.9.0-installer-linux-x86_64.sh'
   #- chmod +x bazel-0.9.0-installer-linux-x86_64.sh
