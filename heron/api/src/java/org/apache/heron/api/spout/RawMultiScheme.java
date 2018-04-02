@@ -37,8 +37,8 @@ import java.util.List;
 
 import org.apache.heron.api.tuple.Fields;
 
-import static org.apache.heron.api.utils.Utils.tuple;
 import static java.util.Arrays.asList;
+import static org.apache.heron.api.utils.Utils.tuple;
 
 public class RawMultiScheme implements MultiScheme {
   private static final long serialVersionUID = 1540454777373652254L;
