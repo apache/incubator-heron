@@ -34,10 +34,6 @@ import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.Watcher;
-
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
@@ -56,6 +52,9 @@ import org.apache.heron.statemgr.FileSystemStateManager;
 import org.apache.heron.statemgr.zookeeper.ZkContext;
 import org.apache.heron.statemgr.zookeeper.ZkUtils;
 import org.apache.heron.statemgr.zookeeper.ZkWatcherCallback;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.Watcher;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());

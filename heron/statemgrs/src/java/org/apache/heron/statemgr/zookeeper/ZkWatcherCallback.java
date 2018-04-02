@@ -14,10 +14,9 @@
 
 package org.apache.heron.statemgr.zookeeper;
 
+import org.apache.heron.spi.statemgr.WatchCallback;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-
-import org.apache.heron.spi.statemgr.WatchCallback;
 
 public final class ZkWatcherCallback {
   public static Watcher makeZkWatcher(final WatchCallback watcher) {
