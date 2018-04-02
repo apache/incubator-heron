@@ -23,7 +23,6 @@ import java.nio.channels.SocketChannel;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
@@ -32,6 +31,10 @@ import org.apache.heron.common.network.REQID;
 import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.resource.UnitTestHelper;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * To test whether Instance's handleRead() from the stream manager.
@@ -73,28 +76,28 @@ public class HandleReadTest extends AbstractNetworkTest {
 
       getNIOLooper().exitLoop();
 
-      Assert.assertEquals(1, getInStreamQueue().size());
+      assertEquals(1, getInStreamQueue().size());
 
       Message msg = getInStreamQueue().poll();
-      Assert.assertTrue(msg instanceof HeronTuples.HeronTupleSet);
+      assertTrue(msg instanceof HeronTuples.HeronTupleSet);
 
       HeronTuples.HeronTupleSet heronTupleSet = (HeronTuples.HeronTupleSet) msg;
 
-      Assert.assertTrue(heronTupleSet.hasData());
-      Assert.assertFalse(heronTupleSet.hasControl());
+      assertTrue(heronTupleSet.hasData());
+      assertFalse(heronTupleSet.hasControl());
 
       HeronTuples.HeronDataTupleSet heronDataTupleSet = heronTupleSet.getData();
 
-      Assert.assertEquals("test-spout", heronDataTupleSet.getStream().getComponentName());
-      Assert.assertEquals("default", heronDataTupleSet.getStream().getId());
+      assertEquals("test-spout", heronDataTupleSet.getStream().getComponentName());
+      assertEquals("default", heronDataTupleSet.getStream().getId());
 
       StringBuilder response = new StringBuilder();
       for (HeronTuples.HeronDataTuple heronDataTuple : heronDataTupleSet.getTuplesList()) {
         response.append(heronDataTuple.getValues(0).toStringUtf8());
-        Assert.assertEquals(1, heronDataTuple.getRootsCount());
+        assertEquals(1, heronDataTuple.getRootsCount());
       }
 
-      Assert.assertEquals("ABABABABAB", response.toString());
+      assertEquals("ABABABABAB", response.toString());
     } catch (ClosedChannelException ignored) {
     } finally {
       close(socketChannel);

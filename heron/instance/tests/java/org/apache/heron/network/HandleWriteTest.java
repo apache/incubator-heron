@@ -20,7 +20,6 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
@@ -31,6 +30,10 @@ import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.proto.stmgr.StreamManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.resource.UnitTestHelper;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * To test whether Instance's handleWrite() from the stream manager.
@@ -78,14 +81,14 @@ public class HandleWriteTest extends AbstractNetworkTest {
         incomingPacket.unpackMessage(builder);
         StreamManager.RegisterInstanceResponse response = builder.build();
 
-        Assert.assertNotNull(response);
-        Assert.assertTrue(response.isInitialized());
-        Assert.assertEquals(Common.StatusCode.OK, response.getStatus().getStatus());
-        Assert.assertEquals(1, response.getPplan().getStmgrsCount());
-        Assert.assertEquals(2, response.getPplan().getInstancesCount());
-        Assert.assertEquals(1, response.getPplan().getTopology().getBoltsCount());
-        Assert.assertEquals(1, response.getPplan().getTopology().getSpoutsCount());
-        Assert.assertEquals(TopologyAPI.TopologyState.RUNNING,
+        assertNotNull(response);
+        assertTrue(response.isInitialized());
+        assertEquals(Common.StatusCode.OK, response.getStatus().getStatus());
+        assertEquals(1, response.getPplan().getStmgrsCount());
+        assertEquals(2, response.getPplan().getInstancesCount());
+        assertEquals(1, response.getPplan().getTopology().getBoltsCount());
+        assertEquals(1, response.getPplan().getTopology().getSpoutsCount());
+        assertEquals(TopologyAPI.TopologyState.RUNNING,
             response.getPplan().getTopology().getState());
       }
 

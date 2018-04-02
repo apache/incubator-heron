@@ -13,9 +13,10 @@
 //  limitations under the License.
 package org.apache.heron.dlog;
 
+import org.junit.Test;
+
 import org.apache.distributedlog.AppendOnlyStreamWriter;
 import org.apache.distributedlog.api.DistributedLogManager;
-import org.junit.Test;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;

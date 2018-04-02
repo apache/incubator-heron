@@ -21,7 +21,6 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.common.network.OutgoingPacket;
@@ -31,6 +30,7 @@ import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.instance.InstanceControlMsg;
 import org.apache.heron.resource.UnitTestHelper;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -76,11 +76,11 @@ public class ConnectTest extends AbstractNetworkTest {
 
       PhysicalPlanHelper physicalPlanHelper = instanceControlMsg.getNewPhysicalPlanHelper();
 
-      Assert.assertEquals("test-bolt", physicalPlanHelper.getMyComponent());
-      Assert.assertEquals(InetAddress.getLocalHost().getHostName(),
+      assertEquals("test-bolt", physicalPlanHelper.getMyComponent());
+      assertEquals(InetAddress.getLocalHost().getHostName(),
           physicalPlanHelper.getMyHostname());
-      Assert.assertEquals(0, physicalPlanHelper.getMyInstanceIndex());
-      Assert.assertEquals(1, physicalPlanHelper.getMyTaskId());
+      assertEquals(0, physicalPlanHelper.getMyInstanceIndex());
+      assertEquals(1, physicalPlanHelper.getMyTaskId());
 
     } catch (ClosedChannelException ignored) {
     } finally {

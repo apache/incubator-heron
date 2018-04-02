@@ -15,15 +15,15 @@ package org.apache.heron.dlog;
 
 import java.io.ByteArrayInputStream;
 
+import org.junit.Test;
+
 import org.apache.distributedlog.DLSN;
 import org.apache.distributedlog.LogRecordWithDLSN;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.LogReader;
 import org.apache.distributedlog.exceptions.EndOfStreamException;
-import org.junit.Test;
 
 import static com.google.common.base.Charsets.UTF_8;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
