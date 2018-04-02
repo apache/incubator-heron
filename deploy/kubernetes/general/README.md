@@ -3,7 +3,7 @@
 ### Requirements:
 * Kubernetes cluster with 3 or more nodes
 * [kubectl](https://kubernetes.io/docs/tasks/kubectl/install/)
-* [heron client](https://twitter.github.io/heron/docs/getting-started/)
+* [heron client](https://apache.github.io/incubator-heron/docs/getting-started/)
 
 
 
