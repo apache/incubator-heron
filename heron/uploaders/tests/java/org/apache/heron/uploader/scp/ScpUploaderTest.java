@@ -14,14 +14,15 @@
 
 package org.apache.heron.uploader.scp;
 
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.uploader.UploaderException;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;

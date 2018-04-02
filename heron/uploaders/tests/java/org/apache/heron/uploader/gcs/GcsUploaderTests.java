@@ -20,11 +20,12 @@ import java.net.URISyntaxException;
 
 import com.google.api.services.storage.model.StorageObject;
 
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Key;
 
 import static org.junit.Assert.assertEquals;
 

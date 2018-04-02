@@ -15,9 +15,10 @@ package org.apache.heron.uploader.localfs;
 
 import java.nio.file.Paths;
 
+import org.junit.Test;
+
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

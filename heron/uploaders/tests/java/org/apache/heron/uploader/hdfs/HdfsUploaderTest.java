@@ -14,11 +14,12 @@
 
 package org.apache.heron.uploader.hdfs;
 
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.uploader.UploaderException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

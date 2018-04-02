@@ -22,11 +22,12 @@ import java.util.Map;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.uploader.UploaderException;
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;

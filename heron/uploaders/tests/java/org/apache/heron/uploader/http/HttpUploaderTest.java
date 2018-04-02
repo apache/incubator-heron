@@ -19,6 +19,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import org.apache.heron.common.basics.PackageType;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
@@ -31,11 +37,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.localserver.LocalServerTestBase;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

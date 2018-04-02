@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.topology.TopologyBuilder;
@@ -32,8 +35,6 @@ import org.apache.heron.api.windowing.TupleWindow;
 import org.apache.heron.api.windowing.WindowingConfigs;
 import org.apache.heron.common.utils.topology.TopologyContextImpl;
 import org.apache.heron.common.utils.tuple.TupleImpl;
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

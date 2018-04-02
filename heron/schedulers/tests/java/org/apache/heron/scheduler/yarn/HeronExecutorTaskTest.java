@@ -18,6 +18,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 import org.apache.heron.api.HeronTopology;
 import org.apache.heron.api.bolt.BaseBasicBolt;
 import org.apache.heron.api.bolt.BasicOutputCollector;
@@ -32,12 +39,6 @@ import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.utils.ShellUtils;
 import org.apache.reef.runtime.common.files.REEFFileNames;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

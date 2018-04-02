@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.apache.distributedlog.AppendOnlyStreamWriter;
 import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
@@ -25,8 +28,6 @@ import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.uploader.UploaderException;
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
