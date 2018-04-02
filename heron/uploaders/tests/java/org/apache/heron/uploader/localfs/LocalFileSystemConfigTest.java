@@ -16,13 +16,12 @@ package org.apache.heron.uploader.localfs;
 
 import java.nio.file.Paths;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import org.apache.heron.common.basics.PackageType;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.common.TokenSub;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LocalFileSystemConfigTest {
 

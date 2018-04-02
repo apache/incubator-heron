@@ -14,14 +14,13 @@
 
 package org.apache.heron.uploader.hdfs;
 
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.uploader.UploaderException;
 
 public class HdfsUploaderTest {
   private HdfsUploader uploader;

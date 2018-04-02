@@ -15,11 +15,10 @@ package org.apache.heron.uploader.localfs;
 
 import java.nio.file.Paths;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LocalFileSystemContextTest {
 

@@ -14,6 +14,8 @@
 
 package org.apache.heron.uploader.scp;
 
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,9 +23,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.uploader.UploaderException;
 
 public class ScpUploaderTest {
   private Config config;

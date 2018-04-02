@@ -22,19 +22,15 @@ import java.util.Map;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Key;
+import org.apache.heron.spi.uploader.UploaderException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Key;
-import org.apache.heron.spi.uploader.UploaderException;
-
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class S3UploaderTest {
   private S3Uploader uploader;
