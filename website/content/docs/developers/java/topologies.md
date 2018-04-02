@@ -129,7 +129,7 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.org/apache/heron/blob/master/examples/src/java/org/apache/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.org/apache/heron/tree/master/examples/src/java/org/apache/heron/examples).
+See the [`ExclamationTopology`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
 
 ## Applying delivery semantics to topologies
 
@@ -151,7 +151,7 @@ There are three delivery semantics available corresponding to the three delivery
 
 In distributed systems, an **ack** (short for "acknowledgment") is a message that confirms that some action has been taken. In Heron, you can create [bolts](#acking-bolts) that emit acks when some desired operation has occurred (for example data has been successfully stored in a database or a message has been successfully produced on a topic in a pub-sub messaging system). Those acks can then be received and acted upon by upstream [spouts](#ack-receiving-spouts).
 
-> You can see acking at work in a complete Heron topology in [this topology](https://github.org/apache/heron/blob/master/examples/src/java/org/apache/heron/examples/api/AckingTopology.java).
+> You can see acking at work in a complete Heron topology in [this topology](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/AckingTopology.java).
 
 Whereas acking a tuple indicates that some operation has succeeded, the opposite can be indicated when a bolt [fails](#failing) a tuple.
 

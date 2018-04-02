@@ -57,7 +57,7 @@ It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/schedu
 ### Configure the YARN scheduler
 
 A set of default configuration files are provided with Heron in the [conf/yarn]
-(https://github.org/apache/heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
+(https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
 The default configuration uses the local state manager. This will work with single-node local
 YARN installation only. A Zookeeper based state management will be needed for topology
 deployment on a multi-node YARN cluster.
@@ -146,6 +146,6 @@ Assuming HDFS as the file system, Heron logs and REEF logs can be found in the f
 
 1. The YARN Scheduler will restart any failed workers and TMaster containers. However [AM HA](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html)  is not
  supported yet. As a result AM failure will result in topology failure.
- Issue: [#949](https://github.org/apache/heron/issues/949)
+ Issue: [#949](https://github.com/apache/incubator-heron/issues/949)
 1. TMaster and Scheduler are started in separate containers. Increased network latency can result
- in warnings or failures. Issue: [#951] (https://github.org/apache/heron/issues/951)
+ in warnings or failures. Issue: [#951] (https://github.com/apache/incubator-heron/issues/951)

@@ -48,7 +48,7 @@ In the sections below, we'll build a stateful topology with effectively-once sem
 * A [`RandomIntSpout`](#example-stateful-spout) will continuously emit random integers between 1 and 100
 * An [`AdditionBolt`](#example-stateful-bolt) will receive those random numbers and add each number to a running sum. When the sum reaches 1,000,000, it will go back to zero. The bolt won't emit any data but will simply log the current sum.
 
-> You can see the code for another stateful Heron topology with effectively-once semantics in [this word count example](https://github.org/apache/heron/blob/master/examples/src/java/org/apache/heron/examples/api/StatefulWordCountTopology.java).
+> You can see the code for another stateful Heron topology with effectively-once semantics in [this word count example](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/StatefulWordCountTopology.java).
 
 ### Example stateful spout
 
