@@ -11,8 +11,8 @@ source ${DIR}/testutils.sh
 JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
 SCALA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/scala-integration-tests.jar"
 
-# run the java integration test
-T="heron integration_test java"
+# run the scala integration test
+T="heron integration_test scala"
 start_timer "$T"
 ${HOME}/bin/http-server 8080 &
 http_server_id=$!
@@ -24,6 +24,13 @@ ${HOME}/bin/test-runner \
   -tp ${HOME}/.herontests/data/scala \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
+
+# run the java integration test
+T="heron integration_test java"
+start_timer "$T"
+${HOME}/bin/http-server 8080 &
+http_server_id=$!
+trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
 ${HOME}/bin/test-runner \
   -hc heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
