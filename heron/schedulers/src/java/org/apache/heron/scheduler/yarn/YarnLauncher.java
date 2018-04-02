@@ -23,17 +23,6 @@ import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.reef.client.ClientConfiguration;
-import org.apache.reef.client.DriverConfiguration;
-import org.apache.reef.client.REEF;
-import org.apache.reef.runtime.yarn.client.YarnClientConfiguration;
-import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
-import org.apache.reef.tang.Configuration;
-import org.apache.reef.tang.Injector;
-import org.apache.reef.tang.Tang;
-import org.apache.reef.tang.annotations.Unit;
-import org.apache.reef.tang.exceptions.InjectionException;
-
 import org.apache.heron.scheduler.yarn.HeronMasterDriver.ContainerAllocationHandler;
 import org.apache.heron.scheduler.yarn.HeronMasterDriver.FailedContainerHandler;
 import org.apache.heron.scheduler.yarn.HeronMasterDriver.HeronSchedulerLauncher;
@@ -45,6 +34,16 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.scheduler.ILauncher;
+import org.apache.reef.client.ClientConfiguration;
+import org.apache.reef.client.DriverConfiguration;
+import org.apache.reef.client.REEF;
+import org.apache.reef.runtime.yarn.client.YarnClientConfiguration;
+import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
+import org.apache.reef.tang.Configuration;
+import org.apache.reef.tang.Injector;
+import org.apache.reef.tang.Tang;
+import org.apache.reef.tang.annotations.Unit;
+import org.apache.reef.tang.exceptions.InjectionException;
 
 /**
  * Launches Heron Scheduler on a YARN using REEF. The launcher will start a master (driver/AM)

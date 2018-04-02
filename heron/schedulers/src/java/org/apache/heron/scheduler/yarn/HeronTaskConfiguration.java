@@ -14,12 +14,6 @@
 
 package org.apache.heron.scheduler.yarn;
 
-import org.apache.reef.driver.task.TaskConfiguration;
-import org.apache.reef.tang.formats.ConfigurationModule;
-import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
-import org.apache.reef.tang.formats.OptionalParameter;
-import org.apache.reef.tang.formats.RequiredParameter;
-
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMap;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
@@ -30,6 +24,11 @@ import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
+import org.apache.reef.driver.task.TaskConfiguration;
+import org.apache.reef.tang.formats.ConfigurationModule;
+import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
+import org.apache.reef.tang.formats.OptionalParameter;
+import org.apache.reef.tang.formats.RequiredParameter;
 
 public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> TOPOLOGY_NAME = new RequiredParameter<>();
