@@ -275,7 +275,7 @@ public class NomadScheduler implements IScheduler {
   }
 
   /**
-   * Get the task spec for using the docker driver in Noad
+   * Get the task spec for using the docker driver in Nomad
    * In docker mode, Heron will be use in docker containers
    */
   Task getTaskSpecDockerDriver(Task task, String taskName, int containerIndex) {

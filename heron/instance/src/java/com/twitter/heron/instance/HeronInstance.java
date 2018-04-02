@@ -302,7 +302,7 @@ public class HeronInstance {
     String logMsg = "\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName
         + " with taskId " + taskId + " and componentIndex " + componentIndex
-        + " and stmgrId " + streamId + " and stmgrPort " + streamPort
+        + " and streamManagerId " + streamId + " and streamManagerPort " + streamPort
         + " and metricsManagerPort " + metricsPort;
 
     if (remoteDebuggerPort != null) {
