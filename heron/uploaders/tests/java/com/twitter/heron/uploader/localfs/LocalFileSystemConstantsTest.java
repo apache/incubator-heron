@@ -16,7 +16,7 @@ package com.twitter.heron.uploader.localfs;
 
 final class LocalFileSystemConstantsTest {
   public static final String TEST_DATA_PATH =
-      "/__main__/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
+      "/org_apache_heron/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
 
   private LocalFileSystemConstantsTest() {
   }

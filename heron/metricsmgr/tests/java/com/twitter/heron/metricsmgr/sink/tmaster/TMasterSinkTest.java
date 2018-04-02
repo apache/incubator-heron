@@ -86,7 +86,8 @@ public class TMasterSinkTest {
 
     String filePath =
         Paths.get(runFiles,
-                  "/__main__/heron/config/src/yaml/conf/test/test_heron_internals.yaml").toString();
+                  "/org_apache_heron/heron/config/src/yaml/conf/test/test_heron_internals.yaml")
+             .toString();
     SystemConfig.Builder sb = SystemConfig.newBuilder(true)
         .putAll(filePath, true)
         .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 1);
