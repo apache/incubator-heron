@@ -13,6 +13,6 @@ eco_deps = [
 
 java_library(
     name = "eco-java",
-    srcs = glob(["com/twitter/heron/eco/**/*.java"]),
+    srcs = glob(["org/apache/heron/eco/**/*.java"]),
     deps = eco_deps
 )

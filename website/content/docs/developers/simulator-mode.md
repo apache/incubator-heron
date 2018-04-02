@@ -17,7 +17,7 @@ in ``storm-compatibility-unshaded_deploy.jar``  (under ``bazel-bin/storm-compati
 For example:
 
 ```java
-import com.twitter.heron.simulator.Simulator;
+import org.apache.heron.simulator.Simulator;
 Simulator simulator = new Simulator();
 ```
 

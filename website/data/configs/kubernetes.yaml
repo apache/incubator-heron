@@ -244,15 +244,15 @@ configfiles:
   configs:
   - name: heron.class.packing.algorithm
     description: Packing algorithm for packing instances into containers
-    default: com.twitter.heron.packing.roundrobin.RoundRobinPacking
+    default: org.apache.heron.packing.roundrobin.RoundRobinPacking
 - file: scheduler
   configs:
   - name: heron.class.scheduler
     description: scheduler class for distributing the topology for execution
-    default: com.twitter.heron.scheduler.kubernetes.KubernetesScheduler
+    default: org.apache.heron.scheduler.kubernetes.KubernetesScheduler
   - name: heron.class.launcher
     description: launcher class for submitting and launching the topology
-    default: com.twitter.heron.scheduler.kubernetes.KubernetesLauncher
+    default: org.apache.heron.scheduler.kubernetes.KubernetesLauncher
   - name: heron.directory.sandbox.java.home
     description: location of java - pick it up from shell environment
     default: $JAVA_HOME
@@ -268,12 +268,12 @@ configfiles:
   configs:
   - name: heron.statefulstorage.classname
     description: The type of storage to be used for state checkpointing
-    default: com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorage
+    default: org.apache.heron.statefulstorage.localfs.LocalFileSystemStorage
 - file: statemgr
   configs:
   - name: heron.class.state.manager
     description: local state manager class for managing state in a persistent fashion
-    default: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+    default: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
   - name: heron.statemgr.connection.string
     description: local state manager connection string
   - name: heron.statemgr.root.path
@@ -298,7 +298,7 @@ configfiles:
   configs:
   - name: heron.class.uploader
     description: uploader class for transferring the topology files (jars, tars, PEXes, etc.) to storage
-    default: com.twitter.heron.uploader.s3.S3Uploader
+    default: org.apache.heron.uploader.s3.S3Uploader
   - name: heron.uploader.s3.bucket
     description: S3 bucket in which topology assets will be stored (if AWS S3 is being used)
   - name: heron.uploader.s3.access_key

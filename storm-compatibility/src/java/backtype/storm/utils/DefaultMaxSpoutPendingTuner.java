@@ -22,7 +22,7 @@ package backtype.storm.utils;
  * This is a class that helps to auto tune the max spout pending value
  */
 public class DefaultMaxSpoutPendingTuner {
-  private com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner delegate;
+  private org.apache.heron.api.utils.DefaultMaxSpoutPendingTuner delegate;
 
   /**
    * Conv constructor when initing from a non-set initial value
@@ -33,7 +33,7 @@ public class DefaultMaxSpoutPendingTuner {
 
   public DefaultMaxSpoutPendingTuner(Long maxSpoutPending, float autoTuneFactor,
                                      double progressBound) {
-    delegate = new com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner(maxSpoutPending,
+    delegate = new org.apache.heron.api.utils.DefaultMaxSpoutPendingTuner(maxSpoutPending,
         autoTuneFactor,
         progressBound);
   }

@@ -20,4 +20,4 @@ rm -f heron-storm.jar
 
 # Verify storm and heron bolts compile with heron-storm.jar
 scalac -cp bazel-genfiles/./storm-compatibility/src/java/heron-storm.jar \
-  $dir/com/twitter/heron/examples/*.scala
+  $dir/org/apache/heron/examples/*.scala

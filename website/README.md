@@ -88,9 +88,9 @@ one can use `grep` command to find those parent webpages.
 
 ## Publishing the Site
 
-The content on the [twitter.github.io/heron](http://twitter.github.io/heron)
+The content on the [https://apache.github.io/incubator-heron/](https://apache.github.io/incubator-heron/)
 website is what is committed on the [gh-pages
-branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
+branch](https://github.org/apache/heron/tree/gh-pages) of the Heron repo. To
 simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
 submodule that points to the `gh-pages` branch of the heron repo.

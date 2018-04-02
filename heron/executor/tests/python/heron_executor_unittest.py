@@ -101,7 +101,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
            "-Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true " \
-           "-cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager " \
+           "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
            "--id=metricsmgr-%d --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ --topology-id=topid " \
            "--system-config-file=%s --override-config-file=%s --sink-config-file=metrics_sinks_config_file" %\
@@ -114,7 +114,7 @@ class HeronExecutorTest(unittest.TestCase):
              "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
              "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
              "-Xloggc:log-files/gc.metricscache.log -Djava.net.preferIPv4Stack=true " \
-             "-cp metricscachemgr_classpath com.twitter.heron.metricscachemgr.MetricsCacheManager " \
+             "-cp metricscachemgr_classpath org.apache.heron.metricscachemgr.MetricsCacheManager " \
              "--metricscache_id metricscache-0 --master_port metricscachemgr_masterport " \
              "--stats_port metricscachemgr_statsport --topology_name topname --topology_id topid " \
              "--system_config_file %s --override_config_file %s " \
@@ -130,7 +130,7 @@ class HeronExecutorTest(unittest.TestCase):
              "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
              "-Xloggc:log-files/gc.healthmgr.log -Djava.net.preferIPv4Stack=true " \
              "-cp scheduler_classpath:healthmgr_classpath " \
-             "com.twitter.heron.healthmgr.HealthManager --cluster cluster --role role " \
+             "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
              "--environment environ --topology_name topname --verbose"
 
   def get_expected_instance_command(component_name, instance_id, container_id):
@@ -144,7 +144,7 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 " \
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
-           "com.twitter.heron.instance.HeronInstance -topology_name topname -topology_id topid -instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
+           "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid -instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
            "-stmgr_port tmaster_controller_port -metricsmgr_port metricsmgr_port -system_config_file %s -override_config_file %s" \
            % (instance_name, instance_name, component_name, instance_id,
               container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)

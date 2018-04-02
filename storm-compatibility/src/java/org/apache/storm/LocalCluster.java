@@ -26,7 +26,7 @@ import org.apache.storm.generated.NotAliveException;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.utils.ConfigUtils;
 
-import com.twitter.heron.simulator.Simulator;
+import org.apache.heron.simulator.Simulator;
 
 @SuppressWarnings("rawtypes")
 public class LocalCluster implements ILocalCluster {

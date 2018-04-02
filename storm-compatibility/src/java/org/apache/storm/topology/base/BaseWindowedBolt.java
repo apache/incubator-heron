@@ -31,14 +31,14 @@ import org.apache.storm.topology.TupleFieldTimestampExtractor;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.windowing.TimestampExtractor;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
+import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.api.tuple.Tuple;
 
 public abstract class BaseWindowedBolt implements IWindowedBolt {
   private static final long serialVersionUID = -3998164228343123590L;
-  protected final transient com.twitter.heron.api.windowing.WindowingConfigs windowConfiguration;
-  protected com.twitter.heron.api.windowing.TimestampExtractor timestampExtractor;
+  protected final transient org.apache.heron.api.windowing.WindowingConfigs windowConfiguration;
+  protected org.apache.heron.api.windowing.TimestampExtractor timestampExtractor;
 
   /**
    * Holds a count value for count based windows and sliding intervals.
@@ -175,7 +175,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   protected BaseWindowedBolt() {
-    windowConfiguration = new com.twitter.heron.api.windowing.WindowingConfigs();
+    windowConfiguration = new org.apache.heron.api.windowing.WindowingConfigs();
   }
 
   private BaseWindowedBolt withWindowLength(Count count) {
@@ -308,7 +308,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
           "Window is already configured with a timestamp extractor: " + timestampExtractor);
     }
 
-    this.timestampExtractor = new com.twitter.heron.api.windowing.TimestampExtractor() {
+    this.timestampExtractor = new org.apache.heron.api.windowing.TimestampExtractor() {
 
       @Override
       public long extractTimestamp(Tuple tuple) {
@@ -325,7 +325,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
       @Override
       public long extractTimestamp(org.apache.storm.tuple.Tuple tuple) {
 
-        return timestampExtractor.extractTimestamp(new com.twitter.heron.api.tuple.Tuple() {
+        return timestampExtractor.extractTimestamp(new org.apache.heron.api.tuple.Tuple() {
 
           @Override
           public int size() {

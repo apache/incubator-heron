@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Originally derived from:
-# https://github.com/twitter/heron/blob/master/tools/rules/pex_rules.bzl
+# https://github.org/apache/heron/blob/master/tools/rules/pex_rules.bzl
 
 """Python pex rules for Bazel
 

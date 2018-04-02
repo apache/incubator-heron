@@ -16,13 +16,13 @@ block](https://maven.apache.org/pom.html#Dependencies).
 
 ```xml
 <dependency>
-  <groupId>com.twitter.heron</groupId>
+  <groupId>org.apache.heron</groupId>
   <artifactId>heron-api</artifactId>
   <version>{{< heronVersion >}}</version>
   <scope>compile</scope>
 </dependency>
 <dependency>
-  <groupId>com.twitter.heron</groupId>
+  <groupId>org.apache.heron</groupId>
   <artifactId>heron-storm</artifactId>
   <version>{{< heronVersion >}}</version>
   <scope>compile</scope>
@@ -96,7 +96,7 @@ Start Guide](../getting-started) guide:
 ```bash
 $ heron submit local \
   ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
-  com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
+  org.apache.heron.examples.ExclamationTopology \ # The topology's Java class
   ExclamationTopology # The name of the topology
 ```
 

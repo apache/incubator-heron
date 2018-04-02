@@ -29,7 +29,7 @@ public class SpoutFailInfo {
     this.failLatencyMs = failLatencyMs;
   }
 
-  public SpoutFailInfo(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
+  public SpoutFailInfo(org.apache.heron.api.hooks.info.SpoutFailInfo info) {
     this.messageId = info.getMessageId();
     this.spoutTaskId = info.getSpoutTaskId();
     this.failLatencyMs = info.getFailLatency().toMillis();

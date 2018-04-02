@@ -6,7 +6,7 @@ appVersion: VERSION
 icon: https://twitter.github.io/heron/img/HeronTextLogo-small.png
 home: http://heron.io
 sources:
-  - https://github.com/twitter/heron.git
+  - https://github.org/apache/heron.git
 maintainers:
   - name: Karthik Ramasamy
     email: kramasamy@gmail.com
