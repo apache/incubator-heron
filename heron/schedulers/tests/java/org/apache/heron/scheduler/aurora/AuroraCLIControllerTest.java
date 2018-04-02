@@ -24,8 +24,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
-import org.apache.heron.spi.utils.PackingTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -33,6 +31,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
+import org.apache.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

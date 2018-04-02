@@ -30,7 +30,6 @@
  * limitations under the License.
  */
 
-
 package org.apache.heron.api.exception;
 
 public class AlreadyAliveException extends Exception {

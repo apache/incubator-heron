@@ -25,13 +25,13 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.spi.packing.PackingPlan.InstancePlan;
 import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
+import org.apache.heron.spi.packing.PackingPlan.InstancePlan;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Utility methods for common test assertions related to packing

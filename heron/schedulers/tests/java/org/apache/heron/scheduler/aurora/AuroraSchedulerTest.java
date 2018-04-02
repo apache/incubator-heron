@@ -22,20 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.cli.CommandLine;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.utils.topology.TopologyTests;
@@ -51,13 +48,18 @@ import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.PackingTestUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMapOf;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -80,9 +82,9 @@ public class AuroraSchedulerTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    scheduler = Mockito.spy(AuroraScheduler.class);
+    scheduler = spy(AuroraScheduler.class);
     doReturn(new HashMap<String, String>())
-        .when(scheduler).createAuroraProperties(Mockito.any(Resource.class));
+        .when(scheduler).createAuroraProperties(any(Resource.class));
   }
 
   @AfterClass
@@ -95,15 +97,15 @@ public class AuroraSchedulerTest {
    */
   @Test
   public void testOnSchedule() throws Exception {
-    AuroraController controller = Mockito.mock(AuroraController.class);
+    AuroraController controller = mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
 
     SchedulerStateManagerAdaptor stateManager = mock(SchedulerStateManagerAdaptor.class);
-    Config runtime = Mockito.mock(Config.class);
+    Config runtime = mock(Config.class);
     when(runtime.get(Key.SCHEDULER_STATE_MANAGER_ADAPTOR)).thenReturn(stateManager);
     when(runtime.getStringValue(Key.TOPOLOGY_NAME)).thenReturn(TOPOLOGY_NAME);
 
-    Config mConfig = Mockito.mock(Config.class);
+    Config mConfig = mock(Config.class);
     PowerMockito.mockStatic(Config.class);
     when(Config.toClusterMode(mConfig)).thenReturn(mConfig);
 
@@ -113,13 +115,13 @@ public class AuroraSchedulerTest {
     scheduler.initialize(mConfig, runtime);
 
     // Fail to schedule due to null PackingPlan
-    Assert.assertFalse(scheduler.onSchedule(null));
+    assertFalse(scheduler.onSchedule(null));
 
     PackingPlan plan = new PackingPlan(PACKING_PLAN_ID, new HashSet<PackingPlan.ContainerPlan>());
     assertTrue(plan.getContainers().isEmpty());
 
     // Fail to schedule due to PackingPlan is empty
-    Assert.assertFalse(scheduler.onSchedule(plan));
+    assertFalse(scheduler.onSchedule(plan));
 
     // Construct valid PackingPlan
     Set<PackingPlan.ContainerPlan> containers = new HashSet<>();
@@ -128,58 +130,58 @@ public class AuroraSchedulerTest {
 
     // Failed to create job via controller
     doReturn(false).when(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(anyMapOf(AuroraField.class, String.class));
     doReturn(true).when(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
-    Assert.assertFalse(scheduler.onSchedule(validPlan));
+    assertFalse(scheduler.onSchedule(validPlan));
 
-    Mockito.verify(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
-    Mockito.verify(stateManager)
+    verify(controller)
+        .createJob(anyMapOf(AuroraField.class, String.class));
+    verify(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     // Happy path
     doReturn(true).when(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(anyMapOf(AuroraField.class, String.class));
     assertTrue(scheduler.onSchedule(validPlan));
 
-    Mockito.verify(controller, Mockito.times(2))
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
-    Mockito.verify(stateManager, Mockito.times(2))
+    verify(controller, times(2))
+        .createJob(anyMapOf(AuroraField.class, String.class));
+    verify(stateManager, times(2))
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }
 
   @Test
   public void testOnKill() throws Exception {
-    Config mockConfig = Mockito.mock(Config.class);
+    Config mockConfig = mock(Config.class);
     PowerMockito.mockStatic(Config.class);
     when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
-    AuroraController controller = Mockito.mock(AuroraController.class);
+    AuroraController controller = mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, mock(Config.class));
 
     // Failed to kill job via controller
     doReturn(false).when(controller).killJob();
-    Assert.assertFalse(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
-    Mockito.verify(controller).killJob();
+    assertFalse(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
+    verify(controller).killJob();
 
     // Happy path
     doReturn(true).when(controller).killJob();
     assertTrue(scheduler.onKill(Scheduler.KillTopologyRequest.getDefaultInstance()));
-    Mockito.verify(controller, Mockito.times(2)).killJob();
+    verify(controller, times(2)).killJob();
   }
 
   @Test
   public void testOnRestart() throws Exception {
-    Config mockConfig = Mockito.mock(Config.class);
+    Config mockConfig = mock(Config.class);
     PowerMockito.mockStatic(Config.class);
     when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
-    AuroraController controller = Mockito.mock(AuroraController.class);
+    AuroraController controller = mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, mock(Config.class));
 
     // Construct the RestartTopologyRequest
     int containerToRestart = 1;
@@ -191,14 +193,14 @@ public class AuroraSchedulerTest {
     // Failed to kill job via controller
     doReturn(false).when(
         controller).restart(containerToRestart);
-    Assert.assertFalse(scheduler.onRestart(restartTopologyRequest));
-    Mockito.verify(controller).restart(containerToRestart);
+    assertFalse(scheduler.onRestart(restartTopologyRequest));
+    verify(controller).restart(containerToRestart);
 
     // Happy path
     doReturn(true).when(
         controller).restart(containerToRestart);
     assertTrue(scheduler.onRestart(restartTopologyRequest));
-    Mockito.verify(controller, Mockito.times(2)).restart(containerToRestart);
+    verify(controller, times(2)).restart(containerToRestart);
   }
 
   @Test
@@ -206,16 +208,16 @@ public class AuroraSchedulerTest {
     final String JOB_LINK_FORMAT = "http://go/${CLUSTER}/${ROLE}/${ENVIRON}/${TOPOLOGY}";
     final String SUBSTITUTED_JOB_LINK = "http://go/local/heron/test/test_topology";
 
-    Config mockConfig = Mockito.mock(Config.class);
+    Config mockConfig = mock(Config.class);
     when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
         .thenReturn(JOB_LINK_FORMAT);
 
     PowerMockito.mockStatic(Config.class);
     when(Config.toClusterMode(mockConfig)).thenReturn(mockConfig);
 
-    AuroraController controller = Mockito.mock(AuroraController.class);
+    AuroraController controller = mock(AuroraController.class);
     doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, mock(Config.class));
 
     PowerMockito.spy(TokenSub.class);
     PowerMockito.doReturn(SUBSTITUTED_JOB_LINK)
@@ -248,7 +250,7 @@ public class AuroraSchedulerTest {
     when(commandLine.getOptionValue("topology_package")).thenReturn("jar");
     when(commandLine.getOptionValue("topology_defn")).thenReturn("/mock/defnFile.defn");
     when(commandLine.getOptionValue("topology_bin")).thenReturn("binaryFile.jar");
-    Config config = Mockito.spy(SubmitterMain.loadConfig(commandLine, topology));
+    Config config = spy(SubmitterMain.loadConfig(commandLine, topology));
 
     AuroraScheduler testScheduler = new AuroraScheduler();
     testScheduler.initialize(config, runtime);

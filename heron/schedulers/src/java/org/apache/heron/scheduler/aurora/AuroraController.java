@@ -16,7 +16,7 @@ package org.apache.heron.scheduler.aurora;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 
 /**
  * Interface that defines how a client interacts with aurora to control the job lifecycle
@@ -32,6 +32,6 @@ public interface AuroraController {
    */
   boolean restart(Integer containerId);
 
-  void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove);
+  void removeContainers(Set<ContainerPlan> containersToRemove);
   Set<Integer> addContainers(Integer count);
 }

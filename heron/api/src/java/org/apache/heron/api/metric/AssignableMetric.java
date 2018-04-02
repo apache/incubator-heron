@@ -30,7 +30,6 @@
  * limitations under the License.
  */
 
-
 package org.apache.heron.api.metric;
 
 public class AssignableMetric<T> implements IMetric<T> {

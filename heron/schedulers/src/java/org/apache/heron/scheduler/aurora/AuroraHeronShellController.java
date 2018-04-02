@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import org.apache.heron.proto.system.PhysicalPlans.StMgr;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
-import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
@@ -116,7 +116,7 @@ class AuroraHeronShellController implements AuroraController {
   }
 
   @Override
-  public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+  public void removeContainers(Set<ContainerPlan> containersToRemove) {
     cliController.removeContainers(containersToRemove);
   }
 

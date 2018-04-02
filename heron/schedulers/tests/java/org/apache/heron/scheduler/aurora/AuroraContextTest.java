@@ -13,11 +13,12 @@
 // limitations under the License.
 package org.apache.heron.scheduler.aurora;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+
+import static org.junit.Assert.assertEquals;
 
 public class AuroraContextTest {
 
@@ -28,7 +29,7 @@ public class AuroraContextTest {
         .put(AuroraContext.JOB_TEMPLATE, auroraTemplate)
         .put(Key.HERON_CONF, "/test")
         .build();
-    Assert.assertEquals("Expected to use value from JOB_TEMPLATE config",
+    assertEquals("Expected to use value from JOB_TEMPLATE config",
         auroraTemplate, AuroraContext.getHeronAuroraPath(config));
   }
 
@@ -37,7 +38,7 @@ public class AuroraContextTest {
     Config config = Config.newBuilder()
         .put(Key.HERON_CONF, "/test")
         .build();
-    Assert.assertEquals("Expected to use heron_conf/heron.aurora", "/test/heron.aurora",
+    assertEquals("Expected to use heron_conf/heron.aurora", "/test/heron.aurora",
         AuroraContext.getHeronAuroraPath(config));
   }
 }

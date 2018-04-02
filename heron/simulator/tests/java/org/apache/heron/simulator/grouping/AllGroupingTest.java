@@ -18,11 +18,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.heron.proto.system.HeronTuples.HeronDataTuple;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.apache.heron.proto.system.HeronTuples.HeronDataTuple;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * AllGrouping Tester.
@@ -51,10 +53,10 @@ public class AllGroupingTest {
     for (int i = 0; i < 1000; ++i) {
       HeronDataTuple dummy = HeronDataTuple.getDefaultInstance();
       List<Integer> dest = g.getListToSend(dummy);
-      Assert.assertEquals(dest.size(), taskIds.size());
+      assertEquals(dest.size(), taskIds.size());
       Collections.sort(dest);
       for (int j = 0; j < taskIds.size(); ++j) {
-        Assert.assertEquals(taskIds.get(j), dest.get(j));
+        assertEquals(taskIds.get(j), dest.get(j));
       }
     }
   }

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 import org.apache.heron.spi.utils.ShellUtils;
 
 /**
@@ -98,7 +98,7 @@ class AuroraCLIController implements AuroraController {
   }
 
   @Override
-  public void removeContainers(Set<PackingPlan.ContainerPlan> containersToRemove) {
+  public void removeContainers(Set<ContainerPlan> containersToRemove) {
     String instancesToKill = getInstancesIdsToKill(containersToRemove);
     //aurora job kill <cluster>/<role>/<env>/<name>/<instance_ids>
     List<String> auroraCmd = new ArrayList<>(Arrays.asList(
@@ -171,9 +171,9 @@ class AuroraCLIController implements AuroraController {
     return runProcess(auroraCmd, null, null);
   }
 
-  private static String getInstancesIdsToKill(Set<PackingPlan.ContainerPlan> containersToRemove) {
+  private static String getInstancesIdsToKill(Set<ContainerPlan> containersToRemove) {
     StringBuilder ids = new StringBuilder();
-    for (PackingPlan.ContainerPlan containerPlan : containersToRemove) {
+    for (ContainerPlan containerPlan : containersToRemove) {
       if (ids.length() > 0) {
         ids.append(",");
       }
