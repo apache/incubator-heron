@@ -134,7 +134,8 @@ public class S3UploaderTest {
     String expectedBucket = "bucket";
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
-    when(mockS3Client.putObject(eq(expectedBucket), eq(expectedRemotePath), any(File.class))).thenThrow(SdkClientException.class);
+    when(mockS3Client.putObject(eq(expectedBucket), eq(expectedRemotePath), any(File.class)))
+        .thenThrow(SdkClientException.class);
     uploader.uploadPackage();
   }
 
