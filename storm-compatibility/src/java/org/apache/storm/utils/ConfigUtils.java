@@ -174,19 +174,21 @@ public final class ConfigUtils {
    * @param heron the heron config object to receive the results.
    */
   private static void doTopologyLevelTranslation(Config heronConfig) {
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
-      Integer nAckers =
-          Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
-      if (nAckers > 0) {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+    if (!heronConfig.containsKey(Config.TOPOLOGY_RELIABILITY_MODE)) {
+      if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
+        Integer nAckers =
+            Utils.getInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
+        if (nAckers > 0) {
+          com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+              com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+        } else {
+          com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+              com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+        }
       } else {
         com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+            com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
       }
-    } else {
-      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
   }
 }

@@ -25,6 +25,7 @@ import org.apache.storm.generated.StormTopology;
 
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.WindowedBoltExecutor;
+import com.twitter.heron.api.topology.IStatefulComponent;
 
 public class TopologyBuilder {
   private com.twitter.heron.api.topology.TopologyBuilder delegate =
@@ -40,9 +41,14 @@ public class TopologyBuilder {
   }
 
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
-    IRichBoltDelegate boltImpl = new IRichBoltDelegate(bolt);
-    com.twitter.heron.api.topology.BoltDeclarer declarer =
-        delegate.setBolt(id, boltImpl, parallelismHint);
+    com.twitter.heron.api.bolt.IRichBolt boltImpl;
+    if (bolt instanceof IStatefulComponent) {
+      boltImpl = new IRichStatefulBoltDelagate(bolt);
+    } else {
+      boltImpl = new IRichBoltDelegate(bolt);
+    }
+    com.twitter.heron.api.topology.BoltDeclarer declarer
+        = delegate.setBolt(id, boltImpl, parallelismHint);;
     return new BoltDeclarerImpl(declarer);
   }
 
@@ -72,9 +78,14 @@ public class TopologyBuilder {
   }
 
   public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
-    IRichSpoutDelegate spoutImpl = new IRichSpoutDelegate(spout);
-    com.twitter.heron.api.topology.SpoutDeclarer declarer =
-        delegate.setSpout(id, spoutImpl, parallelismHint);
+    com.twitter.heron.api.spout.IRichSpout spoutImpl;
+    if (spout instanceof IStatefulComponent) {
+      spoutImpl = new IRichStatefulSpoutDelegate(spout);
+    } else {
+      spoutImpl = new IRichSpoutDelegate(spout);
+    }
+    com.twitter.heron.api.topology.SpoutDeclarer declarer
+        = delegate.setSpout(id, spoutImpl, parallelismHint);
     return new SpoutDeclarerImpl(declarer);
   }
 }
