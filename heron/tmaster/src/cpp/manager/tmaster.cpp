@@ -592,12 +592,7 @@ bool TMaster::UpdateRuntimeConfig(const ComponentConfigMap& _config,
   DCHECK(current_pplan_->topology().IsInitialized());
 
   LOG(INFO) << "Update runtime config: ";
-  for (auto iter = _config.begin(); iter != _config.end(); ++iter) {
-    LOG(INFO) << iter->first << " =>";
-    for (auto i = iter->second.begin(); i != iter->second.end(); ++i) {
-      LOG(INFO) << i->first << " : " << i->second;
-    }
-  }
+  LogConfig(_config);
 
   // Parse and set the new configs
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -1040,6 +1035,15 @@ bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) cons
   }
 
   return true;
+}
+
+void TMaster::LogConfig(const ComponentConfigMap& _config) {
+  for (auto iter = _config.begin(); iter != _config.end(); ++iter) {
+    LOG(INFO) << iter->first << " =>";
+    for (auto i = iter->second.begin(); i != iter->second.end(); ++i) {
+      LOG(INFO) << i->first << " : " << i->second;
+    }
+  }
 }
 
 }  // namespace tmaster

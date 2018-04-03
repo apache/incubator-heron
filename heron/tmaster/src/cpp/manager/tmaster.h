@@ -123,6 +123,9 @@ class TMaster {
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
 
+  // Log config object
+  void LogConfig(const ComponentConfigMap& _config);
+
   // Big brother function that does the assignment to the workers
   // If _new_stmgr is null, this means that there was a plan
   // existing, but a _new_stmgr joined us. So redo his part

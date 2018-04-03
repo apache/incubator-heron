@@ -137,7 +137,7 @@ class TopologyConfigHelper {
   static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
 
   // Get runtime config key
-  static std::string GetRuntimeConfigKey(const std::string key);
+  static std::string GetRuntimeConfigKey(const std::string& key);
 
   // Convert configs in map to runtime configs (append runtime postfix)
   static void ConvertToRuntimeConfigs(const std::map<std::string, std::string>& _origin,

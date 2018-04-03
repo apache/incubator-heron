@@ -413,7 +413,7 @@ bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology
                                TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, false);
 }
 
-std::string TopologyConfigHelper::GetRuntimeConfigKey(const std::string _key) {
+std::string TopologyConfigHelper::GetRuntimeConfigKey(const std::string& _key) {
   return _key + RUNTIME_CONFIG_POSTFIX;
 }
 
