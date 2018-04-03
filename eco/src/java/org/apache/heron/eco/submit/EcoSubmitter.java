@@ -13,11 +13,12 @@
 //  limitations under the License.
 package org.apache.heron.eco.submit;
 
-import org.apache.heron.api.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
+
+import org.apache.heron.api.Config;
 
 public class EcoSubmitter {
 
