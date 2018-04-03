@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.junit.Test;
+
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.streamlet.Config;
@@ -37,7 +39,6 @@ import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

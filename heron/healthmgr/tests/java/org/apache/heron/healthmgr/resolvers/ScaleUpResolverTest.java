@@ -29,6 +29,7 @@ import com.microsoft.dhalion.resolver.Action;
 import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
@@ -38,7 +39,6 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.common.utils.topology.TopologyTests;
 
 import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;

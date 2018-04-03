@@ -20,10 +20,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.heron.api.Config;
-import org.apache.heron.api.generated.TopologyAPI;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.apache.heron.api.Config;
+import org.apache.heron.api.generated.TopologyAPI;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
