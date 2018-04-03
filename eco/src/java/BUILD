@@ -39,6 +39,15 @@ java_library(
 )
 
 java_library(
+    name = "eco-heron-builder-java",
+    srcs = glob(["com/twitter/heron/eco/builder/heron/*.java"]),
+    deps = eco_deps + [
+        ":eco-builder-java",
+        ":eco-defs-java",
+    ],
+)
+
+java_library(
     name = "eco-submit-java",
     srcs = glob(["com/twitter/heron/eco/submit/*.java"]),
     deps = eco_deps, 
@@ -51,6 +60,7 @@ java_library(
         ":eco-defs-java",
         ":eco-parser-java",
         ":eco-builder-java",
+        ":eco-heron-builder-java",
         ":eco-storm-builder-java",
         ":eco-submit-java",
     ],

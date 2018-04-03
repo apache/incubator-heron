@@ -11,21 +11,23 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.builder;
+package com.twitter.heron.eco.builder.heron;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.grouping.CustomStreamGrouping;
-import com.twitter.heron.topology.BoltDeclarer;
-import com.twitter.heron.topology.IBasicBolt;
-import com.twitter.heron.topology.IRichBolt;
-import com.twitter.heron.topology.IWindowedBolt;
-import com.twitter.heron.topology.TopologyBuilder;
-import com.twitter.heron.tuple.Fields;
-import com.twitter.heron.utils.Utils;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.BoltDeclarer;
+import com.twitter.heron.api.bolt.IBasicBolt;
+import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.utils.Utils;
+
+import com.twitter.heron.eco.builder.ObjectBuilder;
 
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;

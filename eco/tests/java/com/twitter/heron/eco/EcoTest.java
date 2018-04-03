@@ -86,7 +86,7 @@ public class EcoTest {
     verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
         any(ObjectBuilder.class));
     verify(mockTopologyBuilder).createTopology();
-    verify(mockEcoSubmitter).submitTopology(any(String.class), any(Config.class),
+    verify(mockEcoSubmitter).submitStormTopology(any(String.class), any(Config.class),
         any(StormTopology.class));
   }
 }

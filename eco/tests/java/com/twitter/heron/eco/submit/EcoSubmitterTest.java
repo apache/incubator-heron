@@ -48,7 +48,7 @@ public class EcoSubmitterTest {
     PowerMockito.doNothing().when(StormSubmitter.class, "submitTopology",
         any(String.class), any(Config.class), any(StormTopology.class));
 
-    subject.submitTopology("name", config, topology);
+    subject.submitStormTopology("name", config, topology);
     PowerMockito.verifyStatic(times(1));
     StormSubmitter.submitTopology(anyString(), any(Config.class), any(StormTopology.class));
 

@@ -11,15 +11,20 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.builder;
+package com.twitter.heron.eco.builder.heron;
 
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Logger;
 
-import com.twitter.heron.topology.TopologyBuilder;
-
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.topology.TopologyBuilder;
+
+import com.twitter.heron.eco.builder.BoltBuilder;
+import com.twitter.heron.eco.builder.ConfigBuilder;
+import com.twitter.heron.eco.builder.ComponentBuilder;
+import com.twitter.heron.eco.builder.ObjectBuilder;
+
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 
