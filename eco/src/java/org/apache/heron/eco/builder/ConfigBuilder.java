@@ -16,7 +16,6 @@ package org.apache.heron.eco.builder;
 import java.util.List;
 import java.util.Map;
 
-
 import org.apache.heron.api.Config;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
