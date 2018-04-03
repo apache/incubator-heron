@@ -22,9 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.hooks.ITaskHookDelegate;
-
 import org.apache.heron.api.Config;
+import org.apache.storm.hooks.ITaskHookDelegate;
 
 public final class ConfigUtils {
 
