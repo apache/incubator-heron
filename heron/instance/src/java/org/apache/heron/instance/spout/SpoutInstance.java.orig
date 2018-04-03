@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
+<<<<<<< HEAD:heron/instance/src/java/org/apache/heron/instance/spout/SpoutInstance.java
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.metric.GlobalMetrics;
@@ -47,6 +48,33 @@ import org.apache.heron.instance.IInstance;
 import org.apache.heron.instance.util.InstanceUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.HeronTuples;
+=======
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.metric.GlobalMetrics;
+import com.twitter.heron.api.serializer.IPluggableSerializer;
+import com.twitter.heron.api.spout.ISpout;
+import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.state.State;
+import com.twitter.heron.api.topology.IStatefulComponent;
+import com.twitter.heron.api.topology.IUpdatable;
+import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.metrics.FullSpoutMetrics;
+import com.twitter.heron.common.utils.metrics.SpoutMetrics;
+import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
+import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
+import com.twitter.heron.common.utils.topology.TopologyContextImpl;
+import com.twitter.heron.instance.IInstance;
+import com.twitter.heron.instance.util.InstanceUtils;
+import com.twitter.heron.proto.ckptmgr.CheckpointManager;
+import com.twitter.heron.proto.system.HeronTuples;
+>>>>>>> 860a926273caa37e2fa7d07ad7a27e2cac097f08:heron/instance/src/java/com/twitter/heron/instance/spout/SpoutInstance.java
 
 public class SpoutInstance implements IInstance {
   private static final Logger LOG = Logger.getLogger(SpoutInstance.class.getName());

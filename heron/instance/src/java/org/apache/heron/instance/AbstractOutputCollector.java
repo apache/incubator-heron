@@ -38,6 +38,7 @@ public class AbstractOutputCollector {
   protected final ComponentMetrics metrics;
   protected final boolean ackEnabled;
   private long totalTuplesEmitted;
+  private long totalBytesEmitted;
   private PhysicalPlanHelper helper;
 
   /**
@@ -52,6 +53,7 @@ public class AbstractOutputCollector {
     this.serializer = serializer;
     this.metrics = metrics;
     this.totalTuplesEmitted = 0;
+    this.totalBytesEmitted = 0;
     this.helper = helper;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
@@ -117,6 +119,10 @@ public class AbstractOutputCollector {
     return totalTuplesEmitted;
   }
 
+  public long getTotalBytesEmitted() {
+    return totalBytesEmitted;
+  }
+
   protected HeronTuples.HeronDataTuple.Builder initTupleBuilder(String streamId,
                                                                 List<Object> tuple,
                                                                 Integer emitDirectTaskId) {
@@ -168,6 +174,7 @@ public class AbstractOutputCollector {
     // submit to outputter
     outputter.addDataTuple(streamId, bldr, tupleSizeInBytes);
     totalTuplesEmitted++;
+    totalBytesEmitted += tupleSizeInBytes;
 
     // Update metrics
     metrics.emittedTuple(streamId);
