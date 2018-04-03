@@ -21,11 +21,6 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import org.apache.distributedlog.AppendOnlyStreamWriter;
-import org.apache.distributedlog.DistributedLogConfiguration;
-import org.apache.distributedlog.api.DistributedLogManager;
-import org.apache.distributedlog.api.namespace.Namespace;
-import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +29,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.apache.distributedlog.AppendOnlyStreamWriter;
+import org.apache.distributedlog.DistributedLogConfiguration;
+import org.apache.distributedlog.api.DistributedLogManager;
+import org.apache.distributedlog.api.namespace.Namespace;
+import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
