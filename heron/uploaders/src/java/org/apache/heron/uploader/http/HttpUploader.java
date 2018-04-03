@@ -24,6 +24,11 @@ import java.util.logging.Logger;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Context;
+import org.apache.heron.spi.common.Key;
+import org.apache.heron.spi.uploader.IUploader;
+import org.apache.heron.spi.uploader.UploaderException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -35,12 +40,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Context;
-import org.apache.heron.spi.common.Key;
-import org.apache.heron.spi.uploader.IUploader;
-import org.apache.heron.spi.uploader.UploaderException;
 
 /**
  * Provides a basic uploader class for uploading topology packages via Http.
