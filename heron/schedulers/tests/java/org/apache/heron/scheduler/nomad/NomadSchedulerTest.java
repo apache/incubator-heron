@@ -26,13 +26,6 @@ import com.hashicorp.nomad.apimodel.Task;
 import com.hashicorp.nomad.apimodel.TaskGroup;
 import com.hashicorp.nomad.javasdk.NomadApiClient;
 
-import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.proto.scheduler.Scheduler;
-import org.apache.heron.scheduler.utils.SchedulerUtils;
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Key;
-import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.spi.packing.Resource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,6 +36,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.proto.scheduler.Scheduler;
+import org.apache.heron.scheduler.utils.SchedulerUtils;
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Key;
+import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.Resource;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

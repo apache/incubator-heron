@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.mesos.SchedulerDriver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,6 +35,7 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
+import org.apache.mesos.SchedulerDriver;
 
 
 public class MesosSchedulerTest {

@@ -14,9 +14,10 @@
 
 package org.apache.heron.scheduler.mesos.framework;
 
-import org.apache.mesos.Protos;
 import org.junit.Assert;
 import org.junit.Test;
+
+import org.apache.mesos.Protos;
 
 
 public class TaskResourcesTest {
