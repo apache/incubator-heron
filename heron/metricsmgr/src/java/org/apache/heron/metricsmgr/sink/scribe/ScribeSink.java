@@ -26,6 +26,13 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.heron.common.basics.SysUtils;
+import org.apache.heron.common.basics.TypeUtils;
+import org.apache.heron.metricsmgr.MetricsUtil;
+import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
+import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
+import org.apache.heron.spi.metricsmgr.sink.IMetricsSink;
+import org.apache.heron.spi.metricsmgr.sink.SinkContext;
 import org.apache.scribe.LogEntry;
 import org.apache.scribe.ResultCode;
 import org.apache.scribe.scribe;
@@ -34,14 +41,6 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
-
-import org.apache.heron.common.basics.SysUtils;
-import org.apache.heron.common.basics.TypeUtils;
-import org.apache.heron.metricsmgr.MetricsUtil;
-import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
-import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
-import org.apache.heron.spi.metricsmgr.sink.IMetricsSink;
-import org.apache.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * A metrics sink that writes to Scribe with format required by Twitter Cuckoo
