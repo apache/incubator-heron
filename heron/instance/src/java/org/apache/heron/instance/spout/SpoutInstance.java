@@ -33,6 +33,7 @@ import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
+import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SlaveLooper;
