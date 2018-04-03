@@ -30,12 +30,11 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Context;
 import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
-
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Context;
 
 /**
  * Mesos Framework, communicating with Mesos Master, to do the actual scheduling.
