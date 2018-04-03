@@ -94,8 +94,12 @@ public class EcoTopologyDefinition {
   }
 
   public String getName() {
-
     return name;
+  }
+
+  public String getType() {
+    Object obj = config.getOrDefault("topology.type", null);
+    return obj == null ? null : obj.toString();
   }
 
   public void setName(String name) {
