@@ -48,7 +48,6 @@ typedef std::map<std::string, std::string> ConfigValueMap;
 typedef std::map<std::string, std::map<std::string, std::string>> ComponentConfigMap;
 
 const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
-const sp_string RUNTIME_CONFIG_POSTFIX = ":runtime";
 
 class TMaster {
  public:
@@ -191,10 +190,6 @@ class TMaster {
   void KillContainer(const std::string& host_name,
                      sp_int32 port,
                      const std::string& stmgr_id);
-
-  void AppendPostfix(const ConfigValueMap& _origin,
-                     const std::string& post_fix,
-                     ConfigValueMap& _update);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;

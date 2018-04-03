@@ -1867,6 +1867,62 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   TearCommonResources(common);
 }
 
+// Test PatchPhysicalPlanWithHydratedTopology function
+TEST(StMgr, test_PatchPhysicalPlanWithHydratedTopology) {
+  int32_t nSpouts = 2;
+  int32_t nSpoutInstances = 1;
+  int32_t nBolts = 3;
+  int32_t nBoltInstances = 1;
+  heron::proto::api::Topology* topology =
+      GenerateDummyTopology("topology_name",
+                            "topology_id",
+                            nSpouts, nSpoutInstances, nBolts, nBoltInstances,
+                            heron::proto::api::SHUFFLE);
+
+  heron::proto::system::PhysicalPlan* pplan = new heron::proto::system::PhysicalPlan();
+  pplan->mutable_topology()->CopyFrom(*topology);
+
+  // Verify initial values
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        *topology,
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(),
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");
+  // Change runtime data in PhysicalPlan and patch it
+  std::map<std::string, std::string> update;
+  update["conf.new"] = "test";
+  update[heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS] = "10";
+  heron::config::TopologyConfigHelper::SetTopologyConfig(pplan->mutable_topology(), update);
+
+  // Verify updated runtime data is still in the patched physical plan
+  // The topology in the physical plan should have the old name
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        *topology,
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");  // The internal topology object should still have the initial value
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(),
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "10");  // The topology object in the physical plan should have the new value
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(), "conf.new", ""),
+    "test");  // The topology object in the physical plan should have the new config
+
+  delete pplan;
+}
+
 int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   std::cout << "Current working directory (to find stmgr logs) "
