@@ -50,7 +50,7 @@ genrule(
         "make",
         "mkdir -p $$INSTALL_DIR/include $$INSTALL_DIR/lib",
         "cp include/libunwind-common.h include/libunwind-coredump.h include/libunwind-dynamic.h $$INSTALL_DIR/include",
-        "cp include/libunwind.h include/libunwind-ptrace.h include/libunwind-x86_64.h $$INSTALL_DIR/include",
+        "cp include/libunwind.h include/libunwind-ptrace.h include/libunwind-x86_64.h include/unwind.h $$INSTALL_DIR/include",
         "cp src/.libs/libunwind.a src/.libs/libunwind-coredump.a src/.libs/libunwind-ptrace.a $$INSTALL_DIR/lib",
         "cp src/.libs/libunwind-setjmp.a src/.libs/libunwind-x86_64.a $$INSTALL_DIR/lib",
         "rm -rf $$TMP_DIR",
