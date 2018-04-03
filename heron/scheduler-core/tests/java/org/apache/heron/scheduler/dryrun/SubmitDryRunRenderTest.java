@@ -19,16 +19,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.common.Config;
