@@ -74,6 +74,8 @@ class SpoutInstance : public InstanceBase {
   int maxWriteBufferSize_;
   // This is the max time to spend in emitting tuple in one go
   int maxEmitBatchIntervalMs_;
+  // This is the max number of bytes to emit in one go
+  int maxEmitBatchSize_;
 };
 
 }  // namespace instance

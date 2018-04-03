@@ -216,6 +216,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The maximum time in ms for an spout instance to emit tuples per attempt
   int GetHeronInstanceEmitBatchTimeMs();
 
+  // The maximum number of bytes for an spout instance to emit tuples per attempt
+  int GetHeronInstanceEmitBatchSize();
+
   // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
   int GetHeronInstanceSetDataTupleCapacity();
 
