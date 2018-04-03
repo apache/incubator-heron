@@ -32,6 +32,7 @@ import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.scheduler.utils.SubmitterUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
+import org.apache.heron.spi.common.Key;
 
 public final class ConfigUtils {
 
