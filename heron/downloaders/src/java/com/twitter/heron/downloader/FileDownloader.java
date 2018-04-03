@@ -19,7 +19,7 @@ import java.nio.file.Path;
 
 /**
  * Used to download files via heron_downloader that has a URI prefix of "file://"
- * E.g. ./heron_dowloader file:///foo/bar /path/location
+ * E.g. ./heron_downloader file:///foo/bar /path/location
  */
 public class FileDownloader implements Downloader {
   @Override

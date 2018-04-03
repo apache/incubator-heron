@@ -46,7 +46,7 @@ cc_library(
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
     deps = [
-        "//third_party/libevent:libevent-cxx",
+        "@org_libevent_libevent//:libevent",
         "//heron/common/src/cpp/threads:threads-cxx",
         "//heron/common/src/cpp/errors:errors-cxx",
         "//heron/common/src/cpp/basics:basics-cxx",

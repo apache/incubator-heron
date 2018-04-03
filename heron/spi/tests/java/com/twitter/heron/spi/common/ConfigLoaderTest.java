@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 @PrepareForTest(ConfigLoader.class)
 public class ConfigLoaderTest {
   private static final String TEST_DATA_PATH =
-      "/__main__/heron/spi/tests/java/com/twitter/heron/spi/common/testdata";
+      "/org_apache_heron/heron/spi/tests/java/com/twitter/heron/spi/common/testdata";
 
   private final String heronHome =
       Paths.get(System.getenv("JAVA_RUNFILES"), TEST_DATA_PATH).toString();

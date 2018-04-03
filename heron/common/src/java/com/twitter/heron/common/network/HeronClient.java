@@ -33,7 +33,7 @@ import com.twitter.heron.common.basics.NIOLooper;
 /**
  * Implements this class could handle some following socket related behaviors:
  * 1. handleRead(SelectableChannel), which read data from a socket and convert into incomingPacket.
- * It could handle the conditions of closedConnection, normal Reading and partial Reading. When a
+ * It could handle the conditions of closedConnection, normal Reading and partial Reading. When an
  * incomingPacket is read, it will be pass to handlePacket(), which will convert incomingPackets to
  * messages and call onIncomingMessage(message), which should be implemented by its child class.
  * <p>
