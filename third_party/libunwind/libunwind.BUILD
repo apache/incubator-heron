@@ -47,7 +47,7 @@ genrule(
         "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-config.patch)",
         "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-cache.patch)",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
-        "make install",
+        'make install SUBDIRS="src tests"',
         "rm -rf $$TMP_DIR",
     ]),
 )
