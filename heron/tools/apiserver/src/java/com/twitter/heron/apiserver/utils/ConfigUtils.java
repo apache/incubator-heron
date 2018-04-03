@@ -32,6 +32,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.SubmitterUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigLoader;
+import com.twitter.heron.spi.common.Key;
 
 public final class ConfigUtils {
 
@@ -62,10 +63,17 @@ public final class ConfigUtils {
         String releaseFile,
         String overrideConfigurationFile) {
     // TODO add release file
-    return ConfigLoader.loadConfig(heronDirectory,
+    Config config = ConfigLoader.loadConfig(heronDirectory,
         heronConfigDirectory,
         releaseFile,
         overrideConfigurationFile);
+    // Put location of the override file in the config so that schedulers invoked by
+    // the apiserver can load the override configs if needed. OVERRIDE_YAML cannot be used
+    // to set this because then the location will get passed on to the heron executors
+    return Config.newBuilder()
+        .putAll(config)
+        .put(Key.APISERVER_OVERRIDE_YAML, overrideConfigurationFile)
+        .build();
   }
 
   public static Config getTopologyConfig(String topologyPackage, String topologyBinaryFile,

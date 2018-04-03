@@ -70,7 +70,8 @@ public class NomadScheduler implements IScheduler {
         .putAll(config)
         .putAll(ConfigLoader.loadConfig(
             Context.heronHome(config), Context.heronConf(config),
-            null, Context.overrideFile(config)))
+            null, Context.apiserverOverrideFile(config) != null
+                ? Context.apiserverOverrideFile(config) : Context.overrideFile(config)))
         .build());
     this.runtimeConfig = runtime;
     this.updateTopologyManager =
