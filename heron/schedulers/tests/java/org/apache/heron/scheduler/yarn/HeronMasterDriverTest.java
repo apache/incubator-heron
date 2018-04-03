@@ -24,16 +24,6 @@ import java.util.concurrent.Future;
 
 import com.google.common.base.Optional;
 
-import org.apache.reef.driver.evaluator.AllocatedEvaluator;
-import org.apache.reef.driver.evaluator.EvaluatorDescriptor;
-import org.apache.reef.driver.evaluator.EvaluatorRequest;
-import org.apache.reef.driver.evaluator.EvaluatorRequestor;
-import org.apache.reef.driver.evaluator.FailedEvaluator;
-import org.apache.reef.evaluator.context.parameters.ContextIdentifier;
-import org.apache.reef.runtime.common.files.REEFFileNames;
-import org.apache.reef.tang.Configuration;
-import org.apache.reef.tang.types.NamedParameterNode;
-import org.apache.reef.wake.time.event.StartTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +40,16 @@ import org.apache.heron.packing.roundrobin.RoundRobinPacking;
 import org.apache.heron.scheduler.SchedulerMain;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.utils.PackingTestUtils;
+import org.apache.reef.driver.evaluator.AllocatedEvaluator;
+import org.apache.reef.driver.evaluator.EvaluatorDescriptor;
+import org.apache.reef.driver.evaluator.EvaluatorRequest;
+import org.apache.reef.driver.evaluator.EvaluatorRequestor;
+import org.apache.reef.driver.evaluator.FailedEvaluator;
+import org.apache.reef.evaluator.context.parameters.ContextIdentifier;
+import org.apache.reef.runtime.common.files.REEFFileNames;
+import org.apache.reef.tang.Configuration;
+import org.apache.reef.tang.types.NamedParameterNode;
+import org.apache.reef.wake.time.event.StartTime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
