@@ -18,6 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.heron.eco.definition.ComponentStream;
+import org.apache.heron.eco.definition.EcoExecutionContext;
+import org.apache.heron.eco.definition.EcoTopologyDefinition;
+import org.apache.heron.eco.definition.GroupingDefinition;
+import org.apache.heron.eco.definition.ObjectDefinition;
+import org.apache.heron.eco.definition.StreamDefinition;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.topology.BoltDeclarer;
 import org.apache.storm.topology.IBasicBolt;
@@ -26,13 +32,6 @@ import org.apache.storm.topology.IWindowedBolt;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.utils.Utils;
-
-import org.apache.heron.eco.definition.ComponentStream;
-import org.apache.heron.eco.definition.EcoExecutionContext;
-import org.apache.heron.eco.definition.EcoTopologyDefinition;
-import org.apache.heron.eco.definition.GroupingDefinition;
-import org.apache.heron.eco.definition.ObjectDefinition;
-import org.apache.heron.eco.definition.StreamDefinition;
 
 public class StreamBuilder {
 
