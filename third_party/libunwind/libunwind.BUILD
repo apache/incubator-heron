@@ -47,12 +47,7 @@ genrule(
         "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-config.patch)",
         "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-cache.patch)",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
-        "make",
-        "mkdir -p $$INSTALL_DIR/include $$INSTALL_DIR/lib",
-        "cp include/libunwind-common.h include/libunwind-coredump.h include/libunwind-dynamic.h $$INSTALL_DIR/include",
-        "cp include/libunwind.h include/libunwind-ptrace.h include/libunwind-x86_64.h include/unwind.h $$INSTALL_DIR/include",
-        "cp src/.libs/libunwind.a src/.libs/libunwind-coredump.a src/.libs/libunwind-ptrace.a $$INSTALL_DIR/lib",
-        "cp src/.libs/libunwind-setjmp.a src/.libs/libunwind-x86_64.a $$INSTALL_DIR/lib",
+        'make install SUBDIRS="src tests"',
         "rm -rf $$TMP_DIR",
     ]),
 )
