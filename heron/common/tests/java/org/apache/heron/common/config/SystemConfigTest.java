@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.heron.common.basics.ByteAmount;
 
 public class SystemConfigTest {
