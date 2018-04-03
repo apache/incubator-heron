@@ -297,6 +297,10 @@ public class Context {
     return cfg.getStringValue(Key.OVERRIDE_YAML);
   }
 
+  public static String apiserverOverrideFile(Config cfg) {
+    return cfg.getStringValue(Key.APISERVER_OVERRIDE_YAML);
+  }
+
   public static String executorBinary(Config cfg) {
     return cfg.getStringValue(Key.EXECUTOR_BINARY);
   }
