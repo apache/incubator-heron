@@ -17,7 +17,7 @@ package com.twitter.heron.eco.builder;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Logger;
 
-import org.apache.storm.topology.TopologyBuilder;
+import com.twitter.heron.topology.TopologyBuilder;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;

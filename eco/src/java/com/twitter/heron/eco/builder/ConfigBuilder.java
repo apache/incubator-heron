@@ -44,7 +44,7 @@ public class ConfigBuilder {
   private static final Integer MINIMUM_BYTES = 256000000;
   private static final Integer MINIMUM_MB = 256;
 
-  protected Config buildConfig(EcoTopologyDefinition topologyDefinition)
+  public Config buildConfig(EcoTopologyDefinition topologyDefinition)
       throws IllegalArgumentException {
 
     Map<String, Object> configMap = topologyDefinition.getConfig();

@@ -18,14 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.grouping.CustomStreamGrouping;
-import org.apache.storm.topology.BoltDeclarer;
-import org.apache.storm.topology.IBasicBolt;
-import org.apache.storm.topology.IRichBolt;
-import org.apache.storm.topology.IWindowedBolt;
-import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
+import com.twitter.heron.grouping.CustomStreamGrouping;
+import com.twitter.heron.topology.BoltDeclarer;
+import com.twitter.heron.topology.IBasicBolt;
+import com.twitter.heron.topology.IRichBolt;
+import com.twitter.heron.topology.IWindowedBolt;
+import com.twitter.heron.topology.TopologyBuilder;
+import com.twitter.heron.tuple.Fields;
+import com.twitter.heron.utils.Utils;
 
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
