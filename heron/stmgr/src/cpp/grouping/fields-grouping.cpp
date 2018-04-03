@@ -50,7 +50,7 @@ void FieldsGrouping::GetListToSend(const proto::system::HeronDataTuple& _tuple,
   size_t prime_num = 633910111UL;
   for (auto iter = fields_grouping_indices_.begin();
        iter != fields_grouping_indices_.end(); ++iter) {
-    CHECK(_tuple.values_size() > *iter);
+    CHECK_GT(_tuple.values_size(), *iter);
     size_t h = str_hash_fn(_tuple.values(*iter));
     task_index += (h % prime_num);
   }

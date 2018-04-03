@@ -61,8 +61,8 @@ void StatefulRestorer::HandleStMgrRestored(const std::string& _stmgr_id,
                                            int64_t _restore_txid,
                                            const StMgrMap& _stmgrs) {
   CHECK(in_progress_);
-  CHECK(_checkpoint_id == checkpoint_id_in_progress_);
-  CHECK(_restore_txid == restore_txid_);
+  CHECK_EQ(_checkpoint_id, checkpoint_id_in_progress_);
+  CHECK_EQ(_restore_txid, restore_txid_);
   unreplied_stmgrs_.erase(_stmgr_id);
   if (unreplied_stmgrs_.empty()) {
     Finish2PhaseCommit(_stmgrs);

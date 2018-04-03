@@ -58,7 +58,7 @@ StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _opti
   http_server_->InstallCallBack("/stmgrsregistrationsummary",
       std::move(cbHandleStmgrsRegistrationSummary));
   http_server_->InstallGenericCallBack(std::move(cbHandleUnknown));
-  CHECK(http_server_->Start() == SP_OK);
+  CHECK_EQ(http_server_->Start(), SP_OK);
 }
 
 StatsInterface::~StatsInterface() { delete http_server_; }

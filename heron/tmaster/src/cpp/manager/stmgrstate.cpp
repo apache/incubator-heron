@@ -123,7 +123,7 @@ StMgrState::AddAssignment(const std::vector<pair<string, sp_int32> >& _assignmen
                                 proto::system::Assignment* _assignment)
 {
   // A vector of <component_id, partition_id is given to us.
-  CHECK(_assignments.size() == workers_.size());
+  CHECK_EQ(_assignments.size(), workers_.size());
 
   proto::system::NodeManagerAssignment* val = _assignment->add_assignments();
   val->set_nodemgr_id(info_->nodemgr_id());
