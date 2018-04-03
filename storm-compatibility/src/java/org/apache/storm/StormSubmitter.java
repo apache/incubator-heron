@@ -20,12 +20,11 @@ package org.apache.storm;
 
 import java.util.Map;
 
+import org.apache.heron.api.HeronSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.utils.ConfigUtils;
-
-import org.apache.heron.api.HeronSubmitter;
 
 /**
  * Use this class to submit topologies to run on the Storm cluster. You should run your program

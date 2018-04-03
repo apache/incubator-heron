@@ -21,12 +21,11 @@ package org.apache.storm.topology;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.topology.IUpdatable;
 import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.utils.ConfigUtils;
-
-import org.apache.heron.api.spout.SpoutOutputCollector;
-import org.apache.heron.api.topology.IUpdatable;
 
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces

@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.simple.JSONAware;
+
+import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.storm.generated.Bolt;
 import org.apache.storm.generated.SpoutSpec;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.tuple.Fields;
-import org.json.simple.JSONAware;
-
-import org.apache.heron.api.generated.TopologyAPI;
 
 // import org.apache.storm.generated.ComponentCommon;
 // import org.apache.storm.generated.GlobalStreamId;
