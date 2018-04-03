@@ -186,7 +186,8 @@ public class AuroraCLIControllerTest {
         originalArgument.append("Querying instance statuses: x");
         return true;
       }
-    }).when(controller).runProcess(anyListOf(String.class), any(StringBuilder.class), any(StringBuilder.class));
+    }).when(controller).runProcess(anyListOf(String.class), any(StringBuilder.class),
+        any(StringBuilder.class));
     Set<Integer> ret = controller.addContainers(containersToAdd);
     assertEquals(0, ret.size());
     verify(controller).runProcess(eq(expectedCommand), any(), any());
