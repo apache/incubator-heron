@@ -16,7 +16,6 @@ package com.twitter.heron.eco;
 import java.io.FileInputStream;
 
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,9 +27,7 @@ import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
-import com.twitter.heron.eco.builder.storm.EcoBuilder;
-import com.twitter.heron.eco.builder.ObjectBuilder;
-import com.twitter.heron.eco.definition.EcoExecutionContext;
+
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.parser.EcoParser;
 import com.twitter.heron.eco.submit.EcoSubmitter;
@@ -38,7 +35,6 @@ import com.twitter.heron.eco.submit.EcoSubmitter;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
