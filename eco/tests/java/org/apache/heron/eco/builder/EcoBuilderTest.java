@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +28,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.heron.api.Config;
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
+
+import org.apache.storm.topology.TopologyBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;

@@ -13,8 +13,6 @@
 //  limitations under the License.
 package org.apache.heron.eco.submit;
 
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.StormTopology;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +21,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import org.apache.heron.api.Config;
+
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.StormTopology;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

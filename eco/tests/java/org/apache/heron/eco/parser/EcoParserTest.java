@@ -18,6 +18,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.apache.heron.eco.definition.BeanDefinition;
 import org.apache.heron.eco.definition.BeanReference;
 import org.apache.heron.eco.definition.BoltDefinition;
@@ -25,8 +28,6 @@ import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.definition.GroupingDefinition;
 import org.apache.heron.eco.definition.PropertyDefinition;
 import org.apache.heron.eco.definition.StreamDefinition;
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;

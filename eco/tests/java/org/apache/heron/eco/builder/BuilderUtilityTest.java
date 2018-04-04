@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.storm.testing.TestWordSpout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,12 +30,12 @@ import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.ObjectDefinition;
 import org.apache.heron.eco.definition.PropertyDefinition;
 
+import org.apache.storm.testing.TestWordSpout;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
