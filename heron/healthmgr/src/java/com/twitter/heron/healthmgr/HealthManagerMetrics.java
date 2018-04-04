@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
+
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -61,7 +62,6 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
 
   /**
    * constructor to expose healthmgr metrics to local metricsmgr
-   * 
    * @param metricsMgrPort local MetricsMgr port
    * @throws IOException
    */
@@ -141,7 +141,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
   public synchronized void executeIncr(String metricName) {
     executeCount.scope(metricName).incr();
   }
-  
+
   public synchronized void executeSensorIncr(String sensor) {
     executeSensorCount.scope(sensor).incr();
   }
