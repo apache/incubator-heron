@@ -15,6 +15,11 @@ package com.twitter.heron.eco.submit;
 
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
+
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.HeronTopology;
+import com.twitter.heron.api.HeronTopology;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +45,7 @@ public class EcoSubmitterTest {
   }
 
   @Test
-  public void submitTopology_AllGood_BehavesAsExpected()
+  public void submitStormTopology_AllGood_BehavesAsExpected()
       throws Exception {
     Config config = new Config();
     StormTopology topology = new StormTopology();
@@ -51,6 +56,21 @@ public class EcoSubmitterTest {
     subject.submitStormTopology("name", config, topology);
     PowerMockito.verifyStatic(times(1));
     StormSubmitter.submitTopology(anyString(), any(Config.class), any(StormTopology.class));
+
+  }
+
+  @Test
+  public void submitHeronTopology_AllGood_BehavesAsExpected()
+      throws Exception {
+    Config config = new Config();
+    HeronTopology topology = new HeronTopology(null);
+    PowerMockito.spy(HeronSubmitter.class);
+    PowerMockito.doNothing().when(HeronSubmitter.class, "submitTopology",
+        any(String.class), any(Config.class), any(HeronTopology.class));
+
+    subject.submitHeronTopology("name", config, topology);
+    PowerMockito.verifyStatic(times(1));
+    HeronSubmitter.submitTopology(anyString(), any(Config.class), any(HeronTopology.class));
 
   }
 }
