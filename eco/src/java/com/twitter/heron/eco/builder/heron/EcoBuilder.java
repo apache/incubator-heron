@@ -21,8 +21,8 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.topology.TopologyBuilder;
 
 import com.twitter.heron.eco.builder.BoltBuilder;
-import com.twitter.heron.eco.builder.ConfigBuilder;
 import com.twitter.heron.eco.builder.ComponentBuilder;
+import com.twitter.heron.eco.builder.ConfigBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
 
 import com.twitter.heron.eco.definition.EcoExecutionContext;

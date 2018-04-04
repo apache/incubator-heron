@@ -64,7 +64,7 @@ public class Eco {
     String topologyType = topologyDefinition.getType();
 
     if (topologyType != null && topologyType.equals("storm")) {
-      com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder = 
+      com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.storm.EcoBuilder(
             new com.twitter.heron.eco.builder.storm.SpoutBuilder(),
             new BoltBuilder(),
@@ -87,7 +87,7 @@ public class Eco {
           .buildTopologyBuilder(executionContext, objectBuilder);
       ecoSubmitter.submitStormTopology(topologyName, topologyConfig, builder.createTopology());
     } else {
-      com.twitter.heron.eco.builder.heron.EcoBuilder ecoBuilder = 
+      com.twitter.heron.eco.builder.heron.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.heron.EcoBuilder(
             new com.twitter.heron.eco.builder.heron.SpoutBuilder(),
             new BoltBuilder(),

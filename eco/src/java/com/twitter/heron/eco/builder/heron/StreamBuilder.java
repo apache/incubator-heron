@@ -28,7 +28,6 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.utils.Utils;
 
 import com.twitter.heron.eco.builder.ObjectBuilder;
-
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
