@@ -11,29 +11,28 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.builder.storm;
+package com.twitter.heron.eco.builder.heron;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.generated.GlobalStreamId;
-import org.apache.storm.grouping.CustomStreamGrouping;
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.task.WorkerTopologyContext;
-import org.apache.storm.topology.BasicOutputCollector;
-import org.apache.storm.topology.BoltDeclarer;
-import org.apache.storm.topology.IBasicBolt;
-import org.apache.storm.topology.IRichBolt;
-import org.apache.storm.topology.IWindowedBolt;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.windowing.TimestampExtractor;
-import org.apache.storm.windowing.TupleWindow;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.bolt.BasicOutputCollector;
+import com.twitter.heron.api.topology.BoltDeclarer;
+import com.twitter.heron.api.bolt.IBasicBolt;
+import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.topology.OutputFieldsDeclarer;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.windowing.TimestampExtractor;
+import com.twitter.heron.api.windowing.TupleWindow;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StreamBuilderTest {
+public class HeronStreamBuilderTest {
 
   @Mock
   private EcoTopologyDefinition mockDefinition;
@@ -267,13 +266,13 @@ public class StreamBuilderTest {
   private class MockCustomStreamGrouping implements CustomStreamGrouping {
 
     @Override
-    public void prepare(WorkerTopologyContext context, GlobalStreamId stream,
-                        List<Integer> targetTasks) {
+    public void prepare(TopologyContext context, String component,
+        String streamId, List<Integer> targetTasks) {
 
     }
 
     @Override
-    public List<Integer> chooseTasks(int taskId, List<Object> values) {
+    public List<Integer> chooseTasks(List<Object> values) {
       return null;
     }
   }
@@ -282,7 +281,7 @@ public class StreamBuilderTest {
   private class MockIRichBolt implements IRichBolt {
 
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(Map heronConf, TopologyContext context, OutputCollector collector) {
 
     }
 
@@ -345,7 +344,7 @@ public class StreamBuilderTest {
   @SuppressWarnings({"rawtypes", "unchecked", "serial"})
   public class MockIBasicBolt implements IBasicBolt {
     @Override
-    public void prepare(Map stormConf, TopologyContext context) {
+    public void prepare(Map heronConf, TopologyContext context) {
 
     }
 
