@@ -224,7 +224,7 @@ class Server : public BaseServer {
       CloseConnection(_conn);
       return;
     }
-    CHECK(m->IsInitialized());
+    CHECK(m->IsInitialized()) << "Protobuf not initialized";
 
     std::function<void()> cb = std::bind(method, _t, rid, _conn, m);
 

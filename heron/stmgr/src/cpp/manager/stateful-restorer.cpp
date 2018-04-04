@@ -247,7 +247,8 @@ void StatefulRestorer::HandleAllInstancesConnected() {
 void StatefulRestorer::HandleDeadInstanceConnection(sp_int32 _task_id) {
   if (in_progress_) {
     instance_connections_pending_ = true;
-    CHECK(local_taskids_.find(_task_id) != local_taskids_.end());
+    CHECK(local_taskids_.find(_task_id) != local_taskids_.end())
+        << "Task " << _task_id << " is not found in local task list";
     restore_pending_.insert(_task_id);
     get_ckpt_pending_.insert(_task_id);
   }

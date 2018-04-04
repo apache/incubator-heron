@@ -73,7 +73,7 @@ SpoutInstance::~SpoutInstance() {
 }
 
 void SpoutInstance::Start() {
-  CHECK(!active_);
+  CHECK(!active_) << "Spout instance has been started already";
   LOG(INFO) << "Starting spout " << taskContext_->getThisComponentName()
             << " with ackingEnabled?: " << ackingEnabled_
             << " with enableMessageTimeouts?: " << enableMessageTimeouts_;
@@ -94,7 +94,7 @@ void SpoutInstance::Start() {
 
 void SpoutInstance::Activate() {
   LOG(INFO) << "Came in Activate of the spout";
-  CHECK(!active_);
+  CHECK(!active_) << "Spout instance has been started already";
   if (spout_) {
     spout_->activate();
   }
@@ -103,7 +103,7 @@ void SpoutInstance::Activate() {
 
 void SpoutInstance::Deactivate() {
   LOG(INFO) << "Came in Deactivate of the spout";
-  CHECK(active_);
+  CHECK(active_) << "Spout instance is not active";
   if (spout_) {
     spout_->deactivate();
   }

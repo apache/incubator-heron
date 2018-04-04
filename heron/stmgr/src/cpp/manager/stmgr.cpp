@@ -282,7 +282,7 @@ void StMgr::FetchMetricsCacheLocation() {
 }
 
 void StMgr::StartStmgrServer() {
-  CHECK(!stmgr_server_);
+  CHECK(!stmgr_server_) << "Stmgr server is already running";
   LOG(INFO) << "Creating StmgrServer";
   NetworkOptions sops;
   sops.set_host(IpUtils::getHostName());
@@ -302,7 +302,7 @@ void StMgr::StartStmgrServer() {
 }
 
 void StMgr::StartInstanceServer() {
-  CHECK(!instance_server_);
+  CHECK(!instance_server_) << "InstanceServer server is already running";
   LOG(INFO) << "Creating InstanceServer";
   NetworkOptions sops;
   sops.set_host(IpUtils::getHostName());
@@ -348,7 +348,7 @@ void StMgr::CreateCheckpointMgrClient() {
 }
 
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
-  CHECK(!tmaster_client_);
+  CHECK(!tmaster_client_) << "TMaster client has already existed";
   LOG(INFO) << "Creating Tmaster Client at " << tmasterLocation->host() << ":"
             << tmasterLocation->master_port();
   NetworkOptions master_options;
@@ -384,7 +384,7 @@ void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation
 }
 
 void StMgr::CreateTupleCache() {
-  CHECK(!tuple_cache_);
+  CHECK(!tuple_cache_) << "Tuple cache has already existed";
   LOG(INFO) << "Creating tuple cache ";
   sp_uint32 drain_threshold_bytes_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainSizeMb() * 1_MB;
@@ -999,7 +999,7 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
 void StMgr::HandleStoreInstanceStateCheckpoint(
             const proto::ckptmgr::InstanceStateCheckpoint& _message,
             const proto::system::Instance& _instance) {
-  CHECK(stateful_restorer_);
+  CHECK(stateful_restorer_) << "Stateful restorer doesn't exist when storing checkpoint";
   int32_t task_id = _instance.info().task_id();
   LOG(INFO) << "Got a checkpoint state message from " << task_id
             << " for checkpoint " << _message.checkpoint_id();
@@ -1072,7 +1072,7 @@ void StMgr::HandleDownStreamStatefulCheckpoint(
 void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txid) {
   LOG(INFO) << "Got a Restore Topology State message from Tmaster for checkpoint "
             << _checkpoint_id << " and txid " << _restore_txid;
-  CHECK(stateful_restorer_);
+  CHECK(stateful_restorer_) << "Stateful restorer doesn't exist when restoring state";
 
   // Start the restore process
   std::unordered_set<sp_int32> local_taskids;
@@ -1085,7 +1085,7 @@ void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txi
 void StMgr::StartStatefulProcessing(sp_string _checkpoint_id) {
   LOG(INFO) << "Received StartProcessing message from tmaster for "
             << _checkpoint_id;
-  CHECK(stateful_restorer_);
+  CHECK(stateful_restorer_) << "Stateful restorer doesn't exist when starting process";
   if (stateful_restorer_->InProgress()) {
     LOG(FATAL) << "StartProcessing received from Tmaster for "
                << _checkpoint_id << " when we are still in Restore";
@@ -1099,7 +1099,7 @@ void StMgr::HandleRestoreInstanceStateResponse(sp_int32 _task_id,
   // If we are stateful topology, we might want to see how the restore went
   // and if it was successful and all other local instances have recovered
   // send back a success response to tmaster saying that we have recovered
-  CHECK(stateful_restorer_);
+  CHECK(stateful_restorer_) << "Stateful restorer doesn't exist when querying restore state";
   stateful_restorer_->HandleInstanceRestoredState(_task_id, _status.status(), _checkpoint_id);
 }
 

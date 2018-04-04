@@ -142,7 +142,7 @@ void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage*
 }
 
 void MetricsMgrClient::InternalSendTMasterLocation() {
-  CHECK(tmaster_location_);
+  CHECK(tmaster_location_) << "TMaster location is not available yet";
   proto::system::TMasterLocationRefreshMessage* m =
       new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
@@ -152,7 +152,7 @@ void MetricsMgrClient::InternalSendTMasterLocation() {
 }
 
 void MetricsMgrClient::InternalSendMetricsCacheLocation() {
-  CHECK(metricscache_location_);
+  CHECK(metricscache_location_) << "MetricsCache location is not available yet";
   proto::system::MetricsCacheLocationRefreshMessage* m =
       new proto::system::MetricsCacheLocationRefreshMessage();
   m->mutable_metricscache()->CopyFrom(*metricscache_location_);

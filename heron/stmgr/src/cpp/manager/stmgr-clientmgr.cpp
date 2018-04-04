@@ -131,7 +131,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
 bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& _stmgr_id,
                                             const proto::system::HeronTupleSet2& _msg) {
   auto iter = clients_.find(_stmgr_id);
-  CHECK(iter != clients_.end());
+  CHECK(iter != clients_.end()) << "Stmgr " << _stmgr_id << " is not found in client list";
 
   // Acquire the message
   proto::stmgr::TupleStreamMessage* out = nullptr;
@@ -151,7 +151,7 @@ bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
 void StMgrClientMgr::SendDownstreamStatefulCheckpoint(const sp_string& _stmgr_id,
                            proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
   auto iter = clients_.find(_stmgr_id);
-  CHECK(iter != clients_.end());
+  CHECK(iter != clients_.end()) << "Stmgr " << _stmgr_id << " is not found in client list";
   iter->second->SendDownstreamStatefulCheckpoint(_message);
 }
 

@@ -76,7 +76,8 @@ void IMetricsRegistrarImpl::sendMetrics(int timeBucketSizeInSecs) {
       datum->set_name(metricName);
       datum->set_value(metricValue);
     } else {
-      CHECK(multiMetrics_.find(metricName) != multiMetrics_.end());
+      CHECK(multiMetrics_.find(metricName) != multiMetrics_.end())
+          << "Metric " << metricName << " is not found";
       std::map<std::string, std::string> mmap;
       multiMetrics_[metricName]->getValueAndReset(mmap);
       for (auto& kv : mmap) {

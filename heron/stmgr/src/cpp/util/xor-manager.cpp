@@ -59,17 +59,17 @@ void XorManager::rotate(EventLoopImpl::Status) {
 }
 
 void XorManager::create(sp_int32 _task_id, sp_int64 _key, sp_int64 _value) {
-  CHECK(tasks_.find(_task_id) != tasks_.end());
+  CHECK(tasks_.find(_task_id) != tasks_.end()) << "Task " << _task_id << " is not found";
   tasks_[_task_id]->create(_key, _value);
 }
 
 bool XorManager::anchor(sp_int32 _task_id, sp_int64 _key, sp_int64 _value) {
-  CHECK(tasks_.find(_task_id) != tasks_.end());
+  CHECK(tasks_.find(_task_id) != tasks_.end()) << "Task " << _task_id << " is not found";
   return tasks_[_task_id]->anchor(_key, _value);
 }
 
 bool XorManager::remove(sp_int32 _task_id, sp_int64 _key) {
-  CHECK(tasks_.find(_task_id) != tasks_.end());
+  CHECK(tasks_.find(_task_id) != tasks_.end()) << "Task " << _task_id << " is not found";
   return tasks_[_task_id]->remove(_key);
 }
 

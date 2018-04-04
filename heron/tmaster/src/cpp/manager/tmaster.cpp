@@ -116,7 +116,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
   tmaster_location_->set_controller_port(tmaster_controller_port_);
   tmaster_location_->set_master_port(master_port_);
   tmaster_location_->set_stats_port(stats_port_);
-  DCHECK(tmaster_location_->IsInitialized());
+  DCHECK(tmaster_location_->IsInitialized()) << "TMaster local is not initialized";
   FetchPackingPlan();
 
   // Send tmaster location to metrics mgr
@@ -555,7 +555,7 @@ void TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
 
 void TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb) {
   CHECK_EQ(current_pplan_->topology().state(), proto::api::PAUSED);
-  DCHECK(current_pplan_->topology().IsInitialized());
+  DCHECK(current_pplan_->topology().IsInitialized()) << "Topology is not initialized";
 
   // Set the status
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -572,7 +572,7 @@ void TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb) {
 
 void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
   CHECK_EQ(current_pplan_->topology().state(), proto::api::RUNNING);
-  DCHECK(current_pplan_->topology().IsInitialized());
+  DCHECK(current_pplan_->topology().IsInitialized()) << "Topology is not initialized";
 
   // Set the status
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -589,7 +589,7 @@ void TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb) {
 
 bool TMaster::UpdateRuntimeConfig(const ComponentConfigMap& _config,
                                   VCallback<proto::system::StatusCode> cb) {
-  DCHECK(current_pplan_->topology().IsInitialized());
+  DCHECK(current_pplan_->topology().IsInitialized()) << "Topology is not initialized";
 
   // Parse and set the new configs
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
@@ -628,7 +628,7 @@ void TMaster::HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _s
 // validated using ValidateRuntimeConig() function.
 bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
                                             const ComponentConfigMap& _config) {
-  DCHECK(_topology->IsInitialized());
+  DCHECK(_topology->IsInitialized()) << "Topology is not initialized";
 
   ComponentConfigMap::const_iterator iter;
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
@@ -758,7 +758,7 @@ void TMaster::DoPhysicalPlan(EventLoop::Status) {
   // to use as many portions from it as possible
   proto::system::PhysicalPlan* pplan = MakePhysicalPlan();
   CHECK_NOTNULL(pplan);
-  DCHECK(pplan->IsInitialized());
+  DCHECK(pplan->IsInitialized()) << "Topology is not initialized";
 
   if (!ValidateStMgrsWithPackingPlan()) {
     // TODO(kramasamy): Do Something better here
@@ -854,7 +854,8 @@ proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
     // we need to just adjust the stmgrs mapping
     // First lets verify that our original pplan and instances
     // all match up
-    CHECK(ValidateStMgrsWithPhysicalPlan(current_pplan_));
+    CHECK(ValidateStMgrsWithPhysicalPlan(current_pplan_))
+        << "Original pplan doesn't match the instances";
     proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
     new_pplan->mutable_topology()->CopyFrom(current_pplan_->topology());
 
@@ -1016,7 +1017,7 @@ bool TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan
 bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) const {
   LOG(INFO) << "Validating runtime configs.";
   const proto::api::Topology& topology = current_pplan_->topology();
-  DCHECK(topology.IsInitialized());
+  DCHECK(topology.IsInitialized()) << "Topology is not initialized";
 
   std::unordered_set<std::string> components;
   config::TopologyConfigHelper::GetAllComponentNames(topology, components);

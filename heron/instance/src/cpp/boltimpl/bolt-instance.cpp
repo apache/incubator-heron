@@ -70,7 +70,7 @@ BoltInstance::~BoltInstance() {
 }
 
 void BoltInstance::Start() {
-  CHECK(!active_);
+  CHECK(!active_) << "Bolt instance has been started already";
   LOG(INFO) << "Starting bolt " << taskContext_->getThisComponentName();
   bolt_->open(taskContext_->getConfig(), taskContext_, collector_);
   if (taskContext_->getConfig()->hasConfig(api::config::Config::TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
@@ -86,13 +86,13 @@ void BoltInstance::Start() {
 
 void BoltInstance::Activate() {
   LOG(INFO) << "Not doing anything in Bolt Activate";
-  CHECK(!active_);
+  CHECK(!active_) << "Bolt instance has been started already";
   active_ = true;
 }
 
 void BoltInstance::Deactivate() {
   LOG(INFO) << "Not doing anything in Bolt Dacctivate";
-  CHECK(active_);
+  CHECK(!active_) << "Bolt instance is not active";
   active_ = false;
 }
 

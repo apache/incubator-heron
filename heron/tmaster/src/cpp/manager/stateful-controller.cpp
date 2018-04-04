@@ -211,7 +211,7 @@ StatefulController::AddNewConsistentCheckpoint(const std::string& _new_checkpoin
 }
 
 bool StatefulController::GotRestoreResponse(const std::string& _stmgr) const {
-  CHECK(restorer_->IsInProgress());
+  CHECK(restorer_->IsInProgress()) << "State restore is not in progress";
   return restorer_->GotResponse(_stmgr);
 }
 

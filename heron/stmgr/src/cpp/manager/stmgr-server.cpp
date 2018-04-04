@@ -148,7 +148,8 @@ void StMgrServer::StartBackPressureClientCb(const sp_string& _other_stmgr_id) {
 
 void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
   CHECK(remote_ends_who_caused_back_pressure_.find(_other_stmgr_id) !=
-        remote_ends_who_caused_back_pressure_.end());
+        remote_ends_who_caused_back_pressure_.end())
+      << "Stmgr " << _other_stmgr_id << " is not found in backpressure list";
   remote_ends_who_caused_back_pressure_.erase(_other_stmgr_id);
 
   if (!stmgr_->DidAnnounceBackPressure()) {
@@ -175,7 +176,8 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
     return;
   }
   auto iter = rstmgrs_.find(_conn);
-  CHECK(iter != rstmgrs_.end());
+  CHECK(iter != rstmgrs_.end())
+      << "Connection " << _conn << " is not found in remote stmgr list when starting backpressure";
   sp_string stmgr_id = iter->second;
   stmgrs_who_announced_back_pressure_.insert(stmgr_id);
 
@@ -196,7 +198,8 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
     return;
   }
   auto iter = rstmgrs_.find(_conn);
-  CHECK(iter != rstmgrs_.end());
+  CHECK(iter != rstmgrs_.end())
+      << "Connection " << _conn << " is not found in remote stmgr list when stopping backpressure";
   sp_string stmgr_id = iter->second;
   // Did we receive a start back pressure message from this stmgr to
   // begin with? We could have been dead at the time of the announcement

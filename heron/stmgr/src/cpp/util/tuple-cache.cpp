@@ -125,8 +125,8 @@ TupleCache::TupleList::TupleList() {
 }
 
 TupleCache::TupleList::~TupleList() {
-  CHECK(tuples_.empty());
-  CHECK(!current_);
+  CHECK(tuples_.empty()) << "Buffer is not empty when destructing TupleList";
+  CHECK(!current_) << "Current tuple set is not empty when destructing TupleList";
 }
 
 void TupleCache::TupleList::clear() {
