@@ -44,11 +44,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class EcoTest {
 
   @Mock
-  private EcoBuilder mockEcoBuilder;
-  @Mock
   private EcoParser mockEcoParser;
-  @Mock
-  private TopologyBuilder mockTopologyBuilder;
   @Mock
   private EcoSubmitter mockEcoSubmitter;
   @InjectMocks
@@ -56,9 +52,7 @@ public class EcoTest {
 
   @After
   public void ensureNoUnexpectedMockInteractions() {
-    Mockito.verifyNoMoreInteractions(mockEcoBuilder,
-        mockEcoParser,
-        mockTopologyBuilder,
+    Mockito.verifyNoMoreInteractions(mockEcoParser,
         mockEcoSubmitter);
   }
 
@@ -76,18 +70,12 @@ public class EcoTest {
 
     when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
         .thenReturn(topologyDefinition);
-//    when(mockEcoBuilder.buildConfig(eq(topologyDefinition))).thenReturn(config);
-    when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class),
-        any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
 
     subject.submit(mockStream, mockPropsStream, false);
 
     verify(mockEcoParser).parseFromInputStream(same(mockStream),
         same(mockPropsStream), eq(false));
-//    verify(mockEcoBuilder).buildConfig(same(topologyDefinition));
-//    verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
-//        any(ObjectBuilder.class));
-//    verify(mockTopologyBuilder).createTopology();
+
     verify(mockEcoSubmitter).submitStormTopology(any(String.class), any(Config.class),
         any(StormTopology.class));
   }
