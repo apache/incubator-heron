@@ -27,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.eco.builder.storm.EcoBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
@@ -37,6 +38,7 @@ import com.twitter.heron.eco.submit.EcoSubmitter;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -65,9 +67,6 @@ public class EcoTest {
     EcoTopologyDefinition topologyDefinition = new EcoTopologyDefinition();
     topologyDefinition.setName(topologyName);
 
-
-    Config config = new Config();
-
     when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
         .thenReturn(topologyDefinition);
 
@@ -78,5 +77,27 @@ public class EcoTest {
 
     verify(mockEcoSubmitter).submitStormTopology(any(String.class), any(Config.class),
         any(StormTopology.class));
+  }
+
+  @Test
+  public void testSubmit_HeronTopologyType_BehavesAsExpected() throws Exception {
+    FileInputStream mockStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+    final String topologyName = "the name";
+    EcoTopologyDefinition topologyDefinition = new EcoTopologyDefinition();
+    topologyDefinition.setName(topologyName);
+    topologyDefinition.setType("heron");
+
+    when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
+        .thenReturn(topologyDefinition);
+
+    subject.submit(mockStream, mockPropsStream, false);
+
+    verify(mockEcoParser).parseFromInputStream(same(mockStream),
+        same(mockPropsStream), eq(false));
+
+    verify(mockEcoSubmitter).submitHeronTopology(any(String.class), any(Config.class),
+        any(HeronTopology.class));
   }
 }
