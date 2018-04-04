@@ -30,7 +30,7 @@ public class JsonFormatterUtils {
   }
 
   public String renderPackingPlan(String topologyName, String packingClass,
-                                      PackingPlan packingPlan) throws JsonProcessingException {
+                                  PackingPlan packingPlan) throws JsonProcessingException {
     ObjectNode topLevel = mapper.createObjectNode();
     topLevel.put("packingClass", packingClass);
     topLevel.put("topology", topologyName);
