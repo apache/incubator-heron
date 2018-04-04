@@ -18,21 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.bolt.BasicOutputCollector;
-import com.twitter.heron.api.topology.BoltDeclarer;
-import com.twitter.heron.api.bolt.IBasicBolt;
-import com.twitter.heron.api.bolt.IRichBolt;
-import com.twitter.heron.api.bolt.IWindowedBolt;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.windowing.TimestampExtractor;
-import com.twitter.heron.api.windowing.TupleWindow;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +26,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.twitter.heron.eco.builder.ObjectBuilder;
+import com.twitter.heron.api.bolt.BasicOutputCollector;
+import com.twitter.heron.api.bolt.IBasicBolt;
+import com.twitter.heron.api.bolt.IRichBolt;
+import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.BoltDeclarer;
+import com.twitter.heron.api.topology.OutputFieldsDeclarer;
+import com.twitter.heron.api.topology.TopologyBuilder;
+import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.api.windowing.TimestampExtractor;
+import com.twitter.heron.api.windowing.TupleWindow;
 
+import com.twitter.heron.eco.builder.ObjectBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.definition.GroupingDefinition;

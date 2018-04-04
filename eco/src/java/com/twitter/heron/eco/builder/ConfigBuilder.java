@@ -44,6 +44,11 @@ public class ConfigBuilder {
   private static final Integer MINIMUM_BYTES = 256000000;
   private static final Integer MINIMUM_MB = 256;
 
+  /**
+   * Build the config for a ECO topology definition
+   *
+   * @param topologyDefinition - ECO topology definition
+   */
   public Config buildConfig(EcoTopologyDefinition topologyDefinition)
       throws IllegalArgumentException {
 

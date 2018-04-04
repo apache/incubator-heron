@@ -16,10 +16,6 @@ package com.twitter.heron.eco.submit;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
 
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.HeronTopology;
-import com.twitter.heron.api.HeronTopology;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +24,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.HeronTopology;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

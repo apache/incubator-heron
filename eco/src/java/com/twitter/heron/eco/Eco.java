@@ -55,6 +55,7 @@ public class Eco {
   }
 
   /**
+   * Submit an ECO topology
    *
    * @param fileInputStream  The input stream associated with ECO topology definition file
    * @param propertiesFile  The optional key-value property file for optional property substitution.
@@ -70,7 +71,7 @@ public class Eco {
     String topologyName = topologyDefinition.getName();
     String topologyType = topologyDefinition.getType();
 
-    if (topologyType == null || topologyType.equals("storm")) {
+    if (topologyType == null || "storm".equals(topologyType)) {
       System.out.println("topology type is Storm");
       com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.storm.EcoBuilder(

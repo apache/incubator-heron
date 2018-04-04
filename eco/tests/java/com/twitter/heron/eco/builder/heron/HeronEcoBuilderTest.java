@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,12 +25,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.topology.TopologyBuilder;
+
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.ComponentBuilder;
 import com.twitter.heron.eco.builder.ConfigBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
 
-import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 

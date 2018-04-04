@@ -18,11 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.bolt.IWindowedBolt;
+import com.twitter.heron.api.grouping.CustomStreamGrouping;
+import com.twitter.heron.api.topology.BoltDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.utils.Utils;

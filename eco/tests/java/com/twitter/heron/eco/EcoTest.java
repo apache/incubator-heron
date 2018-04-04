@@ -27,8 +27,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.eco.builder.storm.EcoBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
+import com.twitter.heron.eco.builder.storm.EcoBuilder;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.parser.EcoParser;
