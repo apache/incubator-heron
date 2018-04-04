@@ -255,6 +255,7 @@ class StMgr {
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
 
+  // whether MetricsCacheMgr is running
   sp_string metricscachemgr_mode_;
 };
 
