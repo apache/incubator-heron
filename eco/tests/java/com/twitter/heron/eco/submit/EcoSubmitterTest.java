@@ -34,7 +34,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(StormSubmitter.class)
+@PrepareForTest({StormSubmitter.class, HeronSubmitter.class})
 public class EcoSubmitterTest {
 
   private EcoSubmitter subject;
