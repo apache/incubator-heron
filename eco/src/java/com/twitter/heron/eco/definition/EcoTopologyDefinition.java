@@ -21,6 +21,7 @@ import java.util.Map;
 
 public class EcoTopologyDefinition {
 
+  public static final String TOPOLOGY_TYPE = "topology.type";
   private String name;
   private Map<String, Object> config = new HashMap<>();
   private Map<String, SpoutDefinition> spouts =  new LinkedHashMap<>();
@@ -98,12 +99,12 @@ public class EcoTopologyDefinition {
   }
 
   public String getType() {
-    Object obj = config.getOrDefault("topology.type", null);
+    Object obj = config.getOrDefault(TOPOLOGY_TYPE, null);
     return obj == null ? null : obj.toString();
   }
 
   public void setType(String type) {
-    this.config.put("topology.type", type);
+    this.config.put(TOPOLOGY_TYPE, type);
   }
 
   public void setName(String name) {
