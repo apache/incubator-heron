@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include "network/networkoptions.h"
 #include <arpa/inet.h>
 #include <string>
+#include "network/networkoptions.h"
+#include "network/ssloptions.h"
 #include "basics/spconsts.h"
 
 // This is the default high water mark on the num of bytes that can be left outstanding on
@@ -44,6 +45,7 @@ NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
   high_watermark_ = _copyFrom.get_high_watermark();
   low_watermark_ = _copyFrom.get_low_watermark();
   sin_path_ = _copyFrom.get_sin_path();
+  ssloptions_ = _copyFrom.get_ssl_options();
 }
 
 NetworkOptions::~NetworkOptions() {}
@@ -88,3 +90,11 @@ sp_int32 NetworkOptions::get_sin_family() const {
 void NetworkOptions::set_sin_path(const std::string& _sin_path) { sin_path_ = _sin_path; }
 
 const std::string& NetworkOptions::get_sin_path() const { return sin_path_; }
+
+void NetworkOptions::set_ssl_options(const SSLOptions& ssloptions) {
+  ssloptions_ = ssloptions;
+}
+
+const SSLOptions& NetworkOptions::get_ssl_options() const {
+  return ssloptions_;
+}

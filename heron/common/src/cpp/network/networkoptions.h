@@ -19,6 +19,7 @@
 
 #include <string>
 #include "basics/basics.h"
+#include "network/ssloptions.h"
 /*
  * NetworkOptions class definition.
  * One can specify things like which host/port to bind on.
@@ -50,6 +51,8 @@ class NetworkOptions {
   // applicable only for unix sockets
   void set_sin_path(const std::string& socket_path);
 
+  void set_ssl_options(const SSLOptions& ssloptions);
+
   // get functions for inet address family
   sp_string get_host() const;
   sp_int32 get_port() const;
@@ -72,6 +75,9 @@ class NetworkOptions {
   // get the unix path
   const std::string& get_sin_path() const;
 
+  // get the ssl options for the network connection
+  const SSLOptions& get_ssl_options() const;
+
  private:
   // The host that we shd bind on
   sp_string host_;
@@ -91,6 +97,8 @@ class NetworkOptions {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  SSLOptions ssloptions_;
 };
 
 #endif  // NETWORKOPTIONS_H_

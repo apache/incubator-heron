@@ -39,6 +39,9 @@ void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
   connection_options_.high_watermark_ = options_.get_high_watermark();
   connection_options_.low_watermark_ = options_.get_low_watermark();
+  connection_options_.ssloptions_ = options_.get_ssl_options();
+  connection_options_.mode_ = SSLMode::SERVER;
+
   on_new_connection_callback_ = [this](EventLoop::Status status) { this->OnNewConnection(status); };
 }
 

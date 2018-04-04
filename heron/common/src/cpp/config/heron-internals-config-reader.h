@@ -191,6 +191,12 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // Low water mark on the num in MB that can be left outstanding on a connection
   sp_int32 GetHeronStreammgrNetworkBackpressureLowwatermarkMb();
 
+  // Path to the ssl certificate for stream manager communication
+  sp_string GetHeronStreammgrEncryptionCertificatePath();
+
+  // Path to the private key for stream manager communication
+  sp_string GetHeronStreammgrEncryptionPrivateKeyPath();
+
   /**
   * Instance Config Getters
   **/

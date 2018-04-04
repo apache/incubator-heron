@@ -29,6 +29,9 @@
 #include "basics/basics.h"
 #include "network/event_loop.h"
 #include "network/network_error.h"
+#include "network/ssloptions.h"
+#include "event2/bufferevent_ssl.h"
+#include "openssl/ssl.h"
 
 struct bufferevent;
 
@@ -70,10 +73,17 @@ class ConnectionEndPoint {
 /**
  * Options that the server passes to the Connection.
  */
+enum SSLMode {
+  SERVER,
+  CLIENT
+};
+
 struct ConnectionOptions {
   sp_uint32 max_packet_size_;
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+  SSLOptions ssloptions_;
+  SSLMode mode_;
 };
 
 /*
@@ -199,6 +209,9 @@ class BaseConnection {
   // of an io error). This is the method used to do that.
   void internalClose(NetworkErrorCode status);
 
+  void openConnection(bufferevent_options boptions);
+  void openSSLConnection(bufferevent_options boptions);
+
   // Connect status of this connection
   State mState;
 
@@ -212,6 +225,8 @@ class BaseConnection {
   EventLoop* mEventLoop;
   // The underlying bufferevent
   struct bufferevent* buffer_;
+  SSL *ssl_;
+  SSL_CTX *sslctx_;
 
   // The config for rate limit (bytes per second) on read
   sp_int64 read_bps_;

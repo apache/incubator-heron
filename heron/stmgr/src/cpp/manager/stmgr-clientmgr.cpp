@@ -114,6 +114,7 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
                                           const sp_string& _hostname, sp_int32 _port) {
   stmgr_clientmgr_metrics_->scope(METRIC_STMGR_NEW_CONNECTIONS)->incr();
   NetworkOptions options;
+
   options.set_host(_hostname);
   options.set_port(_port);
   options.set_max_packet_size(config::HeronInternalsConfigReader::Instance()
@@ -121,6 +122,16 @@ StMgrClient* StMgrClientMgr::CreateClient(const sp_string& _other_stmgr_id,
   options.set_high_watermark(high_watermark_);
   options.set_low_watermark(low_watermark_);
   options.set_socket_family(PF_INET);
+
+  sp_string certificate_path =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrEncryptionCertificatePath();
+  sp_string private_key_path =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrEncryptionPrivateKeyPath();
+
+  if (certificate_path != "" && private_key_path != "") {
+    options.set_ssl_options(SSLOptions(certificate_path, private_key_path));
+  }
+
   StMgrClient* client = new StMgrClient(eventLoop_, options, topology_name_, topology_id_,
                                         stmgr_id_, _other_stmgr_id, this, metrics_manager_client_,
                                         droptuples_upon_backpressure_);

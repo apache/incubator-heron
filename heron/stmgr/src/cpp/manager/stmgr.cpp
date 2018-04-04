@@ -291,6 +291,7 @@ void StMgr::StartStmgrServer() {
   CHECK(!stmgr_server_);
   LOG(INFO) << "Creating StmgrServer";
   NetworkOptions sops;
+
   sops.set_host(IpUtils::getHostName());
   sops.set_port(data_port_);
   sops.set_socket_family(PF_INET);
@@ -300,6 +301,16 @@ void StMgr::StartStmgrServer() {
       1_MB);
   sops.set_high_watermark(high_watermark_);
   sops.set_low_watermark(low_watermark_);
+
+  sp_string certificate_path =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrEncryptionCertificatePath();
+  sp_string private_key_path =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrEncryptionPrivateKeyPath();
+
+  if (certificate_path != "" && private_key_path != "") {
+    sops.set_ssl_options(SSLOptions(certificate_path, private_key_path));
+  }
+
   stmgr_server_ = new StMgrServer(eventLoop_, sops, topology_name_, topology_id_, stmgr_id_, this);
 
   // start the server

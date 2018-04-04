@@ -838,6 +838,13 @@ new_http_archive(
 )
 
 new_http_archive(
+    name = "org_openssl_openssl",
+    urls = ["https://www.openssl.org/source/openssl-1.1.0h.tar.gz"],
+    strip_prefix = "openssl-1.1.0h",
+    build_file = "third_party/openssl/openssl.BUILD",
+)
+
+new_http_archive(
     name = "org_nongnu_libunwind",
     urls = ["http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
     strip_prefix = "libunwind-1.1",

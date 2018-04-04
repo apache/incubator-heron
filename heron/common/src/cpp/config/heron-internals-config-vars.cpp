@@ -112,6 +112,10 @@ const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_NETWORK_BACKPRESSURE_L
     "heron.streammgr.network.backpressure.lowwatermark.mb";
 const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB =
     "heron.streammgr.stateful.buffer.size.mb";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_CERTIFICATE_PATH =
+    "heron.streammgr.encryption.certificate_path";
+const sp_string HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_PRIVATE_KEY_PATH =
+    "heron.streammgr.encryption.private_key_path";
 
 // heron.instance.* configs are for the instance
 const sp_string HeronInternalsConfigVars::HERON_INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC =

@@ -18,11 +18,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "network/baseconnection.h"
 #include <string>
+#include "network/baseconnection.h"
 #include "basics/basics.h"
+#include "event2/bufferevent_ssl.h"
 #include "glog/logging.h"
 #include "network/regevent.h"
+#include "openssl/err.h"
+#include "openssl/ssl.h"
 
 const sp_int32 __SYSTEM_NETWORK_READ_BATCH_SIZE__ = 1048576;           // 1M
 const sp_int32 __SYSTEM_NETWORK_DEFAULT_WRITE_BATCH_SIZE__ = 1048576;  // 1M
@@ -50,6 +53,64 @@ BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* 
   mState = INIT;
   mOnClose = NULL;
   bufferevent_options boptions = BEV_OPT_DEFER_CALLBACKS;
+
+  if (mOptions->ssloptions_.is_configured()) {
+    LOG(INFO) << "SSL is configured with certificate path"
+              << mOptions->ssloptions_.get_certificate_path() << " and private key path "
+              << mOptions->ssloptions_.get_private_key_path();
+    openSSLConnection(boptions);
+  } else {
+    openConnection(boptions);
+  }
+}
+
+void BaseConnection::openSSLConnection(bufferevent_options boptions) {
+  LOG(INFO) << "Starting connection with SSL cert path " <<
+    mOptions->ssloptions_.get_certificate_path() << " and key path " <<
+    mOptions->ssloptions_.get_private_key_path();
+
+  if ((sslctx_ = SSL_CTX_new(SSLv23_method())) == NULL) {
+    sp_int64 error = ERR_get_error();
+    LOG(FATAL) << "Error creating ssl context, error " << error << " "
+               << ERR_error_string(error, NULL);
+  }
+
+  int status;
+  if ((status = SSL_CTX_use_certificate_chain_file(
+           sslctx_, mOptions->ssloptions_.get_certificate_path().c_str())) != 1) {
+    sp_int64 error = ERR_get_error();
+    LOG(FATAL) << "Error loading ssl cert status " << status << " error " << error << " "
+               << ERR_error_string(error, NULL);
+  }
+
+  if ((status = SSL_CTX_use_PrivateKey_file(
+           sslctx_, mOptions->ssloptions_.get_private_key_path().c_str(), SSL_FILETYPE_PEM)) != 1) {
+    sp_int64 error = ERR_get_error();
+    LOG(FATAL) << "Error loading ssl private key status " << status << " error " << error << " "
+               << ERR_error_string(error, NULL);
+  }
+
+  if ((status = SSL_CTX_check_private_key(sslctx_)) != 1) {
+    sp_int64 error = ERR_get_error();
+    LOG(FATAL) << "Error checking ssl private key status " << status << " error " << error << " "
+               << ERR_error_string(error, NULL);
+  }
+
+  ssl_ = SSL_new(sslctx_);
+
+  bufferevent_ssl_state ssl_state;
+  if (mOptions->mode_ == SSLMode::CLIENT) {
+    ssl_state = BUFFEREVENT_SSL_CONNECTING;
+  } else {
+    ssl_state = BUFFEREVENT_SSL_ACCEPTING;
+  }
+
+  buffer_ = bufferevent_openssl_socket_new(mEventLoop->dispatcher(), mEndpoint->get_fd(), ssl_,
+                                            ssl_state, boptions);
+}
+
+void BaseConnection::openConnection(bufferevent_options boptions) {
+  LOG(INFO) << "Starting connection without SSL";
   buffer_ = bufferevent_socket_new(mEventLoop->dispatcher(), mEndpoint->get_fd(), boptions);
   read_bps_ = burst_read_bps_ = 0;
   rate_limit_cfg_ = NULL;
@@ -58,6 +119,8 @@ BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* 
 BaseConnection::~BaseConnection() {
   CHECK(mState == INIT || mState == DISCONNECTED);
   disableRateLimit();  // To free the config object
+  SSL_CTX_free(sslctx_);
+  SSL_free(ssl_);
   bufferevent_free(buffer_);
 }
 
@@ -132,11 +195,15 @@ sp_int32 BaseConnection::write(struct evbuffer* _buffer) {
 }
 
 void BaseConnection::handleEvent(sp_int16 events) {
-  if (events & BEV_EVENT_CONNECTED) {
+  // If SSL is configured, BEV_EVENT_CONNECTED will be sent from the openssl
+  // and this is normal otherwise we should not process the connected event.
+  if (!mOptions->ssloptions_.is_configured() && events & BEV_EVENT_CONNECTED) {
     LOG(FATAL) << "BaseConnetion does not process connected event";
   }
   if (events & (BEV_EVENT_ERROR|BEV_EVENT_EOF)) {
-    LOG(ERROR) << "BufferEvent reported error on connection " << this;
+    sp_int64 error = ERR_get_error();
+    LOG(ERROR) << "BufferEvent reported error " << error << " " << ERR_error_string(error, NULL)
+               << "on connection " << this;
     mState = TO_BE_DISCONNECTED;
     internalClose(WRITE_ERROR);
   }

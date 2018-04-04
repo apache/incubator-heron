@@ -83,6 +83,11 @@ heron.streammgr.network.backpressure.highwatermark.mb: 50
 # Low water mark on the num in MB that can be left outstanding on a connection
 heron.streammgr.network.backpressure.lowwatermark.mb: 30
 
+# Certificate path to be used for ssl. An empty string leaves ssl off
+heron.streammgr.encryption.certificate_path: ""
+
+# Private key path to be used for ssl. An empty string leaves ssl off
+heron.streammgr.encryption.private_key_path: ""
 
 ### heron.tmaster.* configs are for the tmaster
 

@@ -181,6 +181,12 @@ class HeronInternalsConfigVars {
   // checkpoint markers to arrive before giving up
   static const sp_string HERON_STREAMMGR_STATEFUL_BUFFER_SIZE_MB;
 
+  // Path to the ssl certificate for stream manager communication
+  static const sp_string HERON_STREAMMGR_ENCRYPTION_CERTIFICATE_PATH;
+
+  // Path to the private key for stream manager communication
+  static const sp_string HERON_STREAMMGR_ENCRYPTION_PRIVATE_KEY_PATH;
+
   /**
   * HERON_INSTANCE_* configs are for the instance
   **/
