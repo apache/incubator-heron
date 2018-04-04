@@ -24,7 +24,7 @@ from integration_test.src.python.integration_test.common.spout import ABSpout
 
 def one_bolt_multi_tasks_builder(topology_name, http_server_url):
   builder = TestTopologyBuilder(topology_name, http_server_url)
-  ab_spout = builder.add_spout("ab-spout", ABSpout, 1)
+  ab_spout = builder.add_spout("ab-spout", ABSpout, 1, append_sequence_id=True)
 
   builder.add_bolt("identity-bolt", IdentityBolt,
                    inputs={ab_spout: Grouping.SHUFFLE},

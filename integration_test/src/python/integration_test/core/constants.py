@@ -28,3 +28,5 @@ USER_SPOUT_CLASSPATH = "user.spout.classpath"
 USER_BOLT_CLASSPATH = "user.bolt.classpath"
 # user defined max executions
 USER_MAX_EXECUTIONS = "user.max.exec"
+# append stream id or not
+USER_APPEND_STREAM_ID = "user.append.stream_id"

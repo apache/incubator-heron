@@ -33,7 +33,7 @@ public final class OneBoltMultiTasks extends AbstractTestTopology {
   @Override
   protected TestTopologyBuilder buildTopology(TestTopologyBuilder builder) {
 
-    builder.setSpout("ab-spout", new ABSpout(), 1);
+    builder.setSpout("ab-spout", new ABSpout(true), 1);
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("word")), 3)
         .shuffleGrouping("ab-spout");
     return builder;
