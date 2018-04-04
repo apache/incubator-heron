@@ -70,8 +70,8 @@ public class Eco {
     String topologyName = topologyDefinition.getName();
     String topologyType = topologyDefinition.getType();
 
-    if (topologyType != null || topologyType.equals("storm")) {
-      System.out.println("Storm");
+    if (topologyType == null || topologyType.equals("storm")) {
+      System.out.println("topology type is Storm");
       com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.storm.EcoBuilder(
             new com.twitter.heron.eco.builder.storm.SpoutBuilder(),
@@ -95,6 +95,7 @@ public class Eco {
           .buildTopologyBuilder(executionContext, objectBuilder);
       ecoSubmitter.submitStormTopology(topologyName, topologyConfig, builder.createTopology());
     } else {
+      System.out.println("topology type is Heron");
       com.twitter.heron.eco.builder.heron.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.heron.EcoBuilder(
             new com.twitter.heron.eco.builder.heron.SpoutBuilder(),
