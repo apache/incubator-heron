@@ -167,7 +167,7 @@ def add_dry_run(parser):
   :return:
   '''
   default_format = 'table'
-  resp_formats = ['raw', 'table', 'colored_table']
+  resp_formats = ['raw', 'table', 'colored_table', 'json']
   available_options = ', '.join(['%s' % opt for opt in resp_formats])
 
   def dry_run_resp_format(value):

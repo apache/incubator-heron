@@ -20,6 +20,7 @@ import org.apache.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import org.apache.heron.scheduler.dryrun.UpdateDryRunResponse;
 import org.apache.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
 import org.apache.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
+import com.twitter.heron.scheduler.dryrun.UpdateJsonDryRunRenderer;
 
 public final class DryRunRenders {
 
@@ -31,6 +32,8 @@ public final class DryRunRenders {
         return new SubmitTableDryRunRenderer(response, false).render();
       case COLORED_TABLE:
         return new SubmitTableDryRunRenderer(response, true).render();
+      case JSON:
+        return new SubmitJsonDryRunRenderer(response).render();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", formatType));
     }
@@ -44,6 +47,8 @@ public final class DryRunRenders {
         return new UpdateTableDryRunRenderer(response, false).render();
       case COLORED_TABLE:
         return new UpdateTableDryRunRenderer(response, true).render();
+      case JSON:
+        return new UpdateJsonDryRunRenderer(response).render();
       default: throw new IllegalArgumentException(
           String.format("Unexpected rendering format: %s", formatType));
     }
