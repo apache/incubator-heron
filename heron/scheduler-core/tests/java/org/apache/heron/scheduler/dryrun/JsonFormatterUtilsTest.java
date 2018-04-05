@@ -11,23 +11,23 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.scheduler.dryrun;
+package org.apache.heron.scheduler.dryrun;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.utils.PackingTestUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.heron.common.basics.Pair;
+import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.utils.PackingTestUtils;
 
-import static com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import static junit.framework.TestCase.assertEquals;
+import static org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 
 public class JsonFormatterUtilsTest {
 
@@ -55,7 +55,7 @@ public class JsonFormatterUtilsTest {
   public void testRenderPackingPlan() throws Exception {
     JsonFormatterUtils utils = new JsonFormatterUtils();
     String packingPlanJson = utils.renderPackingPlan("test-topology",
-        "com.twitter.heron.packing.roundrobin.RoundRobingPacking", plan);
+        "org.apache.heron.packing.roundrobin.RoundRobingPacking", plan);
 
     String filename =  "/heron/scheduler-core/tests/resources/JsonFormatterUtilsExpectedJson.txt";
     InputStream stream = JsonFormatterUtils.class.getResourceAsStream(filename);

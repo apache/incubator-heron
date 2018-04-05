@@ -20,7 +20,7 @@ import org.apache.heron.scheduler.dryrun.SubmitTableDryRunRenderer;
 import org.apache.heron.scheduler.dryrun.UpdateDryRunResponse;
 import org.apache.heron.scheduler.dryrun.UpdateRawDryRunRenderer;
 import org.apache.heron.scheduler.dryrun.UpdateTableDryRunRenderer;
-import com.twitter.heron.scheduler.dryrun.UpdateJsonDryRunRenderer;
+import org.apache.heron.scheduler.dryrun.UpdateJsonDryRunRenderer;
 
 public final class DryRunRenders {
 
