@@ -110,7 +110,7 @@ spec:
               -D heron.kubernetes.scheduler.uri=http://localhost:8001
               -D heron.kubernetes.scheduler.namespace={{ .Release.Namespace }}
               -D heron.executor.docker.image={{ .Values.image }}
-              -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
+              -D heron.class.uploader=org.apache.heron.uploader.dlog.DLUploader
               -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:2181/distributedlog
           envFrom:

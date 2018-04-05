@@ -22,9 +22,9 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
 
 public class OutputFieldsGetter implements OutputFieldsDeclarer {
-  private com.twitter.heron.api.topology.OutputFieldsDeclarer delegate;
+  private org.apache.heron.api.topology.OutputFieldsDeclarer delegate;
 
-  public OutputFieldsGetter(com.twitter.heron.api.topology.OutputFieldsDeclarer delegate) {
+  public OutputFieldsGetter(org.apache.heron.api.topology.OutputFieldsDeclarer delegate) {
     this.delegate = delegate;
   }
 

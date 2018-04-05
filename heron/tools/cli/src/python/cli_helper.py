@@ -134,7 +134,7 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
 
   # invoke the runtime manager to kill the topology
   result = execute.heron_class(
-      'com.twitter.heron.scheduler.RuntimeManagerMain',
+      'org.apache.heron.scheduler.RuntimeManagerMain',
       lib_jars,
       extra_jars=[],
       args=new_args

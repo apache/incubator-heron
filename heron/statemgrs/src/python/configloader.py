@@ -27,7 +27,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
                                  overrides={}):
   """ Reads configs to determine which state manager to use and converts them to state manager
   locations. Handles a subset of config wildcard substitution supported in the substitute method in
-  com.twitter.heron.spi.common.Misc.java"""
+  org.apache.heron.spi.common.Misc.java"""
   with open(state_manager_config_file, 'r') as stream:
     config = yaml.load(stream)
 
@@ -66,7 +66,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
       state_manager_location[key_mappings[config_key]] = config[config_key]
 
   state_manager_class = config['heron.class.state.manager']
-  if state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
+  if state_manager_class == 'org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager':
     state_manager_location['type'] = 'zookeeper'
     state_manager_location['name'] = 'zk'
 

@@ -16,7 +16,7 @@ class Bolt(BaseBolt):
 
 * The `initialize()` method is called when the bolt is first initialized and
 provides the bolt with the executing environment. It is equivalent to `prepare()`
-method of the [`IBolt`](/api/com/twitter/heron/api/bolt/IBolt.html) interface in Java.
+method of the [`IBolt`](/api/org/apache/heron/api/bolt/IBolt.html) interface in Java.
 Note that you should not override `__init__()` constructor of `Bolt` class
 for initialization of custom variables, since it is used internally by HeronInstance; instead,
 `initialize()` should be used to initialize any custom variables or connections to databases.

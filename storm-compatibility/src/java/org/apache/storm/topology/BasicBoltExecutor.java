@@ -21,11 +21,10 @@ package org.apache.storm.topology;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.topology.IUpdatable;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
-
-import com.twitter.heron.api.topology.IUpdatable;
 
 public class BasicBoltExecutor implements IRichBolt, IUpdatable {
   private static final Logger LOG = Logger.getLogger(BasicBoltExecutor.class.getName());
@@ -77,7 +76,7 @@ public class BasicBoltExecutor implements IRichBolt, IUpdatable {
   }
 
   @Override
-  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+  public void update(org.apache.heron.api.topology.TopologyContext topologyContext) {
     if (delegate instanceof IUpdatable) {
       ((IUpdatable) delegate).update(topologyContext);
     } else {

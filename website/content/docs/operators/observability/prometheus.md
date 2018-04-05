@@ -17,7 +17,7 @@ To set up your Heron cluster to export to Prometheus, you need to make two chang
 
 Parameter | Description | Default
 :---------|:------------|:-------
-`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html)
+`class` | The Java class used to control Prometheus sink behavior | [`org.apache.heron.metricsmgr.sink.PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html)
 `port` | The port on which Prometheus will scrape for metrics. **Note**: You must supply a `port` *or* `port-file` config. | 8080
 `port-file` | The path to a text file that contains the port number to be used by Prometheus for metrics scraping. **Note**: You must supply a `port` *or* `port-file` config. | `metrics.port`
 `path` | The Prometheus path on which to publish metrics | `/metrics`

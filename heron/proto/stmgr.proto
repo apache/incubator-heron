@@ -1,6 +1,6 @@
 syntax = "proto2";
 package heron.proto.stmgr;
-option java_package = "com.twitter.heron.proto.stmgr";
+option java_package = "org.apache.heron.proto.stmgr";
 option java_outer_classname = "StreamManager";
 
 import "common.proto";

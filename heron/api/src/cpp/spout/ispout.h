@@ -35,7 +35,7 @@ namespace spout {
  * that DAG has been successfully processed, it will send an ack message to the Spout.
  * <p>
  * <p>If a tuple fails to be fully process within the configured timeout for the
- * topology (see {@link com.twitter.heron.api.Config}), Heron will send a fail
+ * topology (see {@link org.apache.heron.api.Config}), Heron will send a fail
  * message to the spout
  * for the message.</p>
  * <p>

@@ -45,9 +45,9 @@ java_library(
 
 java_tests(
    test_classes = [
-       "com.twitter.heron.metricscachemgr.metricscache.CacheCoreTest",
-       "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
-       "com.twitter.heron.metricscachemgr.metricscache.MetricsCacheTest",
+       "org.apache.heron.metricscachemgr.metricscache.CacheCoreTest",
+       "org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtilsTest",
+       "org.apache.heron.metricscachemgr.metricscache.MetricsCacheTest",
      ],
      runtime_deps = [ ":metricscachemgr-tests" ],
      size = "small",
