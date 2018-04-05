@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "heron-eco-examples-support",
-    srcs = glob(["**/*.yaml", "**/*.properties"]),
+    srcs = glob(["**/*.yaml"]),
 )
 
 java_binary(

@@ -15,6 +15,7 @@ package com.twitter.heron.eco.submit;
 
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,13 +24,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.HeronTopology;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(StormSubmitter.class)
+@PrepareForTest({StormSubmitter.class, HeronSubmitter.class})
 public class EcoSubmitterTest {
 
   private EcoSubmitter subject;
@@ -40,7 +43,7 @@ public class EcoSubmitterTest {
   }
 
   @Test
-  public void submitTopology_AllGood_BehavesAsExpected()
+  public void submitStormTopology_AllGood_BehavesAsExpected()
       throws Exception {
     Config config = new Config();
     StormTopology topology = new StormTopology();
@@ -48,9 +51,24 @@ public class EcoSubmitterTest {
     PowerMockito.doNothing().when(StormSubmitter.class, "submitTopology",
         any(String.class), any(Config.class), any(StormTopology.class));
 
-    subject.submitTopology("name", config, topology);
+    subject.submitStormTopology("name", config, topology);
     PowerMockito.verifyStatic(times(1));
     StormSubmitter.submitTopology(anyString(), any(Config.class), any(StormTopology.class));
+
+  }
+
+  @Test
+  public void submitHeronTopology_AllGood_BehavesAsExpected()
+      throws Exception {
+    Config config = new Config();
+    HeronTopology topology = new HeronTopology(null);
+    PowerMockito.spy(HeronSubmitter.class);
+    PowerMockito.doNothing().when(HeronSubmitter.class, "submitTopology",
+        any(String.class), any(Config.class), any(HeronTopology.class));
+
+    subject.submitHeronTopology("name", config, topology);
+    PowerMockito.verifyStatic(times(1));
+    HeronSubmitter.submitTopology(anyString(), any(Config.class), any(HeronTopology.class));
 
   }
 }

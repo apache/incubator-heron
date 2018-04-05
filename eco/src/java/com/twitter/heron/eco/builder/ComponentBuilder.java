@@ -20,7 +20,7 @@ import com.twitter.heron.eco.definition.BeanDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 
 public class ComponentBuilder {
-  protected void buildComponents(EcoExecutionContext context, ObjectBuilder objectBuilder)
+  public void buildComponents(EcoExecutionContext context, ObjectBuilder objectBuilder)
       throws ClassNotFoundException,
       IllegalAccessException, InstantiationException,
       NoSuchFieldException, InvocationTargetException {

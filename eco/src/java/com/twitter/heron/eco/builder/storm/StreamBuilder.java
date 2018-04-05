@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.eco.builder;
+package com.twitter.heron.eco.builder.storm;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -26,6 +26,8 @@ import org.apache.storm.topology.IWindowedBolt;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.utils.Utils;
+
+import com.twitter.heron.eco.builder.ObjectBuilder;
 
 import com.twitter.heron.eco.definition.ComponentStream;
 import com.twitter.heron.eco.definition.EcoExecutionContext;

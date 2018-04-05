@@ -16,7 +16,6 @@ package com.twitter.heron.eco;
 import java.io.FileInputStream;
 
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.api.mockito.PowerMockito;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.eco.builder.EcoBuilder;
-import com.twitter.heron.eco.builder.ObjectBuilder;
-import com.twitter.heron.eco.definition.EcoExecutionContext;
+import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
 import com.twitter.heron.eco.parser.EcoParser;
 import com.twitter.heron.eco.submit.EcoSubmitter;
@@ -44,11 +41,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class EcoTest {
 
   @Mock
-  private EcoBuilder mockEcoBuilder;
-  @Mock
   private EcoParser mockEcoParser;
-  @Mock
-  private TopologyBuilder mockTopologyBuilder;
   @Mock
   private EcoSubmitter mockEcoSubmitter;
   @InjectMocks
@@ -56,37 +49,50 @@ public class EcoTest {
 
   @After
   public void ensureNoUnexpectedMockInteractions() {
-    Mockito.verifyNoMoreInteractions(mockEcoBuilder,
-        mockEcoParser,
-        mockTopologyBuilder,
+    Mockito.verifyNoMoreInteractions(mockEcoParser,
         mockEcoSubmitter);
   }
 
   @Test
-  public void testSubmit_AllGood_BehavesAsExpected() throws Exception {
+  public void testSubmit_StormTopologyType_BehavesAsExpected() throws Exception {
     FileInputStream mockStream = PowerMockito.mock(FileInputStream.class);
     FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
 
     final String topologyName = "the name";
     EcoTopologyDefinition topologyDefinition = new EcoTopologyDefinition();
     topologyDefinition.setName(topologyName);
-    Config config = new Config();
 
     when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
         .thenReturn(topologyDefinition);
-    when(mockEcoBuilder.buildConfig(eq(topologyDefinition))).thenReturn(config);
-    when(mockEcoBuilder.buildTopologyBuilder(any(EcoExecutionContext.class),
-        any(ObjectBuilder.class))).thenReturn(mockTopologyBuilder);
 
     subject.submit(mockStream, mockPropsStream, false);
 
     verify(mockEcoParser).parseFromInputStream(same(mockStream),
         same(mockPropsStream), eq(false));
-    verify(mockEcoBuilder).buildConfig(same(topologyDefinition));
-    verify(mockEcoBuilder).buildTopologyBuilder(any(EcoExecutionContext.class),
-        any(ObjectBuilder.class));
-    verify(mockTopologyBuilder).createTopology();
-    verify(mockEcoSubmitter).submitTopology(any(String.class), any(Config.class),
+
+    verify(mockEcoSubmitter).submitStormTopology(any(String.class), any(Config.class),
         any(StormTopology.class));
+  }
+
+  @Test
+  public void testSubmit_HeronTopologyType_BehavesAsExpected() throws Exception {
+    FileInputStream mockStream = PowerMockito.mock(FileInputStream.class);
+    FileInputStream mockPropsStream = PowerMockito.mock(FileInputStream.class);
+
+    final String topologyName = "the name";
+    EcoTopologyDefinition topologyDefinition = new EcoTopologyDefinition();
+    topologyDefinition.setName(topologyName);
+    topologyDefinition.setType("heron");
+
+    when(mockEcoParser.parseFromInputStream(eq(mockStream), eq(mockPropsStream), eq(false)))
+        .thenReturn(topologyDefinition);
+
+    subject.submit(mockStream, mockPropsStream, false);
+
+    verify(mockEcoParser).parseFromInputStream(same(mockStream),
+        same(mockPropsStream), eq(false));
+
+    verify(mockEcoSubmitter).submitHeronTopology(any(String.class), any(Config.class),
+        any(HeronTopology.class));
   }
 }
