@@ -1,12 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "storm-eco-examples-support",
-    srcs = glob(["**/*.yaml", "**/*.properties"]),
+    name = "heron-eco-examples-support",
+    srcs = glob(["**/*.yaml"]),
 )
 
 java_binary(
-    name='storm-eco-examples-unshaded',
+    name='eco-examples-unshaded',
     srcs = glob(["com/twitter/heron/examples/eco/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java-low-level",
@@ -18,8 +18,8 @@ java_binary(
 )
 
 genrule(
-    name = 'storm-eco-examples',
-    srcs = [":storm-eco-examples-unshaded_deploy.jar"],
-    outs = ["storm-eco-examples.jar"],
+    name = 'heron-eco-examples',
+    srcs = [":eco-examples-unshaded_deploy.jar"],
+    outs = ["heron-eco-examples.jar"],
     cmd  = "cp $< $@",
 )
