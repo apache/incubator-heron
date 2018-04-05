@@ -77,8 +77,8 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
       }
     }
 
-    Instant now = context.checkpoint();
     if (assignments.size() > 0) {
+      Instant now = context.checkpoint();
       diagnoses.add(new Diagnosis(DIAGNOSIS_SLOW_INSTANCE.text(), now, assignments));
     }
 

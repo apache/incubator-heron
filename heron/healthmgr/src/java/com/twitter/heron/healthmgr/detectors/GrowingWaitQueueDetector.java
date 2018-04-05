@@ -17,8 +17,7 @@ package com.twitter.heron.healthmgr.detectors;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -56,21 +55,21 @@ public class GrowingWaitQueueDetector extends BaseDetector {
    */
   @Override
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
-
     Collection<Symptom> result = new ArrayList<>();
 
-    MeasurementsTable waitQueueMetrics = MeasurementsTable.of(measurements).type
-        (METRIC_WAIT_Q_SIZE.text());
+    MeasurementsTable waitQueueMetrics
+        = MeasurementsTable.of(measurements).type(METRIC_WAIT_Q_SIZE.text());
+
     for (String component : waitQueueMetrics.uniqueComponents()) {
-      Set<String> addresses = new HashSet<>();
       double maxSlope = computeWaitQueueSizeTrend(waitQueueMetrics.component(component));
       if (maxSlope > rateLimit) {
         LOG.info(String.format("Detected growing wait queues for %s, max rate %f",
             component, maxSlope));
-        addresses.add(component);
+        Collection<String> addresses = Collections.singletonList(component);
         result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), context.checkpoint(), addresses));
       }
     }
+
     return result;
   }
 
@@ -84,9 +83,8 @@ public class GrowingWaitQueueDetector extends BaseDetector {
         continue;
       }
 
-      Collection<Measurement> measurements = metrics.instance(instance).sort(false,
-          MeasurementsTable.SortKey
-              .TIME_STAMP).get();
+      Collection<Measurement> measurements
+          = metrics.instance(instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).get();
       SimpleRegression simpleRegression = new SimpleRegression(true);
 
       for (Measurement m : measurements) {
