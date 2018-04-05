@@ -18,14 +18,11 @@ import java.util.Map;
 import java.util.Random;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.bolt.BaseBasicBolt;
-import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.api.utils.Utils;
 

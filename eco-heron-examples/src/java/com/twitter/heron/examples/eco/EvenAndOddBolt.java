@@ -16,8 +16,8 @@ package com.twitter.heron.examples.eco;
 
 import java.util.Map;
 
-import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
+import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 

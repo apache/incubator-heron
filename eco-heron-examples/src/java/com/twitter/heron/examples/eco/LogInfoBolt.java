@@ -16,7 +16,6 @@ package com.twitter.heron.examples.eco;
 
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.bolt.IBasicBolt;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
