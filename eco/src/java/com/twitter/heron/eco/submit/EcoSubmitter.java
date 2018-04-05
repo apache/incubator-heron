@@ -13,17 +13,27 @@
 //  limitations under the License.
 package com.twitter.heron.eco.submit;
 
+
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.AlreadyAliveException;
-import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronSubmitter;
+import com.twitter.heron.api.HeronTopology;
 
 public class EcoSubmitter {
 
-  public void submitTopology(String topologyName, Config topologyConfig, StormTopology topology)
-      throws AlreadyAliveException, InvalidTopologyException {
+  public void submitStormTopology(String topologyName,
+                                  Config topologyConfig, StormTopology topology)
+      throws org.apache.storm.generated.AlreadyAliveException,
+      org.apache.storm.generated.InvalidTopologyException {
     StormSubmitter.submitTopology(topologyName, topologyConfig, topology);
+  }
+
+  public void submitHeronTopology(String topologyName,
+                                  Config topologyConfig, HeronTopology topology)
+      throws com.twitter.heron.api.exception.AlreadyAliveException,
+      com.twitter.heron.api.exception.InvalidTopologyException {
+    HeronSubmitter.submitTopology(topologyName, topologyConfig, topology);
   }
 }

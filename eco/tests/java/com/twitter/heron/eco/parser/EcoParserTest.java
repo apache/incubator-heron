@@ -172,6 +172,7 @@ public class EcoParserTest {
       + "---\n"
       + "\n"
       + "name: \"kafka-topology\"\n"
+      + "type: \"heron\"\n"
       + "\n"
       + "# Components\n"
       + "# Components are analagous to Spring beans. They are meant to be used as constructor,\n"
@@ -349,6 +350,7 @@ public class EcoParserTest {
     List<BeanDefinition> components = topologyDefinition.getComponents();
 
     assertEquals("kafka-topology", topologyDefinition.getName());
+    assertEquals("heron", topologyDefinition.getType());
     assertEquals(4, components.size());
 
     BeanDefinition stringSchemeComponent = components.get(0);

@@ -15,6 +15,7 @@ package com.twitter.heron.eco;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -23,17 +24,13 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.storm.topology.TopologyBuilder;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.eco.builder.BoltBuilder;
 import com.twitter.heron.eco.builder.BuilderUtility;
 import com.twitter.heron.eco.builder.ComponentBuilder;
 import com.twitter.heron.eco.builder.ConfigBuilder;
-import com.twitter.heron.eco.builder.EcoBuilder;
 import com.twitter.heron.eco.builder.ObjectBuilder;
-import com.twitter.heron.eco.builder.SpoutBuilder;
-import com.twitter.heron.eco.builder.StreamBuilder;
 import com.twitter.heron.eco.definition.BoltDefinition;
 import com.twitter.heron.eco.definition.EcoExecutionContext;
 import com.twitter.heron.eco.definition.EcoTopologyDefinition;
@@ -50,16 +47,22 @@ public class Eco {
   private static final String ENV_PROPS = "env-props";
   private static final String ECO_CONFIG_FILE = "eco-config-file";
 
-  private EcoBuilder ecoBuilder;
   private EcoParser ecoParser;
   private EcoSubmitter ecoSubmitter;
 
-  public Eco(EcoBuilder ecoBuilder, EcoParser ecoParser, EcoSubmitter ecoSubmitter) {
-    this.ecoBuilder = ecoBuilder;
+  public Eco(EcoParser ecoParser, EcoSubmitter ecoSubmitter) {
     this.ecoParser = ecoParser;
     this.ecoSubmitter = ecoSubmitter;
   }
 
+  /**
+   * Submit an ECO topology
+   *
+   * @param fileInputStream  The input stream associated with ECO topology definition file
+   * @param propertiesFile  The optional key-value property file for optional property substitution.
+   * @param envFilter The optional flag to tell ECO to perform environment variable substitution
+   * @throws Exception
+   */
   public void submit(FileInputStream fileInputStream,
                      FileInputStream propertiesFile, boolean envFilter)
       throws Exception {
@@ -67,21 +70,61 @@ public class Eco {
         .parseFromInputStream(fileInputStream, propertiesFile, envFilter);
 
     String topologyName = topologyDefinition.getName();
+    String topologyType = topologyDefinition.getType();
 
-    Config topologyConfig = ecoBuilder
-        .buildConfig(topologyDefinition);
+    if ("storm".equals(topologyType)) {
+      System.out.println("topology type is Storm");
+      com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder =
+          new com.twitter.heron.eco.builder.storm.EcoBuilder(
+            new com.twitter.heron.eco.builder.storm.SpoutBuilder(),
+            new BoltBuilder(),
+            new com.twitter.heron.eco.builder.storm.StreamBuilder(),
+            new ComponentBuilder(),
+            new ConfigBuilder());
 
-    EcoExecutionContext executionContext
-        = new EcoExecutionContext(topologyDefinition, topologyConfig);
+      Config topologyConfig = ecoBuilder
+          .buildConfig(topologyDefinition);
 
-    printTopologyInfo(executionContext);
+      EcoExecutionContext executionContext
+          = new EcoExecutionContext(topologyDefinition, topologyConfig);
 
-    ObjectBuilder objectBuilder = new ObjectBuilder();
-    objectBuilder.setBuilderUtility(new BuilderUtility());
-    TopologyBuilder builder = ecoBuilder
-        .buildTopologyBuilder(executionContext, objectBuilder);
+      printTopologyInfo(executionContext);
 
-    ecoSubmitter.submitTopology(topologyName, topologyConfig, builder.createTopology());
+      ObjectBuilder objectBuilder = new ObjectBuilder();
+      objectBuilder.setBuilderUtility(new BuilderUtility());
+
+      org.apache.storm.topology.TopologyBuilder builder = ecoBuilder
+          .buildTopologyBuilder(executionContext, objectBuilder);
+      ecoSubmitter.submitStormTopology(topologyName, topologyConfig, builder.createTopology());
+    } else if ("heron".equals(topologyType)) {
+      System.out.println("topology type is Heron");
+      com.twitter.heron.eco.builder.heron.EcoBuilder ecoBuilder =
+          new com.twitter.heron.eco.builder.heron.EcoBuilder(
+            new com.twitter.heron.eco.builder.heron.SpoutBuilder(),
+            new BoltBuilder(),
+            new com.twitter.heron.eco.builder.heron.StreamBuilder(),
+            new ComponentBuilder(),
+            new ConfigBuilder());
+
+      Config topologyConfig = ecoBuilder
+          .buildConfig(topologyDefinition);
+
+      EcoExecutionContext executionContext
+          = new EcoExecutionContext(topologyDefinition, topologyConfig);
+
+      printTopologyInfo(executionContext);
+
+      ObjectBuilder objectBuilder = new ObjectBuilder();
+      objectBuilder.setBuilderUtility(new BuilderUtility());
+
+      com.twitter.heron.api.topology.TopologyBuilder builder = ecoBuilder
+          .buildTopologyBuilder(executionContext, objectBuilder);
+      ecoSubmitter.submitHeronTopology(topologyName, topologyConfig, builder.createTopology());
+    } else {
+      LOG.log(Level.SEVERE,
+          String.format("Unknown topology type \'%s\' for topology %s, not submitted",
+              topologyType, topologyName));
+    }
   }
 
   public static void main(String[] args) throws Exception {
@@ -109,15 +152,7 @@ public class Eco {
 
     Boolean filterFromEnv = cmd.hasOption(ENV_PROPS);
 
-    Eco eco = new Eco(
-        new EcoBuilder(
-            new SpoutBuilder(),
-            new BoltBuilder(),
-            new StreamBuilder(),
-            new ComponentBuilder(),
-            new ConfigBuilder()),
-        new EcoParser(),
-        new EcoSubmitter());
+    Eco eco = new Eco(new EcoParser(), new EcoSubmitter());
 
     eco.submit(fin, propsInputStream, filterFromEnv);
   }

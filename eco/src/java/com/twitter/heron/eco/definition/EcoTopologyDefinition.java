@@ -22,6 +22,7 @@ import java.util.Map;
 public class EcoTopologyDefinition {
 
   private String name;
+  private String type;
   private Map<String, Object> config = new HashMap<>();
   private Map<String, SpoutDefinition> spouts =  new LinkedHashMap<>();
   private Map<String, BoltDefinition> bolts = new LinkedHashMap<>();
@@ -94,8 +95,23 @@ public class EcoTopologyDefinition {
   }
 
   public String getName() {
-
     return name;
+  }
+
+  public String getType() {
+    if (type == null || "storm".equals(type)) {
+      return "storm";
+    }
+
+    if ("heron".equals(type)) {
+      return "heron";
+    }
+
+    return null;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   public void setName(String name) {
