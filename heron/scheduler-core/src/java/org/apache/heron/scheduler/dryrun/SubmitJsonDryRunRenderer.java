@@ -11,12 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.twitter.heron.scheduler.dryrun;
+package org.apache.heron.scheduler.dryrun;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.common.Context;
+import org.apache.heron.spi.packing.PackingPlan;
 
 /**
  * Dry-run renderer that renders submit dry-run response in raw format
