@@ -15,6 +15,7 @@ package com.twitter.heron.eco;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
@@ -71,7 +72,7 @@ public class Eco {
     String topologyName = topologyDefinition.getName();
     String topologyType = topologyDefinition.getType();
 
-    if (topologyType == null || "storm".equals(topologyType)) {
+    if ("storm".equals(topologyType)) {
       System.out.println("topology type is Storm");
       com.twitter.heron.eco.builder.storm.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.storm.EcoBuilder(
@@ -95,7 +96,7 @@ public class Eco {
       org.apache.storm.topology.TopologyBuilder builder = ecoBuilder
           .buildTopologyBuilder(executionContext, objectBuilder);
       ecoSubmitter.submitStormTopology(topologyName, topologyConfig, builder.createTopology());
-    } else {
+    } else if ("heron".equals(topologyType)) {
       System.out.println("topology type is Heron");
       com.twitter.heron.eco.builder.heron.EcoBuilder ecoBuilder =
           new com.twitter.heron.eco.builder.heron.EcoBuilder(
@@ -119,6 +120,10 @@ public class Eco {
       com.twitter.heron.api.topology.TopologyBuilder builder = ecoBuilder
           .buildTopologyBuilder(executionContext, objectBuilder);
       ecoSubmitter.submitHeronTopology(topologyName, topologyConfig, builder.createTopology());
+    } else {
+      LOG.log(Level.SEVERE,
+          String.format("Unknown topology type \'%s\' for topology %s, not submitted",
+              topologyType, topologyName));
     }
   }
 
