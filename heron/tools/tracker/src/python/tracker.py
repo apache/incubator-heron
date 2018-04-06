@@ -426,6 +426,7 @@ class Tracker(object):
         "spouts": {},
         "bolts": {},
         "config": {},
+        "components": {}
     }
 
     if not topology.physical_plan:
@@ -443,12 +444,21 @@ class Tracker(object):
     # Configs
     if topology.physical_plan.topology.topology_config:
       physicalPlan["config"] = convert_pb_kvs(topology.physical_plan.topology.topology_config.kvs)
+
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []
+      if spout_name not in physicalPlan["components"]:
+        physicalPlan["components"][spout_name] = {
+            "config": convert_pb_kvs(spout.comp.config.kvs)
+        }
     for bolt in bolts:
       bolt_name = bolt.comp.name
       physicalPlan["bolts"][bolt_name] = []
+      if bolt_name not in physicalPlan["components"]:
+        physicalPlan["components"][bolt_name] = {
+            "config": convert_pb_kvs(bolt.comp.config.kvs)
+        }
 
     for stmgr in stmgrs:
       host = stmgr.host_name
