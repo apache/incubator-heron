@@ -13,7 +13,6 @@
 //  limitations under the License.
 package org.apache.heron.eco.definition;
 
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

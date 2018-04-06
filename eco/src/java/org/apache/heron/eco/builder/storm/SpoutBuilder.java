@@ -22,7 +22,6 @@ import org.apache.heron.eco.definition.ObjectDefinition;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.TopologyBuilder;
 
-
 public class SpoutBuilder {
 
   protected void buildSpouts(EcoExecutionContext executionContext,

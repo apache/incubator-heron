@@ -24,7 +24,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.apache.heron.api.Config;
 import org.apache.heron.eco.builder.BoltBuilder;
 import org.apache.heron.eco.builder.BuilderUtility;
@@ -38,7 +37,6 @@ import org.apache.heron.eco.definition.SpoutDefinition;
 import org.apache.heron.eco.definition.StreamDefinition;
 import org.apache.heron.eco.parser.EcoParser;
 import org.apache.heron.eco.submit.EcoSubmitter;
-
 
 public class Eco {
 

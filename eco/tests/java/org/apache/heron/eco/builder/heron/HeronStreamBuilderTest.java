@@ -40,7 +40,6 @@ import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.TimestampExtractor;
 import org.apache.heron.api.windowing.TupleWindow;
-
 import org.apache.heron.eco.builder.ObjectBuilder;
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;

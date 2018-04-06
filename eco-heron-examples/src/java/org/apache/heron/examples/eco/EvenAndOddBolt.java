@@ -20,7 +20,6 @@ import org.apache.heron.api.bolt.BasicOutputCollector;
 import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
-
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 

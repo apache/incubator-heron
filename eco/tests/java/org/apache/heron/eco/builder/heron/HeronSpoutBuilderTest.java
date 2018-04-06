@@ -31,7 +31,6 @@ import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.api.topology.TopologyContext;
-
 import org.apache.heron.eco.builder.ObjectBuilder;
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;

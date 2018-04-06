@@ -18,11 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.storm.spout.SpoutOutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.IRichSpout;
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.topology.TopologyBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,10 +27,14 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.apache.heron.eco.builder.ObjectBuilder;
-
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.definition.SpoutDefinition;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.IRichSpout;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.TopologyBuilder;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;

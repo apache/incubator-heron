@@ -17,8 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.storm.testing.FixedTuple;
-import org.apache.storm.testing.TestWordSpout;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,12 +28,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.heron.eco.definition.ConfigurationMethodDefinition;
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.ObjectDefinition;
+import org.apache.storm.testing.FixedTuple;
+import org.apache.storm.testing.TestWordSpout;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyObject;

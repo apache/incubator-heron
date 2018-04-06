@@ -18,6 +18,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import org.apache.heron.eco.builder.ObjectBuilder;
+import org.apache.heron.eco.definition.EcoExecutionContext;
+import org.apache.heron.eco.definition.EcoTopologyDefinition;
+import org.apache.heron.eco.definition.GroupingDefinition;
+import org.apache.heron.eco.definition.ObjectDefinition;
+import org.apache.heron.eco.definition.StreamDefinition;
 import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.task.OutputCollector;
@@ -34,21 +48,6 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.windowing.TimestampExtractor;
 import org.apache.storm.windowing.TupleWindow;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import org.apache.heron.eco.builder.ObjectBuilder;
-
-import org.apache.heron.eco.definition.EcoExecutionContext;
-import org.apache.heron.eco.definition.EcoTopologyDefinition;
-import org.apache.heron.eco.definition.GroupingDefinition;
-import org.apache.heron.eco.definition.ObjectDefinition;
-import org.apache.heron.eco.definition.StreamDefinition;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;

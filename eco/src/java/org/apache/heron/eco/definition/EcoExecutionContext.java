@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.apache.heron.api.Config;
 
-
 public class EcoExecutionContext {
 
   private EcoTopologyDefinition topologyDefinition;

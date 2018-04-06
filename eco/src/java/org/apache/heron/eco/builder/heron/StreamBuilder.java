@@ -26,9 +26,7 @@ import org.apache.heron.api.topology.BoltDeclarer;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.utils.Utils;
-
 import org.apache.heron.eco.builder.ObjectBuilder;
-
 import org.apache.heron.eco.definition.ComponentStream;
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;

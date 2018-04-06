@@ -21,7 +21,6 @@ import org.apache.heron.api.spout.BaseRichSpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
-
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.api.utils.Utils;

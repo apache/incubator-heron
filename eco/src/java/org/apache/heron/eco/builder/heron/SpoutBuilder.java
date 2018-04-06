@@ -17,13 +17,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.api.topology.TopologyBuilder;
-
 import org.apache.heron.eco.builder.ObjectBuilder;
-
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.definition.ObjectDefinition;
-
 
 public class SpoutBuilder {
 

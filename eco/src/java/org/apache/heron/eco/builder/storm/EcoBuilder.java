@@ -26,7 +26,6 @@ import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.storm.topology.TopologyBuilder;
 
-
 public class EcoBuilder {
 
   private SpoutBuilder spoutBuilder;

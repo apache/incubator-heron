@@ -24,6 +24,7 @@ import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 
 import static org.apache.heron.api.utils.Utils.tuple;
+
 @SuppressWarnings({"serial", "rawtypes"})
 public class TestNameCounter extends BaseBasicBolt {
 

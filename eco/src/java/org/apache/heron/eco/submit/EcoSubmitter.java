@@ -13,13 +13,11 @@
 //  limitations under the License.
 package org.apache.heron.eco.submit;
 
-
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.generated.StormTopology;
-
 import org.apache.heron.api.Config;
 import org.apache.heron.api.HeronSubmitter;
 import org.apache.heron.api.HeronTopology;
+import org.apache.storm.StormSubmitter;
+import org.apache.storm.generated.StormTopology;
 
 public class EcoSubmitter {
 
