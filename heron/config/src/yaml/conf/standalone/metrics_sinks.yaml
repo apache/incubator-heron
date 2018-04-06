@@ -60,7 +60,8 @@ tmaster-sink:
 
 prometheus-sink:
    class: "com.twitter.heron.metricsmgr.sink.PrometheusSink"
-   port: 8080 # The port on which to run (either port or port-file are mandatory)
+#   port: 8080 # The port on which to run (either port or port-file are mandatory)
+   port-file: "port_file"
    path: /metrics # The path on which to publish the metrics (mandatory)
    flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
    include-topology-name: true # Include topology name in metric name (default false)

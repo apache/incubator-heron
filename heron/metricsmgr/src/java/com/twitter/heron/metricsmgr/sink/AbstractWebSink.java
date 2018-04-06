@@ -82,7 +82,7 @@ abstract class AbstractWebSink implements IMetricsSink {
   @Override
   public final void init(Map<String, Object> conf, SinkContext context) {
     String path = (String) conf.get(KEY_PATH);
-    String portFile = (String) conf.get(KEY_PORT_FILE);
+    String portFile = getServerPortFile(conf);
 
     cacheMaxSize = TypeUtils.getLong(conf.getOrDefault(KEY_METRICS_CACHE_MAX_SIZE,
         DEFAULT_MAX_CACHE_SIZE));
@@ -132,6 +132,7 @@ abstract class AbstractWebSink implements IMetricsSink {
         os.close();
         LOG.log(Level.INFO, "Received metrics request.");
       });
+      LOG.info("Starting web sink server on port: " + port);
       httpServer.start();
     } catch (IOException e) {
       throw new RuntimeException("Failed to create Http server on port " + port, e);
@@ -163,5 +164,9 @@ abstract class AbstractWebSink implements IMetricsSink {
     if (httpServer != null) {
       httpServer.stop(0);
     }
+  }
+
+  public static String getServerPortFile(Map<String, Object> conf) {
+    return (String) conf.get(KEY_PORT_FILE);
   }
 }
