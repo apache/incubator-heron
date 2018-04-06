@@ -18,16 +18,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.utils.PackingTestUtils;
 
-import static org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 import static junit.framework.TestCase.assertEquals;
+import static org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
 
 public class JsonFormatterUtilsTest {
 
