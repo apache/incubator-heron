@@ -39,7 +39,6 @@ import org.apache.heron.apiserver.actions.ActionType;
 import org.apache.heron.spi.common.Config;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
