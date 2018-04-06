@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.api.tuple.Tuple;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IWindowedBolt;
@@ -30,10 +33,6 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TupleFieldTimestampExtractor;
 import org.apache.storm.tuple.TupleImpl;
 import org.apache.storm.windowing.TimestampExtractor;
-
-import org.apache.heron.api.generated.TopologyAPI;
-import org.apache.heron.api.tuple.Fields;
-import org.apache.heron.api.tuple.Tuple;
 
 public abstract class BaseWindowedBolt implements IWindowedBolt {
   private static final long serialVersionUID = -3998164228343123590L;

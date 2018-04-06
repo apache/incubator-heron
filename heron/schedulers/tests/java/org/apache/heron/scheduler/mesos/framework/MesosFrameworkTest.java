@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.mesos.Protos;
-import org.apache.mesos.SchedulerDriver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,6 +30,8 @@ import org.mockito.Mockito;
 
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.apache.mesos.Protos;
+import org.apache.mesos.SchedulerDriver;
 
 public class MesosFrameworkTest {
   private static final String TOPOLOGY_NAME = "testTopology";

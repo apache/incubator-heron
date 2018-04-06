@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.heron.common.basics.TypeUtils;
 import org.apache.storm.Config;
 import org.apache.storm.hooks.info.BoltAckInfo;
 import org.apache.storm.hooks.info.BoltExecuteInfo;
@@ -30,8 +31,6 @@ import org.apache.storm.hooks.info.EmitInfo;
 import org.apache.storm.hooks.info.SpoutAckInfo;
 import org.apache.storm.hooks.info.SpoutFailInfo;
 import org.apache.storm.task.TopologyContext;
-
-import org.apache.heron.common.basics.TypeUtils;
 
 /**
  * There would be types of task hooks inside ITaskHookDelegate:

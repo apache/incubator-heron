@@ -21,10 +21,9 @@ package org.apache.storm.topology;
 // TODO:- Add this
 // import org.apache.storm.grouping.CustomStreamGrouping;
 
-import org.apache.storm.generated.StormTopology;
-
 import org.apache.heron.api.HeronTopology;
 import org.apache.heron.api.bolt.WindowedBoltExecutor;
+import org.apache.storm.generated.StormTopology;
 
 public class TopologyBuilder {
   private org.apache.heron.api.topology.TopologyBuilder delegate =

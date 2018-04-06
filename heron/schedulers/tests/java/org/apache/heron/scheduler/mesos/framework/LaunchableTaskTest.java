@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.mesos.Protos;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +27,7 @@ import org.mockito.Mockito;
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.apache.mesos.Protos;
 
 public class LaunchableTaskTest {
   private static final String TOPOLOGY_NAME = "testTopology";
