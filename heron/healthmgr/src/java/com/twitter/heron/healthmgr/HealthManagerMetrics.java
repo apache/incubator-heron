@@ -227,7 +227,6 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
     @Override
     public void onResponse(StatusCode status, Object ctx, Message response) {
       if (status != StatusCode.OK) {
-        // TODO:- is this a good thing?
         throw new RuntimeException("Response from Metrics Manager not ok");
       }
       if (Metrics.MetricPublisherRegisterResponse.class.isInstance(response)) {
