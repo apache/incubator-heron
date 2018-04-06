@@ -25,7 +25,10 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Values;
 
-public class StatefulRandomIntSpout extends BaseRichSpout implements IStatefulComponent<String, Integer> {
+import backtype.storm.utils.Utils;
+
+public class StatefulRandomIntSpout extends BaseRichSpout
+    implements IStatefulComponent<String, Integer> {
   private SpoutOutputCollector spoutOutputCollector;
   private State<String, Integer> count;
 
@@ -61,7 +64,9 @@ public class StatefulRandomIntSpout extends BaseRichSpout implements IStatefulCo
 
   @Override
   public void nextTuple() {
+    Utils.sleep(2000);
     int randomInt = randomInt();
+    System.out.println("Emitting Value: " + randomInt);
     spoutOutputCollector.emit(new Values(randomInt));
   }
 }

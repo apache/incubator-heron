@@ -12,27 +12,41 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: "stateful-word-count"
+name: "stateful-windowing"
 type: "heron"
 
 config:
   topology.workers: 1
   topology.reliability.mode: "EFFECTIVELY_ONCE"
 
+components:
+
+  - id: "windowLength"
+    className: "com.twitter.heron.api.bolt.BaseWindowedBolt$Count"
+    constructorArgs:
+      - 5
+
+  - id: "slidingInterval"
+    className: "com.twitter.heron.api.bolt.BaseWindowedBolt$Count"
+    constructorArgs:
+      - 3
 
 spouts:
-  - id: "int-spout"
-    className: "com.twitter.heron.examples.eco.StatefulRandomIntSpout"
+  - id: "integer-spout"
+    className: "com.twitter.heron.examples.eco.StatefulNumberSpout"
     parallelism: 1
 
 bolts:
-  - id: "stateful-consumer-bolt"
-    className: "com.twitter.heron.examples.eco.StatefulConsumerBolt"
+  - id: "stateful-window-sum-bolt"
+    className: "com.twitter.heron.examples.eco.StatefulWindowSumBolt"
+    configMethods:
+      - name: "withWindow"
+        args: [ref: "windowLength", ref: "slidingInterval"]
     parallelism: 1
 
 
 streams:
-  - from: "int-spout"
-    to: "stateful-consumer-bolt"
+  - from: "integer-spout"
+    to: "stateful-window-sum-bolt"
     grouping:
       type: SHUFFLE

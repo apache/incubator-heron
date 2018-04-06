@@ -23,16 +23,16 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
+
 public class StatefulConsumerBolt extends BaseRichBolt
-    implements IStatefulComponent<String, Integer> {
+    implements IStatefulComponent<Integer, Integer> {
   private static final long serialVersionUID = -5470591933906954522L;
 
   private OutputCollector collector;
-  private Map<String, Integer> countMap;
-  private State<String, Integer> myState;
+  private State<Integer, Integer> myState;
 
   @Override
-  public void initState(State<String, Integer> state) {
+  public void initState(State<Integer, Integer> state) {
     this.myState = state;
   }
 
@@ -48,7 +48,7 @@ public class StatefulConsumerBolt extends BaseRichBolt
 
   @Override
   public void execute(Tuple tuple) {
-    String key = tuple.getString(0);
+    int key = tuple.getInteger(0);
     System.out.println("looking in state for: " + key);
     if (myState.get(key) == null) {
       System.out.println("did not find " + key + " in state: ");
