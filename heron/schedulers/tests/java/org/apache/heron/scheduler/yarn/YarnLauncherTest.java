@@ -18,18 +18,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.reef.driver.parameters.DriverIdentifier;
-import org.apache.reef.driver.parameters.DriverMemory;
-import org.apache.reef.runtime.common.driver.DriverRuntimeConfigurationOptions.JobControlHandler;
-import org.apache.reef.runtime.common.driver.api.RuntimeParameters;
-import org.apache.reef.runtime.common.driver.client.ClientManager;
-import org.apache.reef.runtime.common.driver.resourcemanager.NodeDescriptorHandler;
-import org.apache.reef.runtime.common.driver.resourcemanager.ResourceAllocationHandler;
-import org.apache.reef.runtime.common.driver.resourcemanager.ResourceManagerStatus;
-import org.apache.reef.runtime.common.driver.resourcemanager.ResourceStatusHandler;
-import org.apache.reef.runtime.yarn.client.parameters.JobQueue;
-import org.apache.reef.tang.Configuration;
-import org.apache.reef.tang.types.NamedParameterNode;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -45,6 +33,18 @@ import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackage
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
+import org.apache.reef.driver.parameters.DriverIdentifier;
+import org.apache.reef.driver.parameters.DriverMemory;
+import org.apache.reef.runtime.common.driver.DriverRuntimeConfigurationOptions.JobControlHandler;
+import org.apache.reef.runtime.common.driver.api.RuntimeParameters;
+import org.apache.reef.runtime.common.driver.client.ClientManager;
+import org.apache.reef.runtime.common.driver.resourcemanager.NodeDescriptorHandler;
+import org.apache.reef.runtime.common.driver.resourcemanager.ResourceAllocationHandler;
+import org.apache.reef.runtime.common.driver.resourcemanager.ResourceManagerStatus;
+import org.apache.reef.runtime.common.driver.resourcemanager.ResourceStatusHandler;
+import org.apache.reef.runtime.yarn.client.parameters.JobQueue;
+import org.apache.reef.tang.Configuration;
+import org.apache.reef.tang.types.NamedParameterNode;
 
 public class YarnLauncherTest {
   // This test verifies if launcher correctly provides all heron specific configurations are to reef

@@ -24,17 +24,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
 import com.amazonaws.SdkClientException;
-
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-
 import com.google.common.base.Strings;
 
 import org.apache.heron.spi.common.Config;

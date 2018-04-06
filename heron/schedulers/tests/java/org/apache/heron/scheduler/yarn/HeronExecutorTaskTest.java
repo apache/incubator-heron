@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.reef.runtime.common.files.REEFFileNames;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +40,7 @@ import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.utils.ShellUtils;
+import org.apache.reef.runtime.common.files.REEFFileNames;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.swing.*")
