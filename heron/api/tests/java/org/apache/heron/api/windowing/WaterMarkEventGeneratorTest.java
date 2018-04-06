@@ -26,7 +26,9 @@ import org.junit.Test;
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link WaterMarkEventGenerator}

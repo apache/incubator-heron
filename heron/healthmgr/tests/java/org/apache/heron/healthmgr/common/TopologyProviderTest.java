@@ -24,10 +24,10 @@ import org.junit.Test;
 
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI.Topology;
+import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import org.apache.heron.common.utils.topology.TopologyTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

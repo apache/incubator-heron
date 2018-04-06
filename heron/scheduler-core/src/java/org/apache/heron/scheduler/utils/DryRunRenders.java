@@ -14,7 +14,6 @@
 package org.apache.heron.scheduler.utils;
 
 import org.apache.heron.common.basics.DryRunFormatType;
-
 import org.apache.heron.scheduler.dryrun.SubmitDryRunResponse;
 import org.apache.heron.scheduler.dryrun.SubmitJsonDryRunRenderer;
 import org.apache.heron.scheduler.dryrun.SubmitRawDryRunRenderer;

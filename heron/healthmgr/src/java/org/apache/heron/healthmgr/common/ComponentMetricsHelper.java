@@ -23,7 +23,6 @@ import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-
 import org.apache.heron.healthmgr.sensors.BaseSensor;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;

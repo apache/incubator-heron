@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.hooks.ITaskHook;
 import org.apache.heron.api.metric.CombinedMetric;

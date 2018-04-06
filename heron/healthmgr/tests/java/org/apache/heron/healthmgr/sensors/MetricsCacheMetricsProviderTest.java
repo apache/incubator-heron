@@ -22,6 +22,10 @@ import java.util.Map;
 
 import com.microsoft.dhalion.metrics.ComponentMetrics;
 import com.microsoft.dhalion.metrics.InstanceMetrics;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import org.apache.heron.proto.system.Common.Status;
 import org.apache.heron.proto.system.Common.StatusCode;
 import org.apache.heron.proto.tmaster.TopologyMaster;
@@ -31,9 +35,6 @@ import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.IndividualMe
 import org.apache.heron.proto.tmaster.TopologyMaster.MetricResponse.TaskMetric;
 import org.apache.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-
-import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

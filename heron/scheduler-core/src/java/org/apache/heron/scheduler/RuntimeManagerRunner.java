@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.heron.api.generated.TopologyAPI;

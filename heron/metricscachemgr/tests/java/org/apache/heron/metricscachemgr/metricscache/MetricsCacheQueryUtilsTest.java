@@ -35,7 +35,9 @@ import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.tmaster.TopologyMaster;
 
 import static org.apache.heron.metricscachemgr.metricscache.MetricsCacheQueryUtils.toProtobuf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class MetricsCacheQueryUtilsTest {
   private static void assertMetricRequest(

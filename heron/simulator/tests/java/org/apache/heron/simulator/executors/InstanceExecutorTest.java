@@ -28,7 +28,6 @@ import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.instance.IInstance;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.simulator.utils.TopologyManager;
-
 import org.apache.heron.simulator.utils.TopologyManagerTest;
 
 
