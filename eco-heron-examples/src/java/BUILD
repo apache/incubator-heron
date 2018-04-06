@@ -7,7 +7,7 @@ filegroup(
 
 java_binary(
     name='eco-examples-unshaded',
-    srcs = glob(["com/twitter/heron/examples/eco/**/*.java"]),
+    srcs = glob(["org/apache/heron/examples/eco/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/java:api-java",

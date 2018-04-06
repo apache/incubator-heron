@@ -1,8 +1,8 @@
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.nomad.NomadScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.nomad.NomadScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.nomad.NomadLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.nomad.NomadLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY_ID}

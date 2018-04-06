@@ -20,7 +20,7 @@ title: Release Process
 
 Steps taken from Maven Release process outlined by [sonatype.org](http://central.sonatype.org/) and summarized below.
 
-1. Request access to publish to com.twitter by creating account and requesting access in [sonatype.org](https://issues.sonatype.org).
+1. Request access to publish to org.apache by creating account and requesting access in [sonatype.org](https://issues.sonatype.org).
 2. Twitter contact needed to confirm access [(see example)](https://issues.sonatype.org/browse/OSSRH-22297).
 3. Install local GPG/PGP to sign files by following [sonatype instructions](http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp). 
 4. Publish public key [(see example)](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
@@ -35,11 +35,11 @@ Example POM template files required located in `heron/release/maven/`.
 
 <!-- TODO refer to release "build process" instructions, not download  -->
 <!-- TODO update for "heron-spi" artifact when available -->
-### Step 1 - Download and install `heron-api-install-{VERSION}-{DIST}.sh` from [github releases](https://github.com/twitter/heron/releases)
+### Step 1 - Download and install `heron-api-install-{VERSION}-{DIST}.sh` from [github releases](https://github.com/apache/incubator-heron/releases)
 
 Example command for `heron-api` version `0.14.0` installed using the `--user` flag:
 ```
-$ wget https://github.com/twitter/heron/releases/download/0.14.0/heron-api-install-0.14.0-darwin.sh
+$ wget https://github.com/apache/incubator-heron/releases/download/0.14.0/heron-api-install-0.14.0-darwin.sh
 $ chmod +x heron-api-install-0.14.0-darwin.sh
 $ ./heron-api-install-0.14.0-darwin.sh --user
 ```
@@ -128,9 +128,9 @@ For each artifact, `heron-api`, `heron-storm` and `heron-spi`, separately upload
   5.  `Closing` will fail if your components do not meet the requirements. If this happens, you can press **Drop** and the staging repository will be deleted.
   6.  Once you have successfully closed the staging repository, you can release it by pressing the **Release** button.
 
-Note, since `com.twitter.heron` already exists, once released, artifacts will immediately be synced with Maven Central.  
+Note, since `org.apache.heron` already exists, once released, artifacts will immediately be synced with Maven Central.
 
-4. Check that artifacts are successfully released by going to [Maven's search page](http://search.maven.org/) and searching for `com.twitter.heron` with proper `version`.
+4. Check that artifacts are successfully released by going to [Maven's search page](http://search.maven.org/) and searching for `org.apache.heron` with proper `version`.
 
 5. As a final end-to-end check, ensure that you can successfully pull the correct `version` artifacts from Maven Central in a local topology. To do this:
   1. Delete your local `~/.heronapi` directory.

@@ -21,98 +21,98 @@ eco_test_deps = heron_local_deps + test_deps_files
 
 java_test(
     name = "StormEcoBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/storm/StormEcoBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/storm/StormEcoBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small",
 )
 
 java_test(
     name = "HeronEcoBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronEcoBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/heron/HeronEcoBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small",
 )
 
 java_test(
     name = "EcoParserTest",
-    srcs = glob(["com/twitter/heron/eco/parser/EcoParserTest.java"]),
+    srcs = glob(["org/apache/heron/eco/parser/EcoParserTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "ConfigBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/ConfigBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/ConfigBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "BoltBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/BoltBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/BoltBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "ComponentBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/ComponentBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/ComponentBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "StormSpoutBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/storm/StormSpoutBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/storm/StormSpoutBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "HeronSpoutBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronSpoutBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/heron/HeronSpoutBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "StormStreamBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/storm/StormStreamBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/storm/StormStreamBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "HeronStreamBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronStreamBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/heron/HeronStreamBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "EcoTest",
-    srcs = glob(["com/twitter/heron/eco/EcoTest.java"]),
+    srcs = glob(["org/apache/heron/eco/EcoTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "ObjectBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/ObjectBuilderTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/ObjectBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "BuilderUtilityTest",
-    srcs = glob(["com/twitter/heron/eco/builder/BuilderUtilityTest.java"]),
+    srcs = glob(["org/apache/heron/eco/builder/BuilderUtilityTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
     name = "EcoSubmitterTest",
-    srcs = glob(["com/twitter/heron/eco/submit/EcoSubmitterTest.java"]),
+    srcs = glob(["org/apache/heron/eco/submit/EcoSubmitterTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )

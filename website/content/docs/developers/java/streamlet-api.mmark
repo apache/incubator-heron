@@ -17,7 +17,7 @@ In order to use the `heron-api` library, add this to the `dependencies` block of
 
 ```xml
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
 </dependency>
@@ -107,8 +107,8 @@ The other options are `at-most-once` and `at-least-once`. If you don't explicitl
 Every Streamlet API topology needs to be configured using a `Config` object. Here's an example default configuration:
 
 ```java
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Runner;
+import org.apache.heron.streamlet.Config;
+import org.apache.heron.streamlet.Runner;
 
 Config topologyConfig = Config.defaultConfig();
 
@@ -264,8 +264,8 @@ The context object available to a transform operation provides access to:
 Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.SerializableTransformer;
 
 import java.util.function.Consumer;
 
@@ -291,7 +291,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
 
 This operation does a few things:
 
-* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `setup` method, the [`Context`](/api/java/org/apache/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
 * In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
 * In the `cleanup` step, the current count of items processed is logged.
 
@@ -310,7 +310,7 @@ builder.newSource(() -> "Some string over and over");
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.newBuilder();
 
@@ -339,7 +339,7 @@ Reduce by key and window operations produce a new streamlet of key-value window 
 ```java
 import java.util.Arrays;
 
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.newBuilder()
     .newSource(() -> "Mary had a little lamb")
@@ -383,8 +383,8 @@ In this example, the supplier streamlet emits random integers between one and te
 In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Sink;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.Sink;
 
 public class FormattedLogSink implements Sink<T> {
     private String streamletName;

@@ -24,7 +24,7 @@
 ### To submit/activate/kill a topology:
 ```
 #To submit a topology:
-        docker exec heron_executor_1 heron submit local /usr/local/heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology --deploy-deactivated
+        docker exec heron_executor_1 heron submit local /usr/local/heron/examples/heron-examples.jar org.apache.heron.examples.ExclamationTopology ExclamationTopology --deploy-deactivated
 #To activate a topology:
         docker exec -it heron_executor_1 heron activate local ExclamationTopology
 #To kill a topology:

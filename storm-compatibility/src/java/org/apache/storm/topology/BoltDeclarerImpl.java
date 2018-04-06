@@ -28,9 +28,9 @@ import org.apache.storm.utils.ConfigUtils;
 import org.apache.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
-  private com.twitter.heron.api.topology.BoltDeclarer delegate;
+  private org.apache.heron.api.topology.BoltDeclarer delegate;
 
-  public BoltDeclarerImpl(com.twitter.heron.api.topology.BoltDeclarer delegate) {
+  public BoltDeclarerImpl(org.apache.heron.api.topology.BoltDeclarer delegate) {
     this.delegate = delegate;
   }
 

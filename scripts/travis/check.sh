@@ -10,7 +10,7 @@ TMP_DIR=$(mktemp -d)
 
 tar -xf $HERON_CORE_LOC -C $TMP_DIR 2>/dev/null
 cd $TMP_DIR
-THIRD_PARTIES="$(jar -tf $HERON_INSTANCE | grep -v 'com/twitter' | grep -oE '(com|org)/[^/]+/' | sort | uniq)"
+THIRD_PARTIES="$(jar -tf $HERON_INSTANCE | grep -v 'org/apache' | grep -oE '(com|org)/[^/]+/' | sort | uniq)"
 if [ -z "$THIRD_PARTIES" ]; then
   exit 0
 else

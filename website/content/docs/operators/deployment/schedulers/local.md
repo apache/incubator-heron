@@ -32,10 +32,10 @@ To configure Heron to use local scheduler, specify the following in `scheduler.y
 config file.
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for local scheduler.
-Set this to `com.twitter.heron.scheduler.local.LocalScheduler`
+Set this to `org.apache.heron.scheduler.local.LocalScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching
-topologies. Set this to `com.twitter.heron.scheduler.local.LocalLauncher`
+topologies. Set this to `org.apache.heron.scheduler.local.LocalLauncher`
 
 * `heron.scheduler.local.working.directory` --- Provides the working
 directory for topology. The working directory is essentially a scratch pad where
@@ -52,10 +52,10 @@ use the value set in the bash environment variable $JAVA_HOME.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.local.LocalScheduler
+heron.class.scheduler: org.apache.heron.scheduler.local.LocalScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.local.LocalLauncher
+heron.class.launcher: org.apache.heron.scheduler.local.LocalLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory: ${HOME}/.herondata/topologies/${CLUSTER}/${TOPOLOGY}

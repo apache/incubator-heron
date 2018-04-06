@@ -32,13 +32,13 @@ import java.util.List;
  * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TupleImpl implements Tuple {
-  private com.twitter.heron.api.tuple.Tuple delegate;
+  private org.apache.heron.api.tuple.Tuple delegate;
 
-  public TupleImpl(com.twitter.heron.api.tuple.Tuple t) {
+  public TupleImpl(org.apache.heron.api.tuple.Tuple t) {
     delegate = t;
   }
 
-  public com.twitter.heron.api.tuple.Tuple getDelegate() {
+  public org.apache.heron.api.tuple.Tuple getDelegate() {
     return delegate;
   }
 

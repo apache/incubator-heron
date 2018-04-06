@@ -66,7 +66,7 @@ $ export PATH="$PATH:$HOME/bin"
 ### Step 8 --- Fetch the latest version of Heron's source code
 
 ```bash
-$ git clone https://github.com/twitter/heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd heron
 ```
 
 ### Step 9 --- Configure Heron for building with Bazel
@@ -206,7 +206,7 @@ bazelVersion %}}).
 ### Step 6 --- Download Heron and compile it
 
 ```bash
-$ git clone https://github.com/twitter/heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd heron
 $ ./bazel_configure.py
 $ bazel build --config=centos heron/...
 ```

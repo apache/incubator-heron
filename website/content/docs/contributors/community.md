@@ -7,7 +7,7 @@ title: Community
 
 Discussion about Heron happens on GitHub and over mailing list.
 
-* GitHub: [twitter/heron](https://github.com/twitter/heron)
+* GitHub: [twitter/heron](https://github.com/apache/incubator-heron)
 * Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
 * Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
@@ -32,7 +32,7 @@ $ ./scripts/setup-intellij.sh
 
 In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
 "cleanup" changes) are preferred. If you're looking for places to contribute, issues with label
-[help-wanted](https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
+[help-wanted](https://github.com/apache/incubator-heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
 are good candidates. Please check with [mailing list](https://groups.google.com/forum/#!forum/heron-users)
 if your patch involves lots of changes.
 

@@ -167,7 +167,7 @@ Once your standalone cluster is up and running and you've set the service URL fo
 ```bash
 $ heron submit standalone \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCount
 ```
 
@@ -177,7 +177,7 @@ You can also specify the service url as part of the submission command:
 $ heron submit standalone \
   --service-url http://localhost:9000 \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCount
 ```
 

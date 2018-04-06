@@ -12,7 +12,7 @@ You can make Heron aware of the Http uploader by modifying the `uploader.yaml` c
 for the Heron cluster. You’ll need to specify the following for each cluster:
 
 * `heron.class.uploader` — Indicate the uploader class to be loaded. You should set this 
-to `com.twitter.heron.uploader.http.HttpUploader`
+to `org.apache.heron.uploader.http.HttpUploader`
 
 * `heron.uploader.http.uri` — Provides the name of the URI where the topology jar should be 
 uploaded.
@@ -23,7 +23,7 @@ Below is an example configuration (in `uploader.yaml`) for a Http uploader:
 
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader: com.twitter.heron.uploader.http.HttpUploader
+heron.class.uploader: org.apache.heron.uploader.http.HttpUploader
 
 heron.uploader.http.uri: http://localhost:9000/api/v1/file/upload
 ```
@@ -37,7 +37,7 @@ ${HOME}/.heron/bin/heron-apiserver
 --base-template standalone 
 -D heron.statemgr.connection.string=<zookeeper_host:zookeeper_port> 
 -D heron.nomad.scheduler.uri=<scheduler_uri> 
--D heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader 
+-D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader
 --verbose
 ```
 

@@ -18,7 +18,7 @@ job "apiserver" {
         "--base-template", "standalone",
         "-D", "heron.statemgr.connection.string=<zookeeper_host:zookeeper_port>",
         "-D", "heron.nomad.scheduler.uri=<scheduler_uri>",
-        "-D", "heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader",
+        "-D", "heron.class.uploader=org.apache.heron.uploader.http.HttpUploader",
         "--verbose"]
       }
       resources {
