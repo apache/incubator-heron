@@ -15,7 +15,6 @@ package org.apache.heron.eco;
 
 import java.io.FileInputStream;
 
-import org.apache.storm.generated.StormTopology;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +29,7 @@ import org.apache.heron.api.HeronTopology;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.parser.EcoParser;
 import org.apache.heron.eco.submit.EcoSubmitter;
+import org.apache.storm.generated.StormTopology;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
