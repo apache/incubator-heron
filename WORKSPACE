@@ -922,6 +922,18 @@ new_http_archive(
     build_file = "third_party/nomad/nomad.BUILD",
 )
 
+# for twitter connector
+TWITTER_CONNECTOR_VERSION = "4.0.6"
+maven_jar(
+  name = "org_twitter4j_core",
+  artifact = "org.twitter4j:twitter4j-core:" + TWITTER_CONNECTOR_VERSION,
+)
+
+maven_jar(
+  name = "org_twitter4j_stream",
+  artifact = "org.twitter4j:twitter4j-stream:" + TWITTER_CONNECTOR_VERSION,
+)
+
 # scala integration
 rules_scala_version="5cdae2f034581a05e23c3473613b409de5978833" # update this as needed
 

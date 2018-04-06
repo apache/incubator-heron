@@ -361,3 +361,16 @@ java_library(
         "@commons_logging_commons_logging//jar",
     ],
 )
+
+java_library(
+    name = "twitter4j",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@org_twitter4j_stream//jar",
+        "@org_twitter4j_core//jar",
+    ],
+    deps = [
+        "@org_twitter4j_stream//jar",
+        "@org_twitter4j_core//jar",
+    ],
+)
