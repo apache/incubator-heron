@@ -22,8 +22,8 @@ public abstract class BaseDiagnoser implements IDiagnoser {
   protected ExecutionContext context;
 
   @Override
-  public void initialize(ExecutionContext context) {
-    this.context = context;
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
   }
 
   public enum DiagnosisType {

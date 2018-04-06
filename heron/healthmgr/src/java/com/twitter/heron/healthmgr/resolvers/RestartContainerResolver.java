@@ -35,7 +35,6 @@ import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 
 import static com.twitter.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
@@ -56,8 +55,8 @@ public class RestartContainerResolver implements IResolver {
   }
 
   @Override
-  public void initialize(ExecutionContext context) {
-    this.context = context;
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
   }
 
   @Override

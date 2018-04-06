@@ -54,8 +54,8 @@ public class DataSkewDiagnoser extends BaseDiagnoser {
     SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
     // verify data skew, larger queue size and back pressure for the same component exists
-    if (waitQSkew.assignment(bpComponent).size() == 0 || processingRateSkew.assignment
-        (bpComponent).size() == 0) {
+    if (waitQSkew.assignment(bpComponent).size() == 0
+        || processingRateSkew.assignment(bpComponent).size() == 0) {
       return diagnoses;
     }
 

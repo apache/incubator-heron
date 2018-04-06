@@ -45,7 +45,7 @@ public abstract class BaseDetector implements IDetector {
   }
 
   @Override
-  public void initialize(ExecutionContext context) {
-    this.context = context;
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
   }
 }

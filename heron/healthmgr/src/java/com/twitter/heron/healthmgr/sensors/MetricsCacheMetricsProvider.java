@@ -72,7 +72,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
         TopologyMaster.MetricResponse response =
             getMetricsFromMetricsCache(metric, component, startTime, duration);
         Collection<Measurement> measurements = parse(response, component, metric, startTime);
-        LOG.fine(String.format("%d measurements received for %s/%s", measurements.size(), component, metric));
+        LOG.fine(String.format("%d measurements received for %s/%s",
+            measurements.size(), component, metric));
         result.addAll(measurements);
       }
     }

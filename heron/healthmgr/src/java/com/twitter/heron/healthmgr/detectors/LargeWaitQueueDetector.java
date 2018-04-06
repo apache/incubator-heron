@@ -54,8 +54,8 @@ public class LargeWaitQueueDetector extends BaseDetector {
 
     Collection<Symptom> result = new ArrayList<>();
 
-    MeasurementsTable waitQueueMetrics = MeasurementsTable.of(measurements).type
-        (METRIC_WAIT_Q_SIZE.text());
+    MeasurementsTable waitQueueMetrics
+        = MeasurementsTable.of(measurements).type(METRIC_WAIT_Q_SIZE.text());
     for (String component : waitQueueMetrics.uniqueComponents()) {
       Set<String> addresses = new HashSet<>();
       MeasurementsTable instanceMetrics = waitQueueMetrics.component(component);

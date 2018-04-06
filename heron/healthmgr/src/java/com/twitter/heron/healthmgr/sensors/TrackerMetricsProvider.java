@@ -75,7 +75,8 @@ public class TrackerMetricsProvider implements MetricsProvider {
       for (String component : components) {
         String response = getMetricsFromTracker(metric, component, startTime, duration);
         Collection<Measurement> measurements = parse(response, component, metric);
-        LOG.fine(String.format("%d measurements received for %s/%s", measurements.size(), component, metric));
+        LOG.fine(String.format("%d measurements received for %s/%s",
+            measurements.size(), component, metric));
         result.addAll(measurements);
       }
     }

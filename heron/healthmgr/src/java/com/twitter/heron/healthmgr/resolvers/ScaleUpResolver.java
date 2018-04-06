@@ -77,8 +77,8 @@ public class ScaleUpResolver implements IResolver {
   }
 
   @Override
-  public void initialize(ExecutionContext context) {
-    this.context = context;
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
   }
 
   @Override
