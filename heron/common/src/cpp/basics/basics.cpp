@@ -154,7 +154,7 @@ static void InitLogging() {
  *      Instance id of the program calling initialize
  */
 static void InitHelper(const char* argv0, const char* instance, bool istest) {
-  CHECK(signal(SIGPIPE, SIG_IGN) != SIG_ERR);
+  CHECK_NE(signal(SIGPIPE, SIG_IGN), SIG_ERR);
 
   // create execution meta data object
   SetMetadata(argv0, instance, istest);

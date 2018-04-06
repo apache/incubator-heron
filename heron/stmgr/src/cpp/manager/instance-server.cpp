@@ -222,7 +222,8 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
   auto iiter = active_instances_.find(_conn);
   if (iiter != active_instances_.end()) {
     sp_int32 task_id = iiter->second;
-    CHECK(instance_info_.find(task_id) != instance_info_.end());
+    CHECK(instance_info_.find(task_id) != instance_info_.end())
+        << "Task " << task_id << " is not found";
     sp_string instance_id = instance_info_[task_id]->instance_->instance_id();
     LOG(INFO) << "Instance " << instance_id << " closed connection";
 
@@ -524,7 +525,8 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   }
 
   CHECK(remote_ends_who_caused_back_pressure_.find(instance_name) !=
-        remote_ends_who_caused_back_pressure_.end());
+        remote_ends_who_caused_back_pressure_.end())
+      << "Instance " << instance_name << " is not found in the backpressure list";
   remote_ends_who_caused_back_pressure_.erase(instance_name);
 
   // Indicate which instance component stopped back pressure

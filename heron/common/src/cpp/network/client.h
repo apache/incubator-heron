@@ -245,7 +245,7 @@ class Client : public BaseClient {
       __global_protobuf_pool_release__(m);
       return;
     }
-    CHECK(m->IsInitialized());
+    CHECK(m->IsInitialized()) << "Protobuf not initialized";
 
     std::function<void()> cb = std::bind(method, _t, m);
 

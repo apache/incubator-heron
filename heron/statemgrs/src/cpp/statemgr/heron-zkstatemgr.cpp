@@ -74,22 +74,22 @@ HeronZKStateMgr::~HeronZKStateMgr() {
 
 void HeronZKStateMgr::InitTree() {
   // Needs to be implemented
-  CHECK(false);
+  CHECK(false) << "HeronZKStateMgr::InitTree() is not implemented yet";
 }
 
 void HeronZKStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
                                               VCallback<> watcher) {
-  CHECK(watcher);
-  CHECK(!topology_name.empty());
+  CHECK(watcher) << "Watcher callback is missing in SetTMasterLocationWatch";
+  CHECK(!topology_name.empty()) << "Topology name is missing";
 
   tmaster_location_watcher_info_ = new TMasterLocationWatchInfo(std::move(watcher), topology_name);
   SetTMasterLocationWatchInternal();
 }
 
 void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_name,
-                                              VCallback<> watcher) {
-  CHECK(watcher);
-  CHECK(!topology_name.empty());
+                                                   VCallback<> watcher) {
+  CHECK(watcher) << "Watcher callback is missing in SetMetricsCacheLocationWatch";
+  CHECK(!topology_name.empty()) << "Topology name is missing";
 
   metricscache_location_watcher_info_ = new TMasterLocationWatchInfo(
                               std::move(watcher), topology_name);
@@ -97,8 +97,8 @@ void HeronZKStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_n
 }
 
 void HeronZKStateMgr::SetPackingPlanWatch(const std::string& topology_name, VCallback<> watcher) {
-  CHECK(watcher);
-  CHECK(!topology_name.empty());
+  CHECK(watcher) << "Watcher callback is missing in SetPackingPlanWatch";
+  CHECK(!topology_name.empty()) << "Topology name is missing";
 
   packing_plan_watcher_info_ = new TMasterLocationWatchInfo(std::move(watcher), topology_name);
   SetPackingPlanWatchInternal();

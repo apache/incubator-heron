@@ -65,7 +65,7 @@ void HeronLocalFileStateMgr::InitTree() {
 
 void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology_name,
                                                      VCallback<> watcher) {
-  CHECK(watcher);
+  CHECK(watcher) << "Watcher callback is missing in SetTMasterLocationWatch()";
   // We kind of cheat here. We check periodically
   time_t tmaster_last_change = FileUtils::getModifiedTime(GetTMasterLocationPath(topology_name));
 
@@ -78,7 +78,7 @@ void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology
 
 void HeronLocalFileStateMgr::SetMetricsCacheLocationWatch(const std::string& topology_name,
                                                      VCallback<> watcher) {
-  CHECK(watcher);
+  CHECK(watcher) << "Watcher callback is missing in SetMetricsCacheLocationWatch()";
   // We kind of cheat here. We check periodically
   time_t tmaster_last_change = FileUtils::getModifiedTime(
                                GetMetricsCacheLocationPath(topology_name));
@@ -92,7 +92,7 @@ void HeronLocalFileStateMgr::SetMetricsCacheLocationWatch(const std::string& top
 
 void HeronLocalFileStateMgr::SetPackingPlanWatch(const std::string& topology_name,
                                                  VCallback<> watcher) {
-  CHECK(watcher);
+  CHECK(watcher) << "Watcher callback is missing in SetPackingPlanWatch";
   // We kind of cheat here. We check periodically
   time_t packingplan_last_change = FileUtils::getModifiedTime(GetPackingPlanPath(topology_name));
 

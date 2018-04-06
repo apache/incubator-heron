@@ -131,7 +131,7 @@ ZKClient::ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
     : eventLoop_(eventLoop),
       hostportlist_(hostportlist),
       client_global_watcher_cb_(std::move(global_watcher_cb)) {
-  CHECK(client_global_watcher_cb_);
+  CHECK(client_global_watcher_cb_) << "Client global watcher is not provided";
   Init();
 }
 
@@ -341,7 +341,7 @@ void ZKClient::ZkWatcherCb(VCallback<> cb) {
 }
 
 void ZKClient::SendWatchEvent(const ZkWatchEvent& event) {
-  CHECK(client_global_watcher_cb_);
+  CHECK(client_global_watcher_cb_) << "Client global watcher is not provided";
   piper_->ExecuteInEventLoop(std::bind(&RunWatchEventCb, client_global_watcher_cb_, event));
 }
 

@@ -60,9 +60,9 @@ void StatefulRestorer::HandleStMgrRestored(const std::string& _stmgr_id,
                                            const std::string& _checkpoint_id,
                                            int64_t _restore_txid,
                                            const StMgrMap& _stmgrs) {
-  CHECK(in_progress_);
-  CHECK(_checkpoint_id == checkpoint_id_in_progress_);
-  CHECK(_restore_txid == restore_txid_);
+  CHECK(in_progress_) << "State restore is not in progress";
+  CHECK_EQ(_checkpoint_id, checkpoint_id_in_progress_) << "Checkpoint id doesn't match";
+  CHECK_EQ(_restore_txid, restore_txid_) << "Restore txid doesn't match";
   unreplied_stmgrs_.erase(_stmgr_id);
   if (unreplied_stmgrs_.empty()) {
     Finish2PhaseCommit(_stmgrs);
@@ -71,7 +71,7 @@ void StatefulRestorer::HandleStMgrRestored(const std::string& _stmgr_id,
 
 void StatefulRestorer::Finish2PhaseCommit(const StMgrMap& _stmgrs) {
   LOG(INFO) << "Finishing Stateful 2 Phase Commit since all stmgrs have replied back";
-  CHECK(unreplied_stmgrs_.empty());
+  CHECK(unreplied_stmgrs_.empty()) << "Unreplied stmgrs are found when finishing 2-phrase commit";
   for (auto kv : _stmgrs) {
     kv.second->SendStartStatefulProcessingMessage(checkpoint_id_in_progress_);
   }

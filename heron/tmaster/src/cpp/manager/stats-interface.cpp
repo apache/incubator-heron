@@ -58,7 +58,7 @@ StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _opti
   http_server_->InstallCallBack("/stmgrsregistrationsummary",
       std::move(cbHandleStmgrsRegistrationSummary));
   http_server_->InstallGenericCallBack(std::move(cbHandleUnknown));
-  CHECK(http_server_->Start() == SP_OK);
+  CHECK_EQ(http_server_->Start(), SP_OK);
 }
 
 StatsInterface::~StatsInterface() { delete http_server_; }
@@ -77,7 +77,7 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
   proto::tmaster::MetricResponse* res =
     metrics_collector_->GetMetrics(req, tmaster_->getInitialTopology());
   sp_string response_string;
-  CHECK(res->SerializeToString(&response_string));
+  CHECK(res->SerializeToString(&response_string)) << "Failed to serialize MetricResponse";
   OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
   response->AddHeader("Content-Type", "application/octet-stream");
   response->AddHeader("Content-Length", std::to_string(response_string.size()));
@@ -102,7 +102,8 @@ void StatsInterface::HandleExceptionRequest(IncomingHTTPRequest* _request) {
   heron::proto::tmaster::ExceptionLogResponse* exception_response =
       metrics_collector_->GetExceptions(exception_request);
   sp_string response_string;
-  CHECK(exception_response->SerializeToString(&response_string));
+  CHECK(exception_response->SerializeToString(&response_string))
+      << "Failed to serialize ExceptionLogResponse";
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
   http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
@@ -126,7 +127,8 @@ void StatsInterface::HandleExceptionSummaryRequest(IncomingHTTPRequest* _request
   heron::proto::tmaster::ExceptionLogResponse* exception_response =
       metrics_collector_->GetExceptionsSummary(exception_request);
   sp_string response_string;
-  CHECK(exception_response->SerializeToString(&response_string));
+  CHECK(exception_response->SerializeToString(&response_string))
+      << "Failed to serialize ExceptionLogResponse";
   OutgoingHTTPResponse* http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
   http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
@@ -151,7 +153,8 @@ void StatsInterface::HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest*
   }
   auto stmgrs_reg_summary_response = tmaster_->GetStmgrsRegSummary();
   sp_string response_string;
-  CHECK(stmgrs_reg_summary_response->SerializeToString(&response_string));
+  CHECK(stmgrs_reg_summary_response->SerializeToString(&response_string))
+      << "Failed to serialize StmgrsRegSummary";
   auto http_response = new OutgoingHTTPResponse(_request);
   http_response->AddHeader("Content-Type", "application/octet-stream");
   http_response->AddHeader("Content-Length", std::to_string(response_string.size()));

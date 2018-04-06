@@ -92,7 +92,8 @@ void Client::Init() { message_rid_gen_ = new REQID_Generator(); }
 
 void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
   auto iter = requestResponseMap_.find(_request->GetTypeName());
-  CHECK(iter != requestResponseMap_.end());
+  CHECK(iter != requestResponseMap_.end())
+      << "Reponse type " << _request->GetTypeName() << " is not found";
   const sp_string& _expected_response_type = iter->second;
   if (state_ != CONNECTED) {
     delete _request;
