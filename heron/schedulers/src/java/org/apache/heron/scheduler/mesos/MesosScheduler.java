@@ -25,10 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.mesos.MesosSchedulerDriver;
-import org.apache.mesos.Protos;
-import org.apache.mesos.SchedulerDriver;
-
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.scheduler.mesos.framework.BaseContainer;
@@ -42,6 +38,9 @@ import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 import org.apache.heron.spi.scheduler.IScheduler;
+import org.apache.mesos.MesosSchedulerDriver;
+import org.apache.mesos.Protos;
+import org.apache.mesos.SchedulerDriver;
 
 /**
  * Schedule a topology to a mesos cluster

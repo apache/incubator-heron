@@ -23,11 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.mesos.Protos;
-
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.scheduler.utils.SchedulerUtils.ExecutorPort;
 import org.apache.heron.spi.common.Config;
+import org.apache.mesos.Protos;
 
 /**
  * A structure to group container info and mesos info,
