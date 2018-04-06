@@ -40,7 +40,8 @@ public final class SerializeDeSerializeHelper {
             + "Fall back to Java serializer. "
             + "This could cause serious performance degradation. "
             + "You can specify to use Kryo as serializer. "
-            + "See https://apache.github.io/incubator-heron/docs/developers/serialization/ for details");
+            + "See https://apache.github.io/incubator-heron/docs/developers/serialization/ "
+            + "for details");
         serializer = new JavaSerializer();
       } else {
         serializer = (IPluggableSerializer) Class.forName(serializerClassName).newInstance();
