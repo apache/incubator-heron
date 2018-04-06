@@ -35,6 +35,21 @@ import javax.inject.Inject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
+import org.apache.heron.api.exception.InvalidTopologyException;
+import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.scheduler.SchedulerMain;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.HttpPort;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Role;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
+import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
+import org.apache.heron.spi.packing.PackingPlan;
+import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
+import org.apache.heron.spi.packing.Resource;
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.context.ContextConfiguration;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
@@ -52,22 +67,6 @@ import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
-
-import org.apache.heron.api.exception.InvalidTopologyException;
-import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.scheduler.SchedulerMain;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.HttpPort;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Role;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
-import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
-import org.apache.heron.spi.packing.PackingPlan;
-import org.apache.heron.spi.packing.PackingPlan.ContainerPlan;
-import org.apache.heron.spi.packing.Resource;
 
 /**
  * {@link HeronMasterDriver} is a topology's ApplicationMaster running on YARN clusters. It performs

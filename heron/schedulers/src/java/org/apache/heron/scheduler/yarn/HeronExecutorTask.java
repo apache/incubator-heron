@@ -23,13 +23,6 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import org.apache.reef.runtime.common.files.REEFFileNames;
-import org.apache.reef.tang.annotations.Parameter;
-import org.apache.reef.tang.annotations.Unit;
-import org.apache.reef.task.Task;
-import org.apache.reef.task.events.CloseEvent;
-import org.apache.reef.wake.EventHandler;
-
 import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.generated.TopologyAPI.Topology;
 import org.apache.heron.api.utils.TopologyUtils;
@@ -50,6 +43,12 @@ import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.utils.ShellUtils;
+import org.apache.reef.runtime.common.files.REEFFileNames;
+import org.apache.reef.tang.annotations.Parameter;
+import org.apache.reef.tang.annotations.Unit;
+import org.apache.reef.task.Task;
+import org.apache.reef.task.events.CloseEvent;
+import org.apache.reef.wake.EventHandler;
 
 @Unit
 public class HeronExecutorTask implements Task {

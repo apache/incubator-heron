@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.cli.CommandLine;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -36,6 +35,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.utils.topology.TopologyTests;

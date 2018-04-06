@@ -14,13 +14,6 @@
 
 package org.apache.heron.scheduler.yarn;
 
-import org.apache.reef.client.DriverConfiguration;
-import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
-import org.apache.reef.tang.formats.ConfigurationModule;
-import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
-import org.apache.reef.tang.formats.OptionalParameter;
-import org.apache.reef.tang.formats.RequiredParameter;
-
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
@@ -30,6 +23,12 @@ import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import org.apache.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
+import org.apache.reef.client.DriverConfiguration;
+import org.apache.reef.runtime.yarn.client.YarnDriverConfiguration;
+import org.apache.reef.tang.formats.ConfigurationModule;
+import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
+import org.apache.reef.tang.formats.OptionalParameter;
+import org.apache.reef.tang.formats.RequiredParameter;
 
 /**
  * {@link HeronDriverConfiguration} constructs optional and required configuration needed by Heron
