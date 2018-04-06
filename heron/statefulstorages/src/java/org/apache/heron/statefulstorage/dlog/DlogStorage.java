@@ -27,7 +27,6 @@ import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
-
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.dlog.DLInputStream;
 import org.apache.heron.dlog.DLOutputStream;
