@@ -15,14 +15,12 @@ package org.apache.heron.eco.builder.storm;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.storm.topology.IRichSpout;
-import org.apache.storm.topology.TopologyBuilder;
-
 import org.apache.heron.eco.builder.ObjectBuilder;
-
 import org.apache.heron.eco.definition.EcoExecutionContext;
 import org.apache.heron.eco.definition.EcoTopologyDefinition;
 import org.apache.heron.eco.definition.ObjectDefinition;
+import org.apache.storm.topology.IRichSpout;
+import org.apache.storm.topology.TopologyBuilder;
 
 
 public class SpoutBuilder {
