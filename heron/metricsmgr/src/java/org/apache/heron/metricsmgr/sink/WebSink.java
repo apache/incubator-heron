@@ -21,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Ticker;
 import com.google.common.cache.Cache;
