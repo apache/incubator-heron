@@ -293,11 +293,15 @@ def run_tests(conf, args):
 
   http_server_host_port = "%s:%d" % (args.http_server_hostname, args.http_server_port)
 
-  if args.tests_bin_path.endswith(".jar"):
+  if args.tests_bin_path.endswith("scala-integration-tests.jar"):
+    test_topologies = filter_test_topologies(conf["scalaTopologies"], args.test_topology_pattern)
+    topology_classpath_prefix = conf["topologyClasspathPrefix"]
+    extra_topology_args = "-s http://%s/state" % http_server_host_port
+  elif args.tests_bin_path.endswith("integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["javaTopologies"], args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
     extra_topology_args = "-s http://%s/state" % http_server_host_port
-  elif args.tests_bin_path.endswith(".pex"):
+  elif args.tests_bin_path.endswith("heron_integ_topology.pex"):
     test_topologies = filter_test_topologies(conf["pythonTopologies"], args.test_topology_pattern)
     topology_classpath_prefix = ""
     extra_topology_args = ""
