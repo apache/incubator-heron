@@ -25,6 +25,9 @@ fi
 # download and extract heron topology package
 ${HERON_TOPOLOGY_DOWNLOAD_CMD}
 
+# set metrics port file
+echo ${NOMAD_PORT_metrics_port} > ${METRICS_PORT_FILE}
+
 # launch heron executor
 trap 'kill -TERM $PID' TERM INT
 ${HERON_EXECUTOR_CMD} &
