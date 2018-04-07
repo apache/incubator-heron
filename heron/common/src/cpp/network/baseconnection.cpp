@@ -57,8 +57,8 @@ BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* 
 
 BaseConnection::~BaseConnection() {
   CHECK(mState == INIT || mState == DISCONNECTED);
-  bufferevent_free(buffer_);
   disableRateLimit();  // To free the config object
+  bufferevent_free(buffer_);
 }
 
 sp_int32 BaseConnection::start() {
