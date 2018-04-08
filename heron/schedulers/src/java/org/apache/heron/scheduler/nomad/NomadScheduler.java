@@ -48,6 +48,8 @@ import com.hashicorp.nomad.javasdk.ServerQueryResponse;
 
 import org.apache.heron.metricsmgr.MetricsSinksConfig;
 import org.apache.heron.metricsmgr.sink.PrometheusSink;
+import org.apache.heron.proto.scheduler.Scheduler;
+import org.apache.heron.scheduler.UpdateTopologyManager;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.common.Config;
