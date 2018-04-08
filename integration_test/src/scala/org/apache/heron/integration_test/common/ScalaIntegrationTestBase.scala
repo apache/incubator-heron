@@ -11,11 +11,9 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.integration_test.common
+package org.apache.heron.integration_test.common
 
-import com.twitter.heron.integration_test.core.TestTopologyBuilder
-import com.twitter.heron.streamlet.scala.Builder
-import com.twitter.heron.streamlet.scala.impl.BuilderImpl
+import org.apache.heron.integration_test.core.TestTopologyBuilder
 
 /**
   * Scala Integration Test Base
