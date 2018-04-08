@@ -46,8 +46,8 @@ import com.hashicorp.nomad.javasdk.NomadApiConfiguration;
 import com.hashicorp.nomad.javasdk.NomadException;
 import com.hashicorp.nomad.javasdk.ServerQueryResponse;
 
-import com.twitter.heron.metricsmgr.MetricsSinksConfig;
-import com.twitter.heron.metricsmgr.sink.PrometheusSink;
+import org.apache.heron.metricsmgr.MetricsSinksConfig;
+import org.apache.heron.metricsmgr.sink.PrometheusSink;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.scheduler.utils.SchedulerUtils;
 import org.apache.heron.spi.common.Config;
@@ -57,7 +57,7 @@ import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 import org.apache.heron.spi.scheduler.IScheduler;
 
-import static com.twitter.heron.scheduler.nomad.NomadConstants.METRICS_PORT;
+import static org.apache.heron.scheduler.nomad.NomadConstants.METRICS_PORT;
 
 @SuppressWarnings("IllegalCatch")
 public class NomadScheduler implements IScheduler {
