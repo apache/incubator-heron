@@ -38,7 +38,6 @@ object ScalaStreamletWithFilterAndTransform {
 /**
   * Scala Streamlet Integration Test
   */
-@SerialVersionUID(-7280407024398984674L)
 class ScalaStreamletWithFilterAndTransform(args: Array[String])
     extends AbstractTestTopology(args)
     with ScalaIntegrationTestBase {
