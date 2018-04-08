@@ -132,3 +132,6 @@ website/public/
 
 # Visual Studio Code
 .vscode
+
+# integration_test
+results/

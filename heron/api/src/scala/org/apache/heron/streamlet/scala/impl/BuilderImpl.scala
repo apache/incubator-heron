@@ -37,4 +37,7 @@ class BuilderImpl(builder: org.apache.heron.streamlet.Builder)
   def build(): TopologyBuilder =
     builder.asInstanceOf[JavaBuilderImpl].build()
 
+  def build(topologyBuilder: TopologyBuilder): TopologyBuilder =
+    builder.asInstanceOf[JavaBuilderImpl].build(topologyBuilder)
+
 }
