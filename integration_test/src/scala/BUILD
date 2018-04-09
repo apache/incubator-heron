@@ -9,7 +9,7 @@ filegroup(
 
 scala_binary(
     name = "scala-integration-tests-unshaded",
-    srcs = glob(["com/twitter/heron/integration_test/**/*.scala"]),
+    srcs = glob(["org/apache/heron/integration_test/**/*.scala"]),
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/api/src/scala:api-scala",
@@ -17,7 +17,7 @@ scala_binary(
         "//integration_test/src/java:core",
         "//heron/api/src/java:api-java-low-level"
     ],
-    main_class = "com.twitter.heron.integration_test.topology.scala_streamlet_with_filter_and_transform.ScalaStreamletWithFilterAndTransform"
+    main_class = "org.apache.heron.integration_test.topology.scala_streamlet_with_filter_and_transform.ScalaStreamletWithFilterAndTransform"
 )
 
 genrule(

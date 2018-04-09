@@ -16,9 +16,16 @@ package org.apache.heron.integration_test.topology.scala_streamlet_with_filter_a
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.apache.heron.api.Config
-import org.apache.heron.integration_test.common.AbstractTestTopology
 import org.apache.heron.integration_test.core.TestTopologyBuilder
 import org.apache.heron.streamlet.Context
+
+import org.apache.heron.integration_test.common.{
+  AbstractTestTopology,
+  ScalaIntegrationTestBase
+}
+import org.apache.heron.streamlet.scala.{
+  Builder, SerializableTransformer
+}
 
 object ScalaStreamletWithFilterAndTransform {
   def main(args: Array[String]): Unit = {

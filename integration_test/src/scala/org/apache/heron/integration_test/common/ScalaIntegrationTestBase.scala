@@ -15,6 +15,9 @@ package org.apache.heron.integration_test.common
 
 import org.apache.heron.integration_test.core.TestTopologyBuilder
 
+import org.apache.heron.streamlet.scala.Builder
+import org.apache.heron.streamlet.scala.impl.BuilderImpl
+
 /**
   * Scala Integration Test Base
   */
