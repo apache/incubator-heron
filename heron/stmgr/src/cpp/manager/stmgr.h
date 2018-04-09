@@ -64,7 +64,8 @@ class StMgr {
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
         sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
-        sp_int64 _high_watermark, sp_int64 _low_watermark);
+        sp_int64 _high_watermark, sp_int64 _low_watermark,
+        const sp_string& _metricscachemgr_mode);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -253,6 +254,9 @@ class StMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  // whether MetricsCacheMgr is running
+  sp_string metricscachemgr_mode_;
 };
 
 }  // namespace stmgr
