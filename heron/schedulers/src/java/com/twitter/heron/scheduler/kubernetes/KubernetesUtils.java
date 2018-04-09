@@ -61,6 +61,8 @@ final class KubernetesUtils {
     } catch (IOException ioe) {
       // ignore
       details = ioe.getMessage();
+    } finally {
+      SysUtils.closeIgnoringExceptions(response.body());
     }
     return message + "\ndetails:\n" + details;
   }
