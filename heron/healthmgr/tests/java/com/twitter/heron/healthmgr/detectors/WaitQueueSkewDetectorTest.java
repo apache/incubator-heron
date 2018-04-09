@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.apache.heron.healthmgr.detectors;
+package com.twitter.heron.healthmgr.detectors;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,57 +20,67 @@ import java.util.Collection;
 
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
 import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
-import org.apache.heron.healthmgr.HealthPolicyConfig;
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 
-import static org.apache.heron.healthmgr.detectors.LargeWaitQueueDetector.CONF_SIZE_LIMIT;
+import static com.twitter.heron.healthmgr.detectors.WaitQueueSkewDetector.CONF_SKEW_RATIO;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class LargeWaitQueueDetectorTest {
+public class WaitQueueSkewDetectorTest {
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
-    when(config.getConfig(CONF_SIZE_LIMIT, 1000)).thenReturn(20);
+    when(config.getConfig(CONF_SKEW_RATIO, 20.0)).thenReturn(15.0);
 
     Measurement measurement1
         = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 21);
+        (1497892222), 1501);
     Measurement measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892322), 21);
+        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 100.0);
 
     Collection<Measurement> metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
 
-    LargeWaitQueueDetector detector = new LargeWaitQueueDetector(config);
+    WaitQueueSkewDetector detector = new WaitQueueSkewDetector(config);
     PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
     when(context.checkpoint()).thenReturn(Instant.now());
     detector.initialize(context);
     Collection<Symptom> symptoms = detector.detect(metrics);
 
-    assertEquals(1, symptoms.size());
-    assertEquals(1, symptoms.iterator().next().assignments().size());
+    assertEquals(3, symptoms.size());
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i1").size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i2").size());
 
 
-    measurement1
+     measurement1
         = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 11);
-    measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892322), 10);
+        (1497892222), 1500);
+     measurement2
+        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 110.0);
 
     metrics = new ArrayList<>();
     metrics.add(measurement1);
     metrics.add(measurement2);
 
-    detector = new LargeWaitQueueDetector(config);
+    detector = new WaitQueueSkewDetector(config);
+    detector.initialize(context);
     symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());

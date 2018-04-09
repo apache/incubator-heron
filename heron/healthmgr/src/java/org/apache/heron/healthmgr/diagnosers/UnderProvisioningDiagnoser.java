@@ -15,48 +15,56 @@
 
 package org.apache.heron.healthmgr.diagnosers;
 
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
 
-import org.apache.heron.healthmgr.common.ComponentMetricsHelper;
-
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_UNDER_PROVISIONING;
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 
 public class UnderProvisioningDiagnoser extends BaseDiagnoser {
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
   @Override
-  public Diagnosis diagnose(List<Symptom> symptoms) {
-    List<Symptom> bpSymptoms = getBackPressureSymptoms(symptoms);
-    Map<String, ComponentMetrics> processingRateSkewComponents =
-        getProcessingRateSkewComponents(symptoms);
-    Map<String, ComponentMetrics> waitQDisparityComponents = getWaitQDisparityComponents(symptoms);
+  public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
+    Collection<Diagnosis> diagnoses = new ArrayList<>();
 
-    if (bpSymptoms.isEmpty() || !processingRateSkewComponents.isEmpty()
-        || !waitQDisparityComponents.isEmpty()) {
-      // Since there is no back pressure or similar processing rates
-      // and buffer sizes, no action is needed
-      return null;
-    } else if (bpSymptoms.size() > 1) {
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    SymptomsTable bp = symptomsTable.type(SYMPTOM_COMP_BACK_PRESSURE.text());
+    if (bp.size() > 1) {
       // TODO handle cases where multiple detectors create back pressure symptom
       throw new IllegalStateException("Multiple back-pressure symptoms case");
     }
-    ComponentMetrics bpMetrics = bpSymptoms.iterator().next().getComponent();
 
-    ComponentMetricsHelper compStats = new ComponentMetricsHelper(bpMetrics);
-    compStats.computeBpStats();
-    LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure(%s) and similar processing rates "
-            + "and buffer sizes",
-        bpMetrics.getName(), compStats.getTotalBackpressure()));
+    if (bp.size() == 0) {
+      return diagnoses;
+    }
+    String bpComponent = bp.first().assignments().iterator().next();
 
+    SymptomsTable processingRateSkew = symptomsTable.type(SYMPTOM_PROCESSING_RATE_SKEW.text());
+    SymptomsTable waitQSkew = symptomsTable.type(SYMPTOM_WAIT_Q_SIZE_SKEW.text());
 
-    Symptom resultSymptom = new Symptom(SYMPTOM_UNDER_PROVISIONING.text(), bpMetrics);
-    return new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING.text(), resultSymptom);
+    if (waitQSkew.assignment(bpComponent).size() != 0
+        || processingRateSkew.assignment(bpComponent).size() != 0) {
+      return diagnoses;
+    }
+
+    Collection<String> assignments = Collections.singletonList(bpComponent);
+    LOG.info(String.format("UNDER_PROVISIONING: %s back-pressure and similar processing rates "
+        + "and wait queue sizes", bpComponent));
+
+    diagnoses.add(
+        new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING.text(), context.checkpoint(), assignments));
+
+    //TODO verify large wait queue for all instances
+
+    return diagnoses;
   }
 }

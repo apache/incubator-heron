@@ -16,16 +16,15 @@
 package org.apache.heron.healthmgr.sensors;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
@@ -34,8 +33,6 @@ import org.apache.heron.healthmgr.common.TopologyProvider;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureSensor extends BaseSensor {
-  private static final Logger LOG = Logger.getLogger(BackPressureSensor.class.getName());
-
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
@@ -51,72 +48,46 @@ public class BackPressureSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
-  @Override
-  public Map<String, ComponentMetrics> get(String... components) {
-    return get();
-  }
-
   /**
    * Computes the average (millis/sec) back-pressure caused by instances in the configured window
    *
-   * @return the average value
+   * @return the average value measurements
    */
-  public Map<String, ComponentMetrics> get() {
-    Map<String, ComponentMetrics> result = new HashMap<>();
+  @Override
+  public Collection<Measurement> fetch() {
+    Collection<Measurement> result = new ArrayList<>();
+    Instant now = context.checkpoint();
 
     String[] boltComponents = topologyProvider.getBoltNames();
-    for (String boltComponent : boltComponents) {
-      String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(boltComponent);
+    Duration duration = getDuration();
+    for (String component : boltComponents) {
+      String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(component);
 
-      Duration duration = getDuration();
-      Map<String, InstanceMetrics> instanceMetrics = new HashMap<>();
-      for (String boltInstanceName : boltInstanceNames) {
-        String metric = getMetricName() + boltInstanceName;
-        Map<String, ComponentMetrics> stmgrResult = metricsProvider.getComponentMetrics(
-            metric, duration, COMPONENT_STMGR);
+      for (String instance : boltInstanceNames) {
+        String metric = getMetricName() + instance;
 
-        if (stmgrResult.get(COMPONENT_STMGR) == null) {
+        Collection<Measurement> stmgrResult
+            = metricsProvider.getMeasurements(now, duration, metric, COMPONENT_STMGR);
+        if (stmgrResult.isEmpty()) {
           continue;
         }
 
-        HashMap<String, InstanceMetrics> streamManagerResult =
-            stmgrResult.get(COMPONENT_STMGR).getMetrics();
-
-        if (streamManagerResult.isEmpty()) {
+        MeasurementsTable table = MeasurementsTable.of(stmgrResult).component(COMPONENT_STMGR);
+        if (table.size() == 0) {
           continue;
         }
-
-        // since a bolt instance belongs to one stream manager,
-        // for tracker rest api: expect just one metrics manager instance in the result;
-        // for tmaster/metricscache stat interface: expect a list
-        Double valueSum = 0.0;
-        for (Iterator<InstanceMetrics> it = streamManagerResult.values().iterator();
-            it.hasNext();) {
-          InstanceMetrics stmgrInstanceResult = it.next();
-
-          Double val = stmgrInstanceResult.getMetricValueSum(metric);
-          if (val == null) {
-            continue;
-          } else {
-            valueSum += val;
-          }
-        }
-        double averageBp = valueSum / duration.getSeconds();
+        double averageBp = table.type(metric).sum() / duration.getSeconds();
 
         // The maximum value of averageBp should be 1000, i.e. 1000 millis of BP per second. Due to
         // a bug in Heron (Issue: 1753), this value could be higher in some cases. The following
         // check partially corrects the reported BP value
         averageBp = averageBp > 1000 ? 1000 : averageBp;
-        InstanceMetrics boltInstanceMetric
-            = new InstanceMetrics(boltInstanceName, getMetricName(), averageBp);
 
-        instanceMetrics.put(boltInstanceName, boltInstanceMetric);
+        Measurement measurement
+            = new Measurement(component, instance, getMetricName(), now, averageBp);
+        result.add(measurement);
       }
-
-      ComponentMetrics componentMetrics = new ComponentMetrics(boltComponent, instanceMetrics);
-      result.put(boltComponent, componentMetrics);
     }
-
     return result;
   }
 }

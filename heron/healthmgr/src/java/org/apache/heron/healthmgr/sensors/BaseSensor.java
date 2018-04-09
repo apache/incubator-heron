@@ -15,8 +15,11 @@
 package org.apache.heron.healthmgr.sensors;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.microsoft.dhalion.api.ISensor;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
@@ -24,12 +27,13 @@ import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 public abstract class BaseSensor implements ISensor {
   static final Duration DEFAULT_METRIC_DURATION = Duration.ofSeconds(300);
   static final String COMPONENT_STMGR = "__stmgr__";
+  protected ExecutionContext context;
 
   public enum MetricName {
     METRIC_EXE_COUNT("__execute-count/default"),
     METRIC_BACK_PRESSURE("__time_spent_back_pressure_by_compid/"),
-    METRIC_BUFFER_SIZE("__connection_buffer_by_instanceid/"),
-    METRIC_BUFFER_SIZE_SUFFIX("/bytes"),
+    METRIC_WAIT_Q_SIZE("__connection_buffer_by_instanceid/"),
+    METRIC_WAIT_Q_SIZE_SUFFIX("/bytes"),
     METRIC_WAIT_Q_GROWTH_RATE("METRIC_WAIT_Q_GROWTH_RATE");
 
     private String text;
@@ -78,7 +82,17 @@ public abstract class BaseSensor implements ISensor {
     return value;
   }
 
-  public String getMetricName() {
+  @Override
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
+  }
+
+  @Override
+  public Collection<String> getMetricTypes() {
+    return Collections.singletonList(metricName);
+  }
+
+  String getMetricName() {
     return metricName;
   }
 

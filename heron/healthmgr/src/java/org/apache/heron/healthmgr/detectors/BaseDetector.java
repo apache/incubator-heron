@@ -15,18 +15,22 @@
 package org.apache.heron.healthmgr.detectors;
 
 import com.microsoft.dhalion.api.IDetector;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 public abstract class BaseDetector implements IDetector {
-  public enum SymptomName {
-    SYMPTOM_BACK_PRESSURE(BackPressureDetector.class.getSimpleName()),
+  protected ExecutionContext context;
+
+  public enum SymptomType {
+    SYMPTOM_COMP_BACK_PRESSURE(BackPressureDetector.class.getSimpleName() + "Component"),
+    SYMPTOM_INSTANCE_BACK_PRESSURE(BackPressureDetector.class.getSimpleName() + "Instance"),
     SYMPTOM_GROWING_WAIT_Q(GrowingWaitQueueDetector.class.getSimpleName()),
     SYMPTOM_LARGE_WAIT_Q(LargeWaitQueueDetector.class.getSimpleName()),
     SYMPTOM_PROCESSING_RATE_SKEW(ProcessingRateSkewDetector.class.getSimpleName()),
-    SYMPTOM_WAIT_Q_DISPARITY(WaitQueueDisparityDetector.class.getSimpleName());
+    SYMPTOM_WAIT_Q_SIZE_SKEW(WaitQueueSkewDetector.class.getSimpleName());
 
     private String text;
 
-    SymptomName(String name) {
+    SymptomType(String name) {
       this.text = name;
     }
 
@@ -38,5 +42,10 @@ public abstract class BaseDetector implements IDetector {
     public String toString() {
       return text();
     }
+  }
+
+  @Override
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
   }
 }

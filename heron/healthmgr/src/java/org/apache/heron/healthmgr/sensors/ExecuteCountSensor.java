@@ -15,12 +15,15 @@
 
 package org.apache.heron.healthmgr.sensors;
 
-import java.util.Map;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.TopologyProvider;
@@ -30,6 +33,7 @@ import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EX
 public class ExecuteCountSensor extends BaseSensor {
   private final TopologyProvider topologyProvider;
   private final MetricsProvider metricsProvider;
+  private Instant now;
 
   @Inject
   ExecuteCountSensor(TopologyProvider topologyProvider,
@@ -40,14 +44,10 @@ public class ExecuteCountSensor extends BaseSensor {
     this.metricsProvider = metricsProvider;
   }
 
-  public Map<String, ComponentMetrics> get() {
-    String[] boltNames = topologyProvider.getBoltNames();
-    return get(boltNames);
-  }
-
-  public Map<String, ComponentMetrics> get(String... boltNames) {
-    return metricsProvider.getComponentMetrics(getMetricName(),
-        getDuration(),
-        boltNames);
+  @Override
+  public Collection<Measurement> fetch() {
+    List<String> bolts = Arrays.asList(topologyProvider.getBoltNames());
+    now = context.checkpoint();
+    return metricsProvider.getMeasurements(now, getDuration(), getMetricTypes(), bolts);
   }
 }

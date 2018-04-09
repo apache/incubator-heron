@@ -14,12 +14,13 @@
 
 package org.apache.heron.healthmgr.sensors;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.Collection;
 
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static org.apache.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,39 +52,31 @@ public class BufferSizeSensorTest {
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
     for (String boltId : boltIds) {
-      String metric = MetricName.METRIC_BUFFER_SIZE
-          + boltId + MetricName.METRIC_BUFFER_SIZE_SUFFIX;
-      registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
+      String metric = METRIC_WAIT_Q_SIZE
+          + boltId + MetricName.METRIC_WAIT_Q_SIZE_SUFFIX;
+      BackPressureSensorTest
+          .registerStMgrInstanceMetricResponse(metricsProvider, metric, boltId.length());
     }
 
     BufferSizeSensor bufferSizeSensor =
         new BufferSizeSensor(null, packingPlanProvider, topologyProvider, metricsProvider);
 
-    Map<String, ComponentMetrics> componentMetrics = bufferSizeSensor.get();
-    assertEquals(2, componentMetrics.size());
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    bufferSizeSensor.initialize(context);
 
-    assertEquals(1, componentMetrics.get("bolt-1").getMetrics().size());
-    assertEquals(boltIds[0].length(), componentMetrics.get("bolt-1").getMetrics(boltIds[0])
-        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
+    Collection<Measurement> componentMetrics = bufferSizeSensor.fetch();
+    assertEquals(3, componentMetrics.size());
 
-    assertEquals(2, componentMetrics.get("bolt-2").getMetrics().size());
-    assertEquals(boltIds[1].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[1])
-        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
-    assertEquals(boltIds[2].length(), componentMetrics.get("bolt-2").getMetrics(boltIds[2])
-        .getMetricValueSum(MetricName.METRIC_BUFFER_SIZE.text()).intValue());
-  }
+    MeasurementsTable table = MeasurementsTable.of(componentMetrics);
+    assertEquals(1, table.component("bolt-1").size());
+    assertEquals(boltIds[0].length(), table.component("bolt-1").instance(boltIds[0])
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
 
-  static void registerStMgrInstanceMetricResponse(MetricsProvider metricsProvider,
-                                                  String metric,
-                                                  long value) {
-    Map<String, ComponentMetrics> result = new HashMap<>();
-    ComponentMetrics metrics = new ComponentMetrics("__stmgr__");
-    InstanceMetrics instanceMetrics = new InstanceMetrics("stmgr-1");
-    instanceMetrics.addMetric(metric, value);
-    metrics.addInstanceMetric(instanceMetrics);
-    result.put("__stmgr__", metrics);
-
-    when(metricsProvider.getComponentMetrics(metric, DEFAULT_METRIC_DURATION, "__stmgr__"))
-        .thenReturn(result);
+    assertEquals(2, table.component("bolt-2").size());
+    assertEquals(boltIds[1].length(), table.component("bolt-2").instance(boltIds[1])
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
+    assertEquals(boltIds[2].length(), table.component("bolt-2").instance(boltIds[2])
+        .type(METRIC_WAIT_Q_SIZE.text()).sum(), 0.01);
   }
 }

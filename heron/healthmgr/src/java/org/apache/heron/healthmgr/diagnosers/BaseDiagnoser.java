@@ -14,26 +14,19 @@
 
 package org.apache.heron.healthmgr.diagnosers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.microsoft.dhalion.api.IDiagnoser;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
-import org.apache.heron.healthmgr.detectors.BaseDetector.SymptomName;
-
-import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_BACK_PRESSURE;
-import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_PROCESSING_RATE_SKEW;
-import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_WAIT_Q_DISPARITY;
 
 public abstract class BaseDiagnoser implements IDiagnoser {
-  public enum DiagnosisName {
-    SYMPTOM_UNDER_PROVISIONING("SYMPTOM_UNDER_PROVISIONING"),
-    SYMPTOM_DATA_SKEW("SYMPTOM_DATA_SKEW"),
-    SYMPTOM_SLOW_INSTANCE("SYMPTOM_SLOW_INSTANCE"),
+  protected ExecutionContext context;
+
+  @Override
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
+  }
+
+  public enum DiagnosisType {
 
     DIAGNOSIS_UNDER_PROVISIONING(UnderProvisioningDiagnoser.class.getSimpleName()),
     DIAGNOSIS_SLOW_INSTANCE(SlowInstanceDiagnoser.class.getSimpleName()),
@@ -41,7 +34,7 @@ public abstract class BaseDiagnoser implements IDiagnoser {
 
     private String text;
 
-    DiagnosisName(String name) {
+    DiagnosisType(String name) {
       this.text = name;
     }
 
@@ -53,38 +46,5 @@ public abstract class BaseDiagnoser implements IDiagnoser {
     public String toString() {
       return text();
     }
-  }
-
-  List<Symptom> getBackPressureSymptoms(List<Symptom> symptoms) {
-    return getFilteredSymptoms(symptoms, SYMPTOM_BACK_PRESSURE);
-  }
-
-  Map<String, ComponentMetrics> getProcessingRateSkewComponents(List<Symptom> symptoms) {
-    return getFilteredComponents(symptoms, SYMPTOM_PROCESSING_RATE_SKEW);
-  }
-
-  Map<String, ComponentMetrics> getWaitQDisparityComponents(List<Symptom> symptoms) {
-    return getFilteredComponents(symptoms, SYMPTOM_WAIT_Q_DISPARITY);
-  }
-
-  private List<Symptom> getFilteredSymptoms(List<Symptom> symptoms, SymptomName type) {
-    List<Symptom> result = new ArrayList<>();
-    for (Symptom symptom : symptoms) {
-      if (symptom.getName().equals(type.text())) {
-        result.add(symptom);
-      }
-    }
-    return result;
-  }
-
-  private Map<String, ComponentMetrics> getFilteredComponents(List<Symptom> symptoms,
-                                                              SymptomName type) {
-    Map<String, ComponentMetrics> result = new HashMap<>();
-    for (Symptom symptom : symptoms) {
-      if (symptom.getName().equals(type.text())) {
-        result.putAll(symptom.getComponents());
-      }
-    }
-    return result;
   }
 }

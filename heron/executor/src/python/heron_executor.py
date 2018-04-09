@@ -498,7 +498,7 @@ class HeronExecutor(object):
                      "--cluster", self.cluster,
                      "--role", self.role,
                      "--environment", self.environment,
-                     "--topology_name", self.topology_name, "--verbose"]
+                     "--topology_name", self.topology_name]
 
     return healthmgr_cmd
 
@@ -725,7 +725,8 @@ class HeronExecutor(object):
         '--config_file=%s' % self.heron_internals_config_file,
         '--override_config_file=%s' % self.override_config_file,
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard]]
+        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
+        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'

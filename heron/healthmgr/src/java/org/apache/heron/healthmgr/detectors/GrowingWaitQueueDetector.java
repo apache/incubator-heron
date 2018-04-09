@@ -16,34 +16,33 @@
 package org.apache.heron.healthmgr.detectors;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Symptom;
+
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
-import org.apache.heron.healthmgr.common.ComponentMetricsHelper;
-import org.apache.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_GROWING_WAIT_Q;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_GROWING_WAIT_Q;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 
-public class GrowingWaitQueueDetector implements IDetector {
-  static final String CONF_LIMIT = GrowingWaitQueueDetector.class.getSimpleName() + ".limit";
+public class GrowingWaitQueueDetector extends BaseDetector {
+  static final String CONF_LIMIT
+      = GrowingWaitQueueDetector.class.getSimpleName() + ".limit";
 
   private static final Logger LOG = Logger.getLogger(GrowingWaitQueueDetector.class.getName());
-  private final BufferSizeSensor pendingBufferSensor;
   private final double rateLimit;
 
   @Inject
-  GrowingWaitQueueDetector(BufferSizeSensor pendingBufferSensor,
-                           HealthPolicyConfig policyConfig) {
-    this.pendingBufferSensor = pendingBufferSensor;
+  GrowingWaitQueueDetector(HealthPolicyConfig policyConfig) {
     rateLimit = (double) policyConfig.getConfig(CONF_LIMIT, 10.0);
   }
 
@@ -51,23 +50,53 @@ public class GrowingWaitQueueDetector implements IDetector {
    * Detects all components unable to keep up with input load, hence having a growing pending buffer
    * or wait queue
    *
-   * @return A collection of all components executing slower than input rate.
+   * @return A collection of symptoms each one corresponding to a components executing slower
+   * than input rate.
    */
   @Override
-  public List<Symptom> detect() {
-    ArrayList<Symptom> result = new ArrayList<>();
+  public Collection<Symptom> detect(Collection<Measurement> measurements) {
+    Collection<Symptom> result = new ArrayList<>();
 
-    Map<String, ComponentMetrics> bufferSizes = pendingBufferSensor.get();
-    for (ComponentMetrics compMetrics : bufferSizes.values()) {
-      ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      compStats.computeBufferSizeTrend();
-      if (compStats.getMaxBufferChangeRate() > rateLimit) {
+    MeasurementsTable waitQueueMetrics
+        = MeasurementsTable.of(measurements).type(METRIC_WAIT_Q_SIZE.text());
+
+    for (String component : waitQueueMetrics.uniqueComponents()) {
+      double maxSlope = computeWaitQueueSizeTrend(waitQueueMetrics.component(component));
+      if (maxSlope > rateLimit) {
         LOG.info(String.format("Detected growing wait queues for %s, max rate %f",
-            compMetrics.getName(), compStats.getMaxBufferChangeRate()));
-        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), compMetrics));
+            component, maxSlope));
+        Collection<String> addresses = Collections.singletonList(component);
+        result.add(new Symptom(SYMPTOM_GROWING_WAIT_Q.text(), context.checkpoint(), addresses));
       }
     }
 
     return result;
+  }
+
+
+  private double computeWaitQueueSizeTrend(MeasurementsTable metrics) {
+    double maxSlope = 0;
+    for (String instance : metrics.uniqueInstances()) {
+
+      if (metrics.instance(instance) == null || metrics.instance(instance).size() < 3) {
+        // missing of insufficient data for creating a trend line
+        continue;
+      }
+
+      Collection<Measurement> measurements
+          = metrics.instance(instance).sort(false, MeasurementsTable.SortKey.TIME_STAMP).get();
+      SimpleRegression simpleRegression = new SimpleRegression(true);
+
+      for (Measurement m : measurements) {
+        simpleRegression.addData(m.instant().getEpochSecond(), m.value());
+      }
+
+      double slope = simpleRegression.getSlope();
+
+      if (maxSlope < slope) {
+        maxSlope = slope;
+      }
+    }
+    return maxSlope;
   }
 }

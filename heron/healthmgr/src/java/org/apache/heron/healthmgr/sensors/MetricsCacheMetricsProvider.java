@@ -18,8 +18,8 @@ package org.apache.heron.healthmgr.sensors;
 import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,8 +29,7 @@ import javax.inject.Named;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
 
 import org.apache.heron.proto.system.Common.StatusCode;
 import org.apache.heron.proto.tmaster.TopologyMaster;
@@ -51,7 +50,6 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
   private final String topologyName;
 
-  private Clock clock = new Clock();
   private String metricsCacheLocation;
 
   @Inject
@@ -64,35 +62,29 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
   }
 
   @Override
-  public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           Instant startTime,
-                                                           Duration duration,
-                                                           String... components) {
-    Map<String, ComponentMetrics> result = new HashMap<>();
-    for (String component : components) {
-      TopologyMaster.MetricResponse response =
-          getMetricsFromMetricsCache(metric, component, startTime, duration);
-
-      Map<String, InstanceMetrics> metrics = parse(response, component, metric, startTime);
-      ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
-      result.put(component, componentMetric);
+  public Collection<Measurement> getMeasurements(Instant startTime,
+                                                 Duration duration,
+                                                 Collection<String> metricNames,
+                                                 Collection<String> components) {
+    Collection<Measurement> result = new ArrayList<>();
+    for (String metric : metricNames) {
+      for (String component : components) {
+        TopologyMaster.MetricResponse response =
+            getMetricsFromMetricsCache(metric, component, startTime, duration);
+        Collection<Measurement> measurements = parse(response, component, metric, startTime);
+        LOG.fine(String.format("%d measurements received for %s/%s",
+            measurements.size(), component, metric));
+        result.addAll(measurements);
+      }
     }
     return result;
   }
 
-  @Override
-  public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           Duration duration,
-                                                           String... components) {
-    Instant start = Instant.ofEpochMilli(clock.currentTime() - duration.toMillis());
-    return getComponentMetrics(metric, start, duration, components);
-  }
-
   @VisibleForTesting
   @SuppressWarnings("unchecked")
-  Map<String, InstanceMetrics> parse(
+  Collection<Measurement> parse(
       TopologyMaster.MetricResponse response, String component, String metric, Instant startTime) {
-    Map<String, InstanceMetrics> metricsData = new HashMap<>();
+    Collection<Measurement> metricsData = new ArrayList();
 
     if (response == null || !response.getStatus().getStatus().equals(StatusCode.OK)) {
       LOG.info(String.format(
@@ -109,29 +101,32 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     // convert heron.protobuf.taskMetrics to dhalion.InstanceMetrics
     for (TaskMetric tm : response.getMetricList()) {
       String instanceId = tm.getInstanceId();
-      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceId);
-
       for (IndividualMetric im : tm.getMetricList()) {
         String metricName = im.getName();
-        Map<Instant, Double> values = new HashMap<>();
 
         // case 1
         for (IntervalValue iv : im.getIntervalValuesList()) {
           MetricInterval mi = iv.getInterval();
           String value = iv.getValue();
-          values.put(Instant.ofEpochSecond(mi.getStart()), Double.parseDouble(value));
+          Measurement measurement = new Measurement(
+              component,
+              instanceId,
+              metricName,
+              Instant.ofEpochSecond(mi.getStart()),
+              Double.parseDouble(value));
+          metricsData.add(measurement);
         }
         // case 2
         if (im.hasValue()) {
-          values.put(startTime, Double.parseDouble(im.getValue()));
-        }
-
-        if (!values.isEmpty()) {
-          instanceMetrics.addMetric(metricName, values);
+          Measurement measurement = new Measurement(
+              component,
+              instanceId,
+              metricName,
+              startTime,
+              Double.parseDouble(im.getValue()));
+          metricsData.add(measurement);
         }
       }
-
-      metricsData.put(instanceId, instanceMetrics);
     }
 
     return metricsData;
@@ -145,8 +140,8 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
         .setComponentName(component)
         .setExplicitInterval(
             MetricInterval.newBuilder()
-                .setStart(start.getEpochSecond())
-                .setEnd(start.plus(duration).getEpochSecond())
+                .setStart(start.minus(duration).getEpochSecond())
+                .setEnd(start.getEpochSecond())
                 .build())
         .addMetric(metric)
         .build();
@@ -179,11 +174,6 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
     }
   }
 
-  @VisibleForTesting
-  void setClock(Clock clock) {
-    this.clock = clock;
-  }
-
   /* returns last known location of metrics cache
    */
   private synchronized String getCacheLocation() {
@@ -199,11 +189,5 @@ public class MetricsCacheMetricsProvider implements MetricsProvider {
 
   private synchronized void resetCacheLocation() {
     metricsCacheLocation = null;
-  }
-
-  static class Clock {
-    long currentTime() {
-      return System.currentTimeMillis();
-    }
   }
 }

@@ -14,51 +14,83 @@
 
 package org.apache.heron.healthmgr.diagnosers;
 
-import java.util.List;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.api.IDiagnoser;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
+import org.junit.Before;
 import org.junit.Test;
 
-import org.apache.heron.healthmgr.TestUtils;
-
-import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class UnderProvisioningDiagnoserTest {
+  private final String comp = "comp";
+  private IDiagnoser diagnoser;
+  private Instant now = Instant.now();
+  private ExecutionContext context;
+
+  @Before
+  public void initTestData() {
+    now = Instant.now();
+
+    context = mock(ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(now);
+
+    diagnoser = new UnderProvisioningDiagnoser();
+    diagnoser.initialize(context);
+  }
+
   @Test
   public void diagnosisWhen1Of1InstanceInBP() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0);
-    //symptoms.add(TestUtils.createLargeWaitQSymptom(5000));
-    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
+    Collection<String> assign = Collections.singleton(comp);
+    Symptom symptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
+    Collection<Symptom> symptoms = Collections.singletonList(symptom);
+    Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
     validateDiagnosis(result);
   }
 
   @Test
   public void diagnosisFailsNotSimilarQueueSizes() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    symptoms.add(TestUtils.createWaitQueueDisparitySymptom(100, 500, 500));
-    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
-    assertNull(result);
+    Collection<String> assign = Collections.singleton(comp);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
+    Symptom qDisparitySymptom = new Symptom(SYMPTOM_WAIT_Q_SIZE_SKEW.text(), now, assign);
+    Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
+
+    Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
+    assertEquals(0, result.size());
   }
 
   @Test
   public void diagnosisFailsNotSimilarProcessingRates() {
-    List<Symptom> symptoms = TestUtils.createBpSymptomList(123, 0, 0);
-    symptoms.add(TestUtils.createExeCountSymptom(100, 500, 500));
+    // TODO BP instance should be same as the one with high processing rate
+    Collection<String> assign = Collections.singleton(comp);
+    Symptom bpSymptom = new Symptom(SYMPTOM_COMP_BACK_PRESSURE.text(), now, assign);
+    Symptom qDisparitySymptom = new Symptom(SYMPTOM_PROCESSING_RATE_SKEW.text(), now, assign);
+    Collection<Symptom> symptoms = Arrays.asList(bpSymptom, qDisparitySymptom);
 
-    Diagnosis result = new UnderProvisioningDiagnoser().diagnose(symptoms);
-    assertNull(result);
+    Collection<Diagnosis> result = diagnoser.diagnose(symptoms);
+    assertEquals(0, result.size());
   }
 
-  private void validateDiagnosis(Diagnosis result) {
-    assertEquals(1, result.getSymptoms().size());
-    ComponentMetrics data = result.getSymptoms().values().iterator().next().getComponent();
-    assertEquals(123,
-        data.getMetricValueSum("container_1_bolt_0", METRIC_BACK_PRESSURE.text())
-            .intValue());
+  private void validateDiagnosis(Collection<Diagnosis> result) {
+    assertEquals(1, result.size());
+    Diagnosis diagnoses = result.iterator().next();
+    assertEquals(DIAGNOSIS_UNDER_PROVISIONING.text(), diagnoses.type());
+    assertEquals(1, diagnoses.assignments().size());
+    assertEquals(comp, diagnoses.assignments().iterator().next());
+    // TODO
+//    Assert.assertEquals(1, result.getSymptoms().size());
   }
 }

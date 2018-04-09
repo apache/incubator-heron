@@ -13,20 +13,20 @@
 // limitations under the License.
 
 
-package org.apache.heron.healthmgr.detectors;
+package com.twitter.heron.healthmgr.detectors;
 
 import javax.inject.Inject;
 
-import org.apache.heron.healthmgr.HealthPolicyConfig;
+import com.twitter.heron.healthmgr.HealthPolicyConfig;
 import com.twitter.heron.healthmgr.sensors.BaseSensor;
 
-public class ProcessingRateSkewDetector extends SkewDetector {
-  public static final String CONF_SKEW_RATIO = "ProcessingRateSkewDetector.skewRatio";
+public class WaitQueueSkewDetector extends SkewDetector {
+  static final String CONF_SKEW_RATIO = "WaitQueueSkewDetector.skewRatio";
 
   @Inject
-  ProcessingRateSkewDetector(HealthPolicyConfig policyConfig) {
-    super((double) policyConfig.getConfig(CONF_SKEW_RATIO, 1.5),
-        BaseSensor.MetricName.METRIC_EXE_COUNT,
-        BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW);
+  WaitQueueSkewDetector(HealthPolicyConfig policyConfig) {
+    super((double) policyConfig.getConfig(CONF_SKEW_RATIO, 20.0),
+        BaseSensor.MetricName.METRIC_WAIT_Q_SIZE,
+        BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW);
   }
 }

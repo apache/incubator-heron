@@ -15,16 +15,15 @@
 
 package org.apache.heron.healthmgr.policy;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.Collection;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.DiagnosisTable;
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
@@ -34,16 +33,19 @@ import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import org.apache.heron.healthmgr.detectors.ProcessingRateSkewDetector;
-import org.apache.heron.healthmgr.detectors.WaitQueueDisparityDetector;
+import com.twitter.heron.healthmgr.detectors.WaitQueueSkewDetector;
 import org.apache.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import org.apache.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import org.apache.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import org.apache.heron.healthmgr.resolvers.ScaleUpResolver;
+import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
+import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
+import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_DATA_SKEW;
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_SLOW_INSTANCE;
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.DIAGNOSIS_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 
 public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     implements EventHandler<TopologyUpdate> {
@@ -59,10 +61,13 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
   @Inject
   DynamicResourceAllocationPolicy(HealthPolicyConfig policyConfig,
                                   EventManager eventManager,
+                                  BackPressureSensor backPressureSensor,
+                                  BufferSizeSensor bufferSizeSensor,
+                                  ExecuteCountSensor executeCountSensor,
                                   BackPressureDetector backPressureDetector,
                                   LargeWaitQueueDetector largeWaitQueueDetector,
                                   ProcessingRateSkewDetector dataSkewDetector,
-                                  WaitQueueDisparityDetector waitQueueDisparityDetector,
+                                  WaitQueueSkewDetector waitQueueSkewDetector,
                                   UnderProvisioningDiagnoser underProvisioningDiagnoser,
                                   DataSkewDiagnoser dataSkewDiagnoser,
                                   SlowInstanceDiagnoser slowInstanceDiagnoser,
@@ -70,26 +75,27 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     this.policyConfig = policyConfig;
     this.scaleUpResolver = scaleUpResolver;
 
+    registerSensors(backPressureSensor, bufferSizeSensor, executeCountSensor);
     registerDetectors(backPressureDetector, largeWaitQueueDetector,
-        waitQueueDisparityDetector, dataSkewDetector);
+        waitQueueSkewDetector, dataSkewDetector);
     registerDiagnosers(underProvisioningDiagnoser, dataSkewDiagnoser, slowInstanceDiagnoser);
+    registerResolvers(scaleUpResolver);
 
-    setPolicyExecutionInterval(TimeUnit.MILLISECONDS,
-        (int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000));
+    setPolicyExecutionInterval(
+        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
 
     eventManager.addEventListener(TopologyUpdate.class, this);
   }
 
   @Override
-  public IResolver selectResolver(List<Diagnosis> diagnosis) {
-    Map<String, Diagnosis> diagnosisMap
-        = diagnosis.stream().collect(Collectors.toMap(Diagnosis::getName, d -> d));
+  public IResolver selectResolver(Collection<Diagnosis> diagnosis) {
+    DiagnosisTable diagnosisTable = DiagnosisTable.of(diagnosis);
 
-    if (diagnosisMap.containsKey(DIAGNOSIS_DATA_SKEW.text())) {
+    if (diagnosisTable.type(DIAGNOSIS_DATA_SKEW.text()).size() > 0) {
       LOG.warning("Data Skew diagnoses. This diagnosis does not have any resolver.");
-    } else if (diagnosisMap.containsKey(DIAGNOSIS_SLOW_INSTANCE.text())) {
+    } else if (diagnosisTable.type(DIAGNOSIS_SLOW_INSTANCE.text()).size() > 0) {
       LOG.warning("Slow Instance diagnoses. This diagnosis does not have any resolver.");
-    } else if (diagnosisMap.containsKey(DIAGNOSIS_UNDER_PROVISIONING.text())) {
+    } else if (diagnosisTable.type(DIAGNOSIS_UNDER_PROVISIONING.text()).size() > 0) {
       return scaleUpResolver;
     }
 
@@ -100,6 +106,6 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
   public void onEvent(TopologyUpdate event) {
     int interval = (int) policyConfig.getConfig(CONF_WAIT_INTERVAL_MILLIS, 180000);
     LOG.info("Received topology update action event: " + event);
-    setOneTimeDelay(TimeUnit.MILLISECONDS, interval);
+    setOneTimeDelay(Duration.ofMillis(interval));
   }
 }

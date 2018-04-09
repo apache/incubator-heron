@@ -14,22 +14,26 @@
 
 package org.apache.heron.healthmgr.resolvers;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.events.EventManager;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.apache.heron.api.generated.TopologyAPI;
-import org.apache.heron.common.utils.topology.TopologyTests;
+import com.twitter.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
@@ -40,7 +44,7 @@ import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.PackingPlan;
 
-import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
@@ -67,20 +71,26 @@ public class ScaleUpResolverTest {
     ISchedulerClient scheduler = mock(ISchedulerClient.class);
     when(scheduler.updateTopology(any(UpdateTopologyRequest.class))).thenReturn(true);
 
-    ComponentMetrics metrics
-        = new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE.text(), 123);
-    Symptom symptom = new Symptom(SYMPTOM_UNDER_PROVISIONING.text(), metrics);
-    List<Diagnosis> diagnosis = new ArrayList<>();
-    diagnosis.add(new Diagnosis("test", symptom));
+    Instant now = Instant.now();
+    Collections.singletonList(new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 123));
+
+    List<String> assignments = Collections.singletonList("bolt");
+    Diagnosis diagnoses =
+        new Diagnosis(DIAGNOSIS_UNDER_PROVISIONING.text(), now, assignments, null);
+    List<Diagnosis> diagnosis = Collections.singletonList(diagnoses);
+
+    ExecutionContext context = mock(ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(now);
 
     ScaleUpResolver resolver
         = new ScaleUpResolver(null, packingPlanProvider, scheduler, eventManager, null);
+    resolver.initialize(context);
     ScaleUpResolver spyResolver = spy(resolver);
 
-    doReturn(2).when(spyResolver).computeScaleUpFactor(metrics);
+    doReturn(2).when(spyResolver).computeScaleUpFactor("bolt");
     doReturn(currentPlan).when(spyResolver).buildNewPackingPlan(any(HashMap.class), eq(currentPlan));
 
-    List<Action> result = spyResolver.resolve(diagnosis);
+    Collection<Action> result = spyResolver.resolve(diagnosis);
     verify(scheduler, times(1)).updateTopology(any(UpdateTopologyRequest.class));
     assertEquals(1, result.size());
   }
@@ -141,28 +151,35 @@ public class ScaleUpResolverTest {
 
   @Test
   public void testScaleUpFactorComputation() {
+    Instant now = Instant.now();
+    Collection<Measurement> result = new ArrayList<>();
+
+    ExecutionContext context = Mockito.mock(ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(now);
+    when(context.previousCheckpoint()).thenReturn(now);
+
     ScaleUpResolver resolver = new ScaleUpResolver(null, null, null, eventManager, null);
+    resolver.initialize(context);
 
-    ComponentMetrics metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 500));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 0));
+    result.add(new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 500));
+    result.add(new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), now, 0));
+    when(context.measurements()).thenReturn(MeasurementsTable.of(result));
+    int factor = resolver.computeScaleUpFactor("bolt");
+    assertEquals(4, factor);
 
-    int result = resolver.computeScaleUpFactor(metrics);
-    assertEquals(4, result);
+    result.clear();
+    result.add(new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 750));
+    result.add(new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), now, 0));
+    when(context.measurements()).thenReturn(MeasurementsTable.of(result));
+    factor = resolver.computeScaleUpFactor("bolt");
+    assertEquals(8, factor);
 
-    metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 750));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 0));
-
-    result = resolver.computeScaleUpFactor(metrics);
-    assertEquals(8, result);
-
-    metrics = new ComponentMetrics("bolt");
-    metrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_BACK_PRESSURE.text(), 400));
-    metrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_BACK_PRESSURE.text(), 100));
-    metrics.addInstanceMetric(new InstanceMetrics("i3", METRIC_BACK_PRESSURE.text(), 0));
-
-    result = resolver.computeScaleUpFactor(metrics);
-    assertEquals(6, result);
+    result.clear();
+    result.add(new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 400));
+    result.add(new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), now, 100));
+    result.add(new Measurement("bolt", "i3", METRIC_BACK_PRESSURE.text(), now, 0));
+    when(context.measurements()).thenReturn(MeasurementsTable.of(result));
+    factor = resolver.computeScaleUpFactor("bolt");
+    assertEquals(6, factor);
   }
 }
