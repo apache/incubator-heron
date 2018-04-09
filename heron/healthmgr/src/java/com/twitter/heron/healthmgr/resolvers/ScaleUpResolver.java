@@ -13,8 +13,11 @@
 // limitations under the License.
 package com.twitter.heron.healthmgr.resolvers;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +27,12 @@ import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.dhalion.api.IResolver;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.diagnoser.Diagnosis;
+import com.microsoft.dhalion.core.Action;
+import com.microsoft.dhalion.core.Diagnosis;
+import com.microsoft.dhalion.core.DiagnosisTable;
+import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.events.EventManager;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
-import com.microsoft.dhalion.resolver.Action;
+import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
@@ -46,7 +49,7 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisName.SYMPTOM_UNDER_PROVISIONING;
+import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 
@@ -58,6 +61,7 @@ public class ScaleUpResolver implements IResolver {
   private ISchedulerClient schedulerClient;
   private EventManager eventManager;
   private Config config;
+  private ExecutionContext context;
 
   @Inject
   public ScaleUpResolver(TopologyProvider topologyProvider,
@@ -73,75 +77,85 @@ public class ScaleUpResolver implements IResolver {
   }
 
   @Override
-  public List<Action> resolve(List<Diagnosis> diagnosis) {
-    for (Diagnosis diagnoses : diagnosis) {
-      Symptom bpSymptom = diagnoses.getSymptoms().get(SYMPTOM_UNDER_PROVISIONING.text());
-      if (bpSymptom == null || bpSymptom.getComponents().isEmpty()) {
-        // nothing to fix as there is no back pressure
-        continue;
-      }
+  public void initialize(ExecutionContext ctxt) {
+    this.context = ctxt;
+  }
 
-      if (bpSymptom.getComponents().size() > 1) {
-        throw new UnsupportedOperationException("Multiple components with back pressure symptom");
-      }
+  @Override
+  public Collection<Action> resolve(Collection<Diagnosis> diagnosis) {
+    List<Action> actions = new ArrayList<>();
 
-      ComponentMetrics bpComponent = bpSymptom.getComponent();
-      int newParallelism = computeScaleUpFactor(bpComponent);
-      Map<String, Integer> changeRequest = new HashMap<>();
-      changeRequest.put(bpComponent.getName(), newParallelism);
+    DiagnosisTable table = DiagnosisTable.of(diagnosis);
+    table = table.type(DIAGNOSIS_UNDER_PROVISIONING.text());
 
-      PackingPlan currentPackingPlan = packingPlanProvider.get();
-      PackingPlan newPlan = buildNewPackingPlan(changeRequest, currentPackingPlan);
-      if (newPlan == null) {
-        return null;
-      }
-
-      Scheduler.UpdateTopologyRequest updateTopologyRequest =
-          Scheduler.UpdateTopologyRequest.newBuilder()
-              .setCurrentPackingPlan(getSerializedPlan(currentPackingPlan))
-              .setProposedPackingPlan(getSerializedPlan(newPlan))
-              .build();
-
-      LOG.info("Sending Updating topology request: " + updateTopologyRequest);
-      if (!schedulerClient.updateTopology(updateTopologyRequest)) {
-        throw new RuntimeException(String.format("Failed to update topology with Scheduler, "
-            + "updateTopologyRequest=%s", updateTopologyRequest));
-      }
-
-      TopologyUpdate action = new TopologyUpdate();
-      LOG.info("Broadcasting topology update event");
-      eventManager.onEvent(action);
-
-      LOG.info("Scheduler updated topology successfully.");
-
-      List<Action> actions = new ArrayList<>();
-      actions.add(action);
+    if (table.size() == 0) {
+      LOG.fine("No under-previsioning diagnosis present, ending as there's nothing to fix");
       return actions;
     }
 
-    return null;
+    // Scale the first assigned component
+    Diagnosis diagnoses = table.first();
+    // verify diagnoses instance is valid
+    if (diagnoses.assignments().isEmpty()) {
+      LOG.warning(String.format("Diagnosis %s is missing assignments", diagnoses.id()));
+      return actions;
+    }
+    String component = diagnoses.assignments().iterator().next();
+
+    int newParallelism = computeScaleUpFactor(component);
+    Map<String, Integer> changeRequest = new HashMap<>();
+    changeRequest.put(component, newParallelism);
+
+    PackingPlan currentPackingPlan = packingPlanProvider.get();
+    PackingPlan newPlan = buildNewPackingPlan(changeRequest, currentPackingPlan);
+    if (newPlan == null) {
+      return null;
+    }
+
+    Scheduler.UpdateTopologyRequest updateTopologyRequest =
+        Scheduler.UpdateTopologyRequest.newBuilder()
+            .setCurrentPackingPlan(getSerializedPlan(currentPackingPlan))
+            .setProposedPackingPlan(getSerializedPlan(newPlan))
+            .build();
+
+    LOG.info("Sending Updating topology request: " + updateTopologyRequest);
+    if (!schedulerClient.updateTopology(updateTopologyRequest)) {
+      throw new RuntimeException(String.format("Failed to update topology with Scheduler, "
+          + "updateTopologyRequest=%s", updateTopologyRequest));
+    }
+    LOG.info("Scheduler updated topology successfully.");
+
+    LOG.info("Broadcasting topology update event");
+    TopologyUpdate action
+        = new TopologyUpdate(context.checkpoint(), Collections.singletonList(component));
+    eventManager.onEvent(action);
+
+    actions.add(action);
+    return actions;
   }
 
   @VisibleForTesting
-  int computeScaleUpFactor(ComponentMetrics componentMetrics) {
-    double totalCompBpTime = 0;
-    String compName = componentMetrics.getName();
-    for (InstanceMetrics instanceMetrics : componentMetrics.getMetrics().values()) {
-      double instanceBp = instanceMetrics.getMetricValueSum(METRIC_BACK_PRESSURE.text());
-      LOG.info(String.format("Instance:%s, bpTime:%.0f", instanceMetrics.getName(), instanceBp));
-      totalCompBpTime += instanceBp;
-    }
+  int computeScaleUpFactor(String compName) {
+    Instant newest = context.checkpoint();
+    Instant oldest = context.previousCheckpoint();
+    MeasurementsTable table = context.measurements()
+        .component(compName)
+        .type(METRIC_BACK_PRESSURE.text())
+        .between(oldest, newest);
 
+    double totalCompBpTime = table.sum();
     LOG.info(String.format("Component: %s, bpTime: %.0f", compName, totalCompBpTime));
+
     if (totalCompBpTime >= 1000) {
       totalCompBpTime = 999;
+      LOG.warning(String.format("Comp:%s, bpTime after filter: %.0f", compName, totalCompBpTime));
     }
-    LOG.warning(String.format("Comp:%s, bpTime after filter: %.0f", compName, totalCompBpTime));
 
     double unusedCapacity = (1.0 * totalCompBpTime) / (1000 - totalCompBpTime);
+
     // scale up fencing: do not scale more than 4 times the current size
     unusedCapacity = unusedCapacity > 4.0 ? 4.0 : unusedCapacity;
-    int parallelism = (int) Math.ceil(componentMetrics.getMetrics().size() * (1 + unusedCapacity));
+    int parallelism = (int) Math.ceil(table.uniqueInstances().size() * (1 + unusedCapacity));
     LOG.info(String.format("Component's, %s, unused capacity is: %.3f. New parallelism: %d",
         compName, unusedCapacity, parallelism));
     return parallelism;

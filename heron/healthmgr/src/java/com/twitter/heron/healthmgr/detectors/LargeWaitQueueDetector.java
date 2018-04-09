@@ -16,59 +16,65 @@
 package com.twitter.heron.healthmgr.detectors;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.microsoft.dhalion.api.IDetector;
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Symptom;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.common.ComponentMetricsHelper;
-import com.twitter.heron.healthmgr.common.MetricsStats;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomName.SYMPTOM_LARGE_WAIT_Q;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_LARGE_WAIT_Q;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
-public class LargeWaitQueueDetector implements IDetector {
+public class LargeWaitQueueDetector extends BaseDetector {
   static final String CONF_SIZE_LIMIT = "LargeWaitQueueDetector.limit";
 
   private static final Logger LOG = Logger.getLogger(LargeWaitQueueDetector.class.getName());
-  private final BufferSizeSensor pendingBufferSensor;
   private final int sizeLimit;
 
   @Inject
-  LargeWaitQueueDetector(BufferSizeSensor pendingBufferSensor,
-                         HealthPolicyConfig policyConfig) {
-    this.pendingBufferSensor = pendingBufferSensor;
+  LargeWaitQueueDetector(HealthPolicyConfig policyConfig) {
     sizeLimit = (int) policyConfig.getConfig(CONF_SIZE_LIMIT, 1000);
   }
 
   /**
-   * Detects all components unable to keep up with input load, hence having a large pending buffer
-   * or wait queue
+   * Detects all components having a large pending buffer or wait queue
    *
-   * @return A collection of all components executing slower than input rate.
+   * @return A collection of symptoms each one corresponding to components with
+   * large wait queues.
    */
   @Override
-  public List<Symptom> detect() {
-    ArrayList<Symptom> result = new ArrayList<>();
+  public Collection<Symptom> detect(Collection<Measurement> measurements) {
 
-    Map<String, ComponentMetrics> bufferSizes = pendingBufferSensor.get();
-    for (ComponentMetrics compMetrics : bufferSizes.values()) {
-      ComponentMetricsHelper compStats = new ComponentMetricsHelper(compMetrics);
-      MetricsStats stats = compStats.computeMinMaxStats(METRIC_BUFFER_SIZE.text());
-      if (stats.getMetricMin() > sizeLimit) {
-        LOG.info(String.format("Detected large wait queues for %s, smallest queue is %f",
-            compMetrics.getName(), stats.getMetricMin()));
-        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q.text(), compMetrics));
+    Collection<Symptom> result = new ArrayList<>();
+
+    MeasurementsTable waitQueueMetrics
+        = MeasurementsTable.of(measurements).type(METRIC_WAIT_Q_SIZE.text());
+    for (String component : waitQueueMetrics.uniqueComponents()) {
+      Set<String> addresses = new HashSet<>();
+      MeasurementsTable instanceMetrics = waitQueueMetrics.component(component);
+      for (String instance : instanceMetrics.uniqueInstances()) {
+        double avgWaitQSize = instanceMetrics.instance(instance).mean();
+        if (avgWaitQSize > sizeLimit) {
+          LOG.info(String.format("Detected large wait queues for instance"
+              + "%s, smallest queue is + %f", instance, avgWaitQSize));
+          addresses.add(instance);
+        }
+      }
+      if (addresses.size() > 0) {
+        result.add(new Symptom(SYMPTOM_LARGE_WAIT_Q.text(), context.checkpoint(), addresses));
       }
     }
 
     return result;
   }
 }
+
+
+

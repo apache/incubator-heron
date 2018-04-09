@@ -17,7 +17,8 @@ package com.twitter.heron.healthmgr.sensors;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,8 +35,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.microsoft.dhalion.api.MetricsProvider;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
 
 import net.minidev.json.JSONArray;
 
@@ -48,8 +48,6 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
   private static final Logger LOG = Logger.getLogger(TrackerMetricsProvider.class.getName());
   private final WebTarget baseTarget;
-
-  private Clock clock = new Clock();
 
   @Inject
   public TrackerMetricsProvider(@Named(CONF_METRICS_SOURCE_URL) String trackerURL,
@@ -68,35 +66,26 @@ public class TrackerMetricsProvider implements MetricsProvider {
   }
 
   @Override
-  public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           Instant startTime,
-                                                           Duration duration,
-                                                           String... components) {
-    Map<String, ComponentMetrics> result = new HashMap<>();
-    for (String component : components) {
-      String response = getMetricsFromTracker(metric, component, startTime, duration);
-      Map<String, InstanceMetrics> metrics = parse(response, component, metric);
-      ComponentMetrics componentMetric = new ComponentMetrics(component, metrics);
-      result.put(component, componentMetric);
+  public Collection<Measurement> getMeasurements(Instant startTime,
+                                                 Duration duration,
+                                                 Collection<String> metricNames,
+                                                 Collection<String> components) {
+    Collection<Measurement> result = new ArrayList<>();
+    for (String metric : metricNames) {
+      for (String component : components) {
+        String response = getMetricsFromTracker(metric, component, startTime, duration);
+        Collection<Measurement> measurements = parse(response, component, metric);
+        LOG.fine(String.format("%d measurements received for %s/%s",
+            measurements.size(), component, metric));
+        result.addAll(measurements);
+      }
     }
     return result;
   }
 
-  @Override
-  public Map<String, ComponentMetrics> getComponentMetrics(String metric,
-                                                           Duration duration,
-                                                           String... components) {
-    Instant start = Instant.ofEpochMilli(clock.currentTime() - duration.toMillis());
-    return getComponentMetrics(metric, start, duration, components);
-  }
-
   @SuppressWarnings("unchecked")
-  private Map<String, InstanceMetrics> parse(String response, String component, String metric) {
-    Map<String, InstanceMetrics> metricsData = new HashMap<>();
-
-    if (response == null || response.isEmpty()) {
-      return metricsData;
-    }
+  private Collection<Measurement> parse(String response, String component, String metric) {
+    Collection<Measurement> metricsData = new ArrayList();
 
     DocumentContext result = JsonPath.parse(response);
     JSONArray jsonArray = result.read("$.." + metric);
@@ -113,14 +102,15 @@ public class TrackerMetricsProvider implements MetricsProvider {
 
     for (String instanceName : metricsMap.keySet()) {
       Map<String, String> tmpValues = (Map<String, String>) metricsMap.get(instanceName);
-      Map<Instant, Double> values = new HashMap<>();
       for (String timeStamp : tmpValues.keySet()) {
-        values.put(Instant.ofEpochSecond(Long.parseLong(timeStamp)),
+        Measurement measurement = new Measurement(
+            component,
+            instanceName,
+            metric,
+            Instant.ofEpochSecond(Long.parseLong(timeStamp)),
             Double.parseDouble(tmpValues.get(timeStamp)));
+        metricsData.add(measurement);
       }
-      InstanceMetrics instanceMetrics = new InstanceMetrics(instanceName);
-      instanceMetrics.addMetric(metric, values);
-      metricsData.put(instanceName, instanceMetrics);
     }
 
     return metricsData;
@@ -131,23 +121,12 @@ public class TrackerMetricsProvider implements MetricsProvider {
     WebTarget target = baseTarget
         .queryParam("metricname", metric)
         .queryParam("component", component)
-        .queryParam("starttime", start.getEpochSecond())
-        .queryParam("endtime", start.getEpochSecond() + duration.getSeconds());
+        .queryParam("starttime", start.getEpochSecond() - duration.getSeconds())
+        .queryParam("endtime", start.getEpochSecond());
 
     LOG.log(Level.FINE, "Tracker Query URI: {0}", target.getUri());
 
     Response r = target.request(MediaType.APPLICATION_JSON_TYPE).get();
     return r.readEntity(String.class);
-  }
-
-  @VisibleForTesting
-  void setClock(Clock clock) {
-    this.clock = clock;
-  }
-
-  static class Clock {
-    long currentTime() {
-      return System.currentTimeMillis();
-    }
   }
 }

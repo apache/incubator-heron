@@ -460,12 +460,27 @@ maven_jar(
 
 maven_jar(
   name = "com_microsoft_dhalion",
-  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+  artifact = "com.microsoft.dhalion:dhalion:0.2.1",
 )
 
 maven_jar(
   name = "org_apache_commons_commons_math3",
   artifact = "org.apache.commons:commons-math3:3.6.1"
+)
+
+maven_jar(
+  name = "tech_tablesaw",
+  artifact = "tech.tablesaw:tablesaw-core:0.11.4"
+)
+
+maven_jar(
+  name = "it_unimi_dsi_fastutil",
+  artifact = "it.unimi.dsi:fastutil:8.1.1"
+)
+
+maven_jar(
+  name = "org_roaringbitmap",
+  artifact = "org.roaringbitmap:RoaringBitmap:0.6.51"
 )
 
 # Google Cloud
