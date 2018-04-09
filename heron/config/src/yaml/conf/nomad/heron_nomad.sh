@@ -7,6 +7,11 @@ CORE_RELEASE_FILE="heron-core.tar.gz"
 CORE_RELEASE_DIR="heron-core"
 TOPOLOGY_PACKAGE_FILE="topology.tar.gz"
 
+# remove directory if already exists
+if [ -d "$HERON_NOMAD_WORKING_DIR" ]; then
+  rm -rf $HERON_NOMAD_WORKING_DIR
+fi
+
 # Create working directory if it does not exist
 mkdir -p ${HERON_NOMAD_WORKING_DIR}
 
