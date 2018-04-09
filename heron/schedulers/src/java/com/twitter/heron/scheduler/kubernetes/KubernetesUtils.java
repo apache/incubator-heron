@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import com.squareup.okhttp.Response;
 
 import com.twitter.heron.common.basics.ByteAmount;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.scheduler.utils.Runtime;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -41,6 +42,7 @@ final class KubernetesUtils {
       log.log(Level.SEVERE, "Error details:\n" +  response.body().string());
     } catch (IOException ioe) {
       // ignore
+      SysUtils.closeIgnoringExceptions(response.body());
     }
   }
 
