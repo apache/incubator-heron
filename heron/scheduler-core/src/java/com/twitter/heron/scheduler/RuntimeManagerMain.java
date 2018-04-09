@@ -115,6 +115,13 @@ public class RuntimeManagerMain {
         .argName("component parallelism")
         .build();
 
+    Option runtimeConfig = Option.builder("rc")
+        .desc("Runtime config to update: [comp:]<name>:<value>,[comp:]<name>:<value>,...")
+        .longOpt("runtime_config")
+        .hasArgs()
+        .argName("runtime config")
+        .build();
+
     Option configFile = Option.builder("p")
         .desc("Path of the config files")
         .longOpt("config_path")
@@ -182,6 +189,7 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(runtimeConfig);
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
     options.addOption(verbose);

@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PackingPlanProviderTest {
-  String topologyName = "topologyName";
+  private String topologyName = "topologyName";
   private EventManager eventManager = new EventManager();
 
   @Test
@@ -67,7 +67,7 @@ public class PackingPlanProviderTest {
     PackingPlan packing = provider.get();
     Assert.assertEquals(1, packing.getContainers().size());
 
-    provider.onEvent(new TopologyUpdate());
+    provider.onEvent(new TopologyUpdate(null, null));
     provider.get();
     verify(adaptor, times(2)).getPackingPlan(topologyName);
   }

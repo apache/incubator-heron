@@ -7,6 +7,12 @@ test_deps_files = [
 
 heron_local_deps = [
     "//eco/src/java:eco-java",
+    "//eco/src/java:eco-submit-java", 
+    "//eco/src/java:eco-builder-java",
+    "//eco/src/java:eco-defs-java",
+    "//eco/src/java:eco-parser-java",
+    "//eco/src/java:eco-storm-builder-java",
+    "//eco/src/java:eco-heron-builder-java",
     "//heron/api/src/java:api-java-low-level",
     "//storm-compatibility/src/java:storm-compatibility-java",
 ]
@@ -14,8 +20,15 @@ heron_local_deps = [
 eco_test_deps = heron_local_deps + test_deps_files
 
 java_test(
-    name = "EcoBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/EcoBuilderTest.java"]),
+    name = "StormEcoBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/storm/StormEcoBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small",
+)
+
+java_test(
+    name = "HeronEcoBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronEcoBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small",
 )
@@ -49,15 +62,29 @@ java_test(
 )
 
 java_test(
-    name = "SpoutBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/SpoutBuilderTest.java"]),
+    name = "StormSpoutBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/storm/StormSpoutBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )
 
 java_test(
-    name = "StreamBuilderTest",
-    srcs = glob(["com/twitter/heron/eco/builder/StreamBuilderTest.java"]),
+    name = "HeronSpoutBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronSpoutBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
+
+java_test(
+    name = "StormStreamBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/storm/StormStreamBuilderTest.java"]),
+    deps = eco_test_deps,
+    size = "small"
+)
+
+java_test(
+    name = "HeronStreamBuilderTest",
+    srcs = glob(["com/twitter/heron/eco/builder/heron/HeronStreamBuilderTest.java"]),
     deps = eco_test_deps,
     size = "small"
 )

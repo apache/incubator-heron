@@ -69,6 +69,7 @@ nomad_sdk_deps = [
 nomad_deps_files = \
     scheduler_deps_files + nomad_sdk_deps + [
         ":scheduler-utils-java",
+        "//heron/metricsmgr/src/java:metricsmgr-java"
     ]
 
 java_library(

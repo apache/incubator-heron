@@ -14,51 +14,82 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
 
 import static com.twitter.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BackPressureDetectorTest {
+  Instant now;
+
+  @Before
+  public void setup() {
+    now = Instant.now();
+  }
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_NOISE_FILTER, 20)).thenReturn(50);
 
-    ComponentMetrics compMetrics =
-        new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE.text(), 55);
-    Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
-    topologyMetrics.put("bolt", compMetrics);
 
-    BackPressureSensor sensor = mock(BackPressureSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 55);
+    Measurement measurement2
+        = new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), now, 3);
+    Measurement measurement3
+        = new Measurement("bolt", "i3", METRIC_BACK_PRESSURE.text(), now, 0);
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+    metrics.add(measurement3);
 
-    BackPressureDetector detector = new BackPressureDetector(sensor, config);
-    List<Symptom> symptoms = detector.detect();
+    BackPressureDetector detector = new BackPressureDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(now);
+    detector.initialize(context);
+    Collection<Symptom> symptoms = detector.detect(metrics);
 
-    Assert.assertEquals(1, symptoms.size());
+    Assert.assertEquals(2, symptoms.size());
+    SymptomsTable compSymptom = SymptomsTable.of(symptoms).type(SYMPTOM_COMP_BACK_PRESSURE.text());
+    Assert.assertEquals(1,compSymptom.size());
+    Assert.assertEquals(1, compSymptom.get().iterator().next().assignments().size());
 
-    compMetrics = new ComponentMetrics("bolt", "i1", METRIC_BACK_PRESSURE.text(), 45);
-    topologyMetrics.put("bolt", compMetrics);
+    SymptomsTable instanceSymptom
+        = SymptomsTable.of(symptoms).type(SYMPTOM_INSTANCE_BACK_PRESSURE.text());
+    Assert.assertEquals(1, instanceSymptom.size());
+    Assert.assertEquals(1, instanceSymptom.get().iterator().next().assignments().size());
 
-    sensor = mock(BackPressureSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
+    Symptom symptom = symptoms.iterator().next();
 
-    detector = new BackPressureDetector(sensor, config);
-    symptoms = detector.detect();
+
+    measurement1
+        = new Measurement("bolt", "i1", METRIC_BACK_PRESSURE.text(), now, 45);
+    measurement2
+        = new Measurement("bolt", "i2", METRIC_BACK_PRESSURE.text(), now, 3);
+    metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+
+    detector = new BackPressureDetector(config);
+    detector.initialize(context);
+    symptoms = detector.detect(metrics);
 
     Assert.assertEquals(0, symptoms.size());
   }

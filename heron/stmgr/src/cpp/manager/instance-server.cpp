@@ -448,8 +448,10 @@ void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
   // There should be parallelism hint and the per instance rate limit should be at least
   // one byte per second
   if (parallelism > 0 && read_bsp > parallelism && burst_read_bsp > parallelism) {
+    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bsp << "/" << burst_read_bsp;
     _conn->setRateLimit(read_bsp / parallelism, burst_read_bsp / parallelism);
   } else {
+    LOG(INFO) << "Disable rate limit in " << _component;
     _conn->disableRateLimit();
   }
 }

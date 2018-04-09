@@ -58,7 +58,7 @@ public class TopologyProviderTest {
     Assert.assertEquals(2, provider.get().getBoltsCount());
 
     // once fetched it is cached
-    provider.onEvent(new TopologyUpdate());
+    provider.onEvent(new TopologyUpdate(null, null));
     provider.get();
     verify(adaptor, times(2)).getPhysicalPlan(topology);
   }

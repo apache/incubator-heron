@@ -206,6 +206,9 @@ class HeronInternalsConfigVars {
   // The maximum time in ms for an spout instance to emit tuples per attempt
   static const sp_string HERON_INSTANCE_EMIT_BATCH_TIME_MS;
 
+  // The maximum number of bytes for n spout instance to emit tuples per attempt
+  static const sp_string HERON_INSTANCE_EMIT_BATCH_SIZE;
+
   // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
   static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY;
 

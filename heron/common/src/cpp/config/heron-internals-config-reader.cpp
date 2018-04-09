@@ -317,6 +317,11 @@ int HeronInternalsConfigReader::GetHeronInstanceEmitBatchTimeMs() {
       .as<int>();
 }
 
+int HeronInternalsConfigReader::GetHeronInstanceEmitBatchSize() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_SIZE]
+      .as<int>();
+}
+
 int HeronInternalsConfigReader::GetHeronInstanceSetDataTupleCapacity() {
   return config_[HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY]
       .as<int>();

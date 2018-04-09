@@ -82,3 +82,26 @@ cc_test(
     flaky = 1,
     linkstatic = 1,
 )
+
+cc_test(
+    name = "tcontroller_unittest",
+    srcs = [
+        "tcontroller_unittest.cpp"
+    ],
+    deps = [
+        "//heron/tmaster/src/cpp:tmaster-cxx",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = [
+        "-Iheron",
+        "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
+        "-Iheron/tmaster/src/cpp",
+        "-Iheron/tmaster/tests/cpp",
+        "-I$(GENDIR)/heron",
+        "-I$(GENDIR)/heron/common/src/cpp",
+    ],
+    size = "small",
+    flaky = 0,
+    linkstatic = 1,
+)

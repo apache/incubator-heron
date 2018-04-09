@@ -21,7 +21,7 @@ import com.twitter.heron.eco.definition.ObjectDefinition;
 
 public class BoltBuilder {
 
-  protected void buildBolts(EcoExecutionContext executionContext,
+  public void buildBolts(EcoExecutionContext executionContext,
                             ObjectBuilder objectBuilder)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
       NoSuchFieldException, InvocationTargetException {

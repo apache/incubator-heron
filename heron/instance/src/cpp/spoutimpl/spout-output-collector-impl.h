@@ -47,6 +47,7 @@ class SpoutOutputCollectorImpl : public api::spout::ISpoutOutputCollector {
   virtual void reportError(std::exception& except);
 
   int64_t getTotalDataTuplesEmitted() const { return collector_->getTotalDataTuplesEmitted(); }
+  int64_t getTotalDataBytesEmitted() const { return collector_->getTotalDataSizeEmitted(); }
   int64_t numInFlight() const { return inflightTuples_.size(); }
   int getImmediateAcksSize() const { return immediateAcks_.size(); }
   std::shared_ptr<RootTupleInfo> getImmediateAcksFront() {

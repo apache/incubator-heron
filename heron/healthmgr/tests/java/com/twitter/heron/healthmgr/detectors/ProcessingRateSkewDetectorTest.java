@@ -14,59 +14,111 @@
 
 package com.twitter.heron.healthmgr.detectors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.MeasurementsTable;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.core.SymptomsTable;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
 
 import static com.twitter.heron.healthmgr.detectors.ProcessingRateSkewDetector.CONF_SKEW_RATIO;
 import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProcessingRateSkewDetectorTest {
+
+  @Test
+  public void testGetMaxMin() {
+    HealthPolicyConfig config = mock(HealthPolicyConfig.class);
+    when(config.getConfig(CONF_SKEW_RATIO, 1.5)).thenReturn(2.5);
+
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    Measurement measurement2
+        = new Measurement("bolt", "i1", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892122), 3000);
+    Measurement measurement3
+        = new Measurement("bolt", "i2", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 200.0);
+    Measurement measurement4
+        = new Measurement("bolt", "i2", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 400.0);
+
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+    metrics.add(measurement3);
+    metrics.add(measurement4);
+
+    MeasurementsTable metricsTable = MeasurementsTable.of(metrics);
+
+
+    ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(config);
+
+    assertEquals(2000, (int) detector.getMaxOfAverage(metricsTable));
+    assertEquals(300, (int) detector.getMinOfAverage(metricsTable));
+
+  }
+
   @Test
   public void testConfigAndFilter() {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_SKEW_RATIO, 1.5)).thenReturn(2.5);
 
-    ComponentMetrics compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
-    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 200));
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    Measurement measurement2
+        = new Measurement("bolt", "i2", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 200.0);
 
-    Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
-    topologyMetrics.put("bolt", compMetrics);
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
 
-    ExecuteCountSensor sensor = mock(ExecuteCountSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
-    when(sensor.getMetricName()).thenReturn(METRIC_EXE_COUNT.text());
+    ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
 
-    ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(sensor, config);
-    List<Symptom> symptoms = detector.detect();
+    Collection<Symptom> symptoms = detector.detect(metrics);
 
-    assertEquals(1, symptoms.size());
+    assertEquals(3, symptoms.size());
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).size());
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i1").size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i2").size());
 
-    compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
-    compMetrics.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 500));
-    topologyMetrics.put("bolt", compMetrics);
+    measurement1
+        = new Measurement("bolt", "i1", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    measurement2
+        = new Measurement("bolt", "i2", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 500.0);
 
-    sensor = mock(ExecuteCountSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
+    metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
 
-    detector = new ProcessingRateSkewDetector(sensor, config);
-    symptoms = detector.detect();
+    detector = new ProcessingRateSkewDetector(config);
+    detector.initialize(context);
+    symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());
   }
@@ -76,43 +128,60 @@ public class ProcessingRateSkewDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_SKEW_RATIO, 1.5)).thenReturn(2.5);
 
-    ComponentMetrics compMetrics1 = new ComponentMetrics("bolt-1");
-    compMetrics1.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
-    compMetrics1.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 200));
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    Measurement measurement2
+        = new Measurement("bolt", "i2", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 200.0);
 
-    ComponentMetrics compMetrics2 = new ComponentMetrics("bolt-2");
-    compMetrics2.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
-    compMetrics2.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 200));
 
-    ComponentMetrics compMetrics3 = new ComponentMetrics("bolt-3");
-    compMetrics3.addInstanceMetric(new InstanceMetrics("i1", METRIC_EXE_COUNT.text(), 1000));
-    compMetrics3.addInstanceMetric(new InstanceMetrics("i2", METRIC_EXE_COUNT.text(), 500));
+    Measurement measurement3
+        = new Measurement("bolt2", "i3", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    Measurement measurement4
+        = new Measurement("bolt2", "i4", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 200.0);
 
-    Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
-    topologyMetrics.put("bolt-1", compMetrics1);
-    topologyMetrics.put("bolt-2", compMetrics2);
-    topologyMetrics.put("bolt-3", compMetrics3);
 
-    ExecuteCountSensor sensor = mock(ExecuteCountSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
-    when(sensor.getMetricName()).thenReturn(METRIC_EXE_COUNT.text());
+    Measurement measurement5
+        = new Measurement("bolt3", "i5", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 1000);
+    Measurement measurement6
+        = new Measurement("bolt3", "i6", METRIC_EXE_COUNT.text(), Instant.ofEpochSecond
+        (1497892222), 500.0);
 
-    ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(sensor, config);
-    List<Symptom> symptoms = detector.detect();
 
-    assertEquals(2, symptoms.size());
-    for (Symptom symptom : symptoms) {
-      if (symptom.getComponent().getName().equals("bolt-1")) {
-        compMetrics1 = null;
-      } else if (symptom.getComponent().getName().equals("bolt-2")) {
-        compMetrics2 = null;
-      } else if (symptom.getComponent().getName().equals("bolt-3")) {
-        compMetrics3 = null;
-      }
-    }
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+    metrics.add(measurement3);
+    metrics.add(measurement4);
+    metrics.add(measurement5);
+    metrics.add(measurement6);
 
-    assertNull(compMetrics1);
-    assertNull(compMetrics2);
-    assertNotNull(compMetrics3);
+    ProcessingRateSkewDetector detector = new ProcessingRateSkewDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
+
+    Collection<Symptom> symptoms = detector.detect(metrics);
+
+    assertEquals(6, symptoms.size());
+
+    SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
+    assertEquals(2, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).size());
+    assertEquals(2, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).size());
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i1").size());
+    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i3").size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i2").size());
+    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+        .SYMPTOM_PROCESSING_RATE_SKEW).assignment("i4").size());
+
   }
 }

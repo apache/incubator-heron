@@ -132,7 +132,7 @@ class HeronExecutorTest(unittest.TestCase):
              "-cp scheduler_classpath:healthmgr_classpath " \
              "com.twitter.heron.healthmgr.HealthManager --cluster cluster --role role " \
              "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port " \
-             "--system_config_file %s --override_config_file %s --verbose" %\
+             "--system_config_file %s --override_config_file %s" %\
              (INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_instance_command(component_name, instance_id, container_id):

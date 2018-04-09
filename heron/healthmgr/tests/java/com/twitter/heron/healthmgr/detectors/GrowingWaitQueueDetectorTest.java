@@ -15,21 +15,19 @@
 package com.twitter.heron.healthmgr.detectors;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import com.microsoft.dhalion.detector.Symptom;
-import com.microsoft.dhalion.metrics.ComponentMetrics;
-import com.microsoft.dhalion.metrics.InstanceMetrics;
+import com.microsoft.dhalion.core.Measurement;
+import com.microsoft.dhalion.core.Symptom;
+import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
 import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
 
 import static com.twitter.heron.healthmgr.detectors.GrowingWaitQueueDetector.CONF_LIMIT;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BUFFER_SIZE;
+import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,52 +38,64 @@ public class GrowingWaitQueueDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_LIMIT, 10.0)).thenReturn(5.0);
 
-    ComponentMetrics compMetrics;
-    InstanceMetrics instanceMetrics;
-    Map<Instant, Double> bufferSizes;
-    Map<String, ComponentMetrics> topologyMetrics = new HashMap<>();
+    Measurement measurement1
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 0.0);
+    Measurement measurement2
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892270), 300.0);
+    Measurement measurement3
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892330), 700.0);
+    Measurement measurement4
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892390), 1000.0);
+    Measurement measurement5
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892450), 1300.0);
 
-    instanceMetrics = new InstanceMetrics("i1");
-    bufferSizes = new HashMap<>();
-    bufferSizes.put(Instant.ofEpochSecond(1497892222), 0.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892270), 300.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892330), 700.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892390), 1000.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892450), 1300.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
 
-    compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(instanceMetrics);
+    Collection<Measurement> metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+    metrics.add(measurement3);
+    metrics.add(measurement4);
+    metrics.add(measurement5);
 
-    topologyMetrics.put("bolt", compMetrics);
-
-    BufferSizeSensor sensor = mock(BufferSizeSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
-
-    GrowingWaitQueueDetector detector = new GrowingWaitQueueDetector(sensor, config);
-    List<Symptom> symptoms = detector.detect();
+    GrowingWaitQueueDetector detector = new GrowingWaitQueueDetector(config);
+    PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
+    when(context.checkpoint()).thenReturn(Instant.now());
+    detector.initialize(context);
+    Collection<Symptom> symptoms = detector.detect(metrics);
 
     assertEquals(1, symptoms.size());
+    assertEquals(1, symptoms.iterator().next().assignments().size());
+    
+    measurement1
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892222), 0.0);
+    measurement2
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892270), 200.0);
+    measurement3
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892330), 400.0);
+    measurement4
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892390), 600.0);
+    measurement5
+        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
+        (1497892450), 800.0);
 
-    instanceMetrics = new InstanceMetrics("i1");
-    bufferSizes = new HashMap<>();
-    bufferSizes.put(Instant.ofEpochSecond(1497892222), 0.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892270), 200.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892330), 400.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892390), 600.0);
-    bufferSizes.put(Instant.ofEpochSecond(1497892450), 800.0);
-    instanceMetrics.addMetric(METRIC_BUFFER_SIZE.text(), bufferSizes);
+    metrics = new ArrayList<>();
+    metrics.add(measurement1);
+    metrics.add(measurement2);
+    metrics.add(measurement3);
+    metrics.add(measurement4);
+    metrics.add(measurement5);
 
-    compMetrics = new ComponentMetrics("bolt");
-    compMetrics.addInstanceMetric(instanceMetrics);
-
-    topologyMetrics.put("bolt", compMetrics);
-
-    sensor = mock(BufferSizeSensor.class);
-    when(sensor.get()).thenReturn(topologyMetrics);
-
-    detector = new GrowingWaitQueueDetector(sensor, config);
-    symptoms = detector.detect();
+    detector = new GrowingWaitQueueDetector(config);
+    symptoms = detector.detect(metrics);
 
     assertEquals(0, symptoms.size());
   }
