@@ -54,7 +54,7 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
       @Override
       public synchronized void onEvent(TopologyUpdate event) {
         LOG.info(
-            "Received topology update event, invalidating cached PhysicalPlan: " + event.getName());
+            "Received topology update event, invalidating cached PhysicalPlan: " + event.type());
         physicalPlan = null;
       }
     });
@@ -64,8 +64,8 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
        */
       @Override
       public synchronized void onEvent(ContainerRestart event) {
-        LOG.info("Received conatiner restart event, invalidating cached PhysicalPlan: "
-            + event.getName());
+        LOG.info("Received container restart event, invalidating cached PhysicalPlan: "
+            + event.type());
         physicalPlan = null;
       }
     });
