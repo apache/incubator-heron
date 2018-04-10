@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,8 +91,8 @@ import com.twitter.heron.spi.utils.ReflectionUtils;
  * <li>health manager mode: <code> -m local</code>, default cluster
  * <li>heron home directory: <code> -d ~/.heron</code>, required if mode is local
  * <li>config directory: <code> -p ~/.heron/conf</code>, required if mode is local
- * <li>metrics type: <code>-s f.q.class.name</code>, default:
- * <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
+ * <li>metrics type: <code>-s f.q.class.name</code>,
+ * default: <code>com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider</code>
  * <li>metrics source: <code>-t http://host:port</code>, default: <code>http://127.0.0.1:8888</code>
  * <li>enable verbose mode: <code> -v</code>
  * </ul>
@@ -117,7 +117,8 @@ public class HealthManager {
   private HealthPolicyConfigReader policyConfigReader;
 
   public enum HealthManagerMode {
-    cluster, local
+    cluster,
+    local
   }
 
   private enum CliArgs {
@@ -174,8 +175,10 @@ public class HealthManager {
     Config config;
     switch (mode) {
       case cluster:
-        config = Config.toClusterMode(Config.newBuilder().putAll(ConfigLoader.loadClusterConfig())
-            .putAll(commandLineConfigs(cmd)).build());
+        config = Config.toClusterMode(Config.newBuilder()
+            .putAll(ConfigLoader.loadClusterConfig())
+            .putAll(commandLineConfigs(cmd))
+            .build());
         break;
 
       case local:
@@ -184,9 +187,10 @@ public class HealthManager {
         }
         String heronHome = getOptionValue(cmd, CliArgs.HERON_HOME);
         String configPath = getOptionValue(cmd, CliArgs.CONFIG_PATH);
-        config = Config.toLocalMode(
-            Config.newBuilder().putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
-                .putAll(commandLineConfigs(cmd)).build());
+        config = Config.toLocalMode(Config.newBuilder()
+            .putAll(ConfigLoader.loadConfig(heronHome, configPath, null, null))
+            .putAll(commandLineConfigs(cmd))
+            .build());
         break;
 
       default:
@@ -247,8 +251,9 @@ public class HealthManager {
   private static void setupLogging(CommandLine cmd, Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigFile(config);
 
-    SystemConfig systemConfig =
-        SystemConfig.newBuilder(true).putAll(systemConfigFilename, true).build();
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(systemConfigFilename, true)
+        .build();
 
     Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
     Level loggingLevel = Level.INFO;
@@ -260,8 +265,10 @@ public class HealthManager {
     LoggingHelper.loggerInit(loggingLevel, true);
 
     String fileName = String.format("%s-%s-%s", "heron", Context.topologyName(config), "healthmgr");
-    LoggingHelper.addLoggingHandler(LoggingHelper.getFileHandler(fileName, loggingDir, true,
-        systemConfig.getHeronLoggingMaximumSize(), systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(fileName, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSize(),
+            systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");
   }
@@ -283,8 +290,10 @@ public class HealthManager {
 
     stateMgrAdaptor = createStateMgrAdaptor();
 
-    this.runtime = Config.newBuilder().put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
-        .put(Key.TOPOLOGY_NAME, Context.topologyName(config)).build();
+    this.runtime = Config.newBuilder()
+        .put(Key.SCHEDULER_STATE_MANAGER_ADAPTOR, stateMgrAdaptor)
+        .put(Key.TOPOLOGY_NAME, Context.topologyName(config))
+        .build();
 
     this.schedulerClient = createSchedulerClient();
 
