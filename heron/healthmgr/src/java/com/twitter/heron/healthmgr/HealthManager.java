@@ -359,11 +359,14 @@ public class HealthManager {
     return new AbstractModule() {
       @Override
       protected void configure() {
-        bind(String.class).annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_TOPOLOGY_NAME))
             .toInstance(Context.topologyName(config));
-        bind(String.class).annotatedWith(Names.named(TrackerMetricsProvider.CONF_CLUSTER))
+        bind(String.class)
+            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_CLUSTER))
             .toInstance(Context.cluster(config));
-        bind(String.class).annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
+        bind(String.class)
+            .annotatedWith(Names.named(TrackerMetricsProvider.CONF_ENVIRON))
             .toInstance(Context.environ(config));
         bind(Config.class).toInstance(config);
         bind(EventManager.class).in(Singleton.class);
