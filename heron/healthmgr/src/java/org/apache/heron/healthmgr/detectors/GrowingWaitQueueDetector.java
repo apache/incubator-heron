@@ -30,8 +30,8 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_GROWING_WAIT_Q;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_GROWING_WAIT_Q;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 
 public class GrowingWaitQueueDetector extends BaseDetector {

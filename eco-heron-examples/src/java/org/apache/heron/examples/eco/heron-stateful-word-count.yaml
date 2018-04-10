@@ -22,12 +22,12 @@ config:
 
 spouts:
   - id: "int-spout"
-    className: "com.twitter.heron.examples.eco.StatefulRandomIntSpout"
+    className: "org.apache.heron.examples.eco.StatefulRandomIntSpout"
     parallelism: 1
 
 bolts:
   - id: "stateful-consumer-bolt"
-    className: "com.twitter.heron.examples.eco.StatefulConsumerBolt"
+    className: "org.apache.heron.examples.eco.StatefulConsumerBolt"
     parallelism: 1
 
 

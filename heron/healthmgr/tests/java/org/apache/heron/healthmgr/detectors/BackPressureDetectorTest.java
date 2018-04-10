@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
 import static org.apache.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

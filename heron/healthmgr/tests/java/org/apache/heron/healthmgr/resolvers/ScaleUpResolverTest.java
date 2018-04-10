@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import org.apache.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.utils.topology.TopologyTests;
+import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
@@ -44,7 +44,7 @@ import org.apache.heron.spi.common.Key;
 import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.PackingPlan;
 
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;

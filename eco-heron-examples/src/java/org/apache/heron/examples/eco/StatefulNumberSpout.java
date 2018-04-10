@@ -11,21 +11,21 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.examples.eco;
+package org.apache.heron.examples.eco;
 
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.state.State;
-import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.Utils;
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.api.tuple.Values;
+import org.apache.heron.api.utils.Utils;
 
 @SuppressWarnings("HiddenField")
 public class StatefulNumberSpout extends BaseRichSpout

@@ -49,7 +49,7 @@ import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.PackingPlanProtoSerializer;
 import org.apache.heron.spi.utils.ReflectionUtils;
 
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 
