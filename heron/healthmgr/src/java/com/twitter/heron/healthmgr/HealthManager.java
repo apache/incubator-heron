@@ -314,8 +314,8 @@ public class HealthManager {
 
       String policyClassName = policyConfig.getPolicyClass();
       LOG.info(String.format("Initializing %s with class %s", policyId, policyClassName));
-      Class<IHealthPolicy> policyClass =
-          (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
+      Class<IHealthPolicy> policyClass
+          = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
 
       AbstractModule module = constructPolicySpecificModule(policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
@@ -326,8 +326,8 @@ public class HealthManager {
 
   @VisibleForTesting
   HealthPolicyConfigReader createPolicyConfigReader() throws FileNotFoundException {
-    String policyConfigFile =
-        Paths.get(Context.heronConf(config), PolicyConfigKey.CONF_FILE_NAME.key()).toString();
+    String policyConfigFile
+        = Paths.get(Context.heronConf(config), PolicyConfigKey.CONF_FILE_NAME.key()).toString();
     HealthPolicyConfigReader configReader = new HealthPolicyConfigReader(policyConfigFile);
     configReader.loadConfig();
     return configReader;
@@ -338,15 +338,19 @@ public class HealthManager {
     return new AbstractModule() {
       @Override
       protected void configure() {
-        bind(String.class).annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_METRICS_SOURCE_URL))
             .toInstance(sourceUrl);
-        bind(String.class).annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE)).toInstance(type);
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
+            .toInstance(type);
       }
     };
   }
 
   private AbstractModule buildCommonConfigModule() throws ReflectiveOperationException {
-    String metricSourceClassName = injector.getInstance(
+    String metricSourceClassName
+        = injector.getInstance(
         com.google.inject.Key.get(String.class, Names.named(CONF_METRICS_SOURCE_TYPE)));
 
     Class<? extends MetricsProvider> metricsProviderClass =
@@ -405,9 +409,12 @@ public class HealthManager {
     String topologyName = getOptionValue(cmd, CliArgs.TOPOLOGY_NAME);
     Boolean verbose = hasOption(cmd, CliArgs.VERBOSE);
 
-    Config.Builder commandLineConfig =
-        Config.newBuilder().put(Key.CLUSTER, cluster).put(Key.ROLE, role).put(Key.ENVIRON, environ)
-            .put(Key.TOPOLOGY_NAME, topologyName).put(Key.VERBOSE, verbose);
+    Config.Builder commandLineConfig = Config.newBuilder()
+        .put(Key.CLUSTER, cluster)
+        .put(Key.ROLE, role)
+        .put(Key.ENVIRON, environ)
+        .put(Key.TOPOLOGY_NAME, topologyName)
+        .put(Key.VERBOSE, verbose);
 
     return commandLineConfig.build();
   }
@@ -421,8 +428,10 @@ public class HealthManager {
   // construct command line help options
   private static Options constructHelpOptions() {
     Options options = new Options();
-    Option help =
-        Option.builder("h").desc("List all options and their description").longOpt("help").build();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
 
     options.addOption(help);
     return options;
