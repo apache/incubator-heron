@@ -499,9 +499,7 @@ class HeronExecutor(object):
                      "--role", self.role,
                      "--environment", self.environment,
                      "--topology_name", self.topology_name,
-                     "--metricsmgr_port", self.metrics_manager_port,
-                     "--system_config_file", self.heron_internals_config_file,
-                     "--override_config_file", self.override_config_file]
+                     "--metricsmgr_port", self.metrics_manager_port]
 
     return healthmgr_cmd
 

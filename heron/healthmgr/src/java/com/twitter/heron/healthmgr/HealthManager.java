@@ -203,8 +203,8 @@ public class HealthManager {
 
     // Add the SystemConfig into SingletonRegistry
     SystemConfig systemConfig = SystemConfig.newBuilder(true)
-        .putAll(getOptionValue(cmd, CliArgs.SYSTEM_CONFIG_FILEPATH), true)
-        .putAll(getOptionValue(cmd, CliArgs.OVERRIDE_CONFIG_FILEPATH), true).build();
+        .putAll(Context.systemFile(config), true)
+        .putAll(Context.overrideFile(config), true).build();
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     LOG.info("Static Heron config loaded successfully ");
