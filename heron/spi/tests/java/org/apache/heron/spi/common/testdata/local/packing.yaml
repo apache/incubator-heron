@@ -1,0 +1,2 @@
+# packing algorithm for packing instances into containers
+heron.class.packing.algorithm:  org.apache.heron.packing.roundrobin.RoundRobinPacking

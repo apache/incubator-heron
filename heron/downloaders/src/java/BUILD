@@ -10,7 +10,7 @@ downloader_deps = [
 java_binary(
   name = 'heron-downloader-unshaded',
   srcs = glob(["**/downloader/*.java"]),
-  main_class = "com.twitter.heron.downloader.DownloadRunner",
+  main_class = "org.apache.heron.downloader.DownloadRunner",
   deps = downloader_deps,
 )
 

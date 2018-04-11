@@ -33,7 +33,7 @@
             <emptyLine />
             <package name="org" withSubpackages="true" static="false" />
             <emptyLine />
-            <package name="com.twitter" withSubpackages="true" static="false" />
+            <package name="org.apache" withSubpackages="true" static="false" />
             <emptyLine />
             <package name="" withSubpackages="true" static="false" />
             <package name="" withSubpackages="true" static="true" />

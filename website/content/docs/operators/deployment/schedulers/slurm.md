@@ -13,13 +13,13 @@ Using the Slurm scheduler is similar to deploying Heron on other systems. The He
 schedulers. The main difference is in the configuration.
 
 A set of default configuration files are provided with Heron in the [conf/slurm]
-(https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm) directory.
+(https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/slurm) directory.
 The default configuration uses the local file system based state manager. It is
 possible that the local file system is mounted using NFS.
 
 When a Heron topology is submitted, the Slurm scheduler allocates the nodes required to
 run the job and starts the Heron processes in those nodes. It uses a `slurm.sh` script found in
-[conf/slum](https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm)
+[conf/slum](https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/slurm)
 directory to submit the topoloy as a batch job to the slurm scheduler.
 
 ## Slurm Scheduler Configuration
@@ -28,10 +28,10 @@ To configure Heron to use slurm scheduler, specify the following in `scheduler.y
 config file:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for slurm scheduler.
-Set this to `com.twitter.heron.scheduler.slurm.SlurmScheduler`
+Set this to `org.apache.heron.scheduler.slurm.SlurmScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching
-topologies. Set this to `com.twitter.heron.scheduler.slurm.SlurmLauncher`
+topologies. Set this to `org.apache.heron.scheduler.slurm.SlurmLauncher`
 
 * `heron.scheduler.local.working.directory` --- The shared directory to be used as
 Heron sandbox directory.
@@ -50,10 +50,10 @@ is a service. In the case of Slurm, it should be set to `False`.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.slurm.SlurmScheduler
+heron.class.scheduler: org.apache.heron.scheduler.slurm.SlurmScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.slurm.SlurmLauncher
+heron.class.launcher: org.apache.heron.scheduler.slurm.SlurmLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory: ${HOME}/.herondata/topologies/${CLUSTER}/${TOPOLOGY}

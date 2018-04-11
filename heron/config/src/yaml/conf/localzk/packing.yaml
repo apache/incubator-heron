@@ -1,3 +1,3 @@
 # packing algorithm for packing instances into containers
-heron.class.packing.algorithm:    com.twitter.heron.packing.roundrobin.ResourceCompliantRRPacking
-heron.class.repacking.algorithm:  com.twitter.heron.packing.roundrobin.ResourceCompliantRRPacking
+heron.class.packing.algorithm:    org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
+heron.class.repacking.algorithm:  org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking

@@ -130,7 +130,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
-  main_class = 'com.twitter.heron.scheduler.SubmitterMain'
+  main_class = 'org.apache.heron.scheduler.SubmitterMain'
   res = execute.heron_class(
       class_name=main_class,
       lib_jars=lib_jars,

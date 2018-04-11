@@ -44,5 +44,5 @@ java_binary(
     name = "metricscache-queryclient-unshaded",
     srcs = glob(["**/*.java"]),
     deps = metricscachemgr_deps_files,
-    main_class="com.twitter.heron.metricscachemgr.MetricsCacheManagerHttpServer"
+    main_class="org.apache.heron.metricscachemgr.MetricsCacheManagerHttpServer"
 )

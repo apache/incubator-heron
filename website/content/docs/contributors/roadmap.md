@@ -8,7 +8,7 @@ For beta releases, the Heron team will maintain two code repositories:
 
 1. A non-public Twitter-internal repository, containing both the mirror of the public Heron Github repository and small proprietary Twitter-specific extensions and features.
 
-2. An external [GitHub repository](https://github.com/twitter/heron), containing only the Heron code.
+2. An external [GitHub repository](https://github.com/apache/incubator-heron), containing only the Heron code.
 
 ### Feature list
 In the following list, each feature is associated with a corresponding milestone. The convention for the priorities are:

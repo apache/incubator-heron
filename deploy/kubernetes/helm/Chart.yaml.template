@@ -3,10 +3,10 @@ description: Heron is a fast distributed streaming engine for processing large d
 name: heron
 version: VERSION
 appVersion: VERSION
-icon: https://twitter.github.io/heron/img/HeronTextLogo-small.png
+icon: https://apache.github.io/incubator-heron/img/HeronTextLogo-small.png
 home: http://heron.io
 sources:
-  - https://github.com/twitter/heron.git
+  - https://github.com/apache/incubator-heron.git
 maintainers:
   - name: Karthik Ramasamy
     email: kramasamy@gmail.com

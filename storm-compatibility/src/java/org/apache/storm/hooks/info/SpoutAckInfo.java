@@ -29,7 +29,7 @@ public class SpoutAckInfo {
     this.completeLatencyMs = completeLatencyMs;
   }
 
-  public SpoutAckInfo(com.twitter.heron.api.hooks.info.SpoutAckInfo info) {
+  public SpoutAckInfo(org.apache.heron.api.hooks.info.SpoutAckInfo info) {
     this.messageId = info.getMessageId();
     this.spoutTaskId = info.getSpoutTaskId();
     this.completeLatencyMs = info.getCompleteLatency().toMillis();

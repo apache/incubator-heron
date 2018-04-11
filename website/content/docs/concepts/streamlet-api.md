@@ -105,9 +105,9 @@ The code below shows how you could implement the processing graph shown [above](
 ```java
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Runner;
+import org.apache.heron.streamlet.Builder;
+import org.apache.heron.streamlet.Config;
+import org.apache.heron.streamlet.Runner;
 
 Builder builder = Builder.newBuilder();
 
@@ -160,7 +160,7 @@ Map operations create a new streamlet by applying the supplied mapping function 
 #### Java example
 
 ```java
-import com.twitter.heron.streamlet.Builder;
+import org.apache.heron.streamlet.Builder;
 
 Builder processingGraphBuilder = Builder.newBuilder();
 
@@ -260,8 +260,8 @@ The context object available to a transform operation provides access to:
 Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.SerializableTransformer;
 
 import java.util.function.Consumer;
 
@@ -287,7 +287,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
 
 This operation does a few things:
 
-* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `setup` method, the [`Context`](/api/java/org/apache/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
 * In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
 * In the `cleanup` step, the current count of items processed is logged.
 
@@ -315,7 +315,7 @@ Reduce by key and window operations produce a new streamlet of key-value window 
 ```java
 import java.util.Arrays;
 
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.newBuilder();
 
@@ -443,7 +443,7 @@ In this example, two streamlets consisting of `Score` objects are joined. In the
 By default, an [inner join](#inner-joins) is applied in join operations but you can also specify a different join type. Here's a Java example for an [outer right](#outer-right-joins) join:
 
 ```java
-import com.twitter.heron.streamlet.JoinType;
+import org.apache.heron.streamlet.JoinType;
 
 scores1
     .join(
@@ -537,8 +537,8 @@ In processing graphs like the ones you build using the Heron Streamlet API, **si
 #### Java example
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Sink;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.Sink;
 
 public class FormattedLogSink implements Sink<T> {
     private String streamletName;
