@@ -1,8 +1,8 @@
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.local.LocalScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.local.LocalScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.local.LocalLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.local.LocalLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}

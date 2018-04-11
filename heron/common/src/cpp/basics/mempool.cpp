@@ -24,7 +24,7 @@
 /* The initial value of pool size limit is 512. This value will
    be overridden by value read from config during initialization
    of stream manager. The reason why we do this is to avoid
-   circular dependency problem. See https://github.com/twitter/heron/pull/2073
+   circular dependency problem. See https://github.com/apache/incubator-heron/pull/2073
    for details */
 MemPool<google::protobuf::Message>* __global_protobuf_pool__ =
                                    new MemPool<google::protobuf::Message>(512);

@@ -21,14 +21,13 @@ package org.apache.storm.topology;
 // TODO:- Add this
 // import org.apache.storm.grouping.CustomStreamGrouping;
 
+import org.apache.heron.api.HeronTopology;
+import org.apache.heron.api.bolt.WindowedBoltExecutor;
 import org.apache.storm.generated.StormTopology;
 
-import com.twitter.heron.api.HeronTopology;
-import com.twitter.heron.api.bolt.WindowedBoltExecutor;
-
 public class TopologyBuilder {
-  private com.twitter.heron.api.topology.TopologyBuilder delegate =
-      new com.twitter.heron.api.topology.TopologyBuilder();
+  private org.apache.heron.api.topology.TopologyBuilder delegate =
+      new org.apache.heron.api.topology.TopologyBuilder();
 
   public StormTopology createTopology() {
     HeronTopology topology = delegate.createTopology();
@@ -41,7 +40,7 @@ public class TopologyBuilder {
 
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
     IRichBoltDelegate boltImpl = new IRichBoltDelegate(bolt);
-    com.twitter.heron.api.topology.BoltDeclarer declarer =
+    org.apache.heron.api.topology.BoltDeclarer declarer =
         delegate.setBolt(id, boltImpl, parallelismHint);
     return new BoltDeclarerImpl(declarer);
   }
@@ -73,7 +72,7 @@ public class TopologyBuilder {
 
   public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
     IRichSpoutDelegate spoutImpl = new IRichSpoutDelegate(spout);
-    com.twitter.heron.api.topology.SpoutDeclarer declarer =
+    org.apache.heron.api.topology.SpoutDeclarer declarer =
         delegate.setSpout(id, spoutImpl, parallelismHint);
     return new SpoutDeclarerImpl(declarer);
   }

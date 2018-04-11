@@ -20,12 +20,11 @@ package org.apache.storm;
 
 import java.util.Map;
 
+import org.apache.heron.api.HeronSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.utils.ConfigUtils;
-
-import com.twitter.heron.api.HeronSubmitter;
 
 /**
  * Use this class to submit topologies to run on the Storm cluster. You should run your program
@@ -55,14 +54,14 @@ public final class StormSubmitter {
 
     // First do topology config translation. Bolt and Spout config translation is handled
     // in their own DeclarerImpl classes.
-    com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
+    org.apache.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
 
     // Now submit a heron topology
     try {
       HeronSubmitter.submitTopology(name, heronConfig, topology.getStormTopology());
-    } catch (com.twitter.heron.api.exception.AlreadyAliveException e) {
+    } catch (org.apache.heron.api.exception.AlreadyAliveException e) {
       throw new AlreadyAliveException();
-    } catch (com.twitter.heron.api.exception.InvalidTopologyException e) {
+    } catch (org.apache.heron.api.exception.InvalidTopologyException e) {
       throw new InvalidTopologyException();
     }
   }

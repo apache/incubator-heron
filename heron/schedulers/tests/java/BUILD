@@ -94,10 +94,10 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
-    "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
-    "com.twitter.heron.scheduler.aurora.AuroraCLIControllerTest",
-    "com.twitter.heron.scheduler.aurora.AuroraContextTest",
+    "org.apache.heron.scheduler.aurora.AuroraSchedulerTest",
+    "org.apache.heron.scheduler.aurora.AuroraLauncherTest",
+    "org.apache.heron.scheduler.aurora.AuroraCLIControllerTest",
+    "org.apache.heron.scheduler.aurora.AuroraContextTest",
   ],
   runtime_deps = [ ":aurora-tests" ],
   size = "small",
@@ -111,10 +111,10 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
-    "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
-    "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
-    "com.twitter.heron.scheduler.yarn.YarnLauncherTest",
+    "org.apache.heron.scheduler.yarn.YarnSchedulerTest",
+    "org.apache.heron.scheduler.yarn.HeronMasterDriverTest",
+    "org.apache.heron.scheduler.yarn.HeronExecutorTaskTest",
+    "org.apache.heron.scheduler.yarn.YarnLauncherTest",
   ],
   runtime_deps = [ ":yarn-tests" ],
   size = "small",
@@ -128,8 +128,8 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.local.LocalLauncherTest",
-    "com.twitter.heron.scheduler.local.LocalSchedulerTest",
+    "org.apache.heron.scheduler.local.LocalLauncherTest",
+    "org.apache.heron.scheduler.local.LocalSchedulerTest",
   ],
   runtime_deps = [ ":local-tests" ],
   size = "small",
@@ -143,9 +143,9 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.slurm.SlurmLauncherTest",
-    "com.twitter.heron.scheduler.slurm.SlurmSchedulerTest",
-    "com.twitter.heron.scheduler.slurm.SlurmControllerTest",
+    "org.apache.heron.scheduler.slurm.SlurmLauncherTest",
+    "org.apache.heron.scheduler.slurm.SlurmSchedulerTest",
+    "org.apache.heron.scheduler.slurm.SlurmControllerTest",
   ],
   runtime_deps = [ ":slurm-tests" ],
   size = "small",
@@ -159,12 +159,12 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.mesos.MesosLauncherTest",
-    "com.twitter.heron.scheduler.mesos.MesosSchedulerTest",
-    "com.twitter.heron.scheduler.mesos.framework.TaskUtilsTest",
-    "com.twitter.heron.scheduler.mesos.framework.TaskResourcesTest",
-    "com.twitter.heron.scheduler.mesos.framework.LaunchableTaskTest",
-    "com.twitter.heron.scheduler.mesos.framework.MesosFrameworkTest",
+    "org.apache.heron.scheduler.mesos.MesosLauncherTest",
+    "org.apache.heron.scheduler.mesos.MesosSchedulerTest",
+    "org.apache.heron.scheduler.mesos.framework.TaskUtilsTest",
+    "org.apache.heron.scheduler.mesos.framework.TaskResourcesTest",
+    "org.apache.heron.scheduler.mesos.framework.LaunchableTaskTest",
+    "org.apache.heron.scheduler.mesos.framework.MesosFrameworkTest",
   ],
   runtime_deps = [ ":mesos-tests" ],
   size = "small",
@@ -178,9 +178,9 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.marathon.MarathonSchedulerTest",
-    "com.twitter.heron.scheduler.marathon.MarathonLauncherTest",
-    "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
+    "org.apache.heron.scheduler.marathon.MarathonSchedulerTest",
+    "org.apache.heron.scheduler.marathon.MarathonLauncherTest",
+    "org.apache.heron.scheduler.marathon.MarathonControllerTest",
   ],
   runtime_deps = [ ":marathon-tests" ],
   size = "small",
@@ -194,10 +194,10 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.kubernetes.KubernetesSchedulerTest",
-    "com.twitter.heron.scheduler.kubernetes.KubernetesControllerTest",
-    "com.twitter.heron.scheduler.kubernetes.KubernetesLauncherTest",
-    "com.twitter.heron.scheduler.kubernetes.VolumesTests",
+    "org.apache.heron.scheduler.kubernetes.KubernetesSchedulerTest",
+    "org.apache.heron.scheduler.kubernetes.KubernetesControllerTest",
+    "org.apache.heron.scheduler.kubernetes.KubernetesLauncherTest",
+    "org.apache.heron.scheduler.kubernetes.VolumesTests",
   ],
   runtime_deps = [ ":kubernetes-tests" ],
   size = "small",
@@ -211,7 +211,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.scheduler.nomad.NomadSchedulerTest",
+    "org.apache.heron.scheduler.nomad.NomadSchedulerTest",
   ],
   runtime_deps = [ ":nomad-tests" ],
   size = "small",

@@ -24,7 +24,7 @@ The [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) class pr
 
 * The `initialize()` method is called when the spout is first initialized
 and provides the spout with the executing environment. It is equivalent to
-`open()` method of [`ISpout`](/api/com/twitter/heron/api/spout/ISpout.html).
+`open()` method of [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html).
 Note that you should not override `__init__()` constructor of `Spout` class
 for initialization of custom variables, since it is used internally by HeronInstance; instead,
 `initialize()` should be used to initialize any custom variables or connections to databases.
