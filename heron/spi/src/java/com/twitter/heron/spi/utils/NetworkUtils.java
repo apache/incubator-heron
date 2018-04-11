@@ -399,7 +399,11 @@ public final class NetworkUtils {
   public static String getHostName() {
     String hostName;
     try {
-      hostName = InetAddress.getLocalHost().getHostName();
+      if (System.getenv("HOST") != null) {
+        hostName = System.getenv("HOST");
+      } else {
+        hostName = InetAddress.getLocalHost().getHostName();
+      }
     } catch (UnknownHostException e) {
       LOG.log(Level.SEVERE, "Unable to get local host name", e);
       hostName = "localhost";

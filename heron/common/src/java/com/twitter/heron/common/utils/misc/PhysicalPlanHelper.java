@@ -111,7 +111,11 @@ public class PhysicalPlanHelper {
     }
 
     try {
-      this.hostname = InetAddress.getLocalHost().getHostName();
+      if (System.getenv("HOST") != null) {
+        this.hostname = System.getenv("HOST");
+      } else {
+        this.hostname = InetAddress.getLocalHost().getHostName();
+      }
     } catch (UnknownHostException e) {
       throw new RuntimeException("GetHostName failed");
     }

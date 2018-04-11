@@ -17,6 +17,7 @@ package com.twitter.heron.metricscachemgr;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -354,12 +355,24 @@ public class MetricsCacheManager {
         .build());
     LOG.info("Cli Config: " + config.toString());
 
+    String hostname;
+    try {
+      if (System.getenv("HOST") != null) {
+        hostname = System.getenv("HOST");
+      } else {
+        hostname = InetAddress.getLocalHost().getHostName();
+      }
+    } catch( UnknownHostException e) {
+      LOG.log(Level.SEVERE, "Unable to get local hostname", e);
+      hostname = "localhost";
+    }
+
     // build metricsCache location
     TopologyMaster.MetricsCacheLocation metricsCacheLocation =
         TopologyMaster.MetricsCacheLocation.newBuilder()
             .setTopologyName(topologyName)
             .setTopologyId(topologyId)
-            .setHost(InetAddress.getLocalHost().getHostName())
+            .setHost(hostname)
             .setControllerPort(-1) // not used for metricscache
             .setMasterPort(masterPort)
             .setStatsPort(statsPort)
