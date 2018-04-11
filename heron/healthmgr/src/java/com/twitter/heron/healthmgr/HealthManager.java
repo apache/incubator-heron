@@ -132,9 +132,7 @@ public class HealthManager {
     CONFIG_PATH("config_path"),
     MODE("mode"),
     VERBOSE("verbose"),
-    METRICSMGR_PORT("metricsmgr_port"),
-    SYSTEM_CONFIG_FILEPATH("system_config_file"),
-    OVERRIDE_CONFIG_FILEPATH("override_config_file");
+    METRICSMGR_PORT("metricsmgr_port");
 
     private String text;
 
@@ -223,28 +221,21 @@ public class HealthManager {
     LOG.info("Initializing health manager");
     healthManager.initialize();
 
-    HealthManagerMetrics publishingMetricsRunnable = null;
-    if (hasOption(cmd, CliArgs.METRICSMGR_PORT)) {
-      LOG.info("Starting Health Manager metric posting thread");
-      publishingMetricsRunnable =
-          new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
-      SingletonRegistry.INSTANCE.registerSingleton(HealthManagerMetrics.METRICS_THREAD,
-          publishingMetricsRunnable);
-    }
+    LOG.info("Starting Health Manager metric posting thread");
+    HealthManagerMetrics publishingMetricsRunnable =
+        new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+    SingletonRegistry.INSTANCE.registerSingleton(HealthManagerMetrics.METRICS_THREAD,
+        publishingMetricsRunnable);
 
     LOG.info("Starting Health Manager");
     PoliciesExecutor policyExecutor = new PoliciesExecutor(healthManager.healthPolicies);
     ScheduledFuture<?> future = policyExecutor.start();
-    if (publishingMetricsRunnable != null) {
-      new Thread(publishingMetricsRunnable).start();
-    }
+    new Thread(publishingMetricsRunnable).start();
     try {
       future.get();
     } finally {
       policyExecutor.destroy();
-      if (publishingMetricsRunnable != null) {
-        publishingMetricsRunnable.close();
-      }
+      publishingMetricsRunnable.close();
     }
   }
 
@@ -521,20 +512,7 @@ public class HealthManager {
         .longOpt(CliArgs.METRICSMGR_PORT.text)
         .hasArgs()
         .argName("metrics_manager port")
-        .build();
-
-    Option systemConfig = Option.builder("y")
-        .desc("System configuration file path")
-        .longOpt(CliArgs.SYSTEM_CONFIG_FILEPATH.text)
-        .hasArgs()
-        .argName("metrics_manager port")
-        .build();
-
-    Option overrideConfig = Option.builder("v")
-        .desc("Override configuration file path")
-        .longOpt(CliArgs.OVERRIDE_CONFIG_FILEPATH.text)
-        .hasArgs()
-        .argName("metrics_manager port")
+        .required()
         .build();
 
     Option verbose = Option.builder("v")
@@ -552,8 +530,6 @@ public class HealthManager {
     options.addOption(metricsSourceURL);
     options.addOption(mode);
     options.addOption(metricsMgrPort);
-    options.addOption(systemConfig);
-    options.addOption(overrideConfig);
     options.addOption(verbose);
 
     return options;

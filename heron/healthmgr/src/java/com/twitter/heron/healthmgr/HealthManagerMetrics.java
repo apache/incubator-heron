@@ -22,6 +22,8 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.inject.Inject;
+
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
@@ -38,7 +40,7 @@ import com.twitter.heron.proto.system.Metrics;
 /**
  * HealthMgr's metrics to be collect
  */
-
+@Singleton
 public class HealthManagerMetrics implements Runnable, AutoCloseable {
   public static final String METRICS_THREAD = "HealthManagerMetrics";
   private static final Logger LOG = Logger.getLogger(HealthManagerMetrics.class.getName());
@@ -65,6 +67,7 @@ public class HealthManagerMetrics implements Runnable, AutoCloseable {
    * @param metricsMgrPort local MetricsMgr port
    * @throws IOException
    */
+  @Inject
   public HealthManagerMetrics(int metricsMgrPort) throws IOException {
     jvmMetrics = new JVMMetrics();
 
