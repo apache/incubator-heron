@@ -75,16 +75,16 @@ class SubmitTest(ClientCommandTest):
     subprocess.Popen = MagicMock()
 
     command = 'heron submit local ~/.heron/examples/heron-examples.jar ' + \
-              'com.twitter.heron.examples.ExclamationTopology EX'
+              'org.apache.heron.examples.ExclamationTopology EX'
 
     create_defn_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
     '~/.heron/examples/heron-examples.jar:/heron/lib/jars/third_party/* ' \
-    'com.twitter.heron.examples.ExclamationTopology EX'
+    'org.apache.heron.examples.ExclamationTopology EX'
 
     submit_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
                       ':/heron/lib/jars/scheduler/*:/heron/lib/jars/uploader/*:' \
                       '/heron/lib/jars/statemgr/*:/heron/lib/jars/packing/* ' \
-                      'com.twitter.heron.scheduler.SubmitterMain --cluster local ' \
+                      'org.apache.heron.scheduler.SubmitterMain --cluster local ' \
                       '--role user --environment default --submit_user %s ' \
                       '--heron_home /heron/home ' \
                       '--config_path /heron/home/conf/local --override_config_file ' \

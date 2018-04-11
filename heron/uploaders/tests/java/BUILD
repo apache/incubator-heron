@@ -46,9 +46,9 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.uploader.localfs.LocalFileSystemConfigTest",
-    "com.twitter.heron.uploader.localfs.LocalFileSystemContextTest",
-    "com.twitter.heron.uploader.localfs.LocalFileSystemUploaderTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemConfigTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemContextTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemUploaderTest",
   ],
   runtime_deps = [ ":localfs-tests" ],
   data = glob(["**/localfs/testdata/*.tar"]),

@@ -38,7 +38,7 @@ import org.apache.storm.tuple.Values;
 import org.apache.storm.windowing.TupleWindow;
 
 /**
- * A sample topology that demonstrates the usage of {@link com.twitter.heron.api.bolt.IWindowedBolt}
+ * A sample topology that demonstrates the usage of {@link org.apache.heron.api.bolt.IWindowedBolt}
  * to calculate sliding window sum.
  */
 public final class SlidingWindowTopology {

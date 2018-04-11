@@ -344,12 +344,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-tests-data-scala",
+    package_dir = "data/scala",
+    srcs = [
+        "//integration_test/src/scala:test-data-files",
+    ],
+    strip_prefix = '/integration_test/src/scala/org/apache/heron/integration_test/topology/'
+)
+
+pkg_tar(
     name = "heron-tests-data-java",
     package_dir = "data/java",
     srcs = [
         "//integration_test/src/java:test-data-files",
     ],
-    strip_prefix = '/integration_test/src/java/com/twitter/heron/integration_test/topology/'
+    strip_prefix = '/integration_test/src/java/org/apache/heron/integration_test/topology/'
 )
 
 pkg_tar(
@@ -365,6 +374,7 @@ pkg_tar(
     name = "heron-tests-lib",
     package_dir = "lib",
     srcs = [
+       "//integration_test/src/scala:scala-integration-tests",
        "//integration_test/src/java:integration-tests",
        "//integration_test/src/python/integration_test/topology:heron_integ_topology",
     ],
@@ -376,6 +386,7 @@ pkg_tar(
     srcs = generated_release_files,
     deps = [
         ":heron-tests-bin",
+        ":heron-tests-data-scala",
         ":heron-tests-data-java",
         ":heron-tests-data-python",
         ":heron-tests-lib",

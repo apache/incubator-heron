@@ -387,7 +387,7 @@ class HeronExecutor(object):
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
-    metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
+    metricsmgr_main_class = 'org.apache.heron.metricsmgr.MetricsManager'
 
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
@@ -428,7 +428,7 @@ class HeronExecutor(object):
 
   def _get_metrics_cache_cmd(self):
     ''' get the command to start the metrics manager processes '''
-    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
+    metricscachemgr_main_class = 'org.apache.heron.metricscachemgr.MetricsCacheManager'
 
     metricscachemgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                            # We could not rely on the default -Xmx setting, which could be very big,
@@ -470,7 +470,7 @@ class HeronExecutor(object):
 
   def _get_healthmgr_cmd(self):
     ''' get the command to start the topology health manager processes '''
-    healthmgr_main_class = 'com.twitter.heron.healthmgr.HealthManager'
+    healthmgr_main_class = 'org.apache.heron.healthmgr.HealthManager'
 
     healthmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                      # We could not rely on the default -Xmx setting, which could be very big,
@@ -498,7 +498,7 @@ class HeronExecutor(object):
                      "--cluster", self.cluster,
                      "--role", self.role,
                      "--environment", self.environment,
-                     "--topology_name", self.topology_name, "--verbose"]
+                     "--topology_name", self.topology_name]
 
     return healthmgr_cmd
 
@@ -618,7 +618,7 @@ class HeronExecutor(object):
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
+                           'org.apache.heron.instance.HeronInstance'] + instance_args)
 
       retval[instance_id] = instance_cmd
     return retval
@@ -626,7 +626,7 @@ class HeronExecutor(object):
   def _get_jvm_version(self):
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
-             '-cp', self.instance_classpath, 'com.twitter.heron.instance.util.JvmVersion']
+             '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       (process_stdout, process_stderr) = process.communicate()
       if process.returncode != 0:
@@ -725,7 +725,8 @@ class HeronExecutor(object):
         '--config_file=%s' % self.heron_internals_config_file,
         '--override_config_file=%s' % self.override_config_file,
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard]]
+        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
+        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -755,7 +756,7 @@ class HeronExecutor(object):
   def _get_ckptmgr_process(self):
     ''' Get the command to start the checkpoint manager process'''
 
-    ckptmgr_main_class = 'com.twitter.heron.ckptmgr.CheckpointManager'
+    ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
                    '-Xmx1024M',

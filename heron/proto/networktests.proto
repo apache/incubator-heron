@@ -1,6 +1,6 @@
 syntax = "proto2";
 package heron.proto.testing;
-option java_package = "com.twitter.heron.proto.testing";
+option java_package = "org.apache.heron.proto.testing";
 option java_outer_classname = "Tests";
 
 message EchoServerRequest {

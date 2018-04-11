@@ -4,7 +4,7 @@
 heron.topology.healthmgr.mode: disabled
 
 # Default class and url for providing metrics
-heron.healthmgr.metricsource.type: com.twitter.heron.healthmgr.sensors.TrackerMetricsProvider
+heron.healthmgr.metricsource.type: org.apache.heron.healthmgr.sensors.TrackerMetricsProvider
 heron.healthmgr.metricsource.url: http://localhost:8888
 
 # Enable MetricsCache if MetricsCache is chosen as metrics provider
@@ -17,11 +17,11 @@ heron.healthmgr.metricsource.url: http://localhost:8888
 #
 ## configuration specific to individual policies listed above
 #dynamic-resource-allocation:
-#  health.policy.class: com.twitter.heron.healthmgr.policy.DynamicResourceAllocationPolicy
+#  health.policy.class: org.apache.heron.healthmgr.policy.DynamicResourceAllocationPolicy
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20
 #  GrowingWaitQueueDetector.limit: 5
 #auto-restart-backpressure-container:
-#  health.policy.class: com.twitter.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
+#  health.policy.class: org.apache.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20

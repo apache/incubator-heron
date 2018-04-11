@@ -1,8 +1,8 @@
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.mesos.MesosScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.mesos.MesosScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.mesos.MesosLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.mesos.MesosLauncher
 
 # working directory for the topologies
 heron.scheduler.mesos.scheduler.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}

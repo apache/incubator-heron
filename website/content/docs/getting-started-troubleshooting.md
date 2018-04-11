@@ -25,14 +25,14 @@ $ heron activate local ExclamationTopology
 
 ...
 
-[2016-05-27 12:02:38 -0600] com.twitter.heron.common.basics.FileUtils SEVERE: \
+[2016-05-27 12:02:38 -0600] org.apache.heron.common.basics.FileUtils SEVERE: \
 Failed to read from file.
 java.nio.file.NoSuchFileException: \
 /home//.herondata/repository/state/local/pplans/ExclamationTopology
 
 ...
 
-[2016-05-27 12:02:38 -0600] com.twitter.heron.spi.utils.TMasterUtils SEVERE: \
+[2016-05-27 12:02:38 -0600] org.apache.heron.spi.utils.TMasterUtils SEVERE: \
 Failed to get physical plan for topology ExclamationTopology
 
 ...

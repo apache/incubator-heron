@@ -33,7 +33,7 @@ import backtype.storm.tuple.Fields;
 // import backtype.storm.utils.ThriftTopologyUtils;
 
 public class GeneralTopologyContext implements JSONAware {
-  private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
+  private org.apache.heron.api.topology.GeneralTopologyContext delegate;
 
   @SuppressWarnings("rawtypes")
   public GeneralTopologyContext(StormTopology topology, Map stormConf,
@@ -44,7 +44,7 @@ public class GeneralTopologyContext implements JSONAware {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
   }
 
-  public GeneralTopologyContext(com.twitter.heron.api.topology.GeneralTopologyContext delegate) {
+  public GeneralTopologyContext(org.apache.heron.api.topology.GeneralTopologyContext delegate) {
     this.delegate = delegate;
   }
 

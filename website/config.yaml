@@ -34,9 +34,9 @@ params:
       - /js/app.min.js
   tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   github:
-    home: https://github.com/twitter/heron
-    master: https://github.com/twitter/heron/tree/master
-    issues: https://github.com/twitter/heron/issues
+    home: https://github.com/apache/incubator-heron
+    master: https://github.com/apache/incubator-heron/tree/master
+    issues: https://github.com/apache/incubator-heron/issues
   social:
     twitter: https://twitter.com/heronstreaming
     slack: https://heronusers.slack.com

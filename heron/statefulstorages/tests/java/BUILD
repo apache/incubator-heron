@@ -20,7 +20,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorageTest",
+    "org.apache.heron.statefulstorage.localfs.LocalFileSystemStorageTest",
   ],
   runtime_deps = [":localfs-tests"],
   size = "small",
@@ -40,7 +40,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.statefulstorage.hdfs.HDFSStorageTest",
+    "org.apache.heron.statefulstorage.hdfs.HDFSStorageTest",
   ],
   runtime_deps = [ ":hdfs-tests" ],
   size = "small",

@@ -69,7 +69,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on Minikube:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/zookeeper.yaml
 ```
 
 #### BookKeeper
@@ -77,7 +77,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 When running Heron on Kubernetes, [Apache BookKeeper](https://bookkeeper.apache.org) is used for things like topology artifact storage. You can start up BookKeeper using this command:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
 ```
 
 #### Heron tools
@@ -85,7 +85,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
 ```
 
 #### Heron API server
@@ -93,7 +93,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on Minikube:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/apiserver.yaml
 ```
 
 ### Managing topologies
@@ -130,7 +130,7 @@ Success! You can now manage Heron topologies on your Minikube Kubernetes install
 $ heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.
@@ -231,7 +231,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your GKE cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/zookeeper.yaml
 ```
 
 #### BookKeeper setup
@@ -241,7 +241,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 To start up an [Apache BookKeeper](https://bookkeeper.apache.org) cluster for Heron:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper.yaml
 ```
 
 #### Heron tools <a id="heron-tools-gke"></a>
@@ -249,7 +249,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/tools.yaml
 ```
 
 #### Heron API server
@@ -259,13 +259,13 @@ The [Heron API server](../../../heron-api-server) is the endpoint that the [Hero
 If you're using Google Cloud Storage:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/gcs-apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/gcs-apiserver.yaml
 ```
 
 If you're using Apache BookKeeper:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
 ```
 
 ### Managing topologies
@@ -302,7 +302,7 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 $ heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.
@@ -343,7 +343,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your Kubernetes cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/zookeeper.yaml
 ```
 
 #### BookKeeper
@@ -351,7 +351,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 When running Heron on Kubernetes, [Apache BookKeeper](https://bookkeeper.apache.org) is used for things like topology artifact storage (unless you're running on GKE). You can start up BookKeeper using this command:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/bookkeeper.yaml
 ```
 
 #### Heron tools
@@ -359,7 +359,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
 ```
 
 #### Heron API server
@@ -367,7 +367,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on your Kubernetes cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/apiserver.yaml
 ```
 
 ### Managing topologies
@@ -404,7 +404,7 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 $ heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.

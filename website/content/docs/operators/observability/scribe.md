@@ -17,7 +17,7 @@ To set up your Heron cluster to export to Scribe, you need to make two changes t
 
 Parameter | Description | Default
 :---------|:------------|:-------
-`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
+`class` | The Java class used to control Prometheus sink behavior | [`org.apache.heron.metricsmgr.sink.ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html)
 `flush-frequency-ms` | How frequently, in milliseconds, the `flush()` method is called | 60000 (one minute)
 `sink-restart-attempts` | How many times Heron should attempt to publish metrics to Scribe before no longer attempting | -1 (forever)
 `scribe-host` | The Scribe host to export metrics to | 127.0.0.1

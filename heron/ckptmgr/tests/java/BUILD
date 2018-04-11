@@ -18,7 +18,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.ckptmgr.CheckpointManagerServerTest",
+    "org.apache.heron.ckptmgr.CheckpointManagerServerTest",
   ],
   runtime_deps = [":ckptmgr-tests"],
   size = "small",

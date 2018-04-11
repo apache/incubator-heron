@@ -21,18 +21,17 @@ package org.apache.storm.topology;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.topology.IUpdatable;
 import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.utils.ConfigUtils;
-
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.topology.IUpdatable;
 
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
  */
-public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout, IUpdatable {
+public class IRichSpoutDelegate implements org.apache.heron.api.spout.IRichSpout, IUpdatable {
   private static final Logger LOG = Logger.getLogger(IRichSpoutDelegate.class.getName());
 
   private static final long serialVersionUID = -1543996045558101339L;
@@ -46,7 +45,7 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
 
   @Override
   @SuppressWarnings("rawtypes")
-  public void open(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context,
+  public void open(Map<String, Object> conf, org.apache.heron.api.topology.TopologyContext context,
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
@@ -84,7 +83,7 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void declareOutputFields(com.twitter.heron.api.topology.OutputFieldsDeclarer declarer) {
+  public void declareOutputFields(org.apache.heron.api.topology.OutputFieldsDeclarer declarer) {
     OutputFieldsGetter getter = new OutputFieldsGetter(declarer);
     delegate.declareOutputFields(getter);
   }
@@ -96,7 +95,7 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+  public void update(org.apache.heron.api.topology.TopologyContext topologyContext) {
     if (delegate instanceof IUpdatable) {
       ((IUpdatable) delegate).update(topologyContext);
     } else {

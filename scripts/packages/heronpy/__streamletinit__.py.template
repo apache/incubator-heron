@@ -1,6 +1,6 @@
 """
 The top-level library for Heron's Python Streamlet API, which enables you to
-write Heron [topologies](https://twitter.github.io/heron/docs/concepts/topologies/)
+write Heron [topologies](https://apache.github.io/incubator-heron/docs/concepts/topologies/)
 using the Python Streamlet API.
 
 Heron topologies are acyclic graphs used to process streaming data. Topologies

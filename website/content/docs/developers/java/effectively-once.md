@@ -7,14 +7,14 @@ title: Effectively-once Java topologies
 You can create Heron topologies that have [effectively-once](../../../concepts/delivery-semantics#stateful-topologies) semantics by doing two things:
 
 1. Set the [delivery semantics](#specifying-delivery-semantics) of the topology to `EFFECTIVELY_ONCE`.
-2. Create topology processing logic in which each component (i.e. each spout and bolt) implements the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface.
+2. Create topology processing logic in which each component (i.e. each spout and bolt) implements the [`IStatefulComponent`](/api/java/org/apache/heron/api/topology/IStatefulComponent.html) interface.
 
 ## Specifying delivery semantics
 
 You can specify the [delivery semantics](../../../concepts/delivery-semantics) of a Heron topology via configuration. To apply effectively-once semantics to a topology:
 
 ```java
-import com.twitter.heron.api.Config;
+import org.apache.heron.api.Config;
 
 Config topologyConfig = new Config();
 topologyConfig.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
@@ -26,18 +26,18 @@ The other possible values for the `TopologyReliabilityMode` enum are `ATMOST_ONC
 
 ## Stateful components
 
-Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/com/twitter/heron/api/topology/IStatefulComponent.html) interface, which requires implementing two methods (both of which are `void` methods):
+Stateful spouts and bolts need to implement the [`IStatefulComponent`](/api/java/org/apache/heron/api/topology/IStatefulComponent.html) interface, which requires implementing two methods (both of which are `void` methods):
 
 Method | Input | Description
 :------|:------|:-----------
 `preSave` | Checkpoint ID (`String`)| The action taken immediately prior to the component's state being saved. 
-`initState` | Initial state ([`State<K, V>`](/api/java/com/twitter/heron/examples/api/StatefulWordCountTopology.ConsumerBolt.html#initState-com.twitter.heron.api.state.State-)) | Initializes the state of the function or operator to that of a previous checkpoint.
+`initState` | Initial state ([`State<K, V>`](/api/java/org/apache/heron/examples/api/StatefulWordCountTopology.ConsumerBolt.html#initState-org.apache.heron.api.state.State-)) | Initializes the state of the function or operator to that of a previous checkpoint.
 
 > Remember that stateful components automatically handle all state storage in the background using a State Manager (the currently available State Managers are [ZooKeeper](../../../operators/deployment/statemanagers/zookeeper) and the [local filesystem](../../../operators/deployment/statemanagers/localfs). You don't need to, for example, save state to an external database.
 
 ## The `State` class
 
-Heron topologies with effectively-once semantics need to be stateful topologies (you can also create stateful topologies with at-least-once or at-most-once semantics). All state in stateful topologies is handled through a [`State`](/api/java/com/twitter/heron/api/state/State.html) class which has the same semantics as a standard Java [`Map`](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html), and so it includes methods like `get`, `set`, `put`, `putIfAbsent`, `keySet`, `compute`, `forEach`, `merge`, and so on.
+Heron topologies with effectively-once semantics need to be stateful topologies (you can also create stateful topologies with at-least-once or at-most-once semantics). All state in stateful topologies is handled through a [`State`](/api/java/org/apache/heron/api/state/State.html) class which has the same semantics as a standard Java [`Map`](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html), and so it includes methods like `get`, `set`, `put`, `putIfAbsent`, `keySet`, `compute`, `forEach`, `merge`, and so on.
 
 Each stateful spout or bolt must be associated with a single `State` object that handles the state, and that object must also be typed as `State<K, V>`, for example `State<String, Integer>`, `State<long, MyPojo>`, etc. An example usage of the state object can be found in the [example topology](#example-effectively-once-topology) below.
 
@@ -48,7 +48,7 @@ In the sections below, we'll build a stateful topology with effectively-once sem
 * A [`RandomIntSpout`](#example-stateful-spout) will continuously emit random integers between 1 and 100
 * An [`AdditionBolt`](#example-stateful-bolt) will receive those random numbers and add each number to a running sum. When the sum reaches 1,000,000, it will go back to zero. The bolt won't emit any data but will simply log the current sum.
 
-> You can see the code for another stateful Heron topology with effectively-once semantics in [this word count example](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/api/StatefulWordCountTopology.java).
+> You can see the code for another stateful Heron topology with effectively-once semantics in [this word count example](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/StatefulWordCountTopology.java).
 
 ### Example stateful spout
 
@@ -57,13 +57,13 @@ The `RandomIntSpout` shown below continuously emits a never-ending series of ran
 > It's important to note that *all* components in stateful topologies must be stateful (i.e. implement the `IStatefulComponent` interface) for the topology to provide effectively-once semantics. That includes spouts, even simple ones like the spout in this example.
 
 ```java
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.state.State;
-import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.api.tuple.Values;
 
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -122,11 +122,11 @@ A few things to note in this spout:
 The `AdditionBolt` takes incoming tuples from the `RandomIntSpout` and adds each integer to produce a running sum. If the sum ever exceeds 1 million, then it resets to zero.
 
 ```java
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.state.State;
-import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.TopologyContext;
+import org.apache.heron.api.bolt.BaseRichBolt;
+import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.TopologyContext;
 
 import java.util.Map;
 
@@ -194,12 +194,12 @@ A few things to notice in this bolt:
 Now that we have a stateful spout and bolt in place, we can build and configure the topology:
 
 ```java
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.exception.AlreadyAliveException;
-import com.twitter.heron.api.exception.InvalidTopologyException;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.tuple.Fields;
+import org.apache.heron.api.Config;
+import org.apache.heron.api.HeronSubmitter;
+import org.apache.heron.api.exception.AlreadyAliveException;
+import org.apache.heron.api.exception.InvalidTopologyException;
+import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.tuple.Fields;
 
 public class EffectivelyOnceTopology {
     public static void main(String[] args) throws AlreadyAliveException, InvalidTopologyException {

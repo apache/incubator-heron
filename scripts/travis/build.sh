@@ -66,7 +66,7 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
-  eco-examples/...
+  eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # run heron unit tests
@@ -77,7 +77,7 @@ python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
-  eco-examples/...
+  eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
@@ -89,7 +89,7 @@ python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
-  eco-examples/...
+  eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # build packages
