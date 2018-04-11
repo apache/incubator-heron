@@ -11,17 +11,17 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-package com.twitter.heron.integration_test.topology.scala_streamlet_with_map_and_flatmap_and_filter_and_clone
+package org.apache.heron.integration_test.topology.scala_streamlet_with_map_and_flatmap_and_filter_and_clone
 
 import scala.collection.mutable.Set
 
-import com.twitter.heron.api.Config
-import com.twitter.heron.integration_test.common.{
+import org.apache.heron.api.Config
+import org.apache.heron.integration_test.common.{
   AbstractTestTopology,
   ScalaIntegrationTestBase
 }
-import com.twitter.heron.integration_test.core.TestTopologyBuilder
-import com.twitter.heron.streamlet.scala.Builder
+import org.apache.heron.integration_test.core.TestTopologyBuilder
+import org.apache.heron.streamlet.scala.Builder
 
 object ScalaStreamletWithMapAndFlatMapAndFilterAndClone {
   val months = "january - february - march - april - may - june" +
