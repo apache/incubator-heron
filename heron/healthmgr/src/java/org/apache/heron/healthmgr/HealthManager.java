@@ -45,6 +45,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.classification.InterfaceStability.Evolving;
 import org.apache.heron.classification.InterfaceStability.Unstable;
+import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.logging.LoggingHelper;
 import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;

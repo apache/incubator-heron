@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.metric.MultiCountMetric;
-import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
@@ -35,12 +34,12 @@ import org.apache.heron.common.network.HeronClient;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.StatusCode;
 import org.apache.heron.common.utils.metrics.JVMMetrics;
+import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.system.Metrics;
 
 /**
  * HealthMgr's metrics to be collect
  */
-@Singleton
 public class HealthManagerMetrics implements Runnable, AutoCloseable {
   public static final String METRICS_THREAD = "HealthManagerMetrics";
   private static final Logger LOG = Logger.getLogger(HealthManagerMetrics.class.getName());
