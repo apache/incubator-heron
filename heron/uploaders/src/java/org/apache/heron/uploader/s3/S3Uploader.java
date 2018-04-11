@@ -34,6 +34,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.base.Strings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.uploader.IUploader;
@@ -143,7 +144,7 @@ public class S3Uploader implements IUploader {
       builder.setClientConfiguration(clientCfg);
     }
 
-    if (customRegion != null && !customRegion.equals("")) {
+    if(StringUtils.isNotBlank(customRegion)) {
       builder.setRegion(customRegion);
     }
 
