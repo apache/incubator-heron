@@ -24,18 +24,18 @@ import java.util.List;
 
 public class Fields implements Iterable<String>, Serializable {
   private static final long serialVersionUID = 4882556192519443356L;
-  private com.twitter.heron.api.tuple.Fields delegate;
+  private org.apache.heron.api.tuple.Fields delegate;
 
   public Fields(String... fields) {
-    delegate = new com.twitter.heron.api.tuple.Fields(fields);
+    delegate = new org.apache.heron.api.tuple.Fields(fields);
   }
 
-  public Fields(com.twitter.heron.api.tuple.Fields delegate) {
+  public Fields(org.apache.heron.api.tuple.Fields delegate) {
     this.delegate = delegate;
   }
 
   public Fields(List<String> fields) {
-    delegate = new com.twitter.heron.api.tuple.Fields(fields);
+    delegate = new org.apache.heron.api.tuple.Fields(fields);
   }
 
   public List<Object> select(Fields selector, List<Object> tuple) {
@@ -76,7 +76,7 @@ public class Fields implements Iterable<String>, Serializable {
     return delegate.toString();
   }
 
-  public com.twitter.heron.api.tuple.Fields getDelegate() {
+  public org.apache.heron.api.tuple.Fields getDelegate() {
     return delegate;
   }
 }

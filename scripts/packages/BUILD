@@ -349,7 +349,7 @@ pkg_tar(
     srcs = [
         "//integration_test/src/scala:test-data-files",
     ],
-    strip_prefix = '/integration_test/src/scala/com/twitter/heron/integration_test/topology/'
+    strip_prefix = '/integration_test/src/scala/org/apache/heron/integration_test/topology/'
 )
 
 pkg_tar(
@@ -358,7 +358,7 @@ pkg_tar(
     srcs = [
         "//integration_test/src/java:test-data-files",
     ],
-    strip_prefix = '/integration_test/src/java/com/twitter/heron/integration_test/topology/'
+    strip_prefix = '/integration_test/src/java/org/apache/heron/integration_test/topology/'
 )
 
 pkg_tar(

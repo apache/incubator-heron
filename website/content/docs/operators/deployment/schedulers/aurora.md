@@ -75,11 +75,11 @@ config file specific for the Heron cluster. The following must be specified
 for each cluster:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for Aurora scheduler.
-You should set this to `com.twitter.heron.scheduler.aurora.AuroraScheduler`
+You should set this to `org.apache.heron.scheduler.aurora.AuroraScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching and
 submitting topologies. To configure the Aurora launcher, set this to
-`com.twitter.heron.scheduler.aurora.AuroraLauncher`
+`org.apache.heron.scheduler.aurora.AuroraLauncher`
 
 * `heron.package.core.uri` --- Indicates the location of the heron core binary package.
 The local scheduler uses this URI to download the core package to the working directory.
@@ -94,10 +94,10 @@ is a service. In the case of Aurora, it should be set to `False`.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.aurora.AuroraScheduler
+heron.class.scheduler: org.apache.heron.scheduler.aurora.AuroraScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.aurora.AuroraLauncher
+heron.class.launcher: org.apache.heron.scheduler.aurora.AuroraLauncher
 
 # location of the core package
 heron.package.core.uri: file:///vagrant/.herondata/dist/heron-core-release.tar.gz

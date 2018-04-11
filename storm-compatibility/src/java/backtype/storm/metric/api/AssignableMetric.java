@@ -20,11 +20,11 @@ package backtype.storm.metric.api;
 
 public class AssignableMetric implements IMetric {
   @SuppressWarnings("rawtypes")
-  private com.twitter.heron.api.metric.AssignableMetric delegate;
+  private org.apache.heron.api.metric.AssignableMetric delegate;
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public AssignableMetric(Object value) {
-    delegate = new com.twitter.heron.api.metric.AssignableMetric(value);
+    delegate = new org.apache.heron.api.metric.AssignableMetric(value);
   }
 
   @SuppressWarnings("unchecked")

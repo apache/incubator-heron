@@ -21,7 +21,7 @@ package backtype.storm.topology;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.topology.IUpdatable;
+import org.apache.heron.api.topology.IUpdatable;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -77,7 +77,7 @@ public class BasicBoltExecutor implements IRichBolt, IUpdatable {
   }
 
   @Override
-  public void update(com.twitter.heron.api.topology.TopologyContext topologyContext) {
+  public void update(org.apache.heron.api.topology.TopologyContext topologyContext) {
     if (delegate instanceof IUpdatable) {
       ((IUpdatable) delegate).update(topologyContext);
     } else {

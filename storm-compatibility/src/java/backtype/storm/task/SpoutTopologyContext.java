@@ -24,7 +24,7 @@ package backtype.storm.task;
  * information in this structure.
  */
 public class SpoutTopologyContext extends TopologyContext {
-  public SpoutTopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
+  public SpoutTopologyContext(org.apache.heron.api.topology.TopologyContext delegate) {
     super(delegate);
   }
 

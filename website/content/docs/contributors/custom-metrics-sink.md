@@ -7,7 +7,7 @@ Manager](../../concepts/architecture#metrics-manager) (MM), which collects
 metrics from all [Heron Instances](../../concepts/architecture#heron-instance) in
 the container. You can define how the MM processes metrics by implementing a
 **metrics sink**, which specifies how the MM handles incoming
-[`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html)
+[`MetricsRecord`](/api/org/apache/heron/spi/metricsmgr/metrics/MetricsRecord.html)
 objects.
 
 > Java is currently the only supported language for custom metrics sinks. This may change in the future.
@@ -20,10 +20,10 @@ implementing your own.
 
 Sink | How it works
 :----|:------------
-[Prometheus](../../operators/observability/prometheus) | [`PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
-[Graphite](../../operators/observability/graphite) | [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
-[Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
-Local filesystem | [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
+[Prometheus](../../operators/observability/prometheus) | [`PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
+[Graphite](../../operators/observability/graphite) | [`GraphiteSink`](/api/org/apache/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
+[Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
+Local filesystem | [`FileSink`](/api/org/apache/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
 
 ## Java Setup
 
@@ -34,7 +34,7 @@ library into your project.
 
 ```xml
 <dependency>
-  <groupId>com.twitter.heron</groupId>
+  <groupId>org.apache.heron</groupId>
   <artifactId>heron-spi</artifactId>
   <version>{{% heronVersion %}}</version>
 </dependency>
@@ -44,22 +44,22 @@ library into your project.
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "heron-spi", version: "{{% heronVersion %}}"
+  compile group: "org.apache.heron", name: "heron-spi", version: "{{% heronVersion %}}"
 }
 ```
 
 ## The `IMetricsSink` Interface
 
 Each metrics sink must implement the
-[`IMetricsSink`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html)
+[`IMetricsSink`](/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html)
 interface, which requires you to implement the following methods:
 
 Method | Description
 :------|:-----------
-[`init`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#init-java.util.Map-com.twitter.heron.spi.metricsmgr.sink.SinkContext-) | Defines the initialization behavior of the sink. The `conf` map is the configuration that is passed to the sink by the `.yaml` configuration file at `heron/config/metrics_sink.yaml`; the [`SinkContext`](/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html) object enables you to access values from the sink's runtime context (the ID of the metrics manager, the ID of the sink, and the name of the topology).
-[`processRecord`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#processRecord-com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord-) | Defines how each [`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html) that passes through the sink is processed.
-[`flush`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#flush--) | Flush any buffered metrics; this function is called at the interval specified by the `flush-frequency-ms` parameter. More info can be found in the [Stream Manager](../../concepts/architecture#stream-manager) documentation.
-[`close`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html#close--) | Closes the stream and releases any system resources associated with it; if the stream is already closed, invoking `close()` has no effect.
+[`init`](/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#init-java.util.Map-org.apache.heron.spi.metricsmgr.sink.SinkContext-) | Defines the initialization behavior of the sink. The `conf` map is the configuration that is passed to the sink by the `.yaml` configuration file at `heron/config/metrics_sink.yaml`; the [`SinkContext`](/api/org/apache/heron/spi/metricsmgr/sink/SinkContext.html) object enables you to access values from the sink's runtime context (the ID of the metrics manager, the ID of the sink, and the name of the topology).
+[`processRecord`](/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#processRecord-org.apache.heron.spi.metricsmgr.metrics.MetricsRecord-) | Defines how each [`MetricsRecord`](/api/org/apache/heron/spi/metricsmgr/metrics/MetricsRecord.html) that passes through the sink is processed.
+[`flush`](/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#flush--) | Flush any buffered metrics; this function is called at the interval specified by the `flush-frequency-ms` parameter. More info can be found in the [Stream Manager](../../concepts/architecture#stream-manager) documentation.
+[`close`](/api/org/apache/heron/spi/metricsmgr/sink/IMetricsSink.html#close--) | Closes the stream and releases any system resources associated with it; if the stream is already closed, invoking `close()` has no effect.
 
 Your implementation of those interfaces will need to be packaged into a JAR file
 and distributed to the `heron-core/lib/metricsmgr` folder of your [Heron
@@ -71,10 +71,10 @@ Below is an example implementation that simply prints the contents of each
 metrics record as it passes through:
 
 ```java
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import org.apache.heron.metricsmgr.api.metrics.MetricsInfo;
+import org.apache.heron.metricsmgr.api.metrics.MetricsRecord;
+import org.apache.heron.metricsmgr.api.sink.IMetricsSink;
+import org.apache.heron.metricsmgr.api.sink.SinkContext;
 
 public class PrintSink implements IMetricsSink {
     @Override

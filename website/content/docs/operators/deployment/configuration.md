@@ -42,10 +42,10 @@ HDFS for uploader will have the following set of configurations.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.aurora.AuroraScheduler
+heron.class.scheduler: org.apache.heron.scheduler.aurora.AuroraScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.aurora.AuroraLauncher
+heron.class.launcher: org.apache.heron.scheduler.aurora.AuroraLauncher
 
 # location of java
 heron.directory.sandbox.java.home: /usr/lib/jvm/java-1.8.0-openjdk-amd64/
@@ -58,7 +58,7 @@ heron.scheduler.is.service: False
 
 ```yaml
 # zookeeper state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # zookeeper state manager connection string
 heron.statemgr.connection.string:  "127.0.0.1:2181"
@@ -82,7 +82,7 @@ heron.uploader.hdfs.topologies.directory.uri:      "hdfs:///heron/topology/"
 ## packing.yaml (for Round Robin)
 ```yaml
 # packing algorithm for packing instances into containers
-heron.class.packing.algorithm:    com.twitter.heron.packing.roundrobin.RoundRobinPacking
+heron.class.packing.algorithm:    org.apache.heron.packing.roundrobin.RoundRobinPacking
 ```
 
 ## client.yaml (for heron cli)

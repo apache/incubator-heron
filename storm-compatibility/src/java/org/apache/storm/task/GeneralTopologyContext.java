@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.simple.JSONAware;
+
+import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.storm.generated.Bolt;
 import org.apache.storm.generated.SpoutSpec;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.tuple.Fields;
-import org.json.simple.JSONAware;
-
-import com.twitter.heron.api.generated.TopologyAPI;
 
 // import org.apache.storm.generated.ComponentCommon;
 // import org.apache.storm.generated.GlobalStreamId;
@@ -37,7 +37,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 // import org.apache.storm.utils.ThriftTopologyUtils;
 
 public class GeneralTopologyContext implements JSONAware {
-  private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
+  private org.apache.heron.api.topology.GeneralTopologyContext delegate;
 
   @SuppressWarnings("rawtypes")
   public GeneralTopologyContext(StormTopology topology, Map stormConf,
@@ -48,7 +48,7 @@ public class GeneralTopologyContext implements JSONAware {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
   }
 
-  public GeneralTopologyContext(com.twitter.heron.api.topology.GeneralTopologyContext delegate) {
+  public GeneralTopologyContext(org.apache.heron.api.topology.GeneralTopologyContext delegate) {
     this.delegate = delegate;
   }
 

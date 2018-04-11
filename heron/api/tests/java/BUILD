@@ -21,18 +21,18 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.api.windowing.WindowManagerTest",
-    "com.twitter.heron.api.windowing.WaterMarkEventGeneratorTest",
-    "com.twitter.heron.api.bolt.WindowedBoltExecutorTest",
-    "com.twitter.heron.api.metric.CountStatAndMetricTest",
-    "com.twitter.heron.api.metric.LatencyStatAndMetricTest",
-    "com.twitter.heron.api.bolt.BaseWindowedBoltTest",
-    "com.twitter.heron.streamlet.impl.StreamletImplTest",
-    "com.twitter.heron.streamlet.impl.operators.JoinOperatorTest",
-    "com.twitter.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
-    "com.twitter.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
-    "com.twitter.heron.api.ConfigTest",
-    "com.twitter.heron.api.HeronSubmitterTest"
+    "org.apache.heron.api.windowing.WindowManagerTest",
+    "org.apache.heron.api.windowing.WaterMarkEventGeneratorTest",
+    "org.apache.heron.api.bolt.WindowedBoltExecutorTest",
+    "org.apache.heron.api.metric.CountStatAndMetricTest",
+    "org.apache.heron.api.metric.LatencyStatAndMetricTest",
+    "org.apache.heron.api.bolt.BaseWindowedBoltTest",
+    "org.apache.heron.streamlet.impl.StreamletImplTest",
+    "org.apache.heron.streamlet.impl.operators.JoinOperatorTest",
+    "org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
+    "org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
+    "org.apache.heron.api.ConfigTest",
+    "org.apache.heron.api.HeronSubmitterTest"
   ],
   runtime_deps = [ ":api-tests" ],
   size = "small",
