@@ -38,7 +38,7 @@ containers are allocated for each topology.
 
 **After 0.14.3 version released**
 
-It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.2 version requested. [#1245](https://github.com/twitter/heron/issues/1245) added `extra-launch-classpath` arguments, which makes it easier and more convenient to submit a topology to YARN.
+It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/scheduler` like what 0.14.2 version requested. [#1245](https://github.com/apache/incubator-heron/issues/1245) added `extra-launch-classpath` arguments, which makes it easier and more convenient to submit a topology to YARN.
 
 > **Tips**
 >
@@ -57,7 +57,7 @@ It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/schedu
 ### Configure the YARN scheduler
 
 A set of default configuration files are provided with Heron in the [conf/yarn]
-(https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
+(https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
 The default configuration uses the local state manager. This will work with single-node local
 YARN installation only. A Zookeeper based state management will be needed for topology
 deployment on a multi-node YARN cluster.
@@ -65,7 +65,7 @@ deployment on a multi-node YARN cluster.
 1. Custom Heron Launcher for YARN: `YarnLauncher`
 1. Custom Heron Scheduler for YARN: `YarnScheduler`
 1. State manager for multi-node deployment:
-`com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
+`org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager`
 1. `YarnLauncher` performs the job of uploader also. So `NullUploader` is used.
 
 ## Topology management
@@ -75,18 +75,18 @@ deployment on a multi-node YARN cluster.
 
 **Under 0.14.2 version (including 0.14.2)**
 
-`$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology`
+`$ heron submit yarn heron-examples.jar org.apache.heron.examples.AckingTopology AckingTopology`
 
 
 **After 0.14.3 version released**
 
-`$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology --extra-launch-classpath <extra-classpath-value>`
+`$ heron submit yarn heron-examples.jar org.apache.heron.examples.AckingTopology AckingTopology --extra-launch-classpath <extra-classpath-value>`
 
 >**Tips**
 >
 >1. More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
 >2. if you want to submit a topology to a specific YARN queue, you can set the `heron.scheduler.yarn.queue` argument in `--config-property`. For instance, `--config-property heron.scheduler.yarn.queue=test`. This configuration could be found in the [conf/yarn/scheduler]
-(https://github.com/twitter/heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
+(https://github.com/apache/incubator-heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
 
 **Sample Output**
 
@@ -104,7 +104,7 @@ Powered by
 
 ...
 ...
-com.twitter.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTopology is running, jobId AckingTopology.
+org.apache.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTopology is running, jobId AckingTopology.
 ```
 
 **Verification**
@@ -146,6 +146,6 @@ Assuming HDFS as the file system, Heron logs and REEF logs can be found in the f
 
 1. The YARN Scheduler will restart any failed workers and TMaster containers. However [AM HA](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html)  is not
  supported yet. As a result AM failure will result in topology failure.
- Issue: [#949](https://github.com/twitter/heron/issues/949)
+ Issue: [#949](https://github.com/apache/incubator-heron/issues/949)
 1. TMaster and Scheduler are started in separate containers. Increased network latency can result
- in warnings or failures. Issue: [#951] (https://github.com/twitter/heron/issues/951)
+ in warnings or failures. Issue: [#951] (https://github.com/apache/incubator-heron/issues/951)

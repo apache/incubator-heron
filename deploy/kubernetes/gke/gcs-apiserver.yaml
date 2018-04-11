@@ -76,7 +76,7 @@ spec:
               -D heron.statemgr.connection.string=zookeeper:2181
               -D heron.kubernetes.scheduler.uri=http://localhost:8001
               -D heron.executor.docker.image=heron/heron:latest
-              -D heron.class.uploader=com.twitter.heron.uploader.gcs.GcsUploader
+              -D heron.class.uploader=org.apache.heron.uploader.gcs.GcsUploader
               -D heron.uploader.gcs.bucket=$GCS_BUCKET
           volumeMounts:
             - name: google-cloud-key

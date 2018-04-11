@@ -28,19 +28,19 @@ algorithm, update the `packing.yaml` file as follows:
 
 ```yaml
 # packing algorithm for packing instances into containers
-heron.class.packing.algorithm:    com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking
+heron.class.packing.algorithm:    org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
 ```
 
 The algorithm accepts as input the values of the following parameters:
 
 1. Component RAM
 2. Hint for the maximum container RAM
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT`)
 3. Hint for the maximum container CPU
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT`)
 4. Hint for the maximum container Disk
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT`)
-5. Padding percentage (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT`)
+5. Padding percentage (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE`)
 6. Component Parallelisms
 
 Parameter 1 determines the RAM requirement of each component in the topology.
@@ -77,12 +77,12 @@ containers as input.
 
 ### Configuring the First Fit Decreasing Packing Algorithm
 
-1. The methods `com.twitter.heron.api.Config.setContainerMaxRamHint(long bytes)`,
-   `com.twitter.heron.api.Config.setContainerMaxCpuHint(float ncpus)`,
-   `com.twitter.heron.api.Config.setContainerMaxDiskHint(long bytes)`
+1. The methods `org.apache.heron.api.Config.setContainerMaxRamHint(long bytes)`,
+   `org.apache.heron.api.Config.setContainerMaxCpuHint(float ncpus)`,
+   `org.apache.heron.api.Config.setContainerMaxDiskHint(long bytes)`
    can be used to set parameters 2-4 when defining a topology.
 
-2. The `com.twitter.heron.api.Config.setContainerPaddingPercentage(int percentage)`
+2. The `org.apache.heron.api.Config.setContainerPaddingPercentage(int percentage)`
    method can be used to set the padding percentage
    defined in parameter 5 when defining a topology.
 
@@ -91,7 +91,7 @@ containers as input.
    ```java
 
      // Set up the topology and its config
-     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+     org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
 
      long maxContainerRam = 10L * Constants.GB;
 

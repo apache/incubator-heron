@@ -58,7 +58,7 @@ class Application(tornado.web.Application):
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
-        # Deprecated. See https://github.com/twitter/heron/issues/1754
+        # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
         (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
@@ -178,7 +178,7 @@ def add_arguments(parser):
 def create_parsers():
   """ create argument parser """
   parser = argparse.ArgumentParser(
-      epilog='For detailed documentation, go to http://github.com/twitter/heron',
+      epilog='For detailed documentation, go to http://github.com/apache/incubator-heron',
       usage="%(prog)s [options] [help]",
       add_help=False)
 

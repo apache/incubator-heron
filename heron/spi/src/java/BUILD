@@ -6,7 +6,7 @@ load("//tools/rules:javadoc.bzl", "java_doc")
 java_doc(
     name = "heron-spi-javadoc",
     libs = [":heron-spi"],
-    pkgs = ["com/twitter/heron/spi"],
+    pkgs = ["org/apache/heron/spi"],
     title = "Heron Spi Documentation",
 )
 

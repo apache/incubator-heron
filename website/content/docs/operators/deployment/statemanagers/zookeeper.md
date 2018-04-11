@@ -25,7 +25,7 @@ need to specify the following for each cluster:
 
 * `heron.class.state.manager` --- Indicates the class to be loaded for managing
 the state in ZooKeeper and this class is loaded using reflection. You should set this
-to `com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
+to `org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager`
 
 * `heron.statemgr.connection.string` --- The host IP address and port to connect to ZooKeeper
 cluster (e.g) "127.0.0.1:2181".
@@ -56,7 +56,7 @@ Below is an example configuration (in `statemgr.yaml`) for a ZooKeeper running i
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string:  "127.0.0.1:2181"

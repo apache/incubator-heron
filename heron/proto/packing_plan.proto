@@ -1,7 +1,7 @@
 syntax = "proto2";
 package heron.proto.system;
 
-option java_package = "com.twitter.heron.proto.system";
+option java_package = "org.apache.heron.proto.system";
 option java_outer_classname = "PackingPlans";
 
 // This file defines the packing plan of a topology.

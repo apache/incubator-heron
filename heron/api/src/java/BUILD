@@ -8,7 +8,7 @@ load("//tools/rules:javadoc.bzl", "java_doc")
 java_doc(
     name = "heron-api-javadoc",
     libs = [":api-java-low-level-functional"],
-    pkgs = ["com/twitter/heron"],
+    pkgs = ["org/apache/heron"],
     title = "Heron Api Documentation",
 )
 
@@ -21,7 +21,7 @@ api_deps_files =  \
 # Low Level Api
 java_library(
     name = "api-java-low-level",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
+    srcs = glob(["org/apache/heron/api/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files,
 )
@@ -29,7 +29,7 @@ java_library(
 # Functional Api
 java_library(
     name = "api-java",
-    srcs = glob(["com/twitter/heron/streamlet/**/*.java"]),
+    srcs = glob(["org/apache/heron/streamlet/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
@@ -41,13 +41,13 @@ java_library(
 java_library(
     name = "api-java-low-level-functional",
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
+    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
 )
 
 java_binary(
     name = "api-unshaded",
-    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
+    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + ["//third_party/java:kryo-neverlink"],
 )
 
@@ -67,6 +67,6 @@ genrule(
 
 java_library(
     name = "classification",
-    srcs = glob(["com/twitter/heron/classification/**/*.java"]),
+    srcs = glob(["org/apache/heron/classification/**/*.java"]),
     resources = ["//heron/api/src:processor-service-conf"],
 )

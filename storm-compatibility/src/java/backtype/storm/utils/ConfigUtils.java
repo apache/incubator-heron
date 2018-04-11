@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import org.apache.heron.api.Config;
 
 import backtype.storm.hooks.ITaskHookDelegate;
 
@@ -83,11 +83,11 @@ public final class ConfigUtils {
         instanceof Boolean)
         && ((Boolean)
         heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
-      com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
-          "com.twitter.heron.api.serializer.JavaSerializer");
+      org.apache.heron.api.Config.setSerializationClassName(heronConfig,
+          "org.apache.heron.api.serializer.JavaSerializer");
     } else {
       heronConfig.put(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION, false);
-      com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
+      org.apache.heron.api.Config.setSerializationClassName(heronConfig,
           "backtype.storm.serialization.HeronPluggableSerializerDelegate");
       if (!heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_KRYO_FACTORY)) {
         heronConfig.put(backtype.storm.Config.TOPOLOGY_KRYO_FACTORY,
@@ -110,7 +110,7 @@ public final class ConfigUtils {
 
   /* We need to play a little dance here.
    * task hooks are a list of class names that need to be invoked at various times during a topology run.
-   * However because Heron operates in com.twitter world and Strom in backtype.storm world, we
+   * However because Heron operates in org.apache world and Strom in backtype.storm world, we
    * pass a ITaskHookDelegate to Heron and remember the actual task hooks in an internal
    * variable STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS
    */
@@ -138,30 +138,30 @@ public final class ConfigUtils {
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_WORKERS)) {
       Integer nWorkers = Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_WORKERS));
-      com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
+      org.apache.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
     }
 
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =
           Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
-      com.twitter.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
+      org.apache.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
       Integer nPending =
           Utils.getInt(
               heronConfig.get(backtype.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
-      com.twitter.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
+      org.apache.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
       Integer tSecs =
           Utils.getInt(
               heronConfig.get(backtype.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
-      com.twitter.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
+      org.apache.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_DEBUG)) {
       Boolean dBg =
           Boolean.parseBoolean(heronConfig.get(backtype.storm.Config.TOPOLOGY_DEBUG).toString());
-      com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
+      org.apache.heron.api.Config.setDebug(heronConfig, dBg);
     }
   }
 
@@ -174,15 +174,15 @@ public final class ConfigUtils {
       Integer nAckers =
           Utils.getInt(heronConfig.get(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS));
       if (nAckers > 0) {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
+        org.apache.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE);
       } else {
-        com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-                 com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+        org.apache.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+                 org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
       }
     } else {
-      com.twitter.heron.api.Config.setTopologyReliabilityMode(heronConfig,
-               com.twitter.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
+      org.apache.heron.api.Config.setTopologyReliabilityMode(heronConfig,
+               org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE);
     }
   }
 }

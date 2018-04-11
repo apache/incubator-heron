@@ -70,7 +70,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
              const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
              sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
-             sp_int64 _high_watermark, sp_int64 _low_watermark)
+             sp_int64 _high_watermark, sp_int64 _low_watermark,
+             const sp_string& _metricscachemgr_mode)
 
     : pplan_(NULL),
       topology_name_(_topology_name),
@@ -96,7 +97,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port
       ckptmgr_port_(_ckptmgr_port),
       ckptmgr_id_(_ckptmgr_id),
       high_watermark_(_high_watermark),
-      low_watermark_(_low_watermark) {}
+      low_watermark_(_low_watermark),
+      metricscachemgr_mode_(_metricscachemgr_mode) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -119,8 +121,10 @@ void StMgr::Init() {
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-  state_mgr_->SetMetricsCacheLocationWatch(
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
+    state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
+  }
 
   reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
   if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
@@ -156,7 +160,9 @@ void StMgr::Init() {
   // constructor needs actual stmgr ports, thus put FetchTMasterLocation()
   // has to be after after StartStmgrServer and StartInstanceServer()
   FetchTMasterLocation();
-  FetchMetricsCacheLocation();
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
+    FetchMetricsCacheLocation();
+  }
 
   if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Now start the stateful restorer

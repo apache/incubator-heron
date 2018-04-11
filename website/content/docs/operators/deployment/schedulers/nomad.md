@@ -91,7 +91,7 @@ Here's an example:
 ```bash
 $ heron submit nomad \
   ~/.heron/examples/heron-streamlet-examples.jar \           # Package path
-  com.twitter.heron.examples.api.WindowedWordCountTopology \ # Topology classpath
+  org.apache.heron.examples.api.WindowedWordCountTopology \ # Topology classpath
   windowed-word-count                                        # Args passed to topology
 ```
 
@@ -109,7 +109,7 @@ $ ~/.heron/bin/heron-apiserver \
   --base-template nomad \
   -D heron.statemgr.connection.string=<ZooKeeper URI> \
   -D heron.nomad.scheduler.uri=<Nomad URI> \
-  -D heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader \
+  -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader \
   --verbose
 ```
 
@@ -130,7 +130,7 @@ job "apiserver" {
         "--base-template", "nomad",
         "-D", "heron.statemgr.connection.string=<zookeeper_uri>",
         "-D", "heron.nomad.scheduler.uri=<scheduler_uri>",
-        "-D", "heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader",
+        "-D", "heron.class.uploader=org.apache.heron.uploader.http.HttpUploader",
         "--verbose"]
       }
       resources {
@@ -154,7 +154,7 @@ Heron users can upload their Heron topology packages to the Heron API server usi
 
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader:    com.twitter.heron.uploader.http.HttpUploader
+heron.class.uploader:    org.apache.heron.uploader.http.HttpUploader
 heron.uploader.http.uri: http://localhost:9000/api/v1/file/upload
 ```
 
@@ -178,7 +178,7 @@ $ ~/.heron/bin/heron-apiserver \
   --heron-core-package-path ~/.heron/dist/heron-core.tar.gz \
   -D heron.statemgr.connection.string=127.0.0.1:2181 \
   -D heron.nomad.scheduler.uri=127.0.0.1:4647 \
-  -D heron.class.uploader=com.twitter.heron.uploader.http.HttpUploader \
+  -D heron.class.uploader=org.apache.heron.uploader.http.HttpUploader \
   --verbose
 ```
 
@@ -207,6 +207,6 @@ Here's an example:
 $ heron submit nomad \
   --service-url=http://localhost:9000 \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.api.WindowedWordCountTopology \
+  org.apache.heron.examples.api.WindowedWordCountTopology \
   windowed-word-count
 ```

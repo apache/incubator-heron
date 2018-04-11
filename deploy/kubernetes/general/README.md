@@ -3,7 +3,7 @@
 ### Requirements:
 * Kubernetes cluster with 3 or more nodes
 * [kubectl](https://kubernetes.io/docs/tasks/kubectl/install/)
-* [heron client](https://twitter.github.io/heron/docs/getting-started/)
+* [heron client](https://apache.github.io/incubator-heron/docs/getting-started/)
 
 
 
@@ -12,7 +12,7 @@
 1. Start zookeeper:
 
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/zookeeper.yaml
 
 $ kubectl get pods
 NAME                                  READY     STATUS    RESTARTS   AGE
@@ -24,7 +24,7 @@ zk-0                                  1/1       Running   0          1m
 
 2. Start bookkeeper:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/bookkeeper.yaml
 ```
 
 This deploys bookkeeper in a `DaemonSet` and requires the ability of exposing `hostPort` for pods communication.
@@ -32,17 +32,17 @@ In some environments like K8S on DC/OS, `hostPort` is not well supported. You ca
 a `StatefulSet` with `Persistent Volumes` as below. Please see [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) for more details.
 
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.statefulset.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/bookkeeper.statefulset.yaml
 ```
 
 3. Start heron tools:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
 ```
 
 4. Start heron apiserver:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/apiserver.yaml
 ```
 
 ### Deploy via heron apiserver
@@ -73,13 +73,13 @@ $ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apis
 ```shell
 $ heron config kubernetes \
 set service_url http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
-com.twitter.heron.examples.api.AckingTopology acking
+org.apache.heron.examples.api.AckingTopology acking
 ```
 
 4. Submit an example topology:
 ```shell
 $ heron submit kubernetes ~/.heron/examples/heron-api-examples.jar \
-com.twitter.heron.examples.api.AckingTopology acking
+org.apache.heron.examples.api.AckingTopology acking
 ```
 
 5. View heron ui:

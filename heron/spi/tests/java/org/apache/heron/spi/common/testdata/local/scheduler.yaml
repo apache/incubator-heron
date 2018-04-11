@@ -1,0 +1,5 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:          org.apache.heron.scheduler.local.LocalScheduler
+
+# launcher class for submitting the topology to the scheduler
+heron.class.launcher:          org.apache.heron.scheduler.local.LocalLauncher

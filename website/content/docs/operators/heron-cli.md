@@ -8,7 +8,7 @@ The **Heron CLI** us used to to manage every aspect of the
 ## Deploying the `heron` CLI Executable
 
 To use `heron` CLI, download the `heron-client-install` for your platfrom from
-[release binaries](https://github.com/twitter/heron/releases) and  run the
+[release binaries](https://github.com/apache/incubator-heron/releases) and  run the
 installation script. For example, if you have downloaded the version `0.13.5`,
 you invoke the installation script as follows:
 

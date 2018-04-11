@@ -283,7 +283,7 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
                                 topology_id,
                                 stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
                                 metricsmgr_port, shell_port, ckptmgr_port, ckptmgr_id,
-                                _high_watermark, _low_watermark);
+                                _high_watermark, _low_watermark, "disabled");
   EXPECT_EQ(0, stmgr_port);
   EXPECT_EQ(0, local_data_port);
   mgr->Init();
