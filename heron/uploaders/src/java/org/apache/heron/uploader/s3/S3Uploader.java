@@ -143,11 +143,14 @@ public class S3Uploader implements IUploader {
       builder.setClientConfiguration(clientCfg);
     }
 
-    s3Client = builder.withRegion(customRegion)
-            .withPathStyleAccessEnabled(true)
-            .withChunkedEncodingDisabled(true)
-            .withPayloadSigningEnabled(true)
-            .build();
+    if (customRegion != null && !customRegion.equals("")) {
+      builder.setRegion(customRegion);
+    }
+
+    s3Client = builder.withPathStyleAccessEnabled(true)
+        .withChunkedEncodingDisabled(true)
+        .withPayloadSigningEnabled(true)
+        .build();
 
     if (!Strings.isNullOrEmpty(endpoint)) {
       s3Client.setEndpoint(endpoint);
@@ -237,7 +240,8 @@ public class S3Uploader implements IUploader {
   public void close() {
     // Cleanup the backup file if it exists as its not needed anymore.
     // This will succeed whether the file exists or not.
-    if (!Strings.isNullOrEmpty(previousVersionFilePath)) {
+    if (!Strings.isNullOrEmpty(previousVersionFilePath)
+        && s3Client.doesObjectExist(bucket, previousVersionFilePath)) {
       s3Client.deleteObject(bucket, previousVersionFilePath);
     }
   }
