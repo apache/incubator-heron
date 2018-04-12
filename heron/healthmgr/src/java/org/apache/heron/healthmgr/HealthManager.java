@@ -214,22 +214,24 @@ public class HealthManager {
     String metricsUrl = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_URL.key());
     metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
 
-    AbstractModule module = buildMetricsProviderModule(metricsUrl, metricSourceClassName);
+    // metrics reporting thread
+    HealthManagerMetrics publishingMetricsRunnable =
+        new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+
+    AbstractModule module
+        = buildBaseModule(metricsUrl, metricSourceClassName, publishingMetricsRunnable);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
     healthManager.initialize();
 
-    LOG.info("Starting Health Manager metric posting thread");
-    HealthManagerMetrics publishingMetricsRunnable =
-        new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
-    SingletonRegistry.INSTANCE.registerSingleton(HealthManagerMetrics.METRICS_THREAD,
-        publishingMetricsRunnable);
-
     LOG.info("Starting Health Manager");
     PoliciesExecutor policyExecutor = new PoliciesExecutor(healthManager.healthPolicies);
     ScheduledFuture<?> future = policyExecutor.start();
+
+    LOG.info("Starting Health Manager metric posting thread");
     new Thread(publishingMetricsRunnable).start();
+
     try {
       future.get();
     } finally {
@@ -324,7 +326,8 @@ public class HealthManager {
   }
 
   @VisibleForTesting
-  static AbstractModule buildMetricsProviderModule(final String sourceUrl, final String type) {
+  static AbstractModule buildBaseModule(final String sourceUrl, final String type,
+                                        final HealthManagerMetrics publishingMetricsRunnable) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -334,6 +337,8 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
             .toInstance(type);
+        bind(HealthManagerMetrics.class)
+            .toInstance(publishingMetricsRunnable);
       }
     };
   }

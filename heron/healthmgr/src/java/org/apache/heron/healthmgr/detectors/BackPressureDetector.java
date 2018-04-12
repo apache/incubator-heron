@@ -28,6 +28,7 @@ import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
@@ -35,14 +36,18 @@ import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMP
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureDetector extends BaseDetector {
+  public static final String BACK_PRESSURE_DETECTOR = "BackPressureDetector";
   static final String CONF_NOISE_FILTER = "BackPressureDetector.noiseFilterMillis";
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
   private final int noiseFilterMillis;
+  private HealthManagerMetrics publishingMetricsRunnable;
 
   @Inject
-  BackPressureDetector(HealthPolicyConfig policyConfig) {
+  BackPressureDetector(HealthPolicyConfig policyConfig,
+                       HealthManagerMetrics publishingMetricsRunnable) {
     noiseFilterMillis = (int) policyConfig.getConfig(CONF_NOISE_FILTER, 20);
+    this.publishingMetricsRunnable = publishingMetricsRunnable;
   }
 
   /**
@@ -53,6 +58,8 @@ public class BackPressureDetector extends BaseDetector {
    */
   @Override
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
+    publishingMetricsRunnable.executeDetectorIncr(BACK_PRESSURE_DETECTOR);
+
     Collection<Symptom> result = new ArrayList<>();
     Instant now = context.checkpoint();
 

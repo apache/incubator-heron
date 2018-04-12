@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import com.google.protobuf.Message;
 
@@ -40,6 +41,7 @@ import org.apache.heron.proto.system.Metrics;
 /**
  * HealthMgr's metrics to be collect
  */
+@Singleton
 public class HealthManagerMetrics implements Runnable, AutoCloseable {
   public static final String METRICS_THREAD = "HealthManagerMetrics";
   private static final Logger LOG = Logger.getLogger(HealthManagerMetrics.class.getName());

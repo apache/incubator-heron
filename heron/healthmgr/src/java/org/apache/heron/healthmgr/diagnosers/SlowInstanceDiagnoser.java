@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import javax.inject.Inject;
+
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
@@ -37,11 +39,17 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   public static final String SLOW_INSTANCE_DIAGNOSER = "SlowInstanceDiagnoser";
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
+  private HealthManagerMetrics publishingMetricsRunnable;
+
+  @Inject
+  public SlowInstanceDiagnoser(HealthManagerMetrics publishingMetricsRunnable) {
+    this.publishingMetricsRunnable = publishingMetricsRunnable;
+  }
+
   @Override
   public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
-    ((HealthManagerMetrics) SingletonRegistry.INSTANCE
-        .getSingleton(HealthManagerMetrics.METRICS_THREAD))
-        .executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
+    publishingMetricsRunnable.executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
+
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
 
