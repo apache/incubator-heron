@@ -1125,24 +1125,29 @@ void StMgr::PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _
   // Back up new topology data (state and configs)
   proto::api::TopologyState st = _pplan->topology().state();
 
-  // Update new config in topology
-  std::map<std::string, std::string> config;
-  heron::config::TopologyConfigHelper::GetTopologyConfig(_pplan->topology(), config);
-  heron::config::TopologyConfigHelper::SetTopologyConfig(_topology, config);
+  std::map<std::string, std::string> topology_config;
+  config::TopologyConfigHelper::GetTopologyConfig(_pplan->topology(), topology_config);
 
   std::unordered_set<std::string> components;
-  heron::config::TopologyConfigHelper::GetAllComponentNames(_pplan->topology(), components);
+  std::map<std::string, std::map<std::string, std::string>> component_config;
+  config::TopologyConfigHelper::GetAllComponentNames(_pplan->topology(), components);
   for (auto iter = components.begin(); iter != components.end(); ++iter) {
-    config.clear();
-    heron::config::TopologyConfigHelper::GetComponentConfig(_pplan->topology(), *iter, config);
-    heron::config::TopologyConfigHelper::SetComponentConfig(_topology, *iter, config);
+    std::map<std::string, std::string> config;
+    config::TopologyConfigHelper::GetComponentConfig(_pplan->topology(), *iter, topology_config);
+    component_config[*iter] = config;
   }
 
+  // Copy hydrated topology into pplan
   _pplan->clear_topology();
   _pplan->mutable_topology()->CopyFrom(*_topology);
 
   // Restore new topology data
   _pplan->mutable_topology()->set_state(st);
+  config::TopologyConfigHelper::SetTopologyConfig(_pplan->mutable_topology(), topology_config);
+  for (auto iter = components.begin(); iter != components.end(); ++iter) {
+    config::TopologyConfigHelper::SetComponentConfig(_pplan->mutable_topology(), *iter,
+        component_config[*iter]);
+  }
 }
 }  // namespace stmgr
 }  // namespace heron

@@ -47,8 +47,6 @@ typedef std::map<std::string, std::string> ConfigValueMap;
 // From component name to config/value pairs
 typedef std::map<std::string, std::map<std::string, std::string>> ComponentConfigMap;
 
-const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
-
 class TMaster {
  public:
   TMaster(const std::string& _zk_hostport, const std::string& _topology_name,

@@ -182,6 +182,9 @@ class TopologyConfigHelper {
   static sp_int64 GetComponentOutputBPS(const proto::api::Topology& _topology,
                                         const std::string& _component);
 
+  // Get reserved topology config key.
+  static const char* GetReservedTopologyConfigKey();
+
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
                                     const std::string& _config_name,

@@ -634,11 +634,12 @@ bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
   DCHECK(_topology->IsInitialized());
 
   ComponentConfigMap::const_iterator iter;
+  const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
     std::map<std::string, std::string> runtime_config;
     config::TopologyConfigHelper::ConvertToRuntimeConfigs(iter->second, runtime_config);
-    if (iter->first == TOPOLOGY_CONFIG_KEY) {
+    if (iter->first == topology_key) {
       config::TopologyConfigHelper::SetTopologyConfig(_topology, runtime_config);
     } else {
       config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, runtime_config);
@@ -1025,8 +1026,9 @@ bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) cons
   config::TopologyConfigHelper::GetAllComponentNames(topology, components);
 
   ComponentConfigMap::const_iterator iter;
+  const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
-    if (iter->first != TOPOLOGY_CONFIG_KEY) {
+    if (iter->first != topology_key) {
       // It is a component, search for it
       if (components.find(iter->first) == components.end()) {
         return false;

@@ -29,6 +29,7 @@
 namespace heron {
 namespace config {
 
+static const char TOPOLOGY_CONFIG_KEY[] = "_topology_";
 static const char RUNTIME_CONFIG_POSTFIX[] = ":runtime";
 
 TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
@@ -583,6 +584,10 @@ sp_int64 TopologyConfigHelper::GetComponentOutputBPS(const proto::api::Topology&
   }
 
   return -1;  // default to -1 (no rate limit)
+}
+
+const char* TopologyConfigHelper::GetReservedTopologyConfigKey() {
+  return TOPOLOGY_CONFIG_KEY;
 }
 }  // namespace config
 }  // namespace heron
