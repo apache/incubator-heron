@@ -38,16 +38,16 @@ public class SlowInstanceDiagnoser extends BaseDiagnoser {
   public static final String SLOW_INSTANCE_DIAGNOSER = "SlowInstanceDiagnoser";
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
 
-  private HealthManagerMetrics publishingMetricsRunnable;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
-  public SlowInstanceDiagnoser(HealthManagerMetrics publishingMetricsRunnable) {
-    this.publishingMetricsRunnable = publishingMetricsRunnable;
+  public SlowInstanceDiagnoser(HealthManagerMetrics publishingMetrics) {
+    this.publishingMetrics = publishingMetrics;
   }
 
   @Override
   public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
-    publishingMetricsRunnable.executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
+    publishingMetrics.executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
 
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);

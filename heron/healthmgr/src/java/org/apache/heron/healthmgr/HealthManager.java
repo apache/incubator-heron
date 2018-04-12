@@ -215,11 +215,11 @@ public class HealthManager {
     metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
 
     // metrics reporting thread
-    HealthManagerMetrics publishingMetricsRunnable =
+    HealthManagerMetrics publishingMetrics =
         new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
 
     AbstractModule module
-        = buildBaseModule(metricsUrl, metricSourceClassName, publishingMetricsRunnable);
+        = buildBaseModule(metricsUrl, metricSourceClassName, publishingMetrics);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
@@ -230,13 +230,13 @@ public class HealthManager {
     ScheduledFuture<?> future = policyExecutor.start();
 
     LOG.info("Starting Health Manager metric posting thread");
-    new Thread(publishingMetricsRunnable).start();
+    new Thread(publishingMetrics).start();
 
     try {
       future.get();
     } finally {
       policyExecutor.destroy();
-      publishingMetricsRunnable.close();
+      publishingMetrics.close();
     }
   }
 
@@ -327,7 +327,7 @@ public class HealthManager {
 
   @VisibleForTesting
   static AbstractModule buildBaseModule(final String sourceUrl, final String type,
-                                        final HealthManagerMetrics publishingMetricsRunnable) {
+                                        final HealthManagerMetrics publishingMetrics) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -338,7 +338,7 @@ public class HealthManager {
             .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
             .toInstance(type);
         bind(HealthManagerMetrics.class)
-            .toInstance(publishingMetricsRunnable);
+            .toInstance(publishingMetrics);
       }
     };
   }

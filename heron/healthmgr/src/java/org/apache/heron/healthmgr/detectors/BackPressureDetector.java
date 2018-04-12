@@ -41,13 +41,13 @@ public class BackPressureDetector extends BaseDetector {
 
   private static final Logger LOG = Logger.getLogger(BackPressureDetector.class.getName());
   private final int noiseFilterMillis;
-  private HealthManagerMetrics publishingMetricsRunnable;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
   BackPressureDetector(HealthPolicyConfig policyConfig,
-                       HealthManagerMetrics publishingMetricsRunnable) {
+                       HealthManagerMetrics publishingMetrics) {
     noiseFilterMillis = (int) policyConfig.getConfig(CONF_NOISE_FILTER, 20);
-    this.publishingMetricsRunnable = publishingMetricsRunnable;
+    this.publishingMetrics = publishingMetrics;
   }
 
   /**
@@ -58,7 +58,7 @@ public class BackPressureDetector extends BaseDetector {
    */
   @Override
   public Collection<Symptom> detect(Collection<Measurement> measurements) {
-    publishingMetricsRunnable.executeDetectorIncr(BACK_PRESSURE_DETECTOR);
+    publishingMetrics.executeDetectorIncr(BACK_PRESSURE_DETECTOR);
 
     Collection<Symptom> result = new ArrayList<>();
     Instant now = context.checkpoint();

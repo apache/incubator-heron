@@ -39,19 +39,19 @@ public class BackPressureSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
-  private HealthManagerMetrics publishingMetricsRunnable;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
   public BackPressureSensor(PackingPlanProvider packingPlanProvider,
                             TopologyProvider topologyProvider,
                             HealthPolicyConfig policyConfig,
                             MetricsProvider metricsProvider,
-                            HealthManagerMetrics publishingMetricsRunnable) {
+                            HealthManagerMetrics publishingMetrics) {
     super(policyConfig, METRIC_BACK_PRESSURE.text(), BackPressureSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
-    this.publishingMetricsRunnable = publishingMetricsRunnable;
+    this.publishingMetrics = publishingMetrics;
   }
 
   /**
@@ -61,7 +61,7 @@ public class BackPressureSensor extends BaseSensor {
    */
   @Override
   public Collection<Measurement> fetch() {
-    publishingMetricsRunnable.executeSensorIncr(BACKPRESSURE_SENSOR);
+    publishingMetrics.executeSensorIncr(BACKPRESSURE_SENSOR);
 
     Collection<Measurement> result = new ArrayList<>();
     Instant now = context.checkpoint();

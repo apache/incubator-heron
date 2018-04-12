@@ -46,17 +46,17 @@ public class RestartContainerResolver implements IResolver {
   private final String topologyName;
   private final ISchedulerClient schedulerClient;
   private ExecutionContext context;
-  private HealthManagerMetrics publishingMetricsRunnable;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
                                   EventManager eventManager,
                                   ISchedulerClient schedulerClient,
-                                  HealthManagerMetrics publishingMetricsRunnable) {
+                                  HealthManagerMetrics publishingMetrics) {
     this.topologyName = topologyName;
     this.eventManager = eventManager;
     this.schedulerClient = schedulerClient;
-    this.publishingMetricsRunnable = publishingMetricsRunnable;
+    this.publishingMetrics = publishingMetrics;
   }
 
   @Override
@@ -66,7 +66,7 @@ public class RestartContainerResolver implements IResolver {
 
   @Override
   public Collection<Action> resolve(Collection<Diagnosis> diagnosis) {
-    publishingMetricsRunnable.executeResolver(RESTART_CONTAINER_RESOLVER);
+    publishingMetrics.executeResolver(RESTART_CONTAINER_RESOLVER);
 
     List<Action> actions = new ArrayList<>();
 
@@ -104,7 +104,7 @@ public class RestartContainerResolver implements IResolver {
               .setTopologyName(topologyName)
               .build());
       LOG.info("Restarted container result: " + b);
-      publishingMetricsRunnable.executeIncr("RestartContainer");
+      publishingMetrics.executeIncr("RestartContainer");
     });
 
     LOG.info("Broadcasting container restart event");
