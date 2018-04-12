@@ -30,7 +30,6 @@ import com.microsoft.dhalion.core.SymptomsTable;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
-import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import org.apache.heron.proto.scheduler.Scheduler.RestartTopologyRequest;

@@ -26,7 +26,6 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
 
-import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.healthmgr.HealthManagerMetrics;
 
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
