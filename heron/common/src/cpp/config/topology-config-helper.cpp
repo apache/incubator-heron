@@ -29,6 +29,9 @@
 namespace heron {
 namespace config {
 
+static const char TOPOLOGY_CONFIG_KEY[] = "_topology_";
+static const char RUNTIME_CONFIG_POSTFIX[] = ":runtime";
+
 TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
   if (_mode == "ATMOST_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
@@ -411,6 +414,20 @@ bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology
                                TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, false);
 }
 
+std::string TopologyConfigHelper::GetRuntimeConfigKey(const std::string& _key) {
+  return _key + RUNTIME_CONFIG_POSTFIX;
+}
+
+// Convert configs in map to runtime configs (append runtime postfix)
+void TopologyConfigHelper::ConvertToRuntimeConfigs(
+    const std::map<std::string, std::string>& _origin,
+    std::map<std::string, std::string>& _retval) {
+  std::map<std::string, std::string>::const_iterator it;
+  for (it = _origin.begin(); it != _origin.end(); ++it) {
+    _retval[GetRuntimeConfigKey(it->first)] = it->second;
+  }
+}
+
 // Return topology level config
 void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topology,
                                              std::map<std::string, std::string>& retval) {
@@ -514,12 +531,9 @@ bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _to
                                                  const std::string& _config_name,
                                                  bool _default_value) {
   static const std::string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  const std::string value = GetConfigValue(cfg, _config_name, "");
-  if (!value.empty()) {
-    return value_true_.compare(value.c_str()) == 0;
-  }
-  return _default_value;
+  const std::string value = GetTopologyConfigValue(_topology, _config_name, "");
+
+  return value_true_.compare(value.c_str()) == 0;
 }
 
 // Convert topology config to a key value map
@@ -528,6 +542,14 @@ void TopologyConfigHelper::ConvertConfigToKVMap(const proto::api::Config& _confi
   for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
     retval[_config.kvs(i).key()] = _config.kvs(i).value();
   }
+}
+
+const std::string TopologyConfigHelper::GetTopologyConfigValue(
+    const proto::api::Topology& _topology,
+    const std::string& _key,
+    const std::string& _default) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  return GetConfigValue(cfg, _key, _default);
 }
 
 const std::string TopologyConfigHelper::GetComponentConfigValue(
@@ -552,13 +574,20 @@ const std::string TopologyConfigHelper::GetComponentConfigValue(
 
 sp_int64 TopologyConfigHelper::GetComponentOutputBPS(const proto::api::Topology& _topology,
                                                      const std::string& _component) {
-  const std::string value = GetComponentConfigValue(_topology, _component,
+  const std::string init_value = GetComponentConfigValue(_topology, _component,
       TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS, "");
+  const std::string value = GetComponentConfigValue(_topology, _component,
+      GetRuntimeConfigKey(TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS), init_value);
 
   if (!value.empty()) {
     return atol(value.c_str());
   }
+
   return -1;  // default to -1 (no rate limit)
+}
+
+const char* TopologyConfigHelper::GetReservedTopologyConfigKey() {
+  return TOPOLOGY_CONFIG_KEY;
 }
 }  // namespace config
 }  // namespace heron
