@@ -23,6 +23,7 @@
 #include <vector>
 #include "basics/basics.h"
 #include "basics/strutils.h"
+#include "config/topology-config-helper.h"
 #include "errors/errors.h"
 #include "manager/tmaster.h"
 #include "network/network.h"
@@ -298,7 +299,8 @@ bool TController::ParseRuntimeConfig(const std::vector<std::string>& paramters,
     std::vector<std::string> segments = StrUtils::split(*iter, ":");
     if (segments.size() == 2) {
       // Topology level config
-      retval[TOPOLOGY_CONFIG_KEY][segments[0]] = segments[1];
+      const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
+      retval[topology_key][segments[0]] = segments[1];
     } else if (segments.size() == 3) {
       // Component level config
       retval[segments[0]][segments[1]] = segments[2];

@@ -591,6 +591,9 @@ bool TMaster::UpdateRuntimeConfig(const ComponentConfigMap& _config,
                                   VCallback<proto::system::StatusCode> cb) {
   DCHECK(current_pplan_->topology().IsInitialized());
 
+  LOG(INFO) << "Update runtime config: ";
+  LogConfig(_config);
+
   // Parse and set the new configs
   proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
   new_pplan->CopyFrom(*current_pplan_);
@@ -631,11 +634,12 @@ bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
   DCHECK(_topology->IsInitialized());
 
   ComponentConfigMap::const_iterator iter;
+  const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
     std::map<std::string, std::string> runtime_config;
-    AppendPostfix(iter->second, RUNTIME_CONFIG_POSTFIX, runtime_config);
-    if (iter->first == TOPOLOGY_CONFIG_KEY) {
+    config::TopologyConfigHelper::ConvertToRuntimeConfigs(iter->second, runtime_config);
+    if (iter->first == topology_key) {
       config::TopologyConfigHelper::SetTopologyConfig(_topology, runtime_config);
     } else {
       config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, runtime_config);
@@ -1022,8 +1026,9 @@ bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) cons
   config::TopologyConfigHelper::GetAllComponentNames(topology, components);
 
   ComponentConfigMap::const_iterator iter;
+  const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
-    if (iter->first != TOPOLOGY_CONFIG_KEY) {
+    if (iter->first != topology_key) {
       // It is a component, search for it
       if (components.find(iter->first) == components.end()) {
         return false;
@@ -1034,12 +1039,12 @@ bool TMaster::ValidateRuntimeConfigNames(const ComponentConfigMap& _config) cons
   return true;
 }
 
-void TMaster::AppendPostfix(const ConfigValueMap& _origin,
-                            const std::string& post_fix,
-                            ConfigValueMap& _retval) {
-  ConfigValueMap::const_iterator it;
-  for (it = _origin.begin(); it != _origin.end(); ++it) {
-    _retval[it->first + post_fix] = it->second;
+void TMaster::LogConfig(const ComponentConfigMap& _config) {
+  for (auto iter = _config.begin(); iter != _config.end(); ++iter) {
+    LOG(INFO) << iter->first << " =>";
+    for (auto i = iter->second.begin(); i != iter->second.end(); ++i) {
+      LOG(INFO) << i->first << " : " << i->second;
+    }
   }
 }
 

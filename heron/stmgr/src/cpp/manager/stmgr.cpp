@@ -532,6 +532,7 @@ void StMgr::StartTMasterClient() {
 
 void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   LOG(INFO) << "Received a new physical plan from tmaster";
+  heron::config::TopologyConfigHelper::LogTopology(_pplan->topology());
   // first make sure that we are part of the plan ;)
   bool found = false;
   for (sp_int32 i = 0; i < _pplan->stmgrs_size(); ++i) {
@@ -555,10 +556,10 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
     LOG(INFO) << "Topology state changed from " << pplan_->topology().state() << " to "
               << _pplan->topology().state();
   }
-  proto::api::TopologyState st = _pplan->topology().state();
-  _pplan->clear_topology();
-  _pplan->mutable_topology()->CopyFrom(*hydrated_topology_);
-  _pplan->mutable_topology()->set_state(st);
+
+  PatchPhysicalPlanWithHydratedTopology(_pplan, hydrated_topology_);
+  LOG(INFO) << "Patched with hydrated topology";
+  heron::config::TopologyConfigHelper::LogTopology(_pplan->topology());
 
   // TODO(vikasr) Currently we dont check if our role has changed
 
@@ -1108,6 +1109,39 @@ void StMgr::HandleRestoreInstanceStateResponse(sp_int32 _task_id,
 void StMgr::HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                       std::string _checkpoint_id, sp_int64 _restore_txid) {
   tmaster_client_->SendRestoreTopologyStateResponse(_status, _checkpoint_id, _restore_txid);
+}
+
+// Patch new physical plan with internal hydrated topology but keep new topology data:
+// - new topology state
+// - new topology/component config
+void StMgr::PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _pplan,
+                                                  proto::api::Topology* _topology) {
+  // Back up new topology data (state and configs)
+  proto::api::TopologyState st = _pplan->topology().state();
+
+  std::map<std::string, std::string> topology_config;
+  config::TopologyConfigHelper::GetTopologyConfig(_pplan->topology(), topology_config);
+
+  std::unordered_set<std::string> components;
+  std::map<std::string, std::map<std::string, std::string>> component_config;
+  config::TopologyConfigHelper::GetAllComponentNames(_pplan->topology(), components);
+  for (auto iter = components.begin(); iter != components.end(); ++iter) {
+    std::map<std::string, std::string> config;
+    config::TopologyConfigHelper::GetComponentConfig(_pplan->topology(), *iter, topology_config);
+    component_config[*iter] = config;
+  }
+
+  // Copy hydrated topology into pplan
+  _pplan->clear_topology();
+  _pplan->mutable_topology()->CopyFrom(*_topology);
+
+  // Restore new topology data
+  _pplan->mutable_topology()->set_state(st);
+  config::TopologyConfigHelper::SetTopologyConfig(_pplan->mutable_topology(), topology_config);
+  for (auto iter = components.begin(); iter != components.end(); ++iter) {
+    config::TopologyConfigHelper::SetComponentConfig(_pplan->mutable_topology(), *iter,
+        component_config[*iter]);
+  }
 }
 }  // namespace stmgr
 }  // namespace heron
