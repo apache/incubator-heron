@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -44,6 +45,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.classification.InterfaceStability.Evolving;
 import org.apache.heron.classification.InterfaceStability.Unstable;
+import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.logging.LoggingHelper;
 import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
@@ -194,6 +196,14 @@ public class HealthManager {
 
     setupLogging(cmd, config);
 
+    LOG.fine(Arrays.toString(cmd.getOptions()));
+
+    // Add the SystemConfig into SingletonRegistry
+    SystemConfig systemConfig = SystemConfig.newBuilder(true)
+        .putAll(Context.systemFile(config), true)
+        .putAll(Context.overrideFile(config), true).build();
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
+
     LOG.info("Static Heron config loaded successfully ");
     LOG.fine(config.toString());
 
@@ -204,32 +214,29 @@ public class HealthManager {
     String metricsUrl = config.getStringValue(PolicyConfigKey.METRIC_SOURCE_URL.key());
     metricsUrl = getOptionValue(cmd, CliArgs.METRIC_SOURCE_URL, metricsUrl);
 
-    AbstractModule module = buildMetricsProviderModule(metricsUrl, metricSourceClassName);
+    // metrics reporting thread
+    HealthManagerMetrics publishingMetrics =
+        new HealthManagerMetrics(Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
+
+    AbstractModule module
+        = buildBaseModule(metricsUrl, metricSourceClassName, publishingMetrics);
     HealthManager healthManager = new HealthManager(config, module);
 
     LOG.info("Initializing health manager");
     healthManager.initialize();
 
-    LOG.info("Starting Health Manager metirc posting thread");
-    HealthManagerMetrics publishingMetricsRunnable = null;
-    if (hasOption(cmd, CliArgs.METRICSMGR_PORT)) {
-      publishingMetricsRunnable = new HealthManagerMetrics(
-          Integer.valueOf(getOptionValue(cmd, CliArgs.METRICSMGR_PORT)));
-    }
-
     LOG.info("Starting Health Manager");
     PoliciesExecutor policyExecutor = new PoliciesExecutor(healthManager.healthPolicies);
     ScheduledFuture<?> future = policyExecutor.start();
-    if (publishingMetricsRunnable != null) {
-      new Thread(publishingMetricsRunnable).start();
-    }
+
+    LOG.info("Starting Health Manager metric posting thread");
+    new Thread(publishingMetrics).start();
+
     try {
       future.get();
     } finally {
       policyExecutor.destroy();
-      if (publishingMetricsRunnable != null) {
-        publishingMetricsRunnable.close();
-      }
+      publishingMetrics.close();
     }
   }
 
@@ -319,7 +326,8 @@ public class HealthManager {
   }
 
   @VisibleForTesting
-  static AbstractModule buildMetricsProviderModule(final String sourceUrl, final String type) {
+  static AbstractModule buildBaseModule(final String sourceUrl, final String type,
+                                        final HealthManagerMetrics publishingMetrics) {
     return new AbstractModule() {
       @Override
       protected void configure() {
@@ -329,6 +337,8 @@ public class HealthManager {
         bind(String.class)
             .annotatedWith(Names.named(CONF_METRICS_SOURCE_TYPE))
             .toInstance(type);
+        bind(HealthManagerMetrics.class)
+            .toInstance(publishingMetrics);
       }
     };
   }
@@ -501,6 +511,14 @@ public class HealthManager {
         .argName("process mode")
         .build();
 
+    Option metricsMgrPort = Option.builder("m")
+        .desc("Port of local MetricsManager")
+        .longOpt(CliArgs.METRICSMGR_PORT.text)
+        .hasArgs()
+        .argName("metrics_manager port")
+        .required()
+        .build();
+
     Option verbose = Option.builder("v")
         .desc("Enable debug logs")
         .longOpt(CliArgs.VERBOSE.text)
@@ -515,6 +533,7 @@ public class HealthManager {
     options.addOption(metricsSourceType);
     options.addOption(metricsSourceURL);
     options.addOption(mode);
+    options.addOption(metricsMgrPort);
     options.addOption(verbose);
 
     return options;

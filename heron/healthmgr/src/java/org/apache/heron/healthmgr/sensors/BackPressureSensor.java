@@ -26,6 +26,7 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
@@ -33,19 +34,24 @@ import org.apache.heron.healthmgr.common.TopologyProvider;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
 public class BackPressureSensor extends BaseSensor {
+  public static final String BACKPRESSURE_SENSOR = "BackPressureSensor";
+
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
   private final TopologyProvider topologyProvider;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
   public BackPressureSensor(PackingPlanProvider packingPlanProvider,
                             TopologyProvider topologyProvider,
                             HealthPolicyConfig policyConfig,
-                            MetricsProvider metricsProvider) {
+                            MetricsProvider metricsProvider,
+                            HealthManagerMetrics publishingMetrics) {
     super(policyConfig, METRIC_BACK_PRESSURE.text(), BackPressureSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
     this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
+    this.publishingMetrics = publishingMetrics;
   }
 
   /**
@@ -55,6 +61,8 @@ public class BackPressureSensor extends BaseSensor {
    */
   @Override
   public Collection<Measurement> fetch() {
+    publishingMetrics.executeSensorIncr(BACKPRESSURE_SENSOR);
+
     Collection<Measurement> result = new ArrayList<>();
     Instant now = context.checkpoint();
 
