@@ -131,7 +131,7 @@ class HeronExecutorTest(unittest.TestCase):
              "-Xloggc:log-files/gc.healthmgr.log -Djava.net.preferIPv4Stack=true " \
              "-cp scheduler_classpath:healthmgr_classpath " \
              "org.apache.heron.healthmgr.HealthManager --cluster cluster --role role " \
-             "--environment environ --topology_name topname"
+             "--environment environ --topology_name topname --metricsmgr_port metricsmgr_port"
 
   def get_expected_instance_command(component_name, instance_id, container_id):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
