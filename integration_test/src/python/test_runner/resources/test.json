@@ -12,6 +12,11 @@
       "topologyName" : "IntegrationTest_ScalaStreamletWithFilterAndTransform",
       "classPath"    : "scala_streamlet_with_filter_and_transform.ScalaStreamletWithFilterAndTransform",
       "expectedResultRelativePath" : "scala_streamlet_with_filter_and_transform/ScalaStreamletWithFilterAndTransformResults.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
+      "classPath"    : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone.ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
+      "expectedResultRelativePath" : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone/ScalaStreamletWithMapAndFlatMapAndFilterAndCloneResults.json"
     }
   ],
   "javaTopologies": [
