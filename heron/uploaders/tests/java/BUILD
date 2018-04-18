@@ -46,9 +46,9 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.uploader.localfs.LocalFileSystemConfigTest",
-    "com.twitter.heron.uploader.localfs.LocalFileSystemContextTest",
-    "com.twitter.heron.uploader.localfs.LocalFileSystemUploaderTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemConfigTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemContextTest",
+    "org.apache.heron.uploader.localfs.LocalFileSystemUploaderTest",
   ],
   runtime_deps = [ ":localfs-tests" ],
   data = glob(["**/localfs/testdata/*.tar"]),
@@ -105,7 +105,7 @@ java_test(
          "@org_apache_httpcomponents_http_core//jar",
          "@org_apache_httpcomponents_http_client//jar",
          "@org_apache_httpcomponents_http_client_test//jar",
-         "//heron/common/src/java:basics-java",
+         "//heron/common/src/java:basics-java"
     ],
     size = "small",
 )

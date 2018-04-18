@@ -78,7 +78,7 @@ In a Heron cluster
 
 ### Uploaders
 
-## Topology Components
+# Topology Components
 
 From an architectural standpoint, Heron was built as an interconnected set of modular
 components. 
@@ -99,9 +99,9 @@ the sections below:
 The **Topology Master** \(TM) manages a topology throughout its entire lifecycle,
 from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
-The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
-ensure that there's only one TM for the topology and that the TM is easily
-discoverable by any process in the topology. The TM also constructs the [physical
+The **TM** creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
+ensure that there's only one **TM** for the topology and that the **TM** is easily
+discoverable by any process in the topology. The **TM** also constructs the [physical
 plan](../topologies#physical-plan) for a topology which it relays to different
 components.
 
@@ -118,7 +118,7 @@ phase of a topology's [lifecycle](../topologies#topology-lifecycle).
 Each Heron topology consists of multiple **containers**, each of which houses
 multiple [Heron Instances]({{< ref "#heron-instance" >}}), a [Stream
 Manager]({{< ref "#stream-manager" >}}), and a [Metrics Manager]({{< ref "#metrics-manager" >}}). Containers
-communicate with the topology's TM to ensure that the topology forms a fully
+communicate with the topology's **TM** to ensure that the topology forms a fully
 connected graph.
 
 For an illustration, see the figure in the [Topology Master]({{< ref "#topology-master" >}})
@@ -130,12 +130,12 @@ section above.
 
 The **Stream Manager** (SM) manages the routing of tuples between topology
 components. Each [Heron Instance]({{< ref "#heron-instance" >}}) in a topology connects to its
-local SM, while all of the SMs in a given topology connect to one another to
-form a network. Below is a visual illustration of a network of SMs:
+local **SM**, while all of the **SMs** in a given topology connect to one another to
+form a network. Below is a visual illustration of a network of **SMs**:
 
 ![Heron Data Flow](/img/data-flow.png)
 
-In addition to being a routing engine for data streams, SMs are responsible for
+In addition to being a routing engine for data streams, **SMs** are responsible for
 propagating [back pressure](https://en.wikipedia.org/wiki/Back_pressure)
 within the topology when necessary. Below is an illustration of back pressure:
 
@@ -147,21 +147,21 @@ components. In response, the SM for container **A** will refuse input from the
 SMs in containers **C** and **D**, which will lead to the socket buffers in
 those containers filling up, which could lead to throughput collapse.
 
-In a situation like this, Heron's back pressure mechanism will kick in. The SM
-in container **A** will send a message to all the other SMs. In response, the
-other SMs will examine the container's [physical
+In a situation like this, Heron's back pressure mechanism will kick in. The **SM**
+in container **A** will send a message to all the other **SMs**. In response, the
+other **SMs** will examine the container's [physical
 plan](../topologies#physical-plan) and cut off inputs from spouts that feed
 bolt **B3** (in this case spout **S1**).
 
 ![Back Pressure 2](/img/backpressure2.png)
 
-Once the lagging bolt (**B3**) begins functioning normally, the SM in container
-**A** will notify the other SMs and stream routing within the topology will
+Once the lagging bolt (**B3**) begins functioning normally, the **SM** in container
+**A** will notify the other **SMs** and stream routing within the topology will
 return to normal.
 
-#### Stream Manger Configuration
+#### Stream Manager Configuration
 
-SMs have a variety of [configurable
+**SMs** have a variety of [configurable
 parameters](../../operators/configuration/stmgr) that you can adjust at each
 phase of a topology's [lifecycle](../topologies#topology-lifecycle).
 
@@ -172,18 +172,18 @@ A **Heron Instance** (HI) is a process that handles a single task of a
 for easy debugging and profiling.
 
 Currently, Heron only supports Java, so all
-HIs are [JVM](https://en.wikipedia.org/wiki/Java_virtual_machine) processes, but
+**HIs** are [JVM](https://en.wikipedia.org/wiki/Java_virtual_machine) processes, but
 this will change in the future.
 
 #### Heron Instance Configuration
 
-HIs have a variety of [configurable
+**HIs** have a variety of [configurable
 parameters](../../operators/configuration/instance) that you can adjust at
 each phase of a topology's [lifecycle](../topologies#topology-lifecycle).
 
 ### Metrics Manager
 
-Each topology runs a Metrics Manager (MM) that collects and exports metrics from
+Each topology runs a **Metrics Manager** (MM) that collects and exports metrics from
 all components in a [container]({{< ref "#container" >}}). It then routes those metrics to
 both the [Topology Master]({{< ref "#topology-master" >}}) and to external collectors, such as
 [Scribe](https://github.com/facebookarchive/scribe),
@@ -192,7 +192,7 @@ both the [Topology Master]({{< ref "#topology-master" >}}) and to external colle
 You can adapt Heron to support additional systems by implementing your own
 [custom metrics sink](../../contributors/custom-metrics-sink).
 
-## Cluster-level Components
+# Cluster-level Components
 
 All of the components listed in the sections above can be found in each
 topology. The components listed below are cluster-level components that function
@@ -200,7 +200,7 @@ outside of particular topologies.
 
 ### Heron CLI
 
-Heron has a CLI tool called `heron` that is used to manage topologies.
+Heron has a **CLI** tool called `heron` that is used to manage topologies.
 Documentation can be found in [Managing
 Topologies](../../operators/heron-cli).
 
@@ -229,7 +229,7 @@ Tracker](../../operators/heron-tracker).
 ### Heron UI
 
 **Heron UI** is a rich visual interface that you can use to interact with
-topologies. Through Heron UI you can see color-coded visual representations of
+topologies. Through **Heron UI** you can see color-coded visual representations of
 the [logical](../topologies#logical-plan) and
 [physical](../topologies#physical-plan) plan of each topology in your cluster.
 
@@ -259,49 +259,47 @@ The diagram below illustrates what happens when you submit a Heron topology:
 
 Component | Description
 :---------|:-----------
-Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`com.twitter.heron.scheduler.SubmitterMain`](/api/java/com/twitter/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
+Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`org.apache.heron.scheduler.SubmitterMain`](/api/java/org/apache/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
 Heron API server | When the [Heron API server](../../operators/heron-api-server) has been notified that a topology is being submitted, it does two things. First, it uploads the topology artifacts (a JAR for Java or a PEX for Python, plus a few other files) to a storage service; Heron supports multiple [uploaders](../../operators/deployment/uploaders) for a variety of storage systems, such as [Amazon S3](../../operators/deployment/uploaders/s3), [HDFS](../../operators/deployment/uploaders/hdfs), and the [local filesystem](../../operators/deployment/uploaders/localfs).
 Heron scheduler | When the Heron CLI (client) submits a topology to the Heron API server, the API server notifies the Heron scheduler and also provides the scheduler with the topology's [logical plan](../../concepts/topologies#logical-plan), [physical plan](../../concepts/topologies#physical-plan), and some other artifacts. The scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Aurora](../../operators/deployment/schedulers/aurora), the [local filesystem](../../operators/deployment/schedulers/localfs), or something else, then deploys the topology using containers.
 Storage | When the topology is deployed to containers by the scheduler, the code running in those containers then downloads the remaining necessary topology artifacts (essentially the code that will run in those containers) from the storage system.
 
-
-<!--
 * Shared Services
 
-    When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked
+    When the main scheduler (`org.apache.heron.scheduler.SchedulerMain`) is invoked
     by the launcher, it fetches the submitted topology artifact from the
-    topology storage, initializes the State Manager, and prepares a physical plan that
+    topology storage, initializes the **State Manager**, and prepares a physical plan that
     specifies how multiple instances should be packed into containers. Then, it starts
-    the specified scheduler, such as `com.twitter.heron.scheduler.local.LocalScheduler`,
+    the specified scheduler, such as `org.apache.heron.scheduler.local.LocalScheduler`,
     which invokes the `heron-executor` for each container.
 
 * Topologies
 
     `heron-executor` process is started for each container and is responsible for
-    executing the Topology Master or Heron Instances (Bolt/Spout) that are
-    assigned to the container. Note that the Topology Master is always executed
-    on container 0. When `heron-executor` executes normal Heron Instances
+    executing the **Topology Master** or **Heron Instances** (Bolt/Spout) that are
+    assigned to the container. Note that the **Topology Master** is always executed
+    on container 0. When `heron-executor` executes normal **Heron Instances**
     (i.e. except for container 0), it first prepares
-    the Stream Manager and the Metrics Manager before starting
-    `com.twitter.heron.instance.HeronInstance` for each instance that is
+    the **Stream Manager** and the **Metrics Manager** before starting
+    `org.apache.heron.instance.HeronInstance` for each instance that is
     assigned to the container.
     
-    Heron Instance has two threads: the gateway thread and the slave thread.
-    The gateway thread is mainly responsible for communicating with the Stream Manager
-    and the Metrics Manager using `StreamManagerClient` and `MetricsManagerClient`
+    **Heron Instance** has two threads: the gateway thread and the slave thread.
+    The gateway thread is mainly responsible for communicating with the **Stream Manager**
+    and the **Metrics Manager** using `StreamManagerClient` and `MetricsManagerClient`
     respectively, as well as sending/receiving tuples to/from the slave
-    thread. On the other hand, the slave thread runs either spout or bolt
+    thread. On the other hand, the slave thread runs either Spout or Bolt
     of the topology based on the physical plan.
     
-    When a new Heron Instance is started, its `StreamManagerClient` establishes
-    a connection and registers itself with the stream manager.
+    When a new **Heron Instance** is started, its `StreamManagerClient` establishes
+    a connection and registers itself with the **Stream Manager**.
     After the successful registration, the gateway thread sends its physical plan to
     the slave thread, which then executes the assigned instance accordingly.
     
 
 ## Codebase
 
-Heron is primarily written in Java, C++, and Python.
+Heron is primarily written in **Java**, **C++**, and **Python**.
 
 A detailed guide to the Heron codebase can be found
 [here](../../contributors/codebase).

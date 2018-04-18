@@ -5,4 +5,4 @@ public/
 static/api
 static/css/style*.css
 static/js/app*.js
-data/assets
+data/assetHashes.json

@@ -118,7 +118,7 @@ case $1 in
     echo "  "
 
     echo "  Then you can ${bold}submit${normal} a topology via the shell:"
-    echo "    heron submit sandbox /heron/examples/heron-api-examples.jar com.twitter.heron.examples.api.ExclamationTopology exclamation"
+    echo "    heron submit sandbox /heron/examples/heron-api-examples.jar org.apache.heron.examples.api.ExclamationTopology exclamation"
     echo "  "
 
     echo "  You can ${bold}deactivate${normal} the topology via the shell as well:"

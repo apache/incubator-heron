@@ -189,15 +189,15 @@ Helm enables you to supply sets of variables via YAML files. There are currently
 
 Configuration | Description
 :-------------|:-----------
-[`small.yaml`](https://github.com/twitter/heron/blob/master/deploy/kubernetes/gcp/small.yaml) | Smaller Heron cluster intended for basic testing, development, and experimentation
-[`large.yaml`](https://github.com/twitter/heron/blob/master/deploy/kubernetes/gcp/large.yaml) | Larger Heron cluster intended for production usage
+[`small.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gcp/small.yaml) | Smaller Heron cluster intended for basic testing, development, and experimentation
+[`large.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gcp/large.yaml) | Larger Heron cluster intended for production usage
 
 To apply the `small` configuration, for example:
 
 ```bash
 $ helm install heron-charts/heron \
   --set platform=gke \
-  --values https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/small.yaml
+  --values https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/small.yaml
 ```
 
 #### Amazon Web Services
@@ -240,6 +240,6 @@ To test your cluster, you can submit an example topology:
 ```bash
 $ heron submit heron-kubernetes \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCount
 ```

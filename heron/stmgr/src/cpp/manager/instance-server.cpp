@@ -15,9 +15,11 @@
  */
 
 #include "manager/instance-server.h"
+
 #include <iostream>
-#include <unordered_set>
+#include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include "manager/checkpoint-gateway.h"
 #include "util/neighbour-calculator.h"
@@ -29,6 +31,7 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
+#include "config/topology-config-helper.h"
 #include "metrics/metrics.h"
 
 namespace heron {
@@ -74,12 +77,12 @@ const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10_s;
 
 
 InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _options,
-                         const sp_string& _topology_name, const sp_string& _topology_id,
-                         const sp_string& _stmgr_id,
-                         const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
-                         heron::common::MetricsMgrSt* _metrics_manager_client,
-                         NeighbourCalculator* _neighbour_calculator,
-                         bool _droptuples_upon_backpressure)
+                               const sp_string& _topology_name, const sp_string& _topology_id,
+                               const sp_string& _stmgr_id,
+                               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
+                               heron::common::MetricsMgrSt* _metrics_manager_client,
+                               NeighbourCalculator* _neighbour_calculator,
+                               bool _droptuples_upon_backpressure)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -252,7 +255,7 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
 }
 
 void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
-                                                proto::stmgr::RegisterInstanceRequest* _request) {
+    proto::stmgr::RegisterInstanceRequest* _request) {
   LOG(INFO) << "Got HandleRegisterInstanceRequest from connection " << _conn << " and instance "
             << _request->instance().instance_id();
   // Do some basic checks
@@ -318,6 +321,11 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
       response.mutable_pplan()->CopyFrom(*pplan);
     }
     SendResponse(_reqid, _conn, response);
+    // Apply rate limit to the connection
+    if (pplan) {
+      const std::string component = instance_info_[task_id]->instance_->info().component_name();
+      SetRateLimit(*pplan, component, _conn);
+    }
 
     // Have all the instances connected to us?
     if (HaveAllInstancesConnectedToUs()) {
@@ -416,12 +424,41 @@ void InstanceServer::DrainCheckpoint(sp_int32 _task_id,
 
 void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   // TODO(vikasr) We do not handle any changes to our local assignment
+  LOG(INFO) << "Broadcasting new PhysicalPlan:";
+  config::TopologyConfigHelper::LogTopology(_pplan.topology());
+
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
   for (auto iter = active_instances_.begin(); iter != active_instances_.end(); ++iter) {
     LOG(INFO) << "Sending new physical plan to instance with task_id: " << iter->second;
-    SendMessage(iter->first, new_assignment);
+    Connection* conn = iter->first;
+    SendMessage(conn, new_assignment);
+    // Update connection's rate limiting base on component config
+    sp_int32 id = iter->second;
+    const std::string component = instance_info_[id]->instance_->info().component_name();
+    SetRateLimit(_pplan, component, conn);
+  }
+}
+
+void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
+                                  const std::string& _component,
+                                  Connection* _conn) const {
+  sp_int64 read_bps =
+      config::TopologyConfigHelper::GetComponentOutputBPS(_pplan.topology(), _component);
+  sp_int32 parallelism =
+      config::TopologyConfigHelper::GetComponentParallelism(_pplan.topology(), _component);
+  // burst rate is 1.5 x of regular rate
+  sp_int64 burst_read_bps = read_bps + read_bps / 2;
+
+  LOG(INFO) << "Parallelism of component " << _component << " is " << parallelism;
+  LOG(INFO) << "Read BPS of component " << _component << " is " << read_bps;
+  if (parallelism > 0 && read_bps >= 0 && burst_read_bps >= 0) {
+    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bps << "/" << burst_read_bps;
+    _conn->setRateLimit(read_bps / parallelism, burst_read_bps / parallelism);
+  } else {
+    LOG(INFO) << "Disable rate limit in " << _component;
+    _conn->disableRateLimit();
   }
 }
 

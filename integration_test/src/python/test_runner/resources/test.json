@@ -5,8 +5,20 @@
   "env" : "dummy_env",
   "resultsServerPort" : "80",
   "cliConfigPath" : "$HOME/.heron/conf",
-  "topologyClasspathPrefix" : "com.twitter.heron.integration_test.topology.",
+  "topologyClasspathPrefix" : "org.apache.heron.integration_test.topology.",
   "releasePackageUri" : "scheme://role/name/version",
+  "scalaTopologies": [
+    {
+      "topologyName" : "IntegrationTest_ScalaStreamletWithFilterAndTransform",
+      "classPath"    : "scala_streamlet_with_filter_and_transform.ScalaStreamletWithFilterAndTransform",
+      "expectedResultRelativePath" : "scala_streamlet_with_filter_and_transform/ScalaStreamletWithFilterAndTransformResults.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
+      "classPath"    : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone.ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
+      "expectedResultRelativePath" : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone/ScalaStreamletWithMapAndFlatMapAndFilterAndCloneResults.json"
+    }
+  ],
   "javaTopologies": [
     {
       "topologyName" : "IntegrationTest_FieldsGrouping",
@@ -27,11 +39,6 @@
       "topologyName" : "IntegrationTest_NonGrouping",
       "classPath"    : "non_grouping.NonGrouping",
       "expectedResultRelativePath" : "non_grouping/NonGroupingResults.json"
-    },
-    {
-      "topologyName" : "IntegrationTest_ShuffleGrouping",
-      "classPath"    : "shuffle_grouping.ShuffleGrouping",
-      "expectedResultRelativePath" : "shuffle_grouping/ShuffleGroupingResults.json"
     },
     {
       "topologyName" : "IntegrationTest_BasicTopologyOneTask",
@@ -61,16 +68,6 @@
       "topologyName" : "IntegrationTest_MultiSpoutsMultiTasks",
       "classPath"    : "multi_spouts_multi_tasks.MultiSpoutsMultiTasks",
       "expectedResultRelativePath" : "multi_spouts_multi_tasks/MultiSpoutsMultiTasksResults.json"
-    },
-    {
-      "topologyName" : "IntegrationTest_OneBoltMultiTasks",
-      "classPath"    : "one_bolt_multi_tasks.OneBoltMultiTasks",
-      "expectedResultRelativePath" : "one_bolt_multi_tasks/OneBoltMultiTasksResults.json"
-    },
-    {
-      "topologyName" : "IntegrationTest_OneSpoutBoltMultiTasks",
-      "classPath"    : "one_spout_bolt_multi_tasks.OneSpoutBoltMultiTasks",
-      "expectedResultRelativePath" : "one_spout_bolt_multi_tasks/OneSpoutBoltMultiTasksResults.json"
     },
     {
       "topologyName" : "IntegrationTest_OneSpoutMultiTasks",

@@ -43,12 +43,12 @@ class OutgoingTupleCollection {
                     int tupleSize);
 
   int64_t getTotalDataTuplesEmitted() const;
+  int64_t getTotalDataSizeEmitted() const;
 
  private:
   void initNewDataTuple(const std::string& streamId);
   void initNewControlTuple();
   void flushRemaining();
-  int64_t getTotalDataSizeEmitted() const;
 
   std::string componentName_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;

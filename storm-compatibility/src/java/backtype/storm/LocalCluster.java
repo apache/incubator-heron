@@ -20,7 +20,7 @@ package backtype.storm;
 
 import java.util.Map;
 
-import com.twitter.heron.simulator.Simulator;
+import org.apache.heron.simulator.Simulator;
 
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;

@@ -1,14 +1,14 @@
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.nomad.NomadScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.nomad.NomadScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.nomad.NomadLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.nomad.NomadLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY_ID}
 
 # location of java - pick it up from shell environment
-heron.directory.sandbox.java.home:           ${JAVA_HOME}
+heron.directory.sandbox.java.home:           $JAVA_HOME
 
 # The URI of Nomad API
 heron.nomad.scheduler.uri:             http://127.0.0.1:4646
@@ -19,3 +19,27 @@ heron.scheduler.is.service:                  False
 # The nomad schedules cpu resources in terms of clock frequency (e.g. MHz), while Heron topologies
 # specify cpu requests in term of cores.  This config maps core to clock freqency.
 heron.nomad.core.freq.mapping: 2000
+
+# specify whether to run heron via raw java execs or in docker containers
+# options: docker or raw_exec
+heron.nomad.driver: "docker"
+
+# The docker image to use for heron if the docker driver is used,
+heron.executor.docker.image: 'heron/heron:latest'
+
+# Set networking mode networking when driver is docker
+heron.nomad.network.mode: "default"
+
+# whether to register metrics service endpoints for prometheus metrics sink in consul
+# the service will be named in the format: metrics-heron-<topology-name>-<container-index>
+heron.nomad.metrics.service.register: True
+
+# interval at which health checks should be conducted for metrics service endpoint
+heron.nomad.metrics.service.check.interval.sec: 10
+
+# timeout of metrics service endpoint health check
+heron.nomad.metrics.service.check.timeout.sec: 2
+
+# additional tags to be attached to metrics service
+# A tag of <topology-name>-<container-index> with be automaticallu attached
+heron.nomad.metrics.service.additional.tags: "prometheus,metrics,heron"

@@ -78,6 +78,6 @@ PS-*),5), 2,3,6)'
 
 Finally, you can configure the Heron UI to deep link to scripted dashboards by specifying an
 [observability URL format]
-(https://github.com/twitter/heron/blob/master/heron/config/src/yaml/tracker/heron_tracker.yaml)
+(https://github.com/apache/incubator-heron/blob/master/heron/config/src/yaml/tracker/heron_tracker.yaml)
 (`viz.url.format`) in the Heron Tracker's configuration. This will add topology-specific buttons to
 the Heron UI enabling you to drill-down into your Grafana dashboards.

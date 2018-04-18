@@ -25,13 +25,13 @@ configuration file:
 
 ```xml
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
     <scope>compile</scope>
 </dependency>
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-storm</artifactId>
     <version>{{< heronVersion >}}</version>
     <scope>compile</scope>
@@ -78,7 +78,7 @@ By default, this will add a JAR in your project's `target` folder with the name 
 ```bash
 $ heron submit local \
   target/my-project-1.2.3-jar-with-dependencies.jar \
-  com.twitter.heron.eco.Eco \
+  org.apache.heron.eco.Eco \
   --eco-config-file path/to/your/topology-definition.yaml
 ```
 
@@ -103,7 +103,7 @@ $ heron submit local \
 
 [Other ECO Examples]({{<ref "#other-eco-examples" >}})
 
-Notice how the above example submission command is referencing the main class `com.twitter.heron.eco.Eco`.  This part of the command
+Notice how the above example submission command is referencing the main class `org.apache.heron.eco.Eco`.  This part of the command
 needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
 
 ## Defining Your ECO Topology File
@@ -129,7 +129,7 @@ config:
 
 components:
   - id: "property-holder"
-    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    className: "org.apache.heron.examples.eco.TestPropertyHolder"
     constructorArgs:
       - "some argument"
     properties:
@@ -140,18 +140,18 @@ components:
 
 spouts:
   - id: "spout-1"
-    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    className: "org.apache.heron.examples.eco.TestFibonacciSpout"
     constructorArgs:
       - ref: "property-holder"
     parallelism: 1
 
 bolts:
   - id: "even-and-odd-bolt"
-    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
+    className: "org.apache.heron.examples.eco.EvenAndOddBolt"
     parallelism: 1
 
   - id: "ibasic-print-bolt"
-    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
+    className: "org.apache.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
     configMethods:
       - name: "sampleConfigurationMethod"
@@ -160,7 +160,7 @@ bolts:
           - MB
 
   - id: "sys-out-bolt"
-    className: "com.twitter.heron.examples.eco.TestPrintBolt"
+    className: "org.apache.heron.examples.eco.TestPrintBolt"
     parallelism: 1
 
 streams:
@@ -188,7 +188,7 @@ If you want to stop here and try to deploy the above topology you can execute:
 ```bash
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
-  com.twitter.heron.eco.Eco \
+  org.apache.heron.eco.Eco \
   --eco-config-file ~/.heron/examples/fibonacci.yaml
 ```
 
@@ -208,7 +208,7 @@ name: "simple-wordcount-topology"
 
 ### Configuration
 
-`config` is the section where you will list your properties to be inserted into a `com.twitter.heron.api.Config` class. This section is optional.
+`config` is the section where you will list your properties to be inserted into a `org.apache.heron.api.Config` class. This section is optional.
 
 ```yaml
 
@@ -295,6 +295,7 @@ underlying TopologyReliabilityMode value.
 * `"topology.timer.events"` : Timer events registered for a topology.  This is a Map<String, Pair<Duration, Runnable>>.  Where the key is the name and the value contains the frequency of the event and the task to run.
 * `"topology.remote.debugging.enable"` : Enable Remote debugging for java heron instances
 * `"topology.droptuples.upon.backpressure"` : Do we want to drop tuples instead of initiating Spout BackPressure
+* `"topology.component.output.bps"` : The per component output bytes per second in this topology
 
 
 ### Components
@@ -308,7 +309,7 @@ if a component has constructor that requires arguments.  We will get into constr
 
 components:
   - id: "property-holder"
-    className: "com.twitter.heron.examples.eco.TestPropertyHolder"
+    className: "org.apache.heron.examples.eco.TestPropertyHolder"
     constructorArgs:
       - "some argument"
 
@@ -369,7 +370,7 @@ property for each bolt or spout once the topology has been deployed into Heron.
 
 spouts:
   - id: "spout-1"
-    className: "com.twitter.heron.examples.eco.TestFibonacciSpout"
+    className: "org.apache.heron.examples.eco.TestFibonacciSpout"
     constructorArgs:
       - ref: "property-holder"
     parallelism: 1
@@ -382,7 +383,7 @@ spouts:
 
 bolts:
   - id: "even-and-odd-bolt"
-    className: "com.twitter.heron.examples.eco.EvenAndOddBolt"
+    className: "org.apache.heron.examples.eco.EvenAndOddBolt"
     parallelism: 1
 
 ```
@@ -492,7 +493,7 @@ After the topology has been killed, execute:
 ```bash
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
-  com.twitter.heron.eco.Eco \
+  org.apache.heron.eco.Eco \
   --eco-config-file ~/.heron/examples/fibonacci.yaml --props ~/.heron/examples/sample.properties
 ```
 
@@ -500,7 +501,7 @@ If you look above at the yaml file snippet at the beginning of the page you will
 
 ```yaml
 - id: "ibasic-print-bolt"
-    className: "com.twitter.heron.examples.eco.TestIBasicPrintBolt"
+    className: "org.apache.heron.examples.eco.TestIBasicPrintBolt"
     parallelism: 1
     configMethods:
       - name: "sampleConfigurationMethod"
@@ -528,7 +529,7 @@ Run the simple wordcount example
 ```bash
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
-   com.twitter.heron.eco.Eco \
+   org.apache.heron.eco.Eco \
    --eco-config-file ~/.heron/examples/simple_wordcount.yaml 
 ```
 
@@ -537,6 +538,6 @@ Run the simple windowing example
 ```bash
 $ heron submit local \
    ~/.heron/examples/heron-eco-examples.jar \
-   com.twitter.heron.eco.Eco \
+   org.apache.heron.eco.Eco \
    --eco-config-file ~/.heron/examples/simple_windowing.yaml 
 ```

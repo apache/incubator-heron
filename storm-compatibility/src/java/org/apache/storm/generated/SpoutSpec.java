@@ -17,7 +17,7 @@
  */
 package org.apache.storm.generated;
 
-import com.twitter.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.generated.TopologyAPI;
 
 public class SpoutSpec {
   private final TopologyAPI.Spout delegate;

@@ -17,6 +17,10 @@
 #ifndef __TCONTROLLER_H_
 #define __TCONTROLLER_H_
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
 #include "basics/basics.h"
@@ -37,6 +41,12 @@ class TController {
   // Called by the tmaster when it gets response form ckptmgr
   void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode _status);
 
+  // Parse and build a map of component name to config kv map from incoming runtime configs.
+  // The incoming runtime configs should have this format: (COMPONENT_NAME|topology):(CONFIG_NAME)
+  // Return false if the configs have bad format.
+  static bool ParseRuntimeConfig(const std::vector<std::string>& paramters,
+      std::map<std::string, std::map<std::string, std::string>>& configMap);
+
  private:
   // Handlers for the requests
   // In all the below handlers, the incoming _request
@@ -50,6 +60,9 @@ class TController {
   void HandleCleanStatefulCheckpointRequest(IncomingHTTPRequest* request);
   void HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* request,
                                                 proto::system::StatusCode);
+  void HandleUpdateRuntimeConfigRequest(IncomingHTTPRequest* request);
+  void HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* request,
+                                            proto::system::StatusCode);
 
   // We are a http server
   HTTPServer* http_server_;
@@ -59,6 +72,28 @@ class TController {
 
   // The callback to be called upon receiving clean stateful checkpoint response
   std::function<void(proto::system::StatusCode)> clean_stateful_checkpoint_cb_;
+
+  // Validate basic topology data
+  // - topology id is available and matches the current topology
+  // - physical plan is available
+  // Detailed errors are logged in the function and returned in the ValidationResult object.
+  // return true when passed; return false if any issue is found.
+  class ValidationResult {
+   public:
+    ValidationResult() { code_ = 0; message_ = ""; }
+    void SetResult(sp_int32 code, const std::string& message) {
+      code_ = code;
+      message_ = message;
+    }
+    sp_int32 GetCode() { return code_; }
+    std::string& GetMessage() { return message_; }
+
+   private:
+    sp_int32 code_;
+    std::string message_;
+  };
+
+  bool ValidateTopology(const IncomingHTTPRequest* request, ValidationResult& result);
 };
 }  // namespace tmaster
 }  // namespace heron

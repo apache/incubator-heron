@@ -70,7 +70,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port
              const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
              const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
              sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
-             sp_int64 _high_watermark, sp_int64 _low_watermark)
+             sp_int64 _high_watermark, sp_int64 _low_watermark,
+             const sp_string& _metricscachemgr_mode)
 
     : pplan_(NULL),
       topology_name_(_topology_name),
@@ -96,7 +97,8 @@ StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port
       ckptmgr_port_(_ckptmgr_port),
       ckptmgr_id_(_ckptmgr_id),
       high_watermark_(_high_watermark),
-      low_watermark_(_low_watermark) {}
+      low_watermark_(_low_watermark),
+      metricscachemgr_mode_(_metricscachemgr_mode) {}
 
 void StMgr::Init() {
   LOG(INFO) << "Init Stmgr" << std::endl;
@@ -119,8 +121,10 @@ void StMgr::Init() {
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
-  state_mgr_->SetMetricsCacheLocationWatch(
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
+    state_mgr_->SetMetricsCacheLocationWatch(
                        topology_name_, [this]() { this->FetchMetricsCacheLocation(); });
+  }
 
   reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
   if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
@@ -156,7 +160,9 @@ void StMgr::Init() {
   // constructor needs actual stmgr ports, thus put FetchTMasterLocation()
   // has to be after after StartStmgrServer and StartInstanceServer()
   FetchTMasterLocation();
-  FetchMetricsCacheLocation();
+  if (0 != metricscachemgr_mode_.compare("disabled")) {
+    FetchMetricsCacheLocation();
+  }
 
   if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
     // Now start the stateful restorer
@@ -532,6 +538,7 @@ void StMgr::StartTMasterClient() {
 
 void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
   LOG(INFO) << "Received a new physical plan from tmaster";
+  heron::config::TopologyConfigHelper::LogTopology(_pplan->topology());
   // first make sure that we are part of the plan ;)
   bool found = false;
   for (sp_int32 i = 0; i < _pplan->stmgrs_size(); ++i) {
@@ -555,10 +562,10 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
     LOG(INFO) << "Topology state changed from " << pplan_->topology().state() << " to "
               << _pplan->topology().state();
   }
-  proto::api::TopologyState st = _pplan->topology().state();
-  _pplan->clear_topology();
-  _pplan->mutable_topology()->CopyFrom(*hydrated_topology_);
-  _pplan->mutable_topology()->set_state(st);
+
+  PatchPhysicalPlanWithHydratedTopology(_pplan, hydrated_topology_);
+  LOG(INFO) << "Patched with hydrated topology";
+  heron::config::TopologyConfigHelper::LogTopology(_pplan->topology());
 
   // TODO(vikasr) Currently we dont check if our role has changed
 
@@ -1108,6 +1115,39 @@ void StMgr::HandleRestoreInstanceStateResponse(sp_int32 _task_id,
 void StMgr::HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                       std::string _checkpoint_id, sp_int64 _restore_txid) {
   tmaster_client_->SendRestoreTopologyStateResponse(_status, _checkpoint_id, _restore_txid);
+}
+
+// Patch new physical plan with internal hydrated topology but keep new topology data:
+// - new topology state
+// - new topology/component config
+void StMgr::PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _pplan,
+                                                  proto::api::Topology* _topology) {
+  // Back up new topology data (state and configs)
+  proto::api::TopologyState st = _pplan->topology().state();
+
+  std::map<std::string, std::string> topology_config;
+  config::TopologyConfigHelper::GetTopologyConfig(_pplan->topology(), topology_config);
+
+  std::unordered_set<std::string> components;
+  std::map<std::string, std::map<std::string, std::string>> component_config;
+  config::TopologyConfigHelper::GetAllComponentNames(_pplan->topology(), components);
+  for (auto iter = components.begin(); iter != components.end(); ++iter) {
+    std::map<std::string, std::string> config;
+    config::TopologyConfigHelper::GetComponentConfig(_pplan->topology(), *iter, topology_config);
+    component_config[*iter] = config;
+  }
+
+  // Copy hydrated topology into pplan
+  _pplan->clear_topology();
+  _pplan->mutable_topology()->CopyFrom(*_topology);
+
+  // Restore new topology data
+  _pplan->mutable_topology()->set_state(st);
+  config::TopologyConfigHelper::SetTopologyConfig(_pplan->mutable_topology(), topology_config);
+  for (auto iter = components.begin(); iter != components.end(); ++iter) {
+    config::TopologyConfigHelper::SetComponentConfig(_pplan->mutable_topology(), *iter,
+        component_config[*iter]);
+  }
 }
 }  // namespace stmgr
 }  // namespace heron

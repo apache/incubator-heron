@@ -1,0 +1,11 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:          org.apache.heron.scheduler.local.LocalScheduler
+
+# packing algorithm for packing instances into containers
+heron.class.packing.algorithm:  org.apache.heron.packing.roundrobin.RoundRobinPacking
+
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:           org.apache.heron.uploader.localfs.FileSystemUploader
+
+# state manager class for managing state in a persistent fashion
+heron.class.state.manager:      org.apache.heron.state.localfs.LocalFileStateManager

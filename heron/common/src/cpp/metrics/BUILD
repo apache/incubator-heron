@@ -38,8 +38,11 @@ cc_library(
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
-        "//third_party/glog:glog-cxx",
+        "@com_github_google_glog//:glog",
         "@com_google_protobuf//:protobuf",
-    ],
+    ] + select({
+        "//tools/platform:darwin": [],
+        "//conditions:default": ["@org_nongnu_libunwind//:libunwind"],
+    }),
     linkstatic = 1,
 )

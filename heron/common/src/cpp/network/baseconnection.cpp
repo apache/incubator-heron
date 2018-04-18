@@ -20,8 +20,8 @@
 
 #include "network/baseconnection.h"
 #include <string>
-#include "glog/logging.h"
 #include "basics/basics.h"
+#include "glog/logging.h"
 #include "network/regevent.h"
 
 const sp_int32 __SYSTEM_NETWORK_READ_BATCH_SIZE__ = 1048576;           // 1M
@@ -51,10 +51,13 @@ BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* 
   mOnClose = NULL;
   bufferevent_options boptions = BEV_OPT_DEFER_CALLBACKS;
   buffer_ = bufferevent_socket_new(mEventLoop->dispatcher(), mEndpoint->get_fd(), boptions);
+  read_bps_ = burst_read_bps_ = 0;
+  rate_limit_cfg_ = NULL;
 }
 
 BaseConnection::~BaseConnection() {
   CHECK(mState == INIT || mState == DISCONNECTED);
+  disableRateLimit();  // To free the config object
   bufferevent_free(buffer_);
 }
 
@@ -176,4 +179,35 @@ sp_int32 BaseConnection::registerEndpointForRead() {
 
 sp_int32 BaseConnection::getOutstandingBytes() const {
   return evbuffer_get_length(bufferevent_get_output(buffer_));
+}
+
+bool BaseConnection::setRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps) {
+  if (_read_bps > 0 && _burst_read_bps > 0) {
+    if (_read_bps != read_bps_ || _burst_read_bps != burst_read_bps_) {
+      // Create new config
+      struct ev_token_bucket_cfg* new_rate_limit_cfg = ev_token_bucket_cfg_new(
+          _read_bps, _burst_read_bps, EV_RATE_LIMIT_MAX, EV_RATE_LIMIT_MAX, NULL);
+      if (bufferevent_set_rate_limit(buffer_, new_rate_limit_cfg) == -1) {
+        ev_token_bucket_cfg_free(new_rate_limit_cfg);
+        LOG(ERROR) << "Faild to apply rate limiting to bufferevent ";
+        return false;
+      }
+      // Update internal data
+      ev_token_bucket_cfg_free(rate_limit_cfg_);
+      rate_limit_cfg_ = new_rate_limit_cfg;
+      read_bps_ = _read_bps;
+      burst_read_bps_ = _burst_read_bps;
+    }
+    return true;
+  }
+  return false;
+}
+
+void BaseConnection::disableRateLimit() {
+  bufferevent_set_rate_limit(buffer_, NULL);
+  if (rate_limit_cfg_) {
+    read_bps_ = burst_read_bps_ = 0;
+    ev_token_bucket_cfg_free(rate_limit_cfg_);
+    rate_limit_cfg_ = NULL;
+  }
 }

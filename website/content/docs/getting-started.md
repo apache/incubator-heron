@@ -36,14 +36,14 @@ This will install a variety of executables and other resources by default in `/u
 
 ## Using installation scripts
 
-To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
+To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
 and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
 `heron-install-{{% heronVersion %}}-darwin.sh`.
 
 Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
+$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
 ```
 
 Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
@@ -96,7 +96,7 @@ using the [Heron CLI tool](../operators/heron-cli):
 ```bash
 $ heron submit local \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCountTopology \
   --deploy-deactivated
 ```
@@ -240,7 +240,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/org/apache/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.

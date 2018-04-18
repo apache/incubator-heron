@@ -19,7 +19,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.downloader.ExtractorTests",
+    "org.apache.heron.downloader.ExtractorTests",
   ],
   runtime_deps = [ ":tests" ],
   size = "small",

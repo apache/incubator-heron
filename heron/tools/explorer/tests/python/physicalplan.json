@@ -35,7 +35,9 @@
       },
       "topology.serializer.classname": "backtype.storm.serialization.HeronPluggableSerializerDelegate",
       "topology.container.cpu": "1.0",
+      "topology.component.cpumap": "word:0.3,exclaim1:0.5",
       "topology.component.rammap": "word:536870912,exclaim1:536870912",
+      "topology.component.diskmap": "word:1073741824,exclaim1:1073741824",
       "topology.worker.childopts": "-XX:+HeapDumpOnOutOfMemoryError",
       "topology.kryo.factory": {
         "raw": "0xac0xed0x000x05t0x00\/backtype.storm.serialization.DefaultKryoFactory",

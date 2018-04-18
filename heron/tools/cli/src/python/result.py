@@ -35,7 +35,7 @@ from heron.common.src.python.utils.log import Log
 #  - status code == 200:
 #    program sends out dry-run response
 
-# Definition corresponds to definition in com.twitter.heron.scheduler.AbstractMain
+# Definition corresponds to definition in org.apache.heron.scheduler.AbstractMain
 
 # pylint: disable=no-init
 class Status(Enum):

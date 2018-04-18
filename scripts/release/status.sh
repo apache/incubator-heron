@@ -78,7 +78,7 @@ echo "HERON_BUILD_TIMESTAMP ${build_timestamp}"
 
 if [ -z ${HERON_BUILD_USER+x} ];
 then
-  build_user=${USER}
+  build_user=${USER:-root}
 else
   build_user=${HERON_BUILD_USER}
 fi

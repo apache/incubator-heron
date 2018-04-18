@@ -1,7 +1,0 @@
-# indicate the type of storage for checkpoint is local file system
-heron.statefulstorage.type:    "LocalFileSystemStorage"
-
-heron.statefulstorage.config:
-  heron.statefulstorage.classname:            "com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorage"
-  heron.statefulstorage.classpath:            ""
-  heron.statefulstorage.localfs.root.path:   "./checkpoints"

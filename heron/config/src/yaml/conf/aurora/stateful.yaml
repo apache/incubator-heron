@@ -1,5 +1,5 @@
 # indicate the type of storage for checkpoint is hdfs
-heron.statefulstorage.classname:         "com.twitter.heron.statefulstorage.hdfs.HDFSStorage"
+heron.statefulstorage.classname:         "org.apache.heron.statefulstorage.hdfs.HDFSStorage"
 
 heron.statefulstorage.config:
   heron.statefulstorage.classpath:        "$(hadoop --config /path/to/configs classpath)"

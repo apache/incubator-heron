@@ -17,7 +17,7 @@ In order to use the `heron-api` library, add this to the `dependencies` block of
 
 ```xml
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
 </dependency>
@@ -107,14 +107,14 @@ The other options are `at-most-once` and `at-least-once`. If you don't explicitl
 Every Streamlet API topology needs to be configured using a `Config` object. Here's an example default configuration:
 
 ```java
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Runner;
+import org.apache.heron.streamlet.Config;
+import org.apache.heron.streamlet.Runner;
 
 Config topologyConfig = Config.defaultConfig();
 
 // Apply topology configuration using the topologyConfig object
 Runner topologyRunner = new Runner();
-topologyRunner.run("name-for-topology", conf, topologyBuilder);
+topologyRunner.run("name-for-topology", topologyConfig, topologyBuilder);
 ```
 
 The table below shows the configurable parameters for Heron topologies:
@@ -165,7 +165,7 @@ Operation | Description | Example
 [`union`](#union-operations) | Unifies two streamlets into one, without modifying the elements of the two streamlets | Unite two different `Streamlet<String>`s into a single streamlet
 [`clone`](#clone-operations) | Creates any number of identical copies of a streamlet | Create three separate streamlets from the same source
 [`transform`](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations) |
-[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
+[`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key. Supported Join Types: Inner (as default), Outer-Left, Outer-Right and Outer. | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
 [`reduceByKeyAndWindow`](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a time window, and in accordance with a reduce function that you apply to all the accumulated values | Count the number of times a value has been encountered within a specified time window
 [`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
 [`toSink`](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc. | Store processing graph results in an AWS Redshift table
@@ -185,7 +185,7 @@ In this example, a supplier streamlet emits an indefinite series of 1s. The `map
 
 ### FlatMap operations
 
-FlatMap operations are like map operations but with the important difference that each element of the streamlet is "flattened" into a collection type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
+FlatMap operations are like `map` operations but with the important difference that each element of the streamlet is "flattened" into a collection type. In this example, a supplier streamlet emits the same sentence over and over again; the `flatMap` operation transforms each sentence into a Java `List` of individual words:
 
 ```java
 builder.newSource(() -> "I have nothing to declare but my genius")
@@ -194,7 +194,7 @@ builder.newSource(() -> "I have nothing to declare but my genius")
 
 The effect of this operation is to transform the `Streamlet<String>` into a `Streamlet<List<String>>`.
 
-> One of the core differences between map and flatMap operations is that flatMap operations typically transform non-collection types into collection types.
+> One of the core differences between `map` and `flatMap` operations is that `flatMap` operations typically transform non-collection types into collection types.
 
 ### Filter operations
 
@@ -205,21 +205,21 @@ builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .filter((i) -> i < 7);
 ```
 
-In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a filter operation that removes all streamlet elements that are greater than 7.
+In this example, a source streamlet consisting of random integers between 1 and 10 is modified by a `filter` operation that removes all streamlet elements that are greater than 6.
 
 ### Union operations
 
 Union operations combine two streamlets of the same type into a single streamlet without modifying the elements. Here's an example:
 
 ```java
-Streamlet<String> oohs = builder.newSource(() -> "ooh");
-Streamlet<String> aahs = builder.newSource(() -> "aah");
+Streamlet<String> flowers = builder.newSource(() -> "flower");
+Streamlet<String> butterflies = builder.newSource(() -> "butterfly");
 
-Streamlet<String> combined = oohs
-        .union(aahs);
+Streamlet<String> combinedSpringStreamlet = flowers
+        .union(butterflies);
 ```
 
-Here, one streamlet is an endless series of "ooh"s while the other is an endless series of "aah"s. The `union` operation combines them into a single streamlet of alternating "ooh"s and "aah"s.
+Here, one streamlet is an endless series of "flowers" while the other is an endless series of "butterflies". The `union` operation combines them into a single `Spring` streamlet of alternating "flowers" and "butterflies".
 
 ### Clone operations
 
@@ -264,8 +264,8 @@ The context object available to a transform operation provides access to:
 Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.SerializableTransformer;
 
 import java.util.function.Consumer;
 
@@ -273,7 +273,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
     private int numberOfItems;
 
     public void setup(Context context) {
-        numberOfItems = (int) context.getState("number-of-items");
+        numberOfItems = (int) context.getState().get("number-of-items");
         context.getState().put("number-of-items", numberOfItems + 1);
     }
 
@@ -291,7 +291,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
 
 This operation does a few things:
 
-* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `setup` method, the [`Context`](/api/java/org/apache/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
 * In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
 * In the `cleanup` step, the current count of items processed is logged.
 
@@ -310,9 +310,9 @@ builder.newSource(() -> "Some string over and over");
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
-Builder builder = Builder.CreateBuilder();
+Builder builder = Builder.newBuilder();
 
 KVStreamlet<String, String> streamlet1 =
         builder.newKVSource(() -> new KeyValue<>("heron-api", "topology-api"));
@@ -339,7 +339,7 @@ Reduce by key and window operations produce a new streamlet of key-value window 
 ```java
 import java.util.Arrays;
 
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.newBuilder()
     .newSource(() -> "Mary had a little lamb")
@@ -366,7 +366,7 @@ When you assign a number of [partitions](#partitioning-and-parallelism) to a pro
 ```java
 import java.util.concurrent.ThreadLocalRandom;
 
-Builder builder = Builder.CreateBuilder();
+Builder builder = Builder.newBuilder();
 
 builder.newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .setNumPartitions(5)
@@ -383,14 +383,14 @@ In this example, the supplier streamlet emits random integers between one and te
 In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Sink;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.Sink;
 
 public class FormattedLogSink implements Sink<T> {
     private String streamletName;
 
     public void setup(Context context) {
-        streamletName = context.getStreamletName();
+        streamletName = context.getStreamName();
     }
 
     public void put(T element) {
@@ -428,8 +428,10 @@ Log operations are special cases of consume operations that log streamlet elemen
 Consume operations are like [sink operations](#sink-operations) except they don't require implementing a full sink interface. Consume operations are thus suited for simple operations like formatted logging. Here's an example:
 
 ```java
+import java.util.concurrent.ThreadLocalRandom;
+
 Builder builder = Builder.newBuilder()
-        .newSource(() -> generateRandomInteger())
+        .newSource(() -> ThreadLocalRandom.current().nextInt(1, 11))
         .filter(i -> i % 2 == 0)
         .consume(i -> {
             String message = String.format("Even number found: %d", i);

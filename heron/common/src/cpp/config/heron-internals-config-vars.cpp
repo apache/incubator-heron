@@ -128,6 +128,8 @@ const sp_string HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_SPOUT_WRITE_QU
     "heron.instance.internal.spout.write.queue.capacity";
 const sp_string HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_TIME_MS =
     "heron.instance.emit.batch.time.ms";
+const sp_string HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_SIZE =
+    "heron.instance.emit.batch.size.bytes";
 const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY =
     "heron.instance.set.data.tuple.capacity";
 const sp_string HeronInternalsConfigVars::HERON_INSTANCE_SET_DATA_TUPLE_SIZE_BYTES =

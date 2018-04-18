@@ -43,11 +43,11 @@ config file specific for the Heron cluster. The following must be specified
 for each cluster:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for Aurora scheduler.
-You should set this to `com.twitter.heron.scheduler.marathon.MarathonScheduler`
+You should set this to `org.apache.heron.scheduler.marathon.MarathonScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching and
 submitting topologies. To configure the Aurora launcher, set this to
-`com.twitter.heron.scheduler.marathon.MarathonLauncher
+`org.apache.heron.scheduler.marathon.MarathonLauncher
 
 * `heron.directory.sandbox.java.home` --- Specifies the location of the Java 8 JRE. Depending on 
 the Docker container you're using for executor image, this may be different. Most often, this 
@@ -85,10 +85,10 @@ publicly-available Docker repository.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.marathon.MarathonScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.marathon.MarathonScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.marathon.MarathonLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.marathon.MarathonLauncher
 
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:          $JAVA_HOME
@@ -119,7 +119,7 @@ configuration file for your Marathon cluster.
 
 * `heron.class.state.manager` --- Specifies the class of the state manager you want to use. In a 
 Marathon cluster, you'll want to use Zookeeper so set this to 
-`com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
+`org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager`
 
 * `heron.statemgr.connection.string` --- Specifies the connection string to the zookeeper cluster. 
 This can be `leader.mesos:2181` within DC/OS-based Mesos clusters if you're in the non-production
@@ -162,7 +162,7 @@ process
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string:  "leader.mesos:2181"

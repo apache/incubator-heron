@@ -1,5 +1,5 @@
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader:                            com.twitter.heron.uploader.http.HttpUploader
+heron.class.uploader:                            org.apache.heron.uploader.http.HttpUploader
 
 heron.uploader.http.uri:                         <http_uploader_uri>
 

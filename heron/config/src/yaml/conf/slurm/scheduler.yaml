@@ -1,8 +1,8 @@
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.slurm.SlurmScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.slurm.SlurmScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.slurm.SlurmLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.slurm.SlurmLauncher
 
 # working directory for the topologies
 heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}

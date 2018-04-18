@@ -1,5 +1,5 @@
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager:        com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager
+heron.class.state.manager:        org.apache.heron.statemgr.localfs.LocalFileSystemStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string: LOCALMODE
