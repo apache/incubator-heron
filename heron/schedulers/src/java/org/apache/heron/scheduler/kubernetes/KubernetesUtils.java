@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import com.squareup.okhttp.Response;
 
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.scheduler.utils.Runtime;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
@@ -41,6 +42,7 @@ final class KubernetesUtils {
       log.log(Level.SEVERE, "Error details:\n" +  response.body().string());
     } catch (IOException ioe) {
       // ignore
+      SysUtils.closeIgnoringExceptions(response.body());
     }
   }
 
@@ -59,6 +61,8 @@ final class KubernetesUtils {
     } catch (IOException ioe) {
       // ignore
       details = ioe.getMessage();
+    } finally {
+      SysUtils.closeIgnoringExceptions(response.body());
     }
     return message + "\ndetails:\n" + details;
   }
