@@ -30,28 +30,33 @@ import com.microsoft.dhalion.core.SymptomsTable;
 import com.microsoft.dhalion.events.EventManager;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import org.apache.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import org.apache.heron.scheduler.client.ISchedulerClient;
 
 import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
+  public static final String RESTART_CONTAINER_RESOLVER = "RestartContainerResolver";
   private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
 
   private final EventManager eventManager;
   private final String topologyName;
   private final ISchedulerClient schedulerClient;
   private ExecutionContext context;
+  private HealthManagerMetrics publishingMetrics;
 
   @Inject
   public RestartContainerResolver(@Named(CONF_TOPOLOGY_NAME) String topologyName,
                                   EventManager eventManager,
-                                  ISchedulerClient schedulerClient) {
+                                  ISchedulerClient schedulerClient,
+                                  HealthManagerMetrics publishingMetrics) {
     this.topologyName = topologyName;
     this.eventManager = eventManager;
     this.schedulerClient = schedulerClient;
+    this.publishingMetrics = publishingMetrics;
   }
 
   @Override
@@ -61,6 +66,8 @@ public class RestartContainerResolver implements IResolver {
 
   @Override
   public Collection<Action> resolve(Collection<Diagnosis> diagnosis) {
+    publishingMetrics.executeResolver(RESTART_CONTAINER_RESOLVER);
+
     List<Action> actions = new ArrayList<>();
 
     // find all back pressure measurements reported in this execution cycle
@@ -97,6 +104,7 @@ public class RestartContainerResolver implements IResolver {
               .setTopologyName(topologyName)
               .build());
       LOG.info("Restarted container result: " + b);
+      publishingMetrics.executeIncr("RestartContainer");
     });
 
     LOG.info("Broadcasting container restart event");

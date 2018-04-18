@@ -136,6 +136,13 @@ class TopologyConfigHelper {
   // Do we want to drop tuples upon backpressure detection
   static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
 
+  // Get runtime config key
+  static std::string GetRuntimeConfigKey(const std::string& key);
+
+  // Convert configs in map to runtime configs (append runtime postfix)
+  static void ConvertToRuntimeConfigs(const std::map<std::string, std::string>& _origin,
+                                      std::map<std::string, std::string>& _retval);
+
   // Return topology level config
   static void GetTopologyConfig(const proto::api::Topology& _topology,
                                 std::map<std::string, std::string>& retval);
@@ -155,6 +162,11 @@ class TopologyConfigHelper {
                                  const std::string& _component_name,
                                  const std::map<std::string, std::string>& config);
 
+  // Get the topology config value given the config key
+  static const std::string GetTopologyConfigValue(const proto::api::Topology& _topology,
+                                                  const std::string& _key,
+                                                  const std::string& _default);
+
   // Get the config value given component name and config key
   static const std::string GetComponentConfigValue(const proto::api::Topology& _topology,
                                                    const std::string& _component,
@@ -169,6 +181,9 @@ class TopologyConfigHelper {
   // The output BPS of this component. Return -1 if not found
   static sp_int64 GetComponentOutputBPS(const proto::api::Topology& _topology,
                                         const std::string& _component);
+
+  // Get reserved topology config key.
+  static const char* GetReservedTopologyConfigKey();
 
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,

@@ -31,7 +31,7 @@ import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;

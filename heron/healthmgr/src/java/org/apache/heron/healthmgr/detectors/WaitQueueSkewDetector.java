@@ -13,12 +13,12 @@
 // limitations under the License.
 
 
-package com.twitter.heron.healthmgr.detectors;
+package org.apache.heron.healthmgr.detectors;
 
 import javax.inject.Inject;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BaseSensor;
+import org.apache.heron.healthmgr.HealthPolicyConfig;
+import org.apache.heron.healthmgr.sensors.BaseSensor;
 
 public class WaitQueueSkewDetector extends SkewDetector {
   static final String CONF_SKEW_RATIO = "WaitQueueSkewDetector.skewRatio";

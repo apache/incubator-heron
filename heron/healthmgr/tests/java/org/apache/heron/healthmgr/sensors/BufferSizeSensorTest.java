@@ -28,7 +28,7 @@ import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.healthmgr.sensors.BaseSensor.MetricName;
 
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

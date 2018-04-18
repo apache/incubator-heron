@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.healthmgr.detectors;
+package org.apache.heron.healthmgr.detectors;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,10 +25,10 @@ import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
-import com.twitter.heron.healthmgr.HealthPolicyConfig;
+import org.apache.heron.healthmgr.HealthPolicyConfig;
 
-import static com.twitter.heron.healthmgr.detectors.WaitQueueSkewDetector.CONF_SKEW_RATIO;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.apache.heron.healthmgr.detectors.WaitQueueSkewDetector.CONF_SKEW_RATIO;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -22,23 +22,23 @@ config:
 components:
 
   - id: "windowLength"
-    className: "com.twitter.heron.api.bolt.BaseWindowedBolt$Count"
+    className: "org.apache.heron.api.bolt.BaseWindowedBolt$Count"
     constructorArgs:
       - 5
 
   - id: "slidingInterval"
-    className: "com.twitter.heron.api.bolt.BaseWindowedBolt$Count"
+    className: "org.apache.heron.api.bolt.BaseWindowedBolt$Count"
     constructorArgs:
       - 3
 
 spouts:
   - id: "integer-spout"
-    className: "com.twitter.heron.examples.eco.StatefulNumberSpout"
+    className: "org.apache.heron.examples.eco.StatefulNumberSpout"
     parallelism: 1
 
 bolts:
   - id: "stateful-window-sum-bolt"
-    className: "com.twitter.heron.examples.eco.StatefulWindowSumBolt"
+    className: "org.apache.heron.examples.eco.StatefulWindowSumBolt"
     configMethods:
       - name: "withWindow"
         args: [ref: "windowLength", ref: "slidingInterval"]

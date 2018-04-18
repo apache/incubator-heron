@@ -28,7 +28,7 @@ import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.resolvers.RestartContainerResolver;
-import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
+import org.apache.heron.healthmgr.sensors.BackPressureSensor;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
 

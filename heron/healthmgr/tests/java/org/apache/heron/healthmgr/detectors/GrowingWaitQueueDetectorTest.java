@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
 import static org.apache.heron.healthmgr.detectors.GrowingWaitQueueDetector.CONF_LIMIT;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

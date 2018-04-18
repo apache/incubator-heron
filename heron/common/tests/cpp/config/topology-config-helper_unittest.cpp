@@ -134,12 +134,22 @@ TEST(TopologyConfigHelper, GetAndSetTopologyConfig) {
       "test_topology", "123", 3, NUM_SPOUT_INSTANCES, 3, NUM_BOLT_INSTANCES,
       heron::proto::api::SHUFFLE);
 
-  // Test init config
+  // Test initial config
   std::map<std::string, std::string> old_config;
   heron::config::TopologyConfigHelper::GetTopologyConfig(*test_topology, old_config);
   EXPECT_EQ(old_config[heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS],
             MESSAGE_TIMEOUT);
   EXPECT_EQ(old_config[TOPOLOGY_USER_CONFIG], TOPOLOGY_USER_CONFIG_VALUE);
+
+  // Test GetComponentConfigValue function
+  EXPECT_EQ(
+      heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+          *test_topology, TOPOLOGY_USER_CONFIG, ""),
+      TOPOLOGY_USER_CONFIG_VALUE);
+  EXPECT_EQ(
+      heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+          *test_topology, TOPOLOGY_USER_CONFIG + ".bad", ""),
+      "");
 
   // Set and then test updated config
   std::string runtime_user_config_key = TOPOLOGY_USER_CONFIG + ":runtime";
@@ -171,7 +181,7 @@ TEST(TopologyConfigHelper, GetAndSetComponentConfig) {
   std::string non_test_spout = "test_spout2";
   std::string test_bolt = "test_bolt2";
   std::string non_test_bolt = "test_bolt1";
-  // Test init config
+  // Test initial config
   std::map<std::string, std::string> old_config;
   heron::config::TopologyConfigHelper::GetComponentConfig(*test_topology, test_spout, old_config);
   EXPECT_EQ(old_config[heron::config::TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM],
@@ -182,6 +192,16 @@ TEST(TopologyConfigHelper, GetAndSetComponentConfig) {
   EXPECT_EQ(old_config[heron::config::TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM],
       std::to_string(NUM_BOLT_INSTANCES));
   EXPECT_EQ(old_config[BOLT_USER_CONFIG], BOLT_USER_CONFIG_VALUE);
+
+  // Test GetComponentConfigValue function
+  EXPECT_EQ(
+      heron::config::TopologyConfigHelper::GetComponentConfigValue(
+          *test_topology, test_spout, SPOUT_USER_CONFIG, ""),
+      SPOUT_USER_CONFIG_VALUE);
+  EXPECT_EQ(
+      heron::config::TopologyConfigHelper::GetComponentConfigValue(
+          *test_topology, test_spout, SPOUT_USER_CONFIG + ".bad", ""),
+      "");
 
   // Set user configs to new values
   std::string runtime_spout_user_config_key = SPOUT_USER_CONFIG + ":runtime";
@@ -233,6 +253,24 @@ TEST(TopologyConfigHelper, GetAndSetComponentConfig) {
       std::to_string(NUM_BOLT_INSTANCES));
   EXPECT_EQ(updated_config[BOLT_USER_CONFIG], BOLT_USER_CONFIG_VALUE);
   EXPECT_EQ(updated_config[runtime_bolt_user_config_key], NEW_BOLT_USER_CONFIG_VALUE_2);
+}
+
+TEST(TopologyConfigHelper, GetRuntimeConfigKey) {
+  EXPECT_EQ(
+      heron::config::TopologyConfigHelper::GetRuntimeConfigKey("conf.test1"),
+      "conf.test1:runtime");
+}
+
+TEST(TopologyConfigHelper, ConvertToRuntimeConfigs) {
+  std::map<std::string, std::string> original_config;
+  original_config["conf.test1"] = "a";
+  original_config["conf.test2"] = "b";
+
+  std::map<std::string, std::string> runtime_config;
+  heron::config::TopologyConfigHelper::ConvertToRuntimeConfigs(original_config, runtime_config);
+
+  EXPECT_EQ(runtime_config["conf.test1:runtime"], "a");
+  EXPECT_EQ(runtime_config["conf.test2:runtime"], "b");
 }
 
 int main(int argc, char **argv) {

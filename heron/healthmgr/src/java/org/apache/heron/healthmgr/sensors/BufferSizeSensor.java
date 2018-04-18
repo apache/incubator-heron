@@ -30,7 +30,7 @@ import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;

@@ -19,22 +19,36 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import javax.inject.Inject;
+
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.MeasurementsTable;
 import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.core.SymptomsTable;
 
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
-import static com.twitter.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
-import static com.twitter.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
+import org.apache.heron.healthmgr.HealthManagerMetrics;
+
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_PROCESSING_RATE_SKEW;
+import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_WAIT_Q_SIZE_SKEW;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
+import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 public class SlowInstanceDiagnoser extends BaseDiagnoser {
+  public static final String SLOW_INSTANCE_DIAGNOSER = "SlowInstanceDiagnoser";
   private static final Logger LOG = Logger.getLogger(SlowInstanceDiagnoser.class.getName());
+
+  private HealthManagerMetrics publishingMetrics;
+
+  @Inject
+  public SlowInstanceDiagnoser(HealthManagerMetrics publishingMetrics) {
+    this.publishingMetrics = publishingMetrics;
+  }
 
   @Override
   public Collection<Diagnosis> diagnose(Collection<Symptom> symptoms) {
+    publishingMetrics.executeDiagnoserIncr(SLOW_INSTANCE_DIAGNOSER);
+
     Collection<Diagnosis> diagnoses = new ArrayList<>();
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
 

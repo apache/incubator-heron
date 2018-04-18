@@ -187,6 +187,12 @@ class StMgr {
   void HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                  std::string _checkpoint_id, sp_int64 _restore_txid);
 
+  // Patch new physical plan with internal hydrated topology but keep new topology data:
+  // - new topology state
+  // - new topology/component config
+  static void PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _pplan,
+                                                    proto::api::Topology* _topology);
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;

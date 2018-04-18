@@ -33,19 +33,19 @@ import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.detectors.LargeWaitQueueDetector;
 import org.apache.heron.healthmgr.detectors.ProcessingRateSkewDetector;
-import com.twitter.heron.healthmgr.detectors.WaitQueueSkewDetector;
+import org.apache.heron.healthmgr.detectors.WaitQueueSkewDetector;
 import org.apache.heron.healthmgr.diagnosers.DataSkewDiagnoser;
 import org.apache.heron.healthmgr.diagnosers.SlowInstanceDiagnoser;
 import org.apache.heron.healthmgr.diagnosers.UnderProvisioningDiagnoser;
 import org.apache.heron.healthmgr.resolvers.ScaleUpResolver;
-import com.twitter.heron.healthmgr.sensors.BackPressureSensor;
-import com.twitter.heron.healthmgr.sensors.BufferSizeSensor;
-import com.twitter.heron.healthmgr.sensors.ExecuteCountSensor;
+import org.apache.heron.healthmgr.sensors.BackPressureSensor;
+import org.apache.heron.healthmgr.sensors.BufferSizeSensor;
+import org.apache.heron.healthmgr.sensors.ExecuteCountSensor;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
-import static com.twitter.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
+import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
 
 public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     implements EventHandler<TopologyUpdate> {

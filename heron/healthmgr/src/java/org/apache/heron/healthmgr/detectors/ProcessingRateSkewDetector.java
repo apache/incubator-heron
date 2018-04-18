@@ -18,7 +18,7 @@ package org.apache.heron.healthmgr.detectors;
 import javax.inject.Inject;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
-import com.twitter.heron.healthmgr.sensors.BaseSensor;
+import org.apache.heron.healthmgr.sensors.BaseSensor;
 
 public class ProcessingRateSkewDetector extends SkewDetector {
   public static final String CONF_SKEW_RATIO = "ProcessingRateSkewDetector.skewRatio";
