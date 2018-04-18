@@ -735,7 +735,8 @@ TEST(StMgr, test_runtime_config) {
   std::map<std::string, std::string> validate_good_config;
   validate_good_config[topology_runtime_config_1] = "1";
   validate_good_config[topology_runtime_config_2] = "2";
-  validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
+  const char* topology_key = heron::config::TopologyConfigHelper::GetReservedTopologyConfigKey();
+  validate_good_config_map[topology_key] = validate_good_config;
   validate_good_config_map["spout1"] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 

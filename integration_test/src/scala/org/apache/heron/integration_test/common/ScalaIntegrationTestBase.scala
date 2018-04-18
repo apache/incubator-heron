@@ -21,7 +21,7 @@ import org.apache.heron.streamlet.scala.impl.BuilderImpl
 /**
   * Scala Integration Test Base
   */
-trait ScalaIntegrationTestBase extends Serializable {
+trait ScalaIntegrationTestBase {
 
   protected def build(testTopologyBuilder: TestTopologyBuilder,
                       streamletBuilder: Builder): TestTopologyBuilder = {
