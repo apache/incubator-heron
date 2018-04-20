@@ -637,12 +637,12 @@ bool TMaster::UpdateRuntimeConfigInTopology(proto::api::Topology* _topology,
   const char* topology_key = config::TopologyConfigHelper::GetReservedTopologyConfigKey();
   for (iter = _config.begin(); iter != _config.end(); ++iter) {
     // Get config for topology or component.
-    std::map<std::string, std::string> runtime_config;
-    config::TopologyConfigHelper::ConvertToRuntimeConfigs(iter->second, runtime_config);
+    std::map<std::string, std::string> config;
+    config::TopologyConfigHelper::ConvertToRuntimeConfigs(iter->second, config);
     if (iter->first == topology_key) {
-      config::TopologyConfigHelper::SetTopologyConfig(_topology, runtime_config);
+      config::TopologyConfigHelper::SetTopologyRuntimeConfig(_topology, config);
     } else {
-      config::TopologyConfigHelper::SetComponentConfig(_topology, iter->first, runtime_config);
+      config::TopologyConfigHelper::SetComponentRuntimeConfig(_topology, iter->first, config);
     }
   }
 

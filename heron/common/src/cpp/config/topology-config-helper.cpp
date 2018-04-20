@@ -428,34 +428,41 @@ void TopologyConfigHelper::ConvertToRuntimeConfigs(
   }
 }
 
-// Return topology level config
-void TopologyConfigHelper::GetTopologyConfig(const proto::api::Topology& _topology,
-                                             std::map<std::string, std::string>& retval) {
+
+// Return topology level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::GetTopologyRuntimeConfig(
+    const proto::api::Topology& _topology,
+    std::map<std::string, std::string>& retval) {
   if (_topology.has_topology_config()) {
     const proto::api::Config& config = _topology.topology_config();
-    ConvertConfigToKVMap(config, retval);
+    ConvertRuntimeConfigToKVMap(config, retval);
   }
 }
 
-// Update topology level config
-void TopologyConfigHelper::SetTopologyConfig(proto::api::Topology* _topology,
-                                             const std::map<std::string, std::string>& _update) {
+// Update topology level runtime  config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::SetTopologyRuntimeConfig(
+    proto::api::Topology* _topology,
+    const std::map<std::string, std::string>& _update) {
   if (_topology->has_topology_config()) {
     proto::api::Config* config = _topology->mutable_topology_config();
-    UpdateConfigFromKVMap(config, _update);
+    UpdateRuntimeConfigFromKVMap(config, _update);
   }
 }
 
-// Return component level config
-void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topology,
-                                              const std::string& _component_name,
-                                              std::map<std::string, std::string>& retval) {
+// Return component level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::GetComponentRuntimeConfig(
+    const proto::api::Topology& _topology,
+    const std::string& _component_name,
+    std::map<std::string, std::string>& retval) {
   // We are assuming component names are unique and returning the config
   // of the first spout or bolt found with the name.
   for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
     if (_topology.spouts(i).comp().name() == _component_name) {
       const proto::api::Config& config = _topology.spouts(i).comp().config();
-      ConvertConfigToKVMap(config, retval);
+      ConvertRuntimeConfigToKVMap(config, retval);
       return;
     }
   }
@@ -463,23 +470,25 @@ void TopologyConfigHelper::GetComponentConfig(const proto::api::Topology& _topol
   for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
     if (_topology.bolts(i).comp().name() == _component_name) {
       const proto::api::Config& config = _topology.bolts(i).comp().config();
-      ConvertConfigToKVMap(config, retval);
+      ConvertRuntimeConfigToKVMap(config, retval);
       return;
     }
   }
 }
 
-// Update component level config
-void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
-                                              const std::string& _component_name,
-                                              const std::map<std::string, std::string>& _update) {
+// Update component level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::SetComponentRuntimeConfig(
+    proto::api::Topology* _topology,
+    const std::string& _component_name,
+    const std::map<std::string, std::string>& _update) {
   // We are assuming component names are unique and updating config for all instances
   // with the specific component name.
   for (sp_int32 i = 0; i < _topology->spouts_size(); ++i) {
     proto::api::Component* comp = _topology->mutable_spouts(i)->mutable_comp();
     if (comp->name() == _component_name) {
       proto::api::Config* config = comp->mutable_config();
-      UpdateConfigFromKVMap(config, _update);
+      UpdateRuntimeConfigFromKVMap(config, _update);
     }
   }
 
@@ -487,13 +496,13 @@ void TopologyConfigHelper::SetComponentConfig(proto::api::Topology* _topology,
     proto::api::Component* comp = _topology->mutable_bolts(i)->mutable_comp();
     if (comp->name() == _component_name) {
       proto::api::Config* config = comp->mutable_config();
-      UpdateConfigFromKVMap(config, _update);
+      UpdateRuntimeConfigFromKVMap(config, _update);
     }
   }
 }
 
 // For every existing config, update the value; for every non-existing config, add it.
-void TopologyConfigHelper::UpdateConfigFromKVMap(proto::api::Config* _config,
+void TopologyConfigHelper::UpdateRuntimeConfigFromKVMap(proto::api::Config* _config,
     const std::map<std::string, std::string>& _kv_map) {
   std::set<std::string> updated;
   for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
@@ -537,10 +546,17 @@ bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _to
 }
 
 // Convert topology config to a key value map
-void TopologyConfigHelper::ConvertConfigToKVMap(const proto::api::Config& _config,
-                                                std::map<std::string, std::string>& retval) {
+void TopologyConfigHelper::ConvertRuntimeConfigToKVMap(
+    const proto::api::Config& _config,
+    std::map<std::string, std::string>& retval) {
   for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
-    retval[_config.kvs(i).key()] = _config.kvs(i).value();
+    const std::string& key = _config.kvs(i).key();
+    // Assuming RUNTIME_CONFIG_POSTFIX is unique and doesn't happen in normal cases. When it is
+    // found in a config key, the config is considered a runtime config and extracted into the
+    // result
+    if (key.find(RUNTIME_CONFIG_POSTFIX) != std::string::npos) {
+      retval[_config.kvs(i).key()] = _config.kvs(i).value();
+    }
   }
 }
 

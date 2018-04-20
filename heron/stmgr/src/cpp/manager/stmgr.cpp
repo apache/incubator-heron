@@ -1126,14 +1126,14 @@ void StMgr::PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _
   proto::api::TopologyState st = _pplan->topology().state();
 
   std::map<std::string, std::string> topology_config;
-  config::TopologyConfigHelper::GetTopologyConfig(_pplan->topology(), topology_config);
+  config::TopologyConfigHelper::GetTopologyRuntimeConfig(_pplan->topology(), topology_config);
 
   std::unordered_set<std::string> components;
   std::map<std::string, std::map<std::string, std::string>> component_config;
   config::TopologyConfigHelper::GetAllComponentNames(_pplan->topology(), components);
   for (auto iter = components.begin(); iter != components.end(); ++iter) {
     std::map<std::string, std::string> config;
-    config::TopologyConfigHelper::GetComponentConfig(_pplan->topology(), *iter, topology_config);
+    config::TopologyConfigHelper::GetComponentRuntimeConfig(_pplan->topology(), *iter, config);
     component_config[*iter] = config;
   }
 
@@ -1143,9 +1143,10 @@ void StMgr::PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _
 
   // Restore new topology data
   _pplan->mutable_topology()->set_state(st);
-  config::TopologyConfigHelper::SetTopologyConfig(_pplan->mutable_topology(), topology_config);
+  config::TopologyConfigHelper::SetTopologyRuntimeConfig(_pplan->mutable_topology(),
+                                                         topology_config);
   for (auto iter = components.begin(); iter != components.end(); ++iter) {
-    config::TopologyConfigHelper::SetComponentConfig(_pplan->mutable_topology(), *iter,
+    config::TopologyConfigHelper::SetComponentRuntimeConfig(_pplan->mutable_topology(), *iter,
         component_config[*iter]);
   }
 }
