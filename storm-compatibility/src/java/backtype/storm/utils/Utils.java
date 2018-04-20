@@ -38,7 +38,7 @@ public final class Utils {
       Class<?> c = Class.forName(klass);
       return c.newInstance();
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to create instance for class: " + klass, e);
     }
   }
 
