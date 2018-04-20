@@ -19,6 +19,8 @@ sections:
     sublinks:
     - name: The Heron Streamlet API for Java
       url: /docs/developers/java/streamlet-api
+    - name: The Heron Streamlet API for Scala
+      url: /docs/developers/scala/streamlet-api
     - name: The Heron ECO API for Java
       url: /docs/developers/java/eco-api
     - name: The Heron Topology API for Java
