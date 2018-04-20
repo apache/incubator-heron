@@ -144,23 +144,23 @@ class TopologyConfigHelper {
                                       std::map<std::string, std::string>& _retval);
 
   // Return topology level config
-  static void GetTopologyConfig(const proto::api::Topology& _topology,
-                                std::map<std::string, std::string>& retval);
+  static void GetTopologyRuntimeConfig(const proto::api::Topology& _topology,
+                                       std::map<std::string, std::string>& retval);
 
   // Update topology level config
-  static void SetTopologyConfig(proto::api::Topology* _topology,
-                                const std::map<std::string, std::string>& retval);
+  static void SetTopologyRuntimeConfig(proto::api::Topology* _topology,
+                                       const std::map<std::string, std::string>& retval);
 
 
   // Return component level config
-  static void GetComponentConfig(const proto::api::Topology& _topology,
-                                 const std::string& _component_name,
-                                 std::map<std::string, std::string>& config);
+  static void GetComponentRuntimeConfig(const proto::api::Topology& _topology,
+                                        const std::string& _component_name,
+                                        std::map<std::string, std::string>& config);
 
   // Update component level config
-  static void SetComponentConfig(proto::api::Topology* _topology,
-                                 const std::string& _component_name,
-                                 const std::map<std::string, std::string>& config);
+  static void SetComponentRuntimeConfig(proto::api::Topology* _topology,
+                                        const std::string& _component_name,
+                                        const std::map<std::string, std::string>& config);
 
   // Get the topology config value given the config key
   static const std::string GetTopologyConfigValue(const proto::api::Topology& _topology,
@@ -190,11 +190,11 @@ class TopologyConfigHelper {
                                     const std::string& _config_name,
                                     bool _default_value);
   // Convert topology config to a key value map
-  static void ConvertConfigToKVMap(const proto::api::Config& _config,
-                                   std::map<std::string, std::string>& retval);
+  static void ConvertRuntimeConfigToKVMap(const proto::api::Config& _config,
+                                          std::map<std::string, std::string>& retval);
   // Update topology config from a key value map
-  static void UpdateConfigFromKVMap(proto::api::Config* _config,
-                                    const std::map<std::string, std::string>& _kv_map);
+  static void UpdateRuntimeConfigFromKVMap(proto::api::Config* _config,
+                                           const std::map<std::string, std::string>& _kv_map);
 };
 }  // namespace config
 }  // namespace heron
