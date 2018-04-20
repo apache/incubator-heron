@@ -1899,7 +1899,7 @@ TEST(StMgr, test_PatchPhysicalPlanWithHydratedTopology) {
   std::map<std::string, std::string> update;
   update["conf.new"] = "test";
   update[heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS] = "10";
-  heron::config::TopologyConfigHelper::SetTopologyConfig(pplan->mutable_topology(), update);
+  heron::config::TopologyConfigHelper::SetTopologyRuntimeConfig(pplan->mutable_topology(), update);
 
   // Verify updated runtime data is still in the patched physical plan
   // The topology in the physical plan should have the old name
