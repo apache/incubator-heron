@@ -109,8 +109,8 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       }
     } else {
       String[] names = new File(topologyCheckpointRoot).list();
-      if (names.length == 0) {
-        LOG.warning("No checkpoint files under root path: " + topologyCheckpointRoot);
+      if (names == null) {
+        LOG.warning("There is no such checkpoint root path: " + topologyCheckpointRoot);
       } else {
         for (String name : names) {
           if (name.compareTo(oldestCheckpointPreserved) < 0) {
