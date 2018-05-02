@@ -26,8 +26,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
-import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointMetadata;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -41,12 +42,15 @@ public class HDFSStorage implements IStatefulStorage {
 
   private String checkpointRootPath;
   private FileSystem fileSystem;
+  private String topologyName;
 
   @Override
-  public void init(Map<String, Object> conf) throws StatefulStorageException {
+  public void init(String topology, final Map<String, Object> conf)
+      throws StatefulStorageException {
     LOG.info("Initializing... Config: " + conf.toString());
     LOG.info("Class path: " + System.getProperty("java.class.path"));
 
+    this.topologyName = topology;
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
 
     // Notice, we pass the config folder via classpath
@@ -68,17 +72,16 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public void store(Checkpoint checkpoint) throws StatefulStorageException {
-    Path path = new Path(getCheckpointPath(checkpoint.getTopologyName(),
-                                           checkpoint.getCheckpointId(),
-                                           checkpoint.getComponent(),
-                                           checkpoint.getTaskId()));
+  public void storeCheckpoint(CheckpointPartitionInfo info, Checkpoint checkpoint)
+      throws StatefulStorageException {
+    Path path = new Path(getCheckpointPath(info.getCheckpointId(),
+                                           info.getComponent(),
+                                           info.getPartitionId()));
 
     // We need to ensure the existence of directories structure,
     // since it is not guaranteed that FileSystem.create(..) always creates parents' dirs.
-    String checkpointDir = getCheckpointDir(checkpoint.getTopologyName(),
-                                            checkpoint.getCheckpointId(),
-                                            checkpoint.getComponent());
+    String checkpointDir = getCheckpointDir(info.getCheckpointId(),
+                                            info.getComponent());
     createDir(checkpointDir);
 
     FSDataOutputStream out = null;
@@ -93,11 +96,11 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public Checkpoint restore(String topologyName, String checkpointId,
-                            PhysicalPlans.Instance instanceInfo) throws StatefulStorageException {
-    Path path = new Path(getCheckpointPath(topologyName, checkpointId,
-                                           instanceInfo.getInfo().getComponentName(),
-                                           instanceInfo.getInfo().getTaskId()));
+  public Checkpoint restoreCheckpoint(CheckpointPartitionInfo info)
+      throws StatefulStorageException {
+    Path path = new Path(getCheckpointPath(info.getCheckpointId(),
+                                           info.getComponent(),
+                                           info.getPartitionId()));
 
     FSDataInputStream in = null;
     CheckpointManager.InstanceStateCheckpoint state = null;
@@ -110,13 +113,26 @@ public class HDFSStorage implements IStatefulStorage {
     } finally {
       SysUtils.closeIgnoringExceptions(in);
     }
-    return new Checkpoint(topologyName, instanceInfo, state);
+    return new Checkpoint(state);
   }
 
   @Override
-  public void dispose(String topologyName, String oldestCheckpointPreserved,
-                      boolean deleteAll) throws StatefulStorageException {
-    String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
+  public void storeComponentMetaData(CheckpointPartitionInfo info, CheckpointMetadata metadata)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+  }
+
+  @Override
+  public CheckpointMetadata restoreComponentMetadata(CheckpointPartitionInfo info)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+    return null;
+  }
+
+  @Override
+  public void dispose(String oldestCheckpointPreserved, boolean deleteAll)
+      throws StatefulStorageException {
+    String topologyCheckpointRoot = getTopologyCheckpointRoot();
     Path topologyRootPath = new Path(topologyCheckpointRoot);
 
     if (deleteAll) {
@@ -172,18 +188,16 @@ public class HDFSStorage implements IStatefulStorage {
     }
   }
 
-  private String getTopologyCheckpointRoot(String topologyName) {
+  private String getTopologyCheckpointRoot() {
     return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  private String getCheckpointDir(String topologyName, String checkpointId, String componentName) {
+  private String getCheckpointDir(String checkpointId, String componentName) {
     return String.format("%s/%s/%s",
-        getTopologyCheckpointRoot(topologyName), checkpointId, componentName);
+        getTopologyCheckpointRoot(), checkpointId, componentName);
   }
 
-  private String getCheckpointPath(String topologyName, String checkpointId,
-                                   String componentName, int taskId) {
-    return String.format("%s/%d", getCheckpointDir(topologyName, checkpointId, componentName),
-                         taskId);
+  private String getCheckpointPath(String checkpointId, String componentName, int taskId) {
+    return String.format("%s/%d", getCheckpointDir(checkpointId, componentName), taskId);
   }
 }

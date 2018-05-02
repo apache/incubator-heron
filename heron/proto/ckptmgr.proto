@@ -82,7 +82,9 @@ message StatefulConsistentCheckpoints {
   repeated StatefulConsistentCheckpoint consistent_checkpoints = 1;
 }
 
-// tmaster -> stmgr messages
+/*
+ * tmaster <-> stmgr messages
+ */
 
 // Message sent to stmgrs by the tmaster to initiate checkpointing
 message StartStatefulCheckpoint {
@@ -140,7 +142,9 @@ message StartStmgrStatefulProcessing {
   required string checkpoint_id = 1;
 }
 
-// tmaster -> ckptmgr messages
+/*
+ * tmaster -> ckptmgr messages
+ */
 
 // This is the message that a tmaster sends
 // when it wants to register itself
@@ -171,7 +175,25 @@ message CleanStatefulCheckpointResponse {
   repeated string cleaned_checkpoint_ids = 2;
 }
 
-// stmgr -> ckptmgr messages
+/*
+ * stmgr -> ckptmgr messages
+ */
+
+// This message encapsulates the info associated with
+// state of an instance/partition
+message InstanceStateCheckpoint {
+  required string checkpoint_id = 1;
+  required bytes state = 2;
+  // A version string that can be specified by user. It can be used to translate
+  // checkpoint data from older versions to the latest version when necessary.
+  optional string data_version = 3;
+}
+
+// This message encapsulates the info associated with
+// checkpoint metadata of a component
+message CheckpointComponentMetadata {
+  required int32 parallelism = 1;
+}
 
 // This is the message that a stmgr sends
 // when it wants to register itself with
@@ -195,6 +217,9 @@ message SaveInstanceStateRequest {
   // Information about the instance whose state this is
   required heron.proto.system.Instance instance = 1;
   required InstanceStateCheckpoint checkpoint = 2;
+  // Stmgrs need to send meta data as well to the first instance of
+  // each component as well
+  optional CheckpointComponentMetadata metadata = 3;
 }
 
 // After successfully saving state, this is what
@@ -221,19 +246,14 @@ message GetInstanceStateResponse {
   optional InstanceStateCheckpoint checkpoint = 4;
 }
 
-// stmgr -> Instance messages
+/*
+ * stmgr -> Instance messages
+ */
 
 // This is the message that the stmgr sends to its
 // local tasks to begin initiating checkpoint
 message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
-}
-
-// This proto encapsulates the info associated with
-// state of an instance
-message InstanceStateCheckpoint {
-  required string checkpoint_id = 1;
-  required bytes state = 2;
 }
 
 // This is the message that the instance sends
@@ -262,7 +282,9 @@ message StartInstanceStatefulProcessing {
   required string checkpoint_id = 1;
 }
 
-// stmgr -> stmgr messages
+/*
+ * stmgr -> stmgr messages
+ */
 
 // Once stmgr receives StoreInstanceStateCheckpoint from an instance,
 // it sends this message to all of that instance's 

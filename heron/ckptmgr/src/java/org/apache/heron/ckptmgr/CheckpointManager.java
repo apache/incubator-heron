@@ -45,8 +45,8 @@ public class CheckpointManager {
   private static final String CHECKPOINT_MANAGER_HOST = "127.0.0.1";
 
   // The looper drives CheckpointManagerServer
-  private final NIOLooper checkpointManagerServerLoop;
-  private final CheckpointManagerServer checkpointManagerServer;
+  private NIOLooper checkpointManagerServerLoop;
+  private CheckpointManagerServer checkpointManagerServer;
 
   // Print usage options
   private static void usage(Options options) {
@@ -128,14 +128,21 @@ public class CheckpointManager {
     return options;
   }
 
-  public CheckpointManager(
-      String topologyName, String topologyId, String checkpointMgrId,
-      String serverHost, int serverPort,
-      SystemConfig systemConfig, CheckpointManagerConfig checkpointManagerConfig)
+  public CheckpointManager() {
+  }
+
+  public void init(
+      String topologyName,
+      String topologyId,
+      String checkpointMgrId,
+      String serverHost,
+      int serverPort,
+      SystemConfig systemConfig,
+      CheckpointManagerConfig checkpointManagerConfig)
       throws IOException, CheckpointManagerException {
 
-    this.checkpointManagerServerLoop = new NIOLooper();
-
+    LOG.info("Initializing CheckpointManager");
+    checkpointManagerServerLoop = new NIOLooper();
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(
             checkpointManagerConfig.getWriteBatchSize(),
@@ -147,25 +154,7 @@ public class CheckpointManager {
             checkpointManagerConfig.getMaximumPacketSize());
 
     // Setup the IStatefulStorage
-    // TODO(mfu): This should be done in an executor driven by another thread, kind of async
-    IStatefulStorage statefulStorage;
-    String classname = checkpointManagerConfig.getStorageClassname();
-    try {
-      statefulStorage = (IStatefulStorage) Class.forName(classname).newInstance();
-    } catch (InstantiationException e) {
-      throw new CheckpointManagerException(classname + " class must have a no-arg constructor.", e);
-    } catch (IllegalAccessException e) {
-      throw new CheckpointManagerException(classname + " class must be concrete.", e);
-    } catch (ClassNotFoundException e) {
-      throw new CheckpointManagerException(classname + " class must be a class path.", e);
-    }
-
-    try {
-      statefulStorage.init(
-          Collections.unmodifiableMap(checkpointManagerConfig.getStatefulStorageConfig()));
-    } catch (StatefulStorageException e) {
-      throw new CheckpointManagerException(classname + " init threw exception", e);
-    }
+    IStatefulStorage statefulStorage = setupStatefulStorage(topologyName, checkpointManagerConfig);
 
     // Start the server
     this.checkpointManagerServer = new CheckpointManagerServer(
@@ -179,6 +168,33 @@ public class CheckpointManager {
     LOG.info("Starting CheckpointManager Server");
     checkpointManagerServer.start();
     checkpointManagerServerLoop.loop();
+  }
+
+  private static IStatefulStorage setupStatefulStorage(
+      String topologyName,
+      CheckpointManagerConfig checkpointManagerConfig) throws CheckpointManagerException {
+
+    IStatefulStorage statefulStorage;
+    String classname = checkpointManagerConfig.getStorageClassname();
+
+    try {
+      statefulStorage = (IStatefulStorage) Class.forName(classname).newInstance();
+    } catch (InstantiationException e) {
+      throw new CheckpointManagerException(classname + " class must have a no-arg constructor.", e);
+    } catch (IllegalAccessException e) {
+      throw new CheckpointManagerException(classname + " class must be concrete.", e);
+    } catch (ClassNotFoundException e) {
+      throw new CheckpointManagerException(classname + " class must be a class path.", e);
+    }
+
+    try {
+      statefulStorage.init(topologyName,
+          Collections.unmodifiableMap(checkpointManagerConfig.getStatefulStorageConfig()));
+    } catch (StatefulStorageException e) {
+      throw new CheckpointManagerException(classname + " init threw exception", e);
+    }
+
+    return statefulStorage;
   }
 
   public static void main(String[] args) throws IOException,
@@ -236,9 +252,9 @@ public class CheckpointManager {
 
     LOG.info("System Config: " + systemConfig);
 
-    CheckpointManager checkpointManager =
-        new CheckpointManager(topologyName, topologyId, ckptmgrId,
-            CHECKPOINT_MANAGER_HOST, port, systemConfig, ckptmgrConfig);
+    CheckpointManager checkpointManager = new CheckpointManager();
+    checkpointManager.init(topologyName, topologyId, ckptmgrId,
+        CHECKPOINT_MANAGER_HOST, port, systemConfig, ckptmgrConfig);
     checkpointManager.startAndLoop();
 
     LOG.info("Loops terminated. Exiting.");

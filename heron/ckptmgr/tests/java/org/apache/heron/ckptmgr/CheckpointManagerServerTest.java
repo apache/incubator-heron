@@ -33,6 +33,7 @@ import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 
 import static org.apache.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
@@ -149,7 +150,8 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
-                verify(statefulStorage).store(any(Checkpoint.class));
+                verify(statefulStorage).storeCheckpoint(any(CheckpointPartitionInfo.class),
+                    any(Checkpoint.class));
                 assertEquals(CHECKPOINT_ID,
                     ((CheckpointManager.SaveInstanceStateResponse) response).getCheckpointId());
                 assertEquals(instance,
@@ -161,8 +163,9 @@ public class CheckpointManagerServerTest {
 
   @Test
   public void testGetInstanceState() throws Exception {
-    final Checkpoint checkpoint = new Checkpoint(TOPOLOGY_NAME, instance, instanceStateCheckpoint);
-    when(statefulStorage.restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance)).thenReturn(checkpoint);
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(CHECKPOINT_ID, instance);
+    final Checkpoint checkpoint = new Checkpoint(instanceStateCheckpoint);
+    when(statefulStorage.restoreCheckpoint(info)).thenReturn(checkpoint);
 
     runTest(TestRequestHandler.RequestType.GET_INSTANCE_STATE,
         new HeronServerTester.SuccessResponseHandler(
@@ -171,7 +174,7 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
-                verify(statefulStorage).restore(TOPOLOGY_NAME, CHECKPOINT_ID, instance);
+                verify(statefulStorage).restoreCheckpoint(info);
                 assertEquals(checkpoint.getCheckpoint(),
                     ((CheckpointManager.GetInstanceStateResponse) response).getCheckpoint());
               }
@@ -188,7 +191,7 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
-                verify(statefulStorage).dispose(anyString(), anyString(), anyBoolean());
+                verify(statefulStorage).dispose(anyString(), anyBoolean());
               }
             })
     );

@@ -22,8 +22,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
-import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointMetadata;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -33,9 +34,12 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   private static final String ROOT_PATH_KEY = "heron.statefulstorage.localfs.root.path";
 
   private String checkpointRootPath;
+  private String topologyName;
 
   @Override
-  public void init(Map<String, Object> conf) throws StatefulStorageException {
+  public void init(String topology, final Map<String, Object> conf)
+      throws StatefulStorageException {
+    this.topologyName = topology;
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
     if (checkpointRootPath != null) {
       checkpointRootPath = checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
@@ -49,15 +53,15 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public void store(Checkpoint checkpoint) throws StatefulStorageException {
-    String path = getCheckpointPath(checkpoint.getTopologyName(), checkpoint.getCheckpointId(),
-                                    checkpoint.getComponent(), checkpoint.getTaskId());
+  public void storeCheckpoint(CheckpointPartitionInfo info, Checkpoint checkpoint)
+      throws StatefulStorageException {
+    String path = getCheckpointPath(info.getCheckpointId(),
+                                    info.getComponent(), info.getPartitionId());
 
     // We would try to create but we would not enforce this operation successful,
     // since it is possible already created by others
-    String checkpointDir = getCheckpointDir(checkpoint.getTopologyName(),
-                                            checkpoint.getCheckpointId(),
-                                            checkpoint.getComponent());
+    String checkpointDir = getCheckpointDir(info.getCheckpointId(),
+                                            info.getComponent());
     FileUtils.createDirectory(checkpointDir);
 
     // Do a check after the attempt
@@ -74,11 +78,10 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public Checkpoint restore(String topologyName, String checkpointId,
-                            PhysicalPlans.Instance instanceInfo) throws StatefulStorageException {
-    String path = getCheckpointPath(topologyName, checkpointId,
-                                    instanceInfo.getInfo().getComponentName(),
-                                    instanceInfo.getInfo().getTaskId());
+  public Checkpoint restoreCheckpoint(CheckpointPartitionInfo info)
+      throws StatefulStorageException {
+    String path = getCheckpointPath(info.getCheckpointId(), info.getComponent(),
+                                    info.getPartitionId());
 
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {
@@ -90,16 +93,29 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       } catch (InvalidProtocolBufferException e) {
         throw new StatefulStorageException("Failed to parse the data", e);
       }
-      return new Checkpoint(topologyName, instanceInfo, state);
+      return new Checkpoint(state);
     } else {
       throw new StatefulStorageException("Failed to parse the data");
     }
   }
 
   @Override
-  public void dispose(String topologyName, String oldestCheckpointPreserved,
-                      boolean deleteAll) throws StatefulStorageException {
-    String topologyCheckpointRoot = getTopologyCheckpointRoot(topologyName);
+  public void storeComponentMetaData(CheckpointPartitionInfo info, CheckpointMetadata metadata)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+  }
+
+  @Override
+  public CheckpointMetadata restoreComponentMetadata(CheckpointPartitionInfo info)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+    return null;
+  }
+
+  @Override
+  public void dispose(String oldestCheckpointPreserved, boolean deleteAll)
+      throws StatefulStorageException {
+    String topologyCheckpointRoot = getTopologyCheckpointRoot();
 
     if (deleteAll) {
       // Clean all checkpoint states
@@ -125,18 +141,15 @@ public class LocalFileSystemStorage implements IStatefulStorage {
     }
   }
 
-  private String getTopologyCheckpointRoot(String topologyName) {
+  private String getTopologyCheckpointRoot() {
     return String.format("%s/%s", checkpointRootPath, topologyName);
   }
 
-  private String getCheckpointDir(String topologyName, String checkpointId, String componentName) {
-    return String.format("%s/%s/%s",
-        getTopologyCheckpointRoot(topologyName), checkpointId, componentName);
+  private String getCheckpointDir(String checkpointId, String componentName) {
+    return String.format("%s/%s/%s", getTopologyCheckpointRoot(), checkpointId, componentName);
   }
 
-  private String getCheckpointPath(String topologyName, String checkpointId,
-                                   String componentName, int taskId) {
-    return String.format("%s/%d", getCheckpointDir(topologyName, checkpointId, componentName),
-                         taskId);
+  private String getCheckpointPath(String checkpointId, String componentName, int taskId) {
+    return String.format("%s/%d", getCheckpointDir(checkpointId, componentName), taskId);
   }
 }
