@@ -19,12 +19,23 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.apache.heron.spi.common.Config;
+
 import static org.junit.Assert.assertTrue;
 
 public class RegistryTest {
 
   @Test
   public void testGetDownloader() throws Exception {
+    Map<String, String> protocols = new HashMap<>();
+    protocols.put("http", "org.apache.heron.downloader.HttpDownloader");
+    protocols.put("https", "org.apache.heron.downloader.HttpDownloader");
+    protocols.put("distributedlog", "org.apache.heron.downloader.DLDownloader");
+    protocols.put("file", "org.apache.heron.downloader.FileDownloader");
+    Config config = Config.newBuilder()
+        .put("heron.downloader.registry", protocols)
+        .build();
+
     Map<String, Class<? extends Downloader>> downloaders = new HashMap<>();
     downloaders.put("http", HttpDownloader.class);
     downloaders.put("https", HttpDownloader.class);
@@ -32,13 +43,18 @@ public class RegistryTest {
     downloaders.put("file", FileDownloader.class);
 
     URI httpUri = URI.create("http://127.0.0.1/test/http");
-    Downloader downloader = Registry.getDownloader(downloaders, httpUri);
+    Class<? extends Downloader> clazz = Registry.UriToClass(config, httpUri);
+    Downloader downloader = Registry.getDownloader(clazz, httpUri);
     assertTrue(downloader instanceof HttpDownloader);
+
     URI httpsUri = URI.create("https://127.0.0.1/test/http");
-    downloader = Registry.getDownloader(downloaders, httpsUri);
+    clazz = Registry.UriToClass(config, httpsUri);
+    downloader = Registry.getDownloader(clazz, httpsUri);
     assertTrue(downloader instanceof HttpDownloader);
+
     URI dlUri = URI.create("distributedlog://127.0.0.1/test/distributedlog");
-    downloader = Registry.getDownloader(downloaders, dlUri);
+    clazz = Registry.UriToClass(config, dlUri);
+    downloader = Registry.getDownloader(clazz, dlUri);
     assertTrue(downloader instanceof DLDownloader);
   }
 

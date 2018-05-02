@@ -17,8 +17,6 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -29,7 +27,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.ConfigLoader;
-import org.apache.heron.spi.common.Key;
 
 public final class DownloadRunner {
 
@@ -184,14 +181,8 @@ public final class DownloadRunner {
       file.mkdirs();
     }
 
-    Map<String, Class<? extends Downloader>> downloaders = new HashMap<>();
-    for (Map.Entry<String, Object> e
-        : ((Map<String, Object>) config.get(Key.DOWNLOADER_PROTOCOLS)).entrySet()) {
-      Class clazz = Class.forName((String) e.getValue());
-      downloaders.put(e.getKey(), clazz);
-    }
-
-    final Downloader downloader = Registry.getDownloader(downloaders, topologyLocation);
+    Class clazz = Registry.UriToClass(config, topologyLocation);
+    final Downloader downloader = Registry.getDownloader(clazz, topologyLocation);
     downloader.download(topologyLocation, topologyDestination);
   }
 

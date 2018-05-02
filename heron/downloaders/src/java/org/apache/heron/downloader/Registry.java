@@ -17,21 +17,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Key;
+
 final class Registry {
 
   private Registry() { }
 
-  public static Downloader getDownloader(
-      Map<String, Class<? extends Downloader>> downloaders, URI uri) throws Exception {
+  public static Class<? extends Downloader> UriToClass(Config config, URI uri) throws Exception {
     final String scheme = uri.getScheme().toLowerCase();
-    if (!downloaders.containsKey(scheme)) {
+    Map<String, Object> yamlConfig = (Map<String, Object>) config.get(Key.DOWNLOADER_PROTOCOLS);
+    if (!yamlConfig.containsKey(scheme)) {
       throw new RuntimeException(
           String.format("Unable to create downloader unsupported uri %s", uri.toString()));
     }
+    Class clazz = Class.forName((String) yamlConfig.get(scheme));
+    return clazz;
+  }
 
+  public static Downloader getDownloader(
+      Class<? extends Downloader> downloaderClass, URI uri) throws Exception {
     try {
-      final Class<? extends Downloader> downloaderClass = downloaders.get(scheme);
-
       return downloaderClass.getConstructor().newInstance();
     } catch (InstantiationException | IllegalAccessException
         | InvocationTargetException | NoSuchMethodException e) {
