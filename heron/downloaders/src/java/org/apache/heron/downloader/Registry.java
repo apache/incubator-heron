@@ -15,39 +15,22 @@ package org.apache.heron.downloader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 final class Registry {
 
-  private static final Map<String, Class<? extends Downloader>> DOWNLOADERS =
-      new HashMap<>();
+  private Registry() { }
 
-  static {
-    DOWNLOADERS.put("http", HttpDownloader.class);
-    DOWNLOADERS.put("https", HttpDownloader.class);
-    DOWNLOADERS.put("distributedlog", DLDownloader.class);
-    DOWNLOADERS.put("file", FileDownloader.class);
-  }
-
-  private static final Registry INSTANCE = new Registry();
-
-  private Registry() {
-  }
-
-  static Registry get() {
-    return INSTANCE;
-  }
-
-  Downloader getDownloader(URI uri) throws Exception {
+  public static Downloader getDownloader(
+      Map<String, Class<? extends Downloader>> downloaders, URI uri) throws Exception {
     final String scheme = uri.getScheme().toLowerCase();
-    if (!DOWNLOADERS.containsKey(scheme)) {
+    if (!downloaders.containsKey(scheme)) {
       throw new RuntimeException(
           String.format("Unable to create downloader unsupported uri %s", uri.toString()));
     }
 
     try {
-      final Class<? extends Downloader> downloaderClass = DOWNLOADERS.get(scheme);
+      final Class<? extends Downloader> downloaderClass = downloaders.get(scheme);
 
       return downloaderClass.getConstructor().newInstance();
     } catch (InstantiationException | IllegalAccessException

@@ -149,6 +149,10 @@ public class Context {
     return cfg.getStringValue(Key.UPLOADER_YAML);
   }
 
+  public static String downloaderFile(Config cfg) {
+    return cfg.getStringValue(Key.DOWNLOADER_YAML);
+  }
+
   public static String schedulerJar(Config cfg) {
     return cfg.getStringValue(Key.SCHEDULER_JAR);
   }

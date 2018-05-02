@@ -14,6 +14,8 @@
 package org.apache.heron.downloader;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -23,14 +25,20 @@ public class RegistryTest {
 
   @Test
   public void testGetDownloader() throws Exception {
+    Map<String, Class<? extends Downloader>> downloaders = new HashMap<>();
+    downloaders.put("http", HttpDownloader.class);
+    downloaders.put("https", HttpDownloader.class);
+    downloaders.put("distributedlog", DLDownloader.class);
+    downloaders.put("file", FileDownloader.class);
+
     URI httpUri = URI.create("http://127.0.0.1/test/http");
-    Downloader downloader = Registry.get().getDownloader(httpUri);
+    Downloader downloader = Registry.getDownloader(downloaders, httpUri);
     assertTrue(downloader instanceof HttpDownloader);
     URI httpsUri = URI.create("https://127.0.0.1/test/http");
-    downloader = Registry.get().getDownloader(httpsUri);
+    downloader = Registry.getDownloader(downloaders, httpsUri);
     assertTrue(downloader instanceof HttpDownloader);
     URI dlUri = URI.create("distributedlog://127.0.0.1/test/distributedlog");
-    downloader = Registry.get().getDownloader(dlUri);
+    downloader = Registry.getDownloader(downloaders, dlUri);
     assertTrue(downloader instanceof DLDownloader);
   }
 
