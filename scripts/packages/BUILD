@@ -268,7 +268,7 @@ pkg_tar(
 
 pkg_tar(
     name = "heron-lib-downloader",
-    package_dir = "lib/downloader",
+    package_dir = "lib/downloaders",
     srcs = heron_client_lib_downloader_files(),
 )
 
