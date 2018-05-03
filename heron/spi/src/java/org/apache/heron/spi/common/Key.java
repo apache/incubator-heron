@@ -149,7 +149,7 @@ public enum Key {
   COMPONENT_JVM_OPTS_IN_BASE64   ("heron.runtime.component.jvm.opts.in.base64",    Type.STRING),
   INSTANCE_JVM_OPTS_IN_BASE64    ("heron.runtime.instance.jvm.opts.in.base64",     Type.STRING),
   NUM_CONTAINERS                 ("heron.runtime.num.containers",                  Type.INTEGER),
-  DOWNLOADER_PROTOCOLS           ("heron.downloader.registry",                     Type.STRING),
+  DOWNLOADER_PROTOCOLS           ("heron.downloader.registry",                     Type.MAP),
 
   //release info
   HERON_RELEASE_PACKAGE          ("heron.release.package",         Type.STRING),
