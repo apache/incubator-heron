@@ -427,7 +427,7 @@ def run(command, parser, cl_args, unknown_args):
         cl_args['extra_launch_classpath']
       return SimpleResult(Status.InvocationError, err_context)
 
-  # create a temporary directory for topology file and topology definition file
+  # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
   opts.cleaned_up_files.append(tmp_dir)
 
