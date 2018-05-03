@@ -368,13 +368,15 @@ def submit_cpp(cl_args, unknown_args, tmp_dir):
 
   return launch_topologies(cl_args, topology_file, tmp_dir)
 
-################################################################################
-#
-#  the topology's binary.
-################################################################################
-# pylint: disable=unused-argument
-def submit_cpp(cl_args, unknown_args, tmp_dir):
-
+def download(uri):
+  current_path = os.path.realpath(__file__)
+  print current_path
+  tmp_dir = tempfile.mkdtemp()
+  subprocess.call([current_path + "downloader.sh", uri, tmp_dir])
+  suffix = (".jar", ".tar", ".tar.gz", ".pex", ".dylib", ".so")
+  for f in os.listdir(tmp_dir):
+    if f.endswith(suffix):
+      return os.path.join(tmp_dir, f)
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -397,13 +399,8 @@ def run(command, parser, cl_args, unknown_args):
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 
-  # create a temporary directory for topology file and topology definition file
-  tmp_dir = tempfile.mkdtemp()
-
   if urlparse.urlparse(topology_file).scheme:
-    current_path = os.path.realpath(__file__)
-    subprocess.call([current_path + "downloader.sh", topology_file, tmp_dir + "topology.jar"])
-    topology_file = tmp_dir + "topology.jar"
+    topology_file = download(topology_file)
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
@@ -430,7 +427,8 @@ def run(command, parser, cl_args, unknown_args):
         cl_args['extra_launch_classpath']
       return SimpleResult(Status.InvocationError, err_context)
 
-  # temporary directory for topology definition file
+  # create a temporary directory for topology file and topology definition file
+  tmp_dir = tempfile.mkdtemp()
   opts.cleaned_up_files.append(tmp_dir)
 
   # if topology needs to be launched in deactivated state, do it so
