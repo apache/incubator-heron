@@ -15,7 +15,6 @@ metricscachemgr_deps_files = heron_java_proto_files() + [
            "//heron/common/src/java:utils-java",
            "//heron/scheduler-core/src/java:scheduler-java",
            "//heron/statemgrs/src/java:statemgrs-java",
-           "//heron/metricsmgr/src/thrift:thrift_scribe_java",
            "//heron/metricsmgr/src/java:metricsmgr-java",
            "//third_party/java:cli",
            "//third_party/java:guava",

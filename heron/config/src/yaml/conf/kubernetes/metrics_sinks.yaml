@@ -115,20 +115,6 @@ metricscache-sink:
     "__server/__time_spent_back_pressure_initiated": SUM
     "__time_spent_back_pressure_by_compid": SUM
 
-### Config for scribe-sink
-# scribe-sink:
-#   class: "org.apache.heron.metricsmgr.sink.scribe.ScribeSink"
-#   flush-frequency-ms: 60000
-#   sink-restart-attempts: -1 # Forever
-#   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
-#   scribe-port: 1463 # The port of scribe to be exported metrics to
-#   scribe-category: "scribe-category" # The category of the scribe to be exported metrics to
-#   service-namespace: "heron" # The service name of the metrics in scribe-category
-#   scribe-timeout-ms: 200 # The timeout in seconds for metrics manager to write metrics to scribe
-#   scribe-connect-server-attempts: 2 # The maximum retry attempts to connect to scribe server
-#   scribe-retry-attempts: 5 # The maximum retry attempts to write metrics to scribe
-#   scribe-retry-interval-ms: 100 # The interval to retry to write metrics to scribe
-
 ### Config for graphite-sink
 ### Currently the graphite-sink is disabled
 # graphite-sink:
