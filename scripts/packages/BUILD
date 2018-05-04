@@ -10,6 +10,7 @@ load("//tools/rules:heron_client.bzl", "heron_client_lib_metricscachemgr_files")
 load("//tools/rules:heron_client.bzl", "heron_client_lib_packing_files")
 load("//tools/rules:heron_client.bzl", "heron_client_lib_statemgr_files")
 load("//tools/rules:heron_client.bzl", "heron_client_lib_uploader_files")
+load("//tools/rules:heron_client.bzl", "heron_client_lib_downloader_files")
 load("//tools/rules:heron_client.bzl", "heron_client_lib_healthmgr_files")
 
 load("//tools/rules:heron_core.bzl", "heron_core_files")
@@ -266,6 +267,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-lib-downloader",
+    package_dir = "lib/downloaders",
+    srcs = heron_client_lib_downloader_files(),
+)
+
+pkg_tar(
     name = "heron-lib-healthmgr",
     package_dir = "lib/healthmgr",
     srcs = heron_client_lib_healthmgr_files(),
@@ -328,6 +335,7 @@ pkg_tar(
         ":heron-lib-statemgr",
         ":heron-lib-metricscachemgr",
         ":heron-lib-uploader",
+        ":heron-lib-downloader",
     ],
 )
 

@@ -1,0 +1,6 @@
+# downloader class for protocols
+heron.downloader.registry:
+  http:              org.apache.heron.downloader.HttpDownloader
+  https:             org.apache.heron.downloader.HttpDownloader
+  distributedlog:    org.apache.heron.downloader.DLDownloader
+  file:              org.apache.heron.downloader.FileDownloader
