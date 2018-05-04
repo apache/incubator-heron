@@ -8,11 +8,9 @@ metricscachemgr_deps_files = [
     "//heron/proto:proto_common_java",
     "//heron/proto:proto_metrics_java",
     "//heron/proto:proto_tmaster_java",
-    "//heron/metricsmgr/src/thrift:thrift_scribe_java",
     "//third_party/java:jackson",
     "//third_party/java:cli",
     "//third_party/java:guava",
-    "//third_party/java:logging", # slf4j is only used for thrift in scribe-sink
     "//heron/proto:proto_topology_java",
     "//heron/metricscachemgr/src/java:metricscachemgr-java",
     "//heron/spi/src/java:packing-spi-java",
