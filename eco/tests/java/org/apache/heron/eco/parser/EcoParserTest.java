@@ -77,17 +77,17 @@ public class EcoParserTest {
       + "# spout definitions\n"
       + "spouts:\n"
       + "  - id: \"spout-1\"\n"
-      + "    className: \"com.twitter.heron.sample.TestWordSpout\"\n"
+      + "    className: \"org.apache.heron.sample.TestWordSpout\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "# bolt definitions\n"
       + "bolts:\n"
       + "  - id: \"bolt-1\"\n"
-      + "    className: \"com.twitter.heron.sample.TestWordCounter\"\n"
+      + "    className: \"org.apache.heron.sample.TestWordCounter\"\n"
       + "    parallelism: 2\n"
       + "\n"
       + "  - id: \"bolt-2\"\n"
-      + "    className: \"com.twitter.heron.sample.LogInfoBolt\"\n"
+      + "    className: \"org.apache.heron.sample.LogInfoBolt\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "#stream definitions\n"
@@ -140,17 +140,17 @@ public class EcoParserTest {
       + "# spout definitions\n"
       + "spouts:\n"
       + "  - id: \"spout-1\"\n"
-      + "    className: \"com.twitter.heron.sample.TestWordSpout\"\n"
+      + "    className: \"org.apache.heron.sample.TestWordSpout\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "# bolt definitions\n"
       + "bolts:\n"
       + "  - id: \"bolt-1\"\n"
-      + "    className: \"com.twitter.heron.sample.TestWordCounter\"\n"
+      + "    className: \"org.apache.heron.sample.TestWordCounter\"\n"
       + "    parallelism: 2\n"
       + "\n"
       + "  - id: \"bolt-2\"\n"
-      + "    className: \"com.twitter.heron.sample.LogInfoBolt\"\n"
+      + "    className: \"org.apache.heron.sample.LogInfoBolt\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "#stream definitions\n"
@@ -298,7 +298,7 @@ public class EcoParserTest {
       + "\n"
       + "components:\n"
       + "  - id: \"property-holder\"\n"
-      + "    className: \"com.twitter.heron.examples.eco.TestPropertyHolder\"\n"
+      + "    className: \"org.apache.heron.examples.eco.TestPropertyHolder\"\n"
       + "    constructorArgs:\n"
       + "      - \"some argument\"\n"
       + "    properties:\n"
@@ -309,18 +309,18 @@ public class EcoParserTest {
       + "\n"
       + "spouts:\n"
       + "  - id: \"spout-1\"\n"
-      + "    className: \"com.twitter.heron.examples.eco.TestFibonacciSpout\"\n"
+      + "    className: \"org.apache.heron.examples.eco.TestFibonacciSpout\"\n"
       + "    constructorArgs:\n"
       + "      - ref: \"property-holder\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "bolts:\n"
       + "  - id: \"even-and-odd-bolt\"\n"
-      + "    className: \"com.twitter.heron.examples.eco.EvenAndOddBolt\"\n"
+      + "    className: \"org.apache.heron.examples.eco.EvenAndOddBolt\"\n"
       + "    parallelism: 1\n"
       + "\n"
       + "  - id: \"ibasic-print-bolt\"\n"
-      + "    className: \"com.twitter.heron.examples.eco.TestIBasicPrintBolt\"\n"
+      + "    className: \"org.apache.heron.examples.eco.TestIBasicPrintBolt\"\n"
       + "    parallelism: 1\n"
       + "    configMethods:\n"
       + "      - name: \"sampleConfigurationMethod\"\n"
@@ -328,7 +328,7 @@ public class EcoParserTest {
       + "          - \"${ecoPropertyOne}\"\n"
       + "\n"
       + "  - id: \"sys-out-bolt\"\n"
-      + "    className: \"com.twitter.heron.examples.eco.TestPrintBolt\"\n"
+      + "    className: \"org.apache.heron.examples.eco.TestPrintBolt\"\n"
       + "    parallelism: 1";
 
   private static final String SAMPLE_PROPERTIES = "ecoPropertyOne=ecoValueOne\n"
@@ -408,13 +408,13 @@ public class EcoParserTest {
     BoltDefinition bolt1 = topologyDefinition.getBolt(BOLT_1);
     assertNotNull(bolt1);
     assertEquals(2, bolt1.getParallelism());
-    assertEquals("com.twitter.heron.sample.TestWordCounter", bolt1.getClassName());
+    assertEquals("org.apache.heron.sample.TestWordCounter", bolt1.getClassName());
     assertEquals(BOLT_1, bolt1.getId());
 
 
     BoltDefinition bolt2 = topologyDefinition.getBolt(BOLT_2);
     assertEquals(1, bolt2.getParallelism());
-    assertEquals("com.twitter.heron.sample.LogInfoBolt", bolt2.getClassName());
+    assertEquals("org.apache.heron.sample.LogInfoBolt", bolt2.getClassName());
     assertEquals(BOLT_2, bolt2.getId());
 
     List<StreamDefinition> streamDefinitions = topologyDefinition.getStreams();
