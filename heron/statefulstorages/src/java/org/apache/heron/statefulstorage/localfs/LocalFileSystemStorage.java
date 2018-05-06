@@ -1,16 +1,21 @@
-// Copyright 2017 Twitter. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.apache.heron.statefulstorage.localfs;
 
@@ -109,17 +114,21 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       }
     } else {
       String[] names = new File(topologyCheckpointRoot).list();
-      for (String name : names) {
-        if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
+      if (names == null) {
+        LOG.warning("There is no such checkpoint root path: " + topologyCheckpointRoot);
+      } else {
+        for (String name : names) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
+            FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
+          }
         }
-      }
 
-      // Do a double check. Now all checkpoints with smaller checkpoint id should be cleaned
-      names = new File(topologyCheckpointRoot).list();
-      for (String name : names) {
-        if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          throw new StatefulStorageException("Failed to delete " + name);
+        // Do a double check. Now all checkpoints with smaller checkpoint id should be cleaned
+        names = new File(topologyCheckpointRoot).list();
+        for (String name : names) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
+            throw new StatefulStorageException("Failed to delete " + name);
+          }
         }
       }
     }
