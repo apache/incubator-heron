@@ -164,7 +164,6 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
-                System.out.println("***** 0");
                 verify(statefulStorage).storeCheckpoint(any(CheckpointPartitionInfo.class),
                     any(Checkpoint.class));
                 assertEquals(CHECKPOINT_ID,
@@ -180,7 +179,8 @@ public class CheckpointManagerServerTest {
   public void testGetInstanceState() throws Exception {
     final CheckpointPartitionInfo info = new CheckpointPartitionInfo(CHECKPOINT_ID, instance);
     final Checkpoint checkpoint = new Checkpoint(instanceStateCheckpoint);
-    when(statefulStorage.restoreCheckpoint(info)).thenReturn(checkpoint);
+    when(statefulStorage.restoreCheckpoint(any(CheckpointPartitionInfo.class)))
+        .thenReturn(checkpoint);
 
     runTest(TestRequestHandler.RequestType.GET_INSTANCE_STATE,
         new HeronServerTester.SuccessResponseHandler(
