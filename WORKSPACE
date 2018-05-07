@@ -891,10 +891,9 @@ new_http_archive(
 
 new_http_archive(
     name = "com_github_jbeder_yaml_cpp",
-    urls = ["https://storage.googleapis.com/heron-packages/yaml-cpp-noboost.tar.gz"],
-    strip_prefix = "yaml-cpp-noboost",
+    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
+    strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     build_file = "third_party/yaml-cpp/yaml.BUILD",
-    sha256 = "87684ea7a640733e2fe2f753348e306a6764c88fe3f30518c3273e367ff3d17b",
 )
 # end 3rdparty C++ dependencies
 
