@@ -68,7 +68,12 @@ void Piper::SignalMainThread() {
   // Ths os will take care of that.
   int rc = write(pipers_[1], "a", 1);
   if (rc != 1) {
-    LOG(FATAL) << "Write to pipe failed in Piper with return code: " << rc;
+    // Not using LOG(FATAL) here due to dead-lock causing process stuck problem
+    // Call LOG(ERROR) twice to make sure the first call finished successfully
+    // Manually call abort() to terminate the process with a coredump
+    LOG(ERROR) << "Write to pipe failed in Piper with return code: " << rc;
+    LOG(ERROR) << "Aborting the process...";
+    abort();
   }
 }
 
