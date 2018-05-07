@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -96,15 +97,15 @@ public class HDFSStorageTest {
 
     doNothing().when(hdfsStorage).createDir(anyString());
 
-    //hdfsStorage.store(checkpoint);
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    hdfsStorage.storeCheckpoint(info, checkpoint);
 
     verify(mockCheckpointState).writeTo(mockFSDateOutputStream);
   }
 
   @Test
   public void testRestore() throws Exception {
-    Checkpoint restoreCheckpoint = new Checkpoint(instanceCheckpointState);
-
     FSDataInputStream mockFSDataInputStream = mock(FSDataInputStream.class);
 
     when(mockFileSystem.open(any(Path.class))).thenReturn(mockFSDataInputStream);
@@ -113,8 +114,9 @@ public class HDFSStorageTest {
     PowerMockito.doReturn(instanceCheckpointState)
         .when(CheckpointManager.InstanceStateCheckpoint.class, "parseFrom", mockFSDataInputStream);
 
-    //hdfsStorage.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
-    //    StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    Checkpoint restoreCheckpoint = hdfsStorage.restoreCheckpoint(info);
     assertEquals(restoreCheckpoint.getCheckpoint(), instanceCheckpointState);
   }
 

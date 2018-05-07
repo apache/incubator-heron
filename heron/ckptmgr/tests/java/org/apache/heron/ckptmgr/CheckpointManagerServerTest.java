@@ -53,6 +53,7 @@ public class CheckpointManagerServerTest {
   private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
   private static CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
+  private static CheckpointManager.CheckpointComponentMetadata checkpointComponentMetadata;
   private static CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
   private static CheckpointManager.CleanStatefulCheckpointRequest cleanStatefulCheckpointRequest;
@@ -87,18 +88,26 @@ public class CheckpointManagerServerTest {
         .build();
 
     instanceStateCheckpoint = CheckpointManager.InstanceStateCheckpoint.newBuilder()
-            .setCheckpointId(CHECKPOINT_ID)
-            .setState(ByteString.copyFrom(BYTES))
-            .build();
+        .setCheckpointId(CHECKPOINT_ID)
+        .setState(ByteString.copyFrom(BYTES))
+        .setDataVersion("")
+        .build();
+
+    checkpointComponentMetadata = CheckpointManager.CheckpointComponentMetadata.newBuilder()
+        .setComponentName(COMPONENT_NAME)
+        .setParallelism(2)
+        .build();
 
     saveInstanceStateRequest = CheckpointManager.SaveInstanceStateRequest.newBuilder()
         .setInstance(instance)
         .setCheckpoint(instanceStateCheckpoint)
+        .setMetadata(checkpointComponentMetadata)
         .build();
 
     getInstanceStateRequest = CheckpointManager.GetInstanceStateRequest.newBuilder()
         .setInstance(instance)
         .setCheckpointId(CHECKPOINT_ID)
+        .setMetadata(checkpointComponentMetadata)
         .build();
 
     cleanStatefulCheckpointRequest = CheckpointManager.CleanStatefulCheckpointRequest.newBuilder()
@@ -150,6 +159,7 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
+                System.out.println("***** 0");
                 verify(statefulStorage).storeCheckpoint(any(CheckpointPartitionInfo.class),
                     any(Checkpoint.class));
                 assertEquals(CHECKPOINT_ID,

@@ -53,8 +53,9 @@ public interface IStatefulStorage {
   Checkpoint restoreCheckpoint(final CheckpointPartitionInfo info) throws StatefulStorageException;
 
   /**
-   * Store medata data for component. Ideally this function should only be called once
-   * for each component.
+   * Store medata data for component. Ideally in distributed storages this function should only
+   * be called once for each component. In local storages, the function should be called by
+   * every instance and the data should be stored with the checkpoint data for each partition.
    * @param info The information (reference key) for the checkpoint partition.
    * @param metadata The checkpoint metadata from a component.
    */

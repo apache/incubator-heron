@@ -29,13 +29,14 @@ import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
-//import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
-//import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -77,12 +78,13 @@ public class LocalFileSystemStorageTest {
 
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
     when(mockCheckpoint.getCheckpoint()).thenReturn(checkpoint);
-/*
-    localFileSystemStorage.store(mockCheckpoint);
+
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    localFileSystemStorage.storeCheckpoint(info, mockCheckpoint);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.writeToFile(anyString(), eq(checkpoint.toByteArray()), eq(true));
-*/
   }
 
   @Test
@@ -90,19 +92,13 @@ public class LocalFileSystemStorageTest {
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(checkpoint.toByteArray())
         .when(FileUtils.class, "readFromFile", anyString());
-/*
-    CheckpointPartitionInfo info = new CheckpointPartitionInfo(environment, topologyName,
-        StatefulStorageTestContext.CHECKPOINT_ID, instanceInfo.getComponentName(),
-        instance);
 
-    Checkpoint ckpt =
-        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, checkpoint);
-
-    localFileSystemStorage.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
 
+    Checkpoint ckpt = localFileSystemStorage.restoreCheckpoint(info);
+
     assertEquals(checkpoint, ckpt.getCheckpoint());
-*/
   }
 
   @Test

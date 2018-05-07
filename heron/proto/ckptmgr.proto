@@ -192,7 +192,8 @@ message InstanceStateCheckpoint {
 // This message encapsulates the info associated with
 // checkpoint metadata of a component
 message CheckpointComponentMetadata {
-  required int32 parallelism = 1;
+  required string component_name = 1;
+  required int32 parallelism = 2;
 }
 
 // This is the message that a stmgr sends
@@ -217,9 +218,8 @@ message SaveInstanceStateRequest {
   // Information about the instance whose state this is
   required heron.proto.system.Instance instance = 1;
   required InstanceStateCheckpoint checkpoint = 2;
-  // Stmgrs need to send meta data as well to the first instance of
-  // each component as well
-  optional CheckpointComponentMetadata metadata = 3;
+  // Stmgrs need to send meta data as well
+  required CheckpointComponentMetadata metadata = 3;
 }
 
 // After successfully saving state, this is what
@@ -235,6 +235,8 @@ message SaveInstanceStateResponse {
 message GetInstanceStateRequest {
   required heron.proto.system.Instance instance = 1;
   required string checkpoint_id = 2;
+  // Stmgrs need to send meta data as well to verify if there is any changes.
+  required CheckpointComponentMetadata metadata = 3;
 }
 
 // This is the response that Checkpoint Mgr sends to StMgr

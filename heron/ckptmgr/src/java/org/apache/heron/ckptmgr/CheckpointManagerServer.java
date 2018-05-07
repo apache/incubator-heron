@@ -209,7 +209,7 @@ public class CheckpointManagerServer extends HeronServer {
     Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
-                           + " component %s instance %s on connection %s",
+                           + " component %s partition %s on connection %s",
                            info.getCheckpointId(),
                            info.getComponent(),
                            info.getPartitionId(),
@@ -219,12 +219,12 @@ public class CheckpointManagerServer extends HeronServer {
     String errorMessage = "";
     try {
       statefulStorage.storeCheckpoint(info, checkpoint);
-      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
+      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s partition %s",
                              info.getCheckpointId(), info.getComponent(),
                              info.getPartitionId()));
     } catch (StatefulStorageException e) {
       errorMessage = String.format("Save checkpoint not successful for checkpointId "
-                                   + "%s component %s instance %s",
+                                   + "%s component %s partition %s",
                                    info.getCheckpointId(), info.getComponent(),
                                    info.getPartitionId());
       statusCode = Common.StatusCode.NOTOK;

@@ -14,21 +14,24 @@
 
 package org.apache.heron.spi.statefulstorage;
 
-import org.apache.heron.proto.ckptmgr.CheckpointManager;
+import org.apache.heron.proto.ckptmgr.CheckpointManager.CheckpointComponentMetadata;
 
 /**
  * The checkpoint metadata for a component.
  */
 public class CheckpointMetadata {
-  private CheckpointManager.CheckpointComponentMetadata metadata;
+  private CheckpointComponentMetadata metadata;
   private int nBytes;
 
-  public CheckpointMetadata(int parallelism) {
-//    this.metadata.setParallelism(parallelism);
+  public CheckpointMetadata(String componentName, int parallelism) {
+    this.metadata = CheckpointComponentMetadata.newBuilder()
+      .setComponentName(componentName)
+      .setParallelism(parallelism)
+      .build();
     this.nBytes = this.metadata.getSerializedSize();
   }
 
-  public CheckpointManager.CheckpointComponentMetadata getMetadata() {
+  public CheckpointComponentMetadata getMetadata() {
     return metadata;
   }
 

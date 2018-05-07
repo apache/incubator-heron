@@ -37,6 +37,7 @@ import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -94,15 +95,16 @@ public class DlogStorageTest {
     CheckpointManager.InstanceStateCheckpoint mockCheckpointState =
         mock(CheckpointManager.InstanceStateCheckpoint.class);
 
-//    Checkpoint checkpoint =
-//        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, mockCheckpointState);
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    Checkpoint checkpoint = new Checkpoint(mockCheckpointState);
 
     DistributedLogManager mockDLM = mock(DistributedLogManager.class);
     when(mockNamespace.openLog(anyString())).thenReturn(mockDLM);
     AppendOnlyStreamWriter mockWriter = mock(AppendOnlyStreamWriter.class);
     when(mockDLM.getAppendOnlyStreamWriter()).thenReturn(mockWriter);
 
-//    dlogStorage.store(checkpoint);
+    dlogStorage.storeCheckpoint(info, checkpoint);
 
     verify(mockWriter).markEndOfStream();
     verify(mockWriter).close();
@@ -110,9 +112,6 @@ public class DlogStorageTest {
 
   @Test
   public void testRestore() throws Exception {
-    Checkpoint restoreCheckpoint =
-        new Checkpoint(instanceStateCheckpoint);
-
     InputStream mockInputStream = mock(InputStream.class);
     doReturn(mockInputStream).when(dlogStorage).openInputStream(anyString());
 
@@ -121,10 +120,9 @@ public class DlogStorageTest {
         .when(CheckpointManager.InstanceStateCheckpoint.class,
             "parseFrom", mockInputStream);
 
-    //dlogStorage.restore(
-    //    StatefulStorageTestContext.TOPOLOGY_NAME,
-    //    StatefulStorageTestContext.CHECKPOINT_ID,
-    //    instance);
+    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    Checkpoint restoreCheckpoint = dlogStorage.restoreCheckpoint(info);
     assertEquals(restoreCheckpoint.getCheckpoint(), instanceStateCheckpoint);
   }
 
