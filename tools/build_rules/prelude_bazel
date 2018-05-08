@@ -4,11 +4,6 @@ load(
 )
 
 load(
-    "@//tools/rules:genthrift.bzl",
-    "thrift_library",
-)
-
-load(
     "@//tools/rules/pex:pex_rules.bzl",
     "pex_binary",
     "pex_library",

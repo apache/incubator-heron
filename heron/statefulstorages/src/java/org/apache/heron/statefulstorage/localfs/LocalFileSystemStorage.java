@@ -114,17 +114,21 @@ public class LocalFileSystemStorage implements IStatefulStorage {
       }
     } else {
       String[] names = new File(topologyCheckpointRoot).list();
-      for (String name : names) {
-        if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
+      if (names == null) {
+        LOG.warning("There is no such checkpoint root path: " + topologyCheckpointRoot);
+      } else {
+        for (String name : names) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
+            FileUtils.deleteDir(new File(topologyCheckpointRoot, name), true);
+          }
         }
-      }
 
-      // Do a double check. Now all checkpoints with smaller checkpoint id should be cleaned
-      names = new File(topologyCheckpointRoot).list();
-      for (String name : names) {
-        if (name.compareTo(oldestCheckpointPreserved) < 0) {
-          throw new StatefulStorageException("Failed to delete " + name);
+        // Do a double check. Now all checkpoints with smaller checkpoint id should be cleaned
+        names = new File(topologyCheckpointRoot).list();
+        for (String name : names) {
+          if (name.compareTo(oldestCheckpointPreserved) < 0) {
+            throw new StatefulStorageException("Failed to delete " + name);
+          }
         }
       }
     }
