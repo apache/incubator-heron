@@ -40,7 +40,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       status_finish(200)
       try:
         logger.info("Print stmgr backtrace to ./stmgr.bt")
-        cmd = 'timeout 3 gdb -batch -ex "run" -ex "bt" -p `cat stmgr-1.pid` 2>&1 > stmgr.bt'
+        cmd = 'timeout 3 gdb -batch -ex "bt" -p `cat stmgr-1.pid` 2>&1 > stmgr.bt'
         subprocess.call(cmd, shell=True)
       except Exception:
         logger.warning("Exception: ")
