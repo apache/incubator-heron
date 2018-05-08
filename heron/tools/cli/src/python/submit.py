@@ -30,6 +30,7 @@ from heron.proto import topology_pb2
 from heron.tools.cli.src.python.result import SimpleResult, Status
 import heron.tools.cli.src.python.args as cli_args
 import heron.tools.cli.src.python.execute as execute
+import heron.tools.cli.src.python.fetcher.fetcher as fetcher
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.cli.src.python.result as result
@@ -390,6 +391,11 @@ def run(command, parser, cl_args, unknown_args):
 
   # get the topology file name
   topology_file = cl_args['topology-file-name']
+
+  try:
+    topology_file = fetcher.fetch(topology_file)
+  except Exception:
+    pass # fixme
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
