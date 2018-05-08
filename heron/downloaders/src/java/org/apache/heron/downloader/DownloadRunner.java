@@ -170,8 +170,17 @@ public final class DownloadRunner {
             "Invalid mode: " + cmd.getOptionValue(CliArgs.MODE.text));
     }
 
-    final String uri = cmd.getOptionValue(CliArgs.TOPOLOGY_PACKAGE_URI.text, null);
-    final String destination = cmd.getOptionValue(CliArgs.EXTRACT_DESTINATION.text, null);
+    String uri = cmd.getOptionValue(CliArgs.TOPOLOGY_PACKAGE_URI.text, null);
+    String destination = cmd.getOptionValue(CliArgs.EXTRACT_DESTINATION.text, null);
+    if (uri == null && destination == null) {
+      String[] leftOverArgs = cmd.getArgs();
+      if (leftOverArgs.length != 2) {
+        System.err.println("Usage: downloader <topology-package-uri> <extract-destination>");
+        return;
+      }
+      uri = leftOverArgs[0];
+      destination = leftOverArgs[1];
+    }
 
     final URI topologyLocation = new URI(uri);
     final Path topologyDestination = Paths.get(destination);
