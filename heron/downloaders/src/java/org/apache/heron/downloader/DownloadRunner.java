@@ -76,7 +76,6 @@ public final class DownloadRunner {
         .longOpt(CliArgs.TOPOLOGY_PACKAGE_URI.text)
         .hasArgs()
         .argName(CliArgs.TOPOLOGY_PACKAGE_URI.text)
-        .required()
         .build();
 
     Option destination = Option.builder("f")
@@ -84,7 +83,6 @@ public final class DownloadRunner {
         .longOpt(CliArgs.EXTRACT_DESTINATION.text)
         .hasArgs()
         .argName(CliArgs.EXTRACT_DESTINATION.text)
-        .required()
         .build();
 
     Option heronHome = Option.builder("d")
@@ -172,6 +170,7 @@ public final class DownloadRunner {
 
     String uri = cmd.getOptionValue(CliArgs.TOPOLOGY_PACKAGE_URI.text, null);
     String destination = cmd.getOptionValue(CliArgs.EXTRACT_DESTINATION.text, null);
+    // make it compatible with old param format
     if (uri == null && destination == null) {
       String[] leftOverArgs = cmd.getArgs();
       if (leftOverArgs.length != 2) {
