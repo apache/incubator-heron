@@ -113,10 +113,10 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   sp_int32 byte_size = _request->ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  auto opkt = new OutgoingPacket(sop);
-  CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
-  CHECK_EQ(opkt->PackREQID(rid), 0);
-  CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
+  OutgoingPacket opkt(sop);
+  CHECK_EQ(opkt.PackString(_request->GetTypeName()), 0);
+  CHECK_EQ(opkt.PackREQID(rid), 0);
+  CHECK_EQ(opkt.PackProtocolBuffer(*_request, byte_size), 0);
 
   // delete the request
   delete _request;
@@ -124,7 +124,6 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   Connection* conn = static_cast<Connection*>(conn_);
   if (conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
-    delete opkt;
     responseHandlers[_expected_response_type](NULL, WRITE_ERROR);
     return;
   }
@@ -132,7 +131,6 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
     auto cb = [rid, this](EventLoop::Status s) { this->OnPacketTimer(rid, s); };
     CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, _msecs), 0);
   }
-  return;
 }
 
 void Client::InternalSendMessage(const google::protobuf::Message& _message) {
@@ -149,18 +147,15 @@ void Client::InternalSendMessage(const google::protobuf::Message& _message) {
   sp_int32 byte_size = _message.ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message.GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  auto opkt = new OutgoingPacket(sop);
-  CHECK_EQ(opkt->PackString(_message.GetTypeName()), 0);
-  CHECK_EQ(opkt->PackREQID(rid), 0);
-  CHECK_EQ(opkt->PackProtocolBuffer(_message, byte_size), 0);
+  OutgoingPacket opkt(sop);
+  CHECK_EQ(opkt.PackString(_message.GetTypeName()), 0);
+  CHECK_EQ(opkt.PackREQID(rid), 0);
+  CHECK_EQ(opkt.PackProtocolBuffer(_message, byte_size), 0);
 
   Connection* conn = static_cast<Connection*>(conn_);
   if (conn->sendPacket(opkt) != 0) {
     LOG(ERROR) << "Some problem sending message thru the connection. Dropping message" << std::endl;
-    delete opkt;
-    return;
   }
-  return;
 }
 
 void Client::InternalSendResponse(OutgoingPacket* _packet) {
@@ -171,7 +166,7 @@ void Client::InternalSendResponse(OutgoingPacket* _packet) {
   }
 
   Connection* conn = static_cast<Connection*>(conn_);
-  if (conn->sendPacket(_packet) != 0) {
+  if (conn->sendPacket(*_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping..." << std::endl;
     delete _packet;
     return;

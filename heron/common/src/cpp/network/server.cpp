@@ -175,15 +175,11 @@ void Server::OnNewPacket(Connection* _connection, IncomingPacket* _packet) {
 void Server::InternalSendResponse(Connection* _connection, OutgoingPacket* _packet) {
   if (active_connections_.find(_connection) == active_connections_.end()) {
     LOG(ERROR) << "Trying to send on unknown connection! Dropping.. " << std::endl;
-    delete _packet;
     return;
   }
-  if (_connection->sendPacket(_packet) != 0) {
+  if (_connection->sendPacket(*_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping... " << std::endl;
-    delete _packet;
-    return;
   }
-  return;
 }
 
 void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _request,
@@ -211,17 +207,16 @@ void Server::InternalSendRequest(Connection* _conn, google::protobuf::Message* _
   sp_int32 byte_size = _request->ByteSize();
   sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  auto opkt = new OutgoingPacket(sop);
-  CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
-  CHECK_EQ(opkt->PackREQID(rid), 0);
-  CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
+  OutgoingPacket opkt(sop);
+  CHECK_EQ(opkt.PackString(_request->GetTypeName()), 0);
+  CHECK_EQ(opkt.PackREQID(rid), 0);
+  CHECK_EQ(opkt.PackProtocolBuffer(*_request, byte_size), 0);
 
   // delete the request
   delete _request;
 
   if (_conn->sendPacket(opkt) != 0) {
     context_map_.erase(rid);
-    delete opkt;
     auto cb = [_response_placeholder, _ctx, this]() {
       this->HandleResponse(_response_placeholder, _ctx, WRITE_ERROR);
     };

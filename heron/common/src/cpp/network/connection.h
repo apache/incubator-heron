@@ -82,7 +82,7 @@ class Connection : public BaseConnection {
    * A negative value of sendPacket indicates an error. The most likely error is improperly
    * formatted packet.
    */
-  sp_int32 sendPacket(OutgoingPacket* packet);
+  sp_int32 sendPacket(OutgoingPacket& packet);
 
   /**
    * Invoke the callback cb when a new packet arrives. A pointer to the packet is passed

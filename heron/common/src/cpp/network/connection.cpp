@@ -52,25 +52,30 @@ Connection::~Connection() {
   delete mIncomingPacket;
 }
 
-sp_int32 Connection::sendPacket(OutgoingPacket* packet) {
-  struct evbuffer* packet_buffer =  packet->release_buffer();
-  delete packet;
-  if (write(packet_buffer) < 0) return -1;
+sp_int32 Connection::sendPacket(OutgoingPacket& packet) {
+  struct evbuffer* packet_buffer =  packet.release_buffer();
 
-  if (!hasCausedBackPressure()) {
-    // Are we above the threshold?
-    if (getOutstandingBytes() >= mOptions->high_watermark_) {
-      // Have we been above the threshold enough number of times?
-      if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
-        mNumEnqueuesWithBufferFull = 0;
-        if (mOnConnectionBufferFull) {
-          mOnConnectionBufferFull(this);
-        }
-      }
-    } else {
-      mNumEnqueuesWithBufferFull = 0;
-    }
+  if (write(packet_buffer) < 0) {
+    return -1;
   }
+
+  if (hasCausedBackPressure()) {
+    return 0;
+  }
+  
+  // Are we above the threshold?
+  if (getOutstandingBytes() >= mOptions->high_watermark_) {
+    // Have we been above the threshold enough number of times?
+    if (++mNumEnqueuesWithBufferFull > __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__) {
+      mNumEnqueuesWithBufferFull = 0;
+      if (mOnConnectionBufferFull) {
+        mOnConnectionBufferFull(this);
+      }
+    }
+  } else {
+    mNumEnqueuesWithBufferFull = 0;
+  }
+
   return 0;
 }
 
