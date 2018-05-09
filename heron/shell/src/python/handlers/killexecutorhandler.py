@@ -40,8 +40,9 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       status_finish(200)
       try:
         logger.info("Print stmgr backtrace to ./stmgr.bt")
-        cmd = 'timeout 3 gdb -batch -ex "thread apply all bt" -p `cat stmgr-*.pid` 2&>1 > stmgr.bt && sync'
-        subprocess.call(cmd, shell=True)
+        cmd = 'gdb -batch -ex "thread apply all bt" -p `cat stmgr-*.pid` 2&>1'
+        output = subprocess.check_output(cmd, shell=True)
+        logger.warning(output)
       except Exception:
         logger.warning("Exception: ")
       logger.info("Killing parent executor")
