@@ -199,7 +199,7 @@ class Client : public BaseClient {
 
   void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
   void InternalSendMessage(const google::protobuf::Message& _message);
-  void InternalSendResponse(OutgoingPacket* _packet);
+  void InternalSendResponse(OutgoingPacket& _packet);
 
   // Internal method to be called by the Connection class
   // when a new packet arrives

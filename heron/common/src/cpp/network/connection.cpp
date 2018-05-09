@@ -62,7 +62,7 @@ sp_int32 Connection::sendPacket(OutgoingPacket& packet) {
   if (hasCausedBackPressure()) {
     return 0;
   }
-  
+
   // Are we above the threshold?
   if (getOutstandingBytes() >= mOptions->high_watermark_) {
     // Have we been above the threshold enough number of times?

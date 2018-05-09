@@ -49,10 +49,12 @@ void Client::SendResponse(REQID _id, const google::protobuf::Message& _response)
   sp_int32 byte_size = _response.ByteSize();
   sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
                         REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
-  auto opkt = new OutgoingPacket(data_size);
-  CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
-  CHECK_EQ(opkt->PackREQID(_id), 0);
-  CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
+  OutgoingPacket opkt(data_size);
+
+  CHECK_EQ(opkt.PackString(_response.GetTypeName()), 0);
+  CHECK_EQ(opkt.PackREQID(_id), 0);
+  CHECK_EQ(opkt.PackProtocolBuffer(_response, byte_size), 0);
+
   InternalSendResponse(opkt);
   return;
 }
@@ -158,20 +160,16 @@ void Client::InternalSendMessage(const google::protobuf::Message& _message) {
   }
 }
 
-void Client::InternalSendResponse(OutgoingPacket* _packet) {
+void Client::InternalSendResponse(OutgoingPacket& _packet) {
   if (state_ != CONNECTED) {
     LOG(ERROR) << "Client is not connected. Dropping response" << std::endl;
-    delete _packet;
     return;
   }
 
   Connection* conn = static_cast<Connection*>(conn_);
-  if (conn->sendPacket(*_packet) != 0) {
+  if (conn->sendPacket(_packet) != 0) {
     LOG(ERROR) << "Error sending packet to! Dropping..." << std::endl;
-    delete _packet;
-    return;
   }
-  return;
 }
 
 void Client::OnNewPacket(IncomingPacket* _ipkt) {
