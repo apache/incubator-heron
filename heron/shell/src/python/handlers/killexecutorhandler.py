@@ -40,7 +40,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
       status_finish(200)
       try:
         logger.info("Print stmgr backtrace to ./stmgr.bt")
-        cmd = 'gdb -batch -ex "thread apply all bt" -p `cat stmgr-*.pid` 2&>1'
+        cmd = 'gdb -batch -ex "thread apply all bt" -p `cat stmgr-*.pid` 2>&1'
         output = subprocess.check_output(cmd, shell=True)
         logger.warning(output)
       except Exception:
