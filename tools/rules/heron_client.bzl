@@ -7,6 +7,7 @@ def heron_client_bin_files():
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/admin/src/python:heron-admin",
         "//third_party/nomad:heron-nomad",
+        "//heron/downloaders/src/shell:heron-downloader"
     ]
 
 def heron_client_conf_files():
@@ -85,3 +86,8 @@ def heron_client_lib_third_party_files():
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
     ]
+
+def heron_client_lib_downloader_files():
+  return [
+    "//heron/downloaders/src/java:heron-downloader",
+  ]
