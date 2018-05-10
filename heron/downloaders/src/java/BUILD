@@ -2,6 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 downloader_deps = [
   "@org_apache_distributedlog_core//jar",
+  "@commons_cli_commons_cli//jar",
   "//heron/spi/src/java:common-spi-java",
   "//heron/io/dlog/src/java:dlog-lib",
   "//third_party/java:commons-compress",
