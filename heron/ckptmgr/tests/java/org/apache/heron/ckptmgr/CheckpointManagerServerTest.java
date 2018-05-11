@@ -105,13 +105,11 @@ public class CheckpointManagerServerTest {
     saveInstanceStateRequest = CheckpointManager.SaveInstanceStateRequest.newBuilder()
         .setInstance(instance)
         .setCheckpoint(checkpointPartition)
-        .setMetadata(checkpointComponentMetadata)
         .build();
 
     getInstanceStateRequest = CheckpointManager.GetInstanceStateRequest.newBuilder()
         .setInstance(instance)
         .setCheckpointId(CHECKPOINT_ID)
-        .setMetadata(checkpointComponentMetadata)
         .build();
 
     cleanStatefulCheckpointRequest = CheckpointManager.CleanStatefulCheckpointRequest.newBuilder()

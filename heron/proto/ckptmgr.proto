@@ -217,9 +217,6 @@ message SaveInstanceStateRequest {
   // TODO(nwang): currently repartition is not supported and each request
   //     contains a single partition.
   required InstanceStateCheckpointPartition checkpoint = 2;
-  // Stmgrs need to send component metadata so that Checkpoint
-  // Mgrs know how to repartition if needed.
-  optional CheckpointComponentMetadata metadata = 3;
 }
 
 // After successfully saving state, this is what
@@ -235,9 +232,6 @@ message SaveInstanceStateResponse {
 message GetInstanceStateRequest {
   required heron.proto.system.Instance instance = 1;
   required string checkpoint_id = 2;
-  // Stmgrs need to send component metadata so that Checkpoint
-  // Mgrs know how to repartition if needed.
-  optional CheckpointComponentMetadata metadata = 3;
 }
 
 // This is the response that Checkpoint Mgr sends to StMgr
