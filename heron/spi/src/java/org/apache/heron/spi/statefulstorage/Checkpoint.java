@@ -24,15 +24,13 @@ import org.apache.heron.proto.ckptmgr.CheckpointManager;
 /**
  * The checkpoint data from an instance. It contains the instance information and the checkpoint
  * data for the instance.
- * TODO(nwang): Currently each instance has only one partition. In future when repartitioning
- *     is supported, each checkpoint will have a list of partitions.
+ * TODO(nwang): Currently each instance has only one partition.
  */
 public class Checkpoint {
   private CheckpointManager.InstanceStateCheckpointPartition checkpoint;
   private int nBytes;
 
   public Checkpoint(CheckpointManager.InstanceStateCheckpointPartition checkpoint) {
-    // TODO(nwang): Currently only support one partition per checkpoint.
     this.checkpoint = checkpoint;
     this.nBytes = checkpoint.getSerializedSize();
   }
@@ -43,6 +41,6 @@ public class Checkpoint {
 
   @Override
   public String toString() {
-    return String.format("InstanceCheckpoint(%d bytes)", nBytes);
+    return String.format("Checkpoint(%d bytes)", nBytes);
   }
 }

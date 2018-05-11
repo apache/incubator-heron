@@ -138,7 +138,7 @@ public class DlogStorage implements IStatefulStorage {
         topologyName,
         info.getCheckpointId(),
         info.getComponent(),
-        info.getPartitionId());
+        info.getInstanceId());
 
     OutputStream out = null;
     try {
@@ -158,7 +158,7 @@ public class DlogStorage implements IStatefulStorage {
         topologyName,
         info.getCheckpointId(),
         info.getComponent(),
-        info.getPartitionId());
+        info.getInstanceId());
 
     InputStream in = null;
     CheckpointManager.InstanceStateCheckpointPartition state;

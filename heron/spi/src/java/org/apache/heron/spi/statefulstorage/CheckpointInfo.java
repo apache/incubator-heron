@@ -22,22 +22,22 @@ package org.apache.heron.spi.statefulstorage;
 import org.apache.heron.proto.system.PhysicalPlans;
 
 /**
- * The information for one checkpoint partition. It can be used to reference checkpoint and
- * metadata (partitionId is ignored).
+ * The information for one checkpoint blob. It can be used to reference checkpoint and
+ * metadata (instance id is ignored).
  */
 public class CheckpointInfo {
   // The checkpoint ID under the topology.
   private final String checkpointId;
   // The name of the component.
   private final String componentName;
-  // TODO(nwang): Currently only support one partition per checkpoint.
-  private final int partitionId;
+  // TODO(nwang): Currently only support one partition per instance.
+  private final int instanceId;
 
   public CheckpointInfo(String checkpointId, PhysicalPlans.Instance instance) {
 
     this.checkpointId = checkpointId;
     this.componentName = instance.getInfo().getComponentName();
-    this.partitionId = instance.getInfo().getComponentIndex();
+    this.instanceId = instance.getInfo().getComponentIndex();
   }
 
   public String getCheckpointId() {
@@ -48,13 +48,13 @@ public class CheckpointInfo {
     return componentName;
   }
 
-  public int getPartitionId() {
-    return partitionId;
+  public int getInstanceId() {
+    return instanceId;
   }
 
   @Override
   public String toString() {
     return String.format("CheckpointInfo(%s %s %d)",
-                         checkpointId, componentName, partitionId);
+                         checkpointId, componentName, instanceId);
   }
 }

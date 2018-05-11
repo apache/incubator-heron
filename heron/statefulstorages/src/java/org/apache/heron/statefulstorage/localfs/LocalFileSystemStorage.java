@@ -61,7 +61,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   public void storeCheckpoint(CheckpointInfo info, Checkpoint checkpoint)
       throws StatefulStorageException {
     String path = getCheckpointPath(info.getCheckpointId(),
-                                    info.getComponent(), info.getPartitionId());
+                                    info.getComponent(), info.getInstanceId());
 
     // We would try to create but we would not enforce this operation successful,
     // since it is possible already created by others
@@ -86,7 +86,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   public Checkpoint restoreCheckpoint(CheckpointInfo info)
       throws StatefulStorageException {
     String path = getCheckpointPath(info.getCheckpointId(), info.getComponent(),
-                                    info.getPartitionId());
+                                    info.getInstanceId());
 
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {

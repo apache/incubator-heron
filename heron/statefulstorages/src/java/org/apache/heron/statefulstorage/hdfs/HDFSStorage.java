@@ -81,7 +81,7 @@ public class HDFSStorage implements IStatefulStorage {
       throws StatefulStorageException {
     Path path = new Path(getCheckpointPath(info.getCheckpointId(),
                                            info.getComponent(),
-                                           info.getPartitionId()));
+                                           info.getInstanceId()));
 
     // We need to ensure the existence of directories structure,
     // since it is not guaranteed that FileSystem.create(..) always creates parents' dirs.
@@ -105,7 +105,7 @@ public class HDFSStorage implements IStatefulStorage {
       throws StatefulStorageException {
     Path path = new Path(getCheckpointPath(info.getCheckpointId(),
                                            info.getComponent(),
-                                           info.getPartitionId()));
+                                           info.getInstanceId()));
 
     FSDataInputStream in = null;
     CheckpointManager.InstanceStateCheckpointPartition state = null;
