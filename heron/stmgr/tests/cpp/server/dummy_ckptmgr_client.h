@@ -49,7 +49,7 @@ class DummyCkptMgrClient : public heron::stmgr::CkptMgrClient {
   void DummyGetWatcher(heron::proto::system::StatusCode _status,
                        int32_t _restore_txid,
                        const std::string& _ckpt_id,
-                       const heron::proto::ckptmgr::InstanceStateCheckpoint& _ckpt);
+                       const heron::proto::ckptmgr::InstanceStateCheckpointPartition& _ckpt);
   void DummyRegisterWatcher();
   // Map from ckptid to task_ids for which the call was made
   std::map<std::string, std::set<int32_t>> saves_;

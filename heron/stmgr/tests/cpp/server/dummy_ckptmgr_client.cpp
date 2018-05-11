@@ -93,10 +93,11 @@ void DummyCkptMgrClient::DummySaveWatcher(const heron::proto::system::Instance&,
                                           const std::string&) {
 }
 
-void DummyCkptMgrClient::DummyGetWatcher(heron::proto::system::StatusCode,
-                                         int32_t,
-                                         const std::string&,
-                                         const heron::proto::ckptmgr::InstanceStateCheckpoint&) {
+void DummyCkptMgrClient::DummyGetWatcher(
+    heron::proto::system::StatusCode,
+    int32_t,
+    const std::string&,
+    const heron::proto::ckptmgr::InstanceStateCheckpointPartition&) {
 }
 
 void DummyCkptMgrClient::DummyRegisterWatcher() {

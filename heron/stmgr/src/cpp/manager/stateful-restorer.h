@@ -108,7 +108,7 @@ class StatefulRestorer {
   // restore its state pointed to by _state.
   void HandleCheckpointState(proto::system::StatusCode _status, sp_int32 _task_id,
                              sp_string _checkpoint_id,
-                             const proto::ckptmgr::InstanceStateCheckpoint& _state);
+                             const proto::ckptmgr::InstanceStateCheckpointPartition& _state);
   // called when a stmgr connection closes. If we are in the middle of a restore,
   // we cannot complete it until all our stmgr clients are connected
   void HandleDeadStMgrConnection();

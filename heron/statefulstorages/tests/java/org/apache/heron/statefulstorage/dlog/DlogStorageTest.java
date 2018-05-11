@@ -43,7 +43,7 @@ import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -58,13 +58,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Namespace.class, CheckpointManager.InstanceStateCheckpoint.class})
+@PrepareForTest({Namespace.class, CheckpointManager.InstanceStateCheckpointPartition.class})
 public class DlogStorageTest {
 
   private static final String ROOT_URI = "distributedlog://127.0.0.1/heron/statefulstorage";
 
   private PhysicalPlans.Instance instance;
-  private CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
+  private CheckpointManager.InstanceStateCheckpointPartition checkpointPartition;
 
   private DlogStorage dlogStorage;
   private NamespaceBuilder mockNsBuilder;
@@ -87,7 +87,7 @@ public class DlogStorageTest {
     dlogStorage = spy(dlogStorage);
 
     instance = StatefulStorageTestContext.getInstance();
-    instanceStateCheckpoint = StatefulStorageTestContext.getInstanceStateCheckpoint();
+    checkpointPartition = StatefulStorageTestContext.getInstanceStateCheckpoint();
   }
 
   @After
@@ -97,11 +97,11 @@ public class DlogStorageTest {
 
   @Test
   public void testStore() throws Exception {
-    PowerMockito.mockStatic(CheckpointManager.InstanceStateCheckpoint.class);
-    CheckpointManager.InstanceStateCheckpoint mockCheckpointState =
-        mock(CheckpointManager.InstanceStateCheckpoint.class);
+    PowerMockito.mockStatic(CheckpointManager.InstanceStateCheckpointPartition.class);
+    CheckpointManager.InstanceStateCheckpointPartition mockCheckpointState =
+        mock(CheckpointManager.InstanceStateCheckpointPartition.class);
 
-    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+    final CheckpointInfo info = new CheckpointInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
     Checkpoint checkpoint = new Checkpoint(mockCheckpointState);
 
@@ -121,15 +121,15 @@ public class DlogStorageTest {
     InputStream mockInputStream = mock(InputStream.class);
     doReturn(mockInputStream).when(dlogStorage).openInputStream(anyString());
 
-    PowerMockito.spy(CheckpointManager.InstanceStateCheckpoint.class);
-    PowerMockito.doReturn(instanceStateCheckpoint)
-        .when(CheckpointManager.InstanceStateCheckpoint.class,
+    PowerMockito.spy(CheckpointManager.InstanceStateCheckpointPartition.class);
+    PowerMockito.doReturn(checkpointPartition)
+        .when(CheckpointManager.InstanceStateCheckpointPartition.class,
             "parseFrom", mockInputStream);
 
-    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+    final CheckpointInfo info = new CheckpointInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
     Checkpoint restoreCheckpoint = dlogStorage.restoreCheckpoint(info);
-    assertEquals(restoreCheckpoint.getCheckpoint(), instanceStateCheckpoint);
+    assertEquals(restoreCheckpoint.getCheckpoint(), checkpointPartition);
   }
 
   @Test

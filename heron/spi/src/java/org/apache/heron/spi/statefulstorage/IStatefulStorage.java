@@ -47,7 +47,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @param checkpoint The checkpoint data.
    */
-  void storeCheckpoint(final CheckpointPartitionInfo info, final Checkpoint checkpoint)
+  void storeCheckpoint(final CheckpointInfo info, final Checkpoint checkpoint)
       throws StatefulStorageException;
 
   /**
@@ -55,7 +55,8 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @return The checkpoint data from the specified blob id.
    */
-  Checkpoint restoreCheckpoint(final CheckpointPartitionInfo info) throws StatefulStorageException;
+  Checkpoint restoreCheckpoint(final CheckpointInfo info)
+        throws StatefulStorageException;
 
   /**
    * Store medata data for component. Ideally in distributed storages this function should only
@@ -64,7 +65,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @param metadata The checkpoint metadata from a component.
    */
-  void storeComponentMetaData(final CheckpointPartitionInfo info, final CheckpointMetadata metadata)
+  void storeComponentMetaData(final CheckpointInfo info, final CheckpointMetadata metadata)
       throws StatefulStorageException;
 
   /**
@@ -72,7 +73,7 @@ public interface IStatefulStorage {
    * @param info The information (reference key) for the checkpoint partition.
    * @return The checkpoint metadata for the component.
    */
-  CheckpointMetadata restoreComponentMetadata(final CheckpointPartitionInfo info)
+  CheckpointMetadata restoreComponentMetadata(final CheckpointInfo info)
       throws StatefulStorageException;
 
   /**

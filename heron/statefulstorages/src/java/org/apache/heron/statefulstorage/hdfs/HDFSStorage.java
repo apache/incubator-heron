@@ -32,8 +32,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.CheckpointMetadata;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -77,7 +77,7 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public void storeCheckpoint(CheckpointPartitionInfo info, Checkpoint checkpoint)
+  public void storeCheckpoint(CheckpointInfo info, Checkpoint checkpoint)
       throws StatefulStorageException {
     Path path = new Path(getCheckpointPath(info.getCheckpointId(),
                                            info.getComponent(),
@@ -101,18 +101,18 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public Checkpoint restoreCheckpoint(CheckpointPartitionInfo info)
+  public Checkpoint restoreCheckpoint(CheckpointInfo info)
       throws StatefulStorageException {
     Path path = new Path(getCheckpointPath(info.getCheckpointId(),
                                            info.getComponent(),
                                            info.getPartitionId()));
 
     FSDataInputStream in = null;
-    CheckpointManager.InstanceStateCheckpoint state = null;
+    CheckpointManager.InstanceStateCheckpointPartition state = null;
     try {
       in = fileSystem.open(path);
       state =
-          CheckpointManager.InstanceStateCheckpoint.parseFrom(in);
+          CheckpointManager.InstanceStateCheckpointPartition.parseFrom(in);
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to read", e);
     } finally {
@@ -122,13 +122,13 @@ public class HDFSStorage implements IStatefulStorage {
   }
 
   @Override
-  public void storeComponentMetaData(CheckpointPartitionInfo info, CheckpointMetadata metadata)
+  public void storeComponentMetaData(CheckpointInfo info, CheckpointMetadata metadata)
       throws StatefulStorageException {
     // TODO(nwang): To implement
   }
 
   @Override
-  public CheckpointMetadata restoreComponentMetadata(CheckpointPartitionInfo info)
+  public CheckpointMetadata restoreComponentMetadata(CheckpointInfo info)
       throws StatefulStorageException {
     // TODO(nwang): To implement
     return null;

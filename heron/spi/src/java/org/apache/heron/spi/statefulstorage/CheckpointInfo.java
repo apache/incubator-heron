@@ -25,17 +25,15 @@ import org.apache.heron.proto.system.PhysicalPlans;
  * The information for one checkpoint partition. It can be used to reference checkpoint and
  * metadata (partitionId is ignored).
  */
-public class CheckpointPartitionInfo {
+public class CheckpointInfo {
   // The checkpoint ID under the topology.
   private final String checkpointId;
   // The name of the component.
   private final String componentName;
-  // The checkpoint partition id under the component. For example, it could be instance
-  // index if each instance has one partition; or it can also be other kind of ids that are
-  // consistent for the component.
+  // TODO(nwang): Currently only support one partition per checkpoint.
   private final int partitionId;
 
-  public CheckpointPartitionInfo(String checkpointId, PhysicalPlans.Instance instance) {
+  public CheckpointInfo(String checkpointId, PhysicalPlans.Instance instance) {
 
     this.checkpointId = checkpointId;
     this.componentName = instance.getInfo().getComponentName();
@@ -56,7 +54,7 @@ public class CheckpointPartitionInfo {
 
   @Override
   public String toString() {
-    return String.format("CheckpointPartitionInfo(%s %s %d)",
+    return String.format("CheckpointInfo(%s %s %d)",
                          checkpointId, componentName, partitionId);
   }
 }

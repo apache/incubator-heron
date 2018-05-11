@@ -646,7 +646,7 @@ void InstanceServer::HandleCheckpointMarker(sp_int32 _src_task_id, sp_int32 _des
 }
 
 bool InstanceServer::SendRestoreInstanceStateRequest(sp_int32 _task_id,
-            const proto::ckptmgr::InstanceStateCheckpoint& _state) {
+            const proto::ckptmgr::InstanceStateCheckpointPartition& _state) {
   LOG(INFO) << "Sending RestoreInstanceState request to task " << _task_id;
   if (instance_info_.find(_task_id) == instance_info_.end()) {
     LOG(WARNING) << "Cannot send RestoreInstanceState Request to task "

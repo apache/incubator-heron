@@ -272,7 +272,7 @@ TEST(StatefulRestorer, normalcase) {
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_tasks);
   for (auto task : local_tasks) {
     EXPECT_FALSE(dummy_instance_server->DidSendRestoreRequest(task));
-    heron::proto::ckptmgr::InstanceStateCheckpoint c;
+    heron::proto::ckptmgr::InstanceStateCheckpointPartition c;
     c.set_checkpoint_id(ckpt_id);
     restorer->HandleCheckpointState(heron::proto::system::OK, task, ckpt_id, c);
     // Make sure that restore is sent to the instances
@@ -334,7 +334,7 @@ TEST(StatefulRestorer, deadinstances) {
   std::unordered_set<int32_t> local_tasks;
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_tasks);
   for (auto task : local_tasks) {
-    heron::proto::ckptmgr::InstanceStateCheckpoint c;
+    heron::proto::ckptmgr::InstanceStateCheckpointPartition c;
     c.set_checkpoint_id(ckpt_id);
     restorer->HandleCheckpointState(heron::proto::system::OK, task, ckpt_id, c);
   }
@@ -370,7 +370,7 @@ TEST(StatefulRestorer, deadinstances) {
   // Make sure that ckpt request is sent again
   EXPECT_TRUE(ckptmgr_client->GetCalled(ckpt_id, troublesome_task));
   // The state is fetched from ckptmgr
-  heron::proto::ckptmgr::InstanceStateCheckpoint c;
+  heron::proto::ckptmgr::InstanceStateCheckpointPartition c;
   c.set_checkpoint_id(ckpt_id);
   restorer->HandleCheckpointState(heron::proto::system::OK, troublesome_task, ckpt_id, c);
   EXPECT_TRUE(restorer->InProgress());
@@ -433,7 +433,7 @@ TEST(StatefulRestorer, deadckptmgr) {
       first = false;
       troublesome_task = task;
     } else {
-      heron::proto::ckptmgr::InstanceStateCheckpoint c;
+      heron::proto::ckptmgr::InstanceStateCheckpointPartition c;
       c.set_checkpoint_id(ckpt_id);
       restorer->HandleCheckpointState(heron::proto::system::OK, task, ckpt_id, c);
       restorer->HandleInstanceRestoredState(task, heron::proto::system::OK, ckpt_id);

@@ -31,10 +31,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import org.apache.heron.common.basics.FileUtils;
-import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
+import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpointPartition;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @PrepareForTest(FileUtils.class)
 public class LocalFileSystemStorageTest {
   private PhysicalPlans.Instance instance;
-  private InstanceStateCheckpoint checkpoint;
+  private InstanceStateCheckpointPartition checkpoint;
 
   private LocalFileSystemStorage localFileSystemStorage;
 
@@ -84,7 +84,7 @@ public class LocalFileSystemStorageTest {
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
     when(mockCheckpoint.getCheckpoint()).thenReturn(checkpoint);
 
-    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+    final CheckpointInfo info = new CheckpointInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
     localFileSystemStorage.storeCheckpoint(info, mockCheckpoint);
 
@@ -98,7 +98,7 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(checkpoint.toByteArray())
         .when(FileUtils.class, "readFromFile", anyString());
 
-    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(
+    final CheckpointInfo info = new CheckpointInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
 
     Checkpoint ckpt = localFileSystemStorage.restoreCheckpoint(info);

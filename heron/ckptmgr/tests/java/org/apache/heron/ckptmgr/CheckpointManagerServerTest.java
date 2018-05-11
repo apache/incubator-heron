@@ -38,7 +38,7 @@ import org.apache.heron.common.testhelpers.HeronServerTester;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 
 import static org.apache.heron.common.testhelpers.HeronServerTester.RESPONSE_RECEIVED_TIMEOUT;
@@ -57,7 +57,7 @@ public class CheckpointManagerServerTest {
   private static final String CHECKPOINT_ID = "checkpoint_id";
   private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
-  private static CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
+  private static CheckpointManager.InstanceStateCheckpointPartition checkpointPartition;
   private static CheckpointManager.CheckpointComponentMetadata checkpointComponentMetadata;
   private static CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
@@ -92,10 +92,10 @@ public class CheckpointManagerServerTest {
         .setInfo(info)
         .build();
 
-    instanceStateCheckpoint = CheckpointManager.InstanceStateCheckpoint.newBuilder()
+    checkpointPartition = CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
         .setState(ByteString.copyFrom(BYTES))
-        .setDataVersion("")
+        .setDataVersion(0)
         .build();
 
     checkpointComponentMetadata = CheckpointManager.CheckpointComponentMetadata.newBuilder()
@@ -105,7 +105,7 @@ public class CheckpointManagerServerTest {
 
     saveInstanceStateRequest = CheckpointManager.SaveInstanceStateRequest.newBuilder()
         .setInstance(instance)
-        .setCheckpoint(instanceStateCheckpoint)
+        .setCheckpoint(checkpointPartition)
         .setMetadata(checkpointComponentMetadata)
         .build();
 
@@ -164,8 +164,8 @@ public class CheckpointManagerServerTest {
               @Override
               public void handleResponse(HeronClient client, StatusCode status,
                                          Object ctx, Message response) throws Exception {
-                verify(statefulStorage).storeCheckpoint(any(CheckpointPartitionInfo.class),
-                    any(Checkpoint.class));
+                verify(statefulStorage).storeCheckpoint(
+                    any(CheckpointInfo.class), any(Checkpoint.class));
                 assertEquals(CHECKPOINT_ID,
                     ((CheckpointManager.SaveInstanceStateResponse) response).getCheckpointId());
                 assertEquals(instance,
@@ -177,9 +177,9 @@ public class CheckpointManagerServerTest {
 
   @Test
   public void testGetInstanceState() throws Exception {
-    final CheckpointPartitionInfo info = new CheckpointPartitionInfo(CHECKPOINT_ID, instance);
-    final Checkpoint checkpoint = new Checkpoint(instanceStateCheckpoint);
-    when(statefulStorage.restoreCheckpoint(any(CheckpointPartitionInfo.class)))
+    final CheckpointInfo info = new CheckpointInfo(CHECKPOINT_ID, instance);
+    final Checkpoint checkpoint = new Checkpoint(checkpointPartition);
+    when(statefulStorage.restoreCheckpoint(any(CheckpointInfo.class)))
         .thenReturn(checkpoint);
 
     runTest(TestRequestHandler.RequestType.GET_INSTANCE_STATE,

@@ -34,7 +34,7 @@ import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -208,8 +208,8 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    CheckpointPartitionInfo info =
-        new CheckpointPartitionInfo(request.getCheckpoint().getCheckpointId(),
+    CheckpointInfo info =
+        new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
                                     request.getInstance());
     Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
 
@@ -251,8 +251,7 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.GetInstanceStateRequest request
   ) {
-    CheckpointPartitionInfo info = new CheckpointPartitionInfo(request.getCheckpointId(),
-        request.getInstance());
+    CheckpointInfo info = new CheckpointInfo(request.getCheckpointId(), request.getInstance());
     LOG.info(String.format("Got a get checkpoint request for checkpointId %s "
                            + " component %s taskId %d on connection %s",
                            info.getCheckpointId(),
@@ -269,8 +268,8 @@ public class CheckpointManagerServer extends HeronServer {
     Common.StatusCode statusCode = Common.StatusCode.OK;
     if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
       LOG.info("The checkpoint id was empty, this sending empty state");
-      CheckpointManager.InstanceStateCheckpoint dummyState =
-          CheckpointManager.InstanceStateCheckpoint.newBuilder()
+      CheckpointManager.InstanceStateCheckpointPartition dummyState =
+          CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
               .setCheckpointId(request.getCheckpointId())
               .setState(ByteString.EMPTY).build();
 

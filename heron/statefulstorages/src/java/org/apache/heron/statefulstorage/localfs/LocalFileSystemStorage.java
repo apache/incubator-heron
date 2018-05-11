@@ -28,8 +28,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.CheckpointMetadata;
-import org.apache.heron.spi.statefulstorage.CheckpointPartitionInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -58,7 +58,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public void storeCheckpoint(CheckpointPartitionInfo info, Checkpoint checkpoint)
+  public void storeCheckpoint(CheckpointInfo info, Checkpoint checkpoint)
       throws StatefulStorageException {
     String path = getCheckpointPath(info.getCheckpointId(),
                                     info.getComponent(), info.getPartitionId());
@@ -83,7 +83,7 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public Checkpoint restoreCheckpoint(CheckpointPartitionInfo info)
+  public Checkpoint restoreCheckpoint(CheckpointInfo info)
       throws StatefulStorageException {
     String path = getCheckpointPath(info.getCheckpointId(), info.getComponent(),
                                     info.getPartitionId());
@@ -91,10 +91,10 @@ public class LocalFileSystemStorage implements IStatefulStorage {
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {
       // Try to parse the protobuf
-      CheckpointManager.InstanceStateCheckpoint state;
+      CheckpointManager.InstanceStateCheckpointPartition state;
       try {
         state =
-            CheckpointManager.InstanceStateCheckpoint.parseFrom(res);
+            CheckpointManager.InstanceStateCheckpointPartition.parseFrom(res);
       } catch (InvalidProtocolBufferException e) {
         throw new StatefulStorageException("Failed to parse the data", e);
       }
@@ -105,13 +105,13 @@ public class LocalFileSystemStorage implements IStatefulStorage {
   }
 
   @Override
-  public void storeComponentMetaData(CheckpointPartitionInfo info, CheckpointMetadata metadata)
+  public void storeComponentMetaData(CheckpointInfo info, CheckpointMetadata metadata)
       throws StatefulStorageException {
     // TODO(nwang): To implement
   }
 
   @Override
-  public CheckpointMetadata restoreComponentMetadata(CheckpointPartitionInfo info)
+  public CheckpointMetadata restoreComponentMetadata(CheckpointInfo info)
       throws StatefulStorageException {
     // TODO(nwang): To implement
     return null;
