@@ -184,12 +184,6 @@ message CleanStatefulCheckpointResponse {
 message InstanceStateCheckpointPartition {
   required string checkpoint_id = 1;
   required bytes state = 2;
-  // Id of this partition. If not provided, repartition is not supported and
-  // the partition id is the same as the instance index (component specific).
-  optional int32 partition_id = 3;
-  // A version string that can be specified by user. It can be used to translate
-  // checkpoint data from older versions to the latest version when necessary.
-  optional int32 data_version = 4;
 }
 
 // This message encapsulates the info associated with

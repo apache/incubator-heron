@@ -95,7 +95,6 @@ public class CheckpointManagerServerTest {
     checkpointPartition = CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
         .setState(ByteString.copyFrom(BYTES))
-        .setDataVersion(0)
         .build();
 
     checkpointComponentMetadata = CheckpointManager.CheckpointComponentMetadata.newBuilder()
