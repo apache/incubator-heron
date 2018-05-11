@@ -24,6 +24,8 @@ import logging
 import os
 import tempfile
 import requests
+import subprocess
+import urlparse
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -370,6 +372,22 @@ def submit_cpp(cl_args, unknown_args, tmp_dir):
 
   return launch_topologies(cl_args, topology_file, tmp_dir)
 
+def download(uri, cluster):
+  tmp_dir = tempfile.mkdtemp()
+  cmd_downloader = config.get_heron_bin_dir() + "/heron-downloader.sh"
+  cmd_uri = "-u " + uri
+  cmd_destination = "-f " + tmp_dir
+  cmd_heron_root = "-d " + config.get_heron_dir()
+  cmd_heron_config = "-p " + config.get_heron_cluster_conf_dir(cluster, config.get_heron_conf_dir())
+  cmd_mode = "-m local"
+  cmd = [cmd_downloader, cmd_uri, cmd_destination, cmd_heron_root, cmd_heron_config, cmd_mode]
+  Log.debug("download uri command: %s", cmd)
+  subprocess.call(cmd)
+  suffix = (".jar", ".tar", ".tar.gz", ".pex", ".dylib", ".so")
+  for f in os.listdir(tmp_dir):
+    if f.endswith(suffix):
+      return os.path.join(tmp_dir, f)
+
 ################################################################################
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
@@ -390,6 +408,11 @@ def run(command, parser, cl_args, unknown_args):
 
   # get the topology file name
   topology_file = cl_args['topology-file-name']
+
+  if urlparse.urlparse(topology_file).scheme:
+    cl_args['topology-file-name'] = download(topology_file, cl_args['cluster'])
+    topology_file = cl_args['topology-file-name']
+    Log.debug("download uri to local file: %s", topology_file)
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
