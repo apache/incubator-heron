@@ -21,3 +21,8 @@ genrule(
   outs = ["heron-downloader.jar"],
   cmd  = "cp $< $@",
 )
+
+filegroup(
+  name = "exported-downloader-java-src",
+  srcs = glob(["**/*.java"]),
+)
