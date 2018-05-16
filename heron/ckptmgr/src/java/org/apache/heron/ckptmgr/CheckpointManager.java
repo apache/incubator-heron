@@ -50,8 +50,8 @@ public class CheckpointManager {
   private static final String CHECKPOINT_MANAGER_HOST = "127.0.0.1";
 
   // The looper drives CheckpointManagerServer
-  private NIOLooper checkpointManagerServerLoop;
-  private CheckpointManagerServer checkpointManagerServer;
+  private final NIOLooper checkpointManagerServerLoop;
+  private final CheckpointManagerServer checkpointManagerServer;
 
   // Print usage options
   private static void usage(Options options) {
@@ -133,21 +133,14 @@ public class CheckpointManager {
     return options;
   }
 
-  public CheckpointManager() {
-  }
-
-  public void init(
-      String topologyName,
-      String topologyId,
-      String checkpointMgrId,
-      String serverHost,
-      int serverPort,
-      SystemConfig systemConfig,
-      CheckpointManagerConfig checkpointManagerConfig)
+  public CheckpointManager(
+      String topologyName, String topologyId, String checkpointMgrId,
+      String serverHost, int serverPort,
+      SystemConfig systemConfig, CheckpointManagerConfig checkpointManagerConfig)
       throws IOException, CheckpointManagerException {
 
-    LOG.info("Initializing CheckpointManager");
-    checkpointManagerServerLoop = new NIOLooper();
+    this.checkpointManagerServerLoop = new NIOLooper();
+
     HeronSocketOptions serverSocketOptions =
         new HeronSocketOptions(
             checkpointManagerConfig.getWriteBatchSize(),
@@ -159,29 +152,9 @@ public class CheckpointManager {
             checkpointManagerConfig.getMaximumPacketSize());
 
     // Setup the IStatefulStorage
-    IStatefulStorage statefulStorage = setupStatefulStorage(topologyName, checkpointManagerConfig);
-
-    // Start the server
-    this.checkpointManagerServer = new CheckpointManagerServer(
-        topologyName, topologyId, checkpointMgrId, statefulStorage,
-        checkpointManagerServerLoop, serverHost, serverPort, serverSocketOptions);
-  }
-
-  public void startAndLoop() {
-    // The CheckpointManagerServer would run in the main thread
-    // We do it in the final step since it would await the main thread
-    LOG.info("Starting CheckpointManager Server");
-    checkpointManagerServer.start();
-    checkpointManagerServerLoop.loop();
-  }
-
-  private static IStatefulStorage setupStatefulStorage(
-      String topologyName,
-      CheckpointManagerConfig checkpointManagerConfig) throws CheckpointManagerException {
-
+    // TODO(mfu): This should be done in an executor driven by another thread, kind of async
     IStatefulStorage statefulStorage;
     String classname = checkpointManagerConfig.getStorageClassname();
-
     try {
       statefulStorage = (IStatefulStorage) Class.forName(classname).newInstance();
     } catch (InstantiationException e) {
@@ -199,7 +172,18 @@ public class CheckpointManager {
       throw new CheckpointManagerException(classname + " init threw exception", e);
     }
 
-    return statefulStorage;
+    // Start the server
+    this.checkpointManagerServer = new CheckpointManagerServer(
+        topologyName, topologyId, checkpointMgrId, statefulStorage,
+        checkpointManagerServerLoop, serverHost, serverPort, serverSocketOptions);
+  }
+
+  public void startAndLoop() {
+    // The CheckpointManagerServer would run in the main thread
+    // We do it in the final step since it would await the main thread
+    LOG.info("Starting CheckpointManager Server");
+    checkpointManagerServer.start();
+    checkpointManagerServerLoop.loop();
   }
 
   public static void main(String[] args) throws IOException,
@@ -257,9 +241,9 @@ public class CheckpointManager {
 
     LOG.info("System Config: " + systemConfig);
 
-    CheckpointManager checkpointManager = new CheckpointManager();
-    checkpointManager.init(topologyName, topologyId, ckptmgrId,
-        CHECKPOINT_MANAGER_HOST, port, systemConfig, ckptmgrConfig);
+    CheckpointManager checkpointManager =
+        new CheckpointManager(topologyName, topologyId, ckptmgrId,
+            CHECKPOINT_MANAGER_HOST, port, systemConfig, ckptmgrConfig);
     checkpointManager.startAndLoop();
 
     LOG.info("Loops terminated. Exiting.");

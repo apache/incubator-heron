@@ -210,7 +210,7 @@ public class CheckpointManagerServer extends HeronServer {
   ) {
     CheckpointInfo info =
         new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
-                                    request.getInstance());
+                           request.getInstance());
     Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
