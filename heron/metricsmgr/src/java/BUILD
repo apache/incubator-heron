@@ -24,6 +24,11 @@ deps = [
     "@org_yaml_snakeyaml//jar",
 ]
 
+filegroup(
+    name = "metricsmgr-main",
+    srcs = glob(["**/MetricsManager.java"]),
+)
+
 java_library(
     name = "metricsmgr-java",
     srcs = files, 
@@ -32,7 +37,7 @@ java_library(
 
 java_binary(
     name = "metricsmgr-unshaded",
-    srcs = glob(["**/MetricsManager.java"]),
+    srcs = [":metricsmgr-main"],
     deps = [
         ":metricsmgr-java",
         "//heron/api/src/java:api-java-low-level",
