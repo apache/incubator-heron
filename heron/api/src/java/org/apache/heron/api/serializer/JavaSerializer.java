@@ -40,7 +40,7 @@ public class JavaSerializer implements IPluggableSerializer {
       oos.writeObject(object);
       oos.flush();
     } catch (IOException e) {
-      throw new RuntimeException("NotSerializable object is: " + object.toString(), e);
+      throw new RuntimeException("Failed to serialize object: " + object.toString(), e);
     }
     return bos.toByteArray();
   }
