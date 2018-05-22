@@ -20,6 +20,8 @@
 package org.apache.heron.instance;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -60,14 +62,17 @@ public class OutgoingTupleCollection {
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
 
   // Total data emitted in bytes for the entire life
-  private long totalDataEmittedInBytes;
+  private AtomicLong totalDataEmittedInBytes = new AtomicLong();
 
   // Current size in bytes for data types to pack into the HeronTupleSet
   private long currentDataTupleSizeInBytes;
 
+  private final ReentrantLock lock;
+
   public OutgoingTupleCollection(
       PhysicalPlanHelper helper,
-      Communicator<Message> outQueue) {
+      Communicator<Message> outQueue,
+      ReentrantLock lock) {
     this.outQueue = outQueue;
     this.helper = helper;
     SystemConfig systemConfig =
@@ -77,17 +82,23 @@ public class OutgoingTupleCollection {
         SerializeDeSerializeHelper.getSerializer(helper.getTopologyContext().getTopologyConfig());
 
     // Initialize the values in constructor
-    this.totalDataEmittedInBytes = 0;
+    this.totalDataEmittedInBytes.set(0);
     this.currentDataTupleSizeInBytes = 0;
 
     // Read the config values
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
     this.maxDataTupleSize = systemConfig.getInstanceSetDataTupleSize();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
+    this.lock = lock;
   }
 
   public void sendOutTuples() {
-    flushRemaining();
+    lock.lock();
+    try {
+      flushRemaining();
+    } finally {
+      lock.unlock();
+    }
   }
 
   /**
@@ -97,71 +108,93 @@ public class OutgoingTupleCollection {
    */
   public void sendOutState(State<Serializable, Serializable> state,
                            String checkpointId) {
-    // flush all the current data before sending the state
-    flushRemaining();
+    lock.lock();
+    try {
+      // flush all the current data before sending the state
+      flushRemaining();
 
-    // Serialize the state
-    byte[] serializedState = serializer.serialize(state);
+      // Serialize the state
+      byte[] serializedState = serializer.serialize(state);
 
-    // Construct the instance state checkpoint
-    CheckpointManager.InstanceStateCheckpoint instanceState =
-        CheckpointManager.InstanceStateCheckpoint.newBuilder()
-          .setCheckpointId(checkpointId)
-          .setState(ByteString.copyFrom(serializedState))
-          .build();
+      // Construct the instance state checkpoint
+      CheckpointManager.InstanceStateCheckpoint instanceState =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder()
+              .setCheckpointId(checkpointId)
+              .setState(ByteString.copyFrom(serializedState))
+              .build();
 
-    CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
-        CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
-            .setState(instanceState)
-            .build();
+      CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
+          CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
+              .setState(instanceState)
+              .build();
 
-    // Put the checkpoint to out stream queue
-    outQueue.offer(storeRequest);
+      // Put the checkpoint to out stream queue
+      outQueue.offer(storeRequest);
+    } finally {
+      lock.unlock();
+    }
   }
 
   public void addDataTuple(
       String streamId,
       HeronTuples.HeronDataTuple.Builder newTuple,
       long tupleSizeInBytes) {
-    if (tupleSizeInBytes > maxDataTupleSize.asBytes()) {
-      throw new RuntimeException(
-          String.format("Data tuple (stream id: %s) is too large: %d bytes", streamId,
-              tupleSizeInBytes));
-    }
-    if (currentDataTuple == null
-        || !currentDataTuple.getStream().getId().equals(streamId)
-        || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
-        || currentDataTupleSizeInBytes >= maxDataTupleSize.asBytes()) {
-      initNewDataTuple(streamId);
-    }
-    currentDataTuple.addTuples(newTuple);
+    lock.lock();
+    try {
+      if (tupleSizeInBytes > maxDataTupleSize.asBytes()) {
+        throw new RuntimeException(
+            String.format("Data tuple (stream id: %s) is too large: %d bytes", streamId,
+                tupleSizeInBytes));
+      }
+      if (currentDataTuple == null
+          || !currentDataTuple.getStream().getId().equals(streamId)
+          || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
+          || currentDataTupleSizeInBytes >= maxDataTupleSize.asBytes()) {
+        initNewDataTuple(streamId);
+      }
+      currentDataTuple.addTuples(newTuple);
 
-    currentDataTupleSizeInBytes += tupleSizeInBytes;
-    totalDataEmittedInBytes += tupleSizeInBytes;
+      currentDataTupleSizeInBytes += tupleSizeInBytes;
+      totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
+    } finally {
+      lock.unlock();
+    }
   }
 
-  public void addAckTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
-    if (currentControlTuple == null
-        || currentControlTuple.getFailsCount() > 0
-        || currentControlTuple.getAcksCount() >= controlTupleSetCapacity) {
-      initNewControlTuple();
-    }
-    currentControlTuple.addAcks(newTuple);
+  public void addAckTuple(
+      HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+    lock.lock();
+    try {
+      if (currentControlTuple == null
+          || currentControlTuple.getFailsCount() > 0
+          || currentControlTuple.getAcksCount() >= controlTupleSetCapacity) {
+        initNewControlTuple();
+      }
+      currentControlTuple.addAcks(newTuple);
 
-    // Add the size of data in bytes ready to send out
-    totalDataEmittedInBytes += tupleSizeInBytes;
+      // Add the size of data in bytes ready to send out
+      totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
+    } finally {
+      lock.unlock();
+    }
   }
 
-  public void addFailTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
-    if (currentControlTuple == null
-        || currentControlTuple.getAcksCount() > 0
-        || currentControlTuple.getFailsCount() >= controlTupleSetCapacity) {
-      initNewControlTuple();
-    }
-    currentControlTuple.addFails(newTuple);
+  public void addFailTuple(
+      HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
+    lock.lock();
+    try {
+      if (currentControlTuple == null
+          || currentControlTuple.getAcksCount() > 0
+          || currentControlTuple.getFailsCount() >= controlTupleSetCapacity) {
+        initNewControlTuple();
+      }
+      currentControlTuple.addFails(newTuple);
 
-    // Add the size of data in bytes ready to send out
-    totalDataEmittedInBytes += tupleSizeInBytes;
+      // Add the size of data in bytes ready to send out
+      totalDataEmittedInBytes.getAndAdd(tupleSizeInBytes);
+    } finally {
+      lock.unlock();
+    }
   }
 
   private void initNewDataTuple(String streamId) {
@@ -215,18 +248,28 @@ public class OutgoingTupleCollection {
   }
 
   public long getTotalDataEmittedInBytes() {
-    return totalDataEmittedInBytes;
+    return totalDataEmittedInBytes.get();
   }
 
   // Clean the internal state of OutgoingTupleCollection
   public void clear() {
-    currentControlTuple = null;
-    currentDataTuple = null;
+    lock.lock();
+    try {
+      currentControlTuple = null;
+      currentDataTuple = null;
 
-    outQueue.clear();
+      outQueue.clear();
+    } finally {
+      lock.unlock();
+    }
   }
 
   public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
-    this.helper = physicalPlanHelper;
+    lock.lock();
+    try {
+      this.helper = physicalPlanHelper;
+    } finally {
+      lock.unlock();
+    }
   }
 }
