@@ -21,40 +21,29 @@ package org.apache.heron.downloader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.heron.spi.common.Config;
+import org.apache.heron.spi.common.Key;
 
 final class Registry {
 
-  private static final Map<String, Class<? extends Downloader>> DOWNLOADERS =
-      new HashMap<>();
+  private Registry() { }
 
-  static {
-    DOWNLOADERS.put("http", HttpDownloader.class);
-    DOWNLOADERS.put("https", HttpDownloader.class);
-    DOWNLOADERS.put("distributedlog", DLDownloader.class);
-    DOWNLOADERS.put("file", FileDownloader.class);
-  }
-
-  private static final Registry INSTANCE = new Registry();
-
-  private Registry() {
-  }
-
-  static Registry get() {
-    return INSTANCE;
-  }
-
-  Downloader getDownloader(URI uri) throws Exception {
+  public static Class<? extends Downloader> UriToClass(Config config, URI uri) throws Exception {
     final String scheme = uri.getScheme().toLowerCase();
-    if (!DOWNLOADERS.containsKey(scheme)) {
+    Map<String, Object> yamlConfig = (Map<String, Object>) config.get(Key.DOWNLOADER_PROTOCOLS);
+    if (!yamlConfig.containsKey(scheme)) {
       throw new RuntimeException(
           String.format("Unable to create downloader unsupported uri %s", uri.toString()));
     }
+    Class clazz = Class.forName((String) yamlConfig.get(scheme));
+    return clazz;
+  }
 
+  public static Downloader getDownloader(
+      Class<? extends Downloader> downloaderClass, URI uri) throws Exception {
     try {
-      final Class<? extends Downloader> downloaderClass = DOWNLOADERS.get(scheme);
-
       return downloaderClass.getConstructor().newInstance();
     } catch (InstantiationException | IllegalAccessException
         | InvocationTargetException | NoSuchMethodException e) {

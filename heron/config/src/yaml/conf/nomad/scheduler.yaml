@@ -58,5 +58,5 @@ heron.nomad.metrics.service.check.interval.sec: 10
 heron.nomad.metrics.service.check.timeout.sec: 2
 
 # additional tags to be attached to metrics service
-# A tag of <topology-name>-<container-index> with be automaticallu attached
+# A tag of <topology-name>-<container-index> with be automatically attached
 heron.nomad.metrics.service.additional.tags: "prometheus,metrics,heron"
