@@ -143,8 +143,12 @@ void ZKClient::Init() {
 
 // Destructor.
 ZKClient::~ZKClient() {
-  delete piper_;
   zookeeper_close(zk_handle_);
+  // zookeeper_close() depends on piper_
+  // when HeronZKStateMgr::GlobalWatchEventHandler() and GetCompletionWatcher
+  // are called at the same time in two threads,
+  // thus `delete piper_` after zookeeper_close() joins all zk_client threads.
+  delete piper_;
 }
 
 //
