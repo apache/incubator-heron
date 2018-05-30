@@ -20,6 +20,8 @@
 package org.apache.heron.statefulstorage.localfs;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -32,20 +34,25 @@ import org.apache.heron.spi.statefulstorage.Checkpoint;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
-public class LocalFileSystemStorage implements IStatefulStorage {
+public class  LocalFileSystemStorage implements IStatefulStorage {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStorage.class.getName());
 
   private static final String ROOT_PATH_KEY = "heron.statefulstorage.localfs.root.path";
+  private static final String MAX_CHECKPOINTS_KEY = "heron.statefulstorage.localfs.max.checkpoints";
 
   private String checkpointRootPath;
+  private int maxCheckpoints;
 
   @Override
   public void init(Map<String, Object> conf) throws StatefulStorageException {
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
+    maxCheckpoints = (int) conf.get(MAX_CHECKPOINTS_KEY);
     if (checkpointRootPath != null) {
-      checkpointRootPath = checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
+      checkpointRootPath =
+          checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
     }
-    LOG.info("Initialing... Checkpoint root path: " + checkpointRootPath);
+    LOG.info("Initialing LocalFileSystemStorage with Checkpoint root path: "
+        + checkpointRootPath + " Max checkpoints: " + maxCheckpoints);
   }
 
   @Override
@@ -55,6 +62,11 @@ public class LocalFileSystemStorage implements IStatefulStorage {
 
   @Override
   public void store(Checkpoint checkpoint) throws StatefulStorageException {
+    // heron doesn't clean checkpoints stored on local disk automatically
+    // localFS cleans checkpoints before store and limits the number of checkpoints saved
+    String rootPath = getTopologyCheckpointRoot(checkpoint.getTopologyName());
+    cleanCheckpoints(rootPath, maxCheckpoints);
+
     String path = getCheckpointPath(checkpoint.getTopologyName(), checkpoint.getCheckpointId(),
                                     checkpoint.getComponent(), checkpoint.getTaskId());
 
@@ -129,6 +141,23 @@ public class LocalFileSystemStorage implements IStatefulStorage {
           if (name.compareTo(oldestCheckpointPreserved) < 0) {
             throw new StatefulStorageException("Failed to delete " + name);
           }
+        }
+      }
+    }
+  }
+
+  private void cleanCheckpoints(String path, int remaining) throws StatefulStorageException {
+    if (FileUtils.isDirectoryExists(path) && FileUtils.hasChildren(path)) {
+      File[] children = new File(path).listFiles();
+      Arrays.sort(children, Comparator.reverseOrder());
+
+      // only keep the latest N remaining files, delete others
+      for (int i = remaining; i < children.length; i++) {
+        String ckptPath = children[i].getAbsolutePath();
+        FileUtils.deleteDir(ckptPath);
+
+        if (FileUtils.isDirectoryExists(ckptPath)) {
+          throw new StatefulStorageException("Failed to delete " + ckptPath);
         }
       }
     }
