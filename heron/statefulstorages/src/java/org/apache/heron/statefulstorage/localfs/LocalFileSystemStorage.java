@@ -21,7 +21,6 @@ package org.apache.heron.statefulstorage.localfs;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -40,13 +39,16 @@ public class  LocalFileSystemStorage implements IStatefulStorage {
   private static final String ROOT_PATH_KEY = "heron.statefulstorage.localfs.root.path";
   private static final String MAX_CHECKPOINTS_KEY = "heron.statefulstorage.localfs.max.checkpoints";
 
+  private static final int DEFAULT_MAX_CHECKPOINTS = 10;
+
   private String checkpointRootPath;
   private int maxCheckpoints;
 
   @Override
   public void init(Map<String, Object> conf) throws StatefulStorageException {
     checkpointRootPath = (String) conf.get(ROOT_PATH_KEY);
-    maxCheckpoints = (int) conf.get(MAX_CHECKPOINTS_KEY);
+    maxCheckpoints = (int) conf.getOrDefault(MAX_CHECKPOINTS_KEY, DEFAULT_MAX_CHECKPOINTS);
+
     if (checkpointRootPath != null) {
       checkpointRootPath =
           checkpointRootPath.replaceFirst("^~", System.getProperty("user.home"));
@@ -65,7 +67,7 @@ public class  LocalFileSystemStorage implements IStatefulStorage {
     // heron doesn't clean checkpoints stored on local disk automatically
     // localFS cleans checkpoints before store and limits the number of checkpoints saved
     String rootPath = getTopologyCheckpointRoot(checkpoint.getTopologyName());
-    cleanCheckpoints(rootPath, maxCheckpoints);
+    cleanCheckpoints(new File(rootPath), maxCheckpoints);
 
     String path = getCheckpointPath(checkpoint.getTopologyName(), checkpoint.getCheckpointId(),
                                     checkpoint.getComponent(), checkpoint.getTaskId());
@@ -146,18 +148,19 @@ public class  LocalFileSystemStorage implements IStatefulStorage {
     }
   }
 
-  private void cleanCheckpoints(String path, int remaining) throws StatefulStorageException {
-    if (FileUtils.isDirectoryExists(path) && FileUtils.hasChildren(path)) {
-      File[] children = new File(path).listFiles();
-      Arrays.sort(children, Comparator.reverseOrder());
+  protected void cleanCheckpoints(File rootFile, int remaining) throws StatefulStorageException {
+    if (FileUtils.isDirectoryExists(rootFile.getAbsolutePath())
+        && FileUtils.hasChildren(rootFile.getAbsolutePath())) {
+      String[] children = rootFile.list();
+      Arrays.sort(children);
 
       // only keep the latest N remaining files, delete others
-      for (int i = remaining; i < children.length; i++) {
-        String ckptPath = children[i].getAbsolutePath();
-        FileUtils.deleteDir(ckptPath);
+      for (int i = 0; i < children.length - remaining; i++) {
+        File ckptFile = new File(rootFile.getAbsolutePath(), children[i]);
+        FileUtils.deleteDir(ckptFile, true);
 
-        if (FileUtils.isDirectoryExists(ckptPath)) {
-          throw new StatefulStorageException("Failed to delete " + ckptPath);
+        if (FileUtils.isDirectoryExists(ckptFile.getAbsolutePath())) {
+          throw new StatefulStorageException("Failed to delete " + ckptFile.getAbsolutePath());
         }
       }
     }
