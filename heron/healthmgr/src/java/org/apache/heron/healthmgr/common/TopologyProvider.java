@@ -36,7 +36,7 @@ import org.apache.heron.api.generated.TopologyAPI.Topology;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
  * A topology may be updated after initial deployment. This provider is used to provide the latest

@@ -2,6 +2,11 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+files = glob(
+    ["**/*.java"],
+    exclude = ["**/HealthManager.java"],
+)
+
 healthmgr_deps_files = [
     "//heron/api/src/java:api-java-low-level",
     "//heron/api/src/java:classification",
@@ -46,20 +51,20 @@ healthmgr_deps_files = [
 ]
 
 filegroup(
-    name = "exported-healthmgr-java-src",
-    srcs = glob(["**/*.java"]),
+    name = "healthmgr-main",
+    srcs = glob(["**/HealthManager.java"]),
 )
 
 java_library(
     name = "healthmgr-java",
-    srcs = glob(["**/*.java"]),
+    srcs = files,
     deps = heron_java_proto_files() + healthmgr_deps_files,
 )
 
 java_binary(
     name = "healthmgr-unshaded",
-    srcs = glob(["**/*.java"]),
-    deps = heron_java_proto_files() + healthmgr_deps_files,
+    srcs = [":healthmgr-main"],
+    deps = heron_java_proto_files() + healthmgr_deps_files + [":healthmgr-java"],
 )
 
 genrule(
