@@ -66,6 +66,10 @@ import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.ReflectionUtils;
 
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_TYPE;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
+
 /**
  * {@link HealthManager} makes a topology dynamic and self-regulating. This is implemented using
  * Dhalion library. The {@link HealthManager} will perform the following functions to achieve its
@@ -104,10 +108,6 @@ import org.apache.heron.spi.utils.ReflectionUtils;
 @Unstable
 @Evolving
 public class HealthManager {
-  public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
-  public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
-  private static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
-
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
   private AbstractModule baseModule;
