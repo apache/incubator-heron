@@ -26,6 +26,10 @@ import java.util.logging.Logger;
 import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
 
 public class HealthPolicyConfig {
+  public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
+  public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
+  public static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
+
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
 

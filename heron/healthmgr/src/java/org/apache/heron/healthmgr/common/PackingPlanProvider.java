@@ -39,7 +39,7 @@ import org.apache.heron.spi.packing.PackingPlan.InstancePlan;
 import org.apache.heron.spi.packing.PackingPlanProtoDeserializer;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
  * A topology's packing plan may get updated after initial deployment. This provider is used to
