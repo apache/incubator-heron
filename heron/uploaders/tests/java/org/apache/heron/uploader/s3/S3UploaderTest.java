@@ -178,10 +178,28 @@ public class S3UploaderTest {
     String expectedPreviousVersionPath = "test-topology/previous_topology.tar.gz";
     String expectedBucket = "bucket";
 
+    when(mockS3Client.doesObjectExist(expectedBucket, expectedPreviousVersionPath))
+        .thenReturn(true);
+
     uploader.close();
+
+    verify(mockS3Client).doesObjectExist(expectedBucket, expectedPreviousVersionPath);
     verify(mockS3Client).deleteObject(expectedBucket, expectedPreviousVersionPath);
   }
 
+  @Test
+  public void close_DoNotDeleteFileIfItDoesNotExist() {
+    String expectedPreviousVersionPath = "test-topology/previous_topology.tar.gz";
+    String expectedBucket = "bucket";
+
+    when(mockS3Client.doesObjectExist(expectedBucket, expectedPreviousVersionPath))
+        .thenReturn(false);
+
+    uploader.close();
+
+    verify(mockS3Client).doesObjectExist(expectedBucket, expectedPreviousVersionPath);
+    verify(mockS3Client, never()).deleteObject(expectedBucket, expectedPreviousVersionPath);
+  }
 
   @Test
   public void PrefixUploadPathWithSpecifiedPrefix() throws Exception {

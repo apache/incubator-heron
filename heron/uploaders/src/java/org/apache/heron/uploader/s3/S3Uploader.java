@@ -39,6 +39,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.base.Strings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.uploader.IUploader;
@@ -148,11 +149,14 @@ public class S3Uploader implements IUploader {
       builder.setClientConfiguration(clientCfg);
     }
 
-    s3Client = builder.withRegion(customRegion)
-            .withPathStyleAccessEnabled(true)
-            .withChunkedEncodingDisabled(true)
-            .withPayloadSigningEnabled(true)
-            .build();
+    if(StringUtils.isNotBlank(customRegion)) {
+      builder.setRegion(customRegion);
+    }
+
+    s3Client = builder.withPathStyleAccessEnabled(true)
+        .withChunkedEncodingDisabled(true)
+        .withPayloadSigningEnabled(true)
+        .build();
 
     if (!Strings.isNullOrEmpty(endpoint)) {
       s3Client.setEndpoint(endpoint);
@@ -242,7 +246,8 @@ public class S3Uploader implements IUploader {
   public void close() {
     // Cleanup the backup file if it exists as its not needed anymore.
     // This will succeed whether the file exists or not.
-    if (!Strings.isNullOrEmpty(previousVersionFilePath)) {
+    if (!Strings.isNullOrEmpty(previousVersionFilePath)
+        && s3Client.doesObjectExist(bucket, previousVersionFilePath)) {
       s3Client.deleteObject(bucket, previousVersionFilePath);
     }
   }
