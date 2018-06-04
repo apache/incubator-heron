@@ -295,6 +295,16 @@ int HeronInternalsConfigReader::GetHeronInstanceReconnectStreammgrTimes() {
       .as<int>();
 }
 
+sp_string HeronInternalsConfigReader::GetHeronStreammgrEncryptionCertificatePath() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_CERTIFICATE_PATH]
+     .as<std::string>();
+}
+
+sp_string HeronInternalsConfigReader::GetHeronStreammgrEncryptionPrivateKeyPath() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_PRIVATE_KEY_PATH]
+     .as<std::string>();
+}
+
 int HeronInternalsConfigReader::GetHeronInstanceInternalBoltReadQueueCapacity() {
   return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY]
       .as<int>();

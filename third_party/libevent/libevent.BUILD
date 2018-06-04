@@ -8,16 +8,16 @@ include_files = [
     "include/evhttp.h",
     "include/evrpc.h",
     "include/evutil.h",
-
     "include/event2/buffer.h",
     "include/event2/bufferevent_struct.h",
+    "include/event2/bufferevent_ssl.h",
     "include/event2/event.h",
     "include/event2/http_struct.h",
     "include/event2/rpc_struct.h",
-    "include/event2/buffer_compat.h",      
+    "include/event2/buffer_compat.h",
     "include/event2/dns.h",
     "include/event2/event_compat.h",
-    "include/event2/keyvalq_struct.h", 
+    "include/event2/keyvalq_struct.h",
     "include/event2/tag.h",
     "include/event2/bufferevent.h",
     "include/event2/dns_compat.h",
@@ -37,10 +37,8 @@ include_files = [
 ]
 
 lib_files = [
-    "lib/libevent.a", 
-    "lib/libevent_core.a",
-    "lib/libevent_extra.a", 
-    "lib/libevent_pthreads.a",
+    "lib/libevent.a",
+    "lib/libevent_openssl.a",
 ]
 
 genrule(
@@ -52,7 +50,7 @@ genrule(
         'mkdir -p $$TMP_DIR',
         'cp -R $$(pwd)/external/org_libevent_libevent/* $$TMP_DIR',
         'cd $$TMP_DIR',
-        './configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-openssl',
+        './configure --prefix=$$INSTALL_DIR --enable-shared=no --enable-openssl',
         'make install',
         'rm -rf $$TMP_DIR',
     ]),
@@ -60,10 +58,16 @@ genrule(
 
 cc_library(
     name = "libevent",
-    srcs = ["lib/libevent.a"],
+    srcs = [
+        "lib/libevent.a",
+        "lib/libevent_openssl.a",
+    ],
     hdrs = include_files,
-    includes = ["include"],  
+    includes = ["include"],
     linkstatic = 1,
+    deps = [
+        "@org_openssl_openssl//:openssl"
+    ],
 )
 
 filegroup(
