@@ -45,7 +45,7 @@ import org.apache.heron.proto.tmaster.TopologyMaster.MetricsCacheLocation;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.NetworkUtils;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 public class MetricsCacheMetricsProvider implements MetricsProvider {
   private static final String PATH_STATS = "stats";

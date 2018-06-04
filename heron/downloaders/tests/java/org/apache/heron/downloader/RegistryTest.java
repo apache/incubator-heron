@@ -20,8 +20,12 @@
 package org.apache.heron.downloader;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
+
+import org.apache.heron.spi.common.Config;
 
 import static org.junit.Assert.assertTrue;
 
@@ -29,14 +33,34 @@ public class RegistryTest {
 
   @Test
   public void testGetDownloader() throws Exception {
+    Map<String, String> protocols = new HashMap<>();
+    protocols.put("http", "org.apache.heron.downloader.HttpDownloader");
+    protocols.put("https", "org.apache.heron.downloader.HttpDownloader");
+    protocols.put("distributedlog", "org.apache.heron.downloader.DLDownloader");
+    protocols.put("file", "org.apache.heron.downloader.FileDownloader");
+    Config config = Config.newBuilder()
+        .put("heron.downloader.registry", protocols)
+        .build();
+
+    Map<String, Class<? extends Downloader>> downloaders = new HashMap<>();
+    downloaders.put("http", HttpDownloader.class);
+    downloaders.put("https", HttpDownloader.class);
+    downloaders.put("distributedlog", DLDownloader.class);
+    downloaders.put("file", FileDownloader.class);
+
     URI httpUri = URI.create("http://127.0.0.1/test/http");
-    Downloader downloader = Registry.get().getDownloader(httpUri);
+    Class<? extends Downloader> clazz = Registry.UriToClass(config, httpUri);
+    Downloader downloader = Registry.getDownloader(clazz, httpUri);
     assertTrue(downloader instanceof HttpDownloader);
+
     URI httpsUri = URI.create("https://127.0.0.1/test/http");
-    downloader = Registry.get().getDownloader(httpsUri);
+    clazz = Registry.UriToClass(config, httpsUri);
+    downloader = Registry.getDownloader(clazz, httpsUri);
     assertTrue(downloader instanceof HttpDownloader);
+
     URI dlUri = URI.create("distributedlog://127.0.0.1/test/distributedlog");
-    downloader = Registry.get().getDownloader(dlUri);
+    clazz = Registry.UriToClass(config, dlUri);
+    downloader = Registry.getDownloader(clazz, dlUri);
     assertTrue(downloader instanceof DLDownloader);
   }
 

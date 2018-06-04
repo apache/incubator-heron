@@ -42,16 +42,17 @@ public enum Key {
   JAVA_HOME                ("heron.directory.java.home", "${JAVA_HOME}"),
 
   //keys for heron configuration files
-  CLUSTER_YAML             ("heron.config.file.cluster.yaml",   "${HERON_CONF}/cluster.yaml"),
-  CLIENT_YAML              ("heron.config.file.client.yaml",    "${HERON_CONF}/client.yaml"),
-  HEALTHMGR_YAML           ("heron.config.file.healthmgr.yaml", "${HERON_CONF}/healthmgr.yaml"),
-  METRICS_YAML             ("heron.config.file.metrics.yaml",   "${HERON_CONF}/metrics_sinks.yaml"),
-  PACKING_YAML             ("heron.config.file.packing.yaml",   "${HERON_CONF}/packing.yaml"),
-  SCHEDULER_YAML           ("heron.config.file.scheduler.yaml", "${HERON_CONF}/scheduler.yaml"),
-  STATEMGR_YAML            ("heron.config.file.statemgr.yaml",  "${HERON_CONF}/statemgr.yaml"),
-  SYSTEM_YAML              ("heron.config.file.system.yaml",    "${HERON_CONF}/heron_internals.yaml"),
-  UPLOADER_YAML            ("heron.config.file.uploader.yaml",  "${HERON_CONF}/uploader.yaml"),
-  STATEFUL_YAML            ("heron.config.file.stateful.yaml",  "${HERON_CONF}/stateful.yaml"),
+  CLUSTER_YAML             ("heron.config.file.cluster.yaml",    "${HERON_CONF}/cluster.yaml"),
+  CLIENT_YAML              ("heron.config.file.client.yaml",     "${HERON_CONF}/client.yaml"),
+  HEALTHMGR_YAML           ("heron.config.file.healthmgr.yaml",  "${HERON_CONF}/healthmgr.yaml"),
+  METRICS_YAML             ("heron.config.file.metrics.yaml",    "${HERON_CONF}/metrics_sinks.yaml"),
+  PACKING_YAML             ("heron.config.file.packing.yaml",    "${HERON_CONF}/packing.yaml"),
+  SCHEDULER_YAML           ("heron.config.file.scheduler.yaml",  "${HERON_CONF}/scheduler.yaml"),
+  STATEMGR_YAML            ("heron.config.file.statemgr.yaml",   "${HERON_CONF}/statemgr.yaml"),
+  SYSTEM_YAML              ("heron.config.file.system.yaml",     "${HERON_CONF}/heron_internals.yaml"),
+  UPLOADER_YAML            ("heron.config.file.uploader.yaml",   "${HERON_CONF}/uploader.yaml"),
+  DOWNLOADER_YAML          ("heron.config.file.downloader.yaml", "${HERON_CONF}/downloader.yaml"),
+  STATEFUL_YAML            ("heron.config.file.stateful.yaml",   "${HERON_CONF}/stateful.yaml"),
 
   //keys for config provided in the command line
   CLUSTER                  ("heron.config.cluster",             Type.STRING),
@@ -154,6 +155,7 @@ public enum Key {
   COMPONENT_JVM_OPTS_IN_BASE64   ("heron.runtime.component.jvm.opts.in.base64",    Type.STRING),
   INSTANCE_JVM_OPTS_IN_BASE64    ("heron.runtime.instance.jvm.opts.in.base64",     Type.STRING),
   NUM_CONTAINERS                 ("heron.runtime.num.containers",                  Type.INTEGER),
+  DOWNLOADER_PROTOCOLS           ("heron.downloader.registry",                     Type.MAP),
 
   //release info
   HERON_RELEASE_PACKAGE          ("heron.release.package",         Type.STRING),
@@ -189,7 +191,6 @@ public enum Key {
   // user has another chance to double check quota is available.
   // To enable it, change the config from "disabled" to "prompt".
   UPDATE_PROMPT         ("heron.command.update.prompt", "disabled");
-
 
   private final String value;
   private final Object defaultValue;

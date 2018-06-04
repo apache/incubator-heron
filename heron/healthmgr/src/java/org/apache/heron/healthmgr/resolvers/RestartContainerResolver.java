@@ -41,7 +41,7 @@ import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
 import org.apache.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import org.apache.heron.scheduler.client.ISchedulerClient;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
