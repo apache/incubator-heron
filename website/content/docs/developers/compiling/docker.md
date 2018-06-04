@@ -34,13 +34,13 @@ Heron provides a `build-arfifacts.sh` script for Docker located in the
 
 ```bash
 $ cd /path/to/heron/repo
-$ docker/build-artifacts.sh
+$ docker/scripts/build-artifacts.sh
 ```
 
 Running the script by itself will display usage information:
 
 ```
-Usage: docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
+Usage: docker/scripts/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
 
 Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
 
@@ -64,7 +64,7 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
 ```
 
 This will build a Docker container specific to Ubuntu 14.04, create a source
@@ -87,15 +87,13 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
+heron-0.12.0-ubuntu14.04.tar
+heron-0.12.0-ubuntu14.04.tar.gz
 heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz
+heron-core-0.12.0-ubuntu14.04.tar.gz
+heron-install-0.12.0-ubuntu14.04.sh
+heron-layer-0.12.0-ubuntu14.04.tar
 heron-tools-0.12.0-ubuntu14.04.tar.gz
-heron-client-install-0.12.0-ubuntu.sh  
-heron-tools-install-0.12.0-ubuntu.sh
-heron-api-install-0.12.0-ubuntu.sh     
-heron-core-0.12.0-ubuntu.tar.gz
-```
-
 ## Contributing New Environments
 
 You'll notice that there are multiple

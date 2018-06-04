@@ -8,7 +8,7 @@
 # When changing this script, verify that it still works by running locally
 # on a mac. Then verify the other environments by doing this:
 #
-#  cd docker
+#  cd docker/scripts
 #  ./build-artifacts.sh ubuntu15.10 0.12.0 .
 #  ./build-artifacts.sh ubuntu14.04 0.12.0 .
 #  ./build-artifacts.sh centos7 0.12.0 .
