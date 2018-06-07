@@ -26,10 +26,11 @@ import os
 import uuid
 
 import heronpy.api.api_constants as api_constants
+import six
+from heronpy.api.component.component_spec import HeronComponentSpec
 from heronpy.api.serializer import default_serializer
 from heronpy.proto import topology_pb2
 
-from heronpy.api.component.component_spec import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""
@@ -255,6 +256,7 @@ class TopologyType(type):
 
     return sanitized
 
+@six.add_metaclass(TopologyType)
 class Topology(object):
   """Topology is an abstract class for defining a topology
 
@@ -285,7 +287,6 @@ class Topology(object):
                                     inputs={word_spout: Grouping.fields('word')},
                                     config={"count_bolt.specific.config": "another value"})
   """
-  __metaclass__ = TopologyType
 
   # pylint: disable=no-member
   @classmethod
