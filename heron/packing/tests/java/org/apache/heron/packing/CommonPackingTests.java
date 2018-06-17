@@ -345,7 +345,7 @@ public abstract class CommonPackingTests {
         packingPlanExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
-    // Ram for bolt/spout should be the value in component RAM map
+    // RAM for bolt/spout should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {

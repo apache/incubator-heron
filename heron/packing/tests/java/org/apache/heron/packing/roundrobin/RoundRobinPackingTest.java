@@ -284,7 +284,7 @@ public class RoundRobinPackingTest {
         getRoundRobinPackingPlan(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    // Ram for bolt should be the value in component RAM map
+    // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       Assert.assertEquals(containerRam, containerPlan.getRequiredResource().getRam());

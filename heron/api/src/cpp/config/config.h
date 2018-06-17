@@ -305,14 +305,14 @@ class Config {
 
   void setComponentCpu(const std::string& componentName, double cpu) {
     if (cpu < 0) {
-      throw std::runtime_error("Invalid Cpu specified for component");
+      throw std::runtime_error("Invalid CPU specified for component");
     }
     appendComponentConfig<double>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
   }
 
   void setComponentRam(const std::string& componentName, int64_t bytes) {
     if (bytes < 0) {
-      throw std::runtime_error("Invalid Ram specified for component");
+      throw std::runtime_error("Invalid RAM specified for component");
     }
     appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_RAMMAP, componentName, bytes);
   }

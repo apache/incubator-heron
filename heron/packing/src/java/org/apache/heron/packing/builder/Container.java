@@ -31,7 +31,7 @@ import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
 /**
- * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
+ * Class that describes a container used to place Heron Instances with specific memory, CPU and disk
  * requirements. Each container has limited RAM, CpuCores and disk resources.
  */
 public class Container {

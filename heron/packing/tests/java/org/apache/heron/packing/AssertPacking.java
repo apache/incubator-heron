@@ -58,7 +58,7 @@ public final class AssertPacking {
     List<Integer> expectedInstanceIndecies = new ArrayList<>();
     List<Integer> foundInstanceIndecies = new ArrayList<>();
     int expectedInstanceIndex = 1;
-    // Ram for bolt should be the value in component RAM map
+    // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         assertNotEquals(

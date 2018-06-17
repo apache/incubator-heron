@@ -145,7 +145,7 @@ public class ConfigBuilder {
         long megaBytes = extractRawValue(ramWithUom, mbIndex);
         if (megaBytes < MINIMUM_MB) {
           throw new IllegalArgumentException(
-              "The minimum Ram resource allocation for a component must be at least 256MB");
+              "The minimum RAM resource allocation for a component must be at least 256MB");
         }
         byteAmount = ByteAmount.fromMegabytes(megaBytes);
 
@@ -161,7 +161,7 @@ public class ConfigBuilder {
         long bytes = extractRawValue(ramWithUom, bIndex);
         if (bytes < MINIMUM_BYTES) {
           throw new IllegalArgumentException(
-              "The minimum Ram resource allocation for a component must be at least 256000000B");
+              "The minimum RAM resource allocation for a component must be at least 256000000B");
         }
         byteAmount = ByteAmount.fromBytes(bytes);
 
@@ -169,7 +169,7 @@ public class ConfigBuilder {
         // There is no format throw an exception
         throw new
             IllegalArgumentException(
-            " Please specify 'B', 'MB', 'GB' when declaring Ram Resources");
+            " Please specify 'B', 'MB', 'GB' when declaring RAM Resources");
       }
       config.setComponentRam(id, byteAmount);
     }

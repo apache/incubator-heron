@@ -341,7 +341,7 @@ def main():
   parser.add_argument('--sys_config', required=True, help='System Config File')
   parser.add_argument('--override_config', required=True, help='Override Config File')
   parser.add_argument('--topology_pex', required=True, help='Topology Pex File')
-  parser.add_argument('--max_ram', required=True, help='Maximum Ram to limit', type=int)
+  parser.add_argument('--max_ram', required=True, help='Maximum RAM to limit', type=int)
 
   args = parser.parse_args()
 
@@ -384,7 +384,7 @@ def main():
            "\n **Topology Pex file located at: " + args.topology_pex)
   Log.debug("System config: " + str(sys_config))
   Log.debug("Override config: " + str(override_config))
-  Log.debug("Maximum Ram: " + str(args.max_ram))
+  Log.debug("Maximum RAM: " + str(args.max_ram))
 
   heron_instance = SingleThreadHeronInstance(args.topology_name, args.topology_id, instance,
                                              args.stmgr_port, args.metricsmgr_port,

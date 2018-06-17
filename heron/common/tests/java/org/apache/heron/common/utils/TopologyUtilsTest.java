@@ -168,7 +168,7 @@ public class TopologyUtilsTest {
     // sort the component RAM map
     Map<String, ByteAmount> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMapConfig(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts)));
-    // Component RAM map sets only spout's ram
+    // Component RAM map sets only spout's RAM
     Assert.assertArrayEquals(new String[]{"spout"}, ramMap.keySet().toArray());
     Assert.assertArrayEquals(new ByteAmount[]{spoutRam}, ramMap.values().toArray());
   }
