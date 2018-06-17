@@ -27,15 +27,14 @@ from heronpy.streamlet.impl.supplierspout import SupplierStreamlet
 from heronpy.streamlet.impl.generatorspout import GeneratorStreamlet
 
 class Builder(object):
-  """A Builder object is used to build the functional api dag in Heron.
-  """
+  """A Builder object is used to build the functional api DAG in Heron."""
   def __init__(self):
     """
     """
     self._sources = []
 
   def new_source(self, source):
-    """Adds a new source to the computation dag"""
+    """Adds a new source to the computation DAG"""
 
     source_streamlet = None
     if callable(source):
