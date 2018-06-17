@@ -25,7 +25,7 @@ import tempfile
 
 import pulsar
 
-import heronpy.api.src.python.api_constants as api_constants
+import heronpy.api.src.python.api_constants as API_constants
 from heronpy.api.src.python.spout.spout import Spout
 
 from heronpy.streamlet.src.python.streamletboltbase import StreamletBoltBase
@@ -84,7 +84,7 @@ class PulsarSpout(Spout, StreamletBoltBase):
     self.pulsar_cluster = str(config[PulsarSpout.serviceUrl])
     self.topic = str(config[PulsarSpout.topicName])
     mode = config[api_constants.TOPOLOGY_RELIABILITY_MODE]
-    if mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE:
+    if mode == API_constants.TopologyReliabilityMode.ATLEAST_ONCE:
       self.acking_timeout = 1000 * int(config[api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS])
     else:
       self.acking_timeout = 30000
@@ -103,9 +103,9 @@ class PulsarSpout(Spout, StreamletBoltBase):
     self.logConfFileName = GenerateLogConfig(context)
     self.logger.info("Generated LogConf at %s" % self.logConfFileName)
 
-    # We currently use the high level consumer api
+    # We currently use the high level consumer API
     # For supporting effectively once, we will need to switch
-    # to using lower level Reader api, when it becomes
+    # to using lower level Reader API, when it becomes
     # available in python
     self.client = pulsar.Client(self.pulsar_cluster, log_conf_file_path=self.logConfFileName)
     self.logger.info("Setup Client with cluster %s" % self.pulsar_cluster)

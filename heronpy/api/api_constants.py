@@ -18,7 +18,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-''' api_constants.py: defines api constants for topology config'''
+''' API_constants.py: defines API constants for topology config'''
 
 ####################################################################################################
 ###########################  Constants for topology configuration ##################################

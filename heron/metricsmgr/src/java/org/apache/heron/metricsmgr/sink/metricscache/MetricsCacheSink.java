@@ -58,7 +58,7 @@ import org.apache.heron.spi.metricsmgr.sink.SinkContext;
  * <p>
  * 2. Then it would construct a long-live Service running metricsCacheClient, which could automatically
  * recover from uncaught exceptions, i.e. close the old one and start a new one.
- * Also, it provides api to update the MetricsCacheLocation that metricsCacheClient need to connect and
+ * Also, it provides API to update the MetricsCacheLocation that metricsCacheClient need to connect and
  * restart the metricsCacheClient.
  * There are two scenarios we need to restart a metricsCacheClient in our case:
  * <p>
