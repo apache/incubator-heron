@@ -185,7 +185,7 @@ public class HeronMasterDriver {
   }
 
   /*
-   * Must be invoked after workers are scheduled. TMaster needs component ram map.
+   * Must be invoked after workers are scheduled. TMaster needs component RAM map.
    */
   void launchTMaster() {
     tMaster = buildTMaster(Executors.newSingleThreadExecutor());

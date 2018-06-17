@@ -114,9 +114,9 @@ public abstract class CommonPackingTests {
    *
    * @param testTopology Input topology
    * @param componentChanges parallelism changes for scale up/down
-   * @param boltRam ram allocated to bolts
+   * @param boltRam RAM allocated to bolts
    * @param testBoltParallelism bolt parallelism
-   * @param spoutRam ram allocated to spouts
+   * @param spoutRam RAM allocated to spouts
    * @param testSpoutParallelism spout parallelism
    * @param numContainersBeforeRepack number of containers that the initial packing plan should use
    * @param totalInstancesExpected number of instances expected before scaling
@@ -297,14 +297,14 @@ public abstract class CommonPackingTests {
   }
 
   /**
-   * Test invalid ram for instance
+   * Test invalid RAM for instance
    */
   @Test(expected = PackingException.class)
   public void testInvalidRamInstance() throws Exception {
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     int defaultNumInstancesperContainer = 4;
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.ZERO;
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
@@ -345,7 +345,7 @@ public abstract class CommonPackingTests {
         packingPlanExplicitResourcesConfig.getContainers().size());
     Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
 
-    // Ram for bolt/spout should be the value in component ram map
+    // Ram for bolt/spout should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitResourcesConfig.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {

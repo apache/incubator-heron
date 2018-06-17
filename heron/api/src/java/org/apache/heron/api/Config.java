@@ -157,7 +157,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
   /**
-   * Amount of ram per container to be reserved for this topology.
+   * Amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
@@ -171,7 +171,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint";
   /**
-   * Hint for max amount of ram per container to be reserved for this topology.
+   * Hint for max amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_MAX_RAM_HINT = "topology.container.max.ram.hint";
@@ -187,22 +187,22 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
   /**
-   * Amount of ram to pad each container.
+   * Amount of RAM to pad each container.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
    */
   public static final String TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";

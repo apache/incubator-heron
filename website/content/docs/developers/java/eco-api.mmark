@@ -228,11 +228,11 @@ component level `cpu` and `disk` configs in the future.
  topology.component.resourcemap:
 
     - id: "spout-1"
-      ram: 256MB # The minimum value for a component's specified ram is 256MB
+      ram: 256MB # The minimum value for a component's specified RAM is 256MB
       
 
     - id: "bolt-1"
-      ram: 256MB # The minimum value for a component's specified ram is 256MB
+      ram: 256MB # The minimum value for a component's specified RAM is 256MB
       
  ```
  
@@ -274,13 +274,13 @@ underlying TopologyReliabilityMode value.  Values are `ATMOST_ONCE`, `ATLEAST_ON
 mode. The format of this flag is the string encoded values of the
 underlying TopologyReliabilityMode value.
 * `"topology.container.cpu"` : Number of cpu cores per container to be reserved for this topology.
-* `"topology.container.ram"` : Amount of ram per container to be reserved for this topology. In bytes.
+* `"topology.container.ram"` : Amount of RAM per container to be reserved for this topology. In bytes.
 * `"topology.container.disk"` : Amount of disk per container to be reserved for this topology. In bytes.
 * `"topology.container.max.cpu.hint"` : Hint for max number of cpu cores per container to be reserved for this topology.
-* `"topology.container.max.ram.hint"` : Hint for max amount of ram per container to be reserved for this topology.  In bytes.
+* `"topology.container.max.ram.hint"` : Hint for max amount of RAM per container to be reserved for this topology.  In bytes.
 * `"topology.container.max.disk.hint"` : Hint for max amount of disk per container to be reserved for this topology. In bytes.
 * `"topology.container.padding.percentage"` : Hint for max amount of disk per container to be reserved for this topology. In bytes.
-* `"topology.container.ram.padding"` : Amount of ram to pad each container. In bytes.
+* `"topology.container.ram.padding"` : Amount of RAM to pad each container. In bytes.
 * `"topology.stateful.checkpoint.interval.seconds"` : What's the checkpoint interval for stateful topologies in seconds.
 * `"topology.stateful.start.clean"` :  Boolean flag that says that the stateful topology should start from clean state, i.e. ignore any checkpoint state.
 * `"topology.name"` :  Name of the topology. This config is automatically set by Heron when the topology is submitted.

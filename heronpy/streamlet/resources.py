@@ -22,7 +22,7 @@
 
 class Resources(object):
   """Resources needed by the topology are encapsulated in this class.
-     Currently we deal with cpu and ram. Others can be added later.
+     Currently we deal with cpu and RAM. Others can be added later.
   """
   def __init__(self):
     self._cpu = 0.0

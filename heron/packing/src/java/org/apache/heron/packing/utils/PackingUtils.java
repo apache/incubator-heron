@@ -52,14 +52,14 @@ public final class PackingUtils {
 
     if (instanceResources.getRam().lessThan(minInstanceRam)) {
       throw new PackingException(String.format(
-          "Instance requires ram %s which is less than the minimum ram per instance of %s",
+          "Instance requires RAM %s which is less than the minimum RAM per instance of %s",
           instanceResources.getRam(), minInstanceRam));
     }
 
     ByteAmount instanceRam = instanceResources.getRam().increaseBy(paddingPercentage);
     if (instanceRam.greaterThan(maxContainerResources.getRam())) {
       throw new PackingException(String.format(
-          "This instance requires containers of at least %s ram. The current max container "
+          "This instance requires containers of at least %s RAM. The current max container "
               + "size is %s",
           instanceRam, maxContainerResources.getRam()));
     }

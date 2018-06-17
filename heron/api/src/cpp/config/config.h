@@ -136,7 +136,7 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_CPU_REQUESTED;
 
   /**
-   * Amount of ram per container to be reserved for this topology.
+   * Amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_RAM_REQUESTED;
@@ -153,7 +153,7 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 
   /**
-   * Hint for max amount of ram per container to be reserved for this topology.
+   * Hint for max amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_MAX_RAM_HINT;
@@ -171,7 +171,7 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
 
   /**
-   * Amount of ram to pad each container for this topology.
+   * Amount of RAM to pad each container for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_RAM_PADDING;
@@ -183,7 +183,7 @@ class Config {
   static const std::string TOPOLOGY_COMPONENT_CPUMAP;
 
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   static const std::string TOPOLOGY_COMPONENT_RAMMAP;

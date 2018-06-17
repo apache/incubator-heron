@@ -62,22 +62,22 @@ TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean"
 
 # Number of cpu cores per container to be reserved for this topology.
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
-# Amount of ram per container to be reserved for this topology, in bytes.
+# Amount of RAM per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram"
 # Amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk"
-# Hint for max amount of ram per container to be reserved for this topology, in bytes.
+# Hint for max amount of RAM per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint"
 # Hint for max amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint"
 # Padding percentage for this container.
 TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
-# Amount of ram padding per container.
+# Amount of RAM padding per container.
 TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding"
 
 # Per component cpu requirement.
 TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap"
-# Per component ram requirement.
+# Per component RAM requirement.
 TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
 # Per component disk requirement.
 TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap"

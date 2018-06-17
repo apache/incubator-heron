@@ -565,7 +565,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
-      Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
+      Log.info("component name: %s, RAM request: %d, total jvm size: %dM, "
                "cache size: %dM, metaspace size: %dM"
                % (component_name, self.component_ram_map[component_name],
                   total_jvm_size, code_cache_size_mb, java_metasize_mb))

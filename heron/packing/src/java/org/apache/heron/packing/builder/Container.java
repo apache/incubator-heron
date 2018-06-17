@@ -32,7 +32,7 @@ import org.apache.heron.spi.packing.Resource;
 
 /**
  * Class that describes a container used to place Heron Instances with specific memory, Cpu and disk
- * requirements. Each container has limited ram, CpuCores and disk resources.
+ * requirements. Each container has limited RAM, CpuCores and disk resources.
  */
 public class Container {
 
@@ -45,7 +45,7 @@ public class Container {
    * Creates a container with a specific capacity which will maintain a specific percentage
    * of its resources for padding.
    *
-   * @param capacity the capacity of the container in terms of cpu, ram and disk
+   * @param capacity the capacity of the container in terms of cpu, RAM and disk
    * @param paddingPercentage the padding percentage
    */
   Container(int containerId, Resource capacity, int paddingPercentage) {
@@ -163,7 +163,7 @@ public class Container {
         usedResources.getDisk().plus(resource.getDisk()).increaseBy(paddingPercentage);
 
     if (newRam.greaterThan(this.capacity.getRam())) {
-      throw new ResourceExceededException(String.format("Adding %s bytes of ram to existing %s "
+      throw new ResourceExceededException(String.format("Adding %s bytes of RAM to existing %s "
           + "bytes with %d percent padding would exceed capacity %s",
           resource.getRam(), usedResources.getRam(), paddingPercentage, this.capacity.getRam()));
     }
@@ -183,7 +183,7 @@ public class Container {
    * Computes the used resources of the container by taking into account the resources
    * allocated for each instance.
    *
-   * @return a Resource object that describes the used cpu, ram and disk in the container.
+   * @return a Resource object that describes the used cpu, RAM and disk in the container.
    */
   private Resource getTotalUsedResources() {
     ByteAmount usedRam = ByteAmount.ZERO;

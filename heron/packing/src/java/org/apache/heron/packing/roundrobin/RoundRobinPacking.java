@@ -49,7 +49,7 @@ import org.apache.heron.spi.packing.Resource;
  * to take equal number of instances if # of instances is multiple of # of containers.
  * <p>
  * Following semantics are guaranteed:
- * 1. Every container requires same size of resource, i.e. same cpu, ram and disk.
+ * 1. Every container requires same size of resource, i.e. same cpu, RAM and disk.
  * Consider that instances in different containers can be different, the value of size
  * will be aligned to the max one.
  * <p>
@@ -66,20 +66,20 @@ import org.apache.heron.spi.packing.Resource;
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
  * (cpu for instances in container) + (cpu padding for heron internal process)
  * <p>
- * 5. The ram required for a container is calculated as:
+ * 5. The RAM required for a container is calculated as:
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
- * (ram for instances in container) + (ram padding for heron internal process)
+ * (RAM for instances in container) + (RAM padding for heron internal process)
  * <p>
- * 6. The ram required for one instance is calculated as:
+ * 6. The RAM required for one instance is calculated as:
  * value in org.apache.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
  * - if org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists:
- * the default ram value for one instance
+ * the default RAM value for one instance
  * - if org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
- * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (ram padding for heron internal process)
- * - (ram used by instances within TOPOLOGY_COMPONENT_RAMMAP config))) /
+ * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (RAM padding for heron internal process)
+ * - (RAM used by instances within TOPOLOGY_COMPONENT_RAMMAP config))) /
  * (the # of instances in container not specified in TOPOLOGY_COMPONENT_RAMMAP config)
  * 7. The pack() return null if PackingPlan fails to pass the safe check, for instance,
- * the size of ram for an instance is less than the minimal required value.
+ * the size of RAM for an instance is less than the minimal required value.
  */
 public class RoundRobinPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
@@ -129,7 +129,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     Map<Integer, List<InstanceId>> roundRobinAllocation =
         getRoundRobinAllocation(numContainer, parallelismMap);
 
-    // Get the ram map for every instance
+    // Get the RAM map for every instance
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
         getInstancesRamMapInContainer(roundRobinAllocation);
 
@@ -137,7 +137,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
     ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
 
-    LOG.info(String.format("Pack internal: container cpu hint: %f, ram hint: %s, disk hint: %s.",
+    LOG.info(String.format("Pack internal: container cpu hint: %f, RAM hint: %s, disk hint: %s.",
         containerCpu,
         containerDiskInBytes.toString(),
         containerRamHint.toString()));
@@ -191,7 +191,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Calculate the ram required by any instance in the container
+   * Calculate the RAM required by any instance in the container
    *
    * @param allocation the allocation of instances in different container
    * @return A map: (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
@@ -222,23 +222,23 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         }
       }
 
-      // Now we have calculated ram for instances specified in ComponentRamMap
-      // Then to calculate ram for the rest instances
+      // Now we have calculated RAM for instances specified in ComponentRamMap
+      // Then to calculate RAM for the rest instances
       int instancesToAllocate = instancesToBeAccounted.size();
 
       if (instancesToAllocate != 0) {
         ByteAmount individualInstanceRam = instanceRamDefault;
 
-        // The ram map is partially set. We need to calculate ram for the rest
+        // The RAM map is partially set. We need to calculate RAM for the rest
 
-        // We have different strategy depending on whether container ram is specified
-        // If container ram is specified
+        // We have different strategy depending on whether container RAM is specified
+        // If container RAM is specified
         if (!containerRamHint.equals(NOT_SPECIFIED_NUMBER_VALUE)) {
-          // remove ram for heron internal process
+          // remove RAM for heron internal process
           ByteAmount remainingRam =
               containerRamHint.minus(containerRamPadding).minus(usedRam);
 
-          // Split remaining ram evenly
+          // Split remaining RAM evenly
           individualInstanceRam = remainingRam.divide(instancesToAllocate);
         }
 
@@ -336,10 +336,10 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Provide ram per container.
+   * Provide RAM per container.
    *
    * @param allocation packing
-   * @return Container ram requirement
+   * @return Container RAM requirement
    */
   private ByteAmount getContainerRamHint(Map<Integer, List<InstanceId>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
@@ -361,7 +361,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         // Safe check
         if (instancePlan.getResource().getRam().lessThan(MIN_RAM_PER_INSTANCE)) {
           throw new PackingException(String.format("Invalid packing plan generated. A minimum of "
-                  + "%s ram is required, but InstancePlan for component '%s' has %s",
+                  + "%s RAM is required, but InstancePlan for component '%s' has %s",
               MIN_RAM_PER_INSTANCE, instancePlan.getComponentName(),
               instancePlan.getResource().getRam()));
         }
