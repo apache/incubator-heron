@@ -25,7 +25,7 @@ import tempfile
 
 import pulsar
 
-import heronpy.api.src.python.api_constants as API_constants
+import heronpy.api.src.python.api_constants as api_constants
 from heronpy.api.src.python.spout.spout import Spout
 
 from heronpy.streamlet.src.python.streamletboltbase import StreamletBoltBase
@@ -84,7 +84,7 @@ class PulsarSpout(Spout, StreamletBoltBase):
     self.pulsar_cluster = str(config[PulsarSpout.serviceUrl])
     self.topic = str(config[PulsarSpout.topicName])
     mode = config[api_constants.TOPOLOGY_RELIABILITY_MODE]
-    if mode == API_constants.TopologyReliabilityMode.ATLEAST_ONCE:
+    if mode == api_constants.TopologyReliabilityMode.ATLEAST_ONCE:
       self.acking_timeout = 1000 * int(config[api_constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS])
     else:
       self.acking_timeout = 30000
