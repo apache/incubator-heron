@@ -131,7 +131,7 @@ class Config {
   static const std::string TOPOLOGY_RELIABILITY_MODE;
 
   /**
-   * Number of cpu cores per container to be reserved for this topology
+   * Number of CPU cores per container to be reserved for this topology
    */
   static const std::string TOPOLOGY_CONTAINER_CPU_REQUESTED;
 
@@ -148,7 +148,7 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_DISK_REQUESTED;
 
   /**
-   * Hint for max number of cpu cores per container to be reserved for this topology
+   * Hint for max number of CPU cores per container to be reserved for this topology
    */
   static const std::string TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 
@@ -177,7 +177,7 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_RAM_PADDING;
 
   /**
-   * Per component cpu requirement.  The format of this flag is something like
+   * Per component CPU requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
    */
   static const std::string TOPOLOGY_COMPONENT_CPUMAP;

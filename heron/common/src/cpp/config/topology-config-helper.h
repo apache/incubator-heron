@@ -81,7 +81,7 @@ class TopologyConfigHelper {
   // and returns a new topology structure.
   static proto::api::Topology* StripComponentObjects(const proto::api::Topology& _topology);
 
-  // Gets the per container cpu requested by this topology
+  // Gets the per container CPU requested by this topology
   static sp_double64 GetContainerCpuRequested(const proto::api::Topology& _topology);
 
   // Gets the per container RAM requested by this topology

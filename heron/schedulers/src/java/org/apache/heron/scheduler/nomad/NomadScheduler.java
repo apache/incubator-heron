@@ -277,7 +277,7 @@ public class NomadScheduler implements IScheduler {
     long memoryReqMb = containerResource.getRam().asMegabytes();
     resourceReqs.setMemoryMb(longToInt(memoryReqMb));
 
-    // set cpu requirements
+    // set CPU requirements
     double coresReq = containerResource.getCpu();
     double coresReqFreq = NomadContext.getCoreFreqMapping(this.localConfig) * coresReq;
     resourceReqs.setCpu(Integer.valueOf((int) Math.round(coresReqFreq)));

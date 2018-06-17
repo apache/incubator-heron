@@ -273,10 +273,10 @@ underlying TopologyReliabilityMode value.  Values are `ATMOST_ONCE`, `ATLEAST_ON
 * `"topology.reliability.mode"` :  A Heron topology can be run in any one of the TopologyReliabilityMode
 mode. The format of this flag is the string encoded values of the
 underlying TopologyReliabilityMode value.
-* `"topology.container.cpu"` : Number of cpu cores per container to be reserved for this topology.
+* `"topology.container.cpu"` : Number of CPU cores per container to be reserved for this topology.
 * `"topology.container.ram"` : Amount of RAM per container to be reserved for this topology. In bytes.
 * `"topology.container.disk"` : Amount of disk per container to be reserved for this topology. In bytes.
-* `"topology.container.max.cpu.hint"` : Hint for max number of cpu cores per container to be reserved for this topology.
+* `"topology.container.max.cpu.hint"` : Hint for max number of CPU cores per container to be reserved for this topology.
 * `"topology.container.max.ram.hint"` : Hint for max amount of RAM per container to be reserved for this topology.  In bytes.
 * `"topology.container.max.disk.hint"` : Hint for max amount of disk per container to be reserved for this topology. In bytes.
 * `"topology.container.padding.percentage"` : Hint for max amount of disk per container to be reserved for this topology. In bytes.

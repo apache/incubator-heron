@@ -244,7 +244,7 @@ public class MesosScheduler implements IScheduler {
   }
 
   /**
-   * Fill the the resources requirement, i.e. cpu, memory and disk for the given container.
+   * Fill the the resources requirement, i.e. CPU, memory and disk for the given container.
    * This method changes the BaseContainer passed in.
    * <p>
    * Notice: Currently we just make every container homogeneous,

@@ -74,15 +74,15 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * value in org.apache.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
  * the default RAM value for one instance.
  * <p>
- * 5. The cpu required for one instance is calculated as the default cpu value for one instance.
+ * 5. The CPU required for one instance is calculated as the default CPU value for one instance.
  * <p>
  * 6. The disk required for one instance is calculated as the default disk value for one instance.
  * <p>
  * 7. The RAM required for a container is calculated as:
  * (RAM for instances in container) + (paddingPercentage * RAM for instances in container)
  * <p>
- * 8. The cpu required for a container is calculated as:
- * (cpu for instances in container) + (paddingPercentage * cpu for instances in container)
+ * 8. The CPU required for a container is calculated as:
+ * (CPU for instances in container) + (paddingPercentage * CPU for instances in container)
  * <p>
  * 9. The disk required for a container is calculated as:
  * (disk for instances in container) + ((paddingPercentage * disk for instances in container)

@@ -49,7 +49,7 @@ import org.apache.heron.spi.packing.Resource;
  * to take equal number of instances if # of instances is multiple of # of containers.
  * <p>
  * Following semantics are guaranteed:
- * 1. Every container requires same size of resource, i.e. same cpu, RAM and disk.
+ * 1. Every container requires same size of resource, i.e. same CPU, RAM and disk.
  * Consider that instances in different containers can be different, the value of size
  * will be aligned to the max one.
  * <p>
@@ -62,9 +62,9 @@ import org.apache.heron.spi.packing.Resource;
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
  * (disk for instances in container) + (disk padding for heron internal process)
  * <p>
- * 4. The cpu required for a container is calculated as:
+ * 4. The CPU required for a container is calculated as:
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
- * (cpu for instances in container) + (cpu padding for heron internal process)
+ * (CPU for instances in container) + (CPU padding for heron internal process)
  * <p>
  * 5. The RAM required for a container is calculated as:
  * value for org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
@@ -137,7 +137,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
     ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
 
-    LOG.info(String.format("Pack internal: container cpu hint: %f, RAM hint: %s, disk hint: %s.",
+    LOG.info(String.format("Pack internal: container CPU hint: %f, RAM hint: %s, disk hint: %s.",
         containerCpu,
         containerDiskInBytes.toString(),
         containerRamHint.toString()));
@@ -153,7 +153,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       for (InstanceId instanceId : instanceList) {
         ByteAmount instanceRam = instancesRamMap.get(containerId).get(instanceId);
 
-        // Currently not yet support disk or cpu config for different components,
+        // Currently not yet support disk or CPU config for different components,
         // so just use the default value.
         ByteAmount instanceDisk = instanceDiskDefault;
         double instanceCpu = instanceCpuDefault;
@@ -300,10 +300,10 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Provide cpu per container.
+   * Provide CPU per container.
    *
    * @param allocation packing output.
-   * @return cpu per container.
+   * @return CPU per container.
    */
   private double getContainerCpuHint(Map<Integer, List<InstanceId>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();

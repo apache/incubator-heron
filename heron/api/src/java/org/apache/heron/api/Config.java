@@ -153,7 +153,7 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
 
   /**
-   * Number of cpu cores per container to be reserved for this topology
+   * Number of CPU cores per container to be reserved for this topology
    */
   public static final String TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
   /**
@@ -167,7 +167,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk";
   /**
-   * Hint for max number of cpu cores per container to be reserved for this topology
+   * Hint for max number of CPU cores per container to be reserved for this topology
    */
   public static final String TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint";
   /**

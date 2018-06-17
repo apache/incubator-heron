@@ -60,7 +60,7 @@ TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS = "topology.stateful.checkpoint.in
 # clean state, i.e. ignore any checkpoint state
 TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean"
 
-# Number of cpu cores per container to be reserved for this topology.
+# Number of CPU cores per container to be reserved for this topology.
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
 # Amount of RAM per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram"
@@ -75,7 +75,7 @@ TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
 # Amount of RAM padding per container.
 TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding"
 
-# Per component cpu requirement.
+# Per component CPU requirement.
 TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap"
 # Per component RAM requirement.
 TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"

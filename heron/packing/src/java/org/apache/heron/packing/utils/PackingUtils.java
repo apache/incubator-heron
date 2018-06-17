@@ -68,7 +68,7 @@ public final class PackingUtils {
         instanceResources.getCpu(), paddingPercentage));
     if (instanceCpu > maxContainerResources.getCpu()) {
       throw new PackingException(String.format(
-          "This instance requires containers with at least %s cpu cores. The current max container"
+          "This instance requires containers with at least %s CPU cores. The current max container"
               + "size is %s cores",
           instanceCpu, maxContainerResources.getCpu()));
     }

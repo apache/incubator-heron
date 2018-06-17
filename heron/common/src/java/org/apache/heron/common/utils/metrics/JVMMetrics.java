@@ -105,7 +105,7 @@ public class JVMMetrics {
    */
   private MultiAssignableMetric<Long> threadsCPUTimeNs;
 
-  // The cpu time used by threads other than SlaveThread and GatewayThread
+  // The CPU time used by threads other than SlaveThread and GatewayThread
   private AssignableMetric<Long> otherThreadsCPUTimeNs;
 
   /*
@@ -121,11 +121,11 @@ public class JVMMetrics {
    */
   private MultiAssignableMetric<Long> threadsUserCPUTimeNs;
 
-  // The user cpu time used by threads other than SlaveThread and GatewayThread
+  // The user CPU time used by threads other than SlaveThread and GatewayThread
   private AssignableMetric<Long> otherThreadsUserCPUTimeNs;
 
   /*
-   * The "recent cpu usage" for the Java Virtual Machine process.
+   * The "recent CPU usage" for the Java Virtual Machine process.
    * This value is a double in the [0.0,1.0] interval.
    * A value of 0.0 means that none of the CPUs were running threads from the JVM process
    * during the recent period of time observed,
@@ -274,7 +274,7 @@ public class JVMMetrics {
         processCPUTimeNs.setValue(getProcessCPUTimeNs());
         getThreadsMetrics();
 
-        // We multiple # of processors to measure a process cpu load based on cores rather than
+        // We multiple # of processors to measure a process CPU load based on cores rather than
         // overall machine
         processCPULoad.update(getProcessCPULoad() * runtime.availableProcessors());
 
@@ -367,7 +367,7 @@ public class JVMMetrics {
   }
 
   private void getThreadsMetrics() {
-    // Set the cpu usage for every single thread
+    // Set the CPU usage for every single thread
     if (threadMXBean.isThreadCpuTimeSupported()) {
       threadMXBean.setThreadCpuTimeEnabled(true);
 

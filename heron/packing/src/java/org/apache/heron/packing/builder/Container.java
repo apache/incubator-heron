@@ -45,7 +45,7 @@ public class Container {
    * Creates a container with a specific capacity which will maintain a specific percentage
    * of its resources for padding.
    *
-   * @param capacity the capacity of the container in terms of cpu, RAM and disk
+   * @param capacity the capacity of the container in terms of CPU, RAM and disk
    * @param paddingPercentage the padding percentage
    */
   Container(int containerId, Resource capacity, int paddingPercentage) {
@@ -183,7 +183,7 @@ public class Container {
    * Computes the used resources of the container by taking into account the resources
    * allocated for each instance.
    *
-   * @return a Resource object that describes the used cpu, RAM and disk in the container.
+   * @return a Resource object that describes the used CPU, RAM and disk in the container.
    */
   private Resource getTotalUsedResources() {
     ByteAmount usedRam = ByteAmount.ZERO;
