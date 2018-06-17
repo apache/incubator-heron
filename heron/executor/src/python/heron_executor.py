@@ -227,7 +227,7 @@ class HeronExecutor(object):
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
-        # In json, the component name and jvm options are still in base64 encoding
+        # In json, the component name and JVM options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
     self.pkg_type = parsed_args.pkg_type
@@ -565,7 +565,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
-      Log.info("component name: %s, RAM request: %d, total jvm size: %dM, "
+      Log.info("component name: %s, RAM request: %d, total JVM size: %dM, "
                "cache size: %dM, metaspace size: %dM"
                % (component_name, self.component_ram_map[component_name],
                   total_jvm_size, code_cache_size_mb, java_metasize_mb))

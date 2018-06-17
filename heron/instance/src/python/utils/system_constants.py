@@ -104,7 +104,7 @@ INSTANCE_FORCE_EXIT_TIMEOUT_MS = "heron.instance.force.exit.timeout.ms"
 INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC = "heron.instance.reconnect.streammgr.interval.sec"
 # Interval in seconds to reconnect to the metrics manager
 INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC = "heron.instance.reconnect.metricsmgr.interval.sec"
-# Interval in seconds to sample a system metric, for instance, jvm used memory.
+# Interval in seconds to sample a system metric, for instance, JVM used memory.
 INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC = "heron.instance.metrics.system.sample.interval.sec"
 
 # The lookForTimeout Interval in spout instance will be timeoutInSeconds / NBUCKETS

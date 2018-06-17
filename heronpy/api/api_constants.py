@@ -31,7 +31,7 @@ class TopologyReliabilityMode(object):
 
 # Topology-specific options for the worker child process.
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
-# Per component jvm options.
+# Per component JVM options.
 TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts"
 # How often a tick tuple from the "__system" component and "__tick" stream should be sent to tasks.
 TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"

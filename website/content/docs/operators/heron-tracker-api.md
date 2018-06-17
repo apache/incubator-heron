@@ -355,7 +355,7 @@ Returns all exceptions for the component of the topology.
 
 ### <a name="topologies_pid">/topologies/pid</a>
 
-Returns the PID of the instance jvm process.
+Returns the PID of the instance JVM process.
 
 #### Parameters
 
@@ -368,7 +368,7 @@ Returns the PID of the instance jvm process.
 
 ### <a name="topologies_jstack">/topologies/jstack</a>
 
-Returns the thread dump of the instance jvm process.
+Returns the thread dump of the instance JVM process.
 
 #### Parameters
 
@@ -395,7 +395,7 @@ Returns the path to the file that can be downloaded externally.
 
 ### <a name="topologies_histo">/topologies/histo</a>
 
-Returns histogram for the instance jvm process.
+Returns histogram for the instance JVM process.
 
 #### Parameters
 

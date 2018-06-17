@@ -48,7 +48,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts";
   /**
-   * Per component jvm options.  The format of this flag is something like
+   * Per component JVM options.  The format of this flag is something like
    * spout0:jvmopt_for_spout0,spout1:jvmopt_for_spout1. Mostly should be used
    * in conjunction with setComponentJvmOptions(). This is used in addition
    * to TOPOLOGY_WORKER_CHILDOPTS. While TOPOLOGY_WORKER_CHILDOPTS applies for

@@ -27,7 +27,7 @@ from heron.shell.src.python import utils
 
 class JstackHandler(tornado.web.RequestHandler):
   """
-  Responsible for getting the jstack for a jvm process given its pid.
+  Responsible for getting the jstack for a JVM process given its pid.
   """
 
   # pylint: disable=attribute-defined-outside-init

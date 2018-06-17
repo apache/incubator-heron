@@ -62,16 +62,16 @@ public class JVMMetrics {
   // Metrics for count of GC per generational collection, and the sum total of all collections.
   private final MultiAssignableMetric<Long> jvmGCCountPerGCType;
 
-  // Metric for total live jvm threads
+  // Metric for total live JVM threads
   private final AssignableMetric<Integer> jvmThreadCount;
 
-  // Metric for total live jvm daemon threads
+  // Metric for total live JVM daemon threads
   private final AssignableMetric<Integer> jvmDaemonThreadCount;
 
   // Metric for number of open file descriptors
   private final AssignableMetric<Long> fdCount;
 
-  // Metric for max file descriptors allowed per jvm process
+  // Metric for max file descriptors allowed per JVM process
   private final AssignableMetric<Long> fdLimit;
 
   // The accumulated time spending on Garbage Collection in MilliSeconds
