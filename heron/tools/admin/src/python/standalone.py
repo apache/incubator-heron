@@ -796,13 +796,13 @@ def get_nomad_slave_config_file(cl_args):
 
 def get_apiserver_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/apiserver.hcl" % config.get_heron_conf_dir()
 
 def get_heron_tools_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/heron_tools.hcl" % config.get_heron_conf_dir()
 
