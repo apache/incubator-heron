@@ -51,7 +51,7 @@ Interface | Role | Examples
 [`IPacking`](/api/org/apache/heron/spi/packing/IPacking.html) | Defines the algorithm used to generate physical plan for a topology. | [RoundRobin](/api/org/apache/heron/packing/roundrobin/RoundRobinPacking.html)
 [`ILauncher`](/api/org/apache/heron/spi/scheduler/ILauncher.html) | Defines how the scheduler is launched | [Aurora](/api/org/apache/heron/scheduler/aurora/AuroraLauncher.html), [local](/api/org/apache/heron/scheduler/local/LocalLauncher.html)
 [`IScheduler`](/api/org/apache/heron/spi/scheduler/IScheduler.html) | Defines the scheduler object used to construct topologies | [local](/api/org/apache/heron/scheduler/local/LocalScheduler.html)
-[`IUploader`](/api/org/apache/heron/spi/uploader/IUploader.html) | Uploads the topology to a shared location accessible to the runtime environment of the topology | [local](/api/org/apache/heron/uploader/localfs/LocalFileSystemUploader.html) [HDFS](/api/org/apache/heron/uploader/hdfs/HdfsUploader.html) [s3](/api/org/apache/heron/uploader/s3/S3Uploader.html)
+[`IUploader`](/api/org/apache/heron/spi/uploader/IUploader.html) | Uploads the topology to a shared location accessible to the runtime environment of the topology | [local](/api/org/apache/heron/uploader/localfs/LocalFileSystemUploader.html) [HDFS](/api/org/apache/heron/uploader/hdfs/HdfsUploader.html) [S3](/api/org/apache/heron/uploader/s3/S3Uploader.html)
 
 Heron provides a number of built-in implementations out of box.
 
