@@ -26,7 +26,6 @@ import javax.inject.Inject;
 
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
-import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
@@ -42,7 +41,7 @@ import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKe
  * state for long time, which we believe the container cannot recover.
  * 2. resolver: try to restart the backpressure container so as to be rescheduled.
  */
-public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
+public class AutoRestartBackpressureContainerPolicy extends ToggleablePolicy
     implements EventHandler<ContainerRestart> {
 
   private static final String CONF_WAIT_INTERVAL_MILLIS =
