@@ -36,7 +36,7 @@ import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 /**
  * This Policy class
- * 1. has a switch
+ * 1. has a toggle switch
  * 2. works with runtime config
  */
 public class ToggleablePolicy extends HealthPolicyImpl {
@@ -49,12 +49,6 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   @Inject
   protected PhysicalPlanProvider physicalPlanProvider;
   protected boolean running = true;
-
-//  @Inject
-//  ToggleablePolicy(PhysicalPlanProvider physicalPlanProvider) {
-//    running = true;
-//    this.physicalPlanProvider = physicalPlanProvider;
-//  }
 
   @Override
   public Collection<Measurement> executeSensors() {
@@ -109,6 +103,11 @@ public class ToggleablePolicy extends HealthPolicyImpl {
     if (running) {
       return super.executeResolvers(diagnosis);
     } else {
+      /*
+       * TODO(dhalion):
+       * If sub-class could access the `lastExecutionTimestamp`
+       * and `oneTimeDelay`, avoid super method invocation.
+       */
       return super.executeResolvers(new ArrayList<Diagnosis>());
     }
   }
