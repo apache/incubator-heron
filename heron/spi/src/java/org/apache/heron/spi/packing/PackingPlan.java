@@ -122,13 +122,13 @@ public class PackingPlan {
   }
 
   /**
-   * Get the formatted String describing component ram distribution from PackingPlan,
+   * Get the formatted String describing component RAM distribution from PackingPlan,
    * used by executor
    *
-   * @return String describing component ram distribution
+   * @return String describing component RAM distribution
    */
   public String getComponentRamDistribution() {
-    // Generate a map with the minimal ram size for each component
+    // Generate a map with the minimal RAM size for each component
     Map<String, ByteAmount> ramMap = new HashMap<>();
     for (ContainerPlan containerPlan : this.getContainers()) {
       for (InstancePlan instancePlan : containerPlan.getInstances()) {

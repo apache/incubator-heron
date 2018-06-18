@@ -11,7 +11,7 @@ slf4j_version = "1.7.7"
 distributedlog_version = "0.5.0"
 http_client_version = "4.5.2"
 
-# heron api server
+# heron API server
 jetty_version = "9.4.6.v20170531"
 jersey_verion = "2.25.1"
 hk2_api = "2.5.0-b32"
@@ -566,7 +566,7 @@ maven_jar(
 
 # end Kubernetes java client
 
-# heron api server
+# heron API server
 # jetty
 maven_jar(
   name = "org_eclipse_jetty_server",
@@ -723,7 +723,7 @@ maven_jar(
 )
 # end bookkeeper & distributedlog dependencies
 
-# end heron api server
+# end heron API server
 
 # Nomad dependencies
 maven_jar(

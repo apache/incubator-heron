@@ -116,7 +116,7 @@ public class PackingPlanTest {
     PackingPlan newPackingPlan = deserializer.fromProto(serializer.toProto(packingPlan));
     Assert.assertEquals("Packing plan not the same after converting to protobuf object and back",
         newPackingPlan, packingPlan);
-    Assert.assertEquals("Packing plan ram distribution not the same after converting to "
+    Assert.assertEquals("Packing plan RAM distribution not the same after converting to "
             + "protobuf object and back",
         newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());
   }

@@ -106,7 +106,7 @@ public class AppsV1beta1Controller extends KubernetesController {
       if (!response.isSuccessful()) {
         LOG.log(Level.SEVERE, "Error creating topology message: " + response.message());
         KubernetesUtils.logResponseBodyIfPresent(LOG, response);
-        // construct a message based on the k8s api server response
+        // construct a message based on the k8s API server response
         throw new TopologySubmissionException(
             KubernetesUtils.errorMessageFromResponse(response));
       }

@@ -181,7 +181,7 @@ public final class TopologyUtils {
       return false;
     }
 
-    // Only verify ram map string well-formed.
+    // Only verify RAM map string well-formed.
     getComponentRamMapConfig(topology);
     // Verify all bolts input streams exist. First get all output streams.
     Set<String> outputStreams = new HashSet<>();
@@ -244,7 +244,7 @@ public final class TopologyUtils {
    * Returns a empty map if the Config is not set
    *
    * @param topology the topology def
-   * @return a map (componentName -&gt; ram required)
+   * @return a map (componentName -&gt; RAM required)
    */
   public static Map<String, ByteAmount> getComponentRamMapConfig(TopologyAPI.Topology topology)
       throws RuntimeException {

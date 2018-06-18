@@ -99,7 +99,7 @@ def run(command, parser, cl_args, unknown_args):
     try:
       r = service_method(service_apiurl)
       if r.status_code != requests.codes.ok:
-        Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+        Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
       sorted_items = sorted(r.json().items(), key=lambda tup: tup[0])
       for key, value in sorted_items:
         print("%s : %s" % (key, value))

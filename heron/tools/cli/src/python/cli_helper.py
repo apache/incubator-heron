@@ -97,7 +97,7 @@ def run_server(command, cl_args, action, extra_args=dict()):
     r = service_method(service_apiurl, data=data)
     s = Status.Ok if r.status_code == requests.codes.ok else Status.HeronError
     if r.status_code != requests.codes.ok:
-      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+      Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
   except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
     Log.error(err)
     return SimpleResult(Status.HeronError, err_msg, succ_msg)

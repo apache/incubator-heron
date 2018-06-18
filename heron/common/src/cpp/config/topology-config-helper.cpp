@@ -231,7 +231,7 @@ sp_double64 TopologyConfigHelper::GetContainerCpuRequested(const proto::api::Top
       return atof(cfg.kvs(i).value().c_str());
     }
   }
-  // Hmmm.. There was no value specified. The default is to allocate one cpu
+  // Hmmm.. There was no value specified. The default is to allocate one CPU
   // per component on a stmgr
   sp_int32 total_parallelism = TopologyConfigHelper::GetTotalParallelism(_topology);
   sp_int32 nstmgrs = TopologyConfigHelper::GetNumStMgrs(_topology);

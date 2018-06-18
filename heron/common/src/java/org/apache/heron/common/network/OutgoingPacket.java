@@ -45,8 +45,8 @@ import com.google.protobuf.Message;
  * <p>
  * 2. Experiments are done by using direct buffer and the resources saving is negligible:
  * -- Direct buffer would save, in our scenarios, less than 1% of RAM;
- * -- Direct buffer could save 30%~50% cpu of Gateway thread.
- * However, the cpu used by Gateway thread is negligible,
+ * -- Direct buffer could save 30%~50% CPU of Gateway thread.
+ * However, the CPU used by Gateway thread is negligible,
  * less than 2% out of the whole usage in worst case.
  * -- The extra copy is within JVM boundary; it is pretty fast.
  */

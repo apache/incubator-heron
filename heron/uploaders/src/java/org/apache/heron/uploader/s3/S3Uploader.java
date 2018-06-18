@@ -45,7 +45,7 @@ import org.apache.heron.spi.uploader.IUploader;
 import org.apache.heron.spi.uploader.UploaderException;
 
 /**
- * Provides a basic uploader class for uploading topology packages to s3.
+ * Provides a basic uploader class for uploading topology packages to S3.
  * <p>
  * By default this uploader will write topology packages to s3://&lt;bucket&gt;/&lt;topologyName&gt;/topology.tar.gz
  * trying to obtain credentials using the default credential provider chain. The package destination serves as known

@@ -75,7 +75,7 @@ heron.statemgr.zookeeper.is.initialize.tree: True
 # Directory of config files for hadoop client to read from
 heron.uploader.hdfs.config.directory:              "/home/hadoop/hadoop/conf/"
 
-# The URI of the directory for uploading topologies in the hdfs
+# The URI of the directory for uploading topologies in the HDFS
 heron.uploader.hdfs.topologies.directory.uri:      "hdfs:///heron/topology/"
 ```
 

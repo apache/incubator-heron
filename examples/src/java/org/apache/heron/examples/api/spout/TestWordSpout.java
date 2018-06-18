@@ -65,7 +65,7 @@ public class TestWordSpout extends BaseRichSpout {
     final String word = words[rand.nextInt(words.length)];
     collector.emit(new Values(word));
     if (!throttleDuration.isZero()) {
-      SysUtils.sleep(throttleDuration); // sleep to throttle back cpu usage
+      SysUtils.sleep(throttleDuration); // sleep to throttle back CPU usage
     }
   }
 

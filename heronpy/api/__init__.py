@@ -1,2 +1,2 @@
-'''module for heronpy api'''
+'''module for heronpy API'''
 __import__('pkg_resources').declare_namespace(__name__)

@@ -32,8 +32,8 @@ import org.apache.heron.api.tuple.Values;
 import org.apache.heron.integration_test.common.HdfsHelper;
 
 /**
- * Given a list of hdfs path, the spout will emit every line of of the file in String format.
- * When we fetch all items from hdfs BufferedReader, we would set the BufferedReader as null. We
+ * Given a list of HDFS path, the spout will emit every line of of the file in String format.
+ * When we fetch all items from HDFS BufferedReader, we would set the BufferedReader as null. We
  * would like to check whether (BufferedReader == null) to see whether the data is taken completely.
  * <p>
  * Note1: The hadoop cluster config should be provided through the classpath
@@ -69,7 +69,7 @@ public class HdfsStringSpout extends BaseRichSpout {
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {
       throw new RuntimeException(
-          String.format("Number of hdfs files %d not equal to number of tasks %d",
+          String.format("Number of HDFS files %d not equal to number of tasks %d",
               paths.length, numTasks));
     }
 
@@ -80,7 +80,7 @@ public class HdfsStringSpout extends BaseRichSpout {
       int index = context.getThisTaskIndex();
       String path = paths[index];
 
-      // read file from hdfs
+      // read file from HDFS
       br = new BufferedReader(
           HdfsHelper.getHdfsStreamReader(path),
           1024 * 1024

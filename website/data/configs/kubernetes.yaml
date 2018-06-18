@@ -228,7 +228,7 @@ configfiles:
     description: Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting
     default: 60
   - name: heron.instance.metrics.system.sample.interval.sec
-    description: The interval in second for an instance to sample its system metrics, for instance, cpu load.
+    description: The interval in second for an instance to sample its system metrics, for instance, CPU load.
     default: 10
   - name: heron.instance.slave.fetch.pplan.interval.sec
     description: The time interval (in seconds) at which Heron instances fetch the physical plan from slaves
