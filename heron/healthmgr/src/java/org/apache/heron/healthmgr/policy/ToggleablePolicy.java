@@ -56,13 +56,13 @@ public class ToggleablePolicy extends HealthPolicyImpl {
         : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
       LOG.info("kv " + kv.getKey() + " => " + kv.getValue());
       if (kv.getKey().equals(TOGGLE_RUNTIME_CONFIG_KEY)) {
-        String val = kv.getValue();
-        if ("False".equals(val) || "false".equals(val)) {
+        Boolean b = Boolean.parseBoolean(kv.getValue());
+        if (Boolean.FALSE.equals(b)) {
           if (running) {
             running = false;
             LOG.info("policy running status changed to False");
           }
-        } else if ("True".equals(val) || "true".equals(val)) {
+        } else if (Boolean.TRUE.equals(b)) {
           if (!running) {
             running = true;
             LOG.info("policy running status changed to True");
