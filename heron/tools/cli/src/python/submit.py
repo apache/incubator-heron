@@ -196,7 +196,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
     created = r.status_code is requests.codes.created
     s = Status.Ok if created or ok else Status.HeronError
     if s is Status.HeronError:
-      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+      Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
     elif ok:
       # this case happens when we request a dry_run
       print(r.json().get("response"))

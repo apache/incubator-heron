@@ -49,7 +49,7 @@ public class DLOutputStream extends OutputStream {
 
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    // TODO: avoid array copy by using the new bytebuf api
+    // TODO: avoid array copy by using the new bytebuf API
     byte[] newData = new byte[len];
     System.arraycopy(b, off, newData, 0, len);
     write(newData);

@@ -45,9 +45,9 @@ public final class AssertPacking {
   private AssertPacking() { }
 
   /**
-   * Verifies that the containerPlan has at least one bolt named boltName with ram equal to
+   * Verifies that the containerPlan has at least one bolt named boltName with RAM equal to
    * expectedBoltRam and likewise for spouts. If notExpectedContainerRam is not null, verifies that
-   * the container ram is not that.
+   * the container RAM is not that.
    */
   public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
                                       String boltName, String spoutName,
@@ -58,7 +58,7 @@ public final class AssertPacking {
     List<Integer> expectedInstanceIndecies = new ArrayList<>();
     List<Integer> foundInstanceIndecies = new ArrayList<>();
     int expectedInstanceIndex = 1;
-    // Ram for bolt should be the value in component ram map
+    // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
         assertNotEquals(
@@ -68,12 +68,12 @@ public final class AssertPacking {
         expectedInstanceIndecies.add(expectedInstanceIndex++);
         foundInstanceIndecies.add(instancePlan.getTaskId());
         if (instancePlan.getComponentName().equals(boltName)) {
-          assertEquals("Unexpected bolt ram", expectedBoltRam, instancePlan.getResource().getRam());
+          assertEquals("Unexpected bolt RAM", expectedBoltRam, instancePlan.getResource().getRam());
           boltFound = true;
         }
         if (instancePlan.getComponentName().equals(spoutName)) {
           assertEquals(
-              "Unexpected spout ram", expectedSpoutRam, instancePlan.getResource().getRam());
+              "Unexpected spout RAM", expectedSpoutRam, instancePlan.getResource().getRam());
           spoutFound = true;
         }
       }

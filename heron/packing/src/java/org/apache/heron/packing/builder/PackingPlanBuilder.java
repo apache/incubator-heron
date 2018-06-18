@@ -345,7 +345,7 @@ public class PackingPlanBuilder {
         }
         containerRam = containerRam.plus(instanceRam);
 
-        // Currently not yet support disk or cpu config for different components,
+        // Currently not yet support disk or CPU config for different components,
         // so just use the default value.
         ByteAmount instanceDisk = instanceDefaults.getDisk();
         containerDiskInBytes = containerDiskInBytes.plus(instanceDisk);

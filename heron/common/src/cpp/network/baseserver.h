@@ -129,7 +129,7 @@ class BaseServer {
   // When EventLoop invokes upon a timer
   void OnTimer(VCallback<> cb, EventLoop::Status status);
 
-  // Internal functions which do most of the api related activities in the
+  // Internal functions which do most of the API related activities in the
   // main thread
   void InternalCloseConnection(BaseConnection* _connection);
   void InternalAddTimer(VCallback<> cb, sp_int64 msecs);

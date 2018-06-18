@@ -32,11 +32,11 @@ from heron.common.src.python.utils.log import Log
 class PyMetrics(BaseMetricsHelper):
   """Helper class to collect PyHeron program metrics"""
   def __init__(self, metrics_collector):
-    # total sys cpu time
+    # total sys CPU time
     self.sys_cpu_time = AssignableMetrics(0)
-    # total user cpu time
+    # total user CPU time
     self.user_cpu_time = AssignableMetrics(0)
-    # threads cpu usage. Not supported
+    # threads CPU usage. Not supported
     # Add it back when we find an alternative to psutil
     # self.threads = MultiAssignableMetrics()
     # number of open file descriptors. Not supported

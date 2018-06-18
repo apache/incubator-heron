@@ -27,7 +27,7 @@ from heron.shell.src.python import utils
 
 class MemoryHistogramHandler(tornado.web.RequestHandler):
   """
-  Responsible for getting the memory histogram of a jvm process given its pid.
+  Responsible for getting the memory histogram of a JVM process given its pid.
   """
 
   # pylint: disable=attribute-defined-outside-init
