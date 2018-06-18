@@ -78,12 +78,10 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
 
   @Override
   public synchronized PhysicalPlan get() {
-//    if (physicalPlan == null) {
     physicalPlan = stateManagerAdaptor.getPhysicalPlan(topologyName);
     if (physicalPlan == null) {
       throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
     }
-//    }
     return physicalPlan;
   }
 

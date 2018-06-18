@@ -18,19 +18,19 @@
 # Topology health manager mode:
 # disabled = do not launch the health manager
 # cluster = launch the health manager on container-0
-heron.topology.healthmgr.mode: cluster
+heron.topology.healthmgr.mode: disabled
 
 # Default class and url for providing metrics
-heron.healthmgr.metricsource.type: org.apache.heron.healthmgr.sensors.MetricsCacheMetricsProvider
+heron.healthmgr.metricsource.type: org.apache.heron.healthmgr.sensors.TrackerMetricsProvider
 heron.healthmgr.metricsource.url: http://localhost:8888
 
 # Enable MetricsCache if MetricsCache is chosen as metrics provider
-heron.topology.metricscachemgr.mode: cluster
+#heron.topology.metricscachemgr.mode: cluster
 
 ## list of policies to be executed for self regulation
-heron.class.health.policies:
+#heron.class.health.policies:
 #  - dynamic-resource-allocation
-  - auto-restart-backpressure-container
+#  - auto-restart-backpressure-container
 #
 ## configuration specific to individual policies listed above
 #dynamic-resource-allocation:
@@ -38,7 +38,7 @@ heron.class.health.policies:
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20
 #  GrowingWaitQueueDetector.limit: 5
-auto-restart-backpressure-container:
-  health.policy.class: org.apache.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
-  health.policy.interval.ms: 120000
-  BackPressureDetector.noiseFilterMillis: 20
+#auto-restart-backpressure-container:
+#  health.policy.class: org.apache.heron.healthmgr.policy.AutoRestartBackpressureContainerPolicy
+#  health.policy.interval.ms: 120000
+#  BackPressureDetector.noiseFilterMillis: 20
