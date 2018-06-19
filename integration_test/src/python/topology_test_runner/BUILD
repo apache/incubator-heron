@@ -14,5 +14,6 @@ pex_binary(
         "//heron/common/src/python:common-py",
         "//heronpy/proto:proto-py",
         "//integration_test/src/python/common",
+        "//heron/statemgrs/src/python:statemgr-py",
     ],
 )

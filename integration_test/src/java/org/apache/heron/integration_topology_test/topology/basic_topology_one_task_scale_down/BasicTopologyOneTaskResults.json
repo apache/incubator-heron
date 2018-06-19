@@ -1,7 +1,7 @@
 {
   "topology": {
-    "id": "IntegrationTopologyTest_FieldsGrouping",
-    "name": "IntegrationTopologyTest_FieldsGrouping",
+    "id": "IntegrationTopologyTest_NonGrouping",
+    "name": "IntegrationTopologyTest_NonGrouping",
     "spouts": {
       "comp": {
         "name": "ab-spout",
@@ -16,7 +16,7 @@
     "bolts": [
       {
         "comp": {
-          "name": "count-bolt",
+          "name": "identity-bolt",
           "config": {
             "kvs": {
               "key": "topology.component.parallelism",
@@ -32,25 +32,6 @@
             }
           }
         ]
-      },
-      {
-        "comp": {
-          "name": "sum-bolt",
-          "config": {
-            "kvs": {
-              "key": "topology.component.parallelism",
-              "value": "1"
-            }
-          }
-        },
-        "inputs": [
-          {
-            "stream": {
-              "id": "default",
-              "component_name": "count-bolt"
-            }
-          }
-        ]
       }
     ],
     "state": "RUNNING"
@@ -63,21 +44,15 @@
       }
     },
     {
-      "instance_id": "container_1_count-bolt_3",
+      "instance_id": "container_1_identity-bolt_2",
       "info": {
-        "component_name": "count-bolt"
+        "component_name": "identity-bolt"
       }
     },
     {
-      "instance_id": "container_1_count-bolt_4",
+      "instance_id": "container_1_identity-bolt_3",
       "info": {
-        "component_name": "count-bolt"
-      }
-    },
-    {
-      "instance_id": "container_2_sum-bolt_6",
-      "info": {
-        "component_name": "sum-bolt"
+        "component_name": "identity-bolt"
       }
     }
   ]

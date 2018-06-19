@@ -8,53 +8,47 @@ import re
 import sys
 import time
 import uuid
-from httplib import HTTPConnection
 
 from ..common import status
 from heron.common.src.python.utils import log
-from heron.proto import tmaster_pb2, physical_plan_pb2
+from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
 
+#seconds
 RETRY_ATTEMPTS = 15
-#secondsf
 RETRY_INTERVAL = 10
-# seconds
-WAITING_FOR_UPDATE = 5
+WAIT_FOR_DEACTIVATION = 5
 
 
 class TopologyStructureResultChecker(object):
-  """Compares what results we found against what was expected. Verifies and exact match"""
-
-  def __init__(self, topology_name, expected_results_handler, actual_results_handler):
+  """
+  Validate topology graph structure
+  """
+  def __init__(self, topology_name,
+    topology_structure_expected_results_handler,
+    topology_structure_actual_results_handler):
     self.topology_name = topology_name
-    self.expected_results_handler = expected_results_handler
-    self.actual_results_handler = actual_results_handler
+    self.topology_structure_expected_results_handler = topology_structure_expected_results_handler
+    self.topology_structure_actual_results_handler = topology_structure_actual_results_handler
 
   def check_results(self):
-    """ Checks the topology resul
-    ts from the server with the expected results from the file """
-    expected_result = self.expected_results_handler.fetch_results()
-    actual_result = self.actual_results_handler.fetch_cur_pplan()
+    """
+    Checks the topology graph structure from zk with the expected results from local file
+    """
+    expected_result = self.topology_structure_expected_results_handler.fetch_results()
+    actual_result = self.topology_structure_actual_results_handler.fetch_cur_pplan()
 
-    pplan_string = self._decode_string(actual_result)
-
-    with open("/Users/yaoli/test_pplan", 'w') as f:
-          f.write(pplan_string)
-
-    # Build a new instance of json decoder since the default one could not ignore "\n"
     decoder = json.JSONDecoder(strict=False)
     expected_results = decoder.decode(expected_result)
-    logging.info("Got expected results")
 
-    cur_pplan = physical_plan_pb2.PhysicalPlan()
-    cur_pplan.ParseFromString(pplan_string)
-
-    return self._compare(expected_results, cur_pplan)
+    return self._compare(expected_results, actual_result)
 
   def _compare(self, expected_results, actual_results):
-    '''check if the topology structure is correct'''
+    """
+    check if the topology structure is correct
+    """
     expected_nodes, expected_links = self._parse_expected_results(expected_results)
     actual_nodes, actual_links = self._parse_actual_results(actual_results)
     correct_topology = True
@@ -95,11 +89,12 @@ class TopologyStructureResultChecker(object):
       return status.TestSuccess(
         "Topology %s result matches expected result" % self.topology_name)
     else:
-      failure = status.TestFailure("Actual result did not match expected result")
-      raise failure
+      raise status.TestFailure("Actual result did not match expected result")
 
   def _parse_expected_results(self, expected_results):
-    """parse JSON file and generate expected_nodes and expected_links"""
+    """
+    Parse JSON file and generate expected_nodes and expected_links
+    """
     expected_nodes = dict()
     expected_links = dict()
     for bolt in expected_results["topology"]["bolts"]:
@@ -118,7 +113,9 @@ class TopologyStructureResultChecker(object):
     return  expected_nodes, expected_links
 
   def _parse_actual_results(self, actual_results):
-    """parse protobuf messege and generate actual_nodes and actual_links"""
+    """
+    Parse protobuf messege and generate actual_nodes and actual_links
+    """
     actual_nodes = dict()
     actual_links = dict()
     for bolt in actual_results.topology.bolts:
@@ -136,32 +133,44 @@ class TopologyStructureResultChecker(object):
 
     return actual_nodes, actual_links
 
-  def _decode_string(self, actual_result):
-    '''convert received pplan string to original string'''
-    pplan_string_fixed = bytearray(actual_result)
-    pplan_string = bytearray('')
-    i = 0
-    while i < len(pplan_string_fixed):
-      chr_1 = pplan_string_fixed[i]
-      if chr_1 <= 57:
-        chr_1 -= 48
-      else:
-        chr_1 -= 55
-      chr_2 = pplan_string_fixed[i+1]
-      if chr_2 <= 57:
-        chr_2 -= 48
-      else:
-        chr_2 -= 55
-      i += 2
-      new_chr = ((chr_1 << 4) + chr_2) & 0xFF
-      pplan_string.append(new_chr)
 
-    return bytes(pplan_string)
+class InstanceStateResultChecker(TopologyStructureResultChecker):
+  """"
+  Validating instance states after checkpoint rollback
+  TODO(yaoli): complete this class when stateful processing is ready
+  """
+  def __init__(self, topology_name,
+    topology_structure_expected_results_handler,
+    topology_structure_actual_results_handler,
+    instance_state_expected_result_handler,
+    instance_state_actual_result_handler):
+    TopologyStructureResultChecker.__init__(self,topology_name,
+      topology_structure_expected_results_handler,
+      topology_structure_actual_results_handler)
+    self.instance_state_expected_result_handler = instance_state_expected_result_handler
+    self.instance_state_actual_result_handler = instance_state_actual_result_handler
+
+  def check_results(self):
+    topology_structure_check_result = TopologyStructureResultChecker.check_results(self)
+    if isinstance(topology_structure_check_result, status.TestFailure):
+      raise status.TestFailure("The actual topology graph structure does not match the expected one"
+                               + " for topology: %s" % self.topology_name)
+    # check instance states, get the instance_state_check_result
+    # if both above are isinstanc(status.TestSuccess), return success, else return fail
+
+  def _compare_state(self, expected_results, actual_results):
+    pass
+
+  def _parse_state_expected_results(self, expected_results):
+    pass
+
+  def _parse_state_actual_results(self, actual_results):
+    pass
 
 
 class FileBasedExpectedResultsHandler(object):
   """
-  Get expected result from local files
+  Get expected topology graph structure result from local file
   """
   def __init__(self, file_path):
     self.file_path = file_path
@@ -179,84 +188,56 @@ class FileBasedExpectedResultsHandler(object):
     except Exception as e:
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
-class HttpBasedActualResultsHandler(object):
+
+class ZkBasedActualResultsHandler(object):
   """
-  Get actual results from Tmaster through HTTP request
+  Get actual topology graph structure result from zk
   """
-  def __init__(self, zk_host_port, topology_name, cluster_token):
+  def __init__(self, zk_host_port, topology_name):
     self.zk_host_port = zk_host_port
     self.topology_name = topology_name
-    self.cluster_token = cluster_token
-    #self.get_tmaster_host_port()
-
-  def get_tmaster_host_port(self):
-    """
-    For local test, get Tmaster's host and port from
-        /Users/yaoli/.herondata/repository/state/local/tmasters
-    """
-    local_tmaster_path = "/Users/yaoli/.herondata/repository/state/local/tmasters/" \
-                         + self.topology_name
-    with open(local_tmaster_path, "r") as tmaster_location_file:
-      tmaster_location_string = tmaster_location_file.read().rstrip()
-    tmaster_location = tmaster_pb2.TMasterLocation()
-    tmaster_location.ParseFromString(tmaster_location_string)
-    self.tmaster_host_port = "%s:%d" % (tmaster_location.host, tmaster_location.controller_port)
-    logging.info("Get Tmaster host and port from local file, host:port = %s"
-                 % self.tmaster_host_port)
-
-    #  Get TMaster host and port from zk
-    '''zk = KazooClient(hosts='localhost:2181')
-    zk.start()
-    if zk.exists("/heron/tmasters/" + self.topology_name):
-      data, stat = zk.get("/heron/tmasters/" + self.topology_name)
-    tmaster_location = tmaster_pb2.TMasterLocation()
-    tmaster_location.ParseFromString(data)
-    self.tmaster_host_port = "%s:%d" % (tmaster_location.host, tmaster_location.controller_port)
-    logging.info("Get Tmaster host and port from local file, host:port = %s"
-                 % self.tmaster_host_port)'''
+    host_port = self.zk_host_port.split(':')
+    self.zkclient = ZkStateManager("org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager",
+      [(host_port[0], int(host_port[1]))],
+      "/storm/heron/states",
+      "nest7.smfc.twitter.com")
+    # for local test
+    '''self.zkclient = ZkStateManager("local_test",
+      [("127.0.0.1", 2181)],
+      "/heron",
+      "localhost")'''
 
   def fetch_cur_pplan(self):
     try:
-      return self.fetch_from_server('physicalPlan', '/get_current_physical_plan')
+      self.zkclient.start()
+      for i in range(0, RETRY_ATTEMPTS):
+        logging.info("Fetching physical plan of topology %s, retry count: %d", self.topology_name, i)
+        pplan_string = self.zkclient.get_pplan(self.topology_name)
+        if pplan_string is not None and pplan_string.topology.state == 1: # RUNNING = 1
+          break
+        time.sleep(RETRY_INTERVAL)
+      else:
+        raise status.TestFailure("Fetching physical plan fail for %s topology"
+                                 % self.topology_name)
+      self.zkclient.stop()
+      return pplan_string
     except Exception as e:
       raise status.TestFailure("Fetching physical plan failed for %s topology"
                                % self.topology_name, e)
 
-  def fetch_from_server(self, data_name, path):
-    """
-    Make a http get request to fetch actual results from Tmaster
-    """
-    for i in range(0, RETRY_ATTEMPTS):
-      logging.info("Fetching %s for topology %s, retry count: %d", data_name, self.topology_name, i)
-      response = self.get_http_response(path)
-      if response.status == 200:
-        #return response.read().rstrip()
-        #logging.info('type of content length = %s' % type(response.getheader('Content-Length')))
-        #logging.info('http response content length = %s' % response.getheader('Content-Length'))
-        return response.read(int(response.getheader('Content-Length'))*2)
-      elif i != RETRY_ATTEMPTS:
-        logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
-          data_name, response.status, response.reason, response.read())
-        time.sleep(RETRY_INTERVAL)
+class HttpBasedActualResultsHandler(object):
+  """
+  Get actually loaded instance states
+  TODO(yaoli): complete this class when stateful processing is ready
+  """
+  pass
 
-    raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))
-
-  def get_http_response(self, path):
-    """
-    get HTTP response
-    """
-    for _ in range(0, RETRY_ATTEMPTS):
-      try:
-        connection = HTTPConnection(self.tmaster_host_port)
-        connection.request('GET', path)
-        response = connection.getresponse()
-        logging.info('http response content length = %s' % response.getheader('Content-Length'))
-        return response
-      except Exception:
-        time.sleep(RETRY_INTERVAL)
-        continue
-
-    raise status.TestFailure("Failed to get HTTP Response after %d attempts" % RETRY_ATTEMPTS)
+class StatefulStorageBasedExpectedResultsHandler(object):
+  """
+  Get expected instance states from checkpoint storage
+  TODO(yaoli): complete this class when stateful processing is ready
+  """
+  pass
 
 #  Result handlers end
 
@@ -275,7 +256,7 @@ def filter_test_topologies(test_topologies, test_pattern):
 
 
 def run_topology_test(topology_name, classpath, results_checker,
-  params, update_args, extra_topology_args):
+  params, update_args, deactivate_args, restart_args, extra_topology_args):
   try:
     args = "-t %s %s" % \
            (topology_name, extra_topology_args)
@@ -287,18 +268,27 @@ def run_topology_test(topology_name, classpath, results_checker,
 
   logging.info("Successfully submitted %s topology", topology_name)
 
-  time.sleep(WAITING_FOR_UPDATE)
   try:
     if update_args:
       # check if pplan is already available
-      results_checker.actual_results_handler.get_tmaster_host_port()
-      results_checker.actual_results_handler.fetch_cur_pplan()
-      # wait for some time, since pplan available at Tmaster does not mean the topology is ready
-      time.sleep(WAITING_FOR_UPDATE)
+      results_checker.topology_structure_actual_results_handler.fetch_cur_pplan()
       logging.info("Verified topology successfully started, proceeding to update it")
       update_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
         params.role, params.env, topology_name, update_args)
-      time.sleep(WAITING_FOR_UPDATE)
+    elif deactivate_args:
+      results_checker.topology_structure_actual_results_handler.fetch_cur_pplan()
+      logging.info("Verified topology successfully started, proceeding "
+                    + "to deactivate and activate it")
+      deactivate_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
+        params.role, params.env, topology_name, True)
+      time.sleep(WAIT_FOR_DEACTIVATION)
+      deactivate_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
+        params.role, params.env, topology_name, False)
+    elif restart_args:
+      results_checker.topology_structure_actual_results_handler.fetch_cur_pplan()
+      logging.info("Verified topology successfully started, proceeding to kill a container")
+      restart_topology(params.heron_cli_path, params.cli_config_path, params.cluster,
+        params.role, params.env, topology_name, 1)
 
     return results_checker.check_results()
 
@@ -314,9 +304,9 @@ def run_topology_test(topology_name, classpath, results_checker,
 
 def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   env, jar_path, classpath, pkg_uri, args=None):
-  ''' Submit topology using heron-cli '''
-  # Form the command to submit a topology.
-  # cmd = "%s submit localzk %s %s %s %s" % \
+  """
+  Submit topology using heron-cli
+  """
   cmd = "%s submit --config-path=%s %s %s %s %s" % \
         (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
         jar_path, classpath, args)
@@ -343,8 +333,43 @@ def update_topology(heron_cli_path, cli_config_path, cluster,
   logging.info("Successfully updated topology %s", topology_name)
 
 
+def deactivate_topology(heron_cli_path, cli_config_path, cluster,
+    role, env, topology_name, deactivate):
+  if deactivate:
+    cmd = "%s deactivate --config-path=%s %s %s" % \
+          (heron_cli_path, cli_config_path,
+          cluster_token(cluster, role, env), topology_name)
+    logging.info("deactivate topology: %s", cmd)
+    if os.system(cmd) != 0:
+      raise status.TestFailure("Failed to deactivate topology %s" % topology_name)
+    logging.info("Successfully deactivate topology %s", topology_name)
+  else:
+    cmd = "%s activate --config-path=%s %s %s" % \
+          (heron_cli_path, cli_config_path,
+          cluster_token(cluster, role, env), topology_name)
+    logging.info("activate topology: %s", cmd)
+    if os.system(cmd) != 0:
+      raise status.TestFailure("Failed to activate topology %s" % topology_name)
+    logging.info("Successfully activate topology %s", topology_name)
+
+
+def restart_topology(heron_cli_path, cli_config_path, cluster,
+    role, env, topology_name, container_id):
+  cmd = "%s restart --config-path=%s %s %s %s" % \
+        (heron_cli_path, cli_config_path,
+        cluster_token(cluster, role, env), topology_name, str(container_id))
+
+  logging.info("Kill container %s", cmd)
+  if os.system(cmd) != 0:
+    raise status.TestFailure("Failed to kill container %s" % str(container_id))
+
+  logging.info("Successfully kill container %s", str(container_id))
+
+
 def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_name):
-  ''' Kill a topology using heron-cli '''
+  """
+  Kill a topology using heron-cli
+  """
   cmd = "%s kill --config-path=%s %s %s" % \
         (heron_cli_path, cli_config_path, cluster_token(cluster, role, env), topology_name)
 
@@ -356,16 +381,17 @@ def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_
 
 
 def cluster_token(cluster, role, env):
-  # !!! For local test switching between using or not using zk
   if cluster == "local":
-    return cluster
+    return cluster + 'zk'
   return "%s/%s/%s" % (cluster, role, env)
 
 #  Topology manipulations end
 
 
 def run_topology_tests(conf, args):
-  ''' Run the test for each topology specified in the conf file '''
+  """
+  Run the test for each topology specified in the conf file
+  """
   successes = []
   failures = []
   timestamp = time.strftime('%Y%m%d%H%M%S')
@@ -391,13 +417,16 @@ def run_topology_tests(conf, args):
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     classpath = topology_classpath_prefix + topology_conf["classPath"]
 
-    # if the test includes an update we need to pass that info to the topology so it can send
-    # data accordingly. This flag causes the test spout to emit, then check the state of this
-    # token, then emit more.
     update_args = ""
+    deactivate_args = ""
+    restart_args = ""
     topology_args = ''
     if "updateArgs" in topology_conf:
       update_args = topology_conf["updateArgs"]
+    if "deactivateArgs" in topology_conf:
+      deactivate_args = True
+    if "restartArgs" in topology_conf:
+      restart_args = True
 
     if "topologyArgs" in topology_conf:
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
@@ -405,22 +434,33 @@ def run_topology_tests(conf, args):
     expected_result_file_path = \
       args.topologies_path + "/" + topology_conf["expectedResultRelativePath"]
     check_type = topology_conf["checkType"]
-    if processing_type == 'non_stateful' and check_type == 'checkpoint_state':
-      raise ValueError("Cannot check checkpoint state in non_stateful processing. "
-                       + "Not running topology: " + topology_name)
-    results_checker = load_result_checker(
+    if check_type == 'topology_structure':
+      results_checker = load_result_checker(
         check_type, topology_name,
         FileBasedExpectedResultsHandler(expected_result_file_path),
-        HttpBasedActualResultsHandler(zk_host_port, topology_name, cluster_token(
-          args.cluster, args.role, args.env)))
-
+        ZkBasedActualResultsHandler(zk_host_port, topology_name))
+    elif check_type == 'checkpoint_state':
+      if processing_type == 'stateful':
+        results_checker = load_result_checker(
+          check_type, topology_name,
+          FileBasedExpectedResultsHandler(expected_result_file_path),
+          ZkBasedActualResultsHandler(zk_host_port, topology_name),
+          StatefulStorageBasedExpectedResultsHandler(),
+          HttpBasedActualResultsHandler())
+      elif processing_type == 'non_stateful':
+        raise ValueError("Cannot check instance checkpoint state in non_stateful processing. "
+                       + "Not running topology: " + topology_name)
+      else:
+        raise ValueError("Unrecognized processing type for topology: " + topology_name)
+    else:
+      raise ValueError("Unrecognized check type for topology: " + topology_name)
 
     logging.info("==== Starting test %s of %s: %s ====",
       current, len(test_topologies), topology_name)
     start_secs = int(time.time())
     try:
       result = run_topology_test(topology_name, classpath, results_checker,
-        args, update_args, topology_args)
+        args, update_args, deactivate_args, restart_args, topology_args)
       test_tuple = (topology_name, int(time.time()) - start_secs)
       if isinstance(result, status.TestSuccess):
         successes += [test_tuple]
@@ -439,23 +479,29 @@ def run_topology_tests(conf, args):
 
 
 def load_result_checker(check_type, topology_name,
-  expected_result_handler, actual_result_handler):
+  expected_topology_structure_result_handler,
+  actual_topology_structure_result_handler,
+  expected_instance_state_result_handler = None,
+  actual_instance_state_result_handler = None):
 
   if check_type == "topology_structure":
-    return TopologyStructureResultChecker(
-        topology_name, expected_result_handler, actual_result_handler)
+    return TopologyStructureResultChecker(topology_name,
+      expected_topology_structure_result_handler,
+      actual_topology_structure_result_handler)
   elif check_type == "checkpoint_state":
-    # TODO: stateful recover check
-    pass
+    return InstanceStateResultChecker(topology_name,
+      expected_topology_structure_result_handler,
+      actual_topology_structure_result_handler,
+      expected_instance_state_result_handler,
+      actual_instance_state_result_handler)
   else:
     status.TestFailure("Unrecognized check type : %s", check_type)
 
 
-
-
-
 def main():
-  ''' main '''
+  """
+  main
+  """
   log.configure(level=logging.DEBUG)
   conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
@@ -481,11 +527,6 @@ def main():
   parser.add_argument('-pi', '--release-package-uri', dest='release_package_uri', default=None)
   parser.add_argument('-cd', '--cli-config-path', dest='cli_config_path',
     default=conf['cliConfigPath'])
-
-  #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
-  #                    help='comma separated test case(classpath) name that will not be run')
-  #parser.add_argument('-et', '--enable-topologies', dest='enableTopologies', default=None,
-  #                    help='comma separated test case(classpath) name that will be run only')
 
   args, unknown_args = parser.parse_known_args()
   if unknown_args:

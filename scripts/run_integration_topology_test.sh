@@ -39,7 +39,7 @@ bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration_
 # run the java integration tests
 ${TEST_RUNNER} \
   -hc ~/.heron/bin/heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
-  -rh localhost -rp 8080 \
+  -rh szookeeper.smf1.twitter.com -rp 2181 \
   -tp ${JAVA_TESTS_DIR} \
   -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
 

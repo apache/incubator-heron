@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.heron.integration_topology_test.topology.basic_topology_one_task;
+package org.apache.heron.integration_topology_test.topology.basic_topology_one_task_scale_up_down;
 
 import java.net.MalformedURLException;
 
@@ -39,7 +39,7 @@ public final class BasicTopologyOneTask extends AbstractTestTopology {
   @Override
   protected TopologyBuilder buildTopology(TopologyBuilder builder) {
     builder.setSpout("ab-spout", new ABSpout(true), 1);
-    builder.setBolt("identity-bolt", new IdentityBolt(new Fields("word")), 2)
+    builder.setBolt("identity-bolt", new IdentityBolt(new Fields("word")), 3)
         .shuffleGrouping("ab-spout");
     return builder;
   }
