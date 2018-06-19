@@ -57,18 +57,12 @@ public class ToggleablePolicy extends HealthPolicyImpl {
       LOG.info("kv " + kv.getKey() + " => " + kv.getValue());
       if (kv.getKey().equals(TOGGLE_RUNTIME_CONFIG_KEY)) {
         Boolean b = Boolean.parseBoolean(kv.getValue());
-        if (Boolean.FALSE.equals(b)) {
-          if (running) {
-            running = false;
-            LOG.info("policy running status changed to False");
-          }
-        } else if (Boolean.TRUE.equals(b)) {
-          if (!running) {
-            running = true;
-            LOG.info("policy running status changed to True");
-          }
-        } else {
-          LOG.warning("unknown runtime config for `policy running status`: " + val);
+        if (Boolean.FALSE.equals(b) && running) {
+          running = false;
+          LOG.info("policy running status changed to False");
+        } else if (Boolean.TRUE.equals(b) && !running) {
+          running = true;
+          LOG.info("policy running status changed to True");
         }
       }
     }
