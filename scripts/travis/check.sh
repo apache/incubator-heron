@@ -15,6 +15,5 @@ if [ -z "$THIRD_PARTIES" ]; then
   exit 0
 else
   echo "heron-instance.jar should not contain any unshade third party libraries:"
-  echo "Found: ${THIRD_PARTIES}"
   exit 1
 fi

@@ -63,30 +63,27 @@ echo "Using $PLATFORM platform"
 # build heron
 T="heron build"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
-python ${UTILS}/save-logs.py "heron_build.txt" bazel \
+python ${UTILS}/save-logs.py "heron_build.txt" bazel\
   build --config=$PLATFORM heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # run heron unit tests
-T="heron test non-flaky"
-start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc test\
-python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  test\
-  --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=-flaky heron/... \
-  heronpy/... examples/... storm-compatibility-examples/... \
-  eco-storm-examples/... eco-heron-examples/...
-end_timer "$T"
+#T="heron test non-flaky"
+#start_timer "$T"
+#python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
+#  test\
+#  --test_summary=detailed --test_output=errors\
+#  --config=$PLATFORM --test_tag_filters=-flaky heron/... \
+#  heronpy/... examples/... storm-compatibility-examples/... \
+#  eco-storm-examples/... eco-heron-examples/...
+#end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc test\
 python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   test\
   --test_summary=detailed --test_output=errors\
@@ -98,7 +95,6 @@ end_timer "$T"
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
   build\
   --config=$PLATFORM scripts/packages:tarpkgs
@@ -106,7 +102,6 @@ end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   build\
   --config=$PLATFORM scripts/packages:binpkgs
@@ -114,7 +109,6 @@ end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   build\
   --config=$PLATFORM scripts/images:heron.tar

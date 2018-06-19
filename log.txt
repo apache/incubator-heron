@@ -1,0 +1,22 @@
+
+Heron installer
+---------------
+
+Uncompressing...done
+tar xfz /Users/yaoli/.heron/heron.tar.gz -C /Users/yaoli/.heron
+...Uncompressing.
+tar xfz /Users/yaoli/.heron/dist/heron-core.tar.gz -C /Users/yaoli/.heron/dist
+
+Heron is now installed!
+
+Make sure you have "/Users/yaoli/bin" in your path.
+
+See http://heronstreaming.io/docs/getting-started for how to use Heron.
+
+heron.build.version : 'master'
+heron.build.time : Wed Jun  6 15:39:01 PDT 2018
+heron.build.timestamp : 1528324741000
+heron.build.host : tw-mbp-yaoli
+heron.build.user : yaoli
+heron.build.git.revision : c13198b79037246d5baecd8cc35f5454b5db27d5
+heron.build.git.status : Modified

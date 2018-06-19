@@ -1,0 +1,10 @@
+Loading: 
+Loading: 0 packages loaded
+DEBUG: /private/var/tmp/_bazel_yaoli/2f8a7ea825235791e1efcb685a7f23d9/external/bazel_tools/tools/osx/xcode_configure.bzl:85:5: Invoking xcodebuild failed, developer dir: /Applications/Xcode.app/Contents/Developer ,return code 256, stderr: Process terminated by signal 15, stdout: 
+INFO: Analysed 659 targets (0 packages loaded).
+INFO: Found 655 targets and 4 test targets...
+[0 / 4] [-----] BazelWorkspaceStatusAction stable-status.txt
+INFO: Elapsed time: 0.508s, Critical Path: 0.08s
+INFO: Build completed successfully, 1 total action
+
+Executed 0 out of 4 tests: 4 tests pass.
