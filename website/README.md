@@ -14,7 +14,7 @@ installed:
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
-* [pip](https://pypi.python.org/pypi/pip)
+* [pip](https://pypi.python.org/pypi/pip) - install `PyYAML>=3.12`
 * [Go](https://golang.org) (make sure that your `GOPATH` and `GOROOT` are set)
 
 ### macOS setup
@@ -39,8 +39,7 @@ are installed:
 
 1. Navigate to the `website` folder
 2. Run `npm install`
-3. Run `make build-static-assets` (this will build all of the necessary static
-   assets, i.e. CSS, Javascript, etc.)
+3. Run `make site`
 
 ## Building the Docs Locally
 
@@ -68,8 +67,10 @@ This will run the docs locally on `localhost:1313`. Navigate to
 open the browser from the command line:
 
 ```bash
-$ open http://localhost:1313/heron
+$ open http://localhost:1313/incubator-heron/
 ```
+
+You can edit `.md` files and they will be automatically updated in your browser.
 
 ## Working on Static Assets
 
