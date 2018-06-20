@@ -49,6 +49,7 @@ public class HealthPolicyConfigReader {
   public enum PolicyConfigKey {
     CONF_FILE_NAME("healthmgr.yaml"),
     HEALTH_POLICIES("heron.class.health.policies"),
+    HEALTH_POLICY_MODE("health.policy.mode"),
     HEALTH_POLICY_CLASS("health.policy.class"),
     HEALTH_POLICY_INTERVAL("health.policy.interval.ms"),
     CONF_SENSOR_DURATION_SUFFIX(".duration"),

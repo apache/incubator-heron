@@ -49,6 +49,8 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   @Inject
   protected PhysicalPlanProvider physicalPlanProvider;
   protected boolean running = true;
+  // `policyConfigKey` is the config item for this policy in the healthmgr.yaml
+  protected String policyConfigKey;
 
   @Override
   public Collection<Measurement> executeSensors() {

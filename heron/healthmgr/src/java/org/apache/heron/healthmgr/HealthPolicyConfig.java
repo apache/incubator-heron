@@ -42,6 +42,15 @@ public class HealthPolicyConfig {
     return (String) configs.get(PolicyConfigKey.HEALTH_POLICY_CLASS.key());
   }
 
+  String getPolicyMode() {
+    String configKey = PolicyConfigKey.HEALTH_POLICY_MODE.key();
+    if (configs.containsKey(configKey)
+        && "deactivated".equals((String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key()))) {
+      return "deactivated";
+    }
+    return "activated";
+  }
+
   public Duration getInterval() {
     return Duration.ofMillis((int) configs.get(PolicyConfigKey.HEALTH_POLICY_INTERVAL.key()));
   }
