@@ -307,38 +307,38 @@ method for the `TopologyBuilder` in the same way.
 
 ## Example topologies
 
-There are a number of example topologies that you can peruse in the [`heron/examples/src/python`]({{% githubMaster %}}/heron/examples/src/python) directory of the [Heron repo]({{% githubMaster %}}):
+There are a number of example topologies that you can peruse in the [`examples/src/python`]({{% githubMaster %}}/examples/src/python) directory of the [Heron repo]({{% githubMaster %}}):
 
 Topology | File | Description
 :--------|:-----|:-----------
-Word count | [`word_count_topology.py`]({{% githubMaster %}}/heron/examples/src/python/word_count_topology.py) | The [`WordSpout`]({{% githubMaster %}}/heron/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [`CountBolt`]({{% githubMaster %}}/heron/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.
-Multiple streams | [`multi_stream_topology.py`]({{% githubMaster %}}/heron/examples/src/python/multi_stream_topology.py) | The [`MultiStreamSpout`]({{% githubMaster %}}/heron/examples/src/python/spout/multi_stream_spout.py) emits multiple streams to downstream bolts.
-Half acking | [`half_acking_topology.py`]({{% githubMaster %}}/heron/examples/src/python/half_acking_topology.py) | The [`HalfAckBolt`]({{% githubMaster %}}/heron/examples/src/python/bolt/half_ack_bolt.py) acks only half of all received tuples.
-Custom grouping | [`custom_grouping_topology.py`]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py) | The [`SampleCustomGrouping`]({{% githubMaster %}}/heron/examples/src/python/custom_grouping_topology.py#L26) class provides a custom field grouping.
+Word count | [`word_count_topology.py`]({{% githubMaster %}}/examples/src/python/word_count_topology.py) | The [`WordSpout`]({{% githubMaster %}}/examples/src/python/spout/word_spout.py) spout emits random words from a list, while the [`CountBolt`]({{% githubMaster %}}/examples/src/python/bolt/count_bolt.py) bolt counts the number of words that have been emitted.
+Multiple streams | [`multi_stream_topology.py`]({{% githubMaster %}}/examples/src/python/multi_stream_topology.py) | The [`MultiStreamSpout`]({{% githubMaster %}}/examples/src/python/spout/multi_stream_spout.py) emits multiple streams to downstream bolts.
+Half acking | [`half_acking_topology.py`]({{% githubMaster %}}/examples/src/python/half_acking_topology.py) | The [`HalfAckBolt`]({{% githubMaster %}}/examples/src/python/bolt/half_ack_bolt.py) acks only half of all received tuples.
+Custom grouping | [`custom_grouping_topology.py`]({{% githubMaster %}}/examples/src/python/custom_grouping_topology.py) | The [`SampleCustomGrouping`]({{% githubMaster %}}/examples/src/python/custom_grouping_topology.py#L26) class provides a custom field grouping.
 
 You can build the respective PEXs for these topologies using the following commands:
 
 ```shell
-$ bazel build heron/examples/src/python:word_count
-$ bazel build heron/examples/src/python:multi_stream
-$ bazel build heron/examples/src/python:half_acking
-$ bazel build heron/examples/src/python:custom_grouping
+$ bazel build examples/src/python:word_count
+$ bazel build examples/src/python:multi_stream
+$ bazel build examples/src/python:half_acking
+$ bazel build examples/src/python:custom_grouping
 ```
 
-All built PEXs will be stored in `bazel-bin/heron/examples/src/python`. You can submit them to Heron like so:
+All built PEXs will be stored in `bazel-bin/examples/src/python`. You can submit them to Heron like so:
 
 ```shell
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/word_count.pex - \
+  bazel-bin/examples/src/python/word_count.pex - \
   WordCount
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/multi_stream.pex \
+  bazel-bin/examples/src/python/multi_stream.pex \
   heron.examples.src.python.multi_stream_topology.MultiStream
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/half_acking.pex - \
+  bazel-bin/examples/src/python/half_acking.pex - \
   HalfAcking
 $ heron submit local \
-  bazel-bin/heron/examples/src/python/custom_grouping.pex \
+  bazel-bin/examples/src/python/custom_grouping.pex \
   heron.examples.src.python.custom_grouping_topology.CustomGrouping
 ```
 
