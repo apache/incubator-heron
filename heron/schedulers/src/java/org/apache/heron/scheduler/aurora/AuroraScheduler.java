@@ -59,6 +59,11 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
+    System.out.println("print mConfig");
+    System.out.println(mConfig.toString());
+    System.out.println("print mRuntime");
+    System.out.println(mRuntime.toString());
+
     this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     try {
@@ -278,6 +283,8 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
+
+    auroraProperties.put(AuroraField.AURORA_METADATA, topologyPkgURI);
 
     return auroraProperties;
   }
