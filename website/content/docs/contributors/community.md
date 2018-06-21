@@ -7,7 +7,7 @@ title: Community
 
 Discussion about Heron happens on GitHub and over mailing list.
 
-* GitHub: [twitter/heron](https://github.com/apache/incubator-heron)
+* GitHub: [apache/incubator-heron](https://github.com/apache/incubator-heron)
 * Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
 * Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
@@ -41,8 +41,7 @@ you should post on [mailing list](https://groups.google.com/forum/#!forum/heron-
 of opening GitHub issues.**
 
 ### Submitting a Patch
-1. Read the Heron [governance plan](../governance) and accept the
-[Twitter Contributor License Agreement](https://engineering.twitter.com/opensource/cla) (CLA).
+1. Read the Heron [governance plan](../governance).
 
 2. Discuss your plan and design, and get agreement on
 [mailing list](https://groups.google.com/forum/#!forum/heron-users).
