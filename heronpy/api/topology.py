@@ -153,7 +153,7 @@ class TopologyType(type):
       return
     heron_options = TopologyType.get_heron_options_from_env()
     initial_state = heron_options.get("cmdline.topology.initial.state", "RUNNING")
-    tmp_directory = heron_options.get("cmdline.topologydefn.tmpdirectory", None)
+    tmp_directory = heron_options.get("cmdline.topologydefn.tmpdirectory")
     if tmp_directory is None:
       raise RuntimeError("Topology definition temp directory not specified")
 
@@ -194,24 +194,25 @@ class TopologyType(type):
 
     Currently supports the following options natively:
 
-    - `cmdline.topologydefn.tmpdirectory`: the directory to which this
+    - `cmdline.topologydefn.tmpdirectory`: (required) the directory to which this
     topology's defn file is written
-    - `cmdline.topology.initial.state`: the initial state of the topology
-    - `cmdline.topology.name`: topology name on deployment
+    - `cmdline.topology.initial.state`: (default: "RUNNING") the initial state of the topology
+    - `cmdline.topology.name`: (default: class name) topology name on deployment
 
     Returns: map mapping from key to value
     """
-    heron_options_raw = os.environ.get("HERON_OPTIONS", None)
+    heron_options_raw = os.environ.get("HERON_OPTIONS")
     if heron_options_raw is None:
       raise RuntimeError("HERON_OPTIONS environment variable not found")
 
-    ret = {}
-    heron_opt_list = heron_options_raw.replace("%%%%", " ").split(',')
-    for opt_raw in heron_opt_list:
-      opt = opt_raw.split("=")
-      if len(opt) == 2:
-        ret[opt[0]] = opt[1]
-    return ret
+    options = {}
+    for option_line in heron_options_raw.replace("%%%%", " ").split(','):
+      key, sep, value = option_line.partition("=")
+      if sep:
+        options[key] = value
+      else:
+        raise ValueError("Invalid HERON_OPTIONS part %r" % option_line)
+    return options
 
   @classmethod
   def add_bolts_and_spouts(mcs, topology, class_dict):
