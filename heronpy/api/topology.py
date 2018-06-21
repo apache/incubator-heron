@@ -337,8 +337,7 @@ class TopologyBuilder(object):
 
     self.topology_name = name
 
-    # TODO: make this a dict mapping from spec.name to spec
-    self._specs = []
+    self._specs = {}
     self._topology_config = {}
 
   def add_spec(self, *specs):
@@ -355,10 +354,10 @@ class TopologyBuilder(object):
         raise ValueError("TopologyBuilder cannot take a spec without name")
       if spec.name == "config":
         raise ValueError("config is a reserved name")
-      if spec.name in {s.name for s in self._specs}:
-        raise ValueError("Duplicate spec names: %s" % spec.name)
+      if spec.name in self._specs:
+        raise ValueError("Attempting to add duplicate spec name: %r %r" % (spec.name, spec))
 
-      self._specs.append(spec)
+      self._specs[spec.name] = spec
 
   def add_spout(self, name, spout_cls, par, config=None, optional_outputs=None):
     """Add a spout to the topology"""
@@ -385,8 +384,7 @@ class TopologyBuilder(object):
     self._topology_config = config
 
   def _construct_topo_class_dict(self):
-    class_dict = {spec.name: spec for spec in self._specs}
-    # config
+    class_dict = self._specs.copy()
     class_dict["config"] = self._topology_config
     return class_dict
 
