@@ -63,9 +63,8 @@ echo "Using $PLATFORM platform"
 # build heron
 T="heron build"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
-python ${UTILS}/save-logs.py "heron_build.txt" bazel \
-  build --config=$PLATFORM heron/... \
+python ${UTILS}/save-logs.py "heron_build.txt" bazel\
+  --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
@@ -73,9 +72,8 @@ end_timer "$T"
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc test\
 python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
-  test\
+  --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
@@ -86,9 +84,8 @@ end_timer "$T"
 # which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc test\
 python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
-  test\
+  --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
@@ -98,25 +95,22 @@ end_timer "$T"
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_tarpkgs.txt" bazel\
-  build\
+  --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  build\
+  --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
 
 T="heron build docker images"
 start_timer "$T"
-  #--bazelrc=tools/travis/bazel.rc build\
 python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
-  build\
+  --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/images:heron.tar
 end_timer "$T"
 

@@ -1,1 +1,0 @@
-Error: Unable to read .bazelrc file '/Users/yaoli/workspace/incubator-heron/scripts/travis/tools/travis/bazel.rc'.

@@ -11,7 +11,9 @@ import uuid
 
 from ..common import status
 from heron.common.src.python.utils import log
+from heron.statemgrs.src.python import configloader
 from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
+from heron.statemgrs.src.python.filestatemanager import FileStateManager
 
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
@@ -39,6 +41,8 @@ class TopologyStructureResultChecker(object):
     """
     expected_result = self.topology_structure_expected_results_handler.fetch_results()
     actual_result = self.topology_structure_actual_results_handler.fetch_cur_pplan()
+
+    self.topology_structure_actual_results_handler.stop_state_mgr()
 
     decoder = json.JSONDecoder(strict=False)
     expected_results = decoder.decode(expected_result)
@@ -189,41 +193,56 @@ class FileBasedExpectedResultsHandler(object):
       raise status.TestFailure("Failed to read expected result file %s" % self.file_path, e)
 
 
-class ZkBasedActualResultsHandler(object):
+class ZkFileBasedActualResultsHandler(object):
   """
   Get actual topology graph structure result from zk
   """
-  def __init__(self, zk_host_port, topology_name):
-    self.zk_host_port = zk_host_port
+  def __init__(self, topology_name, cluster):
     self.topology_name = topology_name
-    host_port = self.zk_host_port.split(':')
-    self.zkclient = ZkStateManager("org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager",
-      [(host_port[0], int(host_port[1]))],
-      "/storm/heron/states",
-      "nest7.smfc.twitter.com")
-    # for local test
-    '''self.zkclient = ZkStateManager("local_test",
-      [("127.0.0.1", 2181)],
-      "/heron",
-      "localhost")'''
+    self.state_mgr = self._load_state_mgr(cluster)
+    self.state_mgr.start()
+
+  def _load_state_mgr(self, cluster):
+    state_mgr_config = configloader.load_state_manager_locations(cluster, os.getenv("HOME")
+                                                                 +'/.heron/conf/'+cluster
+                                                                 + '/statemgr.yaml')
+    if state_mgr_config[0]["type"] == 'file':
+      return FileStateManager(self.topology_name, os.getenv("HOME")
+                                                  +'/.herondata/repository/state/local')
+    elif state_mgr_config[0]["type"] == 'zookeeper':
+      host_port = state_mgr_config[0]["hostport"].split(':')
+      return ZkStateManager(state_mgr_config[0]["type"],
+        [(host_port[0], int(host_port[1]))],
+        state_mgr_config[0]["rootpath"],
+        state_mgr_config[0]["tunnelhost"])
+    else:
+      raise status.TestFailure("Unrecognized state manager type: %s"
+                               % state_mgr_config["type"])
 
   def fetch_cur_pplan(self):
     try:
-      self.zkclient.start()
       for i in range(0, RETRY_ATTEMPTS):
         logging.info("Fetching physical plan of topology %s, retry count: %d", self.topology_name, i)
-        pplan_string = self.zkclient.get_pplan(self.topology_name)
+        if isinstance(self.state_mgr, FileStateManager) and \
+          not os.path.exists(os.getenv("HOME")+'/.herondata/repository/state/local/pplans/'
+                             +self.topology_name):
+          pplan_string = None
+        else:
+          pplan_string = self.state_mgr.get_pplan(self.topology_name)
         if pplan_string is not None and pplan_string.topology.state == 1: # RUNNING = 1
           break
         time.sleep(RETRY_INTERVAL)
       else:
-        raise status.TestFailure("Fetching physical plan fail for %s topology"
+        raise status.TestFailure("Fetching physical plan failed for %s topology"
                                  % self.topology_name)
-      self.zkclient.stop()
       return pplan_string
     except Exception as e:
       raise status.TestFailure("Fetching physical plan failed for %s topology"
                                % self.topology_name, e)
+
+  def stop_state_mgr(self):
+    self.state_mgr.stop()
+
 
 class HttpBasedActualResultsHandler(object):
   """
@@ -300,7 +319,7 @@ def run_topology_test(topology_name, classpath, results_checker,
     pass
 
 
-# Topology manipulations
+# Topology operations
 
 def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   env, jar_path, classpath, pkg_uri, args=None):
@@ -381,8 +400,8 @@ def kill_topology(heron_cli_path, cli_config_path, cluster, role, env, topology_
 
 
 def cluster_token(cluster, role, env):
-  if cluster == "local":
-    return cluster + 'zk'
+  if cluster == "local" or cluster == "localzk":
+    return cluster
   return "%s/%s/%s" % (cluster, role, env)
 
 #  Topology manipulations end
@@ -396,7 +415,7 @@ def run_topology_tests(conf, args):
   failures = []
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
-  zk_host_port = "%s:%d" % (args.zk_hostname, args.zk_port)
+  # http_host_port = "%s:%d" % (args.http_hostname, args.http_port)
 
   if args.tests_bin_path.endswith("scala-integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["scalaTopologies"], args.test_topology_pattern)
@@ -438,13 +457,13 @@ def run_topology_tests(conf, args):
       results_checker = load_result_checker(
         check_type, topology_name,
         FileBasedExpectedResultsHandler(expected_result_file_path),
-        ZkBasedActualResultsHandler(zk_host_port, topology_name))
+        ZkFileBasedActualResultsHandler(topology_name, args.cluster))
     elif check_type == 'checkpoint_state':
       if processing_type == 'stateful':
         results_checker = load_result_checker(
           check_type, topology_name,
           FileBasedExpectedResultsHandler(expected_result_file_path),
-          ZkBasedActualResultsHandler(zk_host_port, topology_name),
+          ZkFileBasedActualResultsHandler(topology_name, args.cluster),
           StatefulStorageBasedExpectedResultsHandler(),
           HttpBasedActualResultsHandler())
       elif processing_type == 'non_stateful':
@@ -519,9 +538,9 @@ def main():
   parser.add_argument('-cl', '--cluster', dest='cluster', default=conf['cluster'])
   parser.add_argument('-ev', '--env', dest='env', default=conf['env'])
   parser.add_argument('-rl', '--role', dest='role', default=conf['role'])
-  parser.add_argument('-rh', '--zk-hostname', dest='zk_hostname', default='localhost')
-  parser.add_argument('-rp', '--zk-port', dest='zk_port', type=int,
-    default='2181')
+  parser.add_argument('-rh', '--http-hostname', dest='http_hostname', default='localhost')
+  parser.add_argument('-rp', '--http-port', dest='http_port', type=int,
+    default='8080')
   parser.add_argument('-tp', '--topologies-path', dest='topologies_path')
   parser.add_argument('-ts', '--test-topology-pattern', dest='test_topology_pattern', default=None)
   parser.add_argument('-pi', '--release-package-uri', dest='release_package_uri', default=None)

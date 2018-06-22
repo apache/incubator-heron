@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to locally run the functional integration test.
+# Script to locally run the integration topology test.
 #
 
 TEST_RUNNER="./bazel-bin/integration_test/src/python/topology_test_runner/topology-test-runner.pex"
@@ -39,7 +39,7 @@ bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration_
 # run the java integration tests
 ${TEST_RUNNER} \
   -hc ~/.heron/bin/heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
-  -rh szookeeper.smf1.twitter.com -rp 2181 \
+  -rh localhost -rp 8080 \
   -tp ${JAVA_TESTS_DIR} \
   -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
 

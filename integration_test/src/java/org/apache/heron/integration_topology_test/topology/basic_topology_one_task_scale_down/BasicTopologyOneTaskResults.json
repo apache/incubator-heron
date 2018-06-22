@@ -1,7 +1,7 @@
 {
   "topology": {
-    "id": "IntegrationTopologyTest_NonGrouping",
-    "name": "IntegrationTopologyTest_NonGrouping",
+    "id": "IntegrationTopologyTest_BasicTopologyOneTaskScaleDown",
+    "name": "IntegrationTopologyTest_BasicTopologyOneTaskScaleDown",
     "spouts": {
       "comp": {
         "name": "ab-spout",

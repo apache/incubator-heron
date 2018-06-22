@@ -18,7 +18,7 @@ SCALA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/scala/sc
 CORE_PKG="file://${PWD}/bazel-bin/scripts/packages/heron-core.tar.gz"
 
 set -e
-bazel build --config=darwin integration_test/src/...
+
 # building tar packages
 DIR=`dirname $0`
 source ${DIR}/detect_os_type.sh
@@ -31,11 +31,11 @@ http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
 # run the scala integration tests
-#${TEST_RUNNER} \
-#  -hc ~/.heron/bin/heron -tb ${SCALA_INTEGRATION_TESTS_BIN} \
-#  -rh localhost -rp 8080 \
-#  -tp ${SCALA_TESTS_DIR} \
-#  -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
+${TEST_RUNNER} \
+  -hc ~/.heron/bin/heron -tb ${SCALA_INTEGRATION_TESTS_BIN} \
+  -rh localhost -rp 8080 \
+  -tp ${SCALA_TESTS_DIR} \
+  -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
 
 # run the java integration tests
 ${TEST_RUNNER} \
