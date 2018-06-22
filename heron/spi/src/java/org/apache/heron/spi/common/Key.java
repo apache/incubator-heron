@@ -83,7 +83,9 @@ public enum Key {
   //keys for scheduler config
   SCHEDULER_IS_SERVICE     ("heron.scheduler.is.service", Boolean.TRUE),
   SCHEDULER_PROPERTIES     ("heron.scheduler.properties", Type.PROPERTIES),
-  AURORA_METADATA          ("heron.scheduler.aurora.metadata", Type.STRING),
+  AURORA_METADATA_1        ("heron.scheduler.aurora.metadata.1", Type.STRING),
+  AURORA_METADATA_2        ("heron.scheduler.aurora.metadata.2", Type.STRING),
+  AURORA_METADATA_3        ("heron.scheduler.aurora.metadata.3", Type.STRING),
 
   //keys for config provided user binaries and jars
   SCHEDULER_JAR            ("heron.jars.scheduler", "${HERON_LIB}/scheduler/heron-scheduler.jar"),

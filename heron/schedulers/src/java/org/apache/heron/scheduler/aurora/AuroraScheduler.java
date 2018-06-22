@@ -59,11 +59,6 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
-    System.out.println("print mConfig");
-    System.out.println(mConfig.toString());
-    System.out.println("print mRuntime");
-    System.out.println(mRuntime.toString());
-
     this.config = Config.toClusterMode(mConfig);
     this.runtime = mRuntime;
     try {
@@ -284,9 +279,17 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
-    if (config.containsKey(Key.AURORA_METADATA)) {
+    if (config.containsKey(Key.AURORA_METADATA_1)) {
       auroraProperties.put(
-          AuroraField.AURORA_METADATA, config.getStringValue(Key.AURORA_METADATA));
+          AuroraField.AURORA_METADATA_1, config.getStringValue(Key.AURORA_METADATA_1));
+    }
+    if (config.containsKey(Key.AURORA_METADATA_2)) {
+      auroraProperties.put(
+          AuroraField.AURORA_METADATA_2, config.getStringValue(Key.AURORA_METADATA_2));
+    }
+    if (config.containsKey(Key.AURORA_METADATA_3)) {
+      auroraProperties.put(
+          AuroraField.AURORA_METADATA_3, config.getStringValue(Key.AURORA_METADATA_3));
     }
 
     return auroraProperties;
