@@ -424,8 +424,8 @@ def run(command, parser, cl_args, unknown_args):
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
   pex_type = topology_file.endswith(".pex")
   cpp_type = topology_file.endswith(".dylib") or topology_file.endswith(".so")
-  if not jar_type and not tar_type and not pex_type and not cpp_type:
-    ext_name = os.path.splitext(topology_file)
+  if not (jar_type or tar_type or pex_type or cpp_type):
+    _, ext_name = os.path.splitext(topology_file)
     err_context = "Unknown file type '%s'. Please use .tar "\
                   "or .tar.gz or .jar or .pex or .dylib or .so file"\
                   % ext_name
