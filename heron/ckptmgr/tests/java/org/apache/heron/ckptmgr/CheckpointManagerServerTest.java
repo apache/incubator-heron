@@ -57,7 +57,7 @@ public class CheckpointManagerServerTest {
   private static final String CHECKPOINT_ID = "checkpoint_id";
   private static final String CHECKPOINT_MANAGER_ID = "ckptmgr_id";
 
-  private static CheckpointManager.InstanceStateCheckpointPartition checkpointPartition;
+  private static CheckpointManager.InstanceStateCheckpoint checkpointPartition;
   private static CheckpointManager.CheckpointComponentMetadata checkpointComponentMetadata;
   private static CheckpointManager.SaveInstanceStateRequest saveInstanceStateRequest;
   private static CheckpointManager.GetInstanceStateRequest getInstanceStateRequest;
@@ -92,7 +92,7 @@ public class CheckpointManagerServerTest {
         .setInfo(info)
         .build();
 
-    checkpointPartition = CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
+    checkpointPartition = CheckpointManager.InstanceStateCheckpoint.newBuilder()
         .setCheckpointId(CHECKPOINT_ID)
         .setState(ByteString.copyFrom(BYTES))
         .build();

@@ -181,7 +181,7 @@ message CleanStatefulCheckpointResponse {
 
 // This message encapsulates the info associated with
 // state of an instance/partition
-message InstanceStateCheckpointPartition {
+message InstanceStateCheckpoint {
   required string checkpoint_id = 1;
   required bytes state = 2;
 }
@@ -216,7 +216,7 @@ message SaveInstanceStateRequest {
   required heron.proto.system.Instance instance = 1;
   // TODO(nwang): currently repartition is not supported and each request
   //     contains a single partition.
-  required InstanceStateCheckpointPartition checkpoint = 2;
+  required InstanceStateCheckpoint checkpoint = 2;
 }
 
 // After successfully saving state, this is what
@@ -240,7 +240,7 @@ message GetInstanceStateResponse {
   required heron.proto.system.Status status = 1;
   required heron.proto.system.Instance instance = 2;
   required string checkpoint_id = 3;
-  optional InstanceStateCheckpointPartition checkpoint = 4;
+  optional InstanceStateCheckpoint checkpoint = 4;
 }
 
 /*
@@ -256,13 +256,13 @@ message InitiateStatefulCheckpoint {
 // This is the message that the instance sends
 // when it wants stmgr to store its state
 message StoreInstanceStateCheckpoint {
-  required InstanceStateCheckpointPartition state = 1;
+  required InstanceStateCheckpoint state = 1;
 }
 
 // This is the message that stmgr sends to its instance
 // asking them to restore their state
 message RestoreInstanceStateRequest {
-  required InstanceStateCheckpointPartition state = 1;
+  required InstanceStateCheckpoint state = 1;
 }
 
 // This is the message that instance sends to its stmgr

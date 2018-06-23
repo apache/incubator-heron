@@ -54,8 +54,8 @@ public final class StatefulStorageTestContext {
         .build();
   }
 
-  public static CheckpointManager.InstanceStateCheckpointPartition getInstanceStateCheckpoint() {
-    return CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
+  public static CheckpointManager.InstanceStateCheckpoint getInstanceStateCheckpoint() {
+    return CheckpointManager.InstanceStateCheckpoint.newBuilder()
         .setCheckpointId(StatefulStorageTestContext.CHECKPOINT_ID)
         .setState(ByteString.copyFrom(StatefulStorageTestContext.BYTES))
         .build();

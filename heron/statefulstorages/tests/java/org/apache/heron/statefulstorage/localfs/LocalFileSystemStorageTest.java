@@ -32,7 +32,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import org.apache.heron.common.basics.FileUtils;
-import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpointPartition;
+import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
 import org.apache.heron.spi.statefulstorage.CheckpointInfo;
@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 @PrepareForTest(FileUtils.class)
 public class LocalFileSystemStorageTest {
   private PhysicalPlans.Instance instance;
-  private InstanceStateCheckpointPartition checkpoint;
+  private InstanceStateCheckpoint checkpoint;
 
   private LocalFileSystemStorage localFileSystemStorage;
 

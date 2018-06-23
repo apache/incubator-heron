@@ -117,8 +117,8 @@ public class OutgoingTupleCollection {
       byte[] serializedState = serializer.serialize(state);
 
       // Construct the instance state checkpoint
-      CheckpointManager.InstanceStateCheckpointPartition instanceState =
-          CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
+      CheckpointManager.InstanceStateCheckpoint instanceState =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder()
               .setCheckpointId(checkpointId)
               .setState(ByteString.copyFrom(serializedState))
               .build();

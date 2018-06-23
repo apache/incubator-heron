@@ -82,7 +82,7 @@ class InstanceServer : public Server {
   void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
   // Send a RestoreInstanceStateRequest to _task_id asking it to restore itself from _state
   virtual bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
-      const proto::ckptmgr::InstanceStateCheckpointPartition& _state);
+      const proto::ckptmgr::InstanceStateCheckpoint& _state);
   // Send StartInstanceStatefulProcessing message to all instances so that they can start
   // processing
   void SendStartInstanceStatefulProcessing(const std::string& _ckpt_id);

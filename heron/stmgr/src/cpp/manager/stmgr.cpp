@@ -1003,11 +1003,11 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
   instance_server_->InitiateStatefulCheckpoint(_checkpoint_id);
 }
 
-// We just recieved a InstanceStateCheckpointPartition message from one of our instances
+// We just recieved a InstanceStateCheckpoint message from one of our instances
 // We need to propagate it to all downstream tasks
 // We also need to send the checkpoint to ckptmgr
 void StMgr::HandleStoreInstanceStateCheckpoint(
-            const proto::ckptmgr::InstanceStateCheckpointPartition& _message,
+            const proto::ckptmgr::InstanceStateCheckpoint& _message,
             const proto::system::Instance& _instance) {
   CHECK(stateful_restorer_);
   int32_t task_id = _instance.info().task_id();
@@ -1052,7 +1052,7 @@ void StMgr::HandleSavedInstanceState(const proto::system::Instance& _instance,
 // Invoked by CheckpointMgr Client when it retreives the state of an instance
 void StMgr::HandleGetInstanceState(proto::system::StatusCode _status, sp_int32 _task_id,
                                    sp_string _checkpoint_id,
-                                   const proto::ckptmgr::InstanceStateCheckpointPartition& _msg) {
+                                   const proto::ckptmgr::InstanceStateCheckpoint& _msg) {
   if (stateful_restorer_) {
     stateful_restorer_->HandleCheckpointState(_status, _task_id, _checkpoint_id, _msg);
   }

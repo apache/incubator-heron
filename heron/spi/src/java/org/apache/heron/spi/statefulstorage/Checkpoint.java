@@ -27,15 +27,15 @@ import org.apache.heron.proto.ckptmgr.CheckpointManager;
  * TODO(nwang): Currently each instance has only one partition.
  */
 public class Checkpoint {
-  private CheckpointManager.InstanceStateCheckpointPartition checkpoint;
+  private CheckpointManager.InstanceStateCheckpoint checkpoint;
   private int nBytes;
 
-  public Checkpoint(CheckpointManager.InstanceStateCheckpointPartition checkpoint) {
+  public Checkpoint(CheckpointManager.InstanceStateCheckpoint checkpoint) {
     this.checkpoint = checkpoint;
     this.nBytes = checkpoint.getSerializedSize();
   }
 
-  public CheckpointManager.InstanceStateCheckpointPartition getCheckpoint() {
+  public CheckpointManager.InstanceStateCheckpoint getCheckpoint() {
     return this.checkpoint;
   }
 

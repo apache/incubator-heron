@@ -105,10 +105,10 @@ public class  LocalFileSystemStorage implements IStatefulStorage {
     byte[] res = FileUtils.readFromFile(path);
     if (res.length != 0) {
       // Try to parse the protobuf
-      CheckpointManager.InstanceStateCheckpointPartition state;
+      CheckpointManager.InstanceStateCheckpoint state;
       try {
         state =
-            CheckpointManager.InstanceStateCheckpointPartition.parseFrom(res);
+            CheckpointManager.InstanceStateCheckpoint.parseFrom(res);
       } catch (InvalidProtocolBufferException e) {
         throw new StatefulStorageException("Failed to parse the data", e);
       }

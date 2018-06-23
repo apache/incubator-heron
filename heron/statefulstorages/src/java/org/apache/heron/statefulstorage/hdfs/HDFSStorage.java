@@ -108,11 +108,11 @@ public class HDFSStorage implements IStatefulStorage {
                                            info.getInstanceId()));
 
     FSDataInputStream in = null;
-    CheckpointManager.InstanceStateCheckpointPartition state = null;
+    CheckpointManager.InstanceStateCheckpoint state = null;
     try {
       in = fileSystem.open(path);
       state =
-          CheckpointManager.InstanceStateCheckpointPartition.parseFrom(in);
+          CheckpointManager.InstanceStateCheckpoint.parseFrom(in);
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to read", e);
     } finally {

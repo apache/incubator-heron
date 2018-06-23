@@ -268,8 +268,8 @@ public class CheckpointManagerServer extends HeronServer {
     Common.StatusCode statusCode = Common.StatusCode.OK;
     if (!request.hasCheckpointId() || request.getCheckpointId().isEmpty()) {
       LOG.info("The checkpoint id was empty, this sending empty state");
-      CheckpointManager.InstanceStateCheckpointPartition dummyState =
-          CheckpointManager.InstanceStateCheckpointPartition.newBuilder()
+      CheckpointManager.InstanceStateCheckpoint dummyState =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder()
               .setCheckpointId(request.getCheckpointId())
               .setState(ByteString.EMPTY).build();
 

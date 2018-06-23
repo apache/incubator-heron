@@ -161,10 +161,10 @@ public class DlogStorage implements IStatefulStorage {
         info.getInstanceId());
 
     InputStream in = null;
-    CheckpointManager.InstanceStateCheckpointPartition state;
+    CheckpointManager.InstanceStateCheckpoint state;
     try {
       in = openInputStream(checkpointPath);
-      state = CheckpointManager.InstanceStateCheckpointPartition.parseFrom(in);
+      state = CheckpointManager.InstanceStateCheckpoint.parseFrom(in);
     } catch (IOException ioe) {
       throw new StatefulStorageException("Failed to read checkpoint from " + checkpointPath, ioe);
     } finally {

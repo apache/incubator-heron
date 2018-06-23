@@ -56,11 +56,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileSystem.class, CheckpointManager.InstanceStateCheckpointPartition.class})
+@PrepareForTest({FileSystem.class, CheckpointManager.InstanceStateCheckpoint.class})
 public class HDFSStorageTest {
 
   private PhysicalPlans.Instance instance;
-  private CheckpointManager.InstanceStateCheckpointPartition instanceCheckpointState;
+  private CheckpointManager.InstanceStateCheckpoint instanceCheckpointState;
 
   private HDFSStorage hdfsStorage;
   private FileSystem mockFileSystem;
@@ -91,9 +91,9 @@ public class HDFSStorageTest {
 
   @Test
   public void testStore() throws Exception {
-    PowerMockito.mockStatic(CheckpointManager.InstanceStateCheckpointPartition.class);
-    CheckpointManager.InstanceStateCheckpointPartition mockCheckpointState =
-        mock(CheckpointManager.InstanceStateCheckpointPartition.class);
+    PowerMockito.mockStatic(CheckpointManager.InstanceStateCheckpoint.class);
+    CheckpointManager.InstanceStateCheckpoint mockCheckpointState =
+        mock(CheckpointManager.InstanceStateCheckpoint.class);
 
     Checkpoint checkpoint = new Checkpoint(mockCheckpointState);
 
@@ -115,9 +115,9 @@ public class HDFSStorageTest {
 
     when(mockFileSystem.open(any(Path.class))).thenReturn(mockFSDataInputStream);
 
-    PowerMockito.spy(CheckpointManager.InstanceStateCheckpointPartition.class);
+    PowerMockito.spy(CheckpointManager.InstanceStateCheckpoint.class);
     PowerMockito.doReturn(instanceCheckpointState)
-        .when(CheckpointManager.InstanceStateCheckpointPartition.class, "parseFrom",
+        .when(CheckpointManager.InstanceStateCheckpoint.class, "parseFrom",
             mockFSDataInputStream);
 
     final CheckpointInfo info = new CheckpointInfo(
