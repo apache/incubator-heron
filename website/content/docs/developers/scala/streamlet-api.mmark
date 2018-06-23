@@ -17,7 +17,7 @@ In order to use the `heron-api` library, add this to the `dependencies` block of
 
 ```xml
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
 </dependency>
@@ -73,8 +73,8 @@ $ heron submit local \
 Every Streamlet API topology needs to be configured using a `Config` object. Here's an example default configuration:
 
 ```scala
-import com.twitter.heron.streamlet.Config
-import com.twitter.heron.streamlet.scala.Runner
+import org.apache.heron.streamlet.Config
+import org.apache.heron.streamlet.scala.Runner
 
 val topologyConfig = Config.defaultConfig()
 
@@ -230,8 +230,8 @@ The context object available to a transform operation provides access to:
 Here's a Scala example of a transform operation in a topology where a stateful record is kept of the number of items processed:
 
 ```scala
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.SerializableTransformer
+import org.apache.heron.streamlet.Context
+import org.apache.heron.streamlet.scala.SerializableTransformer
 
 class CountNumberOfItems extends SerializableTransformer[String, String] {
     private val numberOfItems = new AtomicLong()
@@ -253,7 +253,7 @@ class CountNumberOfItems extends SerializableTransformer[String, String] {
 
 This operation does a few things:
 
-* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `setup` method, the [`Context`](/api/java/org/apache/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
 * In the `transform` method, the incoming string is transformed as UpperCase in some way and then "accepted" as the new value.
 * In the `cleanup` step, the current count of items processed is logged.
 
@@ -272,8 +272,8 @@ builder.newSource(() => "Some string over and over");
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a `join` operation is added to a processing graph,
 
 ```scala
-import com.twitter.heron.streamlet.{Config, KeyValue, WindowConfig}
-import com.twitter.heron.streamlet.scala.Builder
+import org.apache.heron.streamlet.{Config, KeyValue, WindowConfig}
+import org.apache.heron.streamlet.scala.Builder
 
 val builder = Builder.newBuilder()
 
@@ -313,7 +313,7 @@ You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/strea
 Reduce by key and window operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value, as well as information about the window in which the operation took place). Here's an example:
 
 ```scala
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 val builder = Builder.newBuilder()
 
@@ -361,8 +361,8 @@ In this example, the supplier streamlet emits random integers between 1 and 10. 
 In processing graphs like the ones you build using the Heron Streamlet API, **sinks** are essentially the terminal points in your graph, where your processing logic comes to an end. A processing graph can end with writing to a database, publishing to a topic in a pub-sub messaging system, and so on. With the Streamlet API, you can implement your own custom sinks. Here's an example:
 
 ```scala
-import com.twitter.heron.streamlet.Context
-import com.twitter.heron.streamlet.scala.Sink
+import org.apache.heron.streamlet.Context
+import org.apache.heron.streamlet.scala.Sink
 
 class FormattedLogSink extends Sink[String] {
     private var streamName: Option[String] = None

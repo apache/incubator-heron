@@ -205,7 +205,7 @@ public enum SystemConfigKey {
       "heron.instance.reconnect.metricsmgr.interval.sec", ChronoUnit.SECONDS),
 
   /**
-   * The interval in seconds to sample a system metric, for instance, jvm used memory.
+   * The interval in seconds to sample a system metric, for instance, JVM used memory.
    */
   INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL(
       "heron.instance.metrics.system.sample.interval.sec", ChronoUnit.SECONDS),

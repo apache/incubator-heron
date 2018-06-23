@@ -22,7 +22,7 @@ import org.apache.heron.streamlet.scala.impl.BuilderImpl
 
 /**
   * Builder is used to register all sources. Builder thus keeps track
-  * of all the starting points of the computation dag and uses this
+  * of all the starting points of the computation DAG and uses this
   * information to build the topology
   */
 object Builder {
@@ -32,7 +32,7 @@ object Builder {
 
 /**
   * Builder is used to register all sources. Builder thus keeps track
-  * of all the starting points of the computation dag and uses this
+  * of all the starting points of the computation DAG and uses this
   * information to build the topology
   */
 trait Builder {

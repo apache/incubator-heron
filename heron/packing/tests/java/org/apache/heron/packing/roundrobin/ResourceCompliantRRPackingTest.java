@@ -153,17 +153,17 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set
+   * Test the scenario RAM map config is partially set
    */
   @Test
   public void testCompleteRamMapRequested() throws Exception {
     int numContainers = 2;
 
     // Explicit set resources for container
-    // the value should be ignored, since we set the complete component ram map
+    // the value should be ignored, since we set the complete component RAM map
     ByteAmount containerRam = ByteAmount.fromGigabytes(Long.MAX_VALUE);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -180,7 +180,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is fully set
+   * Test the scenario RAM map config is fully set
    */
   @Test
   public void testPartialRamMap() throws Exception {
@@ -189,7 +189,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
@@ -242,7 +242,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(3);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
@@ -321,13 +321,13 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set and scaling is requested
+   * Test the scenario RAM map config is partially set and scaling is requested
    */
   @Test
   public void testRepackPadding() throws Exception {
     int paddingPercentage = 50;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(4);
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -371,14 +371,14 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set and scaling is requested
+   * Test the scenario RAM map config is partially set and scaling is requested
    */
   @Test
   public void testPartialRamMapScaling() throws Exception {
 
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(4);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -461,7 +461,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
@@ -505,7 +505,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount spoutRam = ByteAmount.fromGigabytes(4);
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);

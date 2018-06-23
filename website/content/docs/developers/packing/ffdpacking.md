@@ -48,7 +48,7 @@ If the requirement is not specified then a default value of 1GB is used. The Fir
 algorithm guarantees that the amount of memory allocated to a component is either the one specified
 by the user or the default one.
 
-The parameters 2-4 determine the maximum container size with respect to RAM, cpu cores and disk.
+The parameters 2-4 determine the maximum container size with respect to RAM, CPU cores and disk.
 If one of these parameters is not specified by the user then
 the hint for the corresponding maximum container resource is set to the default resource requirement
 of 4 Heron instances.
@@ -66,7 +66,7 @@ will be allocated to it.
 Based on these parameters, the algorithm decides how to place the instances in the containers
 and how many containers to use. More specifically, the algorithm first sorts the instances in
 decreasing order of their RAM requirements. It then picks the instance on the head of the sorted
-list and places it in the first container that has enough resources (RAM, cpu cores, disk) to
+list and places it in the first container that has enough resources (RAM, CPU cores, disk) to
 accommodate it. If none of the existing containers have the requires resources, then a new container
 is allocated. Note that if an the RAM requirements of an instance exceed the value of
 parameter 2, then the algorithm returns an empty packing plan. After all the instances have

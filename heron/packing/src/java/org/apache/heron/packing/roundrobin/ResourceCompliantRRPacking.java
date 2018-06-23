@@ -70,25 +70,25 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * through the org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * If the parameter is not specified then a default value of 10 is used (10% of the container size)
  * <p>
- * 4. The ram required for one instance is calculated as:
+ * 4. The RAM required for one instance is calculated as:
  * value in org.apache.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
- * the default ram value for one instance.
+ * the default RAM value for one instance.
  * <p>
- * 5. The cpu required for one instance is calculated as the default cpu value for one instance.
+ * 5. The CPU required for one instance is calculated as the default CPU value for one instance.
  * <p>
  * 6. The disk required for one instance is calculated as the default disk value for one instance.
  * <p>
- * 7. The ram required for a container is calculated as:
- * (ram for instances in container) + (paddingPercentage * ram for instances in container)
+ * 7. The RAM required for a container is calculated as:
+ * (RAM for instances in container) + (paddingPercentage * RAM for instances in container)
  * <p>
- * 8. The cpu required for a container is calculated as:
- * (cpu for instances in container) + (paddingPercentage * cpu for instances in container)
+ * 8. The CPU required for a container is calculated as:
+ * (CPU for instances in container) + (paddingPercentage * CPU for instances in container)
  * <p>
  * 9. The disk required for a container is calculated as:
  * (disk for instances in container) + ((paddingPercentage * disk for instances in container)
  * <p>
  * 10. The pack() return null if PackingPlan fails to pass the safe check, for instance,
- * the size of ram for an instance is less than the minimal required value.
+ * the size of RAM for an instance is less than the minimal required value.
  */
 public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
