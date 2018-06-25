@@ -135,6 +135,33 @@ public class OutgoingTupleCollection {
     }
   }
 
+  /**
+   * Send out the instance state with checkpointId and state location info
+   * @param stateUri local uri indicating state location
+   * @param checkpointId the checkpointId
+   */
+  public void sendOutState(String stateUri, String checkpointId) {
+    lock.lock();
+    try {
+      flushRemaining();
+
+      CheckpointManager.InstanceStateCheckpoint instanceState =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder()
+          .setCheckpointId(checkpointId)
+          .setStateUri(stateUri)
+          .build();
+
+      CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
+          CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
+          .setState(instanceState)
+          .build();
+
+      outQueue.offer(storeRequest);
+    } finally {
+      lock.unlock();
+    }
+  }
+
   public void addDataTuple(
       String streamId,
       HeronTuples.HeronDataTuple.Builder newTuple,
