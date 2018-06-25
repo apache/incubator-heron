@@ -118,6 +118,10 @@ public class AbstractOutputCollector {
     outputter.sendOutState(state, checkpointId);
   }
 
+  public void sendOutState(String stateUri, String checkpointId) {
+    outputter.sendOutState(stateUri, checkpointId);
+  }
+
   // Clean the internal state of BoltOutputCollectorImpl
   public void clear() {
     outputter.clear();

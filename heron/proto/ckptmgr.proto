@@ -253,6 +253,15 @@ message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
 }
 
+// This proto encapsulates the info associated with
+// state of an instance. only one of the state_location
+// and state should be set.
+message InstanceStateCheckpoint {
+  required string checkpoint_id = 1;
+  optional bytes state = 2;
+  optional string state_uri = 3;
+}
+
 // This is the message that the instance sends
 // when it wants stmgr to store its state
 message StoreInstanceStateCheckpoint {

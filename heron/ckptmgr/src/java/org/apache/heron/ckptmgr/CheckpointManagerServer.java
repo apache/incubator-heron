@@ -19,6 +19,9 @@
 
 package org.apache.heron.ckptmgr;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
@@ -33,6 +36,7 @@ import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.Common;
+import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
 import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
@@ -208,10 +212,16 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    CheckpointInfo info =
-        new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
-                           request.getInstance());
-    Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
+    Checkpoint checkpoint = null;
+
+    // TODO(nlu): handle states in different locations
+    if (request.getCheckpoint().hasStateUri()) {
+      checkpoint = loadCheckpoint(request.getInstance(), request.getCheckpoint().getCheckpointId(),
+          request.getCheckpoint().getStateUri());
+    } else {
+      checkpoint = new Checkpoint(topologyName, request.getInstance(),
+          request.getCheckpoint());
+    }
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
                            + " component %s instanceId %s on connection %s",
@@ -244,6 +254,32 @@ public class CheckpointManagerServer extends HeronServer {
     responseBuilder.setInstance(request.getInstance());
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+  private Checkpoint loadCheckpoint(PhysicalPlans.Instance instanceInfo,
+                                    String checkpointId, String stateUri) {
+    LOG.info("fetch state from: " + stateUri);
+    CheckpointManager.InstanceStateCheckpoint checkpoint =
+        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+            .setCheckpointId(checkpointId)
+            .setState(loadStateFromFile(stateUri))
+            .build();
+
+    return new Checkpoint(topologyName, instanceInfo, checkpoint);
+  }
+
+  private ByteString loadStateFromFile(String stateUri) {
+    File f = new File(stateUri);
+    byte[] data = new byte[(int) f.length()];
+
+    try (FileInputStream fis = new FileInputStream(stateUri);
+         DataInputStream dis = new DataInputStream(fis)) {
+
+      dis.read(data);
+      return ByteString.copyFrom(data);
+    } catch (IOException e) {
+      throw new RuntimeException("failed to load local state", e);
+    }
   }
 
   protected void handleGetInstanceStateRequest(
