@@ -17,7 +17,7 @@ SCALA_INTEGRATION_TESTS_BIN="${PWD}/bazel-genfiles/integration_test/src/scala/sc
 CORE_PKG="file://${PWD}/bazel-bin/scripts/packages/heron-core.tar.gz"
 
 set -e
-bazel build --config=darwin integration_test/src/...
+
 # building tar packages
 DIR=`dirname $0`
 source ${DIR}/detect_os_type.sh

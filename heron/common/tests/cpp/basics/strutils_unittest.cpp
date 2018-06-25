@@ -52,6 +52,30 @@ TEST(StrUtilsTest, split) {
   EXPECT_EQ(static_cast<size_t>(0), tokens.size());
 }
 
+TEST(StrUtilsTest, encode) {
+  std::string tokens;
+
+  const std::string s1("ab\0cd12");
+  tokens = StrUtils::encode(s1);
+  EXPECT_EQ("61620063643132", tokens);
+
+  const std::string s2(":;<=");
+  tokens = StrUtils::encode(s2);
+  EXPECT_EQ("3a3b3c3d", tokens);
+}
+
+TEST(StrUtilsTest, decode) {
+  std::string tokens;
+
+  const std::string s1("61620063643132");
+  tokens = StrUtils::decode(s1);
+  EXPECT_EQ("ab\0cd12", tokens);
+
+  const std::string s2("3a3b3c3d");
+  tokens = StrUtils::decode(s2);
+  EXPECT_EQ(":;<=", tokens);
+}
+
 int main(int argc, char **argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);

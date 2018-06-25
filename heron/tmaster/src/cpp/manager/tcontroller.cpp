@@ -287,16 +287,9 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
   } else {
     std::string pplanString;
     tmaster_->getPhysicalPlan()->SerializeToString(&pplanString);
-    std::string pplanStringFixed = "";
 
-    // convert original pplan string to a new one which do not contains b'00000000
-    char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
-        'C', 'D', 'E', 'F' };
-    for (int i = 0; i < pplanString.size(); ++i) {
-        char const byte = pplanString[i];
-        pplanStringFixed += hex_chars[(byte & 0xF0) >> 4];
-        pplanStringFixed += hex_chars[(byte & 0x0F) >> 0];
-    }
+    // SerializeToString() returns object in binary format which needs to be encoded
+    std::string pplanStringFixed = StrUtils::encode(pplanString);
 
     const std::string message("Get current physical plan");
     LOG(INFO) << message;
