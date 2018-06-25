@@ -74,11 +74,6 @@ public abstract class AbstractTestTopology {
     topologyNameOption.setRequired(true);
     options.addOption(topologyNameOption);
 
-    // Option stateTokenOption = new Option("u", STATE_UPDATE_TOKEN, true,
-    //    "state server token to use for spout http condition triggers");
-    //stateTokenOption.setRequired(false);
-    //options.addOption(stateTokenOption);
-
     return options;
   }
 

@@ -44,3 +44,38 @@ StrUtils::split(
 
   return tokens;
 }
+
+std::vector<char> StrUtils::encode(const std::vector<char>& _input) {
+  std::vector<char> output;
+  char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
+      'C', 'D', 'E', 'F' };
+  for (int i = 0; i < _input.size(); ++i) {
+      char const byte = _input[i];
+      output.push_back(hex_chars[(byte & 0xF0) >> 4]);
+      output.push_back(hex_chars[(byte & 0x0F) >> 0]);
+  }
+  return output;
+}
+
+std::vector<char> StrUtils::decode(const std::vector<char>& _input) {
+  std::vector<char> output;
+  int i = 0;
+  while (i < _input.size()) {
+    char chr_1 = _input[i];
+    if (chr_1 <= 57) {
+      chr_1 -= 48;
+    } else {
+      chr_1 -= 55;
+    }
+    char chr_2 = _input[i+1];
+    if (chr_2 <= 57) {
+      chr_2 -= 48;
+    } else {
+      chr_2 -= 55;
+    }
+    i += 2;
+    char new_chr = ((chr_1 << 4) + chr_2) & 0xFF;
+    output.push_back(new_chr);
+  }
+  return output;
+}

@@ -34,6 +34,8 @@ class StrUtils {
  public:
   //! Given a string and a delim, split it
   static std::vector<std::string> split(const std::string& _input, const std::string& _delim);
+  static std::vector<char> encode(const std::vector<char>& _input);
+  static std::vector<char> decode(const std::vector<char>& _input);
 };
 
 #endif

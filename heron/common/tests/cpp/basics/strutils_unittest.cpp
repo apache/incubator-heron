@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <fstream>
 #include <string>
 #include <vector>
 #include "gtest/gtest.h"
@@ -50,6 +51,51 @@ TEST(StrUtilsTest, split) {
   const std::string s4("");
   tokens = StrUtils::split(s4, " ");
   EXPECT_EQ(static_cast<size_t>(0), tokens.size());
+}
+
+TEST(StrUtilsTest, encode) {
+  std::string tokens;
+  std::vector<char> result;
+
+  std::vector<char> s1 = {'a', 'b', '\0', 'c', 'd', '1', '2'};
+  result = StrUtils::encode(s1);
+  for (char chr : result) {
+      tokens += chr;
+  }
+  EXPECT_EQ("61620063643132", tokens);
+
+  std::vector<char> s2 = {':', ';', '<', '='};
+  result = StrUtils::encode(s2);
+  tokens = "";
+  for (char chr : result) {
+      tokens += chr;
+  }
+  EXPECT_EQ("3A3B3C3D", tokens);
+}
+
+TEST(StrUtilsTest, decode) {
+  std::string tokens;
+  std::vector<char> result;
+
+  std::vector<char> s1 = {'6', '1', '6', '2', '0', '0', '6', '3', '6', '4', '3', '1', '3', '2'};
+  result = StrUtils::decode(s1);
+  for (char chr : result) {
+    tokens += chr;
+  }
+  std::vector<char> tmp = {'a', 'b', '\0', 'c', 'd', '1', '2'};
+  std::string expected_result;
+  for (char chr : tmp) {
+    expected_result += chr;
+  }
+  EXPECT_EQ(expected_result, tokens);
+
+  std::vector<char> s2 = {'3', 'A', '3', 'B', '3', 'C', '3', 'D'};
+  result = StrUtils::decode(s2);
+  tokens = "";
+  for (char chr : result) {
+    tokens += chr;
+  }
+  EXPECT_EQ(":;<=", tokens);
 }
 
 int main(int argc, char **argv) {
