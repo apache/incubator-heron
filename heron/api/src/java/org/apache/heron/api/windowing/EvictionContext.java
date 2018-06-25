@@ -19,10 +19,12 @@
 
 package org.apache.heron.api.windowing;
 
+import java.io.Serializable;
+
 /**
  * Context information that can be used by the eviction policy
  */
-public interface EvictionContext {
+public interface EvictionContext extends Serializable {
   /**
    * Returns the reference time that the eviction policy could use to
    * evict the events. In the case of event time processing, this would be
