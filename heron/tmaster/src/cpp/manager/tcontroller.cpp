@@ -19,6 +19,7 @@
 
 #include "manager/tcontroller.h"
 
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -279,7 +280,8 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
       delete request;
       return;
   }
-
+  // proto::system::PhysicalPlan* curPPlan;
+  // curPPlan->CopyFrom(*(tmaster_->getPhysicalPlan()));
   if (tmaster_->getPhysicalPlan() == NULL) {
     http_server_->SendErrorReply(request, 400);
     delete request;
@@ -287,21 +289,27 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
   } else {
     std::string pplanString;
     tmaster_->getPhysicalPlan()->SerializeToString(&pplanString);
-
-    // SerializeToString() returns object in binary format which needs to be encoded
-    std::vector<char> pplanVector;
-    for (int i = 0; i < pplanString.size(); ++i) {
-      pplanVector.push_back(static_cast<char>(pplanString[i]));
-    }
-    std::vector<char> pplanStringFixedVector = StrUtils::hexEncode(pplanVector);
     std::string pplanStringFixed = "";
-    for (char chr : pplanStringFixedVector) {
-      pplanStringFixed += chr;
+
+    // convert original pplan string to a new one which do not contains b'00000000
+    char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
+        'C', 'D', 'E', 'F' };
+    for (int i = 0; i < pplanString.size(); ++i) {
+        char const byte = pplanString[i];
+        pplanStringFixed += hex_chars[(byte & 0xF0) >> 4];
+        pplanStringFixed += hex_chars[(byte & 0x0F) >> 0];
     }
+
+    // for test
+    std::ofstream fout;
+    fout.open("/Users/yaoli/test_pplan_tmaster", std::ios::out);
+    fout << pplanString.size();
+    fout << pplanString;
 
     const std::string message("Get current physical plan");
     LOG(INFO) << message;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    // response->AddResponse(message);
     response->AddResponse(pplanStringFixed);
     http_server_->SendReply(request, 200, response);
   }
@@ -320,6 +328,7 @@ bool TController::ValidateTopology(const IncomingHTTPRequest* request, Validatio
     result.SetResult(400, "Missing 'topologyid' argument in the request");
     return false;
   }
+
   if (id != tmaster_->GetTopologyId()) {
     LOG(ERROR) << "Topology id does not match";
     result.SetResult(400, "Topology id does not match");
