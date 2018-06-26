@@ -396,7 +396,7 @@ class HeronExecutor(object):
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
-                      '-Xmx1024M',
+                      '-Xmx5120M',
                       '-XX:+PrintCommandLineFlags',
                       '-verbosegc',
                       '-XX:+PrintGCDetails',
