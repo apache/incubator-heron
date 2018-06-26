@@ -279,6 +279,12 @@ public class CheckpointManagerServer extends HeronServer {
       return ByteString.copyFrom(data);
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);
+    } finally {
+      // we have to clean it here manually to avoid using too many disks
+      // TODO(nlu): find a cleaner and more consistent way to handle temp state files
+      if (f.exists()) {
+        f.delete();
+      }
     }
   }
 
