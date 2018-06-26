@@ -223,12 +223,10 @@ class ZkFileBasedActualResultsHandler(object):
     try:
       for i in range(0, RETRY_ATTEMPTS):
         logging.info("Fetching physical plan of topology %s, retry count: %d", self.topology_name, i)
-        if isinstance(self.state_mgr, FileStateManager) and \
-          not os.path.exists(os.getenv("HOME")+'/.herondata/repository/state/local/pplans/'
-                             +self.topology_name):
-          pplan_string = None
-        else:
+        try:
           pplan_string = self.state_mgr.get_pplan(self.topology_name)
+        except IOError:
+          pplan_string = None
         if pplan_string is not None and pplan_string.topology.state == 1: # RUNNING = 1
           break
         time.sleep(RETRY_INTERVAL)

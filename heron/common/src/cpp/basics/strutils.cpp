@@ -45,7 +45,8 @@ StrUtils::split(
   return tokens;
 }
 
-std::vector<char> StrUtils::encode(const std::vector<char>& _input) {
+// A simple Hex (Base16) encoder
+std::vector<char> StrUtils::hexEncode(const std::vector<char>& _input) {
   std::vector<char> output;
   char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
       'C', 'D', 'E', 'F' };
@@ -57,28 +58,44 @@ std::vector<char> StrUtils::encode(const std::vector<char>& _input) {
   return output;
 }
 
-std::vector<char> StrUtils::decode(const std::vector<char>& _input) {
-  const int nine = 57;
-  const int number_dif = 48;
-  const int letter_dif = 55;
+// A simple Hex (Base16) decoder, return decoded vector<char> if success,
+// return empty vector<char> if fail.
+std::vector<char> StrUtils::hexDecode(const std::vector<char>& _input) {
   std::vector<char> output;
+  if (_input.size() % 2 == 1) {
+    return output;
+  }
   int i = 0;
-  while (i < _input.size()) {
-    char chr_1 = _input[i];
-    if (chr_1 <= nine) {
-      chr_1 -= number_dif;
-    } else {
-      chr_1 -= letter_dif;
-    }
-    char chr_2 = _input[i+1];
-    if (chr_2 <= nine) {
-      chr_2 -= number_dif;
-    } else {
-      chr_2 -= letter_dif;
+  while (i + 1 < _input.size()) {
+    int chr_1 = decodeHexChar(_input[i]);
+    int chr_2 = decodeHexChar(_input[i+1]);
+    if (chr_1 == -1 || chr_2 == -1) {
+      output.clear();
+      return output;
     }
     i += 2;
     char new_chr = ((chr_1 << 4) + chr_2) & 0xFF;
     output.push_back(new_chr);
   }
   return output;
+}
+
+// Return decoded value in [0, 15]; return -1 if the character is illegal.
+int StrUtils::decodeHexChar(char c) {
+  const int char_zero = 48;
+  const int char_nine = 57;
+  const int char_A = 65;
+  const int char_F = 70;
+
+  if (c < char_zero) {
+    return -1;
+  } else if (c <= char_nine) {
+    return c - char_zero;
+  } else if (c < char_A) {
+    return -1;
+  } else if (c <= char_F) {
+    return c - char_A + 10;
+  } else {
+    return -1;
+  }
 }

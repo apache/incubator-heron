@@ -293,7 +293,7 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
     for (int i = 0; i < pplanString.size(); ++i) {
       pplanVector.push_back(static_cast<char>(pplanString[i]));
     }
-    std::vector<char> pplanStringFixedVector = StrUtils::encode(pplanVector);
+    std::vector<char> pplanStringFixedVector = StrUtils::hexEncode(pplanVector);
     std::string pplanStringFixed = "";
     for (char chr : pplanStringFixedVector) {
       pplanStringFixed += chr;
