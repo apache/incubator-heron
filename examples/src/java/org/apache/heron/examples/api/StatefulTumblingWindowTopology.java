@@ -155,7 +155,9 @@ public final class StatefulTumblingWindowTopology {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("integer", new IntegerSpout(), 1);
     WindowSumBolt windowSumBolt = new WindowSumBolt();
-    windowSumBolt.withTumblingWindow(Duration.ofSeconds(10));
+
+    windowSumBolt.withTumblingWindow(Duration.ofMinutes(10));
+
     builder.setBolt("sumbolt", windowSumBolt, 1).shuffleGrouping("integer");
     builder.setBolt("printer", new PrinterBolt()).shuffleGrouping("sumbolt");
     Config conf = new Config();
@@ -172,6 +174,7 @@ public final class StatefulTumblingWindowTopology {
     conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
     conf.setTopologyStatefulCheckpointIntervalSecs(20);
     conf.setMaxSpoutPending(1000);
+    conf.setMessageTimeoutSecs(1500);
 
     if (args != null && args.length > 0) {
       topoName = args[0];

@@ -276,6 +276,7 @@ public class CheckpointManagerServer extends HeronServer {
       // we have to clean it here manually to avoid using too many disks
       // TODO(nlu): find a cleaner and more consistent way to handle temp state files
       if (f.exists()) {
+        LOG.info("cleaning temp state file: " + f.getPath());
         f.delete();
       }
     }
