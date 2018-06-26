@@ -19,7 +19,7 @@ imagePullPolicy: IfNotPresent
 # Number of replicas for the job binary in bookkeeper
 jobReplicas: 1
 
-# amount of memory to provide for api server
+# amount of memory to provide for API server
 apiServerMemory: 512M
 
 # Number of replicas for storage bookies, memory and storage requirements

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <limits>
@@ -129,8 +132,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   return topology;
 }
 
-static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgrs_, int num_spouts,
-    int num_spout_instances, int num_bolts, int num_bolt_instances) {
+static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(size_t num_stmgrs_,
+    size_t num_spouts, size_t num_spout_instances, size_t num_bolts, size_t num_bolt_instances) {
   size_t spouts_size = num_spouts * num_spout_instances;
   size_t bolts_size = num_bolts * num_bolt_instances;
 
@@ -144,9 +147,9 @@ static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgr
   containerRequiredResource->set_cpu(10);
   containerRequiredResource->set_disk(10);
 
-  sp_int32 task_id = 0;
-  sp_int32 component_index = 0;
-  sp_int32 container_index = 0;
+  sp_uint32 task_id = 0;
+  sp_uint32 component_index = 0;
+  sp_uint32 container_index = 0;
 
   heron::proto::system::PackingPlan* packingPlan = new heron::proto::system::PackingPlan();
   packingPlan->set_id("dummy_packing_plan_id");
@@ -283,7 +286,7 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
                                 topology_id,
                                 stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
                                 metricsmgr_port, shell_port, ckptmgr_port, ckptmgr_id,
-                                _high_watermark, _low_watermark);
+                                _high_watermark, _low_watermark, "disabled");
   EXPECT_EQ(0, stmgr_port);
   EXPECT_EQ(0, local_data_port);
   mgr->Init();
@@ -482,7 +485,7 @@ void StartTMaster(CommonResources& common) {
   CreateLocalStateOnFS(common.topology_, common.packing_plan_, common.dpath_);
 
   // Populate the list of stmgrs
-  for (int i = 0; i < common.num_stmgrs_; ++i) {
+  for (size_t i = 0; i < common.num_stmgrs_; ++i) {
     sp_string id = STMGR_NAME + "-";
     id += std::to_string(i);
     common.stmgrs_id_list_.push_back(id);
@@ -500,11 +503,12 @@ void StartTMaster(CommonResources& common) {
 
 void DistributeWorkersAcrossStmgrs(CommonResources& common) {
   // which stmgr is this component going to get assigned to
-  sp_int32 stmgr_assignment_round = 0;
-  sp_int32 global_index = 0;
+  sp_uint32 stmgr_assignment_round = 0;
+  sp_uint32 global_index = 0;
   // Distribute the spouts
-  for (int spout = 0; spout < common.num_spouts_; ++spout) {
-    for (int spout_instance = 0; spout_instance < common.num_spout_instances_; ++spout_instance) {
+  for (size_t spout = 0; spout < common.num_spouts_; ++spout) {
+    for (size_t spout_instance = 0; spout_instance < common.num_spout_instances_;
+        ++spout_instance) {
       heron::proto::system::Instance* imap =
           CreateInstanceMap(spout, spout_instance, stmgr_assignment_round, global_index++, true);
       common.stmgr_instance_id_list_[stmgr_assignment_round].push_back(imap->instance_id());
@@ -521,8 +525,8 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
   stmgr_assignment_round = 0;
 
   // Distribute the bolts
-  for (int bolt = 0; bolt < common.num_bolts_; ++bolt) {
-    for (int bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
+  for (size_t bolt = 0; bolt < common.num_bolts_; ++bolt) {
+    for (size_t bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
       heron::proto::system::Instance* imap =
           CreateInstanceMap(bolt, bolt_instance, stmgr_assignment_round, global_index++, false);
       // Have we completed a round of distribution of components
@@ -564,8 +568,8 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
                            sp_int32 num_msgs_to_expect_in_bolt) {
   // try to find the lowest bolt task id
   sp_int32 min_bolt_task_id = std::numeric_limits<sp_int32>::max() - 1;
-  for (int bolt = 0; bolt < common.num_bolts_; ++bolt) {
-    for (int bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
+  for (size_t bolt = 0; bolt < common.num_bolts_; ++bolt) {
+    for (size_t bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
       sp_string instanceid = CreateInstanceId(bolt, bolt_instance, false);
       if (common.instanceid_instance_[instanceid]->info().task_id() < min_bolt_task_id) {
         min_bolt_task_id = common.instanceid_instance_[instanceid]->info().task_id();
@@ -574,16 +578,17 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
   }
 
   // Start the spouts
-  for (int spout = 0; spout < common.num_spouts_; ++spout) {
-    for (int spout_instance = 0; spout_instance < common.num_spout_instances_; ++spout_instance) {
+  for (size_t spout = 0; spout < common.num_spouts_; ++spout) {
+    for (size_t spout_instance = 0; spout_instance < common.num_spout_instances_;
+        ++spout_instance) {
       StartDummySpoutInstanceHelper(common, spout, spout_instance, num_msgs_sent_by_spout_instance);
     }
   }
   // Start the bolts
   std::vector<DummyBoltInstance*> bolt_workers_list;
   std::vector<std::thread*> bolt_workers_threads_list;
-  for (int bolt = 0; bolt < common.num_bolts_; ++bolt) {
-    for (int bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
+  for (size_t bolt = 0; bolt < common.num_bolts_; ++bolt) {
+    for (size_t bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
       EventLoopImpl* worker_ss = NULL;
       DummyBoltInstance* worker = NULL;
       std::thread* worker_thread = NULL;
@@ -614,7 +619,7 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
 
 void StartStMgrs(CommonResources& common) {
   // Spawn and start the stmgrs
-  for (int i = 0; i < common.num_stmgrs_; ++i) {
+  for (size_t i = 0; i < common.num_stmgrs_; ++i) {
     EventLoopImpl* stmgr_ss = NULL;
     heron::stmgr::StMgr* mgr = NULL;
     std::thread* stmgr_thread = NULL;
@@ -757,7 +762,7 @@ TEST(StMgr, test_pplan_decode) {
   // Verify that the pplan was decoded properly
   const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
-  for (int i=0; i < common.num_stmgrs_; i++) {
+  for (size_t i = 0; i < common.num_stmgrs_; i++) {
     EXPECT_NE(common.stmgr_ports_.end(),
               std::find(common.stmgr_ports_.begin(), common.stmgr_ports_.end(),
                         pplan0->stmgrs(i).data_port()));
@@ -1865,6 +1870,62 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   delete metricsMgrTmasterLatch;
   delete metricsMgrConnectionCloseLatch;
   TearCommonResources(common);
+}
+
+// Test PatchPhysicalPlanWithHydratedTopology function
+TEST(StMgr, test_PatchPhysicalPlanWithHydratedTopology) {
+  int32_t nSpouts = 2;
+  int32_t nSpoutInstances = 1;
+  int32_t nBolts = 3;
+  int32_t nBoltInstances = 1;
+  heron::proto::api::Topology* topology =
+      GenerateDummyTopology("topology_name",
+                            "topology_id",
+                            nSpouts, nSpoutInstances, nBolts, nBoltInstances,
+                            heron::proto::api::SHUFFLE);
+
+  heron::proto::system::PhysicalPlan* pplan = new heron::proto::system::PhysicalPlan();
+  pplan->mutable_topology()->CopyFrom(*topology);
+
+  // Verify initial values
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        *topology,
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(),
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");
+  // Change runtime data in PhysicalPlan and patch it
+  std::map<std::string, std::string> update;
+  update["conf.new"] = "test";
+  update[heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS] = "10";
+  heron::config::TopologyConfigHelper::SetTopologyRuntimeConfig(pplan->mutable_topology(), update);
+
+  // Verify updated runtime data is still in the patched physical plan
+  // The topology in the physical plan should have the old name
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        *topology,
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "30");  // The internal topology object should still have the initial value
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(),
+        heron::config::TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS,
+        ""),
+    "10");  // The topology object in the physical plan should have the new value
+  EXPECT_EQ(
+    heron::config::TopologyConfigHelper::GetTopologyConfigValue(
+        pplan->topology(), "conf.new", ""),
+    "test");  // The topology object in the physical plan should have the new config
+
+  delete pplan;
 }
 
 int main(int argc, char** argv) {

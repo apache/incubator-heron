@@ -41,16 +41,16 @@ config path.
 
 ```bash
 heron submit mesos --verbose ~/.heron/examples/heron-examples.jar \
-com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+org.apache.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
 The following will be displayed upon a successful submit.
 
 ```bash
-[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.mesos.MesosLauncher INFO: \
+[2016-07-25 22:04:41 -0700] org.apache.heron.scheduler.mesos.MesosLauncher INFO: \
 For checking the status and logs of the topology, use the working directory \
 $HOME/.herondata/topologies/mesos/$USER/ExclamationTopology
-[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.SubmitterMain FINE:  Topology \
+[2016-07-25 22:04:41 -0700] org.apache.heron.scheduler.SubmitterMain FINE:  Topology \
 ExclamationTopology submitted successfully
 INFO: Topology 'ExclamationTopology' launched successfully
 INFO: Elapsed time: 4.114s.
@@ -67,9 +67,9 @@ The log file will show whether the launch succeeded. If it succeeded, at the end
 it will show the task is running.
 
 ```bash
-[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO: \
+[2016-07-25 22:15:47 -0700] org.apache.heron.scheduler.mesos.framework.MesosFramework INFO: \
 Received status update [...]
-[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO: \
+[2016-07-25 22:15:47 -0700] org.apache.heron.scheduler.mesos.framework.MesosFramework INFO: \
 Task with id 'container_1_1469510147073:0' RUNNING
 ``` 
 

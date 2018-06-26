@@ -1,6 +1,6 @@
 """
 The top-level library for Heron's Python API, which enables you to build Heron
-[topologies](https://twitter.github.io/heron/docs/concepts/topologies/) in
+[topologies](https://apache.github.io/incubator-heron/docs/concepts/topologies/) in
 Python.
 
 Heron topologies are acyclic graphs used to process streaming data. Topologies

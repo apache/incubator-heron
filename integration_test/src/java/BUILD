@@ -10,7 +10,7 @@ filegroup(
 java_library(
     name = "core",
     srcs = glob(
-        ["com/twitter/heron/integration_test/core/**/*.java"],
+        ["org/apache/heron/integration_test/core/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",
@@ -28,7 +28,7 @@ java_library(
 java_library(
     name = "common",
     srcs = glob(
-        ["com/twitter/heron/integration_test/common/**/*.java"],
+        ["org/apache/heron/integration_test/common/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",
@@ -44,7 +44,7 @@ java_library(
 java_library(
     name = "integration-tests-lib",
     srcs = glob(
-       ["com/twitter/heron/integration_test/topology/**/*.java"],
+       ["org/apache/heron/integration_test/topology/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",
@@ -60,7 +60,7 @@ java_library(
 java_library(
     name = "local-integration-tests-lib",
     srcs = glob(
-       ["com/twitter/heron/local_integration_test/topology/**/*.java"],
+       ["org/apache/heron/local_integration_test/topology/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",
@@ -74,7 +74,7 @@ java_library(
 java_binary(
     name = "integration-tests-unshaded",
     srcs = glob(
-       ["com/twitter/heron/integration_test/topology/**/*.java"],
+       ["org/apache/heron/integration_test/topology/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",
@@ -97,7 +97,7 @@ genrule(
 java_binary(
     name = "local-integration-tests-unshaded",
     srcs = glob(
-       ["com/twitter/heron/local_integration_test/**/*.java"],
+       ["org/apache/heron/local_integration_test/**/*.java"],
     ),
     deps = [
         "//heron/api/src/java:api-java",

@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <dlfcn.h>
@@ -40,6 +43,8 @@ SpoutInstance::SpoutInstance(EventLoop* eventLoop,
                                ->GetHeronInstanceInternalSpoutWriteQueueCapacity();
   maxEmitBatchIntervalMs_ = config::HeronInternalsConfigReader::Instance()
                              ->GetHeronInstanceEmitBatchTimeMs();
+  maxEmitBatchSize_ = config::HeronInternalsConfigReader::Instance()
+                             ->GetHeronInstanceEmitBatchSize();
   ackingEnabled_ = taskContext->isAckingEnabled();
   enableMessageTimeouts_ = taskContext->enableMessageTimeouts();
   lookForTimeoutsTimer_ = -1;
@@ -61,7 +66,8 @@ SpoutInstance::SpoutInstance(EventLoop* eventLoop,
   collector_.reset(new SpoutOutputCollectorImpl(serializer_, taskContext_, dataFromSlave_));
   LOG(INFO) << "Instantiated spout for component " << taskContext->getThisComponentName()
             << " with task_id " << taskContext->getThisTaskId() << " and maxWriteBufferSize_ "
-            << maxWriteBufferSize_ << " and maxEmitBatchIntervalMs " << maxEmitBatchIntervalMs_;
+            << maxWriteBufferSize_ << " and maxEmitBatchIntervalMs " << maxEmitBatchIntervalMs_
+            << " and maxEmitBatchSize " << maxEmitBatchSize_;
 }
 
 SpoutInstance::~SpoutInstance() {
@@ -131,6 +137,7 @@ void SpoutInstance::produceTuple() {
   int maxSpoutPending = atoi(taskContext_->getConfig()
                              ->get(api::config::Config::TOPOLOGY_MAX_SPOUT_PENDING).c_str());
   int64_t totalTuplesEmitted = collector_->getTotalDataTuplesEmitted();
+  int64_t totalBytesEmitted = collector_->getTotalDataBytesEmitted();
   int64_t startTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
                                    std::chrono::system_clock::now().time_since_epoch()).count();
   int64_t startOfCall = startTime;
@@ -141,9 +148,11 @@ void SpoutInstance::produceTuple() {
                                    std::chrono::system_clock::now().time_since_epoch()).count();
     metrics_->nextTuple(currentTime - startOfCall);
     int64_t newTotalTuplesEmitted = collector_->getTotalDataTuplesEmitted();
+    int64_t newTotalBytesEmitted = collector_->getTotalDataBytesEmitted();
     if (newTotalTuplesEmitted == totalTuplesEmitted) break;
     totalTuplesEmitted = newTotalTuplesEmitted;
     if (currentTime - startTime > maxEmitBatchIntervalMs_ * 1000 * 1000) break;
+    if (newTotalBytesEmitted - totalBytesEmitted > maxEmitBatchSize_) break;
     startOfCall = currentTime;
   }
 }

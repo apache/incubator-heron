@@ -44,7 +44,7 @@ $ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel-0.14.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -66,7 +66,7 @@ $ export PATH="$PATH:$HOME/bin"
 ### Step 8 --- Fetch the latest version of Heron's source code
 
 ```bash
-$ git clone https://github.com/twitter/heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd heron
 ```
 
 ### Step 9 --- Configure Heron for building with Bazel
@@ -195,7 +195,7 @@ export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel-0.14.1-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -206,7 +206,7 @@ bazelVersion %}}).
 ### Step 6 --- Download Heron and compile it
 
 ```bash
-$ git clone https://github.com/twitter/heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd heron
 $ ./bazel_configure.py
 $ bazel build --config=centos heron/...
 ```

@@ -4,7 +4,7 @@
 ### Requirements:
 * [minikube](https://kubernetes.io/docs/getting-started-guides/minikube/#installation)
 * [kubectl](https://kubernetes.io/docs/tasks/kubectl/install/)
-* [heron client](https://twitter.github.io/heron/docs/getting-started/)
+* [heron client](https://apache.github.io/incubator-heron/docs/getting-started/)
 
 
 ### Start minkube
@@ -19,7 +19,7 @@ $ minikube start --memory=7168 --cpus=5 --disk-size=20g
 1. Start zookeeper:
 
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/zookeeper.yaml
 
 $ kubectl get pods
 NAME                                  READY     STATUS    RESTARTS   AGE
@@ -31,21 +31,21 @@ zk-0                                  1/1       Running   0          1m
 
 2. Start bookkeeper:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
 ```
 
 3. Start heron tools:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
 ```
 
-4. Start heron apiserver:
+4. Start heron API server:
 ```shell
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/apiserver.yaml
 ```
 
-### Deploy via heron apiserver
-We will start a proxy to the cluster and then construct a [proxy url](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls) to access the apiserver.
+### Deploy via heron API server
+We will start a proxy to the cluster and then construct a [proxy url](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls) to access the API server.
 
 
 1. Start kubectl proxy:
@@ -53,7 +53,7 @@ We will start a proxy to the cluster and then construct a [proxy url](https://ku
 $ kubectl proxy -p 8001
 ```
 
-2. Verify we can access the apiserver:
+2. Verify we can access the API server:
 
 ```shell
 $ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
@@ -77,7 +77,7 @@ set service_url http://localhost:8001/api/v1/proxy/namespaces/default/services/h
 4. Submit an example topology:
 ```shell
 $ heron submit kubernetes ~/.heron/examples/heron-api-examples.jar \
-com.twitter.heron.examples.api.AckingTopology acking
+org.apache.heron.examples.api.AckingTopology acking
 ```
 
 5. View heron ui:

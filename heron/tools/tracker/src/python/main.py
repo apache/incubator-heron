@@ -1,19 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' main.py '''
 from __future__ import print_function
 import argparse
@@ -58,7 +62,7 @@ class Application(tornado.web.Application):
         (r"/topologies/containerfilestats",
          handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
         (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
-        # Deprecated. See https://github.com/twitter/heron/issues/1754
+        # Deprecated. See https://github.com/apache/incubator-heron/issues/1754
         (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
         (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
          {"tracker":self.tracker}),
@@ -178,7 +182,7 @@ def add_arguments(parser):
 def create_parsers():
   """ create argument parser """
   parser = argparse.ArgumentParser(
-      epilog='For detailed documentation, go to http://github.com/twitter/heron',
+      epilog='For detailed documentation, go to http://github.com/apache/incubator-heron',
       usage="%(prog)s [options] [help]",
       add_help=False)
 

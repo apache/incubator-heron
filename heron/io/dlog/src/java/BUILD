@@ -14,7 +14,7 @@ java_library(
 java_binary(
   name = "dlog-util-unshaded",
   srcs = glob(["**/dlog/*.java"]),
-  main_class = "com.twitter.heron.dlog.Util",
+  main_class = "org.apache.heron.dlog.Util",
   deps = dlog_deps + ["//heron/common/src/java:basics-java"]
 )
 

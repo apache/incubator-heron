@@ -1,19 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 """ The Heron executor is a process that runs on a container and is responsible for starting and
 monitoring the processes of the topology and it's support services."""
 import argparse
@@ -223,7 +227,7 @@ class HeronExecutor(object):
                          lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
-        # In json, the component name and jvm options are still in base64 encoding
+        # In json, the component name and JVM options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
     self.pkg_type = parsed_args.pkg_type
@@ -387,7 +391,7 @@ class HeronExecutor(object):
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
-    metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
+    metricsmgr_main_class = 'org.apache.heron.metricsmgr.MetricsManager'
 
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
@@ -428,7 +432,7 @@ class HeronExecutor(object):
 
   def _get_metrics_cache_cmd(self):
     ''' get the command to start the metrics manager processes '''
-    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
+    metricscachemgr_main_class = 'org.apache.heron.metricscachemgr.MetricsCacheManager'
 
     metricscachemgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                            # We could not rely on the default -Xmx setting, which could be very big,
@@ -470,7 +474,7 @@ class HeronExecutor(object):
 
   def _get_healthmgr_cmd(self):
     ''' get the command to start the topology health manager processes '''
-    healthmgr_main_class = 'com.twitter.heron.healthmgr.HealthManager'
+    healthmgr_main_class = 'org.apache.heron.healthmgr.HealthManager'
 
     healthmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                      # We could not rely on the default -Xmx setting, which could be very big,
@@ -498,7 +502,8 @@ class HeronExecutor(object):
                      "--cluster", self.cluster,
                      "--role", self.role,
                      "--environment", self.environment,
-                     "--topology_name", self.topology_name, "--verbose"]
+                     "--topology_name", self.topology_name,
+                     "--metricsmgr_port", self.metrics_manager_port]
 
     return healthmgr_cmd
 
@@ -560,7 +565,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
-      Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
+      Log.info("component name: %s, RAM request: %d, total JVM size: %dM, "
                "cache size: %dM, metaspace size: %dM"
                % (component_name, self.component_ram_map[component_name],
                   total_jvm_size, code_cache_size_mb, java_metasize_mb))
@@ -618,7 +623,7 @@ class HeronExecutor(object):
       instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
+                           'org.apache.heron.instance.HeronInstance'] + instance_args)
 
       retval[instance_id] = instance_cmd
     return retval
@@ -626,7 +631,7 @@ class HeronExecutor(object):
   def _get_jvm_version(self):
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
-             '-cp', self.instance_classpath, 'com.twitter.heron.instance.util.JvmVersion']
+             '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       (process_stdout, process_stderr) = process.communicate()
       if process.returncode != 0:
@@ -725,7 +730,8 @@ class HeronExecutor(object):
         '--config_file=%s' % self.heron_internals_config_file,
         '--override_config_file=%s' % self.override_config_file,
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard]]
+        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
+        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -755,7 +761,7 @@ class HeronExecutor(object):
   def _get_ckptmgr_process(self):
     ''' Get the command to start the checkpoint manager process'''
 
-    ckptmgr_main_class = 'com.twitter.heron.ckptmgr.CheckpointManager'
+    ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
                    '-Xmx1024M',

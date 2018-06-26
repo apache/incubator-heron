@@ -1,23 +1,28 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "manager/instance-server.h"
+
 #include <iostream>
-#include <unordered_set>
+#include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include "manager/checkpoint-gateway.h"
 #include "util/neighbour-calculator.h"
@@ -422,6 +427,9 @@ void InstanceServer::DrainCheckpoint(sp_int32 _task_id,
 
 void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   // TODO(vikasr) We do not handle any changes to our local assignment
+  LOG(INFO) << "Broadcasting new PhysicalPlan:";
+  config::TopologyConfigHelper::LogTopology(_pplan.topology());
+
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
@@ -439,17 +447,18 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
 void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
                                   const std::string& _component,
                                   Connection* _conn) const {
-  sp_int64 read_bsp =
+  sp_int64 read_bps =
       config::TopologyConfigHelper::GetComponentOutputBPS(_pplan.topology(), _component);
   sp_int32 parallelism =
       config::TopologyConfigHelper::GetComponentParallelism(_pplan.topology(), _component);
-  sp_int64 burst_read_bsp = read_bsp + read_bsp / 2;
+  // burst rate is 1.5 x of regular rate
+  sp_int64 burst_read_bps = read_bps + read_bps / 2;
 
-  // There should be parallelism hint and the per instance rate limit should be at least
-  // one byte per second
-  if (parallelism > 0 && read_bsp > parallelism && burst_read_bsp > parallelism) {
-    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bsp << "/" << burst_read_bsp;
-    _conn->setRateLimit(read_bsp / parallelism, burst_read_bsp / parallelism);
+  LOG(INFO) << "Parallelism of component " << _component << " is " << parallelism;
+  LOG(INFO) << "Read BPS of component " << _component << " is " << read_bps;
+  if (parallelism > 0 && read_bps >= 0 && burst_read_bps >= 0) {
+    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bps << "/" << burst_read_bps;
+    _conn->setRateLimit(read_bps / parallelism, burst_read_bps / parallelism);
   } else {
     LOG(INFO) << "Disable rate limit in " << _component;
     _conn->disableRateLimit();

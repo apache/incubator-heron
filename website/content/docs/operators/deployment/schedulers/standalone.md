@@ -57,11 +57,11 @@ You should see output like this:
 [2018-01-22 10:37:06 -0800] [INFO]: Done starting slaves
 [2018-01-22 10:37:06 -0800] [INFO]: Waiting for cluster to come up... 0
 [2018-01-22 10:37:08 -0800] [INFO]: Starting Heron API Server on 127.0.0.1
-[2018-01-22 10:37:08 -0800] [INFO]: Waiting for apiserver to come up... 0
-[2018-01-22 10:37:09 -0800] [INFO]: Waiting for apiserver to come up... 1
+[2018-01-22 10:37:08 -0800] [INFO]: Waiting for API server to come up... 0
+[2018-01-22 10:37:09 -0800] [INFO]: Waiting for API server to come up... 1
 [2018-01-22 10:37:16 -0800] [INFO]: Done starting Heron API Server
 [2018-01-22 10:37:16 -0800] [INFO]: Starting Heron Tools on 127.0.0.1
-[2018-01-22 10:37:16 -0800] [INFO]: Waiting for apiserver to come up... 0
+[2018-01-22 10:37:16 -0800] [INFO]: Waiting for API server to come up... 0
 [2018-01-22 10:37:17 -0800] [INFO]: Done starting Heron Tools
 [2018-01-22 10:37:17 -0800] [INFO]: Heron standalone cluster complete!
 ```
@@ -167,7 +167,7 @@ Once your standalone cluster is up and running and you've set the service URL fo
 ```bash
 $ heron submit standalone \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCount
 ```
 
@@ -177,7 +177,7 @@ You can also specify the service url as part of the submission command:
 $ heron submit standalone \
   --service-url http://localhost:9000 \
   ~/.heron/examples/heron-streamlet-examples.jar \
-  com.twitter.heron.examples.streamlet.WindowedWordCountTopology \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
   WindowedWordCount
 ```
 

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <map>
@@ -50,10 +53,10 @@ const sp_string heron_internals_config_filename =
 const sp_string metrics_sinks_config_filename =
     "../../../../../../../../heron/config/metrics_sinks.yaml";
 
-const sp_string topology_runtime_config_1 = "topology.runtime.test_config";
-const sp_string topology_runtime_config_2 = "topology.runtime.test_config2";
-const sp_string spout_runtime_config = "topology.runtime.spout.test_config";
-const sp_string bolt_runtime_config = "topology.runtime.bolt.test_config";
+const sp_string topology_init_config_1 = "topology.runtime.test_config";
+const sp_string topology_init_config_2 = "topology.runtime.test_config2";
+const sp_string spout_init_config = "topology.runtime.spout.test_config";
+const sp_string bolt_init_config = "topology.runtime.bolt.test_config";
 
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
@@ -93,7 +96,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     kv->set_value(std::to_string(num_spout_instances));
     // Add runtime config
     heron::proto::api::Config::KeyValue* kv1 = config->add_kvs();
-    kv1->set_key(spout_runtime_config);
+    kv1->set_key(spout_init_config);
     kv1->set_value("-1");
   }
   // Set bolts
@@ -123,7 +126,7 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     kv->set_value(std::to_string(num_bolt_instances));
     // Add runtime config
     heron::proto::api::Config::KeyValue* kv1 = config->add_kvs();
-    kv1->set_key(bolt_runtime_config);
+    kv1->set_key(bolt_init_config);
     kv1->set_value("-1");
   }
   // Set message timeout
@@ -133,10 +136,10 @@ static heron::proto::api::Topology* GenerateDummyTopology(
   kv->set_value(MESSAGE_TIMEOUT);
   // Add runtime config
   heron::proto::api::Config::KeyValue* kv1 = topology_config->add_kvs();
-  kv1->set_key(topology_runtime_config_1);
+  kv1->set_key(topology_init_config_1);
   kv1->set_value("-1");
   heron::proto::api::Config::KeyValue* kv2 = topology_config->add_kvs();
-  kv2->set_key(topology_runtime_config_2);
+  kv2->set_key(topology_init_config_2);
   kv2->set_value("-1");
 
   // Set state
@@ -706,42 +709,21 @@ TEST(StMgr, test_runtime_config) {
   // auto c = t.topology_config();
   for (size_t i = 0; i < common.stmgrs_list_.size(); ++i) {
     while (!common.stmgrs_list_[i]->GetPhysicalPlan()) sleep(1);
-    std::map<std::string, std::string> init_config, init_spout_config, init_bolt_config;
-    const heron::proto::system::PhysicalPlan* pplan = common.stmgrs_list_[i]->GetPhysicalPlan();
-    heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), init_config);
-    EXPECT_EQ(init_config[topology_runtime_config_1], "-1");
-    EXPECT_EQ(init_config[topology_runtime_config_2], "-1");
-    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
-        runtime_test_spout, init_spout_config);
-    EXPECT_EQ(init_spout_config[spout_runtime_config], "-1");
-    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
-        runtime_test_bolt, init_bolt_config);
-    EXPECT_EQ(init_bolt_config[bolt_runtime_config], "-1");
   }
-  std::map<std::string, std::string> init_config, init_spout_config, init_bolt_config;
-  const heron::proto::system::PhysicalPlan* init_pplan = common.tmaster_->getPhysicalPlan();
-  heron::config::TopologyConfigHelper::GetTopologyConfig(init_pplan->topology(), init_config);
-  EXPECT_EQ(init_config[topology_runtime_config_1], "-1");
-  EXPECT_EQ(init_config[topology_runtime_config_2], "-1");
-  heron::config::TopologyConfigHelper::GetComponentConfig(init_pplan->topology(),
-      runtime_test_spout, init_spout_config);
-  EXPECT_EQ(init_spout_config[spout_runtime_config], "-1");
-  heron::config::TopologyConfigHelper::GetComponentConfig(init_pplan->topology(),
-      runtime_test_bolt, init_bolt_config);
-  EXPECT_EQ(init_bolt_config[bolt_runtime_config], "-1");
 
   // Test ValidateRuntimeConfig()
   heron::tmaster::ComponentConfigMap validate_good_config_map;
   std::map<std::string, std::string> validate_good_config;
-  validate_good_config[topology_runtime_config_1] = "1";
-  validate_good_config[topology_runtime_config_2] = "2";
-  validate_good_config_map[heron::tmaster::TOPOLOGY_CONFIG_KEY] = validate_good_config;
+  validate_good_config[topology_init_config_1] = "1";
+  validate_good_config[topology_init_config_2] = "2";
+  const char* topology_key = heron::config::TopologyConfigHelper::GetReservedTopologyConfigKey();
+  validate_good_config_map[topology_key] = validate_good_config;
   validate_good_config_map["spout1"] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_good_config_map), true);
 
   heron::tmaster::ComponentConfigMap validate_bad_config_map;
   std::map<std::string, std::string> validate_bad_config;
-  validate_good_config[topology_runtime_config_1] = "1";
+  validate_good_config[topology_init_config_1] = "1";
   validate_bad_config_map["unknown_component"] = validate_good_config;
   EXPECT_EQ(common.tmaster_->ValidateRuntimeConfig(validate_bad_config_map), false);
 
@@ -771,10 +753,10 @@ TEST(StMgr, test_runtime_config) {
 
   // Post runtime config request with good configs and expect 200 response.
   std::vector<std::string> good_config;
-  good_config.push_back(topology_runtime_config_1 + ":1");
-  good_config.push_back(topology_runtime_config_2 + ":2");
-  good_config.push_back(runtime_test_spout + ":" + spout_runtime_config + ":3");
-  good_config.push_back(runtime_test_bolt + ":" + bolt_runtime_config + ":4");
+  good_config.push_back(topology_init_config_1 + ":1");
+  good_config.push_back(topology_init_config_2 + ":2");
+  good_config.push_back(runtime_test_spout + ":" + spout_init_config + ":3");
+  good_config.push_back(runtime_test_bolt + ":" + bolt_init_config + ":4");
   std::thread* good_config_update_thread = new std::thread(UpdateRuntimeConfig,
       common.topology_id_, common.tmaster_controller_port_, good_config, 200, "good_config");
   good_config_update_thread->join();
@@ -786,35 +768,28 @@ TEST(StMgr, test_runtime_config) {
   for (size_t i = 0; i < common.stmgrs_list_.size(); ++i) {
     std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
     const heron::proto::system::PhysicalPlan* pplan = common.stmgrs_list_[i]->GetPhysicalPlan();
-    heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
-    EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
-    EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
-    EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
-    EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
-    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+    heron::config::TopologyConfigHelper::GetTopologyRuntimeConfig(pplan->topology(),
+        updated_config);
+    EXPECT_EQ(updated_config[topology_init_config_1 + ":runtime"], "1");
+    EXPECT_EQ(updated_config[topology_init_config_2 + ":runtime"], "2");
+    heron::config::TopologyConfigHelper::GetComponentRuntimeConfig(pplan->topology(),
         runtime_test_spout, updated_spout_config);
-    EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
-    EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
-    heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+    EXPECT_EQ(updated_spout_config[spout_init_config + ":runtime"], "3");
+    heron::config::TopologyConfigHelper::GetComponentRuntimeConfig(pplan->topology(),
         runtime_test_bolt, updated_bolt_config);
-    EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
-    EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
+    EXPECT_EQ(updated_bolt_config[bolt_init_config + ":runtime"], "4");
   }
   std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
   const heron::proto::system::PhysicalPlan* pplan = common.tmaster_->getPhysicalPlan();
-  heron::config::TopologyConfigHelper::GetTopologyConfig(pplan->topology(), updated_config);
-  EXPECT_EQ(updated_config[topology_runtime_config_1], "-1");
-  EXPECT_EQ(updated_config[topology_runtime_config_1 + ":runtime"], "1");
-  EXPECT_EQ(updated_config[topology_runtime_config_2], "-1");
-  EXPECT_EQ(updated_config[topology_runtime_config_2 + ":runtime"], "2");
-  heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+  heron::config::TopologyConfigHelper::GetTopologyRuntimeConfig(pplan->topology(), updated_config);
+  EXPECT_EQ(updated_config[topology_init_config_1 + ":runtime"], "1");
+  EXPECT_EQ(updated_config[topology_init_config_2 + ":runtime"], "2");
+  heron::config::TopologyConfigHelper::GetComponentRuntimeConfig(pplan->topology(),
       runtime_test_spout, updated_spout_config);
-  EXPECT_EQ(updated_spout_config[spout_runtime_config], "-1");
-  EXPECT_EQ(updated_spout_config[spout_runtime_config + ":runtime"], "3");
-  heron::config::TopologyConfigHelper::GetComponentConfig(pplan->topology(),
+  EXPECT_EQ(updated_spout_config[spout_init_config + ":runtime"], "3");
+  heron::config::TopologyConfigHelper::GetComponentRuntimeConfig(pplan->topology(),
       runtime_test_bolt, updated_bolt_config);
-  EXPECT_EQ(updated_bolt_config[bolt_runtime_config], "-1");
-  EXPECT_EQ(updated_bolt_config[bolt_runtime_config + ":runtime"], "4");
+  EXPECT_EQ(updated_bolt_config[bolt_init_config + ":runtime"], "4");
 
   // Stop the schedulers
   for (size_t i = 0; i < common.ss_list_.size(); ++i) {

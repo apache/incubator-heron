@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ////////////////////////////////////////////////////////////////
@@ -78,10 +81,10 @@ class TopologyConfigHelper {
   // and returns a new topology structure.
   static proto::api::Topology* StripComponentObjects(const proto::api::Topology& _topology);
 
-  // Gets the per container cpu requested by this topology
+  // Gets the per container CPU requested by this topology
   static sp_double64 GetContainerCpuRequested(const proto::api::Topology& _topology);
 
-  // Gets the per container ram requested by this topology
+  // Gets the per container RAM requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
 
   // Get all the streams emitted by a component
@@ -136,24 +139,36 @@ class TopologyConfigHelper {
   // Do we want to drop tuples upon backpressure detection
   static bool DropTuplesUponBackpressure(const proto::api::Topology& _topology);
 
+  // Get runtime config key
+  static std::string GetRuntimeConfigKey(const std::string& key);
+
+  // Convert configs in map to runtime configs (append runtime postfix)
+  static void ConvertToRuntimeConfigs(const std::map<std::string, std::string>& _origin,
+                                      std::map<std::string, std::string>& _retval);
+
   // Return topology level config
-  static void GetTopologyConfig(const proto::api::Topology& _topology,
-                                std::map<std::string, std::string>& retval);
+  static void GetTopologyRuntimeConfig(const proto::api::Topology& _topology,
+                                       std::map<std::string, std::string>& retval);
 
   // Update topology level config
-  static void SetTopologyConfig(proto::api::Topology* _topology,
-                                const std::map<std::string, std::string>& retval);
+  static void SetTopologyRuntimeConfig(proto::api::Topology* _topology,
+                                       const std::map<std::string, std::string>& retval);
 
 
   // Return component level config
-  static void GetComponentConfig(const proto::api::Topology& _topology,
-                                 const std::string& _component_name,
-                                 std::map<std::string, std::string>& config);
+  static void GetComponentRuntimeConfig(const proto::api::Topology& _topology,
+                                        const std::string& _component_name,
+                                        std::map<std::string, std::string>& config);
 
   // Update component level config
-  static void SetComponentConfig(proto::api::Topology* _topology,
-                                 const std::string& _component_name,
-                                 const std::map<std::string, std::string>& config);
+  static void SetComponentRuntimeConfig(proto::api::Topology* _topology,
+                                        const std::string& _component_name,
+                                        const std::map<std::string, std::string>& config);
+
+  // Get the topology config value given the config key
+  static const std::string GetTopologyConfigValue(const proto::api::Topology& _topology,
+                                                  const std::string& _key,
+                                                  const std::string& _default);
 
   // Get the config value given component name and config key
   static const std::string GetComponentConfigValue(const proto::api::Topology& _topology,
@@ -170,16 +185,19 @@ class TopologyConfigHelper {
   static sp_int64 GetComponentOutputBPS(const proto::api::Topology& _topology,
                                         const std::string& _component);
 
+  // Get reserved topology config key.
+  static const char* GetReservedTopologyConfigKey();
+
  private:
   static bool GetBooleanConfigValue(const proto::api::Topology& _topology,
                                     const std::string& _config_name,
                                     bool _default_value);
   // Convert topology config to a key value map
-  static void ConvertConfigToKVMap(const proto::api::Config& _config,
-                                   std::map<std::string, std::string>& retval);
+  static void ConvertRuntimeConfigToKVMap(const proto::api::Config& _config,
+                                          std::map<std::string, std::string>& retval);
   // Update topology config from a key value map
-  static void UpdateConfigFromKVMap(proto::api::Config* _config,
-                                    const std::map<std::string, std::string>& _kv_map);
+  static void UpdateRuntimeConfigFromKVMap(proto::api::Config* _config,
+                                           const std::map<std::string, std::string>& _kv_map);
 };
 }  // namespace config
 }  // namespace heron

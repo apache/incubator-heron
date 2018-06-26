@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 java_binary(
     name='api-examples-unshaded',
-    srcs = glob(["com/twitter/heron/examples/api/**/*.java"]),
+    srcs = glob(["org/apache/heron/examples/api/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
@@ -20,7 +20,7 @@ genrule(
 
 java_binary(
     name='streamlet-examples-unshaded',
-    srcs = glob(["com/twitter/heron/examples/streamlet/**/*.java"]),
+    srcs = glob(["org/apache/heron/examples/streamlet/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
