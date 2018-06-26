@@ -58,20 +58,23 @@ std::vector<char> StrUtils::encode(const std::vector<char>& _input) {
 }
 
 std::vector<char> StrUtils::decode(const std::vector<char>& _input) {
+  const int nine = 57;
+  const int number_dif = 48;
+  const int letter_dif = 55;
   std::vector<char> output;
   int i = 0;
   while (i < _input.size()) {
     char chr_1 = _input[i];
-    if (chr_1 <= 57) {
-      chr_1 -= 48;
+    if (chr_1 <= nine) {
+      chr_1 -= number_dif;
     } else {
-      chr_1 -= 55;
+      chr_1 -= letter_dif;
     }
     char chr_2 = _input[i+1];
-    if (chr_2 <= 57) {
-      chr_2 -= 48;
+    if (chr_2 <= nine) {
+      chr_2 -= number_dif;
     } else {
-      chr_2 -= 55;
+      chr_2 -= letter_dif;
     }
     i += 2;
     char new_chr = ((chr_1 << 4) + chr_2) & 0xFF;
