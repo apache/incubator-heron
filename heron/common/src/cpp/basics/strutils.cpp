@@ -87,13 +87,9 @@ int StrUtils::decodeHexChar(char c) {
   const int char_A = 65;
   const int char_F = 70;
 
-  if (c < char_zero) {
-    return -1;
-  } else if (c <= char_nine) {
+  if (char_zero <= c && c <= char_nine) {
     return c - char_zero;
-  } else if (c < char_A) {
-    return -1;
-  } else if (c <= char_F) {
+  } else if (char_A <= c && c <= char_F){
     return c - char_A + 10;
   } else {
     return -1;
