@@ -66,7 +66,6 @@ class TController {
   void HandleUpdateRuntimeConfigRequest(IncomingHTTPRequest* request);
   void HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* request,
                                             proto::system::StatusCode);
-  void HandleGetCurPPlanRequest(IncomingHTTPRequest* request);
 
   // We are a http server
   HTTPServer* http_server_;
