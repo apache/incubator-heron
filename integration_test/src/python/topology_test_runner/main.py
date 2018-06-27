@@ -101,6 +101,9 @@ class TopologyStructureResultChecker(object):
     """
     expected_nodes = dict()
     expected_links = dict()
+    # for test
+    logging.info("expected result: ")
+    logging.info(expected_results)
     for bolt in expected_results["topology"]["bolts"]:
       name = bolt["comp"]["name"]
       if name not in expected_links:
