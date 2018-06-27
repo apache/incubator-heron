@@ -318,7 +318,6 @@ public class CheckpointManagerServer extends HeronServer {
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
                                + "component %s taskId %d", checkpoint.getCheckpointId(),
                                checkpoint.getComponent(), checkpoint.getTaskId()));
-        // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "

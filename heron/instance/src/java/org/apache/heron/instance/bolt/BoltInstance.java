@@ -176,7 +176,7 @@ public class BoltInstance implements IInstance {
     String fileName;
 
     try {
-      fileName = Files.createTempFile(checkpointId, "state").toString();
+      fileName = Files.createTempFile(checkpointId, ".state").toString();
     } catch (IOException e) {
       throw new RuntimeException("failed to create local temp file for state");
     }

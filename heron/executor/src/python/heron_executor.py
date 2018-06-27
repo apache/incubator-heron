@@ -764,7 +764,7 @@ class HeronExecutor(object):
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-                   '-Xmx5120M',
+                   '-Xmx2048M',
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',
                    '-XX:+PrintGCDetails',

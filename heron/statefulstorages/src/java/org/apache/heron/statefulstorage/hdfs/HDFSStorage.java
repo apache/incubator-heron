@@ -72,6 +72,7 @@ public class HDFSStorage implements IStatefulStorage {
     SysUtils.closeIgnoringExceptions(fileSystem);
   }
 
+  // TODO(nlu): update the storage interface to remove its awareness of `Checkpoint`
   @Override
   public void store(Checkpoint checkpoint) throws StatefulStorageException {
     Path path = new Path(getCheckpointPath(checkpoint.getTopologyName(),
