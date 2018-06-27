@@ -21,7 +21,6 @@ package org.apache.heron.healthmgr.policy;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -35,7 +34,6 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
-import org.apache.heron.healthmgr.HealthPolicyConfigReader;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
@@ -51,13 +49,14 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   protected PhysicalPlanProvider physicalPlanProvider;
   protected String policyId;
+  private String policyIdRuntime;
   protected HealthPolicyConfig policyConfig;
 
   protected PolicyMode policyMode;
+
   public enum PolicyMode {
     activated,
-    deactivated,
-
+    deactivated
   }
 
   @Inject
@@ -70,30 +69,29 @@ public class ToggleablePolicy extends HealthPolicyImpl {
     this.policyConfig = policyConfig;
 
     policyMode = policyConfig.getPolicyMode();
+    policyIdRuntime = policyId + ":runtime";
   }
 
   @Override
   public Collection<Measurement> executeSensors() {
     for (TopologyAPI.Config.KeyValue kv
         : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
-      LOG.info("kv " + kv.getKey() + " => " + kv.getValue());
-      if (kv.getKey().equals(policyId)) {
+      LOG.fine("kv " + kv.getKey() + ":" + kv.getValue());
+      if (kv.getKey().equals(policyIdRuntime)) {
         String val = kv.getValue();
-        for (String kv2 : val.split(";")) {
-          String kv2s[] = kv2.split(":");
-          if (HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_MODE.key().equals(kv2s[0])) {
-            if (PolicyMode.deactivated.name().equals(kv2s[1]) && policyMode.equals(PolicyMode.activated)) {
-              policyMode = PolicyMode.deactivated;
-              LOG.info("policy " + policyId + " status changed to " + policyMode);
-            } else if (PolicyMode.activated.name().equals(kv2s[1]) && policyMode.equals(PolicyMode.deactivated)) {
-              policyMode = PolicyMode.activated;
-              LOG.info("policy " + policyId + " status changed to " + policyMode);
-            } else {
-              LOG.info("policy " + policyId + " status does not change " + policyMode + "; input "+kv2);
-            }
-            break;
-          }
+        if (PolicyMode.deactivated.name().equals(val)
+            && policyMode.equals(PolicyMode.activated)) {
+          policyMode = PolicyMode.deactivated;
+          LOG.info("policy " + policyId + " status changed to " + policyMode);
+        } else if (PolicyMode.activated.name().equals(val)
+            && policyMode.equals(PolicyMode.deactivated)) {
+          policyMode = PolicyMode.activated;
+          LOG.info("policy " + policyId + " status changed to " + policyMode);
+        } else {
+          LOG.info("policy " + policyId
+              + " status does not change " + policyMode + "; input " + val);
         }
+        break;
       }
     }
 

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -67,7 +66,10 @@ import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.ReflectionUtils;
 
-import static org.apache.heron.healthmgr.HealthPolicyConfig.*;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_TYPE;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
  * {@link HealthManager} makes a topology dynamic and self-regulating. This is implemented using
