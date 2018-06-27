@@ -17,6 +17,7 @@ java_library(
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_ckptmgr_java",
         "//heron/proto:proto_physical_plan_java",
+        "//heron/api/src/java:api-java-low-level",
         "@com_google_protobuf//:protobuf_java",
     ],
 )
