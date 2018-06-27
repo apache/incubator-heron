@@ -84,8 +84,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
             policyMode = val;
             LOG.info("policy " + policyId + " status changed to " + policyMode);
           } else {
-            LOG.info("policy " + policyId + " status does not change " + policyMode
-                + "; unknown input " + val);
+            LOG.fine("policy " + policyId + " status remains same " + policyMode);
           }
           break;
         } catch (IllegalArgumentException e) {
