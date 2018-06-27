@@ -66,6 +66,12 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
     this->HandleUpdateRuntimeConfigRequest(request);
   };
   http_server_->InstallCallBack("/runtime_config/update", std::move(cbUpdateRuntimeConfg));
+
+  // Get current physical plan
+  auto cbGetCurPPlan = [this](IncomingHTTPRequest* request) {
+    this->HandleGetCurPPlanRequest(request);
+  };
+  http_server_->InstallCallBack("/get_current_physical_plan", std::move(cbGetCurPPlan));
 }
 
 TController::~TController() { delete http_server_; }
