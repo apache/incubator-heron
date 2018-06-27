@@ -20,16 +20,22 @@
 package org.apache.heron.ckptmgr;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
+import org.apache.heron.api.state.State;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.network.HeronServer;
 import org.apache.heron.common.network.HeronSocketOptions;
@@ -318,7 +324,19 @@ public class CheckpointManagerServer extends HeronServer {
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
                                + "component %s taskId %d", checkpoint.getCheckpointId(),
                                checkpoint.getComponent(), checkpoint.getTaskId()));
-        responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        boolean spillState = true;
+        CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
+        if (spillState) {
+          String stateUri = storeStateLocally(checkpoint.getCheckpoint().getState().toByteArray(),
+              checkpoint.getCheckpointId());
+           ckpt = CheckpointManager.InstanceStateCheckpoint.newBuilder()
+              .setCheckpointId(checkpoint.getCheckpointId())
+              .setStateUri(stateUri)
+              .build();
+        }
+        responseBuilder.setCheckpoint(ckpt);
+
+        //responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                      + "component %s taskId %d", request.getCheckpointId(),
@@ -333,6 +351,26 @@ public class CheckpointManagerServer extends HeronServer {
                               .setMessage(errorMessage));
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+  private String storeStateLocally(byte[] data, String checkpointId) {
+    String fileName;
+
+    try {
+      fileName = Files.createTempFile(checkpointId, ".state").toString();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to create local temp file for state");
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
+         DataOutputStream oos = new DataOutputStream(fos)) {
+      oos.write(data);
+      oos.flush();
+
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to persist state locally", e);
+    }
   }
 
   @Override

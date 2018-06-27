@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,16 @@
 
 package org.apache.heron.instance;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.Config;
@@ -304,11 +309,16 @@ public class Slave implements Runnable, AutoCloseable {
       instanceState.clear();
       instanceState = null;
     }
+
+
+    // TODO(nlu): clean the code
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
-              request.getState().getState().toByteArray());
+              request.getState().hasStateUri() ?
+                  loadStateFromFile(request.getState().getStateUri()) :
+                  request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
     } else {
@@ -341,6 +351,29 @@ public class Slave implements Runnable, AutoCloseable {
             .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
+  }
+
+  private byte[] loadStateFromFile(String stateUri) {
+    File f = new File(stateUri);
+    byte[] data = new byte[(int) f.length()];
+
+    try (FileInputStream fis = new FileInputStream(stateUri);
+         DataInputStream dis = new DataInputStream(fis)) {
+
+      dis.read(data);
+      return data;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to load local state", e);
+    } finally {
+      // we have to clean it here manually to avoid using too many disks
+      // TODO(nlu): find a cleaner and more consistent way to handle temp state files
+      LOG.info("cleaning temp state file: " + f.getPath());
+      if (f.delete()) {
+        LOG.info("deleted tmp state file");
+      } else {
+        LOG.info("failed to delete state file");
+      }
+    }
   }
 
   private void handleNewPhysicalPlan(InstanceControlMsg instanceControlMsg) {
