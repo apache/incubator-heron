@@ -78,12 +78,12 @@ public class ToggleablePolicy extends HealthPolicyImpl {
         : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
       LOG.fine("kv " + kv.getKey() + ":" + kv.getValue());
       if (kv.getKey().equals(policyIdRuntime)) {
-        String val = kv.getValue();
-        if (PolicyMode.deactivated.name().equals(val)
+        PolicyMode val = PolicyMode.valueOf(kv.getValue());
+        if (PolicyMode.deactivated.equals(val)
             && policyMode.equals(PolicyMode.activated)) {
           policyMode = PolicyMode.deactivated;
           LOG.info("policy " + policyId + " status changed to " + policyMode);
-        } else if (PolicyMode.activated.name().equals(val)
+        } else if (PolicyMode.activated.equals(val)
             && policyMode.equals(PolicyMode.deactivated)) {
           policyMode = PolicyMode.activated;
           LOG.info("policy " + policyId + " status changed to " + policyMode);

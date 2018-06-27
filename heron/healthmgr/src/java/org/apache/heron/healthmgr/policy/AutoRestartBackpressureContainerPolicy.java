@@ -36,7 +36,7 @@ import org.apache.heron.healthmgr.resolvers.RestartContainerResolver;
 import org.apache.heron.healthmgr.sensors.BackPressureSensor;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
-import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
+import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL_MS;
 
 /**
  * This Policy class
@@ -68,7 +68,7 @@ public class AutoRestartBackpressureContainerPolicy extends ToggleablePolicy
     registerResolvers(restartContainerResolver);
 
     setPolicyExecutionInterval(
-        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
+        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL_MS.key(), 60000)));
 
     eventManager.addEventListener(ContainerRestart.class, this);
   }

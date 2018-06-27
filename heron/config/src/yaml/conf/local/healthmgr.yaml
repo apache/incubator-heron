@@ -25,6 +25,8 @@ heron.healthmgr.metricsource.type: org.apache.heron.healthmgr.sensors.MetricsCac
 heron.healthmgr.metricsource.url: http://localhost:8888
 
 # Enable MetricsCache if MetricsCache is chosen as metrics provider
+# disabled = do not launch the metricscache manager
+# cluster = launch the metricscache manager on container-0
 heron.topology.metricscachemgr.mode: cluster
 
 ## list of policies to be executed for self regulation

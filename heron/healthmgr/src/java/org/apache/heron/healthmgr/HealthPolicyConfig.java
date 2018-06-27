@@ -32,6 +32,8 @@ public class HealthPolicyConfig {
   public static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
   public static final String CONF_POLICY_ID = "POLICY_ID";
 
+  public static final String CONF_POLICY_MODE_DEACTIVATED = "deactivated";
+
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
 
@@ -47,14 +49,15 @@ public class HealthPolicyConfig {
   public ToggleablePolicy.PolicyMode getPolicyMode() {
     String configKey = PolicyConfigKey.HEALTH_POLICY_MODE.key();
     if (configs.containsKey(configKey)
-        && "deactivated".equals((String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key()))) {
+        && CONF_POLICY_MODE_DEACTIVATED.equals(
+            (String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key()))) {
       return ToggleablePolicy.PolicyMode.deactivated;
     }
     return ToggleablePolicy.PolicyMode.activated;
   }
 
   public Duration getInterval() {
-    return Duration.ofMillis((int) configs.get(PolicyConfigKey.HEALTH_POLICY_INTERVAL.key()));
+    return Duration.ofMillis((int) configs.get(PolicyConfigKey.HEALTH_POLICY_INTERVAL_MS.key()));
   }
 
   public Object getConfig(String configName) {
