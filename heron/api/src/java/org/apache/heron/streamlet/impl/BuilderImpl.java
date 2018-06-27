@@ -33,7 +33,7 @@ import org.apache.heron.streamlet.Streamlet;
 /**
  * BuilderImpl implements the Builder interface.
  * The builder keeps track of the all the sources of the
- * computation dag and builds the Topology by traversing all
+ * computation DAG and builds the Topology by traversing all
  * the computation nodes.
  */
 public final class BuilderImpl implements Builder {

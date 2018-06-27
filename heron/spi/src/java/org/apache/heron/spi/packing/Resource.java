@@ -87,7 +87,7 @@ public class Resource {
   }
 
   /**
-   * Divides a resource by another resource by dividing the cpu, memory and disk values of the resources.
+   * Divides a resource by another resource by dividing the CPU, memory and disk values of the resources.
    * It returns the maximum of the three results.
    */
   public double divideBy(Resource other) throws RuntimeException {

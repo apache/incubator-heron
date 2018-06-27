@@ -2,9 +2,12 @@
 
 var ConfigTable = React.createClass({
   getInitialState: function() {
-    return {'config': {}};
+    return {
+      'config': {},
+      'component_config': {}
+    };
   },
-  getTopologyConfig: function() {
+  getConfig: function() {
     urlTokens = [  this.props.baseUrl,
                    'topologies',
                    this.props.cluster,
@@ -17,9 +20,23 @@ var ConfigTable = React.createClass({
       url: fetchUrl,
       dataType:  'json',
       success: function(response) {
-        if (response.hasOwnProperty('result')
-            && response.result.hasOwnProperty('config')) {
-          this.setState({config: response.result.config});
+        if (response.hasOwnProperty('result')) {
+          // Topology config
+          var config = {};
+          if (response.result.hasOwnProperty('config')) {
+            config = response.result.config;
+          }
+          // Component config
+          var componentConfig = {};
+          if (response.result.hasOwnProperty('components')) {
+            for (var component in response.result.components) {
+              componentConfig[component] = response.result.components[component].config;
+            }
+          }
+          this.setState({
+            config: config,
+            component_config: componentConfig
+          });
         }
       }.bind(this),
 
@@ -80,27 +97,43 @@ var ConfigTable = React.createClass({
   },
 
   componentWillMount: function () {
-    this.getTopologyConfig();
+    this.getConfig();
   },
   componentDidUpdate: function(prevProps, prevState) {
     if (prevProps.topology != this.props.topology) {
-      this.getTopologyConfig();
+      this.getConfig();
     }
   },
   render: function() {
     var configData = this.state.config;
+    var componentConfigData = this.state.component_config;
     var headings = ['Property', 'Value'];
     var title = 'Configuration';
     var rows = [];
     var self = this;
+    // Fill topology config data
     for (property in configData) {
       var configValue = configData[property];
-      if (typeof configValue == 'string') {
-        rows.push([property, configValue]);
-      } else {
+      if (typeof configValue == 'object') {
         rows.push([property, JSON.parse(configValue.value)]);
+      } else {
+        rows.push([property, configValue]);
       }
     }
+    // Fill component config data
+    for (component in componentConfigData) {
+      data = componentConfigData[component];
+      for (property in data) {
+        var key = '[' + component + '] ' + property;
+        var configValue = data[property];
+        if (typeof configValue == 'object') {
+          rows.push([key, JSON.parse(configValue.value)]);
+        } else {
+          rows.push([key, configValue]);
+        }
+      }
+    }
+
     var tableContent = ( 
       <tbody>{
         rows.map(function(row) {

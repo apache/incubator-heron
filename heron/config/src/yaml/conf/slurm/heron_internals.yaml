@@ -264,7 +264,7 @@ heron.instance.reconnect.streammgr.times: 60
 heron.instance.reconnect.metricsmgr.interval.sec: 5 
 heron.instance.reconnect.metricsmgr.times: 60
 
-# The interval in second for an instance to sample its system metrics, for instance, cpu load.
+# The interval in second for an instance to sample its system metrics, for instance, CPU load.
 heron.instance.metrics.system.sample.interval.sec: 10
 
 # For efficient acknowledgement

@@ -128,7 +128,7 @@ getting launched.
    `heron-executor.stderr` files. All commands to instantiate the instances and
    stream managers are redirected to these files.
 
-2. Check jvm configs for anything amiss.
+2. Check JVM configs for anything amiss.
 
 3. If `Xmx` is too low, increase `containerRAM` or `componentRAM`. Note that
    because heron sets aside some RAM for its internal components, like stream

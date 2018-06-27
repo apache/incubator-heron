@@ -39,9 +39,9 @@ public final class HdfsHelper {
   }
 
   /**
-   * Provide an InputStreamReader to read from a hdfs file
+   * Provide an InputStreamReader to read from a HDFS file
    *
-   * @param path is the hdfs file location
+   * @param path is the HDFS file location
    */
   public static InputStreamReader getHdfsStreamReader(String path) throws IOException {
     Path pt = new Path(path);

@@ -55,7 +55,7 @@ import org.apache.heron.spi.metricsmgr.sink.SinkContext;
  * <p>
  * 2. Then it would construct a long-live Service running TMasterClient, which could automatically
  * recover from uncaught exceptions, i.e. close the old one and start a new one.
- * Also, it provides api to update the TMasterLocation that TMasterClient need to connect and
+ * Also, it provides API to update the TMasterLocation that TMasterClient need to connect and
  * restart the TMasterClient.
  * There are two scenarios we need to restart a TMasterClient in our case:
  * <p>

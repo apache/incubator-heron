@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-# indicate the type of storage for checkpoint is hdfs
+# indicate the type of storage for checkpoint is HDFS
 heron.statefulstorage.classname:         "org.apache.heron.statefulstorage.hdfs.HDFSStorage"
 
 heron.statefulstorage.config:

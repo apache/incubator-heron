@@ -263,6 +263,19 @@ variable to specify the full path to yours.'""" % (program, program, program, en
   print('Using %s:\t%s' % (msg.ljust(20), print_value))
   return VALUE
 
+def discover_jdk():
+  try:
+    jdk_path = os.environ['JAVA_HOME']
+  except KeyError:
+    javac_path = real_program_path('javac')
+    if javac_path is None:
+        fail("You need to have JDK installed to build Heron.\n"
+             "You can set the JAVA_HOME environment variavle to specify the full path to yours.")
+    jdk_bin_path = os.path.dirname(javac_path)
+    jdk_path = os.path.dirname(jdk_bin_path)
+  print('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path))
+  return jdk_path
+
 ######################################################################
 # Discover the linker directory
 ######################################################################
@@ -377,6 +390,7 @@ def main():
   env_map['CXXCPP'] = discover_tool('cpp','C++ preprocessor', 'CXXCPP', cpp_min)
   env_map['LD'] =  discover_tool('ld','linker', 'LD')
   env_map['BLDFLAG'] = discover_linker(env_map)
+  env_map['JAVA_HOME'] = discover_jdk()
 
   # Discover the utilities
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')

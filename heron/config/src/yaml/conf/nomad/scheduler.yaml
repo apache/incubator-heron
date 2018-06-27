@@ -33,8 +33,8 @@ heron.nomad.scheduler.uri:             http://127.0.0.1:4646
 #Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
 
-# The nomad schedules cpu resources in terms of clock frequency (e.g. MHz), while Heron topologies
-# specify cpu requests in term of cores.  This config maps core to clock freqency.
+# The nomad schedules CPU resources in terms of clock frequency (e.g. MHz), while Heron topologies
+# specify CPU requests in term of cores.  This config maps core to clock freqency.
 heron.nomad.core.freq.mapping: 2000
 
 # specify whether to run heron via raw java execs or in docker containers

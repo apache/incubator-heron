@@ -103,9 +103,9 @@ class PulsarSpout(Spout, StreamletBoltBase):
     self.logConfFileName = GenerateLogConfig(context)
     self.logger.info("Generated LogConf at %s" % self.logConfFileName)
 
-    # We currently use the high level consumer api
+    # We currently use the high level consumer API
     # For supporting effectively once, we will need to switch
-    # to using lower level Reader api, when it becomes
+    # to using lower level Reader API, when it becomes
     # available in python
     self.client = pulsar.Client(self.pulsar_cluster, log_conf_file_path=self.logConfFileName)
     self.logger.info("Setup Client with cluster %s" % self.pulsar_cluster)

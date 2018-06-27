@@ -74,7 +74,7 @@ public final class ConfigUtils {
         releaseFile,
         overrideConfigurationFile);
     // Put location of the override file in the config so that schedulers invoked by
-    // the apiserver can load the override configs if needed. OVERRIDE_YAML cannot be used
+    // the API server can load the override configs if needed. OVERRIDE_YAML cannot be used
     // to set this because then the location will get passed on to the heron executors
     return Config.newBuilder()
         .putAll(config)

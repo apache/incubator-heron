@@ -375,7 +375,7 @@ var AllMetrics = React.createClass({
         "component=" + this.props.comp_name;
       var metricnames = [];
 
-      // Explicitly add jvm uptime metric since it
+      // Explicitly add JVM uptime metric since it
       // is unique, in the sense that no stream is
       // associated with it.
       metricnames.push("__jvm-uptime-secs");
