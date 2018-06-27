@@ -21,9 +21,11 @@ package org.apache.heron.healthmgr.policy;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
@@ -32,7 +34,11 @@ import com.microsoft.dhalion.core.Symptom;
 import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.healthmgr.HealthPolicyConfig;
+import org.apache.heron.healthmgr.HealthPolicyConfigReader;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
+
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
 
 /**
  * This Policy class
@@ -43,33 +49,55 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   private static final Logger LOG =
       Logger.getLogger(ToggleablePolicy.class.getName());
 
-  public static final String TOGGLE_CONFIG_KEY = "healthmgr.toggleablepolicy.running";
-  public static final String TOGGLE_RUNTIME_CONFIG_KEY = TOGGLE_CONFIG_KEY + ":runtime";
+  protected PhysicalPlanProvider physicalPlanProvider;
+  protected String policyId;
+  protected HealthPolicyConfig policyConfig;
+
+  protected PolicyMode policyMode;
+  public enum PolicyMode {
+    activated,
+    deactivated,
+
+  }
 
   @Inject
-  protected PhysicalPlanProvider physicalPlanProvider;
-  protected boolean running = true;
-  // `policyConfigKey` is the config item for this policy in the healthmgr.yaml
-  protected String policyConfigKey;
+  public ToggleablePolicy(
+      @Named(CONF_POLICY_ID) String policyId,
+      HealthPolicyConfig policyConfig,
+      PhysicalPlanProvider physicalPlanProvider) {
+    this.physicalPlanProvider = physicalPlanProvider;
+    this.policyId = policyId;
+    this.policyConfig = policyConfig;
+
+    policyMode = policyConfig.getPolicyMode();
+  }
 
   @Override
   public Collection<Measurement> executeSensors() {
     for (TopologyAPI.Config.KeyValue kv
         : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
       LOG.info("kv " + kv.getKey() + " => " + kv.getValue());
-      if (kv.getKey().equals(TOGGLE_RUNTIME_CONFIG_KEY)) {
-        Boolean b = Boolean.parseBoolean(kv.getValue());
-        if (Boolean.FALSE.equals(b) && running) {
-          running = false;
-          LOG.info("policy running status changed to False");
-        } else if (Boolean.TRUE.equals(b) && !running) {
-          running = true;
-          LOG.info("policy running status changed to True");
+      if (kv.getKey().equals(policyId)) {
+        String val = kv.getValue();
+        for (String kv2 : val.split(";")) {
+          String kv2s[] = kv2.split(":");
+          if (HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_MODE.key().equals(kv2s[0])) {
+            if (PolicyMode.deactivated.name().equals(kv2s[1]) && policyMode.equals(PolicyMode.activated)) {
+              policyMode = PolicyMode.deactivated;
+              LOG.info("policy " + policyId + " status changed to " + policyMode);
+            } else if (PolicyMode.activated.name().equals(kv2s[1]) && policyMode.equals(PolicyMode.deactivated)) {
+              policyMode = PolicyMode.activated;
+              LOG.info("policy " + policyId + " status changed to " + policyMode);
+            } else {
+              LOG.info("policy " + policyId + " status does not change " + policyMode + "; input "+kv2);
+            }
+            break;
+          }
         }
       }
     }
 
-    if (running) {
+    if (policyMode.equals(PolicyMode.activated)) {
       return super.executeSensors();
     } else {
       return new ArrayList<Measurement>();
@@ -78,7 +106,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   @Override
   public Collection<Symptom> executeDetectors(Collection<Measurement> measurements) {
-    if (running) {
+    if (policyMode.equals(PolicyMode.activated)) {
       return super.executeDetectors(measurements);
     } else {
       return new ArrayList<Symptom>();
@@ -87,7 +115,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   @Override
   public Collection<Diagnosis> executeDiagnosers(Collection<Symptom> symptoms) {
-    if (running) {
+    if (policyMode.equals(PolicyMode.activated)) {
       return super.executeDiagnosers(symptoms);
     } else {
       return new ArrayList<Diagnosis>();
@@ -96,7 +124,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   @Override
   public Collection<Action> executeResolvers(Collection<Diagnosis> diagnosis) {
-    if (running) {
+    if (policyMode.equals(PolicyMode.activated)) {
       return super.executeResolvers(diagnosis);
     } else {
       /*

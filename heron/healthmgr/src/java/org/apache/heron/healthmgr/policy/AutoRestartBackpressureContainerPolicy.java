@@ -23,16 +23,19 @@ import java.time.Duration;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.resolvers.RestartContainerResolver;
 import org.apache.heron.healthmgr.sensors.BackPressureSensor;
 
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
 import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
 
 /**
@@ -49,15 +52,16 @@ public class AutoRestartBackpressureContainerPolicy extends ToggleablePolicy
   private static final Logger LOG =
       Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
 
-  private final HealthPolicyConfig policyConfig;
 
   @Inject
-  AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig,
+  AutoRestartBackpressureContainerPolicy(@Named(CONF_POLICY_ID) String policyId,
+                                         HealthPolicyConfig policyConfig,
+                                         PhysicalPlanProvider physicalPlanProvider,
                                          EventManager eventManager,
                                          BackPressureSensor backPressureSensor,
                                          BackPressureDetector backPressureDetector,
                                          RestartContainerResolver restartContainerResolver) {
-    this.policyConfig = policyConfig;
+    super(policyId, policyConfig, physicalPlanProvider);
 
     registerSensors(backPressureSensor);
     registerDetectors(backPressureDetector);

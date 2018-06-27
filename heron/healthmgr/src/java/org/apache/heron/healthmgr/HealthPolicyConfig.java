@@ -24,11 +24,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey;
+import org.apache.heron.healthmgr.policy.ToggleablePolicy;
 
 public class HealthPolicyConfig {
   public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
   public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
   public static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
+  public static final String CONF_POLICY_ID = "POLICY_ID";
 
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
@@ -42,13 +44,13 @@ public class HealthPolicyConfig {
     return (String) configs.get(PolicyConfigKey.HEALTH_POLICY_CLASS.key());
   }
 
-  String getPolicyMode() {
+  public ToggleablePolicy.PolicyMode getPolicyMode() {
     String configKey = PolicyConfigKey.HEALTH_POLICY_MODE.key();
     if (configs.containsKey(configKey)
         && "deactivated".equals((String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key()))) {
-      return "deactivated";
+      return ToggleablePolicy.PolicyMode.deactivated;
     }
-    return "activated";
+    return ToggleablePolicy.PolicyMode.activated;
   }
 
   public Duration getInterval() {

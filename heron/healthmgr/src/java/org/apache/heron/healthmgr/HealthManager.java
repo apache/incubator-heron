@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -66,9 +67,7 @@ import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.ReflectionUtils;
 
-import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_TYPE;
-import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
-import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.*;
 
 /**
  * {@link HealthManager} makes a topology dynamic and self-regulating. This is implemented using
@@ -314,7 +313,7 @@ public class HealthManager {
       Class<IHealthPolicy> policyClass
           = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
 
-      AbstractModule module = constructPolicySpecificModule(policyConfig);
+      AbstractModule module = constructPolicySpecificModule(policyId, policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
 
       healthPolicies.add(policy);
@@ -378,10 +377,14 @@ public class HealthManager {
     };
   }
 
-  private AbstractModule constructPolicySpecificModule(final HealthPolicyConfig policyConfig) {
+  private AbstractModule constructPolicySpecificModule(
+      final String policyId, final HealthPolicyConfig policyConfig) {
     return new AbstractModule() {
       @Override
       protected void configure() {
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_POLICY_ID))
+            .toInstance(policyId);
         bind(HealthPolicyConfig.class).toInstance(policyConfig);
       }
     };
