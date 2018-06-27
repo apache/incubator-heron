@@ -35,12 +35,14 @@ heron.class.health.policies:
   - auto-restart-backpressure-container
 
 ## configuration specific to individual policies listed above
+
 #dynamic-resource-allocation:
 #  health.policy.mode: deactivated
 #  health.policy.class: org.apache.heron.healthmgr.policy.DynamicResourceAllocationPolicy
 #  health.policy.interval.ms: 120000
 #  BackPressureDetector.noiseFilterMillis: 20
 #  GrowingWaitQueueDetector.limit: 5
+
 auto-restart-backpressure-container:
   # policy toggle value:
   # deactivated = freeze this policy

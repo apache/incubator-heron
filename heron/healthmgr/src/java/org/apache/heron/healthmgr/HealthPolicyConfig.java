@@ -33,6 +33,7 @@ public class HealthPolicyConfig {
   public static final String CONF_POLICY_ID = "POLICY_ID";
 
   public static final String CONF_POLICY_MODE_DEACTIVATED = "deactivated";
+  public static final String CONF_POLICY_MODE_ACTIVATED = "activated";
 
   private static final Logger LOG = Logger.getLogger(HealthPolicyConfig.class.getName());
   private final Map<String, Object> configs;
@@ -48,10 +49,15 @@ public class HealthPolicyConfig {
 
   public ToggleablePolicy.PolicyMode getPolicyMode() {
     String configKey = PolicyConfigKey.HEALTH_POLICY_MODE.key();
-    if (configs.containsKey(configKey)
-        && CONF_POLICY_MODE_DEACTIVATED.equals(
-            (String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key()))) {
-      return ToggleablePolicy.PolicyMode.deactivated;
+    if (configs.containsKey(configKey)) {
+      String val = (String) configs.get(PolicyConfigKey.HEALTH_POLICY_MODE.key());
+      if (CONF_POLICY_MODE_DEACTIVATED.equals(val)) {
+        return ToggleablePolicy.PolicyMode.deactivated;
+      } else if (CONF_POLICY_MODE_ACTIVATED.equals(val)) {
+        return ToggleablePolicy.PolicyMode.activated;
+      } else {
+        LOG.warning("unknown policy mode config " + val);
+      }
     }
     return ToggleablePolicy.PolicyMode.activated;
   }
