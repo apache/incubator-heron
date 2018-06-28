@@ -95,7 +95,7 @@ import org.apache.reef.wake.time.event.StartTime;
  * are then invoked and heron components will be activated.
  * <p></p>
  * The containers allocated by YARN may be bigger than the requested size. This is a consequence of
- * a YARN scheduler optimization, which allocates resources in fixed memory and cpu increments. For
+ * a YARN scheduler optimization, which allocates resources in fixed memory and CPU increments. For
  * e.g. if the memory increment is 100 MB, YARN may allocated a container of 200 MB when 150 MB is
  * requested. As a result, the actual resource allocation may be little more than what was
  * requested. Moreover YARN does not provide any mechanism to match the container request to
@@ -185,7 +185,7 @@ public class HeronMasterDriver {
   }
 
   /*
-   * Must be invoked after workers are scheduled. TMaster needs component ram map.
+   * Must be invoked after workers are scheduled. TMaster needs component RAM map.
    */
   void launchTMaster() {
     tMaster = buildTMaster(Executors.newSingleThreadExecutor());
@@ -209,7 +209,7 @@ public class HeronMasterDriver {
   }
 
   /**
-   * YARN allocates resources in fixed increments of memory and cpu. As a result, the actual
+   * YARN allocates resources in fixed increments of memory and CPU. As a result, the actual
    * resource allocation may be little more than what was requested. This method finds the biggest
    * heron containerPlan that will fit the allocated YARN container. In some cases the YARN CPU
    * scheduling may be disabled, resulting in default core allocation to each container. This
@@ -327,7 +327,7 @@ public class HeronMasterDriver {
     int cpu = worker.cores;
     ByteAmount mem = worker.mem;
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
-    LOG.info(String.format("Requesting container for worker: %d, mem: %s, cpu: %d", id, mem, cpu));
+    LOG.info(String.format("Requesting container for worker: %d, RAM: %s, CPU: %d", id, mem, cpu));
     requestor.submit(evaluatorRequest);
   }
 

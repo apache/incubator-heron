@@ -151,17 +151,17 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is fully set
+   * Test the scenario RAM map config is fully set
    */
   @Test
   public void testCompleteRamMapRequested() throws Exception {
     // Explicit set max resources for container
-    // the value should be ignored, since we set the complete component ram map
+    // the value should be ignored, since we set the complete component RAM map
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(15);
     ByteAmount maxContainerDisk = ByteAmount.fromGigabytes(20);
     double maxContainerCpu = 30;
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
@@ -186,13 +186,13 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is fully set
+   * Test the scenario RAM map config is fully set
    */
   @Test
   public void testCompleteRamMapRequested2() throws Exception {
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
@@ -216,14 +216,14 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set
+   * Test the scenario RAM map config is partially set
    */
   @Test
   public void testPartialRamMap() throws Exception {
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(4);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
@@ -245,7 +245,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set and padding is configured
+   * Test the scenario RAM map config is partially set and padding is configured
    */
   @Test
   public void testPartialRamMapWithPadding() throws Exception {
@@ -253,7 +253,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(4);
 
     topologyConfig.setContainerMaxRamHint(maxContainerRam);
@@ -316,13 +316,13 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set and scaling is requested
+   * Test the scenario RAM map config is partially set and scaling is requested
    */
   @Test
   public void testRepackPadding() throws Exception {
     int paddingPercentage = 50;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(4);
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
@@ -362,7 +362,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
   }
 
   /**
-   * Test the scenario ram map config is partially set and scaling is requested
+   * Test the scenario RAM map config is partially set and scaling is requested
    */
   @Test
   public void testPartialRamMapScaling() throws Exception {

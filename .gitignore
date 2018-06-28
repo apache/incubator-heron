@@ -135,3 +135,6 @@ website/public/
 
 # integration_test
 results/
+
+# Vagrant
+vagrant/.vagrant/

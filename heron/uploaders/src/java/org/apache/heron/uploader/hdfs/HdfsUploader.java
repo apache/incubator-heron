@@ -38,14 +38,14 @@ public class HdfsUploader implements IUploader {
   private String topologyPackageLocation;
   private URI packageURI;
 
-  // The controller on hdfs
+  // The controller on HDFS
   private HdfsController controller;
 
   @Override
   public void initialize(Config ipconfig) {
     this.config = ipconfig;
 
-    // Instantiate the hdfs controller
+    // Instantiate the HDFS controller
     this.controller = getHdfsController();
 
     this.destTopologyDirectoryURI = HdfsContext.hdfsTopologiesDirectoryURI(config);

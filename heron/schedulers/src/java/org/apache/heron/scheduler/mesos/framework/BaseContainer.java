@@ -53,7 +53,7 @@ public class BaseContainer {
   public String description;
 
   @JsonProperty
-  // # of cpu cores requested
+  // # of CPU cores requested
   public double cpu;
 
   @JsonProperty

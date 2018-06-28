@@ -47,7 +47,7 @@ public class HeronConfigurationOptions {
   public class HeronCorePackageName implements Name<String> {
   }
 
-  @NamedParameter(doc = "Component Ram Distribution")
+  @NamedParameter(doc = "Component RAM Distribution")
   public class ComponentRamMap implements Name<String> {
   }
 

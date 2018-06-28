@@ -11,7 +11,7 @@ slf4j_version = "1.7.7"
 distributedlog_version = "0.5.0"
 http_client_version = "4.5.2"
 
-# heron api server
+# heron API server
 jetty_version = "9.4.6.v20170531"
 jersey_verion = "2.25.1"
 hk2_api = "2.5.0-b32"
@@ -566,7 +566,7 @@ maven_jar(
 
 # end Kubernetes java client
 
-# heron api server
+# heron API server
 # jetty
 maven_jar(
   name = "org_eclipse_jetty_server",
@@ -723,7 +723,7 @@ maven_jar(
 )
 # end bookkeeper & distributedlog dependencies
 
-# end heron api server
+# end heron API server
 
 # Nomad dependencies
 maven_jar(
@@ -957,15 +957,17 @@ new_http_archive(
 )
 
 # scala integration
-rules_scala_version="5cdae2f034581a05e23c3473613b409de5978833" # update this as needed
+rules_scala_version="669ed8750b77fd99b758298f6467aaa5e6a9dabb" # update this as needed
 
 http_archive(
     name = "io_bazel_rules_scala",
-    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip"%rules_scala_version,
+    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
     type = "zip",
     strip_prefix= "rules_scala-%s" % rules_scala_version,
-    sha256 = "bd66b178da5b9b6845f677bdfb2594de8f1050f831a8d69527c6737969376065",
+    sha256 = "1b0f0d7d0cb815116216b0349de0a7d12187dd0d1f4a538f1e7b657d1033a298",
 )
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
 scala_repositories()
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+scala_register_toolchains()

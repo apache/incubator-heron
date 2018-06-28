@@ -25,7 +25,7 @@ import java.io.Serializable;
 public interface ITerminalBolt extends Serializable {
   /**
    * Invoke to write all aggregated data to the destination
-   * Destination can be http URL, local file, hdfs, etc.
+   * Destination can be http URL, local file, HDFS, etc.
    */
   void writeFinishedData();
 }

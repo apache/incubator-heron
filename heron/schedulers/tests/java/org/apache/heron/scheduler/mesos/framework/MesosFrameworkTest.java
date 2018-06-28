@@ -278,7 +278,7 @@ public class MesosFrameworkTest {
     Map<Protos.Offer, TaskResources> offerResources = getOfferResources(offer);
 
     BaseContainer baseContainer = new BaseContainer();
-    // request more cpu than provided
+    // request more CPU than provided
     baseContainer.cpu = 10000;
     baseContainer.memInMB = 0;
     baseContainer.diskInMB = 0;
