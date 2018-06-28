@@ -372,7 +372,7 @@ pkg_tar(
 
 pkg_tar(
     name = "heron-tests-data-topology-java",
-    package_dir = "data/java",
+    package_dir = "data/java/topology_test",
     srcs = [
         "//integration_test/src/java:topology-test-data-files",
     ],

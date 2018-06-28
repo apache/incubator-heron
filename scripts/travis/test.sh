@@ -86,7 +86,7 @@ start_timer "$T"
 ${HOME}/bin/topology-test-runner \
   -hc heron -tb ${JAVA_INTEGRATION_TOPOLOGY_TESTS_BIN} \
   -rh localhost -rp 8080\
-  -tp ${HOME}/.herontests/data/java \
+  -tp ${HOME}/.herontests/data/java/topology_test \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
