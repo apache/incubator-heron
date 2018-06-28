@@ -132,7 +132,7 @@ spec:
               -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
               -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:2181/distributedlog
               {{- else if eq .Values.uploader.class "s3" }}
-              -D heron.class.uploader=com.twitter.heron.uploader.s3.S3Uploader
+              -D heron.class.uploader=org.apache.heron.uploader.s3.S3Uploader
               -D heron.uploader.s3.bucket={{ .Values.uploader.s3Bucket }}
               -D heron.uploader.s3.path_prefix={{ .Values.uploader.s3PathPrefix }}
               -D heron.uploader.s3.access_key={{ .Values.uploader.s3AccessKey }}
