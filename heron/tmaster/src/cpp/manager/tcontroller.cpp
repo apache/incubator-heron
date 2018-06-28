@@ -283,8 +283,6 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
 
   if (tmaster_->getPhysicalPlan() == NULL) {
     http_server_->SendErrorReply(request, 400);
-    delete request;
-    return;
   } else {
     std::string pplanString;
     tmaster_->getPhysicalPlan()->SerializeToString(&pplanString);
@@ -299,6 +297,7 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
     response->AddResponse(pplanStringFixed);
     http_server_->SendReply(request, 200, response);
   }
+  delete request;
 }
 
 /*
