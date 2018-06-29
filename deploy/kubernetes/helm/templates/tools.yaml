@@ -139,6 +139,16 @@ spec:
               -D heron.uploader.s3.secret_key={{ .Values.uploader.s3SecretKey }}
               -D heron.uploader.s3.region={{ .Values.uploader.s3Region }}
               {{- end }}
+              {{- if eq .Values.packing "RoundRobin" }}
+              -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
+              -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
+              {{- else if eq .Values.packing "ResourceCompliantRR" }}
+              -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
+              -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
+              {{- else if eq .Values.packing "FirstFitDecreasing" }}
+              -D heron.class.packing.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
+              -D heron.class.repacking.algorithm=org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
+              {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config

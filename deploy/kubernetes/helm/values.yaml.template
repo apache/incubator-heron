@@ -31,6 +31,9 @@ uploader:
   s3SecretKey: ""
   s3Region: ""
 
+# Packing algorithms
+packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
+
 # Number of replicas for storage bookies, memory and storage requirements
 bookieReplicas: 1
 bookieCpuMin: 100m
