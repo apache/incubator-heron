@@ -14,6 +14,7 @@ echo "Using $PLATFORM platform"
 
 # integration test binaries have to be specified as absolute path
 JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
+JAVA_INTEGRATION_TOPOLOGY_TESTS_BIN="${HOME}/.herontests/lib/integration-topology-tests.jar"
 PYTHON_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/heron_integ_topology.pex"
 SCALA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/scala-integration-tests.jar"
 
@@ -79,4 +80,15 @@ ${HOME}/bin/test-runner \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
+# run the java integration topology test
+T="heron integration_topology_test java"
+start_timer "$T"
+${HOME}/bin/topology-test-runner \
+  -hc heron -tb ${JAVA_INTEGRATION_TOPOLOGY_TESTS_BIN} \
+  -rh localhost -rp 8080\
+  -tp ${HOME}/.herontests/data/java/topology_test \
+  -cl local -rl heron-staging -ev devel
+end_timer "$T"
+
 print_timer_summary
+
