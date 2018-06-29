@@ -26,6 +26,7 @@
 #include <vector>
 #include "basics/basics.h"
 #include "basics/strutils.h"
+#include "cereal/external/base64.hpp"
 #include "config/topology-config-helper.h"
 #include "errors/errors.h"
 #include "manager/tmaster.h"
@@ -65,6 +66,12 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
     this->HandleUpdateRuntimeConfigRequest(request);
   };
   http_server_->InstallCallBack("/runtime_config/update", std::move(cbUpdateRuntimeConfg));
+
+  // Get current physical plan
+  auto cbGetCurPPlan = [this](IncomingHTTPRequest* request) {
+    this->HandleGetCurPPlanRequest(request);
+  };
+  http_server_->InstallCallBack("/get_current_physical_plan", std::move(cbGetCurPPlan));
 }
 
 TController::~TController() { delete http_server_; }
@@ -257,6 +264,37 @@ void TController::HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* requ
     LOG(INFO) << message;
     OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
     response->AddResponse(message);
+    http_server_->SendReply(request, 200, response);
+  }
+  delete request;
+}
+
+void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
+  LOG(INFO) << "Got a GetCurPPlan request from " << request->GetRemoteHost() << ":"
+              << request->GetRemotePort();
+
+  // make sure all the stream managers are alive, in case that when container is fail,
+  // physical plan is still available at TMaster but not a valid one.
+  if (tmaster_->GetStmgrsRegSummary()->absent_stmgrs_size() != 0) {
+      http_server_->SendErrorReply(request, 400);
+      delete request;
+      return;
+  }
+
+  if (tmaster_->getPhysicalPlan() == NULL) {
+    http_server_->SendErrorReply(request, 400);
+  } else {
+    std::string pplanString;
+    tmaster_->getPhysicalPlan()->SerializeToString(&pplanString);
+
+    // SerializeToString() returns object in binary format which needs to be encoded
+    const unsigned char * encodeString = (unsigned char *)pplanString.c_str();
+    std::string pplanStringFixed = cereal::base64::encode(encodeString, pplanString.size());
+
+    const std::string message("Get current physical plan");
+    LOG(INFO) << message;
+    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    response->AddResponse(pplanStringFixed);
     http_server_->SendReply(request, 200, response);
   }
   delete request;
