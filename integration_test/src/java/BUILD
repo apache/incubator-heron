@@ -4,7 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "test-data-files",
-    srcs = glob(["**/*.json"]),
+    srcs = glob(["org/apache/heron/integration_test/topology/**/*.json"]),
+)
+
+filegroup(
+    name = "topology-test-data-files",
+    srcs = glob(["org/apache/heron/integration_topology_test/topology/**/*.json"]),
 )
 
 java_library(
@@ -112,5 +117,63 @@ genrule(
     name = "local-integration-test",
     srcs = [":local-integration-tests-unshaded_deploy.jar"],
     outs = ["local-integration-tests.jar"],
+    cmd = "cp $< $@",
+)
+
+
+java_library(
+    name = "common_topology_test",
+    srcs = glob(
+        ["org/apache/heron/integration_topology_test/common/**/*.java"],
+    ),
+    deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
+        "//storm-compatibility/src/java:storm-compatibility-java",
+        "//third_party/java:hadoop-core",
+        "//third_party/java:jackson",
+        "@commons_cli_commons_cli//jar",
+        ":core"
+    ],
+)
+
+java_library(
+    name = "integration-topology-tests-lib",
+    srcs = glob(
+       ["org/apache/heron/integration_topology_test/topology/**/*.java"],
+    ),
+    deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
+        "//storm-compatibility/src/java:storm-compatibility-java",
+        "@com_googlecode_json_simple_json_simple//jar",
+        "@commons_cli_commons_cli//jar",
+        ":common_topology_test",
+        ":common",
+        ":core"
+    ],
+)
+
+java_binary(
+    name = "integration-topology-tests-unshaded",
+    srcs = glob(
+       ["org/apache/heron/integration_topology_test/topology/**/*.java"],
+    ),
+    deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
+        "//storm-compatibility/src/java:storm-compatibility-java",
+        "@commons_cli_commons_cli//jar",
+        "@com_googlecode_json_simple_json_simple//jar",
+        ":common_topology_test",
+        ":common",
+        ":core"
+    ],
+)
+
+genrule(
+    name = "integration-topology-tests",
+    srcs = [":integration-topology-tests-unshaded_deploy.jar"],
+    outs = ["integration-topology-tests.jar"],
     cmd = "cp $< $@",
 )
