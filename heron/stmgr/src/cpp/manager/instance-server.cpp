@@ -157,7 +157,6 @@ InstanceServer::~InstanceServer() {
     }
   }
 
-  // BUG HERE.
   for (auto qlmIter = connection_buffer_length_metric_map_.begin();
       qlmIter != connection_buffer_length_metric_map_.end(); ++qlmIter) {
     const sp_string& instance_id = qlmIter->first;
@@ -174,6 +173,7 @@ InstanceServer::~InstanceServer() {
 
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
+
   delete instance_server_metrics_;
   delete back_pressure_metric_aggr_;
 
@@ -348,13 +348,11 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
 
     if (connection_buffer_length_metric_map_.find(instance_id) ==
       connection_buffer_length_metric_map_.end()) {
+      task_id_to_name[task_id] = instance_id;
       auto queue_metric = new heron::common::MultiCountMetric();
-      std::string str_task_id;
-      str_task_id.push_back(static_cast<char>(task_id + '0'));
-      metrics_manager_client_->register_metric(MakeQueueLengthCompIdMetricName(str_task_id),
+      metrics_manager_client_->register_metric(MakeQueueLengthCompIdMetricName(instance_id),
                                                queue_metric);
-      LOG(INFO) << "Task ID: " <<  str_task_id;
-      connection_buffer_length_metric_map_[str_task_id] = queue_metric;
+      connection_buffer_length_metric_map_[instance_id] = queue_metric;
     }
     instance_info_[task_id]->set_connection(_conn);
 
@@ -419,11 +417,9 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
-  std::string str_task_id;
-  str_task_id.push_back(static_cast<char>(_task_id + '0'));
-  LOG(INFO) << "Updating for task: " << str_task_id;
+  sp_string instance_id = task_id_to_name[_task_id];
   connection_buffer_length_metric_map_
-    [str_task_id]->scope("packets")->incr();
+    [instance_id]->scope("packets")->incr();
   stateful_gateway_->SendToInstance(_task_id, _message);
 }
 

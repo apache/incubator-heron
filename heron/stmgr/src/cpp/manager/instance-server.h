@@ -169,6 +169,9 @@ class InstanceServer : public Server {
    ConnectionBufferLengthMetricMap;
   ConnectionBufferLengthMetricMap connection_buffer_length_metric_map_;
 
+  // map of task id to task name
+  std::unordered_map<sp_int32, sp_string> task_id_to_name;
+
   // instances/ causing back pressure
   std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;
 
