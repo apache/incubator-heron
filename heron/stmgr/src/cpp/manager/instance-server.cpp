@@ -74,6 +74,9 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_AGGR = "__server/__time_spent_ba
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
 // Prefix for connection buffer's metrics
 const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
+// Prefix for connection buffer's length metrics
+const sp_string CONNECTION_BUFFER_LENGTH_BY_INSTANCEID =
+  "__connection_buffer_length_by_instanceid/";
 
 // TODO(mfu): Read this value from config
 const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10_s;
@@ -154,6 +157,21 @@ InstanceServer::~InstanceServer() {
     }
   }
 
+  // BUG HERE.
+  for (auto qlmIter = connection_buffer_length_metric_map_.begin();
+      qlmIter != connection_buffer_length_metric_map_.end(); ++qlmIter) {
+    const sp_string& instance_id = qlmIter->first;
+    for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
+      if (iter->second->instance_->instance_id() != instance_id) continue;
+      InstanceData* data = iter->second;
+      Connection* iConn = data->conn_;
+      if (!iConn) break;
+      sp_string metric_name = MakeQueueLengthCompIdMetricName(instance_id);
+      metrics_manager_client_->unregister_metric(metric_name);
+      delete qlmIter->second;
+    }
+  }
+
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
   delete instance_server_metrics_;
@@ -188,6 +206,10 @@ sp_string InstanceServer::MakeBackPressureCompIdMetricName(const sp_string& inst
 
 sp_string InstanceServer::MakeQueueSizeCompIdMetricName(const sp_string& instanceid) {
   return CONNECTION_BUFFER_BY_INSTANCEID + instanceid;
+}
+
+sp_string InstanceServer::MakeQueueLengthCompIdMetricName(const sp_string& instanceid) {
+  return CONNECTION_BUFFER_LENGTH_BY_INSTANCEID + instanceid;
 }
 
 void InstanceServer::UpdateQueueMetrics(EventLoop::Status) {
@@ -253,6 +275,14 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
       connection_buffer_metric_map_.erase(instance_id);
     }
 
+    // Clean the connection_buffer_metric_map_
+    auto qlmiter = connection_buffer_length_metric_map_.find(instance_id);
+    if (qlmiter != connection_buffer_length_metric_map_.end()) {
+      metrics_manager_client_->unregister_metric(MakeQueueLengthCompIdMetricName(instance_id));
+      delete connection_buffer_length_metric_map_[instance_id];
+      connection_buffer_length_metric_map_.erase(instance_id);
+    }
+
     stmgr_->HandleDeadInstance(task_id);
   }
 }
@@ -314,6 +344,17 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
       metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
                                                queue_metric);
       connection_buffer_metric_map_[instance_id] = queue_metric;
+    }
+
+    if (connection_buffer_length_metric_map_.find(instance_id) ==
+      connection_buffer_length_metric_map_.end()) {
+      auto queue_metric = new heron::common::MultiCountMetric();
+      std::string str_task_id;
+      str_task_id.push_back(static_cast<char>(task_id + '0'));
+      metrics_manager_client_->register_metric(MakeQueueLengthCompIdMetricName(str_task_id),
+                                               queue_metric);
+      LOG(INFO) << "Task ID: " <<  str_task_id;
+      connection_buffer_length_metric_map_[str_task_id] = queue_metric;
     }
     instance_info_[task_id]->set_connection(_conn);
 
@@ -378,6 +419,11 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
+  std::string str_task_id;
+  str_task_id.push_back(static_cast<char>(_task_id + '0'));
+  LOG(INFO) << "Updating for task: " << str_task_id;
+  connection_buffer_length_metric_map_
+    [str_task_id]->scope("packets")->incr();
   stateful_gateway_->SendToInstance(_task_id, _message);
 }
 
