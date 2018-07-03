@@ -414,8 +414,14 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
   sp_string instance_id = task_id_to_name[_task_id];
-  connection_buffer_length_metric_map_
-    [instance_id]->scope("packets")->incr();
+
+  ConnectionBufferLengthMetricMap::const_iterator it =
+    connection_buffer_length_metric_map_.find(instance_id);
+
+  if ( it != connection_buffer_length_metric_map_.end() )
+    connection_buffer_length_metric_map_
+      [instance_id]->scope("packets")->incr();
+
   stateful_gateway_->SendToInstance(_task_id, _message);
 }
 
