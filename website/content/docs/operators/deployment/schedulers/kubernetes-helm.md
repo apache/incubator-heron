@@ -209,6 +209,21 @@ $ helm install heron-charts/heron \
   --set platform=aws
 ```
 
+##### Using S3 uploader
+
+You can make Heron to use S3 to distribute the user topologies. First you need to set up a S3 bucket and configure an IAM user with enough permissions over it. Get access keys for the user. Then you can deploy Heron like this:
+
+```bash
+$ helm install heron-charts/heron \
+  --set platform=aws \
+  --set uploader.class=s3 \
+  --set uploader.s3Bucket=heron \
+  --set uploader.s3PathPrefix=topologies \
+  --set uploader.s3AccessKey=XXXXXXXXXXXXXXXXXXXX \
+  --set uploader.s3SecretKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \
+  --set uploader.s3Region=us-west-1
+```
+
 #### Bare metal
 
 To run Heron on a bare metal Kubernetes cluster:
