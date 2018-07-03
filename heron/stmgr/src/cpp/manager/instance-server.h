@@ -166,7 +166,7 @@ class InstanceServer : public Server {
 
   // map of Instance_id to queue length metric
   typedef std::unordered_map<sp_string, heron::common::MultiCountMetric*>
-   ConnectionBufferLengthMetricMap;
+    ConnectionBufferLengthMetricMap;
   ConnectionBufferLengthMetricMap connection_buffer_length_metric_map_;
 
   // map of task id to task name
