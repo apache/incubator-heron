@@ -44,6 +44,8 @@ class EventLoopImpl : public EventLoop {
   // Methods inherited from EventLoop.
   virtual void loop();
   virtual sp_int32 loopExit();
+  virtual sp_int32 registerSignal(sp_int32 sig, VCallback<EventLoop::Status> cb);
+  virtual sp_int32 unRegisterSignal(sp_int32 sig);
   virtual sp_int32 registerForRead(sp_int32 fd, VCallback<EventLoop::Status> cb, bool persistent,
                                    sp_int64 timeoutMicroSecs);
   virtual sp_int32 registerForRead(sp_int32 fd, VCallback<EventLoop::Status> cb, bool persistent);
@@ -63,6 +65,7 @@ class EventLoopImpl : public EventLoop {
   // Static member functions to interact with C libevent API
   static void eventLoopImplReadCallback(sp_int32 fd, sp_int16 event, void* arg);
   static void eventLoopImplWriteCallback(sp_int32 fd, sp_int16 event, void* arg);
+  static void eventLoopImplSignalCallback(sp_int32 sig, sp_int16 event, void* arg);
   static void eventLoopImplTimerCallback(sp_int32, sp_int16 event, void* arg);
 
  private:
@@ -81,6 +84,9 @@ class EventLoopImpl : public EventLoop {
   // libevent callback on timer events.
   void handleTimerCallback(sp_int16 event, sp_int64 timerid);
 
+  // libevent callback on signal events.
+  void handleSignalCallback(sp_int32 sig, sp_int16 event);
+
   // The underlying dispatcher that we wrap around.
   struct event_base* mDispatcher;
 
@@ -92,6 +98,9 @@ class EventLoopImpl : public EventLoop {
 
   // The registered timers.
   std::unordered_map<sp_int64, SS_RegisteredEvent<sp_int64>*> mTimerEvents;
+
+  // The registered signals.
+  std::unordered_map<sp_int32, SS_RegisteredEvent<sp_int32>*> mSignalEvents;
 
   // The registered instant callbacks
   typedef std::list<VCallback<>> OrderedCallbackList;

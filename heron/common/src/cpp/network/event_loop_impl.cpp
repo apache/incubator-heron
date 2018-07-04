@@ -37,6 +37,12 @@ void EventLoopImpl::eventLoopImplWriteCallback(sp_int32 fd, sp_int16 event, void
   el->handleWriteCallback(fd, event);
 }
 
+// 'C' style callback for libevent on signal events
+void EventLoopImpl::eventLoopImplSignalCallback(sp_int32 sig, sp_int16 event, void* arg) {
+  auto* el = reinterpret_cast<EventLoopImpl*>(arg);
+  el->handleSignalCallback(sig, event);
+}
+
 // 'C' style callback for libevent on timer events
 void EventLoopImpl::eventLoopImplTimerCallback(sp_int32, sp_int16 event, void* arg) {
   // TODO(vikasr): this needs to change to VCallback
@@ -82,6 +88,39 @@ void EventLoopImpl::loop() {
 }
 
 int EventLoopImpl::loopExit() { return event_base_loopbreak(mDispatcher); }
+
+int EventLoopImpl::registerSignal(int sig, VCallback<EventLoop::Status> cb) {
+  // Create the appropriate structures and init them.
+  auto* event = new SS_RegisteredEvent<sp_int32>(sig, false, std::move(cb), -1);
+  evsignal_set(event->event(), sig, &EventLoopImpl::eventLoopImplSignalCallback, this);
+  if (event_base_set(mDispatcher, event->event()) < 0) {
+    delete event;
+    throw heron::error::Error_Exception(errno);
+  }
+
+  // Now add it to the list of signals monitored by the mDispatcher
+  if (event_add(event->event(), NULL) < 0) {
+    delete event;
+    throw heron::error::Error_Exception(errno);
+  }
+  mSignalEvents[sig] = event;
+  return 0;
+}
+
+int EventLoopImpl::unRegisterSignal(int sig) {
+  if (mSignalEvents.find(sig) == mSignalEvents.end()) {
+    // This signal wasn't registed.  Hence we can't unregister it.
+    return -1;
+  }
+
+  // Delete the underlying event in libevent
+  if (event_del(mSignalEvents[sig]->event()) != 0) {
+    throw heron::error::Error_Exception(errno);
+  }
+  delete mSignalEvents[sig];
+  mSignalEvents.erase(sig);
+  return 0;
+}
 
 int EventLoopImpl::registerForRead(int fd, VCallback<EventLoop::Status> cb, bool persistent) {
   return registerForRead(fd, std::move(cb), persistent, -1);
@@ -371,6 +410,16 @@ void EventLoopImpl::handleTimerCallback(sp_int16 event, sp_int64 timerId) {
     mTimerEvents.erase(timerId);
     cb(mapStatusCode(event));
   }
+}
+
+void EventLoopImpl::handleSignalCallback(sp_int32 sig, sp_int16 event) {
+  if (mSignalEvents.find(sig) == mSignalEvents.end()) {
+    // This is possible when unRegisterSignal has been called before we handle this event
+    // Just ignore this event.
+    return;
+  }
+  auto* registeredEvent = mSignalEvents[sig];
+  registeredEvent->get_callback()(mapStatusCode(event));
 }
 
 EventLoop::Status EventLoopImpl::mapStatusCode(sp_int16 event) {

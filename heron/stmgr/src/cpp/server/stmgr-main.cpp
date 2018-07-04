@@ -48,6 +48,12 @@ DEFINE_string(ckptmgr_id, "", "The id of the local ckptmgr");
 DEFINE_int32(ckptmgr_port, 0, "The port of the local ckptmgr");
 DEFINE_string(metricscachemgr_mode, "disabled", "MetricsCacheMgr mode, default `disabled`");
 
+EventLoopImpl ss;
+
+void sigtermHandler(int signum) {
+  ss.loopExit();
+}
+
 int main(int argc, char* argv[]) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
@@ -55,8 +61,6 @@ int main(int argc, char* argv[]) {
     FLAGS_zkhostportlist = "";
   }
   std::vector<std::string> instances = StrUtils::split(FLAGS_instance_ids, ",");
-
-  EventLoopImpl ss;
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
@@ -85,6 +89,7 @@ int main(int argc, char* argv[]) {
                           FLAGS_shell_port, FLAGS_ckptmgr_port, FLAGS_ckptmgr_id,
                           high_watermark, low_watermark, FLAGS_metricscachemgr_mode);
   mgr.Init();
+  ss.registerSignal(SIGTERM, &sigtermHandler);
   ss.loop();
   return 0;
 }
