@@ -56,7 +56,7 @@ public class FieldsGrouping extends Grouping {
     }
 
     taskIndex = taskIndex % taskIds.size();
-    // Make sure taskIndex is greater than 0
+    // Make sure taskIndex is not negative
     taskIndex = taskIndex >= 0 ? taskIndex : taskIndex + taskIds.size();
     res.add(taskIds.get(taskIndex));
 

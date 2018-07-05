@@ -55,6 +55,8 @@ public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGro
     List<Integer> ret = new ArrayList<>();
     V obj = (V) values.get(0);
     int index = keyExtractor.apply(obj).hashCode() % taskIds.size();
+    // Make sure index is not negative
+    index = index >= 0 ? index : index + taskIds.size();
     ret.add(taskIds.get(index));
     return ret;
   }
