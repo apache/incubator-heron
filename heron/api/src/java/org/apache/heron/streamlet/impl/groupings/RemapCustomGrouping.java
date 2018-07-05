@@ -54,7 +54,10 @@ public class RemapCustomGrouping<R> implements CustomStreamGrouping {
     R obj = (R) values.get(0);
     List<Integer> targets = remapFn.apply(obj, ret.size());
     for (Integer target : targets) {
-      ret.add(taskIds.get(target % taskIds.size()));
+      int index = target % taskIds.size();
+      // Make sure index is not negative
+      index = index >= 0 ? index : index + taskIds.size();
+      ret.add(taskIds.get(index));
     }
     return ret;
   }
