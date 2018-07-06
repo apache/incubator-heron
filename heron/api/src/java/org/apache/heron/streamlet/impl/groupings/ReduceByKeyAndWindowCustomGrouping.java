@@ -25,7 +25,9 @@ import java.util.List;
 
 import org.apache.heron.api.grouping.CustomStreamGrouping;
 import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.SerializableFunction;
+
 
 /**
  * ReduceByKeyAndWindowCustomGrouping is the class that routes the incoming tuples
@@ -54,10 +56,8 @@ public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGro
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
     V obj = (V) values.get(0);
-    int index = keyExtractor.apply(obj).hashCode() % taskIds.size();
-    // Make sure index is not negative
-    index = index >= 0 ? index : index + taskIds.size();
-    ret.add(taskIds.get(index));
+    int key = keyExtractor.apply(obj).hashCode();
+    ret.add(Utils.assignKeyToTask(key, taskIds));
     return ret;
   }
 }
