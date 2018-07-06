@@ -279,17 +279,17 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
-    if (config.containsKey(Key.AURORA_METADATA_1)) {
-      auroraProperties.put(
-          AuroraField.AURORA_METADATA_1, config.getStringValue(Key.AURORA_METADATA_1));
-    }
-    if (config.containsKey(Key.AURORA_METADATA_2)) {
-      auroraProperties.put(
-          AuroraField.AURORA_METADATA_2, config.getStringValue(Key.AURORA_METADATA_2));
-    }
-    if (config.containsKey(Key.AURORA_METADATA_3)) {
-      auroraProperties.put(
-          AuroraField.AURORA_METADATA_3, config.getStringValue(Key.AURORA_METADATA_3));
+    if (config.containsKey(Key.SCHEDULER_PROPERTIES)) {
+      String[] meta = config.getStringValue(Key.SCHEDULER_PROPERTIES).split(",");
+      if (meta.length >= 1) {
+        auroraProperties.put(AuroraField.AURORA_METADATA_1, meta[0]);
+      }
+      if (meta.length >= 2) {
+        auroraProperties.put(AuroraField.AURORA_METADATA_2, meta[1]);
+      }
+      if (meta.length >= 3) {
+        auroraProperties.put(AuroraField.AURORA_METADATA_3, meta[2]);
+      }
     }
 
     return auroraProperties;
