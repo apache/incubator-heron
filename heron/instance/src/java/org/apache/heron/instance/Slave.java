@@ -19,11 +19,16 @@
 
 package org.apache.heron.instance;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.Config;
@@ -311,6 +316,13 @@ public class Slave implements Runnable, AutoCloseable {
               request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
+    } else if (request.getState().hasStateUri()) {
+      String stateUri = request.getState().getStateUri();
+
+      ByteString rawState = loadState(stateUri);
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(rawState.toByteArray());
+      instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
     }
@@ -341,6 +353,25 @@ public class Slave implements Runnable, AutoCloseable {
             .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
+  }
+
+  private ByteString loadState(String stateUri) {
+    File f = new File(stateUri);
+    byte[] data = new byte[(int) f.length()];
+
+    try (FileInputStream fis = new FileInputStream(stateUri);
+         DataInputStream dis = new DataInputStream(fis)) {
+      dis.read(data);
+      return ByteString.copyFrom(data);
+    } catch (IOException e) {
+      throw new RuntimeException("failed to load local state", e);
+    } finally {
+      if (f.exists()) {
+        LOG.info("deleting local state file: " + f.getPath());
+        f.delete();
+      }
+    }
+
   }
 
   private void handleNewPhysicalPlan(InstanceControlMsg instanceControlMsg) {
