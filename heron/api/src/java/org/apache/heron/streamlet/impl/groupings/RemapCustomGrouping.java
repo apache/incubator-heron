@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.heron.api.grouping.CustomStreamGrouping;
 import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.SerializableBiFunction;
 
 /**
@@ -54,7 +55,7 @@ public class RemapCustomGrouping<R> implements CustomStreamGrouping {
     R obj = (R) values.get(0);
     List<Integer> targets = remapFn.apply(obj, ret.size());
     for (Integer target : targets) {
-      ret.add(taskIds.get(target % taskIds.size()));
+      ret.add(Utils.assignKeyToTask(target, taskIds));
     }
     return ret;
   }

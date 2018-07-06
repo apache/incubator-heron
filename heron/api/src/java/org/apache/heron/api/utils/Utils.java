@@ -155,4 +155,11 @@ public final class Utils {
   public static double zeroIfNaNOrInf(double x) {
     return (Double.isNaN(x) || Double.isInfinite(x)) ? 0.0 : x;
   }
+
+  public static Integer assignKeyToTask(int key, List<Integer> taskIds) {
+    int index = key % taskIds.size();
+    // Make sure index is not negative
+    index = index >= 0 ? index : index + taskIds.size();
+    return taskIds.get(index);
+  }
 }
