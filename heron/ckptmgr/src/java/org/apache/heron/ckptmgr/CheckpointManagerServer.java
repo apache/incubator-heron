@@ -22,8 +22,11 @@ package org.apache.heron.ckptmgr;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -283,6 +286,7 @@ public class CheckpointManagerServer extends HeronServer {
       // we have to clean it here manually to avoid using too many disks
       // TODO(nlu): find a cleaner and more consistent way to handle temp state files
       if (f.exists()) {
+        LOG.info("cleaning state file: " + f.getPath());
         f.delete();
       }
     }
@@ -325,7 +329,23 @@ public class CheckpointManagerServer extends HeronServer {
                                info.getComponent(),
                                info.getInstanceId()));
         // Set the checkpoint-state in response
-        responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        boolean spill_disk = true;
+        if (spill_disk) {
+          CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
+
+          // spill state to local disk
+          String stateURI = storeStateLocally(ckpt.getState(), ckpt.getCheckpointId());
+
+          CheckpointManager.InstanceStateCheckpoint ckpt2 =
+              CheckpointManager.InstanceStateCheckpoint.newBuilder()
+                  .setStateUri(stateURI)
+                  .setCheckpointId(ckpt.getCheckpointId())
+                  .build();
+
+          responseBuilder.setCheckpoint(ckpt2);
+        } else {
+          responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        }
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                      + "component %s instanceId %d",
@@ -341,6 +361,26 @@ public class CheckpointManagerServer extends HeronServer {
                               .setMessage(errorMessage));
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+
+  private String storeStateLocally(ByteString states, String ckptId) {
+    String fileName;
+
+    try {
+      fileName = Files.createTempFile(ckptId, "state").toString();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to create local temp file for state", e);
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
+         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(states);
+      oos.flush();
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to persist state locally", e);
+    }
   }
 
   @Override
