@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -366,6 +367,9 @@ public class Slave implements Runnable, AutoCloseable {
     try (FileInputStream fis = new FileInputStream(stateUri);
          DataInputStream dis = new DataInputStream(fis)) {
       dis.read(data);
+
+      LOG.info("loaded state: " + Arrays.toString(data));
+
       return data;
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);

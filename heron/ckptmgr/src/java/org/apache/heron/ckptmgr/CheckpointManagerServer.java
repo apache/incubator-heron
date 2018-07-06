@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -371,7 +372,7 @@ public class CheckpointManagerServer extends HeronServer {
       oos.flush();
 
       LOG.info("state spilled to local disk: " + fileName);
-
+      LOG.info("data: " + Arrays.toString(data));
       return fileName;
     } catch (IOException e) {
       throw new RuntimeException("failed to persist state locally", e);
