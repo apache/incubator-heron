@@ -370,6 +370,8 @@ public class CheckpointManagerServer extends HeronServer {
       oos.write(data);
       oos.flush();
 
+      LOG.info("state spilled to local disk: " + fileName);
+
       return fileName;
     } catch (IOException e) {
       throw new RuntimeException("failed to persist state locally", e);
