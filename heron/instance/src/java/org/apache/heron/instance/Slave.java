@@ -321,6 +321,13 @@ public class Slave implements Runnable, AutoCloseable {
                   request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
+    } else if (request.getState().hasStateUri()) {
+      String stateUri = request.getState().getStateUri();
+
+      ByteString rawState = loadState(stateUri);
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(rawState);
+      instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
     }
@@ -359,7 +366,6 @@ public class Slave implements Runnable, AutoCloseable {
 
     try (FileInputStream fis = new FileInputStream(stateUri);
          DataInputStream dis = new DataInputStream(fis)) {
-
       dis.read(data);
       return data;
     } catch (IOException e) {

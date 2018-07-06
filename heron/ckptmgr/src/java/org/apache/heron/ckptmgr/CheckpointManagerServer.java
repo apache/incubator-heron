@@ -26,7 +26,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.util.logging.Level;
@@ -35,7 +34,6 @@ import java.util.logging.Logger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
-import org.apache.heron.api.state.State;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.network.HeronServer;
 import org.apache.heron.common.network.HeronSocketOptions;
@@ -286,7 +284,6 @@ public class CheckpointManagerServer extends HeronServer {
         LOG.info("deleted tmp state file");
       } else {
         LOG.info("failed to delete state file");
-      }
     }
   }
 
@@ -324,19 +321,24 @@ public class CheckpointManagerServer extends HeronServer {
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
                                + "component %s taskId %d", checkpoint.getCheckpointId(),
                                checkpoint.getComponent(), checkpoint.getTaskId()));
-        boolean spillState = true;
-        CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
-        if (spillState) {
-          String stateUri = storeStateLocally(checkpoint.getCheckpoint().getState().toByteArray(),
-              checkpoint.getCheckpointId());
-           ckpt = CheckpointManager.InstanceStateCheckpoint.newBuilder()
-              .setCheckpointId(checkpoint.getCheckpointId())
-              .setStateUri(stateUri)
-              .build();
-        }
-        responseBuilder.setCheckpoint(ckpt);
+        // Set the checkpoint-state in response
+        boolean spill_disk = true;
+        if (spill_disk) {
+          CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
 
-        //responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+          // spill state to local disk
+          String stateURI = storeStateLocally(ckpt.getState().toByteArray(), ckpt.getCheckpointId());
+
+          CheckpointManager.InstanceStateCheckpoint ckpt2 =
+              CheckpointManager.InstanceStateCheckpoint.newBuilder()
+                  .setStateUri(stateURI)
+                  .setCheckpointId(ckpt.getCheckpointId())
+                  .build();
+
+          responseBuilder.setCheckpoint(ckpt2);
+        } else {
+          responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        }
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                      + "component %s taskId %d", request.getCheckpointId(),
