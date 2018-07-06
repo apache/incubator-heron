@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.Config;
@@ -310,21 +309,21 @@ public class Slave implements Runnable, AutoCloseable {
       instanceState = null;
     }
 
-
     // TODO(nlu): clean the code
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
-              request.getState().hasStateUri() ?
-                  loadStateFromFile(request.getState().getStateUri()) :
-                  request.getState().getState().toByteArray());
+              request.getState().hasStateUri()
+                  ? loadStateFromFile(request.getState().getStateUri())
+                  : request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
     } else if (request.getState().hasStateUri()) {
       String stateUri = request.getState().getStateUri();
 
-      ByteString rawState = loadState(stateUri);
+      byte[] rawState = loadStateFromFile(stateUri);
+      @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(rawState);
       instanceState = stateToRestore;

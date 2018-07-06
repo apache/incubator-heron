@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.util.logging.Level;
@@ -284,6 +283,7 @@ public class CheckpointManagerServer extends HeronServer {
         LOG.info("deleted tmp state file");
       } else {
         LOG.info("failed to delete state file");
+      }
     }
   }
 
@@ -322,12 +322,13 @@ public class CheckpointManagerServer extends HeronServer {
                                + "component %s taskId %d", checkpoint.getCheckpointId(),
                                checkpoint.getComponent(), checkpoint.getTaskId()));
         // Set the checkpoint-state in response
-        boolean spill_disk = true;
-        if (spill_disk) {
+        boolean spillDisk = true;
+        if (spillDisk) {
           CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
 
           // spill state to local disk
-          String stateURI = storeStateLocally(ckpt.getState().toByteArray(), ckpt.getCheckpointId());
+          String stateURI = storeStateLocally(ckpt.getState().toByteArray(),
+              ckpt.getCheckpointId());
 
           CheckpointManager.InstanceStateCheckpoint ckpt2 =
               CheckpointManager.InstanceStateCheckpoint.newBuilder()
