@@ -42,7 +42,7 @@ class AuroraCLIController implements AuroraController {
 
   private final String jobSpec;
   private final boolean isVerbose;
-  private final String auroraFilename;
+  private String auroraFilename;
 
   AuroraCLIController(
       String jobName,
@@ -69,7 +69,7 @@ class AuroraCLIController implements AuroraController {
     if (!extra.isEmpty()) {
       for (String field : extra.keySet()) {
         if (field.equals(AuroraContext.JOB_TEMPLATE)) {
-          auroraFilename.replace("heron.aurora", extra.get(field));
+          auroraFilename = auroraFilename.replace("heron.aurora", extra.get(field));
         } else {
           auroraCmd.add("--bind");
           auroraCmd.add(String.format("%s=%s", field, extra.get(field)));
