@@ -68,7 +68,7 @@ class DummyInstanceServer : public heron::stmgr::InstanceServer {
   virtual void SetAllInstancesConnectedToUs(bool val) { all_instances_connected_ = val; }
 
   virtual bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
-                                         const heron::proto::ckptmgr::InstanceStateCheckpoint&) {
+      const heron::proto::ckptmgr::InstanceStateCheckpoint&) {
     restore_sent_.insert(_task_id);
     return true;
   }
