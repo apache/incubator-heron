@@ -68,8 +68,12 @@ class AuroraCLIController implements AuroraController {
 
     if (!extra.isEmpty()) {
       for (String field : extra.keySet()) {
-        auroraCmd.add("--bind");
-        auroraCmd.add(String.format("%s=%s", field, extra.get(field)));
+        if (field.equals(AuroraContext.JOB_TEMPLATE)) {
+          auroraFilename.replace("heron.aurora", extra.get(field));
+        } else {
+          auroraCmd.add("--bind");
+          auroraCmd.add(String.format("%s=%s", field, extra.get(field)));
+        }
       }
     }
 
