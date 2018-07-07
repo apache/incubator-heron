@@ -19,28 +19,29 @@
 
 package org.apache.heron.spi.statefulstorage;
 
-import org.apache.heron.proto.ckptmgr.CheckpointManager;
+import org.apache.heron.proto.ckptmgr.CheckpointManager.CheckpointComponentMetadata;
 
 /**
- * The checkpoint data from an instance. It contains the instance information and the checkpoint
- * data for the instance.
- * TODO(nwang): Currently each instance has only one partition.
+ * The checkpoint metadata for a component.
  */
-public class Checkpoint {
-  private CheckpointManager.InstanceStateCheckpoint checkpoint;
+public class CheckpointMetadata {
+  private CheckpointComponentMetadata metadata;
   private int nBytes;
 
-  public Checkpoint(CheckpointManager.InstanceStateCheckpoint checkpoint) {
-    this.checkpoint = checkpoint;
-    this.nBytes = checkpoint.getSerializedSize();
+  public CheckpointMetadata(String componentName, int parallelism) {
+    this.metadata = CheckpointComponentMetadata.newBuilder()
+      .setComponentName(componentName)
+      .setParallelism(parallelism)
+      .build();
+    this.nBytes = this.metadata.getSerializedSize();
   }
 
-  public CheckpointManager.InstanceStateCheckpoint getCheckpoint() {
-    return this.checkpoint;
+  public CheckpointComponentMetadata getMetadata() {
+    return metadata;
   }
 
   @Override
   public String toString() {
-    return String.format("Checkpoint(%d bytes)", nBytes);
+    return String.format("CheckpointMetadata(%d bytes)", nBytes);
   }
 }
