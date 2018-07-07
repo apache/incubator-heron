@@ -763,8 +763,8 @@ class HeronExecutor(object):
 
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
+    # TODO(nlu): make the ckptmgr ram usage configurable
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-    // TODO(nlu): make the ckptmgr ram usage configurable
                    '-Xmx5120M',
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',
