@@ -23,18 +23,20 @@ import java.time.Duration;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.microsoft.dhalion.events.EventHandler;
 import com.microsoft.dhalion.events.EventManager;
-import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.resolvers.RestartContainerResolver;
 import org.apache.heron.healthmgr.sensors.BackPressureSensor;
 
-import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
+import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL_MS;
 
 /**
  * This Policy class
@@ -42,7 +44,7 @@ import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKe
  * state for long time, which we believe the container cannot recover.
  * 2. resolver: try to restart the backpressure container so as to be rescheduled.
  */
-public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
+public class AutoRestartBackpressureContainerPolicy extends ToggleablePolicy
     implements EventHandler<ContainerRestart> {
 
   private static final String CONF_WAIT_INTERVAL_MILLIS =
@@ -50,22 +52,23 @@ public class AutoRestartBackpressureContainerPolicy extends HealthPolicyImpl
   private static final Logger LOG =
       Logger.getLogger(AutoRestartBackpressureContainerPolicy.class.getName());
 
-  private final HealthPolicyConfig policyConfig;
 
   @Inject
-  AutoRestartBackpressureContainerPolicy(HealthPolicyConfig policyConfig,
+  AutoRestartBackpressureContainerPolicy(@Named(CONF_POLICY_ID) String policyId,
+                                         HealthPolicyConfig policyConfig,
+                                         PhysicalPlanProvider physicalPlanProvider,
                                          EventManager eventManager,
                                          BackPressureSensor backPressureSensor,
                                          BackPressureDetector backPressureDetector,
                                          RestartContainerResolver restartContainerResolver) {
-    this.policyConfig = policyConfig;
+    super(policyId, policyConfig, physicalPlanProvider);
 
     registerSensors(backPressureSensor);
     registerDetectors(backPressureDetector);
     registerResolvers(restartContainerResolver);
 
     setPolicyExecutionInterval(
-        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
+        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL_MS.key(), 60000)));
 
     eventManager.addEventListener(ContainerRestart.class, this);
   }

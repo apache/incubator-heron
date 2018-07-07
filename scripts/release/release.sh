@@ -19,10 +19,10 @@
 set -eu
 
 # Repositories to push the release branch and the release tag.
-: ${RELEASE_REPOSITORIES:="git@github.com:twitter/heron"}
+: ${RELEASE_REPOSITORIES:="git@github.com:apache/incubator-heron"}
 
 # Repositories to push the master branch
-: ${MASTER_REPOSITORIES:="git@github.com:twitter/heron"}
+: ${MASTER_REPOSITORIES:="git@github.com:apache/incubator-heron"}
 
 # Name of the default editor
 : ${EDITOR=vi}

@@ -32,7 +32,8 @@ java_tests(
     "org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.api.ConfigTest",
-    "org.apache.heron.api.HeronSubmitterTest"
+    "org.apache.heron.api.HeronSubmitterTest",
+    "org.apache.heron.api.utils.UtilsTest"
   ],
   runtime_deps = [ ":api-tests" ],
   size = "small",

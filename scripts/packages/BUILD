@@ -348,6 +348,7 @@ pkg_tar(
     srcs = [
         "//integration_test/src/python/http_server:http-server",
         "//integration_test/src/python/test_runner:test-runner",
+        "//integration_test/src/python/topology_test_runner:topology-test-runner",
     ]
 )
 
@@ -370,6 +371,15 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-tests-data-topology-java",
+    package_dir = "data/java/topology_test",
+    srcs = [
+        "//integration_test/src/java:topology-test-data-files",
+    ],
+    strip_prefix = '/integration_test/src/java/org/apache/heron/integration_topology_test/topology/'
+)
+
+pkg_tar(
     name = "heron-tests-data-python",
     package_dir = "data/python",
     srcs = [
@@ -384,6 +394,7 @@ pkg_tar(
     srcs = [
        "//integration_test/src/scala:scala-integration-tests",
        "//integration_test/src/java:integration-tests",
+       "//integration_test/src/java:integration-topology-tests",
        "//integration_test/src/python/integration_test/topology:heron_integ_topology",
     ],
 )
@@ -396,6 +407,7 @@ pkg_tar(
         ":heron-tests-bin",
         ":heron-tests-data-scala",
         ":heron-tests-data-java",
+        ":heron-tests-data-topology-java",
         ":heron-tests-data-python",
         ":heron-tests-lib",
     ],
@@ -474,9 +486,11 @@ genrule(
         'rm setup.py.template',
         'tree $$HERONPY_DIR',
         '/usr/bin/env python2.7 setup.py sdist',
-        '/usr/bin/env python2.7 setup.py bdist_wheel',
+        '/usr/bin/env python2.7 setup.py bdist_wheel --universal',
+        'cd -',
         'ls -l $$HERONPY_DIR/dist',
-        'cp $$HERONPY_DIR/dist/heronpy-*-py2-*.whl $$OUTPUT_DIR',
+        'cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl $$OUTPUT_DIR',
+        'cp $$HERONPY_DIR/dist/heronpy-*-py2.py3-*.whl "$@"',
         'cp $$HERONPY_DIR/dist/heronpy-*.tar.gz $$OUTPUT_DIR',
         'touch $$OUTPUT_DIR/heronpy.whl',
         'rm -rf $$TMP_DIR',

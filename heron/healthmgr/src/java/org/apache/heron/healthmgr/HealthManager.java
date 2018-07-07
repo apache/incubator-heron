@@ -68,6 +68,7 @@ import org.apache.heron.spi.utils.ReflectionUtils;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_TYPE;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
@@ -314,7 +315,7 @@ public class HealthManager {
       Class<IHealthPolicy> policyClass
           = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
 
-      AbstractModule module = constructPolicySpecificModule(policyConfig);
+      AbstractModule module = constructPolicySpecificModule(policyId, policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
 
       healthPolicies.add(policy);
@@ -378,10 +379,14 @@ public class HealthManager {
     };
   }
 
-  private AbstractModule constructPolicySpecificModule(final HealthPolicyConfig policyConfig) {
+  private AbstractModule constructPolicySpecificModule(
+      final String policyId, final HealthPolicyConfig policyConfig) {
     return new AbstractModule() {
       @Override
       protected void configure() {
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_POLICY_ID))
+            .toInstance(policyId);
         bind(HealthPolicyConfig.class).toInstance(policyConfig);
       }
     };
