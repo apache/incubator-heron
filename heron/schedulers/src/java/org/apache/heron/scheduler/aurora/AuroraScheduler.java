@@ -126,8 +126,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
     Resource containerResource =
         updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
     Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
+    Map<String, String> extraProperties = createExtraProperties(containerResource);
 
-    return controller.createJob(auroraProperties);
+    return controller.createJob(auroraProperties, extraProperties);
   }
 
   @Override
@@ -279,19 +280,19 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.CORE_PACKAGE_URI, heronCoreReleasePkgURI);
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
+    return auroraProperties;
+  }
+
+  protected Map<String, String> createExtraProperties(Resource containerResource) {
+    Map<String, String> extraProperties = new HashMap<>();
+
     if (config.containsKey(Key.SCHEDULER_PROPERTIES)) {
       String[] meta = config.getStringValue(Key.SCHEDULER_PROPERTIES).split(",");
-      if (meta.length >= 1) {
-        auroraProperties.put(AuroraField.AURORA_METADATA_1, meta[0]);
-      }
-      if (meta.length >= 2) {
-        auroraProperties.put(AuroraField.AURORA_METADATA_2, meta[1]);
-      }
-      if (meta.length >= 3) {
-        auroraProperties.put(AuroraField.AURORA_METADATA_3, meta[2]);
+      for (int idx = 1; idx<=meta.length; idx++) {
+        extraProperties.put("AURORA_METADATA_" + idx, meta[idx - 1]);
       }
     }
 
-    return auroraProperties;
+    return extraProperties;
   }
 }
