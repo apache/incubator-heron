@@ -46,7 +46,7 @@ import org.apache.heron.healthmgr.sensors.BackPressureSensor;
 import org.apache.heron.healthmgr.sensors.BufferSizeSensor;
 import org.apache.heron.healthmgr.sensors.ExecuteCountSensor;
 
-import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL;
+import static org.apache.heron.healthmgr.HealthPolicyConfigReader.PolicyConfigKey.HEALTH_POLICY_INTERVAL_MS;
 import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_DATA_SKEW;
 import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_SLOW_INSTANCE;
 import static org.apache.heron.healthmgr.diagnosers.BaseDiagnoser.DiagnosisType.DIAGNOSIS_UNDER_PROVISIONING;
@@ -86,7 +86,7 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     registerResolvers(scaleUpResolver);
 
     setPolicyExecutionInterval(
-        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL.key(), 60000)));
+        Duration.ofMillis((int) policyConfig.getConfig(HEALTH_POLICY_INTERVAL_MS.key(), 60000)));
 
     eventManager.addEventListener(TopologyUpdate.class, this);
   }
