@@ -367,9 +367,6 @@ public class Slave implements Runnable, AutoCloseable {
     try (FileInputStream fis = new FileInputStream(stateUri);
          DataInputStream dis = new DataInputStream(fis)) {
       dis.read(data);
-
-      LOG.info("loaded state: " + Arrays.toString(data));
-
       return data;
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);
