@@ -22,6 +22,7 @@ package org.apache.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
 
+import org.apache.heron.api.bolt.IRichBolt;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.StreamletImpl;
@@ -34,20 +35,26 @@ import org.apache.heron.streamlet.impl.operators.FlatMapOperator;
  */
 public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn;
+  private IRichBolt bolt;
 
   public FlatMapStreamlet(StreamletImpl<R> parent,
                           SerializableFunction<? super R,
                               ? extends Iterable<? extends T>> flatMapFn) {
     this.parent = parent;
-    this.flatMapFn = flatMapFn;
+    this.bolt = new FlatMapOperator<R, T>(flatMapFn);
+    setNumPartitions(parent.getNumPartitions());
+  }
+
+  public FlatMapStreamlet(StreamletImpl<R> parent, IRichBolt bolt) {
+    this.parent = parent;
+    this.bolt = bolt;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.FLATMAP, stageNames);
-    bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
+    bldr.setBolt(getName(), bolt,
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;
   }
