@@ -275,12 +275,6 @@ public class AuroraSchedulerTest {
       Object expected = null;
       Object found = properties.get(field);
       switch (field) {
-        case AURORA_METADATA_1:
-          break;
-        case AURORA_METADATA_2:
-          break;
-        case AURORA_METADATA_3:
-          break;
         case CORE_PACKAGE_URI:
           expected = expectedDist + "/heron-core.tar.gz";
           break;
