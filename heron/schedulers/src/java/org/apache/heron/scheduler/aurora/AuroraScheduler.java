@@ -288,7 +288,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
 
     if (config.containsKey(Key.SCHEDULER_PROPERTIES)) {
       String[] meta = config.getStringValue(Key.SCHEDULER_PROPERTIES).split(",");
-      for (int idx = 1; idx<=meta.length; idx++) {
+      for (int idx = 1; idx <= meta.length; idx++) {
         extraProperties.put("AURORA_METADATA_" + idx, meta[idx - 1]);
       }
     }
