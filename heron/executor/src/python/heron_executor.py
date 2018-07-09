@@ -765,6 +765,7 @@ class HeronExecutor(object):
 
     # TODO(nlu): make the ckptmgr ram usage configurable
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
+                   '-Xms5120M',
                    '-Xmx5120M',
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',

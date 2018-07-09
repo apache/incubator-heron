@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -184,7 +183,7 @@ public class SpoutInstance implements IInstance {
     String fileName;
 
     try {
-      fileName = Files.createTempFile(checkpointId, ".state").toString();
+      fileName = File.createTempFile(checkpointId, ".state", new File("./state_spill")).toString();
     } catch (IOException e) {
       throw new RuntimeException("failed to create local temp file for state");
     }

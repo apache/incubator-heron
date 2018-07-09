@@ -26,8 +26,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -361,7 +359,7 @@ public class CheckpointManagerServer extends HeronServer {
     String fileName;
 
     try {
-      fileName = Files.createTempFile(checkpointId, ".state").toString();
+      fileName = File.createTempFile(checkpointId, ".state", new File("./state_spill")).toString();
     } catch (IOException e) {
       throw new RuntimeException("failed to create local temp file for state");
     }
