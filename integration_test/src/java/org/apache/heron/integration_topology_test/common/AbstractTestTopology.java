@@ -19,7 +19,10 @@
 
 package org.apache.heron.integration_topology_test.common;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,17 +36,24 @@ import org.apache.heron.api.HeronSubmitter;
 import org.apache.heron.api.exception.AlreadyAliveException;
 import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.integration_topology_test.core.HttpUtils;
+import org.apache.heron.integration_topology_test.core.TopologyTestTopologyBuilder;
 
 /**
  * Class to abstract out the common parts of the test framework for submitting topologies.
  * Subclasses can implement {@code buildTopology} and call {@code submit}.
  */
 public abstract class AbstractTestTopology {
+  private static final Integer CHECKPOINT_INTERVAL = 10;
   private static final String TOPOLOGY_OPTION = "topology_name";
-  private static final String STATE_UPDATE_TOKEN = "state_server_update_token";
+  private static final String RESULTS_URL_OPTION = "results_url";
+  private static final String TOPO_URL_OPTION = "test_topo_url";
+  private static final Logger LOG = Logger.getLogger(AbstractTestTopology.class.getName());
 
   private final CommandLine cmd;
   private final String topologyName;
+  private final String httpServerResultsUrl;
+  private final String httpServerTopoUrl;
 
   protected AbstractTestTopology(String[] args) throws MalformedURLException {
     CommandLineParser parser = new DefaultParser();
@@ -59,9 +69,27 @@ public abstract class AbstractTestTopology {
     }
 
     this.topologyName = cmd.getOptionValue(TOPOLOGY_OPTION);
+    if (cmd.getOptionValue(RESULTS_URL_OPTION) != null) {
+      this.httpServerResultsUrl =
+          pathAppend(cmd.getOptionValue(RESULTS_URL_OPTION), this.topologyName);
+    } else {
+      this.httpServerResultsUrl = null;
+    }
+    if (cmd.getOptionValue(TOPO_URL_OPTION) != null) {
+      this.httpServerTopoUrl =
+          pathAppend(cmd.getOptionValue(TOPO_URL_OPTION), this.topologyName);
+    } else {
+      this.httpServerTopoUrl = null;
+    }
   }
 
-  protected abstract TopologyBuilder buildTopology(TopologyBuilder builder);
+  protected TopologyBuilder buildTopology(TopologyBuilder builder) {
+    return builder;
+  }
+  protected TopologyTestTopologyBuilder buildStatefulTopology(TopologyTestTopologyBuilder
+                                                                           builder) {
+    return builder;
+  }
 
   protected Config buildConfig(Config config) {
     return config;
@@ -74,6 +102,17 @@ public abstract class AbstractTestTopology {
     topologyNameOption.setRequired(true);
     options.addOption(topologyNameOption);
 
+    Option resultsUrlOption =
+        new Option("r", RESULTS_URL_OPTION, true, "url to post and get instance state");
+    resultsUrlOption.setRequired(false);
+    options.addOption(resultsUrlOption);
+
+    Option topoUrlOption =
+        new Option("s", TOPO_URL_OPTION, true, "url to post and get test topo "
+            + "parallelism info");
+    topoUrlOption.setRequired(false);
+    options.addOption(topoUrlOption);
+
     return options;
   }
 
@@ -82,12 +121,60 @@ public abstract class AbstractTestTopology {
   }
 
   public final void submit(Config userConf) throws AlreadyAliveException, InvalidTopologyException {
-    TopologyBuilder builder = new TopologyBuilder();
+    if (this.httpServerResultsUrl == null) {
+      TopologyBuilder builder = new TopologyBuilder();
 
-    Config conf = buildConfig(new BasicConfig());
-    if (userConf != null) {
-      conf.putAll(userConf);
+      Config conf = buildConfig(new BasicConfig());
+      if (userConf != null) {
+        conf.putAll(userConf);
+      }
+      HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
+
+    } else {
+      TopologyTestTopologyBuilder builder = new TopologyTestTopologyBuilder(httpServerResultsUrl);
+
+      Config conf = buildConfig(new BasicConfig());
+      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+      conf.setTopologyStatefulCheckpointIntervalSecs(CHECKPOINT_INTERVAL);
+      if (userConf != null) {
+        conf.putAll(userConf);
+      }
+      HeronSubmitter.submitTopology(topologyName, conf,
+          buildStatefulTopology(builder).createTopology());
+
+      // send topo info to http server
+      String topoData = formatJson(builder.getComponentParallelism());
+      LOG.info(String.format("Posting topology parallelism to %s",  this.httpServerTopoUrl));
+      try {
+        int responseCode = -1;
+        for (int attempts = 0; attempts < 2; attempts++) {
+          responseCode = HttpUtils.httpJsonPost(this.httpServerTopoUrl, topoData);
+          if (responseCode == 200) {
+            return;
+          }
+        }
+        throw new RuntimeException(
+            String.format("Failed to post topology parallelism to %s: %s",
+                this.httpServerResultsUrl, responseCode));
+      } catch (IOException | java.text.ParseException e) {
+        throw new RuntimeException(String.format("Posting result to %s failed",
+            this.httpServerResultsUrl), e);
+      }
     }
-    HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
+  }
+
+  private static String pathAppend(String url, String path) {
+    return String.format("%s/%s", url, path);
+  }
+
+  private String formatJson(Map<String, Integer> data) {
+    StringBuilder stateString = new StringBuilder();
+    for (Map.Entry<String, Integer> entry : data.entrySet()) {
+      if (stateString.length() != 0) {
+        stateString.append(", ");
+      }
+      stateString.append(String.format("\"%s\": %d", entry.getKey(), entry.getValue()));
+    }
+    return String.format("{\"%s\": %b, %s}", "Done", false, stateString.toString());
   }
 }
