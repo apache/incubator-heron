@@ -82,8 +82,9 @@ class StMgr {
                           proto::system::HeronTupleSet* _message);
   // Called when an instance does checkpoint and sends its checkpoint
   // to the stmgr to save it
-  void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,
-                                          const proto::system::Instance& _instance);
+  void HandleStoreInstanceStateCheckpoint(
+      const proto::ckptmgr::InstanceStateCheckpoint& _message,
+      const proto::system::Instance& _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   // Send checkpoint message to this task_id
   void DrainDownstreamCheckpoint(sp_int32 _task_id,

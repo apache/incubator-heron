@@ -42,7 +42,7 @@ class AuroraCLIController implements AuroraController {
 
   private final String jobSpec;
   private final boolean isVerbose;
-  private final String auroraFilename;
+  private String auroraFilename;
 
   AuroraCLIController(
       String jobName,
@@ -57,13 +57,24 @@ class AuroraCLIController implements AuroraController {
   }
 
   @Override
-  public boolean createJob(Map<AuroraField, String> bindings) {
+  public boolean createJob(Map<AuroraField, String> bindings, Map<String, String> extra) {
     List<String> auroraCmd =
         new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 
     for (AuroraField field : bindings.keySet()) {
       auroraCmd.add("--bind");
       auroraCmd.add(String.format("%s=%s", field, bindings.get(field)));
+    }
+
+    if (!extra.isEmpty()) {
+      for (String field : extra.keySet()) {
+        if (field.equals(AuroraContext.JOB_TEMPLATE)) {
+          auroraFilename = auroraFilename.replace("heron.aurora", extra.get(field));
+        } else {
+          auroraCmd.add("--bind");
+          auroraCmd.add(String.format("%s=%s", field, extra.get(field)));
+        }
+      }
     }
 
     auroraCmd.add(jobSpec);

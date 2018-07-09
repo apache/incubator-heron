@@ -18,7 +18,6 @@
  */
 package org.apache.heron.integration_topology_test.core;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -56,11 +55,6 @@ public class StatefulIntegrationTopologyTestSpout extends IStatefulSpout {
   }
 
   @Override
-  public Map<String, Object> getComponentConfiguration() {
-    return delegateSpout.getComponentConfiguration();
-  }
-
-  @Override
   public void close() {
     delegateSpout.close();
   }
@@ -85,23 +79,11 @@ public class StatefulIntegrationTopologyTestSpout extends IStatefulSpout {
     // send instance state to http server
     if (!delegateSpout.state.isEmpty()) {
       String compId = delegateSpout.context.getThisComponentId();
+      String dataName = String.format("instance %s state", compId);
       String stateJsonString = formatJson(compId, delegateSpout.state);
-      LOG.info(String.format("Posting instance %s state to %s", compId, this.outputLocation));
-      try {
-        int responseCode = -1;
-        for (int attempts = 0; attempts < 2; attempts++) {
-          responseCode = HttpUtils.httpJsonPost(this.outputLocation, stateJsonString);
-          if (responseCode == 200) {
-            return;
-          }
-        }
-        throw new RuntimeException(
-            String.format("Failed to post instance %s state to %s: %s",
-                compId, this.outputLocation, responseCode));
-      } catch (IOException | java.text.ParseException e) {
-        throw new RuntimeException(String.format("Posting result to %s failed",
-            this.outputLocation), e);
-      }
+
+      LOG.info(String.format("Posting %s to %s", dataName, this.outputLocation));
+      HttpUtils.postToHttpServer(this.outputLocation, stateJsonString, dataName);
     }
   }
 

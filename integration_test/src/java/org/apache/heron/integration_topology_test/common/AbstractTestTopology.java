@@ -19,7 +19,6 @@
 
 package org.apache.heron.integration_topology_test.common;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -144,22 +143,9 @@ public abstract class AbstractTestTopology {
 
       // send topo info to http server
       String topoData = formatJson(builder.getComponentParallelism());
-      LOG.info(String.format("Posting topology parallelism to %s",  this.httpServerTopoUrl));
-      try {
-        int responseCode = -1;
-        for (int attempts = 0; attempts < 2; attempts++) {
-          responseCode = HttpUtils.httpJsonPost(this.httpServerTopoUrl, topoData);
-          if (responseCode == 200) {
-            return;
-          }
-        }
-        throw new RuntimeException(
-            String.format("Failed to post topology parallelism to %s: %s",
-                this.httpServerResultsUrl, responseCode));
-      } catch (IOException | java.text.ParseException e) {
-        throw new RuntimeException(String.format("Posting result to %s failed",
-            this.httpServerResultsUrl), e);
-      }
+      String dataName = "topology parallelism";
+      LOG.info(String.format("Posting %s to %s", dataName, this.httpServerTopoUrl));
+      HttpUtils.postToHttpServer(this.httpServerTopoUrl, topoData, dataName);
     }
   }
 

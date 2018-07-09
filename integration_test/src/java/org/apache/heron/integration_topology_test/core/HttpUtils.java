@@ -44,4 +44,23 @@ public final class HttpUtils {
 
     return response.getStatusLine().getStatusCode();
   }
+
+  public static void postToHttpServer(String postUrl, String data, String dataName)
+    throws RuntimeException {
+    try {
+      int responseCode = -1;
+      for (int attempts = 0; attempts < 2; attempts++) {
+        responseCode = httpJsonPost(postUrl, data);
+        if (responseCode == 200) {
+          return;
+        }
+      }
+      throw new RuntimeException(
+          String.format("Failed to post %s to %s: %s",
+              dataName, postUrl, responseCode));
+    } catch (IOException | java.text.ParseException e) {
+      throw new RuntimeException(String.format("Posting %s to %s failed",
+          dataName, postUrl), e);
+    }
+  }
 }

@@ -16,8 +16,8 @@ from heron.statemgrs.src.python import configloader
 from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 from heron.statemgrs.src.python.filestatemanager import FileStateManager
 
-DEFAULT_TEST_CONF_FILE = "integration_test/src/python/" \
-                         "topology_test_runner/resources/test.json"
+# The location of default configure file
+DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
 
 #seconds
 RETRY_ATTEMPTS = 15
@@ -181,12 +181,6 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
       logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_results)))
       logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_results)))
       raise failure
-
-  '''def _parse_state_expected_results(self, expected_results):
-    pass
-
-  def _parse_state_actual_results(self, actual_results):
-    pass'''
 
 
 class FileBasedExpectedResultsHandler(object):

@@ -57,12 +57,12 @@ public class StatefulIdentityBolt extends IStatefulBolt {
       }
       sb.append(o.toString());
     }
-    LOG.info("Receiving and emitting tuple values: " + sb.toString());
-    if (!state.containsKey(sb.toString())) {
-      state.put(sb.toString(), 1);
+    String word = sb.toString();
+    LOG.info("Receiving and emitting tuple values: " + word);
+    if (!state.containsKey(word)) {
+      state.put(word, 1);
     } else {
-      state.put(sb.toString(),
-          state.get(sb.toString()) + 1);
+      state.put(word, state.get(word) + 1);
     }
     collector.emit(input.getValues());
   }

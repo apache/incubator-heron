@@ -157,6 +157,7 @@ public class BoltInstance implements IInstance {
     } finally {
       collector.lock.unlock();
     }
+    LOG.info("State persisted for checkpoint: " + checkpointId);
   }
 
   @SuppressWarnings("unchecked")

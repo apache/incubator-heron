@@ -21,37 +21,67 @@ package org.apache.heron.spi.statefulstorage;
 
 import java.util.Map;
 
-import org.apache.heron.proto.system.PhysicalPlans;
-
+/**
+ * The interface of all storage classes for checkpoints.
+ * For each checkpoint, two types of data are stored:
+ * - Component Meta Data (one per component).
+ * - Instance Checkpoint Data (one per instance or patition)
+ * Each Stateful Storage implementation needs to handle them accordingly.
+ */
 public interface IStatefulStorage {
   /**
    * Initialize the Stateful Storage
-   *
+   * @param topologyName The name of the topology.
    * @param conf An unmodifiableMap containing basic configuration
-   * Attempts to modify the returned map,
-   * whether direct or via its collection views, result in an UnsupportedOperationException.
    */
-  void init(Map<String, Object> conf) throws StatefulStorageException;
+  void init(String topologyName, final Map<String, Object> conf)
+      throws StatefulStorageException;
 
   /**
    * Closes the Stateful Storage
    */
   void close();
 
-  // Store the checkpoint
-  void store(Checkpoint checkpoint) throws StatefulStorageException;
+  /**
+   * Store instance checkpoint.
+   * @param info The information (reference key) for the checkpoint partition.
+   * @param checkpoint The checkpoint data.
+   */
+  void storeCheckpoint(final CheckpointInfo info, final Checkpoint checkpoint)
+      throws StatefulStorageException;
 
-  // Retrieve the checkpoint
-  Checkpoint restore(String topologyName, String checkpointId,
-                     PhysicalPlans.Instance instanceInfo) throws StatefulStorageException;
+  /**
+   * Retrieve instance checkpoint.
+   * @param info The information (reference key) for the checkpoint partition.
+   * @return The checkpoint data from the specified blob id.
+   */
+  Checkpoint restoreCheckpoint(final CheckpointInfo info)
+        throws StatefulStorageException;
 
-  // TODO(mfu): We should refactor all interfaces in IStatefulStorage,
-  // TODO(mfu): instead providing Class Checkpoint, we should provide an Context class,
-  // TODO(mfu): It should:
-  // TODO(mfu): 1. Provide meta data access, like topologyName
-  // TODO(mfu): 2. Provide utils method to parse the protobuf object, like getTaskId()
-  // TODO(mfu): 3. Common methods, like getCheckpointDir()
-  // Dispose the checkpoint
-  void dispose(String topologyName, String oldestCheckpointId, boolean deleteAll)
-                  throws StatefulStorageException;
+  /**
+   * Store medata data for component. Ideally in distributed storages this function should only
+   * be called once for each component. In local storages, the function should be called by
+   * every instance and the data should be stored with the checkpoint data for each partition.
+   * @param info The information (reference key) for the checkpoint partition.
+   * @param metadata The checkpoint metadata from a component.
+   */
+  void storeComponentMetaData(final CheckpointInfo info, final CheckpointMetadata metadata)
+      throws StatefulStorageException;
+
+  /**
+   * Retrieve component metadata.
+   * @param info The information (reference key) for the checkpoint partition.
+   * @return The checkpoint metadata for the component.
+   */
+  CheckpointMetadata restoreComponentMetadata(final CheckpointInfo info)
+      throws StatefulStorageException;
+
+  /**
+   * Dispose checkpoints.
+   * @param oldestCheckpointPreserved The oldest checkpoint id to be preserved. All checkpoints
+   *        before this id should be deleted.
+   * @param deleteAll Ignore the checkpoint Id and delete all checkpoints.
+   */
+  void dispose(String oldestCheckpointPreserved, boolean deleteAll)
+      throws StatefulStorageException;
 }

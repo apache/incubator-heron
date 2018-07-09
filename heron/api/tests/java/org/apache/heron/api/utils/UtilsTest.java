@@ -17,30 +17,26 @@
  * under the License.
  */
 
-package org.apache.heron.spi.statefulstorage;
+package org.apache.heron.api.utils;
 
-import org.apache.heron.proto.ckptmgr.CheckpointManager;
+import java.util.ArrayList;
 
-/**
- * The checkpoint data from an instance. It contains the instance information and the checkpoint
- * data for the instance.
- * TODO(nwang): Currently each instance has only one partition.
- */
-public class Checkpoint {
-  private CheckpointManager.InstanceStateCheckpoint checkpoint;
-  private int nBytes;
+import org.junit.Test;
 
-  public Checkpoint(CheckpointManager.InstanceStateCheckpoint checkpoint) {
-    this.checkpoint = checkpoint;
-    this.nBytes = checkpoint.getSerializedSize();
-  }
+import junit.framework.TestCase;
 
-  public CheckpointManager.InstanceStateCheckpoint getCheckpoint() {
-    return this.checkpoint;
-  }
+public class UtilsTest extends TestCase {
 
-  @Override
-  public String toString() {
-    return String.format("Checkpoint(%d bytes)", nBytes);
+  @Test
+  public void testAssignKeyToTask() {
+    ArrayList<Integer> taskIds = new ArrayList<Integer>();
+    taskIds.add(1);
+    taskIds.add(2);
+    assertEquals(taskIds.size(), 2);
+    assertEquals(Utils.assignKeyToTask(0, taskIds), Integer.valueOf(1));
+    assertEquals(Utils.assignKeyToTask(100, taskIds), Integer.valueOf(1));
+    assertEquals(Utils.assignKeyToTask(101, taskIds), Integer.valueOf(2));
+    assertEquals(Utils.assignKeyToTask(-100, taskIds), Integer.valueOf(1));
+    assertEquals(Utils.assignKeyToTask(-101, taskIds), Integer.valueOf(2));
   }
 }

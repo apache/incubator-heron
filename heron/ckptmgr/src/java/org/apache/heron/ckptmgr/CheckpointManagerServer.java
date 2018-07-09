@@ -34,6 +34,7 @@ import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -48,9 +49,14 @@ public class CheckpointManagerServer extends HeronServer {
   private SocketChannel connection;
 
   public CheckpointManagerServer(
-      String topologyName, String topologyId, String checkpointMgrId,
-      IStatefulStorage statefulStorage, NIOLooper looper, String host,
-      int port, HeronSocketOptions options) {
+      String topologyName,
+      String topologyId,
+      String checkpointMgrId,
+      IStatefulStorage statefulStorage,
+      NIOLooper looper,
+      String host,
+      int port,
+      HeronSocketOptions options) {
     super(looper, host, port, options);
 
     this.topologyName = topologyName;
@@ -115,8 +121,7 @@ public class CheckpointManagerServer extends HeronServer {
     String errorMessage = "";
 
     try {
-      statefulStorage.dispose(topologyName,
-                                 request.getOldestCheckpointPreserved(), deleteAll);
+      statefulStorage.dispose(request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
       errorMessage = String.format("Request to dispose checkpoint failed for oldest Checkpoint "
@@ -203,25 +208,30 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    Checkpoint checkpoint = new Checkpoint(topologyName, request.getInstance(),
-                                           request.getCheckpoint());
+    CheckpointInfo info =
+        new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
+                           request.getInstance());
+    Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
+
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
-                           + " component %s instance %s on connection %s",
-                           checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                           checkpoint.getInstance(), channel.socket().getRemoteSocketAddress()));
+                           + " component %s instanceId %s on connection %s",
+                           info.getCheckpointId(),
+                           info.getComponent(),
+                           info.getInstanceId(),
+                           channel.socket().getRemoteSocketAddress()));
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
     String errorMessage = "";
     try {
-      statefulStorage.store(checkpoint);
-      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
-                             checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                             checkpoint.getInstance()));
+      statefulStorage.storeCheckpoint(info, checkpoint);
+      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instanceId %s",
+                             info.getCheckpointId(), info.getComponent(),
+                             info.getInstanceId()));
     } catch (StatefulStorageException e) {
       errorMessage = String.format("Save checkpoint not successful for checkpointId "
-                                   + "%s component %s instance %s",
-                                   checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                                   checkpoint.getInstance());
+                                   + "%s component %s instanceId %s",
+                                   info.getCheckpointId(), info.getComponent(),
+                                   info.getInstanceId());
       statusCode = Common.StatusCode.NOTOK;
       LOG.log(Level.WARNING, errorMessage, e);
     }
@@ -241,11 +251,12 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.GetInstanceStateRequest request
   ) {
+    CheckpointInfo info = new CheckpointInfo(request.getCheckpointId(), request.getInstance());
     LOG.info(String.format("Got a get checkpoint request for checkpointId %s "
-                           + " component %s taskId %d on connection %s",
-                           request.getCheckpointId(),
-                           request.getInstance().getInfo().getComponentName(),
-                           request.getInstance().getInfo().getTaskId(),
+                           + " component %s instanceId %d on connection %s",
+                           info.getCheckpointId(),
+                           info.getComponent(),
+                           info.getInstanceId(),
                            channel.socket().getRemoteSocketAddress()));
 
     CheckpointManager.GetInstanceStateResponse.Builder responseBuilder =
@@ -265,18 +276,20 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setCheckpoint(dummyState);
     } else {
       try {
-        Checkpoint checkpoint = statefulStorage.restore(topologyName, request.getCheckpointId(),
-                                                request.getInstance());
+        Checkpoint checkpoint = statefulStorage.restoreCheckpoint(info);
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
-                               + "component %s taskId %d", checkpoint.getCheckpointId(),
-                               checkpoint.getComponent(), checkpoint.getTaskId()));
+                               + "component %s instanceId %d",
+                               info.getCheckpointId(),
+                               info.getComponent(),
+                               info.getInstanceId()));
         // Set the checkpoint-state in response
         responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
-                                     + "component %s taskId %d", request.getCheckpointId(),
-                                     request.getInstance().getInfo().getComponentName(),
-                                     request.getInstance().getInfo().getTaskId());
+                                     + "component %s instanceId %d",
+                                     info.getCheckpointId(),
+                                     info.getComponent(),
+                                     info.getInstanceId());
         LOG.log(Level.WARNING, errorMessage, e);
         statusCode = Common.StatusCode.NOTOK;
       }
