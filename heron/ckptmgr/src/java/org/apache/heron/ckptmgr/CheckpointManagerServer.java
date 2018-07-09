@@ -359,7 +359,7 @@ public class CheckpointManagerServer extends HeronServer {
     String fileName;
 
     try {
-      fileName = File.createTempFile(checkpointId, ".state", new File("./state_spill")).toString();
+      fileName = File.createTempFile(checkpointId, ".state").toString();
     } catch (IOException e) {
       throw new RuntimeException("failed to create local temp file for state");
     }
