@@ -157,6 +157,13 @@ public final class TopologyUtils {
     }
   }
 
+  public static ByteAmount getCheckpointManagerRam(TopologyAPI.Topology topology) {
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    return TopologyUtils.getConfigWithDefault(topologyConfig,
+        org.apache.heron.api.Config.TOPOLOGY_STATEFUL_CKPTMGR_RAM,
+       ByteAmount.fromGigabytes(1));
+  }
+
   /**
    * Throw a IllegalArgumentException if verifyTopology returns false
    * @param topology to validate

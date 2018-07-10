@@ -203,11 +203,6 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         org.apache.heron.api.Config.TOPOLOGY_STATEFUL_CKPTMGR_RAM,
         isStateful ? DEFAULT_DAEMON_PROCESS_RAM_PADDING : ByteAmount.ZERO);
 
-    // TODO(nlu): remove there logging line
-    ByteAmount totalBytes = stmgrRam.plus(metricsmgrRam).plus(ckptmgrRam);
-    LOG.info("discover the topology isStateful: " + isStateful);
-    LOG.info("total container padding bytes: " + totalBytes.toString());
-
     return stmgrRam.plus(metricsmgrRam).plus(ckptmgrRam);
   }
 
