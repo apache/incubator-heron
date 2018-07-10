@@ -90,6 +90,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
   @VisibleForTesting
   static final ByteAmount DEFAULT_RAM_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(2);
+  @VisibleForTesting
+  static final ByteAmount DEFAULT_DAEMON_PROCESS_RAM_PADDING = ByteAmount.fromGigabytes(1);
 
   // Use as a stub as default number value when getting config value
   private static final ByteAmount NOT_SPECIFIED_NUMBER_VALUE = ByteAmount.fromBytes(-1);
@@ -185,9 +187,28 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   private ByteAmount getContainerRamPadding(List<TopologyAPI.Config.KeyValue> topologyConfig) {
-    return TopologyUtils.getConfigWithDefault(topologyConfig,
-        org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_PADDING,
-        DEFAULT_RAM_PADDING_PER_CONTAINER);
+    ByteAmount stmgrRam = TopologyUtils.getConfigWithDefault(topologyConfig,
+        org.apache.heron.api.Config.TOPOLOGY_STMGR_RAM,
+        DEFAULT_DAEMON_PROCESS_RAM_PADDING);
+    ByteAmount metricsmgrRam = TopologyUtils.getConfigWithDefault(topologyConfig,
+        org.apache.heron.api.Config.TOPOLOGY_METRICSMGR_RAM,
+        DEFAULT_DAEMON_PROCESS_RAM_PADDING);
+    String reliabilityMode = TopologyUtils.getConfigWithDefault(topologyConfig,
+        org.apache.heron.api.Config.TOPOLOGY_RELIABILITY_MODE,
+        org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE.name());
+    boolean isStateful =
+        org.apache.heron.api.Config.TopologyReliabilityMode
+            .EFFECTIVELY_ONCE.name().equals(reliabilityMode);
+    ByteAmount ckptmgrRam = TopologyUtils.getConfigWithDefault(topologyConfig,
+        org.apache.heron.api.Config.TOPOLOGY_STATEFUL_CKPTMGR_RAM,
+        isStateful ? DEFAULT_DAEMON_PROCESS_RAM_PADDING : ByteAmount.ZERO);
+
+    // TODO(nlu): remove there logging line
+    ByteAmount totalBytes = stmgrRam.plus(metricsmgrRam).plus(ckptmgrRam);
+    LOG.info("discover the topology isStateful: " + isStateful);
+    LOG.info("total container padding bytes: " + totalBytes.toString());
+
+    return stmgrRam.plus(metricsmgrRam).plus(ckptmgrRam);
   }
 
   /**

@@ -216,7 +216,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         controller.addContainers(containersToAdd.size()));
     if (newAddedContainerIds.size() != containersToAdd.size()) {
       throw new RuntimeException(
-          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          "Aurora returned different container count " + newAddedContainerIds.size()
           + "; input count was " + containersToAdd.size());
     }
     // Do the remapping:

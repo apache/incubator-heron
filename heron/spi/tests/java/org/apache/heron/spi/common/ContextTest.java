@@ -61,6 +61,8 @@ public class ContextTest {
     Config defaultResources = props;
 
     assertEquals(Key.STMGR_RAM.getDefault(), Context.stmgrRam(defaultResources));
+    assertEquals(Key.CKPTMGR_RAM.getDefault(), Context.ckptmgrRam(defaultResources));
+    assertEquals(Key.METRICSMGR_RAM.getDefault(), Context.metricsmgrRam(defaultResources));
     assertEquals(
         (Double) Key.INSTANCE_CPU.getDefault(), Context.instanceCpu(defaultResources), 0.001);
     assertEquals(Key.INSTANCE_RAM.getDefault(), Context.instanceRam(defaultResources));

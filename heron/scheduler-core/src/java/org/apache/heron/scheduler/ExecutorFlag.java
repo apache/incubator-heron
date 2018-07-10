@@ -62,6 +62,7 @@ public enum ExecutorFlag {
   IsStateful("is-stateful"),
   CheckpointManagerClasspath("checkpoint-manager-classpath"),
   CheckpointManagerPort("checkpoint-manager-port"),
+  CheckpointManagerRam("checkpoint-manager-ram"),
   StatefulConfigFile("stateful-config-file"),
   HealthManagerMode("health-manager-mode"),
   HealthManagerClasspath("health-manager-classpath"),
