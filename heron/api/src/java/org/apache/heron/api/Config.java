@@ -48,7 +48,7 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts";
   /**
-   * Per component jvm options.  The format of this flag is something like
+   * Per component JVM options.  The format of this flag is something like
    * spout0:jvmopt_for_spout0,spout1:jvmopt_for_spout1. Mostly should be used
    * in conjunction with setComponentJvmOptions(). This is used in addition
    * to TOPOLOGY_WORKER_CHILDOPTS. While TOPOLOGY_WORKER_CHILDOPTS applies for
@@ -153,11 +153,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_RELIABILITY_MODE = "topology.reliability.mode";
 
   /**
-   * Number of cpu cores per container to be reserved for this topology
+   * Number of CPU cores per container to be reserved for this topology
    */
   public static final String TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
   /**
-   * Amount of ram per container to be reserved for this topology.
+   * Amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
@@ -167,11 +167,11 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk";
   /**
-   * Hint for max number of cpu cores per container to be reserved for this topology
+   * Hint for max number of CPU cores per container to be reserved for this topology
    */
   public static final String TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint";
   /**
-   * Hint for max amount of ram per container to be reserved for this topology.
+   * Hint for max amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_MAX_RAM_HINT = "topology.container.max.ram.hint";
@@ -187,22 +187,22 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
   /**
-   * Amount of ram to pad each container.
+   * Amount of RAM to pad each container.
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
    */
   public static final String TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";

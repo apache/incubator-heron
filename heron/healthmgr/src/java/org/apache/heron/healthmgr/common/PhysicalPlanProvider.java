@@ -33,7 +33,7 @@ import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 /**
  * A topology's physical plan may get updated after initial deployment. This provider is used to
@@ -78,11 +78,9 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
 
   @Override
   public synchronized PhysicalPlan get() {
+    physicalPlan = stateManagerAdaptor.getPhysicalPlan(topologyName);
     if (physicalPlan == null) {
-      physicalPlan = stateManagerAdaptor.getPhysicalPlan(topologyName);
-      if (physicalPlan == null) {
-        throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
-      }
+      throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
     }
     return physicalPlan;
   }

@@ -40,13 +40,13 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
 ```
 
-4. Start heron apiserver:
+4. Start heron API server:
 ```shell
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/apiserver.yaml
 ```
 
-### Deploy via heron apiserver
-We will start a proxy to the cluster and then construct a [proxy url](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls) to access the apiserver.
+### Deploy via heron API server
+We will start a proxy to the cluster and then construct a [proxy url](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls) to access the API server.
 
 
 1. Start kubectl proxy:
@@ -54,7 +54,7 @@ We will start a proxy to the cluster and then construct a [proxy url](https://ku
 $ kubectl proxy -p 8001
 ```
 
-2. Verify we can access the apiserver:
+2. Verify we can access the API server:
 
 ```shell
 $ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version

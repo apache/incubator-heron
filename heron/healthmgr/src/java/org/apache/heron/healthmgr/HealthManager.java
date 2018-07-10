@@ -66,6 +66,11 @@ import org.apache.heron.spi.statemgr.IStateManager;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import org.apache.heron.spi.utils.ReflectionUtils;
 
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_TYPE;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
+
 /**
  * {@link HealthManager} makes a topology dynamic and self-regulating. This is implemented using
  * Dhalion library. The {@link HealthManager} will perform the following functions to achieve its
@@ -104,10 +109,6 @@ import org.apache.heron.spi.utils.ReflectionUtils;
 @Unstable
 @Evolving
 public class HealthManager {
-  public static final String CONF_TOPOLOGY_NAME = "TOPOLOGY_NAME";
-  public static final String CONF_METRICS_SOURCE_URL = "METRICS_SOURCE_URL";
-  private static final String CONF_METRICS_SOURCE_TYPE = "METRICS_SOURCE_TYPE";
-
   private static final Logger LOG = Logger.getLogger(HealthManager.class.getName());
   private final Config config;
   private AbstractModule baseModule;
@@ -314,7 +315,7 @@ public class HealthManager {
       Class<IHealthPolicy> policyClass
           = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
 
-      AbstractModule module = constructPolicySpecificModule(policyConfig);
+      AbstractModule module = constructPolicySpecificModule(policyId, policyConfig);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
 
       healthPolicies.add(policy);
@@ -378,10 +379,14 @@ public class HealthManager {
     };
   }
 
-  private AbstractModule constructPolicySpecificModule(final HealthPolicyConfig policyConfig) {
+  private AbstractModule constructPolicySpecificModule(
+      final String policyId, final HealthPolicyConfig policyConfig) {
     return new AbstractModule() {
       @Override
       protected void configure() {
+        bind(String.class)
+            .annotatedWith(Names.named(CONF_POLICY_ID))
+            .toInstance(policyId);
         bind(HealthPolicyConfig.class).toInstance(policyConfig);
       }
     };

@@ -165,6 +165,7 @@ public class SpoutInstance implements IInstance {
     } finally {
       collector.lock.unlock();
     }
+    LOG.info("State persisted for checkpoint: " + checkpointId);
   }
 
   @SuppressWarnings("unchecked")

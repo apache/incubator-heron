@@ -21,6 +21,7 @@ heron.statefulstorage.classname:            "org.apache.heron.statefulstorage.lo
 heron.statefulstorage.config:
   heron.statefulstorage.classpath:           ""
   heron.statefulstorage.localfs.root.path:   ~/.herondata/checkpoints
+  heron.statefulstorage.localfs.max.checkpoints: 10
 
 # Following are configs for socket between ckptmgr and stateful storage
 heron.ckptmgr.network.write.batch.size.bytes: 32768

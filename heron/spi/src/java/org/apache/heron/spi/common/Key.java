@@ -173,8 +173,8 @@ public enum Key {
   //keys for heron configuration files on the cluster
   OVERRIDE_YAML("heron.config.file.override.yaml",  "${HERON_CONF}/override.yaml"),
 
-  // Path to the config overrides passed into the apiserver. Only applicable to submitting
-  // topologies via apiserver
+  // Path to the config overrides passed into the API server. Only applicable to submitting
+  // topologies via API server
   APISERVER_OVERRIDE_YAML("heron.apiserver.file.override.yaml", Type.STRING),
 
   //keys for config provided user binaries

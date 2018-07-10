@@ -270,7 +270,7 @@ public final class Runtime {
     Logging.setVerbose(verbose);
     Logging.configure(verbose);
 
-    LOG.debug("apiserver overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
+    LOG.debug("API server overrides:\n {}", cmd.getOptionProperties(Flag.Property.name));
 
     final String toolsHome = getToolsHome();
 
@@ -324,7 +324,7 @@ public final class Runtime {
     try {
       server.start();
 
-      LOG.info("Heron apiserver started at {}", server.getURI());
+      LOG.info("Heron API server started at {}", server.getURI());
 
       server.join();
     } catch (Exception ex) {

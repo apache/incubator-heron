@@ -65,8 +65,8 @@ class AuroraHeronShellController implements AuroraController {
   }
 
   @Override
-  public boolean createJob(Map<AuroraField, String> bindings) {
-    return cliController.createJob(bindings);
+  public boolean createJob(Map<AuroraField, String> bindings, Map<String, String> extra) {
+    return cliController.createJob(bindings, extra);
   }
 
   @Override

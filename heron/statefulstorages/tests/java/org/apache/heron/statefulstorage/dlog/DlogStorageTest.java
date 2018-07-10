@@ -43,6 +43,7 @@ import org.apache.distributedlog.api.namespace.NamespaceBuilder;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -63,7 +64,7 @@ public class DlogStorageTest {
   private static final String ROOT_URI = "distributedlog://127.0.0.1/heron/statefulstorage";
 
   private PhysicalPlans.Instance instance;
-  private CheckpointManager.InstanceStateCheckpoint instanceStateCheckpoint;
+  private CheckpointManager.InstanceStateCheckpoint checkpointPartition;
 
   private DlogStorage dlogStorage;
   private NamespaceBuilder mockNsBuilder;
@@ -82,11 +83,11 @@ public class DlogStorageTest {
     when(mockNsBuilder.build()).thenReturn(mockNamespace);
 
     dlogStorage = new DlogStorage(() -> mockNsBuilder);
-    dlogStorage.init(config);
+    dlogStorage.init(StatefulStorageTestContext.TOPOLOGY_NAME, config);
     dlogStorage = spy(dlogStorage);
 
     instance = StatefulStorageTestContext.getInstance();
-    instanceStateCheckpoint = StatefulStorageTestContext.getInstanceStateCheckpoint();
+    checkpointPartition = StatefulStorageTestContext.getInstanceStateCheckpoint();
   }
 
   @After
@@ -100,15 +101,16 @@ public class DlogStorageTest {
     CheckpointManager.InstanceStateCheckpoint mockCheckpointState =
         mock(CheckpointManager.InstanceStateCheckpoint.class);
 
-    Checkpoint checkpoint =
-        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, mockCheckpointState);
+    final CheckpointInfo info = new CheckpointInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    Checkpoint checkpoint = new Checkpoint(mockCheckpointState);
 
     DistributedLogManager mockDLM = mock(DistributedLogManager.class);
     when(mockNamespace.openLog(anyString())).thenReturn(mockDLM);
     AppendOnlyStreamWriter mockWriter = mock(AppendOnlyStreamWriter.class);
     when(mockDLM.getAppendOnlyStreamWriter()).thenReturn(mockWriter);
 
-    dlogStorage.store(checkpoint);
+    dlogStorage.storeCheckpoint(info, checkpoint);
 
     verify(mockWriter).markEndOfStream();
     verify(mockWriter).close();
@@ -116,22 +118,18 @@ public class DlogStorageTest {
 
   @Test
   public void testRestore() throws Exception {
-    Checkpoint restoreCheckpoint =
-        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, instanceStateCheckpoint);
-
     InputStream mockInputStream = mock(InputStream.class);
     doReturn(mockInputStream).when(dlogStorage).openInputStream(anyString());
 
     PowerMockito.spy(CheckpointManager.InstanceStateCheckpoint.class);
-    PowerMockito.doReturn(instanceStateCheckpoint)
+    PowerMockito.doReturn(checkpointPartition)
         .when(CheckpointManager.InstanceStateCheckpoint.class,
             "parseFrom", mockInputStream);
 
-    dlogStorage.restore(
-        StatefulStorageTestContext.TOPOLOGY_NAME,
-        StatefulStorageTestContext.CHECKPOINT_ID,
-        instance);
-    assertEquals(restoreCheckpoint.getCheckpoint(), instanceStateCheckpoint);
+    final CheckpointInfo info = new CheckpointInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    Checkpoint restoreCheckpoint = dlogStorage.restoreCheckpoint(info);
+    assertEquals(restoreCheckpoint.getCheckpoint(), checkpointPartition);
   }
 
   @Test
@@ -167,10 +165,7 @@ public class DlogStorageTest {
     when(mockCheckpoint1.getLogs()).thenReturn(chkp1Tasks.iterator());
     when(mockCheckpoint2.getLogs()).thenReturn(chkp2Tasks.iterator());
 
-    dlogStorage.dispose(
-        StatefulStorageTestContext.TOPOLOGY_NAME,
-        "checkpoint0",
-        true);
+    dlogStorage.dispose("checkpoint0", true);
 
     verify(mockCheckpoint1, times(1)).deleteLog(eq("component1_task1"));
     verify(mockCheckpoint1, times(1)).deleteLog(eq("component1_task2"));
@@ -211,10 +206,7 @@ public class DlogStorageTest {
     when(mockCheckpoint1.getLogs()).thenReturn(chkp1Tasks.iterator());
     when(mockCheckpoint2.getLogs()).thenReturn(chkp2Tasks.iterator());
 
-    dlogStorage.dispose(
-        StatefulStorageTestContext.TOPOLOGY_NAME,
-        "checkpoint0",
-        false);
+    dlogStorage.dispose("checkpoint0", false);
 
     verify(mockCheckpoint1, times(0)).deleteLog(eq("component1_task1"));
     verify(mockCheckpoint1, times(0)).deleteLog(eq("component1_task2"));
@@ -255,10 +247,7 @@ public class DlogStorageTest {
     when(mockCheckpoint1.getLogs()).thenReturn(chkp1Tasks.iterator());
     when(mockCheckpoint2.getLogs()).thenReturn(chkp2Tasks.iterator());
 
-    dlogStorage.dispose(
-        StatefulStorageTestContext.TOPOLOGY_NAME,
-        "checkpoint2",
-        false);
+    dlogStorage.dispose("checkpoint2", false);
 
     verify(mockCheckpoint1, times(1)).deleteLog(eq("component1_task1"));
     verify(mockCheckpoint1, times(1)).deleteLog(eq("component1_task2"));

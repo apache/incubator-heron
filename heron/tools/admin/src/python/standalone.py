@@ -501,7 +501,7 @@ def start_api_server(masters, cl_args):
   output = pid.communicate()
   Log.debug("return code: %s output: %s" % (return_code, output))
   if return_code != 0:
-    Log.error("Failed to start apiserver on %s with error:\n%s" % (single_master, output[1]))
+    Log.error("Failed to start API server on %s with error:\n%s" % (single_master, output[1]))
     sys.exit(-1)
 
   wait_for_job_to_start(single_master, "apiserver")
@@ -796,13 +796,13 @@ def get_nomad_slave_config_file(cl_args):
 
 def get_apiserver_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/apiserver.hcl" % config.get_heron_conf_dir()
 
 def get_heron_tools_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/heron_tools.hcl" % config.get_heron_conf_dir()
 

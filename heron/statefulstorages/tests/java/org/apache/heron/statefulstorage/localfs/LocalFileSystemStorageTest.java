@@ -19,6 +19,7 @@
 
 package org.apache.heron.statefulstorage.localfs;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.proto.ckptmgr.CheckpointManager.InstanceStateCheckpoint;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.statefulstorage.StatefulStorageTestContext;
 
 import static org.junit.Assert.assertEquals;
@@ -60,7 +62,7 @@ public class LocalFileSystemStorageTest {
     config.put(StatefulStorageTestContext.ROOT_PATH_KEY, StatefulStorageTestContext.ROOT_PATH);
 
     localFileSystemStorage = spy(new LocalFileSystemStorage());
-    localFileSystemStorage.init(config);
+    localFileSystemStorage.init(StatefulStorageTestContext.TOPOLOGY_NAME, config);
 
     instance = StatefulStorageTestContext.getInstance();
     checkpoint = StatefulStorageTestContext.getInstanceStateCheckpoint();
@@ -79,14 +81,38 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "isDirectoryExists", anyString());
     PowerMockito.doReturn(true)
         .when(FileUtils.class, "writeToFile", anyString(), any(byte[].class), anyBoolean());
+    PowerMockito.doReturn(false).when(FileUtils.class, "hasChildren", anyString());
 
     Checkpoint mockCheckpoint = mock(Checkpoint.class);
     when(mockCheckpoint.getCheckpoint()).thenReturn(checkpoint);
 
-    localFileSystemStorage.store(mockCheckpoint);
+    final CheckpointInfo info = new CheckpointInfo(
+        StatefulStorageTestContext.CHECKPOINT_ID, instance);
+    localFileSystemStorage.storeCheckpoint(info, mockCheckpoint);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.writeToFile(anyString(), eq(checkpoint.toByteArray()), eq(true));
+  }
+
+  @Test
+  public void testCleanCheckpoints() throws Exception {
+    String fakeRootPath = "/fake/root/path";
+
+    PowerMockito.spy(FileUtils.class);
+    PowerMockito.doReturn(true).when(FileUtils.class, "isDirectoryExists", fakeRootPath);
+    PowerMockito.doReturn(true).when(FileUtils.class, "hasChildren", anyString());
+    PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", any(File.class), anyBoolean());
+
+    File mockRootFile = mock(File.class);
+    when(mockRootFile.getAbsolutePath()).thenReturn(fakeRootPath);
+    String[] files = {"1", "2", "3"};
+    when(mockRootFile.list()).thenReturn(files);
+
+    localFileSystemStorage.cleanCheckpoints(mockRootFile, 1);
+
+    PowerMockito.verifyStatic(times(1));
+    FileUtils.deleteDir(new File(String.format("%s%s%s", fakeRootPath, File.separator, "1")), true);
+    FileUtils.deleteDir(new File(String.format("%s%s%s", fakeRootPath, File.separator, "2")), true);
   }
 
   @Test
@@ -95,11 +121,10 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(checkpoint.toByteArray())
         .when(FileUtils.class, "readFromFile", anyString());
 
-    Checkpoint ckpt =
-        new Checkpoint(StatefulStorageTestContext.TOPOLOGY_NAME, instance, checkpoint);
-
-    localFileSystemStorage.restore(StatefulStorageTestContext.TOPOLOGY_NAME,
+    final CheckpointInfo info = new CheckpointInfo(
         StatefulStorageTestContext.CHECKPOINT_ID, instance);
+
+    Checkpoint ckpt = localFileSystemStorage.restoreCheckpoint(info);
 
     assertEquals(checkpoint, ckpt.getCheckpoint());
   }
@@ -110,7 +135,7 @@ public class LocalFileSystemStorageTest {
     PowerMockito.doReturn(true).when(FileUtils.class, "deleteDir", anyString());
     PowerMockito.doReturn(false).when(FileUtils.class, "isDirectoryExists", anyString());
 
-    localFileSystemStorage.dispose(StatefulStorageTestContext.TOPOLOGY_NAME, "", true);
+    localFileSystemStorage.dispose("", true);
 
     PowerMockito.verifyStatic(times(1));
     FileUtils.deleteDir(anyString());

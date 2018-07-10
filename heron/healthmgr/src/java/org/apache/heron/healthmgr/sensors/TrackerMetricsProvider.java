@@ -43,8 +43,8 @@ import com.microsoft.dhalion.core.Measurement;
 
 import net.minidev.json.JSONArray;
 
-import static org.apache.heron.healthmgr.HealthManager.CONF_METRICS_SOURCE_URL;
-import static org.apache.heron.healthmgr.HealthManager.CONF_TOPOLOGY_NAME;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_METRICS_SOURCE_URL;
+import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 
 public class TrackerMetricsProvider implements MetricsProvider {
   public static final String CONF_CLUSTER = "CLUSTER";

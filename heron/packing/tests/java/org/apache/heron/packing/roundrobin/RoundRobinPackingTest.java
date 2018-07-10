@@ -78,7 +78,7 @@ public class RoundRobinPackingTest {
     org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
     topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
-    // Explicit set insufficient ram for container
+    // Explicit set insufficient RAM for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(0);
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -220,7 +220,7 @@ public class RoundRobinPackingTest {
   }
 
   /**
-   * Test the scenario ram map config is partially set
+   * Test the scenario RAM map config is partially set
    */
   @Test
   public void testCompleteRamMapRequested() throws Exception {
@@ -234,10 +234,10 @@ public class RoundRobinPackingTest {
     topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    // the value should be ignored, since we set the complete component ram map
+    // the value should be ignored, since we set the complete component RAM map
     ByteAmount containerRam = ByteAmount.fromBytes(Long.MAX_VALUE);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
     ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
 
@@ -256,7 +256,7 @@ public class RoundRobinPackingTest {
   }
 
   /**
-   * Test the scenario ram map config is partially set
+   * Test the scenario RAM map config is partially set
    */
   @Test
   public void testPartialRamMap() throws Exception {
@@ -272,7 +272,7 @@ public class RoundRobinPackingTest {
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
 
-    // Explicit set component ram map
+    // Explicit set component RAM map
     ByteAmount boltRam = ByteAmount.fromGigabytes(1);
 
     topologyConfig.setContainerRamRequested(containerRam);
@@ -284,7 +284,7 @@ public class RoundRobinPackingTest {
         getRoundRobinPackingPlan(topologyExplicitRamMap);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
 
-    // Ram for bolt should be the value in component ram map
+    // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan
         : packingPlanExplicitRamMap.getContainers()) {
       Assert.assertEquals(containerRam, containerPlan.getRequiredResource().getRam());
@@ -298,7 +298,7 @@ public class RoundRobinPackingTest {
       }
 
       // Ram for spout should be:
-      // (containerRam - all ram for bolt - ram for padding) / (# of spouts)
+      // (containerRam - all RAM for bolt - RAM for padding) / (# of spouts)
       int spoutCount = instancesCount - boltCount;
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         if (instancePlan.getComponentName().equals(SPOUT_NAME)) {

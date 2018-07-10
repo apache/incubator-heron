@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.heron.api.grouping.CustomStreamGrouping;
 import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.SerializableFunction;
 
 /**
@@ -52,8 +53,8 @@ public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
     V obj = (V) values.get(0);
-    int index = keyExtractor.apply(obj).hashCode() % taskIds.size();
-    ret.add(taskIds.get(index));
+    int key = keyExtractor.apply(obj).hashCode();
+    ret.add(Utils.assignKeyToTask(key, taskIds));
     return ret;
   }
 }

@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.proto.system.HeronTuples;
 
 public class FieldsGrouping extends Grouping {
@@ -55,10 +56,7 @@ public class FieldsGrouping extends Grouping {
       taskIndex += getHashCode(tuple.getValues(indices)) % primeNumber;
     }
 
-    taskIndex = taskIndex % taskIds.size();
-    // Make sure taskIndex is greater than 0
-    taskIndex = taskIndex >= 0 ? taskIndex : taskIndex + taskIds.size();
-    res.add(taskIds.get(taskIndex));
+    res.add(Utils.assignKeyToTask(taskIndex, taskIds));
 
     return res;
   }

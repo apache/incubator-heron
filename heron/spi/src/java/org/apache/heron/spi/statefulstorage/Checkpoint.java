@@ -20,43 +20,19 @@
 package org.apache.heron.spi.statefulstorage;
 
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
-import org.apache.heron.proto.system.PhysicalPlans;
 
+/**
+ * The checkpoint data from an instance. It contains the instance information and the checkpoint
+ * data for the instance.
+ * TODO(nwang): Currently each instance has only one partition.
+ */
 public class Checkpoint {
-  private final String topologyName;
-  private final String checkpointId;
-  private final PhysicalPlans.Instance instanceInfo;
-
   private CheckpointManager.InstanceStateCheckpoint checkpoint;
   private int nBytes;
 
-  public Checkpoint(String topologyName, PhysicalPlans.Instance instanceInfo,
-                    CheckpointManager.InstanceStateCheckpoint checkpoint) {
-    this.topologyName = topologyName;
-    this.checkpointId = checkpoint.getCheckpointId();
-    this.instanceInfo = instanceInfo;
+  public Checkpoint(CheckpointManager.InstanceStateCheckpoint checkpoint) {
     this.checkpoint = checkpoint;
     this.nBytes = checkpoint.getSerializedSize();
-  }
-
-  public String getTopologyName() {
-    return topologyName;
-  }
-
-  public String getCheckpointId() {
-    return checkpointId;
-  }
-
-  public String getComponent() {
-    return instanceInfo.getInfo().getComponentName();
-  }
-
-  public String getInstance() {
-    return instanceInfo.getInstanceId();
-  }
-
-  public int getTaskId() {
-    return instanceInfo.getInfo().getTaskId();
   }
 
   public CheckpointManager.InstanceStateCheckpoint getCheckpoint() {
@@ -65,6 +41,6 @@ public class Checkpoint {
 
   @Override
   public String toString() {
-    return String.format("%s %s %s %s", topologyName, checkpointId, getComponent(), getInstance());
+    return String.format("Checkpoint(%d bytes)", nBytes);
   }
 }

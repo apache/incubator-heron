@@ -29,7 +29,7 @@ import org.apache.heron.spi.packing.PackingPlan;
  */
 public interface AuroraController {
 
-  boolean createJob(Map<AuroraField, String> auroraProperties);
+  boolean createJob(Map<AuroraField, String> auroraProperties, Map<String, String> extra);
   boolean killJob();
 
   /**
