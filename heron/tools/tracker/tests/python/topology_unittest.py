@@ -32,6 +32,15 @@ class TopologyTest(unittest.TestCase):
     self.topology.set_packing_plan(packing_plan)
     self.assertEqual(packing_plan, self.topology.packing_plan)
 
+    # testing with a packing plan with scheduled resources
+    self.topology.set_packing_plan(None)
+    self.assertIsNone(self.topology.id)
+    self.assertIsNone(self.topology.packing_plan)
+
+    packing_plan = MockProto().create_mock_simple_packing_plan2()
+    self.topology.set_packing_plan(packing_plan)
+    self.assertEqual(packing_plan, self.topology.packing_plan)
+
   def test_set_execution_state(self):
     # Set it to None
     self.topology.set_execution_state(None)

@@ -43,12 +43,20 @@ class MockProto(object):
     instancePlan.resource.CopyFrom(self.create_mock_resource())
     return instancePlan
 
-  def create_mock_container_plan(self):
+  def create_mock_simple_container_plan(self):
     containerPlan = protoPackingPlan.ContainerPlan()
     containerPlan.id = 1
     containerPlan.instance_plans.extend([self.create_mock_instance_plan()])
     containerPlan.requiredResource.CopyFrom(self.create_mock_resource())
 
+    return containerPlan
+
+  def create_mock_simple_container_plan2(self):
+    containerPlan = protoPackingPlan.ContainerPlan()
+    containerPlan.id = 1
+    containerPlan.instance_plans.extend([self.create_mock_instance_plan()])
+    containerPlan.requiredResource.CopyFrom(self.create_mock_resource())
+    containerPlan.scheduledResource.CopyFrom(self.create_mock_resource())
     return containerPlan
 
   def create_mock_bolt(self,
@@ -166,7 +174,15 @@ class MockProto(object):
     self):
     packingPlan = protoPackingPlan.PackingPlan()
     packingPlan.id = "ExclamationTopology"
-    packingPlan.container_plans.extend([self.create_mock_container_plan()])
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan()])
+    return packingPlan
+
+  def create_mock_simple_packing_plan2(
+    self):
+    packingPlan = protoPackingPlan.PackingPlan()
+    packingPlan.id = "ExclamationTopology"
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan2()])
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan()])
     return packingPlan
 
   def create_mock_medium_physical_plan(
