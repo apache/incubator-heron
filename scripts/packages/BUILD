@@ -347,6 +347,7 @@ pkg_tar(
     package_dir = "bin",
     srcs = [
         "//integration_test/src/python/http_server:http-server",
+        "//integration_test/src/python/http_server:http-server-stateful",
         "//integration_test/src/python/test_runner:test-runner",
         "//integration_test/src/python/topology_test_runner:topology-test-runner",
     ]

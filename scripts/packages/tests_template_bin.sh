@@ -77,6 +77,9 @@ fi
 if [ -L "${bin}/http-server" ]; then
   rm -f "${bin}/http-server"
 fi
+if [ -L "${bin}/http-server-stateful" ]; then
+  rm -f "${bin}/http-server-stateful"
+fi
 if [ -d "${base}" -a -x "${base}/bin/test-runner" ]; then
   rm -fr "${base}"
 fi
@@ -90,7 +93,7 @@ echo -n .
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 untar ${base}/heron-tests.tar.gz ${base}
 echo -n .
-chmod 0755 ${base}/bin/test-runner ${base}/bin/http-server ${base}/bin/topology-test-runner
+chmod 0755 ${base}/bin/test-runner ${base}/bin/http-server ${base}/bin/topology-test-runner ${base}/bin/http-server-stateful
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
@@ -100,6 +103,7 @@ echo -n .
 ln -s "${base}/bin/test-runner" "${bin}/test-runner"
 ln -s "${base}/bin/topology-test-runner" "${bin}/topology-test-runner"
 ln -s "${base}/bin/http-server" "${bin}/http-server"
+ln -s "${base}/bin/http-server-stateful" "${bin}/http-server-stateful"
 mv "${base}/lib/heron_integ_topology" "${base}/lib/heron_integ_topology.pex"
 echo -n .
 

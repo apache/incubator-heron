@@ -80,6 +80,15 @@ ${HOME}/bin/test-runner \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
+# initialize http-server-stateful for integration tests of
+# instance state in stateful processing
+T="heron integration_topology_test http-server-stateful initialization"
+start_timer "$T"
+${HOME}/bin/http-server-stateful 8080 &
+http_server_id=$!
+trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
+end_timer "$T"
+
 # run the java integration topology test
 T="heron integration_topology_test java"
 start_timer "$T"

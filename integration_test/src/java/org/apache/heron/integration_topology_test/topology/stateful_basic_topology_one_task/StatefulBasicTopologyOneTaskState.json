@@ -1,0 +1,4 @@
+[{"stateful-ab-spout": {"A_6": 1, "A_4": 1, "A_2": 1, "A_0": 1, "A_8": 1, "B_9": 1, "B_1": 1, "B_3": 1, "B_5": 1, "B_7": 1}},
+  {"stateful-identity-bolt": {"B_5": 1, "A_2": 1, "A_8": 1}},
+  {"stateful-identity-bolt": {"B_1": 1, "A_4": 1, "B_7": 1}},
+  {"stateful-identity-bolt": {"A_6": 1, "B_3": 1, "A_0": 1, "B_9": 1}}]
