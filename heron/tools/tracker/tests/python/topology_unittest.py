@@ -22,6 +22,16 @@ class TopologyTest(unittest.TestCase):
     self.assertEqual(MockProto.topology_id, self.topology.id)
     self.assertEqual(physical_plan, self.topology.physical_plan)
 
+  def test_set_packing_plan(self):
+    # Set it to None
+    self.topology.set_packing_plan(None)
+    self.assertIsNone(self.topology.id)
+    self.assertIsNone(self.topology.packing_plan)
+
+    packing_plan = MockProto().create_mock_simple_packing_plan()
+    self.topology.set_packing_plan(packing_plan)
+    self.assertEqual(packing_plan, self.topology.packing_plan)
+
   def test_set_execution_state(self):
     # Set it to None
     self.topology.set_execution_state(None)

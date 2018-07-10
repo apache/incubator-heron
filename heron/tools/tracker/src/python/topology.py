@@ -46,6 +46,7 @@ class Topology(object):
     self.name = name
     self.state_manager_name = state_manager_name
     self.physical_plan = None
+    self.packing_plan = None
     self.execution_state = None
     self.id = None
     self.cluster = None
@@ -126,6 +127,16 @@ class Topology(object):
     else:
       self.physical_plan = physical_plan
       self.id = physical_plan.topology.id
+    self.trigger_watches()
+
+  def set_packing_plan(self, packing_plan):
+    """ set packing plan """
+    if not packing_plan:
+      self.packing_plan = None
+      self.id = None
+    else:
+      self.packing_plan = packing_plan
+      self.id = packing_plan.id
     self.trigger_watches()
 
   # pylint: disable=no-self-use
