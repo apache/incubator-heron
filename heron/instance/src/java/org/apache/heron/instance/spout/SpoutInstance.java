@@ -101,7 +101,8 @@ public class SpoutInstance implements IInstance {
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
 
-    this.spillState = (Boolean) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE);
+    this.spillState =
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE));
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);
 

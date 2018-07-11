@@ -600,7 +600,7 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setTopologyStatefulSpillState(Map<String, Object> conf,
-                                   boolean spillState) {
+                                   String spillState) {
     conf.put(Config.TOPOLOGY_STATEFUL_SPILL_STATE, spillState);
   }
 
@@ -784,7 +784,7 @@ public class Config extends HashMap<String, Object> {
     setCheckpointManagerRam(this, ramInBytes);
   }
 
-  public void setTopologyStatefulSpillState(boolean spillState) {
+  public void setTopologyStatefulSpillState(String spillState) {
     setTopologyStatefulSpillState(this, spillState);
   }
 
