@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.Config;
@@ -328,6 +329,13 @@ public class Slave implements Runnable, AutoCloseable {
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(rawState);
       instanceState = stateToRestore;
+    } else if (request.getState().hasStateLocation()) {
+      String stateUri = request.getState().getStateLocation();
+
+      ByteString rawState = loadState(stateUri);
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(rawState.toByteArray());
+      instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
     }
@@ -360,24 +368,20 @@ public class Slave implements Runnable, AutoCloseable {
     streamOutCommunicator.offer(response);
   }
 
-  private byte[] loadStateFromFile(String stateUri) {
+  private ByteString loadState(String stateUri) {
     File f = new File(stateUri);
     byte[] data = new byte[(int) f.length()];
 
     try (FileInputStream fis = new FileInputStream(stateUri);
          DataInputStream dis = new DataInputStream(fis)) {
       dis.read(data);
-      return data;
+      return ByteString.copyFrom(data);
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);
     } finally {
-      // we have to clean it here manually to avoid using too many disks
-      // TODO(nlu): find a cleaner and more consistent way to handle temp state files
-      LOG.info("cleaning temp state file: " + f.getPath());
-      if (f.delete()) {
-        LOG.info("deleted tmp state file");
-      } else {
-        LOG.info("failed to delete state file");
+      if (f.exists()) {
+        LOG.info("deleting local state file: " + f.getPath());
+        f.delete();
       }
     }
   }

@@ -193,7 +193,7 @@ public class CheckpointManager {
     }
 
     try {
-      statefulStorage.init(
+      statefulStorage.init(topologyName,
           Collections.unmodifiableMap(checkpointManagerConfig.getStatefulStorageConfig()));
     } catch (StatefulStorageException e) {
       throw new CheckpointManagerException(classname + " init threw exception", e);

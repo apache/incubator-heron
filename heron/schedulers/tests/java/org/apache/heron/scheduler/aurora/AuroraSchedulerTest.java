@@ -133,24 +133,28 @@ public class AuroraSchedulerTest {
 
     // Failed to create job via controller
     doReturn(false).when(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(Matchers.anyMapOf(AuroraField.class, String.class),
+            Matchers.anyMapOf(String.class, String.class));
     doReturn(true).when(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     Assert.assertFalse(scheduler.onSchedule(validPlan));
 
     Mockito.verify(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(Matchers.anyMapOf(AuroraField.class, String.class),
+            Matchers.anyMapOf(String.class, String.class));
     Mockito.verify(stateManager)
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
 
     // Happy path
     doReturn(true).when(controller)
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(Matchers.anyMapOf(AuroraField.class, String.class),
+            Matchers.anyMapOf(String.class, String.class));
     assertTrue(scheduler.onSchedule(validPlan));
 
     Mockito.verify(controller, Mockito.times(2))
-        .createJob(Matchers.anyMapOf(AuroraField.class, String.class));
+        .createJob(Matchers.anyMapOf(AuroraField.class, String.class),
+            Matchers.anyMapOf(String.class, String.class));
     Mockito.verify(stateManager, Mockito.times(2))
         .updatePackingPlan(any(PackingPlans.PackingPlan.class), eq(TOPOLOGY_NAME));
   }
@@ -334,6 +338,7 @@ public class AuroraSchedulerTest {
             + " --checkpoint-manager-classpath=" + expectedLib + "/ckptmgr/*:"
             + expectedLib + "/statefulstorage/*:"
             + " --stateful-config-file=" + expectedConf + "/stateful.yaml"
+            + " --checkpoint-manager-ram=1073741824"
             + " --health-manager-mode=disabled"
             + " --health-manager-classpath=" + expectedLib + "/healthmgr/*";
           break;

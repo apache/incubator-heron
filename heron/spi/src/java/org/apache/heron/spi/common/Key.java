@@ -118,10 +118,12 @@ public enum Key {
   STATEMGR_ROOT_PATH        ("heron.statemgr.root.path",         Type.STRING),
 
   //keys for config provided default values for resources
-  STMGR_RAM                 ("heron.resources.stmgr.ram",     ByteAmount.fromBytes(1073741824)),
-  INSTANCE_RAM              ("heron.resources.instance.ram",  ByteAmount.fromBytes(1073741824)),
-  INSTANCE_CPU              ("heron.resources.instance.cpu",  1.0),
-  INSTANCE_DISK             ("heron.resources.instance.disk", ByteAmount.fromBytes(1073741824)),
+  STMGR_RAM                 ("heron.resources.stmgr.ram",      ByteAmount.fromBytes(1073741824)),
+  CKPTMGR_RAM               ("heron.resources.ckptmgr.ram",    ByteAmount.fromBytes(1073741824)),
+  METRICSMGR_RAM            ("heron.resources.metricsmgr.ram", ByteAmount.fromBytes(1073741824)),
+  INSTANCE_RAM              ("heron.resources.instance.ram",   ByteAmount.fromBytes(1073741824)),
+  INSTANCE_CPU              ("heron.resources.instance.cpu",   1.0),
+  INSTANCE_DISK             ("heron.resources.instance.disk",  ByteAmount.fromBytes(1073741824)),
 
   //keys for checkpoint management
   STATEFUL_STORAGE_CLASSNAME               ("heron.statefulstorage.classname", Type.STRING),

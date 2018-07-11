@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +42,7 @@ import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -54,9 +57,14 @@ public class CheckpointManagerServer extends HeronServer {
   private SocketChannel connection;
 
   public CheckpointManagerServer(
-      String topologyName, String topologyId, String checkpointMgrId,
-      IStatefulStorage statefulStorage, NIOLooper looper, String host,
-      int port, HeronSocketOptions options) {
+      String topologyName,
+      String topologyId,
+      String checkpointMgrId,
+      IStatefulStorage statefulStorage,
+      NIOLooper looper,
+      String host,
+      int port,
+      HeronSocketOptions options) {
     super(looper, host, port, options);
 
     this.topologyName = topologyName;
@@ -121,8 +129,7 @@ public class CheckpointManagerServer extends HeronServer {
     String errorMessage = "";
 
     try {
-      statefulStorage.dispose(topologyName,
-                                 request.getOldestCheckpointPreserved(), deleteAll);
+      statefulStorage.dispose(request.getOldestCheckpointPreserved(), deleteAll);
       LOG.info("Dispose checkpoint successful");
     } catch (StatefulStorageException e) {
       errorMessage = String.format("Request to dispose checkpoint failed for oldest Checkpoint "
@@ -209,34 +216,38 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    Checkpoint checkpoint = null;
+    CheckpointInfo info =
+        new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
+            request.getInstance());
 
     // TODO(nlu): handle states in different locations
-    if (request.getCheckpoint().hasStateUri()) {
+    Checkpoint checkpoint = null;
+    if (request.getCheckpoint().hasStateLocation()) {
       checkpoint = loadCheckpoint(request.getInstance(), request.getCheckpoint().getCheckpointId(),
-          request.getCheckpoint().getStateUri());
+          request.getCheckpoint().getStateLocation());
     } else {
-      checkpoint = new Checkpoint(topologyName, request.getInstance(),
-          request.getCheckpoint());
+      checkpoint = new Checkpoint(request.getCheckpoint());
     }
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
-                           + " component %s instance %s on connection %s",
-                           checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                           checkpoint.getInstance(), channel.socket().getRemoteSocketAddress()));
+                           + " component %s instanceId %s on connection %s",
+                           info.getCheckpointId(),
+                           info.getComponent(),
+                           info.getInstanceId(),
+                           channel.socket().getRemoteSocketAddress()));
 
     Common.StatusCode statusCode = Common.StatusCode.OK;
     String errorMessage = "";
     try {
-      statefulStorage.store(checkpoint);
-      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instance %s",
-                             checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                             checkpoint.getInstance()));
+      statefulStorage.storeCheckpoint(info, checkpoint);
+      LOG.info(String.format("Saved checkpoint for checkpointId %s compnent %s instanceId %s",
+                             info.getCheckpointId(), info.getComponent(),
+                             info.getInstanceId()));
     } catch (StatefulStorageException e) {
       errorMessage = String.format("Save checkpoint not successful for checkpointId "
-                                   + "%s component %s instance %s",
-                                   checkpoint.getCheckpointId(), checkpoint.getComponent(),
-                                   checkpoint.getInstance());
+                                   + "%s component %s instanceId %s",
+                                   info.getCheckpointId(), info.getComponent(),
+                                   info.getInstanceId());
       statusCode = Common.StatusCode.NOTOK;
       LOG.log(Level.WARNING, errorMessage, e);
     }
@@ -252,15 +263,15 @@ public class CheckpointManagerServer extends HeronServer {
   }
 
   private Checkpoint loadCheckpoint(PhysicalPlans.Instance instanceInfo,
-                                    String checkpointId, String stateUri) {
-    LOG.info("fetch state from: " + stateUri);
+                                    String checkpointId, String localStateLocation) {
+    LOG.info("fetch state from: " + localStateLocation);
     CheckpointManager.InstanceStateCheckpoint checkpoint =
         CheckpointManager.InstanceStateCheckpoint.newBuilder()
             .setCheckpointId(checkpointId)
-            .setState(loadStateFromFile(stateUri))
+            .setState(loadStateFromFile(localStateLocation))
             .build();
 
-    return new Checkpoint(topologyName, instanceInfo, checkpoint);
+    return new Checkpoint(checkpoint);
   }
 
   private ByteString loadStateFromFile(String stateUri) {
@@ -291,11 +302,12 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.GetInstanceStateRequest request
   ) {
+    CheckpointInfo info = new CheckpointInfo(request.getCheckpointId(), request.getInstance());
     LOG.info(String.format("Got a get checkpoint request for checkpointId %s "
-                           + " component %s taskId %d on connection %s",
-                           request.getCheckpointId(),
-                           request.getInstance().getInfo().getComponentName(),
-                           request.getInstance().getInfo().getTaskId(),
+                           + " component %s instanceId %d on connection %s",
+                           info.getCheckpointId(),
+                           info.getComponent(),
+                           info.getInstanceId(),
                            channel.socket().getRemoteSocketAddress()));
 
     CheckpointManager.GetInstanceStateResponse.Builder responseBuilder =
@@ -315,23 +327,23 @@ public class CheckpointManagerServer extends HeronServer {
       responseBuilder.setCheckpoint(dummyState);
     } else {
       try {
-        Checkpoint checkpoint = statefulStorage.restore(topologyName, request.getCheckpointId(),
-                                                request.getInstance());
+        Checkpoint checkpoint = statefulStorage.restoreCheckpoint(info);
         LOG.info(String.format("Get checkpoint successful for checkpointId %s "
-                               + "component %s taskId %d", checkpoint.getCheckpointId(),
-                               checkpoint.getComponent(), checkpoint.getTaskId()));
+                               + "component %s instanceId %d",
+                               info.getCheckpointId(),
+                               info.getComponent(),
+                               info.getInstanceId()));
         // Set the checkpoint-state in response
-        boolean spillDisk = true;
-        if (spillDisk) {
+        boolean spillToLocalDisk = true;
+        if (spillToLocalDisk) {
           CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
 
           // spill state to local disk
-          String stateURI = storeStateLocally(ckpt.getState().toByteArray(),
-              ckpt.getCheckpointId());
+          String localStateLocation = storeStateLocally(ckpt.getState(), ckpt.getCheckpointId());
 
           CheckpointManager.InstanceStateCheckpoint ckpt2 =
               CheckpointManager.InstanceStateCheckpoint.newBuilder()
-                  .setStateUri(stateURI)
+                  .setStateLocation(localStateLocation)
                   .setCheckpointId(ckpt.getCheckpointId())
                   .build();
 
@@ -341,9 +353,10 @@ public class CheckpointManagerServer extends HeronServer {
         }
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
-                                     + "component %s taskId %d", request.getCheckpointId(),
-                                     request.getInstance().getInfo().getComponentName(),
-                                     request.getInstance().getInfo().getTaskId());
+                                     + "component %s instanceId %d",
+                                     info.getCheckpointId(),
+                                     info.getComponent(),
+                                     info.getInstanceId());
         LOG.log(Level.WARNING, errorMessage, e);
         statusCode = Common.StatusCode.NOTOK;
       }
@@ -355,21 +368,19 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
-  private String storeStateLocally(byte[] data, String checkpointId) {
+ private String storeStateLocally(ByteString states, String ckptId) {
     String fileName;
 
     try {
-      fileName = File.createTempFile(checkpointId, ".state", new File("./")).toString();
+      fileName = Files.createTempFile(ckptId, "state").toString();
     } catch (IOException e) {
-      throw new RuntimeException("failed to create local temp file for state");
+      throw new RuntimeException("failed to create local temp file for state", e);
     }
 
     try (FileOutputStream fos = new FileOutputStream(new File(fileName));
-         DataOutputStream oos = new DataOutputStream(fos)) {
-      oos.write(data);
+         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(states);
       oos.flush();
-
-      LOG.info("state spilled to local disk: " + fileName + "; size: " + data.length);
       return fileName;
     } catch (IOException e) {
       throw new RuntimeException("failed to persist state locally", e);

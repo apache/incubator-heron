@@ -218,6 +218,19 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_STATEFUL_START_CLEAN =
                              "topology.stateful.start.clean";
   /**
+   * Checkpoint Manager RAM requirement.
+   */
+  public static final String TOPOLOGY_STATEFUL_CKPTMGR_RAM =
+                            "topology.stateful.checkpointmanager.ram";
+  /**
+   * Stream Manager RAM requirement
+   */
+  public static final String TOPOLOGY_STMGR_RAM =  "topology.stmgr.ram";
+  /**
+   * Metrics Manager RAM requirement
+   */
+  public static final String TOPOLOGY_METRICSMGR_RAM = "topology.metricsmgr.ram";
+  /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
   public static final String TOPOLOGY_NAME = "topology.name";
@@ -319,6 +332,9 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
+    apiVars.add(TOPOLOGY_STATEFUL_CKPTMGR_RAM);
+    apiVars.add(TOPOLOGY_STMGR_RAM);
+    apiVars.add(TOPOLOGY_METRICSMGR_RAM);
     apiVars.add(TOPOLOGY_RELIABILITY_MODE);
     apiVars.add(TOPOLOGY_NAME);
     apiVars.add(TOPOLOGY_TEAM_NAME);
@@ -572,6 +588,21 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_STATEFUL_START_CLEAN, String.valueOf(clean));
   }
 
+  public static void setCheckpointManagerRam(Map<String, Object> conf,
+                                             ByteAmount ramInBytes) {
+    conf.put(Config.TOPOLOGY_STATEFUL_CKPTMGR_RAM, ramInBytes.asBytes());
+  }
+
+  public static void setStreamManagerRam(Map<String, Object> conf,
+                                         ByteAmount ramInBytes) {
+    conf.put(Config.TOPOLOGY_STMGR_RAM, ramInBytes.asBytes());
+  }
+
+  public static void setMetricsmgrRam(Map<String, Object> conf,
+                                      ByteAmount ramInBytes) {
+    conf.put(Config.TOPOLOGY_METRICSMGR_RAM, ramInBytes.asBytes());
+  }
+
   @SuppressWarnings("rawtypes")
   public static void setEnvironment(Map<String, Object> conf, Map env) {
     conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
@@ -736,6 +767,18 @@ public class Config extends HashMap<String, Object> {
 
   public void setTopologyStatefulStartClean(boolean clean) {
     setTopologyStatefulStartClean(this, clean);
+  }
+
+  public void setCheckpointManagerRam(ByteAmount ramInBytes) {
+    setCheckpointManagerRam(this, ramInBytes);
+  }
+
+  public void setStreamManagerRam(ByteAmount ramInBytes) {
+    setStreamManagerRam(this, ramInBytes);
+  }
+
+  public void setMetricsmgrRam(ByteAmount ramInBytes) {
+    setMetricsmgrRam(this, ramInBytes);
   }
 
   /**

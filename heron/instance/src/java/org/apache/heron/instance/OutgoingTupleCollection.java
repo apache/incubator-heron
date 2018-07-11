@@ -148,7 +148,7 @@ public class OutgoingTupleCollection {
       CheckpointManager.InstanceStateCheckpoint instanceState =
           CheckpointManager.InstanceStateCheckpoint.newBuilder()
           .setCheckpointId(checkpointId)
-          .setStateUri(stateUri)
+          .setStateLocation(stateUri)
           .build();
 
       CheckpointManager.StoreInstanceStateCheckpoint storeRequest =

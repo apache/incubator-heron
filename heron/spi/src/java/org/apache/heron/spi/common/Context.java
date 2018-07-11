@@ -218,6 +218,14 @@ public class Context {
     return cfg.getByteAmountValue(Key.STMGR_RAM);
   }
 
+  public static ByteAmount ckptmgrRam(Config cfg) {
+    return cfg.getByteAmountValue(Key.CKPTMGR_RAM);
+  }
+
+  public static ByteAmount metricsmgrRam(Config cfg) {
+    return cfg.getByteAmountValue(Key.METRICSMGR_RAM);
+  }
+
   public static ByteAmount instanceRam(Config cfg) {
     return cfg.getByteAmountValue(Key.INSTANCE_RAM);
   }

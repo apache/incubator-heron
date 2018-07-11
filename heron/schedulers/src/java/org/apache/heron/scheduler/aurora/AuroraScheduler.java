@@ -126,8 +126,9 @@ public class AuroraScheduler implements IScheduler, IScalable {
     Resource containerResource =
         updatedPackingPlan.getContainers().iterator().next().getScheduledResource().get();
     Map<AuroraField, String> auroraProperties = createAuroraProperties(containerResource);
+    Map<String, String> extraProperties = createExtraProperties(containerResource);
 
-    return controller.createJob(auroraProperties);
+    return controller.createJob(auroraProperties, extraProperties);
   }
 
   @Override
@@ -215,7 +216,7 @@ public class AuroraScheduler implements IScheduler, IScalable {
         controller.addContainers(containersToAdd.size()));
     if (newAddedContainerIds.size() != containersToAdd.size()) {
       throw new RuntimeException(
-          "Aurora returned differnt countainer count " + newAddedContainerIds.size()
+          "Aurora returned different container count " + newAddedContainerIds.size()
           + "; input count was " + containersToAdd.size());
     }
     // Do the remapping:
@@ -280,5 +281,19 @@ public class AuroraScheduler implements IScheduler, IScalable {
     auroraProperties.put(AuroraField.TOPOLOGY_PACKAGE_URI, topologyPkgURI);
 
     return auroraProperties;
+  }
+
+  protected Map<String, String> createExtraProperties(Resource containerResource) {
+    Map<String, String> extraProperties = new HashMap<>();
+
+    if (config.containsKey(Key.SCHEDULER_PROPERTIES)) {
+      String[] meta = config.getStringValue(Key.SCHEDULER_PROPERTIES).split(",");
+      extraProperties.put(AuroraContext.JOB_TEMPLATE, meta[0]);
+      for (int idx = 1; idx < meta.length; idx++) {
+        extraProperties.put("AURORA_METADATA_" + idx, meta[idx]);
+      }
+    }
+
+    return extraProperties;
   }
 }

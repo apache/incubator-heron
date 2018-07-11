@@ -37,7 +37,8 @@ class CkptMgrClient : public Client {
                 std::function<void(const proto::system::Instance&,
                                    const std::string&)> _ckpt_saved_watcher,
                 std::function<void(proto::system::StatusCode, sp_int32, sp_string,
-                              const proto::ckptmgr::InstanceStateCheckpoint&)> _ckpt_get_watcher,
+                              const proto::ckptmgr::InstanceStateCheckpoint&)>
+                              _ckpt_get_watcher,
                 std::function<void()> _register_watcher);
   virtual ~CkptMgrClient();
 

@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -168,6 +169,27 @@ public class BoltInstance implements IInstance {
       }
     } finally {
       collector.lock.unlock();
+    }
+    LOG.info("State persisted for checkpoint: " + checkpointId);
+  }
+
+  private String storeStateLocally(State<Serializable, Serializable> state, String checkpointId) {
+    String fileName;
+
+    try {
+      fileName = Files.createTempFile(checkpointId, "state").toString();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to create local temp file for state");
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
+         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(state);
+      oos.flush();
+
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to persist state locally", e);
     }
   }
 

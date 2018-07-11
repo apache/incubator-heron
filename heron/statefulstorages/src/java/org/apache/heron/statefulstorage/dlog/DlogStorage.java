@@ -37,8 +37,9 @@ import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.dlog.DLInputStream;
 import org.apache.heron.dlog.DLOutputStream;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
-import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
+import org.apache.heron.spi.statefulstorage.CheckpointInfo;
+import org.apache.heron.spi.statefulstorage.CheckpointMetadata;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
 import org.apache.heron.spi.statefulstorage.StatefulStorageException;
 
@@ -52,6 +53,7 @@ public class DlogStorage implements IStatefulStorage {
   private String checkpointNamespaceUriStr;
   private URI checkpointNamespaceUri;
   private int numReplicas = 3;
+  private String topologyName;
 
   // the namespace instance
   private final Supplier<NamespaceBuilder> nsBuilderSupplier;
@@ -66,11 +68,13 @@ public class DlogStorage implements IStatefulStorage {
   }
 
   @Override
-  public void init(Map<String, Object> conf) throws StatefulStorageException {
+  public void init(String topology, Map<String, Object> conf)
+      throws StatefulStorageException {
 
     LOG.info("Initializing ... Config: " + conf.toString());
     LOG.info("Class path: " + System.getProperty("java.class.path"));
 
+    this.topologyName = topology;
     checkpointNamespaceUriStr = (String) conf.get(NS_URI_KEY);
     checkpointNamespaceUri = URI.create(checkpointNamespaceUriStr);
     Integer numReplicasValue = (Integer) conf.get(NUM_REPLICAS_KEY);
@@ -128,12 +132,13 @@ public class DlogStorage implements IStatefulStorage {
   }
 
   @Override
-  public void store(Checkpoint checkpoint) throws StatefulStorageException {
+  public void storeCheckpoint(CheckpointInfo info, Checkpoint checkpoint)
+      throws StatefulStorageException {
     String checkpointPath = getCheckpointPath(
-        checkpoint.getTopologyName(),
-        checkpoint.getCheckpointId(),
-        checkpoint.getComponent(),
-        checkpoint.getTaskId());
+        topologyName,
+        info.getCheckpointId(),
+        info.getComponent(),
+        info.getInstanceId());
 
     OutputStream out = null;
     try {
@@ -147,15 +152,13 @@ public class DlogStorage implements IStatefulStorage {
   }
 
   @Override
-  public Checkpoint restore(String topologyName,
-                            String checkpointId,
-                            PhysicalPlans.Instance instanceInfo)
+  public Checkpoint restoreCheckpoint(CheckpointInfo info)
       throws StatefulStorageException {
     String checkpointPath = getCheckpointPath(
         topologyName,
-        checkpointId,
-        instanceInfo.getInfo().getComponentName(),
-        instanceInfo.getInfo().getTaskId());
+        info.getCheckpointId(),
+        info.getComponent(),
+        info.getInstanceId());
 
     InputStream in = null;
     CheckpointManager.InstanceStateCheckpoint state;
@@ -168,13 +171,24 @@ public class DlogStorage implements IStatefulStorage {
       SysUtils.closeIgnoringExceptions(in);
     }
 
-    return new Checkpoint(topologyName, instanceInfo, state);
+    return new Checkpoint(state);
   }
 
   @Override
-  public void dispose(String topologyName,
-                      String oldestCheckpointId,
-                      boolean deleteAll)
+  public void storeComponentMetaData(CheckpointInfo info, CheckpointMetadata metadata)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+  }
+
+  @Override
+  public CheckpointMetadata restoreComponentMetadata(CheckpointInfo info)
+      throws StatefulStorageException {
+    // TODO(nwang): To implement
+    return null;
+  }
+
+  @Override
+  public void dispose(String oldestCheckpointId, boolean deleteAll)
       throws StatefulStorageException {
 
     // Currently dlog doesn't support recursive deletion. so we have to fetch all the checkpoints
