@@ -77,7 +77,8 @@ def print_usage():
       " --metricscache-manager-master-port=<metricscachemgr_masterport>"
       " --metricscache-manager-stats-port=<metricscachemgr_statsport>"
       " --is-stateful=<is_stateful> --checkpoint-manager-classpath=<ckptmgr_classpath>"
-      " --checkpoint-manager-port=<ckptmgr_port> --stateful-config-file=<stateful_config_file>"
+      " --checkpoint-manager-port=<ckptmgr_port> --checkpoint-manager-ram=<checkpoint_manager_ram>"
+      " --stateful-config-file=<stateful_config_file>"
       " --health-manager-mode=<healthmgr_mode> --health-manager-classpath=<healthmgr_classpath>"
       " --cpp-instance-binary=<cpp_instance_binary>"
       " --jvm-remote-debugger-ports=<comma_seperated_port_list>")
@@ -251,6 +252,7 @@ class HeronExecutor(object):
     self.is_stateful_topology = (parsed_args.is_stateful.lower() == 'true')
     self.checkpoint_manager_classpath = parsed_args.checkpoint_manager_classpath
     self.checkpoint_manager_port = parsed_args.checkpoint_manager_port
+    self.checkpoint_manager_ram = parsed_args.checkpoint_manager_ram
     self.stateful_config_file = parsed_args.stateful_config_file
     self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
         if parsed_args.metricscache_manager_mode else "disabled"
@@ -332,6 +334,7 @@ class HeronExecutor(object):
     parser.add_argument("--is-stateful", required=True)
     parser.add_argument("--checkpoint-manager-classpath", required=True)
     parser.add_argument("--checkpoint-manager-port", required=True)
+    parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
     parser.add_argument("--stateful-config-file", required=True)
     parser.add_argument("--health-manager-mode", required=True)
     parser.add_argument("--health-manager-classpath", required=True)
@@ -763,8 +766,10 @@ class HeronExecutor(object):
 
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
+    ckptmgr_ram_mb = self.checkpoint_manager_ram / (1024 * 1024)
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-                   '-Xmx1024M',
+                   '-Xms%dM' % ckptmgr_ram_mb,
+                   '-Xmx%dM' % ckptmgr_ram_mb,
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',
                    '-XX:+PrintGCDetails',

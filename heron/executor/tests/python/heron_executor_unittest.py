@@ -273,6 +273,7 @@ class HeronExecutorTest(unittest.TestCase):
       ("--is-stateful", "is_stateful_enabled"),
       ("--checkpoint-manager-classpath", "ckptmgr_classpath"),
       ("--checkpoint-manager-port", "ckptmgr-port"),
+      ("--checkpoint-manager-ram", "1073741824"),
       ("--stateful-config-file", "stateful_config_file"),
       ("--health-manager-mode", "cluster"),
       ("--health-manager-classpath", "healthmgr_classpath"),

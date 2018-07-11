@@ -311,6 +311,9 @@ public final class SchedulerUtils {
     args.add(createCommandArg(ExecutorFlag.CheckpointManagerClasspath,
         completeCkptmgrProcessClassPath));
     args.add(createCommandArg(ExecutorFlag.StatefulConfigFile, Context.statefulConfigFile(config)));
+    args.add(createCommandArg(
+        ExecutorFlag.CheckpointManagerRam,
+        Long.toString(TopologyUtils.getCheckpointManagerRam(topology).asBytes())));
 
     String healthMgrMode = Context.healthMgrMode(config)
         == null ? "disabled" : Context.healthMgrMode(config);
