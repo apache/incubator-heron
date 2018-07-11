@@ -74,7 +74,10 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_AGGR = "__server/__time_spent_ba
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
 // Prefix for connection buffer's metrics
 const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
-// Prefix for connection buffer's length metrics
+// Prefix for connection buffer's length metrics. This is different
+// from METRIC_DATA_TUPLES_TO_INSTANCES as that counts
+// the tuples when they are sent to the instance -- this metric
+// will be used to count the tuples as they are received
 const sp_string CONNECTION_BUFFER_LENGTH_BY_INSTANCEID =
   "__connection_buffer_length_by_instanceid/";
 
@@ -396,6 +399,13 @@ void InstanceServer::HandleTupleSetMessage(Connection* _conn,
 }
 
 void InstanceServer::SendToInstance2(proto::stmgr::TupleStreamMessage* _message) {
+  sp_string instance_id = task_id_to_name[_message->task_id()];
+  ConnectionBufferLengthMetricMap::const_iterator it =
+    connection_buffer_length_metric_map_.find(instance_id);
+  if ( it != connection_buffer_length_metric_map_.end() )
+    connection_buffer_length_metric_map_
+      [instance_id]->scope("packets")->incr_by(_message->num_tuples());
+
   stateful_gateway_->SendToInstance(_message);
 }
 
@@ -413,15 +423,17 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
-  sp_string instance_id = task_id_to_name[_task_id];
 
-  ConnectionBufferLengthMetricMap::const_iterator it =
-    connection_buffer_length_metric_map_.find(instance_id);
+  if (_message->has_data()) {
+    sp_string instance_id = task_id_to_name[_task_id];
 
-  if ( it != connection_buffer_length_metric_map_.end() )
-    connection_buffer_length_metric_map_
-      [instance_id]->scope("packets")->incr();
+    ConnectionBufferLengthMetricMap::const_iterator it =
+      connection_buffer_length_metric_map_.find(instance_id);
 
+    if ( it != connection_buffer_length_metric_map_.end() )
+      connection_buffer_length_metric_map_
+        [instance_id]->scope("packets")->incr_by(_message->data().tuples_size());
+  }
   stateful_gateway_->SendToInstance(_task_id, _message);
 }
 
