@@ -50,7 +50,7 @@ build_exec_image() {
   OUTPUT_DIRECTORY=$(realpath $4)
 
   if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
-    TARGET_PLATFORM="ubuntu14.04"
+    TARGET_PLATFORM="debian9"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
     DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-$HERON_VERSION.tar"
@@ -97,7 +97,7 @@ publish_exec_image() {
   INPUT_DIRECTORY=$(realpath $4)
 
   if [ "$INPUT_TARGET_PLATFORM" == "latest" ]; then
-    TARGET_PLATFORM="ubuntu14.04"
+    TARGET_PLATFORM="debian9"
     DOCKER_TAG="$DOCKER_TAG_PREFIX/heron:$HERON_VERSION"
     DOCKER_LATEST_TAG="$DOCKER_TAG_PREFIX/heron:latest"
     DOCKER_IMAGE_FILE="$INPUT_DIRECTORY/heron-$HERON_VERSION.tar"
@@ -142,8 +142,8 @@ case $# in
     echo "Platforms Supported: latest, ubuntu14.04, ubuntu16.04, centos7, debian9"
     echo "  "
     echo "Example:"
-    echo "  $0 build ubuntu14.04 0.12.0 heron ."
-    echo "  $0 publish ubuntu14.04 0.12.0 streamlio ~/ubuntu"
+    echo "  $0 build debian9 0.12.0 heron ."
+    echo "  $0 publish debian9 0.12.0 streamlio ~/ubuntu"
     echo "  "
     exit 1
     ;;
