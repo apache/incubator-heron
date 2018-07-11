@@ -19,10 +19,6 @@
 
 package org.apache.heron.instance.bolt;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -72,6 +68,7 @@ public class BoltInstance implements IInstance {
   private final Communicator<Message> streamInQueue;
 
   private final boolean isTopologyStateful;
+  private final boolean spillState;
 
   private State<Serializable, Serializable> instanceState;
 
@@ -96,8 +93,9 @@ public class BoltInstance implements IInstance {
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
-
     LOG.info("Is this topology stateful: " + isTopologyStateful);
+
+    this.spillState = (Boolean) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE);
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
@@ -156,40 +154,11 @@ public class BoltInstance implements IInstance {
       if (bolt instanceof IStatefulComponent) {
         ((IStatefulComponent) bolt).preSave(checkpointId);
       }
-
-      boolean spillState = true;
-      if (spillState) {
-        String stateUri = storeStateLocally(instanceState, checkpointId);
-        LOG.info("state write to: " + stateUri);
-        collector.sendOutState(stateUri, checkpointId);
-      } else {
-        LOG.info("transferring state via network");
-        collector.sendOutState(instanceState, checkpointId);
-      }
+      collector.sendOutState(instanceState, checkpointId, spillState);
     } finally {
       collector.lock.unlock();
     }
     LOG.info("State persisted for checkpoint: " + checkpointId);
-  }
-
-  private String storeStateLocally(State<Serializable, Serializable> state, String checkpointId) {
-    String fileName;
-
-    try {
-      fileName = File.createTempFile(checkpointId, ".state", new File("./")).toString();
-    } catch (IOException e) {
-      throw new RuntimeException("failed to create local temp file for state");
-    }
-
-    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
-         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-      oos.writeObject(state);
-      oos.flush();
-
-      return fileName;
-    } catch (IOException e) {
-      throw new RuntimeException("failed to persist state locally", e);
-    }
   }
 
   @SuppressWarnings("unchecked")

@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
 import org.apache.heron.api.Config;
@@ -315,25 +314,14 @@ public class Slave implements Runnable, AutoCloseable {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
-              request.getState().hasStateLocation()
-                  ? loadState(request.getState().getStateLocation()).toByteArray()
-                  : request.getState().getState().toByteArray());
+              request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
     } else if (request.getState().hasStateLocation()) {
-      String stateLocation = request.getState().getStateLocation();
-
-      ByteString rawState = loadState(stateLocation);
+      byte[] rawState = loadState(request.getState().getStateLocation());
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
-          (State<Serializable, Serializable>) serializer.deserialize(rawState.toByteArray());
-      instanceState = stateToRestore;
-    } else if (request.getState().hasStateLocation()) {
-      String stateUri = request.getState().getStateLocation();
-
-      ByteString rawState = loadState(stateUri);
-      State<Serializable, Serializable> stateToRestore =
-          (State<Serializable, Serializable>) serializer.deserialize(rawState.toByteArray());
+          (State<Serializable, Serializable>) serializer.deserialize(rawState);
       instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
@@ -367,14 +355,14 @@ public class Slave implements Runnable, AutoCloseable {
     streamOutCommunicator.offer(response);
   }
 
-  private ByteString loadState(String stateUri) {
-    File f = new File(stateUri);
+  private byte[] loadState(String stateLocation) {
+    File f = new File(stateLocation);
     byte[] data = new byte[(int) f.length()];
 
-    try (FileInputStream fis = new FileInputStream(stateUri);
+    try (FileInputStream fis = new FileInputStream(stateLocation);
          DataInputStream dis = new DataInputStream(fis)) {
       dis.read(data);
-      return ByteString.copyFrom(data);
+      return data;
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);
     } finally {

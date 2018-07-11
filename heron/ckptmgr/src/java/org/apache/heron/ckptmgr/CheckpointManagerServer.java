@@ -266,31 +266,26 @@ public class CheckpointManagerServer extends HeronServer {
     CheckpointManager.InstanceStateCheckpoint checkpoint =
         CheckpointManager.InstanceStateCheckpoint.newBuilder()
             .setCheckpointId(checkpointId)
-            .setState(loadStateFromFile(localStateLocation))
+            .setState(ByteString.copyFrom(loadState(localStateLocation)))
             .build();
 
     return new Checkpoint(checkpoint);
   }
 
-  private ByteString loadStateFromFile(String stateUri) {
-    File f = new File(stateUri);
+  private byte[] loadState(String stateLcation) {
+    File f = new File(stateLcation);
     byte[] data = new byte[(int) f.length()];
 
-    try (FileInputStream fis = new FileInputStream(stateUri);
+    try (FileInputStream fis = new FileInputStream(stateLcation);
          DataInputStream dis = new DataInputStream(fis)) {
-
       dis.read(data);
-      return ByteString.copyFrom(data);
+      return data;
     } catch (IOException e) {
       throw new RuntimeException("failed to load local state", e);
     } finally {
-      // we have to clean it here manually to avoid using too many disks
-      // TODO(nlu): find a cleaner and more consistent way to handle temp state files
-      LOG.info("cleaning temp state file: " + f.getPath());
-      if (f.delete()) {
-        LOG.info("deleted tmp state file");
-      } else {
-        LOG.info("failed to delete state file");
+      if (f.exists()) {
+        LOG.info("deleting local state file: " + f.getPath());
+        f.delete();
       }
     }
   }
@@ -337,7 +332,8 @@ public class CheckpointManagerServer extends HeronServer {
           CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
 
           // spill state to local disk
-          String localStateLocation = storeStateLocally(ckpt.getState(), ckpt.getCheckpointId());
+          String localStateLocation = storeState(ckpt.getState(), ckpt.getCheckpointId());
+          LOG.info("state write to: " + localStateLocation);
 
           CheckpointManager.InstanceStateCheckpoint ckpt2 =
               CheckpointManager.InstanceStateCheckpoint.newBuilder()
@@ -366,7 +362,7 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
-  private String storeStateLocally(ByteString states, String ckptId) {
+  private String storeState(ByteString states, String ckptId) {
     String fileName;
 
     try {
