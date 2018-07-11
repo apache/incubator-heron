@@ -201,26 +201,6 @@ public class SpoutInstance implements IInstance {
     }
   }
 
-  private String storeStateLocally(State<Serializable, Serializable> state, String checkpointId) {
-    String fileName;
-
-    try {
-      fileName = File.createTempFile(checkpointId, ".state", new File("./")).toString();
-    } catch (IOException e) {
-      throw new RuntimeException("failed to create local temp file for state");
-    }
-
-    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
-         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-      oos.writeObject(state);
-      oos.flush();
-
-      return fileName;
-    } catch (IOException e) {
-      throw new RuntimeException("failed to persist state locally", e);
-    }
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public void init(State<Serializable, Serializable> state) {

@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -316,18 +315,18 @@ public class Slave implements Runnable, AutoCloseable {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
-              request.getState().hasStateUri()
-                  ? loadStateFromFile(request.getState().getStateUri())
+              request.getState().hasStateLocation()
+                  ? loadState(request.getState().getStateLocation()).toByteArray()
                   : request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
-    } else if (request.getState().hasStateUri()) {
-      String stateUri = request.getState().getStateUri();
+    } else if (request.getState().hasStateLocation()) {
+      String stateLocation = request.getState().getStateLocation();
 
-      byte[] rawState = loadStateFromFile(stateUri);
+      ByteString rawState = loadState(stateLocation);
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
-          (State<Serializable, Serializable>) serializer.deserialize(rawState);
+          (State<Serializable, Serializable>) serializer.deserialize(rawState.toByteArray());
       instanceState = stateToRestore;
     } else if (request.getState().hasStateLocation()) {
       String stateUri = request.getState().getStateLocation();

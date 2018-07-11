@@ -20,7 +20,6 @@
 package org.apache.heron.ckptmgr;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -368,7 +367,7 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
- private String storeStateLocally(ByteString states, String ckptId) {
+  private String storeStateLocally(ByteString states, String ckptId) {
     String fileName;
 
     try {
