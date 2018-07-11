@@ -423,7 +423,6 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
-
   if (_message->has_data()) {
     sp_string instance_id = task_id_to_name[_task_id];
 
