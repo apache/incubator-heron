@@ -78,7 +78,8 @@ public class StatefulIntegrationTopologyTestSpout extends IStatefulSpout {
 
     // send instance state to http server
     if (!delegateSpout.state.isEmpty()) {
-      String compId = delegateSpout.context.getThisComponentId();
+      String compId = String.format("%s_%d", delegateSpout.context.getThisComponentId(),
+          delegateSpout.context.getThisTaskId());
       String dataName = String.format("instance %s state", compId);
       String stateJsonString = formatJson(compId, delegateSpout.state);
 

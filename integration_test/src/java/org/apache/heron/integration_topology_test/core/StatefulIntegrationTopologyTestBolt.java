@@ -50,7 +50,8 @@ public class StatefulIntegrationTopologyTestBolt extends IStatefulBolt {
 
     // send instance state to http server
     if (!delegateBolt.state.isEmpty()) {
-      String compId = delegateBolt.context.getThisComponentId();
+      String compId = String.format("%s_%d", delegateBolt.context.getThisComponentId(),
+          delegateBolt.context.getThisTaskId());
       String dataName = String.format("instance %s state", compId);
       String stateJsonString = formatJson(compId, delegateBolt.state);
 

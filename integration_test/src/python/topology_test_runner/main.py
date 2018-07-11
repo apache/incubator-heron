@@ -163,13 +163,26 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
     # check instance states, get the instance_state_check_result
     # if both above are isinstance(status.TestSuccess), return success, else return fail
     expected_result = self.instance_state_expected_result_handler.fetch_results()
-    actual_result = self.instance_state_actual_result_handler.fetch_results()
 
     decoder = json.JSONDecoder(strict=False)
-    expected_result = sorted(decoder.decode(expected_result))
-    actual_result = sorted(decoder.decode(actual_result))
+    expected_result = decoder.decode(expected_result)
+    
+    actual_result =[]
+    for _ in range(0, RETRY_ATTEMPTS):
+      actual_result = self.instance_state_actual_result_handler.fetch_results()
+      actual_result = decoder.decode(actual_result)
+      if len(actual_result) == len(expected_result):
+        break
+      else:
+        time.sleep(RETRY_INTERVAL)
+    else:
+      raise status.TestFailure("Fail to get actual results of instance states for topology %s"
+                               % self.topology_name)
 
-    return self._compare_state(expected_result, actual_result)
+    if '_' not in expected_result[0].keys()[0]:
+      actual_result = self._parse_instance_id(actual_result)
+
+    return self._compare_state(sorted(expected_result), sorted(actual_result))
 
   def _compare_state(self, expected_results, actual_results):
     if actual_results == expected_results:
@@ -181,6 +194,15 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
       logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_results)))
       logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_results)))
       raise failure
+
+  def _parse_instance_id(self, input):
+    # remove taskId in instaneId
+    output = list()
+    for ele in input:
+      for key in ele:
+        new_key = key.split('_')[0]
+        output.append({new_key: dict(ele[key])})
+    return output
 
 
 class FileBasedExpectedResultsHandler(object):
@@ -265,7 +287,7 @@ class HttpBasedActualResultsHandler(object):
   def fetch_results(self):
     try:
       return self.fetch_from_server(self.server_host_port, self.topology_name,
-        'instance_state', '/results/%s' % self.topology_name)
+        'instance_state', '/stateResults/%s' % self.topology_name)
     except Exception as e:
       raise status.TestFailure("Fetching instance state failed for %s topology" % self.topology_name, e)
 
@@ -318,7 +340,7 @@ def run_topology_test(topology_name, classpath, results_checker,
   check_type):
   try:
     if check_type == 'checkpoint_state':
-      args = "-r http://%s/results -t %s %s" % \
+      args = "-r http://%s/stateResults -t %s %s" % \
              (http_server_host_port, topology_name, extra_topology_args)
     else:
       args = "-t %s %s" % (topology_name, extra_topology_args)
@@ -460,15 +482,12 @@ def run_topology_tests(conf, args):
 
   http_server_host_port = "%s:%d" % (args.http_hostname, args.http_port)
 
-  extra_topology_args = ''
   if args.tests_bin_path.endswith("scala-integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["scalaTopologies"], args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-    extra_topology_args = "-s http://%s/topo" % http_server_host_port
   elif args.tests_bin_path.endswith("integration-topology-tests.jar"):
     test_topologies = filter_test_topologies(conf["javaTopologies"], args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-    extra_topology_args = "-s http://%s/topo" % http_server_host_port
   elif args.tests_bin_path.endswith("heron_integ_topology.pex"):
     test_topologies = filter_test_topologies(conf["pythonTopologies"], args.test_topology_pattern)
     topology_classpath_prefix = ""
@@ -485,7 +504,7 @@ def run_topology_tests(conf, args):
     update_args = ""
     deactivate_args = ""
     restart_args = ""
-    topology_args = extra_topology_args
+    topology_args = ""
     if "updateArgs" in topology_conf:
       update_args = topology_conf["updateArgs"]
     if "deactivateArgs" in topology_conf:

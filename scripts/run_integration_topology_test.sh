@@ -3,7 +3,7 @@
 # Script to locally run the integration topology test.
 #
 
-HTTP_SERVER="./bazel-bin/integration_test/src/python/http_server_stateful/http-server-stateful"
+HTTP_SERVER="./bazel-bin/integration_test/src/python/http_server/http-server"
 TEST_RUNNER="./bazel-bin/integration_test/src/python/topology_test_runner/topology-test-runner.pex"
 
 JAVA_TESTS_DIR="integration_test/src/java/org/apache/heron/integration_topology_test/topology"
