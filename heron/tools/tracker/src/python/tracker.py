@@ -205,6 +205,13 @@ class Tracker(object):
       if not data:
         Log.debug("No data to be set")
 
+    def on_topology_packing_plan(data):
+      """watch packing plan"""
+      Log.info("Watch triggered for topology packing plan: " + topologyName)
+      topology.set_packing_plan(data)
+      if not data:
+        Log.debug("No data to be set")
+
     def on_topology_execution_state(data):
       """watch execution state"""
       Log.info("Watch triggered for topology execution state: " + topologyName)
@@ -228,6 +235,7 @@ class Tracker(object):
 
     # Set watches on the pplan, execution_state, tmaster and scheduler_location.
     state_manager.get_pplan(topologyName, on_topology_pplan)
+    state_manager.get_packing_plan(topologyName, on_topology_packing_plan)
     state_manager.get_execution_state(topologyName, on_topology_execution_state)
     state_manager.get_tmaster(topologyName, on_topology_tmaster)
     state_manager.get_scheduler_location(topologyName, on_topology_scheduler_location)
@@ -301,6 +309,8 @@ class Tracker(object):
     runtime_state = {}
     runtime_state["has_physical_plan"] = \
       True if topology.physical_plan else False
+    runtime_state["has_packing_plan"] = \
+      True if topology.packing_plan else False
     runtime_state["has_tmaster_location"] = \
       True if topology.tmaster else False
     runtime_state["has_scheduler_location"] = \
@@ -514,6 +524,52 @@ class Tracker(object):
 
     return physicalPlan
 
+  # pylint: disable=too-many-locals
+  def extract_packing_plan(self, topology):
+    """
+    Returns the representation of packing plan that will
+    be returned from Tracker.
+    """
+    packingPlan = {
+        "id": "",
+        "container_plans": []
+    }
+
+    if not topology.packing_plan:
+      return packingPlan
+
+    container_plans = topology.packing_plan.container_plans
+
+    containers = []
+    for container_plan in container_plans:
+      instances = []
+      for instance_plan in container_plan.instance_plans:
+        instance_resources = {"cpu": instance_plan.resource.cpu,
+                              "ram": instance_plan.resource.ram,
+                              "disk": instance_plan.resource.disk}
+        instance = {"component_name" : instance_plan.component_name,
+                    "task_id" : instance_plan.task_id,
+                    "component_index": instance_plan.component_index,
+                    "instance_resources": instance_resources}
+        instances.append(instance)
+      required_resource = {"cpu": container_plan.requiredResource.cpu,
+                           "ram": container_plan.requiredResource.ram,
+                           "disk": container_plan.requiredResource.disk}
+      scheduled_resource = {}
+      if container_plan.scheduledResource:
+        scheduled_resource = {"cpu": container_plan.scheduledResource.cpu,
+                              "ram": container_plan.scheduledResource.ram,
+                              "disk": container_plan.scheduledResource.disk}
+      container = {"id": container_plan.id,
+                   "instances": instances,
+                   "required_resources": required_resource,
+                   "scheduled_resources": scheduled_resource}
+      containers.append(container)
+
+    packingPlan["id"] = topology.packing_plan.id
+    packingPlan["container_plans"] = containers
+    return json.dumps(packingPlan)
+
   def setTopologyInfo(self, topology):
     """
     Extracts info from the stored proto states and
@@ -536,6 +592,11 @@ class Tracker(object):
     if not topology.physical_plan:
       has_physical_plan = False
 
+    Log.info("Setting topology info for topology: " + topology.name)
+    has_packing_plan = True
+    if not topology.packing_plan:
+      has_packing_plan = False
+
     has_tmaster_location = True
     if not topology.tmaster:
       has_tmaster_location = False
@@ -549,6 +610,7 @@ class Tracker(object):
         "id": topology.id,
         "logical_plan": None,
         "physical_plan": None,
+        "packing_plan": None,
         "execution_state": None,
         "tmaster_location": None,
         "scheduler_location": None,
@@ -556,6 +618,7 @@ class Tracker(object):
 
     executionState = self.extract_execution_state(topology)
     executionState["has_physical_plan"] = has_physical_plan
+    executionState["has_packing_plan"] = has_packing_plan
     executionState["has_tmaster_location"] = has_tmaster_location
     executionState["has_scheduler_location"] = has_scheduler_location
     executionState["status"] = topology.get_status()
@@ -566,6 +629,7 @@ class Tracker(object):
     topologyInfo["execution_state"] = executionState
     topologyInfo["logical_plan"] = self.extract_logical_plan(topology)
     topologyInfo["physical_plan"] = self.extract_physical_plan(topology)
+    topologyInfo["packing_plan"] = self.extract_packing_plan(topology)
     topologyInfo["tmaster_location"] = self.extract_tmaster(topology)
     topologyInfo["scheduler_location"] = self.extract_scheduler_location(topology)
 

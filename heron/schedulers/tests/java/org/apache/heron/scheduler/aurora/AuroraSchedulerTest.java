@@ -338,6 +338,7 @@ public class AuroraSchedulerTest {
             + " --checkpoint-manager-classpath=" + expectedLib + "/ckptmgr/*:"
             + expectedLib + "/statefulstorage/*:"
             + " --stateful-config-file=" + expectedConf + "/stateful.yaml"
+            + " --checkpoint-manager-ram=1073741824"
             + " --health-manager-mode=disabled"
             + " --health-manager-classpath=" + expectedLib + "/healthmgr/*";
           break;
