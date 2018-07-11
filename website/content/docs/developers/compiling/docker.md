@@ -122,7 +122,7 @@ platforms.
 
 To add support for a new platform, add a new `Dockerfile` to that directory and
 append the name of the platform to the name of the file. If you'd like to add
-support for Debian 8, for example, add a file named `Dockerfile.debian8`. Once
+support for Debian 8, for example, add a file named `Dockerfile.debian9`. Once
 you've done that, follow the instructions in the [Docker
 documentation](https://docs.docker.com/engine/articles/dockerfile_best-practices/).
 

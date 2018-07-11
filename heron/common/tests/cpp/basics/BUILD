@@ -51,6 +51,7 @@ cc_test(
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
         "@com_google_googletest//:gtest",
+        "@com_github_gflags_gflags//:gflags",
     ],
     copts = [
         "-I.",

@@ -17,14 +17,27 @@
 
 FROM openjdk:8-jdk-slim
 
-RUN apt-get -y update && apt-get -y install \
+RUN apt-get update --yes \
+    && apt-get install --yes \
     netcat \
     python \
     unzip \
     curl \
-    supervisor && \
-    apt-get clean all && \
-    rm -rf /var/lib/apt/lists/*
+    supervisor \
+    git build-essential
+
+ENV PATH="/root/.pyenv/bin:${PATH}"
+RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+RUN apt-get install --yes libzip-dev libssl-dev libbz2-dev libsqlite3-dev libreadline-dev \
+    && pyenv update \
+    && pyenv install 3.7.0 \
+    && pyenv global system 3.7.0
+RUN echo 'eval "$(pyenv init -)"' >> /root/.bashrc \
+    && echo 'eval "$(pyenv virtualenv-init -)"' >> /root/.bashrc
+
+
+RUN  apt-get clean all \
+    && rm -rf /var/lib/apt/lists/*
 
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.14

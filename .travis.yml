@@ -1,4 +1,6 @@
-group: edge
+dist: xenial
+
+cache: pip
 
 sudo: required
 
@@ -26,6 +28,14 @@ addons:
       - zlib1g-dev
       - google-perftools
       - libgoogle-perftools-dev
+      # for pyenv
+      - git
+      - build-essential
+      - libzip-dev
+      - libssl-dev
+      - libbz2-dev
+      - libsqlite3-dev
+      - libreadline-dev
 
 env:
   - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
@@ -35,6 +45,11 @@ before_install:
   - wget -q "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
   - chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
   - ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh --user
+  # install the latest python
+  - git -C /opt/pyenv checkout master
+  - git -C /opt/pyenv pull origin master
+  - pyenv install 3.7.0
+  - pyenv global system 3.7.0
 
 before_script:
   # install python module for wheel files

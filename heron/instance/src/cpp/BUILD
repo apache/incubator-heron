@@ -56,6 +56,7 @@ cc_binary(
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
         "@com_github_jbeder_yaml_cpp//:yaml-cxx",
+        "@com_github_google_glog//:glog",
     ],
     linkstatic = 1,
     linkopts = ['-ldl'],
