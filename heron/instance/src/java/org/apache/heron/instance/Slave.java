@@ -316,8 +316,8 @@ public class Slave implements Runnable, AutoCloseable {
               request.getState().getState().toByteArray());
 
       instanceState = stateToRestore;
-    } else if (request.getState().hasStateUri()) {
-      String stateUri = request.getState().getStateUri();
+    } else if (request.getState().hasStateLocation()) {
+      String stateUri = request.getState().getStateLocation();
 
       ByteString rawState = loadState(stateUri);
       State<Serializable, Serializable> stateToRestore =

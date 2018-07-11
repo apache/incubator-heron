@@ -180,10 +180,12 @@ message CleanStatefulCheckpointResponse {
  */
 
 // This message encapsulates the info associated with
-// state of an instance/partition
+// state of an instance/partition. only one of the state_location
+// and state should be set
 message InstanceStateCheckpoint {
   required string checkpoint_id = 1;
-  required bytes state = 2;
+  optional bytes state = 2;
+  optional string state_location = 3;
 }
 
 // This message encapsulates the info associated with
@@ -251,15 +253,6 @@ message GetInstanceStateResponse {
 // local tasks to begin initiating checkpoint
 message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
-}
-
-// This proto encapsulates the info associated with
-// state of an instance. only one of the state_location
-// and state should be set.
-message InstanceStateCheckpoint {
-  required string checkpoint_id = 1;
-  optional bytes state = 2;
-  optional string state_uri = 3;
 }
 
 // This is the message that the instance sends

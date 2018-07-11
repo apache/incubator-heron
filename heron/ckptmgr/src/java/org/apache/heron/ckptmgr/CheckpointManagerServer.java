@@ -215,15 +215,17 @@ public class CheckpointManagerServer extends HeronServer {
       SocketChannel channel,
       CheckpointManager.SaveInstanceStateRequest request
   ) {
-    Checkpoint checkpoint = null;
+    CheckpointInfo info =
+        new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
+            request.getInstance());
 
     // TODO(nlu): handle states in different locations
-    if (request.getCheckpoint().hasStateUri()) {
+    Checkpoint checkpoint = null;
+    if (request.getCheckpoint().hasStateLocation()) {
       checkpoint = loadCheckpoint(request.getInstance(), request.getCheckpoint().getCheckpointId(),
-          request.getCheckpoint().getStateUri());
+          request.getCheckpoint().getStateLocation());
     } else {
-      checkpoint = new Checkpoint(topologyName, request.getInstance(),
-          request.getCheckpoint());
+      checkpoint = new Checkpoint(request.getCheckpoint());
     }
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
@@ -260,15 +262,15 @@ public class CheckpointManagerServer extends HeronServer {
   }
 
   private Checkpoint loadCheckpoint(PhysicalPlans.Instance instanceInfo,
-                                    String checkpointId, String stateUri) {
-    LOG.info("fetch state from: " + stateUri);
+                                    String checkpointId, String localStateLocation) {
+    LOG.info("fetch state from: " + localStateLocation);
     CheckpointManager.InstanceStateCheckpoint checkpoint =
         CheckpointManager.InstanceStateCheckpoint.newBuilder()
             .setCheckpointId(checkpointId)
-            .setState(loadStateFromFile(stateUri))
+            .setState(loadStateFromFile(localStateLocation))
             .build();
 
-    return new Checkpoint(topologyName, instanceInfo, checkpoint);
+    return new Checkpoint(checkpoint);
   }
 
   private ByteString loadStateFromFile(String stateUri) {
@@ -329,16 +331,16 @@ public class CheckpointManagerServer extends HeronServer {
                                info.getComponent(),
                                info.getInstanceId()));
         // Set the checkpoint-state in response
-        boolean spill_disk = true;
-        if (spill_disk) {
+        boolean spillToLocalDisk = true;
+        if (spillToLocalDisk) {
           CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
 
           // spill state to local disk
-          String stateURI = storeStateLocally(ckpt.getState(), ckpt.getCheckpointId());
+          String localStateLocation = storeStateLocally(ckpt.getState(), ckpt.getCheckpointId());
 
           CheckpointManager.InstanceStateCheckpoint ckpt2 =
               CheckpointManager.InstanceStateCheckpoint.newBuilder()
-                  .setStateUri(stateURI)
+                  .setStateLocation(localStateLocation)
                   .setCheckpointId(ckpt.getCheckpointId())
                   .build();
 
