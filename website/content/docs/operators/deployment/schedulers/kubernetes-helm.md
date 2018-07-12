@@ -242,7 +242,7 @@ Once all of the components have been successfully started up, you need to open u
 ```bash
 $ kubectl proxy -p 8001
 ```
- > Note: All of the following urls are valid with the Kubernetes 1.10.0 release.
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
  
 Now, verify that the Heron API server running on Minikube is available using curl:
 

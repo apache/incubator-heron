@@ -104,6 +104,8 @@ Once all of the [components](#components) have been successfully started up, you
 $ kubectl proxy -p 8001
 ```
 
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
+
 Now, verify that the Heron API server running on Minikube is available using curl:
 
 ```bash
@@ -128,7 +130,7 @@ Success! You can now manage Heron topologies on your Minikube Kubernetes install
 
 ```bash
 $ heron submit kubernetes \
-  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking
 ```
@@ -275,6 +277,7 @@ Once all of the [components](#components) have been successfully started up, you
 ```bash
 $ kubectl proxy -p 8001
 ```
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
 
 Now, verify that the Heron API server running on GKE is available using curl:
 
@@ -378,7 +381,7 @@ Once all of the [components](#components) have been successfully started up, you
 $ kubectl proxy -p 8001
 ```
 
-> Note: All of the following urls are valid with the Kubernetes 1.10.0 release.
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
 
 Now, verify that the Heron API server running on GKE is available using curl:
 
