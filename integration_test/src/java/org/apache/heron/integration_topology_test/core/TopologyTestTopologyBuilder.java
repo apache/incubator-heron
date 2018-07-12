@@ -38,7 +38,7 @@ public class TopologyTestTopologyBuilder extends TopologyBuilder {
     this.outputLocation = outputLocation;
   }
 
-  public BoltDeclarer setBolt(String id, IStatefulBolt bolt, Number parallelismHint) {
+  public BoltDeclarer setBolt(String id, StatefulBolt bolt, Number parallelismHint) {
     return setBolt(id, new StatefulIntegrationTopologyTestBolt(bolt, this.outputLocation),
         parallelismHint);
   }
@@ -49,13 +49,13 @@ public class TopologyTestTopologyBuilder extends TopologyBuilder {
     return super.setBolt(id, bolt, parallelismHint);
   }
 
-  public SpoutDeclarer setSpout(String id, IStatefulSpout spout, Number parallelismHint) {
+  public SpoutDeclarer setSpout(String id, StatefulSpout spout, Number parallelismHint) {
     return setSpout(id, spout, parallelismHint, DEFAULT_EXECUTION_COUNT);
   }
 
   // A method allows user to define the maxExecutionCount of the spout
   // To be compatible with earlier Integration Test Framework
-  public SpoutDeclarer setSpout(String id, IStatefulSpout spout,
+  public SpoutDeclarer setSpout(String id, StatefulSpout spout,
                                 Number parallelismHint, int maxExecutionCount) {
 
     StatefulIntegrationTopologyTestSpout wrappedSpout =

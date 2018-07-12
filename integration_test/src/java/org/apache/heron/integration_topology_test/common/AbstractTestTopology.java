@@ -102,24 +102,19 @@ public abstract class AbstractTestTopology {
   }
 
   public final void submit(Config userConf) throws AlreadyAliveException, InvalidTopologyException {
+    Config conf = buildConfig(new BasicConfig());
+    if (userConf != null) {
+      conf.putAll(userConf);
+    }
+
     if (this.httpServerResultsUrl == null) {
       TopologyBuilder builder = new TopologyBuilder();
-
-      Config conf = buildConfig(new BasicConfig());
-      if (userConf != null) {
-        conf.putAll(userConf);
-      }
       HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
 
     } else {
       TopologyTestTopologyBuilder builder = new TopologyTestTopologyBuilder(httpServerResultsUrl);
-
-      Config conf = buildConfig(new BasicConfig());
       conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
       conf.setTopologyStatefulCheckpointIntervalSecs(CHECKPOINT_INTERVAL);
-      if (userConf != null) {
-        conf.putAll(userConf);
-      }
       HeronSubmitter.submitTopology(topologyName, conf,
           buildStatefulTopology(builder).createTopology());
     }

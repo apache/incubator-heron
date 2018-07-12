@@ -27,16 +27,16 @@ import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 
-public class StatefulIntegrationTopologyTestBolt extends IStatefulBolt {
+public class StatefulIntegrationTopologyTestBolt extends StatefulBolt {
 
   private static final long serialVersionUID = 6657584414733837761L;
   private static final Logger LOG =
       Logger.getLogger(StatefulIntegrationTopologyTestBolt.class.getName());
-  private final IStatefulBolt delegateBolt;
+  private final StatefulBolt delegateBolt;
   private boolean checkpointExisted = false;
   private String outputLocation;
 
-  public StatefulIntegrationTopologyTestBolt(IStatefulBolt delegate, String outputLocation) {
+  public StatefulIntegrationTopologyTestBolt(StatefulBolt delegate, String outputLocation) {
     this.delegateBolt = delegate;
     this.outputLocation = outputLocation;
   }

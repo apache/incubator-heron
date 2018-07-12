@@ -26,9 +26,9 @@ import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Values;
-import org.apache.heron.integration_topology_test.core.IStatefulSpout;
+import org.apache.heron.integration_topology_test.core.StatefulSpout;
 
-public class StatefulABSpout extends IStatefulSpout {
+public class StatefulABSpout extends StatefulSpout {
 
   private static final long serialVersionUID = 7431612805823106868L;
   private static final String[] TO_SEND = new String[]{"A", "B"};

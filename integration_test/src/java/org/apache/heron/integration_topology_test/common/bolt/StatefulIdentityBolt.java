@@ -28,9 +28,9 @@ import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
-import org.apache.heron.integration_topology_test.core.IStatefulBolt;
+import org.apache.heron.integration_topology_test.core.StatefulBolt;
 
-public class StatefulIdentityBolt extends IStatefulBolt {
+public class StatefulIdentityBolt extends StatefulBolt {
   private static final long serialVersionUID = 1174496806359441609L;
   private static final Logger LOG = Logger.getLogger(StatefulIdentityBolt.class.getName());
   private Fields fields;

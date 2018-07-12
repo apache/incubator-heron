@@ -20,34 +20,32 @@ package org.apache.heron.integration_topology_test.core;
 
 import java.util.Map;
 
-import org.apache.heron.api.bolt.BaseRichBolt;
-import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
-import org.apache.heron.api.tuple.Tuple;
 
-public class IStatefulBolt extends BaseRichBolt implements IStatefulComponent<String, Integer> {
+public class StatefulSpout extends BaseRichSpout implements IStatefulComponent<String, Integer> {
 
-  private static final long serialVersionUID = 5834931054885658328L;
-
+  private static final long serialVersionUID = 2045875254384424423L;
+  protected SpoutOutputCollector collector;
   protected State<String, Integer> state;
-  protected OutputCollector collector;
   protected TopologyContext context;
 
-  public IStatefulBolt() { }
+  public StatefulSpout() { }
 
   @Override
-  public void prepare(Map<String, Object> map,
-                      TopologyContext inputContext,
-                      OutputCollector inputOutputCollector) {
-    this.context = inputContext;
-    this.collector = inputOutputCollector;
+  public void open(Map<String, Object> conf,
+                   TopologyContext newContext,
+                   SpoutOutputCollector newCollector) {
+    this.context = newContext;
+    this.collector = newCollector;
   }
 
   @Override
-  public void execute(Tuple input) { }
+  public void nextTuple() { }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) { }

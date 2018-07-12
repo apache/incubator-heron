@@ -26,18 +26,18 @@ import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 
-public class StatefulIntegrationTopologyTestSpout extends IStatefulSpout {
+public class StatefulIntegrationTopologyTestSpout extends StatefulSpout {
 
   private static final long serialVersionUID = -6920782627142720131L;
   private static final Logger LOG = Logger
       .getLogger(StatefulIntegrationTopologyTestSpout.class.getName());
 
-  private final IStatefulSpout delegateSpout;
+  private final StatefulSpout delegateSpout;
   private int maxExecutions;
   private int curExecutions;
   private String outputLocation;
 
-  public StatefulIntegrationTopologyTestSpout(IStatefulSpout delegateSpout,
+  public StatefulIntegrationTopologyTestSpout(StatefulSpout delegateSpout,
                                               int maxExecutions, String outputLocation) {
     this.delegateSpout = delegateSpout;
     this.maxExecutions = maxExecutions;
