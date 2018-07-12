@@ -67,4 +67,6 @@ message TupleStreamMessage {
   required int32 task_id = 1;
   // serialized data
   required bytes set = 2;
+  // number of tuples in serialized data tuples only
+  required int32 num_tuples = 4;
 }
