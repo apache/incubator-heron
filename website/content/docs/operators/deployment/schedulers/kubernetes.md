@@ -139,7 +139,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.
@@ -279,7 +279,7 @@ $ kubectl proxy -p 8001
 Now, verify that the Heron API server running on GKE is available using curl:
 
 ```bash
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 ```
 
 You should get a JSON response like this:
@@ -311,7 +311,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.
@@ -378,23 +378,25 @@ Once all of the [components](#components) have been successfully started up, you
 $ kubectl proxy -p 8001
 ```
 
+> Note: All of the following urls are valid with the Kubernetes 1.10.0 release.
+
 Now, verify that the Heron API server running on GKE is available using curl:
 
 ```bash
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 ```
 
 You should get a JSON response like this:
 
 ```json
 {
-  "heron.build.git.revision" : "bf9fe93f76b895825d8852e010dffd5342e1f860",
+  "heron.build.git.revision" : "ddbb98bbf173fb082c6fd575caaa35205abe34df",
   "heron.build.git.status" : "Clean",
   "heron.build.host" : "ci-server-01",
-  "heron.build.time" : "Sun Oct  1 20:42:18 UTC 2017",
-  "heron.build.timestamp" : "1506890538000",
-  "heron.build.user" : "release-agent1",
-  "heron.build.version" : "0.16.2"
+  "heron.build.time" : "Sat Mar 31 09:27:19 UTC 2018",
+  "heron.build.timestamp" : "1522488439000",
+  "heron.build.user" : "release-agent",
+  "heron.build.version" : "0.17.8"
 }
 ```
 
@@ -402,7 +404,7 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 
 ```bash
 $ heron submit kubernetes \
-  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking
 ```
@@ -413,7 +415,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.
