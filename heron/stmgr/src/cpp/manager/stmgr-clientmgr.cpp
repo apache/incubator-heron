@@ -141,6 +141,11 @@ bool StMgrClientMgr::SendTupleStreamMessage(sp_int32 _task_id, const sp_string& 
   out = __global_protobuf_pool_acquire__(out);
   out->set_task_id(_task_id);
   out->set_src_task_id(_msg.src_task_id());
+  sp_int32 length = 0;
+  if (_msg.has_data()) {
+    length = _msg.data().tuples_size();
+  }
+  out->set_num_tuples(length);
   _msg.SerializePartialToString(out->mutable_set());
 
   bool retval = clients_[_stmgr_id]->SendTupleStreamMessage(*out);
