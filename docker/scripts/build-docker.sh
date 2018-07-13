@@ -23,7 +23,6 @@ setup_scratch_dir() {
 
     mkdir $1
     mkdir $1/artifacts
-    echo "success: $1/artifacts"
   fi
 
   cp -R $DOCKER_DIR/dist $1/
