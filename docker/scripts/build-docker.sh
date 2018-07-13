@@ -20,8 +20,10 @@ trap cleanup EXIT
 
 setup_scratch_dir() {
   if [ ! -f "$1" ]; then
+
     mkdir $1
     mkdir $1/artifacts
+    echo "success: $1/artifacts"
   fi
 
   cp -R $DOCKER_DIR/dist $1/
@@ -38,23 +40,18 @@ run_build() {
   setup_scratch_dir $SCRATCH_DIR
 
   # need to copy artifacts locally
-  TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
-  TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
-
-  CLIENT_FILE="$OUTPUT_DIRECTORY/heron-client-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
-  CLIENT_OUT_FILE="$SCRATCH_DIR/artifacts/heron-client-install.sh"
-
   CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
 
-  cp $TOOLS_FILE $TOOLS_OUT_FILE
-  cp $CORE_FILE $CORE_OUT_FILE
+  ALL_FILE="$OUTPUT_DIRECTORY/heron-install.sh"
+  ALL_OUT_FILE="$SCRATCH_DIR/artifacts/heron-install.sh"
 
+  cp $CORE_FILE $CORE_OUT_FILE
+  cp $ALL_FILE $ALL_OUT_FILE
   export HERON_VERSION
 
   echo "Building docker image with tag:$DOCKER_TAG"
   docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
-
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
 

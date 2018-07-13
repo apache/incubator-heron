@@ -18,8 +18,8 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-# run heron installers
-RUN /heron/heron-client-install.sh && /heron/heron-tools-install.sh
+# run heron installer
+RUN /heron/heron-install.sh
 
 RUN tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron
 
