@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import uuid
+from httplib import HTTPConnection
 
 from ..common import status
 from heron.common.src.python.utils import log
@@ -160,16 +161,48 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
       raise status.TestFailure("The actual topology graph structure does not match the expected one"
                                + " for topology: %s" % self.topology_name)
     # check instance states, get the instance_state_check_result
-    # if both above are isinstanc(status.TestSuccess), return success, else return fail
+    # if both above are isinstance(status.TestSuccess), return success, else return fail
+    expected_result = self.instance_state_expected_result_handler.fetch_results()
+
+    decoder = json.JSONDecoder(strict=False)
+    expected_result = decoder.decode(expected_result)
+    
+    actual_result =[]
+    for _ in range(0, RETRY_ATTEMPTS):
+      actual_result = self.instance_state_actual_result_handler.fetch_results()
+      actual_result = decoder.decode(actual_result)
+      if len(actual_result) == len(expected_result):
+        break
+      else:
+        time.sleep(RETRY_INTERVAL)
+    else:
+      raise status.TestFailure("Fail to get actual results of instance states for topology %s"
+                               % self.topology_name)
+
+    if '_' not in expected_result[0].keys()[0]:
+      actual_result = self._parse_instance_id(actual_result)
+
+    return self._compare_state(sorted(expected_result), sorted(actual_result))
 
   def _compare_state(self, expected_results, actual_results):
-    pass
+    if actual_results == expected_results:
+      return status.TestSuccess("Topology %s instance state result matches expected result"
+                                % self.topology_name)
+    else:
+      failure = status.TestFailure("Actual result did not match expected result")
+      # lambda required below to remove the unicode 'u' from the output
+      logging.info("Actual result ---------- \n" + str(map(lambda x: str(x), actual_results)))
+      logging.info("Expected result ---------- \n" + str(map(lambda x: str(x), expected_results)))
+      raise failure
 
-  def _parse_state_expected_results(self, expected_results):
-    pass
-
-  def _parse_state_actual_results(self, actual_results):
-    pass
+  def _parse_instance_id(self, input):
+    # remove taskId in instaneId
+    output = list()
+    for ele in input:
+      for key in ele:
+        new_key = key.split('_')[0]
+        output.append({new_key: dict(ele[key])})
+    return output
 
 
 class FileBasedExpectedResultsHandler(object):
@@ -247,14 +280,44 @@ class HttpBasedActualResultsHandler(object):
   Get actually loaded instance states
   TODO(yaoli): complete this class when stateful processing is ready
   """
-  pass
+  def __init__(self, server_host_port, topology_name):
+    self.server_host_port = server_host_port
+    self.topology_name = topology_name
 
-class StatefulStorageBasedExpectedResultsHandler(object):
-  """
-  Get expected instance states from checkpoint storage
-  TODO(yaoli): complete this class when stateful processing is ready
-  """
-  pass
+  def fetch_results(self):
+    try:
+      return self.fetch_from_server(self.server_host_port, self.topology_name,
+        'instance_state', '/stateResults/%s' % self.topology_name)
+    except Exception as e:
+      raise status.TestFailure("Fetching instance state failed for %s topology" % self.topology_name, e)
+
+  def fetch_from_server(self, server_host_port, topology_name, data_name, path):
+    ''' Make a http get request to fetch actual results from http server '''
+    for i in range(0, RETRY_ATTEMPTS):
+      logging.info("Fetching %s for topology %s, retry count: %d", data_name, topology_name, i)
+      response = self.get_http_response(server_host_port, path)
+      if response.status == 200:
+        return response.read()
+      elif i != RETRY_ATTEMPTS:
+        logging.info("Fetching %s failed with status: %s; reason: %s; body: %s",
+          data_name, response.status, response.reason, response.read())
+        time.sleep(RETRY_INTERVAL)
+
+    raise status.TestFailure("Failed to fetch %s after %d attempts" % (data_name, RETRY_ATTEMPTS))
+
+  def get_http_response(self, server_host_port, path):
+    ''' get HTTP response '''
+    for _ in range(0, RETRY_ATTEMPTS):
+      try:
+        connection = HTTPConnection(server_host_port)
+        connection.request('GET', path)
+        response = connection.getresponse()
+        return response
+      except Exception:
+        time.sleep(RETRY_INTERVAL)
+        continue
+
+    raise status.TestFailure("Failed to get HTTP Response after %d attempts" % RETRY_ATTEMPTS)
 
 #  Result handlers end
 
@@ -273,10 +336,14 @@ def filter_test_topologies(test_topologies, test_pattern):
 
 
 def run_topology_test(topology_name, classpath, results_checker,
-  params, update_args, deactivate_args, restart_args, extra_topology_args):
+  params, update_args, deactivate_args, restart_args, http_server_host_port, extra_topology_args,
+  check_type):
   try:
-    args = "-t %s %s" % \
-           (topology_name, extra_topology_args)
+    if check_type == 'checkpoint_state':
+      args = "-r http://%s/stateResults -t %s %s" % \
+             (http_server_host_port, topology_name, extra_topology_args)
+    else:
+      args = "-t %s %s" % (topology_name, extra_topology_args)
     submit_topology(params.heron_cli_path, params.cli_config_path, params.cluster, params.role,
       params.env, params.tests_bin_path, classpath,
       params.release_package_uri, args)
@@ -413,7 +480,7 @@ def run_topology_tests(conf, args):
   failures = []
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
-  # http_host_port = "%s:%d" % (args.http_hostname, args.http_port)
+  http_server_host_port = "%s:%d" % (args.http_hostname, args.http_port)
 
   if args.tests_bin_path.endswith("scala-integration-tests.jar"):
     test_topologies = filter_test_topologies(conf["scalaTopologies"], args.test_topology_pattern)
@@ -437,7 +504,7 @@ def run_topology_tests(conf, args):
     update_args = ""
     deactivate_args = ""
     restart_args = ""
-    topology_args = ''
+    topology_args = ""
     if "updateArgs" in topology_conf:
       update_args = topology_conf["updateArgs"]
     if "deactivateArgs" in topology_conf:
@@ -448,22 +515,26 @@ def run_topology_tests(conf, args):
     if "topologyArgs" in topology_conf:
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
 
-    expected_result_file_path = \
-      args.topologies_path + "/" + topology_conf["expectedResultRelativePath"]
+    expected_topo_result_file_path = \
+      args.topologies_path + "/" + topology_conf["expectedTopoResultRelativePath"]
+    if "expectedStateResultRelativePath" in topology_conf:
+      expected_state_result_file_path = \
+        args.topologies_path + "/" + topology_conf["expectedStateResultRelativePath"]
+
     check_type = topology_conf["checkType"]
     if check_type == 'topology_structure':
       results_checker = load_result_checker(
         check_type, topology_name,
-        FileBasedExpectedResultsHandler(expected_result_file_path),
+        FileBasedExpectedResultsHandler(expected_topo_result_file_path),
         ZkFileBasedActualResultsHandler(topology_name, args.cluster))
     elif check_type == 'checkpoint_state':
       if processing_type == 'stateful':
         results_checker = load_result_checker(
           check_type, topology_name,
-          FileBasedExpectedResultsHandler(expected_result_file_path),
+          FileBasedExpectedResultsHandler(expected_topo_result_file_path),
           ZkFileBasedActualResultsHandler(topology_name, args.cluster),
-          StatefulStorageBasedExpectedResultsHandler(),
-          HttpBasedActualResultsHandler())
+          FileBasedExpectedResultsHandler(expected_state_result_file_path),
+          HttpBasedActualResultsHandler(http_server_host_port, topology_name))
       elif processing_type == 'non_stateful':
         raise ValueError("Cannot check instance checkpoint state in non_stateful processing. "
                        + "Not running topology: " + topology_name)
@@ -477,7 +548,8 @@ def run_topology_tests(conf, args):
     start_secs = int(time.time())
     try:
       result = run_topology_test(topology_name, classpath, results_checker,
-        args, update_args, deactivate_args, restart_args, topology_args)
+        args, update_args, deactivate_args, restart_args, http_server_host_port, topology_args,
+        check_type)
       test_tuple = (topology_name, int(time.time()) - start_secs)
       if isinstance(result, status.TestSuccess):
         successes += [test_tuple]
