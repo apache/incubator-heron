@@ -14,8 +14,9 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-# run heron tools install
-RUN /heron/heron-tools-install.sh && \
+
+# run heron installer
+RUN /heron/heron-install.sh && \
     tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron && \
     rm -rf /heron/heron-core.tar.gz && \
     rm -rf /heron/heron-tools-install.sh && \
