@@ -57,7 +57,7 @@ run_build() {
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
   gzip $DOCKER_IMAGE_FILE
-}
+} 
 
 case $# in
   3)
