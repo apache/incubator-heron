@@ -33,17 +33,20 @@ import org.apache.heron.api.HeronSubmitter;
 import org.apache.heron.api.exception.AlreadyAliveException;
 import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.integration_topology_test.core.TopologyTestTopologyBuilder;
 
 /**
  * Class to abstract out the common parts of the test framework for submitting topologies.
  * Subclasses can implement {@code buildTopology} and call {@code submit}.
  */
 public abstract class AbstractTestTopology {
+  private static final Integer CHECKPOINT_INTERVAL = 10;
   private static final String TOPOLOGY_OPTION = "topology_name";
-  private static final String STATE_UPDATE_TOKEN = "state_server_update_token";
+  private static final String RESULTS_URL_OPTION = "results_url";
 
   private final CommandLine cmd;
   private final String topologyName;
+  private final String httpServerResultsUrl;
 
   protected AbstractTestTopology(String[] args) throws MalformedURLException {
     CommandLineParser parser = new DefaultParser();
@@ -59,9 +62,21 @@ public abstract class AbstractTestTopology {
     }
 
     this.topologyName = cmd.getOptionValue(TOPOLOGY_OPTION);
+    if (cmd.getOptionValue(RESULTS_URL_OPTION) != null) {
+      this.httpServerResultsUrl =
+          pathAppend(cmd.getOptionValue(RESULTS_URL_OPTION), this.topologyName);
+    } else {
+      this.httpServerResultsUrl = null;
+    }
   }
 
-  protected abstract TopologyBuilder buildTopology(TopologyBuilder builder);
+  protected TopologyBuilder buildTopology(TopologyBuilder builder) {
+    return builder;
+  }
+  protected TopologyTestTopologyBuilder buildStatefulTopology(TopologyTestTopologyBuilder
+                                                                           builder) {
+    return builder;
+  }
 
   protected Config buildConfig(Config config) {
     return config;
@@ -74,6 +89,11 @@ public abstract class AbstractTestTopology {
     topologyNameOption.setRequired(true);
     options.addOption(topologyNameOption);
 
+    Option resultsUrlOption =
+        new Option("r", RESULTS_URL_OPTION, true, "url to post and get instance state");
+    resultsUrlOption.setRequired(false);
+    options.addOption(resultsUrlOption);
+
     return options;
   }
 
@@ -82,12 +102,25 @@ public abstract class AbstractTestTopology {
   }
 
   public final void submit(Config userConf) throws AlreadyAliveException, InvalidTopologyException {
-    TopologyBuilder builder = new TopologyBuilder();
-
     Config conf = buildConfig(new BasicConfig());
     if (userConf != null) {
       conf.putAll(userConf);
     }
-    HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
+
+    if (this.httpServerResultsUrl == null) {
+      TopologyBuilder builder = new TopologyBuilder();
+      HeronSubmitter.submitTopology(topologyName, conf, buildTopology(builder).createTopology());
+
+    } else {
+      TopologyTestTopologyBuilder builder = new TopologyTestTopologyBuilder(httpServerResultsUrl);
+      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE);
+      conf.setTopologyStatefulCheckpointIntervalSecs(CHECKPOINT_INTERVAL);
+      HeronSubmitter.submitTopology(topologyName, conf,
+          buildStatefulTopology(builder).createTopology());
+    }
+  }
+
+  private static String pathAppend(String url, String path) {
+    return String.format("%s/%s", url, path);
   }
 }

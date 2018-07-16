@@ -120,6 +120,23 @@ genrule(
     cmd = "cp $< $@",
 )
 
+java_library(
+    name = "core-topology",
+    srcs = glob(
+        ["org/apache/heron/integration_topology_test/core/**/*.java"],
+    ),
+    deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
+        "//storm-compatibility/src/java:storm-compatibility-java",
+        "//heron/proto:proto_topology_java",
+        "//third_party/java:jackson",
+        "@commons_logging_commons_logging//jar",
+        "@com_google_protobuf//:protobuf_java",
+        "@org_apache_httpcomponents_http_client//jar",
+        "@org_apache_httpcomponents_http_core//jar",
+    ],
+)
 
 java_library(
     name = "common_topology_test",
@@ -133,7 +150,8 @@ java_library(
         "//third_party/java:hadoop-core",
         "//third_party/java:jackson",
         "@commons_cli_commons_cli//jar",
-        ":core"
+        ":core",
+        ":core-topology"
     ],
 )
 
@@ -150,7 +168,8 @@ java_library(
         "@commons_cli_commons_cli//jar",
         ":common_topology_test",
         ":common",
-        ":core"
+        ":core",
+        ":core-topology"
     ],
 )
 
@@ -167,7 +186,8 @@ java_binary(
         "@com_googlecode_json_simple_json_simple//jar",
         ":common_topology_test",
         ":common",
-        ":core"
+        ":core",
+        ":core-topology"
     ],
 )
 

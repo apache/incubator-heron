@@ -4,49 +4,56 @@
   "role" : "dummy_role",
   "env" : "dummy_env",
   "cliConfigPath" : "$HOME/.heron/conf",
-  "processingType" : "non_stateful",
+  "processingType" : "stateful",
   "topologyClasspathPrefix" : "org.apache.heron.integration_topology_test.topology.",
   "javaTopologies": [
     {
       "topologyName" : "IntegrationTopologyTest_FieldsGrouping",
       "classPath"    : "fields_grouping.FieldsGrouping",
-      "expectedResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
+      "expectedTopoResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
       "checkType" : "topology_structure"
     },
     {
       "topologyName" : "IntegrationTopologyTest_BasicTopologyOneTaskScaleUp",
       "classPath"    : "basic_topology_one_task_scale_up.BasicTopologyOneTask",
       "updateArgs"   : "--component-parallelism=ab-spout:2 --component-parallelism=identity-bolt:3",
-      "expectedResultRelativePath" : "basic_topology_one_task_scale_up/BasicTopologyOneTaskResults.json",
+      "expectedTopoResultRelativePath" : "basic_topology_one_task_scale_up/BasicTopologyOneTaskResults.json",
       "checkType" : "topology_structure"
     },
     {
       "topologyName" : "IntegrationTopologyTest_BasicTopologyOneTaskScaleDown",
       "classPath"    : "basic_topology_one_task_scale_down.BasicTopologyOneTask",
       "updateArgs"   : "--component-parallelism=ab-spout:1 --component-parallelism=identity-bolt:2",
-      "expectedResultRelativePath" : "basic_topology_one_task_scale_down/BasicTopologyOneTaskResults.json",
+      "expectedTopoResultRelativePath" : "basic_topology_one_task_scale_down/BasicTopologyOneTaskResults.json",
       "checkType" : "topology_structure"
     },
     {
       "topologyName" : "IntegrationTopologyTest_BasicTopologyOneTaskScaleUpDown",
       "classPath"    : "basic_topology_one_task_scale_up_down.BasicTopologyOneTask",
       "updateArgs"   : "--component-parallelism=ab-spout:2 --component-parallelism=identity-bolt:2",
-      "expectedResultRelativePath" : "basic_topology_one_task_scale_up_down/BasicTopologyOneTaskResults.json",
+      "expectedTopoResultRelativePath" : "basic_topology_one_task_scale_up_down/BasicTopologyOneTaskResults.json",
       "checkType" : "topology_structure"
     },
     {
       "topologyName" : "IntegrationTopologyTest_FieldsGroupingDeactivate",
       "classPath"    : "fields_grouping.FieldsGrouping",
       "deactivateArgs"  : "True",
-      "expectedResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
+      "expectedTopoResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
       "checkType" : "topology_structure"
     },
     {
       "topologyName" : "IntegrationTopologyTest_FieldsGroupingKillContainer",
       "classPath"    : "fields_grouping.FieldsGrouping",
       "restartArgs"  : "True",
-      "expectedResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
+      "expectedTopoResultRelativePath" : "fields_grouping/FieldsGroupingResults.json",
       "checkType" : "topology_structure"
+    },
+    {
+      "topologyName" : "IntegrationTopologyTest_StatefulBasicTopologyOneTask",
+      "classPath"    : "stateful_basic_topology_one_task.StatefulBasicTopologyOneTask",
+      "expectedTopoResultRelativePath" : "stateful_basic_topology_one_task/StatefulBasicTopologyOneTaskTopo.json",
+      "expectedStateResultRelativePath" : "stateful_basic_topology_one_task/StatefulBasicTopologyOneTaskState.json",
+      "checkType" : "checkpoint_state"
     }
   ]
 }
