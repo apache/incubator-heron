@@ -152,6 +152,13 @@ void CkptMgrClient::SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* 
   SendRequest(_request, NULL);
 }
 
+void CkptMgrClient::SendNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
+  LOG(INFO) << "Sending new physical plan to ckpgmgr" << std::endl;
+  proto::stmgr::NewInstanceAssignmentMessage new_assignment;
+  new_assignment.mutable_pplan()->CopyFrom(_pplan);
+  SendMessage(new_assignment);
+}
+
 void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,
                                      const std::string& _checkpoint_id) {
   LOG(INFO) << "Sending GetInstanceState to ckptmgr for task_id " << _instance.info().task_id()

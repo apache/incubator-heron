@@ -600,6 +600,10 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
     clientmgr_->StartConnections(pplan_);
   }
   instance_server_->BroadcastNewPhysicalPlan(*pplan_);
+  // for stateful topologies we need to send the pplan to ckptmgr
+  if (ckptmgr_client_) {
+    ckptmgr_client_->SendNewPhysicalPlan(*pplan_);
+  }
 }
 
 void StMgr::CleanupStreamConsumers() {
@@ -1003,7 +1007,7 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
   instance_server_->InitiateStatefulCheckpoint(_checkpoint_id);
 }
 
-// We just recieved a InstanceStateCheckpoint message from one of our instances
+// We just received a InstanceStateCheckpoint message from one of our instances
 // We need to propagate it to all downstream tasks
 // We also need to send the checkpoint to ckptmgr
 void StMgr::HandleStoreInstanceStateCheckpoint(

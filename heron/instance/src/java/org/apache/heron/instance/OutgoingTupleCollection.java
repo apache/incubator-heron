@@ -20,6 +20,7 @@
 package org.apache.heron.instance;
 
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,6 +32,7 @@ import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.state.State;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
@@ -102,30 +104,40 @@ public class OutgoingTupleCollection {
   }
 
   /**
-   * Send out the instance's state with corresponding checkpointId
+   * Send out the instance's state with corresponding checkpointId. If spillState is True,
+   * the actual state is spill to disk and only the state location is sent out.
    * @param state instance's state
    * @param checkpointId the checkpointId
+   * @param spillState spill the state to local disk if true
+   * @param location the location where state is spilled
    */
   public void sendOutState(State<Serializable, Serializable> state,
-                           String checkpointId) {
+                           String checkpointId,
+                           boolean spillState,
+                           String location) {
     lock.lock();
     try {
       // flush all the current data before sending the state
       flushRemaining();
 
-      // Serialize the state
+      // serialize the state
       byte[] serializedState = serializer.serialize(state);
 
-      // Construct the instance state checkpoint
-      CheckpointManager.InstanceStateCheckpoint instanceState =
-          CheckpointManager.InstanceStateCheckpoint.newBuilder()
-              .setCheckpointId(checkpointId)
-              .setState(ByteString.copyFrom(serializedState))
-              .build();
+      CheckpointManager.InstanceStateCheckpoint.Builder instanceStateBuilder =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder();
+      instanceStateBuilder.setCheckpointId(checkpointId);
+
+      if (spillState) {
+        String stateLocation = location + checkpointId + "-" + UUID.randomUUID();
+        FileUtils.writeToFile(stateLocation, serializedState, true);
+        instanceStateBuilder.setStateLocation(stateLocation);
+      } else {
+        instanceStateBuilder.setState(ByteString.copyFrom(serializedState));
+      }
 
       CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
           CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
-              .setState(instanceState)
+              .setState(instanceStateBuilder.build())
               .build();
 
       // Put the checkpoint to out stream queue

@@ -44,10 +44,10 @@ class CkptMgrClient : public Client {
 
   void Quit();
 
-  // TODO(nlu): add requests methods
   virtual void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
   virtual void GetInstanceState(const proto::system::Instance& _instance,
                                 const std::string& _checkpoint_id);
+  virtual void SendNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
  protected:
   void GetInstanceState(const proto::system::Instance& _instance,
@@ -67,8 +67,6 @@ class CkptMgrClient : public Client {
   void SendRegisterRequest();
 
   void OnReconnectTimer();
-
-  // TODO(nlu): add response handler methods
 
   sp_string topology_name_;
   sp_string topology_id_;

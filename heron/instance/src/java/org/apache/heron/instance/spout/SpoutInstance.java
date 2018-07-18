@@ -40,6 +40,7 @@ import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.TypeUtils;
@@ -67,6 +68,9 @@ public class SpoutInstance implements IInstance {
   private final boolean enableMessageTimeouts;
 
   private final boolean isTopologyStateful;
+  private final boolean spillState;
+  private final String spillStateLocation;
+
   private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
@@ -98,6 +102,12 @@ public class SpoutInstance implements IInstance {
 
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+
+    this.spillState =
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE));
+
+    this.spillStateLocation =
+        String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION));
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);
 
@@ -160,8 +170,7 @@ public class SpoutInstance implements IInstance {
       if (spout instanceof IStatefulComponent) {
         ((IStatefulComponent) spout).preSave(checkpointId);
       }
-
-      collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
     } finally {
       collector.lock.unlock();
     }
@@ -182,6 +191,14 @@ public class SpoutInstance implements IInstance {
     if (spout instanceof IStatefulComponent) {
       this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
+
+      if (spillState) {
+        if (FileUtils.isDirectoryExists(spillStateLocation)) {
+          FileUtils.cleanDir(spillStateLocation);
+        } else {
+          FileUtils.createDirectory(spillStateLocation);
+        }
+      }
     }
 
     spout.open(

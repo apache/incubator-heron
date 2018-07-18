@@ -40,6 +40,7 @@ import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.TypeUtils;
@@ -68,13 +69,21 @@ public class BoltInstance implements IInstance {
   private final Communicator<Message> streamInQueue;
 
   private final boolean isTopologyStateful;
+  private final boolean spillState;
+  private final String spillStateLocation;
 
   private State<Serializable, Serializable> instanceState;
+
+  // The reference to topology's config
+  private final Map<String, Object> config;
 
   private final SlaveLooper looper;
 
   private final SystemConfig systemConfig;
 
+  /**
+   * Construct a BoltInstance basing on given arguments
+   */
   public BoltInstance(PhysicalPlanHelper helper,
                       Communicator<Message> streamInQueue,
                       Communicator<Message> streamOutQueue,
@@ -89,11 +98,16 @@ public class BoltInstance implements IInstance {
     this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
 
-    Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
+    this.config = helper.getTopologyContext().getTopologyConfig();
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
-
     LOG.info("Is this topology stateful: " + isTopologyStateful);
+
+    this.spillState =
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE));
+
+    this.spillStateLocation =
+        String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION));
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
@@ -143,7 +157,6 @@ public class BoltInstance implements IInstance {
     if (!isTopologyStateful) {
       throw new RuntimeException("Could not save a non-stateful topology's state");
     }
-
     // need to synchronize with other OutgoingTupleCollection operations
     // so that topology emit, ack, fail are thread safe
     collector.lock.lock();
@@ -152,8 +165,7 @@ public class BoltInstance implements IInstance {
       if (bolt instanceof IStatefulComponent) {
         ((IStatefulComponent) bolt).preSave(checkpointId);
       }
-
-      collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
     } finally {
       collector.lock.unlock();
     }
@@ -174,6 +186,14 @@ public class BoltInstance implements IInstance {
     if (bolt instanceof IStatefulComponent) {
       this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) bolt).initState(instanceState);
+
+      if (spillState) {
+        if (FileUtils.isDirectoryExists(spillStateLocation)) {
+          FileUtils.cleanDir(spillStateLocation);
+        } else {
+          FileUtils.createDirectory(spillStateLocation);
+        }
+      }
     }
 
     // Delegate

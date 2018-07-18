@@ -21,18 +21,25 @@ package org.apache.heron.ckptmgr;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 
+import org.apache.heron.api.Config;
+import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.utils.TopologyUtils;
+import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.network.HeronServer;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
+import org.apache.heron.proto.stmgr.StreamManager;
 import org.apache.heron.proto.system.Common;
+import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
 import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
@@ -45,6 +52,8 @@ public class CheckpointManagerServer extends HeronServer {
   private final String topologyId;
   private final String checkpointMgrId;
   private final IStatefulStorage statefulStorage;
+  private boolean spillState;
+  private String spillStateLocation;
 
   private SocketChannel connection;
 
@@ -63,6 +72,8 @@ public class CheckpointManagerServer extends HeronServer {
     this.topologyId = topologyId;
     this.checkpointMgrId = checkpointMgrId;
     this.statefulStorage = statefulStorage;
+    this.spillState = false;
+    this.spillStateLocation = "";
 
     this.connection = null;
 
@@ -79,6 +90,8 @@ public class CheckpointManagerServer extends HeronServer {
     registerOnRequest(CheckpointManager.GetInstanceStateRequest.newBuilder());
 
     registerOnRequest(CheckpointManager.CleanStatefulCheckpointRequest.newBuilder());
+
+    registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
   }
 
   @Override
@@ -105,6 +118,16 @@ public class CheckpointManagerServer extends HeronServer {
           rid, channel, (CheckpointManager.CleanStatefulCheckpointRequest) request);
     } else {
       LOG.severe("Unknown kind of request: " + request.getClass().getName());
+    }
+  }
+
+  @Override
+  public void onMessage(SocketChannel channel, Message message) {
+    if (message instanceof StreamManager.NewInstanceAssignmentMessage) {
+      StreamManager.NewInstanceAssignmentMessage m =
+          (StreamManager.NewInstanceAssignmentMessage) message;
+      LOG.info("Handling assignment message from direct NewInstanceAssignmentMessage");
+      handleAssignmentMessage(m.getPplan());
     }
   }
 
@@ -210,8 +233,15 @@ public class CheckpointManagerServer extends HeronServer {
   ) {
     CheckpointInfo info =
         new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
-                           request.getInstance());
-    Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
+            request.getInstance());
+
+    Checkpoint checkpoint;
+    if (request.getCheckpoint().hasStateLocation()) {
+      checkpoint = loadCheckpoint(request.getInstance(), request.getCheckpoint().getCheckpointId(),
+          request.getCheckpoint().getStateLocation());
+    } else {
+      checkpoint = new Checkpoint(request.getCheckpoint());
+    }
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
                            + " component %s instanceId %s on connection %s",
@@ -244,6 +274,22 @@ public class CheckpointManagerServer extends HeronServer {
     responseBuilder.setInstance(request.getInstance());
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+  private Checkpoint loadCheckpoint(PhysicalPlans.Instance instanceInfo,
+                                    String checkpointId, String localStateLocation) {
+    LOG.info("fetch state from: " + localStateLocation);
+    CheckpointManager.InstanceStateCheckpoint checkpoint =
+        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+            .setCheckpointId(checkpointId)
+            .setState(ByteString.copyFrom(FileUtils.readFromFile(localStateLocation)))
+            .build();
+
+    if (!FileUtils.deleteFile(localStateLocation)) {
+      LOG.info("failed to delete state tmp file: " + localStateLocation);
+    }
+
+    return new Checkpoint(checkpoint);
   }
 
   protected void handleGetInstanceStateRequest(
@@ -283,7 +329,23 @@ public class CheckpointManagerServer extends HeronServer {
                                info.getComponent(),
                                info.getInstanceId()));
         // Set the checkpoint-state in response
-        responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        if (spillState) {
+          CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
+          String checkpointId = ckpt.getCheckpointId();
+
+          // spill state to local disk
+          String stateLocation = spillStateLocation + checkpointId + "-" + UUID.randomUUID();
+          FileUtils.writeToFile(stateLocation, ckpt.getState().toByteArray(), true);
+          LOG.info("spilled state to: " + stateLocation);
+          ckpt = CheckpointManager.InstanceStateCheckpoint.newBuilder()
+                  .setStateLocation(stateLocation)
+                  .setCheckpointId(checkpointId)
+                  .build();
+
+          responseBuilder.setCheckpoint(ckpt);
+        } else {
+          responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        }
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                      + "component %s instanceId %d",
@@ -301,9 +363,14 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
-  @Override
-  public void onMessage(SocketChannel channel, Message message) {
-
+  private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {
+    TopologyAPI.Config config = pplan.getTopology().getTopologyConfig();
+    this.spillState = Boolean.parseBoolean(TopologyUtils.getConfigWithDefault(config.getKvsList(),
+        Config.TOPOLOGY_STATEFUL_SPILL_STATE, "false"));
+    this.spillStateLocation = String.valueOf(TopologyUtils.getConfigWithDefault(config.getKvsList(),
+        Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION, ""));
+    LOG.info("spill state: " + spillState
+        + ". set spilled state location: " + spillStateLocation);
   }
 
   @Override
