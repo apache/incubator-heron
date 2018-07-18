@@ -223,6 +223,11 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_STATEFUL_CKPTMGR_RAM =
                             "topology.stateful.checkpointmanager.ram";
   /**
+   * Whether spill the state to disk for transferring
+   */
+  public static final String TOPOLOGY_STATEFUL_SPILL_STATE =
+                            "topology.stateful.spill.state";
+  /**
    * Stream Manager RAM requirement
    */
   public static final String TOPOLOGY_STMGR_RAM =  "topology.stmgr.ram";
@@ -333,6 +338,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_STATEFUL_CKPTMGR_RAM);
+    apiVars.add(TOPOLOGY_STATEFUL_SPILL_STATE);
     apiVars.add(TOPOLOGY_STMGR_RAM);
     apiVars.add(TOPOLOGY_METRICSMGR_RAM);
     apiVars.add(TOPOLOGY_RELIABILITY_MODE);
@@ -593,6 +599,11 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_STATEFUL_CKPTMGR_RAM, ramInBytes.asBytes());
   }
 
+  public static void setTopologyStatefulSpillState(Map<String, Object> conf,
+                                   String spillState) {
+    conf.put(Config.TOPOLOGY_STATEFUL_SPILL_STATE, spillState);
+  }
+
   public static void setStreamManagerRam(Map<String, Object> conf,
                                          ByteAmount ramInBytes) {
     conf.put(Config.TOPOLOGY_STMGR_RAM, ramInBytes.asBytes());
@@ -771,6 +782,10 @@ public class Config extends HashMap<String, Object> {
 
   public void setCheckpointManagerRam(ByteAmount ramInBytes) {
     setCheckpointManagerRam(this, ramInBytes);
+  }
+
+  public void setTopologyStatefulSpillState(String spillState) {
+    setTopologyStatefulSpillState(this, spillState);
   }
 
   public void setStreamManagerRam(ByteAmount ramInBytes) {

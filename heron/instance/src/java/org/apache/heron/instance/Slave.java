@@ -19,6 +19,10 @@
 
 package org.apache.heron.instance;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
@@ -304,12 +308,20 @@ public class Slave implements Runnable, AutoCloseable {
       instanceState.clear();
       instanceState = null;
     }
+
+    // TODO(nlu): clean the code
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
               request.getState().getState().toByteArray());
 
+      instanceState = stateToRestore;
+    } else if (request.getState().hasStateLocation()) {
+      byte[] rawState = loadState(request.getState().getStateLocation());
+      @SuppressWarnings("unchecked")
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(rawState);
       instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
@@ -341,6 +353,24 @@ public class Slave implements Runnable, AutoCloseable {
             .setStatus(Common.Status.newBuilder().setStatus(Common.StatusCode.OK).build())
             .build();
     streamOutCommunicator.offer(response);
+  }
+
+  private byte[] loadState(String stateLocation) {
+    File f = new File(stateLocation);
+    byte[] data = new byte[(int) f.length()];
+
+    try (FileInputStream fis = new FileInputStream(stateLocation);
+         DataInputStream dis = new DataInputStream(fis)) {
+      dis.read(data);
+      return data;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to load local state", e);
+    } finally {
+      if (f.exists()) {
+        LOG.info("deleting local state file: " + f.getPath());
+        f.delete();
+      }
+    }
   }
 
   private void handleNewPhysicalPlan(InstanceControlMsg instanceControlMsg) {

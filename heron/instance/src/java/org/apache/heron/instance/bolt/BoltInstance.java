@@ -68,6 +68,7 @@ public class BoltInstance implements IInstance {
   private final Communicator<Message> streamInQueue;
 
   private final boolean isTopologyStateful;
+  private final boolean spillState;
 
   private State<Serializable, Serializable> instanceState;
 
@@ -92,8 +93,9 @@ public class BoltInstance implements IInstance {
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
-
     LOG.info("Is this topology stateful: " + isTopologyStateful);
+
+    this.spillState = (Boolean) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE);
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
@@ -152,8 +154,7 @@ public class BoltInstance implements IInstance {
       if (bolt instanceof IStatefulComponent) {
         ((IStatefulComponent) bolt).preSave(checkpointId);
       }
-
-      collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId, spillState);
     } finally {
       collector.lock.unlock();
     }

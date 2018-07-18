@@ -131,7 +131,7 @@ public final class ConfigUtils {
    * Otherwise the component config might overwrite the topolgy config with a wrong value.
    * @param heron the heron config object to receive the results.
    */
-  private static void doStormTranslation(Config heronConfig) {
+  private static void   doStormTranslation(Config heronConfig) {
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       heronConfig.put(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS,
           heronConfig.get(org.apache.storm.Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS).toString());

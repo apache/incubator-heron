@@ -19,7 +19,12 @@
 
 package org.apache.heron.ckptmgr;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +38,7 @@ import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.Common;
+import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
 import org.apache.heron.spi.statefulstorage.CheckpointInfo;
 import org.apache.heron.spi.statefulstorage.IStatefulStorage;
@@ -210,8 +216,16 @@ public class CheckpointManagerServer extends HeronServer {
   ) {
     CheckpointInfo info =
         new CheckpointInfo(request.getCheckpoint().getCheckpointId(),
-                           request.getInstance());
-    Checkpoint checkpoint = new Checkpoint(request.getCheckpoint());
+            request.getInstance());
+
+    // TODO(nlu): handle states in different locations
+    Checkpoint checkpoint = null;
+    if (request.getCheckpoint().hasStateLocation()) {
+      checkpoint = loadCheckpoint(request.getInstance(), request.getCheckpoint().getCheckpointId(),
+          request.getCheckpoint().getStateLocation());
+    } else {
+      checkpoint = new Checkpoint(request.getCheckpoint());
+    }
 
     LOG.info(String.format("Got a save checkpoint request for checkpointId %s "
                            + " component %s instanceId %s on connection %s",
@@ -244,6 +258,36 @@ public class CheckpointManagerServer extends HeronServer {
     responseBuilder.setInstance(request.getInstance());
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+  private Checkpoint loadCheckpoint(PhysicalPlans.Instance instanceInfo,
+                                    String checkpointId, String localStateLocation) {
+    LOG.info("fetch state from: " + localStateLocation);
+    CheckpointManager.InstanceStateCheckpoint checkpoint =
+        CheckpointManager.InstanceStateCheckpoint.newBuilder()
+            .setCheckpointId(checkpointId)
+            .setState(ByteString.copyFrom(loadState(localStateLocation)))
+            .build();
+
+    return new Checkpoint(checkpoint);
+  }
+
+  private byte[] loadState(String stateLcation) {
+    File f = new File(stateLcation);
+    byte[] data = new byte[(int) f.length()];
+
+    try (FileInputStream fis = new FileInputStream(stateLcation);
+         DataInputStream dis = new DataInputStream(fis)) {
+      dis.read(data);
+      return data;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to load local state", e);
+    } finally {
+      if (f.exists()) {
+        LOG.info("deleting local state file: " + f.getPath());
+        f.delete();
+      }
+    }
   }
 
   protected void handleGetInstanceStateRequest(
@@ -283,7 +327,24 @@ public class CheckpointManagerServer extends HeronServer {
                                info.getComponent(),
                                info.getInstanceId()));
         // Set the checkpoint-state in response
-        responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        boolean spillToLocalDisk = true;
+        if (spillToLocalDisk) {
+          CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
+
+          // spill state to local disk
+          String localStateLocation = storeState(ckpt.getState(), ckpt.getCheckpointId());
+          LOG.info("state write to: " + localStateLocation);
+
+          CheckpointManager.InstanceStateCheckpoint ckpt2 =
+              CheckpointManager.InstanceStateCheckpoint.newBuilder()
+                  .setStateLocation(localStateLocation)
+                  .setCheckpointId(ckpt.getCheckpointId())
+                  .build();
+
+          responseBuilder.setCheckpoint(ckpt2);
+        } else {
+          responseBuilder.setCheckpoint(checkpoint.getCheckpoint());
+        }
       } catch (StatefulStorageException e) {
         errorMessage = String.format("Get checkpoint not successful for checkpointId %s "
                                      + "component %s instanceId %d",
@@ -299,6 +360,25 @@ public class CheckpointManagerServer extends HeronServer {
                               .setMessage(errorMessage));
 
     sendResponse(rid, channel, responseBuilder.build());
+  }
+
+  private String storeState(ByteString states, String ckptId) {
+    String fileName;
+
+    try {
+      fileName = File.createTempFile(ckptId, "state", new File("./")).toString();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to create local temp file for state", e);
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName));
+         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+      oos.writeObject(states);
+      oos.flush();
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to persist state locally", e);
+    }
   }
 
   @Override

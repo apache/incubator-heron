@@ -19,6 +19,9 @@
 
 package org.apache.heron.instance;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -102,30 +105,37 @@ public class OutgoingTupleCollection {
   }
 
   /**
-   * Send out the instance's state with corresponding checkpointId
+   * Send out the instance's state with corresponding checkpointId. If spillState is True,
+   * the actual state is spill to disk and only the state location is sent out.
    * @param state instance's state
    * @param checkpointId the checkpointId
+   * @param spillState spill the state to local disk if true
    */
   public void sendOutState(State<Serializable, Serializable> state,
-                           String checkpointId) {
+                           String checkpointId,
+                           boolean spillState) {
     lock.lock();
     try {
       // flush all the current data before sending the state
       flushRemaining();
 
-      // Serialize the state
+      // serialize the state
       byte[] serializedState = serializer.serialize(state);
 
-      // Construct the instance state checkpoint
-      CheckpointManager.InstanceStateCheckpoint instanceState =
-          CheckpointManager.InstanceStateCheckpoint.newBuilder()
-              .setCheckpointId(checkpointId)
-              .setState(ByteString.copyFrom(serializedState))
-              .build();
+      CheckpointManager.InstanceStateCheckpoint.Builder instanceStateBuilder =
+          CheckpointManager.InstanceStateCheckpoint.newBuilder();
+      instanceStateBuilder.setCheckpointId(checkpointId);
+
+      if (spillState) {
+        String stateLocation = spillState(serializedState, checkpointId);
+        instanceStateBuilder.setStateLocation(stateLocation);
+      } else {
+        instanceStateBuilder.setState(ByteString.copyFrom(serializedState));
+      }
 
       CheckpointManager.StoreInstanceStateCheckpoint storeRequest =
           CheckpointManager.StoreInstanceStateCheckpoint.newBuilder()
-              .setState(instanceState)
+              .setState(instanceStateBuilder.build())
               .build();
 
       // Put the checkpoint to out stream queue
@@ -134,6 +144,27 @@ public class OutgoingTupleCollection {
       lock.unlock();
     }
   }
+
+  private String spillState(byte[] state, String checkpointId) {
+    String fileName;
+
+    try {
+      // TODO(nlu): different file name for each state
+      fileName = File.createTempFile(checkpointId,
+          "-" + System.currentTimeMillis(),
+          new File("./")).toString();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to create local temp file for state");
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(new File(fileName))) {
+      fos.write(state);
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("failed to persist state locally", e);
+    }
+  }
+
 
   public void addDataTuple(
       String streamId,

@@ -67,6 +67,8 @@ public class SpoutInstance implements IInstance {
   private final boolean enableMessageTimeouts;
 
   private final boolean isTopologyStateful;
+  private final boolean spillState;
+
   private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
@@ -98,6 +100,9 @@ public class SpoutInstance implements IInstance {
 
     this.isTopologyStateful = String.valueOf(Config.TopologyReliabilityMode.EFFECTIVELY_ONCE)
         .equals(config.get(Config.TOPOLOGY_RELIABILITY_MODE));
+
+    this.spillState =
+        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE));
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);
 
@@ -160,8 +165,7 @@ public class SpoutInstance implements IInstance {
       if (spout instanceof IStatefulComponent) {
         ((IStatefulComponent) spout).preSave(checkpointId);
       }
-
-      collector.sendOutState(instanceState, checkpointId);
+      collector.sendOutState(instanceState, checkpointId, spillState);
     } finally {
       collector.lock.unlock();
     }
