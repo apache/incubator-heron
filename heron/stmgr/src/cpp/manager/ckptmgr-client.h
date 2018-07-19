@@ -47,7 +47,7 @@ class CkptMgrClient : public Client {
   virtual void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
   virtual void GetInstanceState(const proto::system::Instance& _instance,
                                 const std::string& _checkpoint_id);
-  virtual void SendNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
+  virtual void SetPhysicalPlan(proto::system::PhysicalPlan& _pplan);
 
  protected:
   void GetInstanceState(const proto::system::Instance& _instance,
@@ -81,6 +81,8 @@ class CkptMgrClient : public Client {
 
   // Config
   sp_int32 reconnect_cpktmgr_interval_sec_;
+
+  proto::system::PhysicalPlan* pplan_;
 };
 
 }  // namespace stmgr

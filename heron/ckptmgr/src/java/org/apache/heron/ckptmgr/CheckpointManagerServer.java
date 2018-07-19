@@ -37,7 +37,6 @@ import org.apache.heron.common.network.HeronServer;
 import org.apache.heron.common.network.HeronSocketOptions;
 import org.apache.heron.common.network.REQID;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
-import org.apache.heron.proto.stmgr.StreamManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
@@ -90,8 +89,6 @@ public class CheckpointManagerServer extends HeronServer {
     registerOnRequest(CheckpointManager.GetInstanceStateRequest.newBuilder());
 
     registerOnRequest(CheckpointManager.CleanStatefulCheckpointRequest.newBuilder());
-
-    registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
   }
 
   @Override
@@ -123,12 +120,6 @@ public class CheckpointManagerServer extends HeronServer {
 
   @Override
   public void onMessage(SocketChannel channel, Message message) {
-    if (message instanceof StreamManager.NewInstanceAssignmentMessage) {
-      StreamManager.NewInstanceAssignmentMessage m =
-          (StreamManager.NewInstanceAssignmentMessage) message;
-      LOG.info("Handling assignment message from direct NewInstanceAssignmentMessage");
-      handleAssignmentMessage(m.getPplan());
-    }
   }
 
   protected void handleCleanStatefulCheckpointRequest(
@@ -201,6 +192,7 @@ public class CheckpointManagerServer extends HeronServer {
   ) {
     LOG.info(String.format("Got a StMgr register request from %s running on host:port %s",
                            request.getStmgrId(), channel.socket().getRemoteSocketAddress()));
+    handlePhysicalPlan(request.getPhysicalPlan());
 
     CheckpointManager.RegisterStMgrResponse.Builder responseBuilder =
         CheckpointManager.RegisterStMgrResponse.newBuilder();
@@ -363,7 +355,7 @@ public class CheckpointManagerServer extends HeronServer {
     sendResponse(rid, channel, responseBuilder.build());
   }
 
-  private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {
+  private void handlePhysicalPlan(PhysicalPlans.PhysicalPlan pplan) {
     TopologyAPI.Config config = pplan.getTopology().getTopologyConfig();
     this.spillState = Boolean.parseBoolean(TopologyUtils.getConfigWithDefault(config.getKvsList(),
         Config.TOPOLOGY_STATEFUL_SPILL_STATE, "false"));
