@@ -21,11 +21,13 @@ package org.apache.heron.healthmgr.policy;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
 import com.microsoft.dhalion.api.IResolver;
+import com.microsoft.dhalion.core.Action;
 import com.microsoft.dhalion.core.Diagnosis;
 import com.microsoft.dhalion.core.DiagnosisTable;
 import com.microsoft.dhalion.events.EventHandler;
@@ -92,7 +94,7 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
   }
 
   @Override
-  public IResolver selectResolver(Collection<Diagnosis> diagnosis) {
+  public Collection<Action> executeResolvers(Collection<Diagnosis> diagnosis) {
     DiagnosisTable diagnosisTable = DiagnosisTable.of(diagnosis);
 
     if (diagnosisTable.type(DIAGNOSIS_DATA_SKEW.text()).size() > 0) {
@@ -100,10 +102,10 @@ public class DynamicResourceAllocationPolicy extends HealthPolicyImpl
     } else if (diagnosisTable.type(DIAGNOSIS_SLOW_INSTANCE.text()).size() > 0) {
       LOG.warning("Slow Instance diagnoses. This diagnosis does not have any resolver.");
     } else if (diagnosisTable.type(DIAGNOSIS_UNDER_PROVISIONING.text()).size() > 0) {
-      return scaleUpResolver;
+      return scaleUpResolver.resolve(diagnosis);
     }
 
-    return null;
+    return Collections.EMPTY_LIST;
   }
 
   @Override

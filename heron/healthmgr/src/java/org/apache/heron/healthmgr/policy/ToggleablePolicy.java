@@ -21,6 +21,7 @@ package org.apache.heron.healthmgr.policy;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -97,7 +98,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
     if (policyMode.equals(PolicyMode.activated)) {
       return super.executeSensors();
     } else {
-      return new ArrayList<Measurement>();
+      return Collections.EMPTY_LIST;
     }
   }
 
@@ -106,7 +107,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
     if (policyMode.equals(PolicyMode.activated)) {
       return super.executeDetectors(measurements);
     } else {
-      return new ArrayList<Symptom>();
+      return Collections.EMPTY_LIST;
     }
   }
 
@@ -115,7 +116,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
     if (policyMode.equals(PolicyMode.activated)) {
       return super.executeDiagnosers(symptoms);
     } else {
-      return new ArrayList<Diagnosis>();
+      return Collections.EMPTY_LIST;
     }
   }
 
