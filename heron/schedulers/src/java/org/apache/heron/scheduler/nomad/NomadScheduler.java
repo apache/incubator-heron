@@ -341,7 +341,8 @@ public class NomadScheduler implements IScheduler {
     // get complete heron executor command
     String executorCmd = executorBinary + " " + String.join(" ", executorArgs);
     // get heron_downloader command for downloading topology package
-    String topologyDownloadCmd = getFetchCommand(this.clusterConfig, this.clusterConfig, this.runtimeConfig);
+    String topologyDownloadCmd = getFetchCommand(this.clusterConfig,
+        this.clusterConfig, this.runtimeConfig);
 
     task.setName(taskName);
     // use nomad driver
@@ -382,7 +383,8 @@ public class NomadScheduler implements IScheduler {
     // get complete heron executor command
     String executorCmd = executorBinary + " " + String.join(" ", executorArgs);
     // get heron_downloader command for downloading topology package
-    String topologyDownloadCmd = getFetchCommand(this.localConfig, this.clusterConfig, this.runtimeConfig);
+    String topologyDownloadCmd = getFetchCommand(this.localConfig,
+        this.clusterConfig, this.runtimeConfig);
     // read nomad heron executor start up script from file
     String heronNomadScript = getHeronNomadScript(this.localConfig);
 
@@ -550,7 +552,8 @@ public class NomadScheduler implements IScheduler {
    * Get the command that will be used to retrieve the topology JAR
    */
   static String getFetchCommand(Config localConfig, Config clusterConfig, Config runtime) {
-    return String.format("%s -u %s -f . -m local -p %s -d %s", Context.downloaderBinary(clusterConfig),
+    return String.format("%s -u %s -f . -m local -p %s -d %s",
+        Context.downloaderBinary(clusterConfig),
         Runtime.topologyPackageUri(runtime).toString(), Context.heronConf(localConfig),
         Context.heronHome(clusterConfig));
   }
