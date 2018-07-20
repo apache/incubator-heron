@@ -106,8 +106,9 @@ public class BoltInstance implements IInstance {
     this.spillState =
         Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE));
 
-    this.spillStateLocation =
-        String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION));
+    this.spillStateLocation = String.format("%s/%s/",
+            String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION)),
+            helper.getMyInstanceId());
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");

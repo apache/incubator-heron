@@ -359,8 +359,15 @@ public class CheckpointManagerServer extends HeronServer {
     TopologyAPI.Config config = pplan.getTopology().getTopologyConfig();
     this.spillState = Boolean.parseBoolean(TopologyUtils.getConfigWithDefault(config.getKvsList(),
         Config.TOPOLOGY_STATEFUL_SPILL_STATE, "false"));
-    this.spillStateLocation = String.valueOf(TopologyUtils.getConfigWithDefault(config.getKvsList(),
-        Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION, ""));
+    this.spillStateLocation = String.format("%s/%s/",
+        String.valueOf(TopologyUtils.getConfigWithDefault(config.getKvsList(),
+                       Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION, "")),
+        "ckptmgr");
+    if (FileUtils.isDirectoryExists(spillStateLocation)) {
+      FileUtils.cleanDir(spillStateLocation);
+    } else {
+      FileUtils.createDirectory(spillStateLocation);
+    }
     LOG.info("spill state: " + spillState
         + ". set spilled state location: " + spillStateLocation);
   }
