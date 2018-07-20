@@ -317,10 +317,6 @@ public class Slave implements Runnable, AutoCloseable {
       String stateLocation = request.getState().getStateLocation();
       byte[] rawState = FileUtils.readFromFile(stateLocation);
 
-      if (!FileUtils.deleteFile(stateLocation)) {
-        LOG.info("failed to delete the state tmp file: " + stateLocation);
-      }
-
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(rawState);

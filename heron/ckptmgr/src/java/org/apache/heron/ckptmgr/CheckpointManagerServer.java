@@ -277,10 +277,6 @@ public class CheckpointManagerServer extends HeronServer {
             .setState(ByteString.copyFrom(FileUtils.readFromFile(localStateLocation)))
             .build();
 
-    if (!FileUtils.deleteFile(localStateLocation)) {
-      LOG.info("failed to delete state tmp file: " + localStateLocation);
-    }
-
     return new Checkpoint(checkpoint);
   }
 
@@ -324,6 +320,9 @@ public class CheckpointManagerServer extends HeronServer {
         if (spillState) {
           CheckpointManager.InstanceStateCheckpoint ckpt = checkpoint.getCheckpoint();
           String checkpointId = ckpt.getCheckpointId();
+
+          // clean any possible existing states
+          FileUtils.cleanDir(spillStateLocation);
 
           // spill state to local disk
           String stateLocation = spillStateLocation + checkpointId + "-" + UUID.randomUUID();

@@ -128,6 +128,8 @@ public class OutgoingTupleCollection {
       instanceStateBuilder.setCheckpointId(checkpointId);
 
       if (spillState) {
+        FileUtils.cleanDir(location);
+
         String stateLocation = location + checkpointId + "-" + UUID.randomUUID();
         FileUtils.writeToFile(stateLocation, serializedState, true);
         instanceStateBuilder.setStateLocation(stateLocation);
