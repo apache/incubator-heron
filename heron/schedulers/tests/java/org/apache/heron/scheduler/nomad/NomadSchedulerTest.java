@@ -324,7 +324,7 @@ public class NomadSchedulerTest {
         .thenReturn(EXECUTOR_CMD_ARGS);
 
     PowerMockito.mockStatic(NomadScheduler.class);
-    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any()))
+    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(TOPOLOGY_DOWNLOAD_CMD);
     PowerMockito.when(NomadScheduler.getHeronNomadScript(this.mockConfig))
         .thenReturn(HERON_NOMAD_SCRIPT);
@@ -405,7 +405,7 @@ public class NomadSchedulerTest {
         .thenReturn(EXECUTOR_CMD_ARGS);
 
     PowerMockito.mockStatic(NomadScheduler.class);
-    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any()))
+    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(TOPOLOGY_DOWNLOAD_CMD);
     PowerMockito.when(NomadScheduler.getHeronNomadScript(this.mockConfig))
         .thenReturn(HERON_NOMAD_SCRIPT);
@@ -485,7 +485,7 @@ public class NomadSchedulerTest {
         .thenReturn(EXECUTOR_CMD_ARGS);
 
     PowerMockito.mockStatic(NomadScheduler.class);
-    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any()))
+    PowerMockito.when(NomadScheduler.getFetchCommand(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(TOPOLOGY_DOWNLOAD_CMD);
     PowerMockito.when(NomadScheduler.getHeronNomadScript(this.mockConfig))
         .thenReturn(HERON_NOMAD_SCRIPT);
