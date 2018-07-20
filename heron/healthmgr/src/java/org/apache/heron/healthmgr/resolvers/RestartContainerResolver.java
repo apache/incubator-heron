@@ -20,10 +20,9 @@
 package org.apache.heron.healthmgr.resolvers;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -74,7 +73,6 @@ public class RestartContainerResolver implements IResolver {
   public Collection<Action> resolve(Collection<Diagnosis> diagnosis) {
     publishingMetrics.executeResolver(RESTART_CONTAINER_RESOLVER);
 
-    List<Action> actions = new ArrayList<>();
 
     // find all back pressure measurements reported in this execution cycle
     Instant current = context.checkpoint();
@@ -85,7 +83,7 @@ public class RestartContainerResolver implements IResolver {
 
     if (bpSymptoms.size() == 0) {
       LOG.fine("No back-pressure measurements found, ending as there's nothing to fix");
-      return actions;
+      return Collections.EMPTY_LIST;
     }
 
     Collection<String> allBpInstances = new HashSet<>();
@@ -116,7 +114,6 @@ public class RestartContainerResolver implements IResolver {
     LOG.info("Broadcasting container restart event");
     ContainerRestart action = new ContainerRestart(current, stmgrIds);
     eventManager.onEvent(action);
-    actions.add(action);
-    return actions;
+    return Collections.singletonList(action);
   }
 }
