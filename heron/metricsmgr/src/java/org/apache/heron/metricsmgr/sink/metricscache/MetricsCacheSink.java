@@ -104,8 +104,8 @@ public class MetricsCacheSink implements IMetricsSink {
   private static final String METRICS_COUNT = "metrics-count";
   private static final String EXCEPTIONS_COUNT = "exceptions-count";
   private static final String RECORD_PROCESS_COUNT = "record-process-count";
-  private static final String TMASTER_RESTART_COUNT = "tmaster-restart-count";
-  private static final String TMASTER_LOCATION_UPDATE_COUNT = "tmaster-location-update-count";
+  private static final String METRICSMGR_RESTART_COUNT = "metricsmgr-restart-count";
+  private static final String METRICSMGR_LOCATION_UPDATE_COUNT = "metricsmgr-location-update-count";
   private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator =
       new Communicator<>();
   private final MetricsFilter tMasterMetricsFilter = new MetricsFilter();
@@ -174,7 +174,7 @@ public class MetricsCacheSink implements IMetricsSink {
             metricsCacheClientService.startNewMasterClient();
 
             // Update Metrics
-            sinkContext.exportCountMetric(TMASTER_LOCATION_UPDATE_COUNT, 1);
+            sinkContext.exportCountMetric(METRICSMGR_LOCATION_UPDATE_COUNT, 1);
           }
         }
 
@@ -241,7 +241,7 @@ public class MetricsCacheSink implements IMetricsSink {
   @Override
   public void flush() {
     // We do nothing here but update metrics
-    sinkContext.exportCountMetric(TMASTER_RESTART_COUNT,
+    sinkContext.exportCountMetric(METRICSMGR_RESTART_COUNT,
         metricsCacheClientService.startedAttempts.longValue());
   }
 
