@@ -117,7 +117,7 @@ int EventLoopImpl::unRegisterSignal(int sig) {
   if (event_del(mSignalEvents[sig]->event()) != 0) {
     throw heron::error::Error_Exception(errno);
   }
-  auto* event = mSignalEvents[sig];
+  auto event = mSignalEvents[sig];
   mSignalEvents.erase(sig);
   delete event;
   return 0;
@@ -176,7 +176,7 @@ int EventLoopImpl::unRegisterForRead(int fd) {
     // cout << "event_del failed for fd " << fd;
     throw heron::error::Error_Exception(errno);
   }
-  auto* event = mReadEvents[fd];
+  auto event = mReadEvents[fd];
   mReadEvents.erase(fd);
   delete event;
   return 0;
@@ -236,7 +236,7 @@ int EventLoopImpl::unRegisterForWrite(int fd) {
     // cout << "event_del failed for fd " << fd;
     throw heron::error::Error_Exception(errno);
   }
-  auto* event = mWriteEvents[fd];
+  auto event = mWriteEvents[fd];
   mWriteEvents.erase(fd);
   delete event;
   return 0;
@@ -293,7 +293,7 @@ sp_int32 EventLoopImpl::unRegisterTimer(sp_int64 timerId) {
     // cout << "event_del failed for timer " << timerId;
     throw heron::error::Error_Exception(errno);
   }
-  auto* event = mTimerEvents[timerId];
+  auto event = mTimerEvents[timerId];
   mTimerEvents.erase(timerId);
   delete event;
   return 0;
