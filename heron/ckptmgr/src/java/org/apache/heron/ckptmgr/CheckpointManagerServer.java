@@ -326,7 +326,9 @@ public class CheckpointManagerServer extends HeronServer {
 
           // spill state to local disk
           String stateLocation = spillStateLocation + checkpointId + "-" + UUID.randomUUID();
-          FileUtils.writeToFile(stateLocation, ckpt.getState().toByteArray(), true);
+          if (FileUtils.writeToFile(stateLocation, ckpt.getState().toByteArray(), true)) {
+            throw new RuntimeException("failed to spill state. Bailing out...");
+          }
           LOG.info("spilled state to: " + stateLocation);
           ckpt = CheckpointManager.InstanceStateCheckpoint.newBuilder()
                   .setStateLocation(stateLocation)

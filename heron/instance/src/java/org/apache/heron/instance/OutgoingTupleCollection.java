@@ -131,7 +131,9 @@ public class OutgoingTupleCollection {
         FileUtils.cleanDir(location);
 
         String stateLocation = location + checkpointId + "-" + UUID.randomUUID();
-        FileUtils.writeToFile(stateLocation, serializedState, true);
+        if (!FileUtils.writeToFile(stateLocation, serializedState, true)) {
+          throw new RuntimeException("failed to spill state. Bailing out...");
+        }
         instanceStateBuilder.setStateLocation(stateLocation);
       } else {
         instanceStateBuilder.setState(ByteString.copyFrom(serializedState));
