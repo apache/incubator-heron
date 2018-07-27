@@ -42,6 +42,7 @@ CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _option
       ckptmgr_id_(_ckptmgr_id),
       stmgr_id_(_stmgr_id),
       quit_(false),
+      pplan_(nullptr),
       ckpt_saved_watcher_(_ckpt_saved_watcher),
       ckpt_get_watcher_(_ckpt_get_watcher),
       register_watcher_(_register_watcher) {
@@ -144,12 +145,17 @@ void CkptMgrClient::SendRegisterRequest() {
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
   request->set_stmgr_id(stmgr_id_);
+  request->mutable_physical_plan()->CopyFrom(*pplan_);
   SendRequest(request, NULL);
 }
 
 void CkptMgrClient::SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request) {
   LOG(INFO) << "Sending SaveInstanceState to ckptmgr" << std::endl;
   SendRequest(_request, NULL);
+}
+
+void CkptMgrClient::SetPhysicalPlan(proto::system::PhysicalPlan& _pplan) {
+  pplan_ = &_pplan;
 }
 
 void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,

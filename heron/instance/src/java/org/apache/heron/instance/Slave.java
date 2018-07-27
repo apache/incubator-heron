@@ -32,6 +32,7 @@ import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.state.HashMapState;
 import org.apache.heron.api.state.State;
 import org.apache.heron.common.basics.Communicator;
+import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.config.SystemConfig;
@@ -304,12 +305,21 @@ public class Slave implements Runnable, AutoCloseable {
       instanceState.clear();
       instanceState = null;
     }
+
     if (request.getState().hasState() && !request.getState().getState().isEmpty()) {
       @SuppressWarnings("unchecked")
       State<Serializable, Serializable> stateToRestore =
           (State<Serializable, Serializable>) serializer.deserialize(
               request.getState().getState().toByteArray());
 
+      instanceState = stateToRestore;
+    } else if (request.getState().hasStateLocation()) {
+      String stateLocation = request.getState().getStateLocation();
+      byte[] rawState = FileUtils.readFromFile(stateLocation);
+
+      @SuppressWarnings("unchecked")
+      State<Serializable, Serializable> stateToRestore =
+          (State<Serializable, Serializable>) serializer.deserialize(rawState);
       instanceState = stateToRestore;
     } else {
       LOG.info("The restore request does not have an actual state");
