@@ -62,6 +62,12 @@ public class HeronTopology {
     if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       userConfig.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
     }
+    if (!userConfig.containsKey(Config.TOPOLOGY_STATEFUL_SPILL_STATE)) {
+      userConfig.put(Config.TOPOLOGY_STATEFUL_SPILL_STATE, "false");
+      if (!userConfig.containsKey(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION)) {
+        userConfig.put(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION, "./spilled-state/");
+      }
+    }
   }
 
   public TopologyAPI.Topology getTopology() {

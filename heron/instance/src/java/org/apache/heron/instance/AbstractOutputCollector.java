@@ -114,8 +114,10 @@ public class AbstractOutputCollector {
 
   // Flush the states
   public void sendOutState(State<Serializable, Serializable> state,
-                           String checkpointId) {
-    outputter.sendOutState(state, checkpointId);
+                           String checkpointId,
+                           boolean spillState,
+                           String location) {
+    outputter.sendOutState(state, checkpointId, spillState, location);
   }
 
   // Clean the internal state of BoltOutputCollectorImpl
