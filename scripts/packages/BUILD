@@ -2,38 +2,6 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar", "pkg_deb")
 
-load("//tools/rules:heron_client.bzl", "heron_client_bin_files")
-load("//tools/rules:heron_client.bzl", "heron_client_conf_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_third_party_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_scheduler_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_metricscachemgr_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_packing_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_statemgr_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_uploader_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_downloader_files")
-load("//tools/rules:heron_client.bzl", "heron_client_lib_healthmgr_files")
-
-load("//tools/rules:heron_core.bzl", "heron_core_files")
-load("//tools/rules:heron_core.bzl", "heron_core_bin_files")
-load("//tools/rules:heron_core.bzl", "heron_core_conf_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_instance_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_healthmgr_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_metricsmgr_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_metricscachemgr_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_packing_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_scheduler_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_statemgr_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_ckptmgr_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_statefulstorage_files")
-load("//tools/rules:heron_core.bzl", "heron_core_lib_downloader_files")
-
-load("//tools/rules:heron_tools.bzl", "heron_tools_files")
-load("//tools/rules:heron_tools.bzl", "heron_tools_bin_files")
-load("//tools/rules:heron_tools.bzl", "heron_tools_bin_all_files")
-load("//tools/rules:heron_tools.bzl", "heron_tools_conf_files")
-load("//tools/rules:heron_tools.bzl", "heron_tools_lib_files")
-load("//tools/rules:heron_examples.bzl", "heron_examples_files")
-
 generated_release_files = [
     "release.yaml",
 ]
@@ -102,67 +70,105 @@ pkg_tar(
 pkg_tar(
     name = "heron-core-bin",
     package_dir = "heron-core/bin",
-    srcs = heron_core_bin_files(),
+    srcs = [
+        "//heron/executor/src/python:heron-executor",
+        "//heron/downloaders/src/shell:heron-downloader",
+        "//heron/instance/src/python:heron-python-instance",
+        "//heron/instance/src/cpp:heron-cpp-instance",
+        "//heron/shell/src/python:heron-shell",
+        "//heron/stmgr/src/cpp:heron-stmgr",
+        "//heron/tmaster/src/cpp:heron-tmaster",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-scheduler",
     package_dir = "heron-core/lib/scheduler",
-    srcs = heron_core_lib_scheduler_files(),
+    srcs = [
+        "//heron/scheduler-core/src/java:heron-scheduler",
+        "//heron/schedulers/src/java:heron-local-scheduler",
+        "//heron/schedulers/src/java:heron-kubernetes-scheduler",
+        "//heron/schedulers/src/java:heron-marathon-scheduler",
+        "//heron/schedulers/src/java:heron-mesos-scheduler",
+        "//heron/schedulers/src/java:heron-nomad-scheduler",
+        "//heron/schedulers/src/java:heron-slurm-scheduler",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-packing",
     package_dir = "heron-core/lib/packing",
-    srcs = heron_core_lib_packing_files(),
+    srcs = [ 
+        "//heron/packing/src/java:heron-roundrobin-packing",
+        "//heron/packing/src/java:heron-binpacking-packing"
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-healthmgr",
     package_dir = "heron-core/lib/healthmgr",
-    srcs = heron_core_lib_healthmgr_files(),
+    srcs = [
+        "//heron/healthmgr/src/java:heron-healthmgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-metricsmgr",
     package_dir = "heron-core/lib/metricsmgr",
-    srcs = heron_core_lib_metricsmgr_files(),
+    srcs = [
+        "//heron/metricsmgr/src/java:heron-metricsmgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-metricscachemgr",
     package_dir = "heron-core/lib/metricscachemgr",
-    srcs = heron_core_lib_metricscachemgr_files(),
+    srcs = [
+        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-statemgr",
     package_dir = "heron-core/lib/statemgr",
-    srcs = heron_core_lib_statemgr_files(),
+    srcs = [
+        "//heron/statemgrs/src/java:heron-localfs-statemgr",
+        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-instance",
     package_dir = "heron-core/lib/instance",
-    srcs = heron_core_lib_instance_files(),
+    srcs = [
+        "//heron/instance/src/java:heron-instance",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-ckptmgr",
     package_dir = "heron-core/lib/ckptmgr",
-    srcs = heron_core_lib_ckptmgr_files(),
+    srcs = [
+        "//heron/ckptmgr/src/java:heron-ckptmgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-statefulstorage",
     package_dir = "heron-core/lib/statefulstorage",
-    srcs = heron_core_lib_statefulstorage_files(),
+    srcs = [
+        "//heron/statefulstorages/src/java:heron-localfs-statefulstorage",
+        "//heron/statefulstorages/src/java:heron-hdfs-statefulstorage",
+        "//heron/statefulstorages/src/java:heron-dlog-statefulstorage",
+    ],
 )
 
 pkg_tar(
     name = "heron-core-lib-downloader",
     package_dir = "heron-core/lib/downloaders",
-    srcs = heron_core_lib_downloader_files(),
+    srcs = [
+        "//heron/downloaders/src/java:heron-downloader",
+    ],
 )
 
 ################################################################################
@@ -177,31 +183,54 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools-bin",
     package_dir = "heron-tools/bin",
-    srcs = heron_tools_bin_all_files(),
+    srcs = [
+        "//heron/tools/apiserver/src/shell:heron-apiserver",
+        "//heron/tools/cli/src/python:heron",
+        "//heron/tools/explorer/src/python:heron-explorer",
+        "//heron/tools/tracker/src/python:heron-tracker",
+        "//heron/tools/ui/src/python:heron-ui",
+    ],
 )
 
 pkg_tar(
     name = "heron-tools-lib-api",
     package_dir = "heron-tools/lib/api",
-    srcs = heron_tools_lib_files(),
+    srcs = [
+        "//heron/tools/apiserver/src/java:heron-apiserver",
+    ],
 )
 
 pkg_tar(
     name = "heron-tools-lib-third_party",
     package_dir = "heron-tools/lib/third_party",
-    srcs = heron_client_lib_third_party_files(),
+    srcs = [
+        "@com_google_protobuf//:protobuf_java",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
+    ],
 )
 
 pkg_tar(
     name = "heron-tools-lib-uploader",
     package_dir = "heron-tools/lib/uploader",
-    srcs = heron_client_lib_uploader_files(),
+    srcs = [
+        "//heron/uploaders/src/java:heron-null-uploader",
+        "//heron/uploaders/src/java:heron-localfs-uploader",
+        "//heron/uploaders/src/java:heron-s3-uploader",
+        "//heron/uploaders/src/java:heron-hdfs-uploader",
+        "//heron/uploaders/src/java:heron-scp-uploader",
+        "//heron/uploaders/src/java:heron-gcs-uploader",
+        "//heron/uploaders/src/java:heron-dlog-uploader",
+        "//heron/uploaders/src/java:heron-http-uploader",
+    ],
 )
 
 pkg_tar(
     name = "heron-tools-conf",
     package_dir = "heron-tools/conf",
-    srcs = heron_tools_conf_files()
+    srcs = [
+        "//heron/tools/config/src/yaml:tracker-yaml",
+    ],
 )
 
 pkg_tar(
@@ -233,67 +262,184 @@ pkg_tar(
 pkg_tar(
     name = "heron-bin",
     package_dir = "bin",
-    srcs = heron_client_bin_files() + heron_tools_bin_files(),
+    srcs = [
+        "//heron/downloaders/src/shell:heron-downloader",
+        "//heron/tools/cli/src/python:heron",
+        "//heron/tools/explorer/src/python:heron-explorer",
+        "//heron/tools/admin/src/python:heron-admin",
+        "//heron/tools/tracker/src/python:heron-tracker",
+        "//heron/tools/ui/src/python:heron-ui",
+        "//heron/tools/apiserver/src/shell:heron-apiserver",
+        "//third_party/nomad:heron-nomad",
+    ],
+)
+
+pkg_tar(
+    name = "heron-include-bolt",
+    package_dir = "include/bolt",
+    srcs = ["//heron/api/src/cpp:cxx-bolt-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-config",
+    package_dir = "include/config",
+    srcs = ["//heron/api/src/cpp:cxx-config-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-exceptions",
+    package_dir = "include/exceptions",
+    srcs = ["//heron/api/src/cpp:cxx-exceptions-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-metric",
+    package_dir = "include/metric",
+    srcs = ["//heron/api/src/cpp:cxx-metric-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-serializer",
+    package_dir = "include/serializer",
+    srcs = ["//heron/api/src/cpp:cxx-serializer-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-spout",
+    package_dir = "include/spout",
+    srcs = ["//heron/api/src/cpp:cxx-spout-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-topology",
+    package_dir = "include/topology",
+    srcs = ["//heron/api/src/cpp:cxx-topology-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-tuple",
+    package_dir = "include/tuple",
+    srcs = ["//heron/api/src/cpp:cxx-tuple-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include-utils",
+    package_dir = "include/utils",
+    srcs = ["//heron/api/src/cpp:cxx-utils-hdrs"],
+)
+
+pkg_tar(
+    name = "heron-include",
+    package_dir = "include",
+    srcs = ["//heron/api/src:cxx-hdrs"],
 )
 
 pkg_tar(
     name = "heron-lib-scheduler",
     package_dir = "lib/scheduler",
-    srcs = heron_client_lib_scheduler_files(),
+    srcs = [
+        "//heron/scheduler-core/src/java:heron-scheduler",
+        "//heron/schedulers/src/java:heron-local-scheduler",
+        "//heron/schedulers/src/java:heron-aurora-scheduler",
+        "//heron/schedulers/src/java:heron-slurm-scheduler",
+        "//heron/schedulers/src/java:heron-yarn-scheduler",
+        "//heron/schedulers/src/java:heron-mesos-scheduler",
+        "//heron/schedulers/src/java:heron-marathon-scheduler",
+        "//heron/schedulers/src/java:heron-kubernetes-scheduler",
+        "//heron/schedulers/src/java:heron-nomad-scheduler",
+        "//heron/packing/src/java:heron-roundrobin-packing",
+        "//heron/packing/src/java:heron-binpacking-packing",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-metricscachemgr",
     package_dir = "lib/metricscachemgr",
-    srcs = heron_client_lib_metricscachemgr_files(),
+    srcs = [
+        "//heron/metricscachemgr/src/java:heron-metricscachemgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-packing",
     package_dir = "lib/packing",
-    srcs = heron_client_lib_packing_files(),
+    srcs = [
+       "//heron/packing/src/java:heron-roundrobin-packing",
+       "//heron/packing/src/java:heron-binpacking-packing",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-statemgr",
     package_dir = "lib/statemgr",
-    srcs = heron_client_lib_statemgr_files(),
+    srcs = [
+        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
+        "//heron/statemgrs/src/java:heron-localfs-statemgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-uploader",
     package_dir = "lib/uploader",
-    srcs = heron_client_lib_uploader_files(),
+    srcs = [
+        "//heron/uploaders/src/java:heron-null-uploader",
+        "//heron/uploaders/src/java:heron-localfs-uploader",
+        "//heron/uploaders/src/java:heron-s3-uploader",
+        "//heron/uploaders/src/java:heron-hdfs-uploader",
+        "//heron/uploaders/src/java:heron-scp-uploader",
+        "//heron/uploaders/src/java:heron-gcs-uploader",
+        "//heron/uploaders/src/java:heron-dlog-uploader",
+        "//heron/uploaders/src/java:heron-http-uploader"
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-downloader",
     package_dir = "lib/downloaders",
-    srcs = heron_client_lib_downloader_files(),
+    srcs = [
+        "//heron/downloaders/src/java:heron-downloader",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-healthmgr",
     package_dir = "lib/healthmgr",
-    srcs = heron_client_lib_healthmgr_files(),
+    srcs = [
+        "//heron/healthmgr/src/java:heron-healthmgr",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-third_party",
     package_dir = "lib/third_party",
-    srcs = heron_client_lib_third_party_files(),
+    srcs = [
+        "@com_google_protobuf//:protobuf_java",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
+    ],
 )
 
 pkg_tar(
     name = "heron-lib-api",
     package_dir = "lib/api",
-    srcs = heron_tools_lib_files(),
+    srcs = [
+        "//heron/api/src/cpp:cxx-api",
+        "//heron/tools/apiserver/src/java:heron-apiserver",
+    ],
 )
 
 pkg_tar(
     name = "heron-examples",
     package_dir = "examples",
-    srcs = heron_examples_files(),
+    srcs = [
+        "//eco-storm-examples/src/java:storm-eco-examples",
+        "//eco-storm-examples/src/java:storm-eco-examples-support",
+        "//eco-heron-examples/src/java:heron-eco-examples",
+        "//eco-heron-examples/src/java:heron-eco-examples-support",
+        "//examples/src/java:heron-api-examples",
+        "//examples/src/java:heron-streamlet-examples",
+        "//examples/src/scala:heron-streamlet-scala-examples",
+    ],
 )
 
 pkg_tar(
@@ -309,7 +455,9 @@ pkg_tar(
     name = "heron-conf-tracker",
     strip_prefix = "/heron/tools/config/src/yaml/tracker",
     package_dir = "conf",
-    srcs = heron_tools_conf_files(),
+    srcs = [
+        "//heron/tools/config/src/yaml:tracker-yaml",
+    ],
 )
 
 pkg_tar(
@@ -328,6 +476,15 @@ pkg_tar(
         ":heron-conf-tracker",
         ":heron-dist",
         ":heron-examples",
+        ":heron-include-bolt",
+        ":heron-include-config",
+        ":heron-include-exceptions",
+        ":heron-include-metric",
+        ":heron-include-serializer",
+        ":heron-include-spout",
+        ":heron-include-topology",
+        ":heron-include-tuple",
+        ":heron-include-utils",
         ":heron-lib-api",
         ":heron-lib-third_party",
         ":heron-lib-scheduler",
