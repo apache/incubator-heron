@@ -65,7 +65,7 @@ test_write "${bin}"
 test_write "${base}"
 
 # Do the actual installation
-echo -n "Uncompressing."
+echo -n "Cleaning up symlinks in ${bin}, if present."
 
 # Cleaning-up, with some guards.
 if [ -L "${bin}/heron" ]; then
@@ -99,20 +99,19 @@ fi
 mkdir -p ${bin} ${base} ${base}/etc
 echo "..done"
 
+echo -n "Uncompressing heron package."
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 untar ${base}/heron.tar.gz ${base}
-echo -n .
+echo "..done"
 chmod 0755 ${base}/bin/heron
 chmod 0755 ${base}/bin/heron-admin
 chmod 0755 ${base}/bin/heron-explorer
 chmod 0755 ${base}/bin/heron-tracker
 chmod 0755 ${base}/bin/heron-ui
 chmod 0755 ${base}/bin/heron-apiserver
-echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
-echo -n .
 
 ln -s "${base}/bin/heron" "${bin}/heron"
 ln -s "${base}/bin/heron-admin" "${bin}/heron-admin"
@@ -121,8 +120,9 @@ ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
 ln -s "${base}/bin/heron-ui" "${bin}/heron-ui"
 ln -s "${base}/bin/heron-apiserver" "${bin}/heron-apiserver"
 
-echo "Uncompressing."
+echo -n "Uncompressing heron core."
 untar ${base}/dist/heron-core.tar.gz ${base}/dist
+echo "..done"
 
 rm "${base}/heron.tar.gz"
 rm -f "${base}/dist/release.yaml"
