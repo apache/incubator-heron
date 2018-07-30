@@ -756,6 +756,12 @@ maven_jar(
 
 # End Nomand dependencies
 
+# Influx DB metrics sink
+maven_jar(
+  name = "org_influxdb",
+  artifact = "org.influxdb:influxdb-java:2.11"
+)
+
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"
 PY_WHEEL = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"

@@ -22,6 +22,7 @@ sinks:
   - file-sink
   - tmaster-sink
   - metricscache-sink
+  - influxdb-sink
 
 ########### Now we would specify the detailed configuration for every unique sink
 ########### Syntax: sink-id: - option(s)
@@ -124,3 +125,12 @@ metricscache-sink:
 #   graphite_port: 2004 # The port of graphite to be exported metrics to
 #   metrics_prefix: "heron" # The prefix of every metrics
 #   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server
+
+# Config for the InfluxDB sink
+influxdb-sink:
+    class: "org.apache.heron.metricsmgr.sink.InfluxDBSink"
+    flush-frequency-ms: 60000 # One min in ms
+    sink-restart-attempts: -1 # Forever
+    influx-host: "http://localhost"
+    influx-port: 8086
+    influx-db-name: "heron"
