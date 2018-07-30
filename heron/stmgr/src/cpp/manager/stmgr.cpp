@@ -130,12 +130,9 @@ void StMgr::Init() {
   }
 
   reliability_mode_ = heron::config::TopologyConfigHelper::GetReliabilityMode(*hydrated_topology_);
-  if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
-    // Start checkpoint manager client
-    CreateCheckpointMgrClient();
-  } else {
-    ckptmgr_client_ = nullptr;
-  }
+  // create and start ckptmgr-client, stateful-restorer when receive pplan
+  ckptmgr_client_ = nullptr;
+  stateful_restorer_ = nullptr;
 
   // Create the client manager
   clientmgr_ = new StMgrClientMgr(eventLoop_, topology_name_, topology_id_, stmgr_id_, this,
@@ -166,18 +163,6 @@ void StMgr::Init() {
   if (0 != metricscachemgr_mode_.compare("disabled")) {
     FetchMetricsCacheLocation();
   }
-
-  if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE) {
-    // Now start the stateful restorer
-    stateful_restorer_ = new StatefulRestorer(ckptmgr_client_, clientmgr_,
-                               tuple_cache_, instance_server_, metrics_manager_client_,
-                               std::bind(&StMgr::HandleStatefulRestoreDone, this,
-                                         std::placeholders::_1, std::placeholders::_2,
-                                         std::placeholders::_3));
-  } else {
-    stateful_restorer_ = nullptr;
-  }
-
   // Check for log pruning every 5 minutes
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::PruneLogs(); }, true,
@@ -353,7 +338,6 @@ void StMgr::CreateCheckpointMgrClient() {
                                       topology_name_, topology_id_,
                                       ckptmgr_id_, stmgr_id_,
                                       save_watcher, get_watcher, ckpt_watcher);
-  ckptmgr_client_->Start();
 }
 
 void StMgr::CreateTMasterClient(proto::tmaster::TMasterLocation* tmasterLocation) {
@@ -600,6 +584,20 @@ void StMgr::NewPhysicalPlan(proto::system::PhysicalPlan* _pplan) {
     clientmgr_->StartConnections(pplan_);
   }
   instance_server_->BroadcastNewPhysicalPlan(*pplan_);
+
+  // create ckptmgr-client and stateful-restorer after receiving pplan
+  if (reliability_mode_ == config::TopologyConfigVars::EFFECTIVELY_ONCE
+      && ckptmgr_client_ == nullptr && stateful_restorer_ == nullptr) {
+    CreateCheckpointMgrClient();
+    stateful_restorer_ = new StatefulRestorer(ckptmgr_client_, clientmgr_,
+                               tuple_cache_, instance_server_, metrics_manager_client_,
+                               std::bind(&StMgr::HandleStatefulRestoreDone, this,
+                                         std::placeholders::_1, std::placeholders::_2,
+                                         std::placeholders::_3));
+
+    ckptmgr_client_->SetPhysicalPlan(*pplan_);
+    ckptmgr_client_->Start();
+  }
 }
 
 void StMgr::CleanupStreamConsumers() {
@@ -1003,7 +1001,7 @@ void StMgr::InitiateStatefulCheckpoint(sp_string _checkpoint_id) {
   instance_server_->InitiateStatefulCheckpoint(_checkpoint_id);
 }
 
-// We just recieved a InstanceStateCheckpoint message from one of our instances
+// We just received a InstanceStateCheckpoint message from one of our instances
 // We need to propagate it to all downstream tasks
 // We also need to send the checkpoint to ckptmgr
 void StMgr::HandleStoreInstanceStateCheckpoint(

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.NIOLooper;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.network.HeronClient;
@@ -79,11 +80,23 @@ public class CheckpointManagerServerTest {
     final int COMPONENT_INDEX = 1;
     final String COMPONENT_NAME = "component_name";
     final byte[] BYTES = "checkpoint manager server test bytes".getBytes();
+    final String TOPO_ID = "topo_id";
+    final String TOPO_NAME = "topo_name";
 
     PhysicalPlans.InstanceInfo info = PhysicalPlans.InstanceInfo.newBuilder()
         .setTaskId(TASK_ID)
         .setComponentIndex(COMPONENT_INDEX)
         .setComponentName(COMPONENT_NAME)
+        .build();
+
+    TopologyAPI.Topology topology = TopologyAPI.Topology.newBuilder()
+        .setId(TOPO_ID)
+        .setName(TOPO_NAME)
+        .setState(TopologyAPI.TopologyState.RUNNING)
+        .build();
+
+    PhysicalPlans.PhysicalPlan pplan = PhysicalPlans.PhysicalPlan.newBuilder()
+        .setTopology(topology)
         .build();
 
     instance = PhysicalPlans.Instance.newBuilder()
@@ -121,6 +134,7 @@ public class CheckpointManagerServerTest {
         .setTopologyId(TOPOLOGY_ID)
         .setStmgrId(STMGR_ID)
         .setTopologyName(TOPOLOGY_NAME)
+        .setPhysicalPlan(pplan)
         .build();
 
     registerTMasterRequest = CheckpointManager.RegisterTMasterRequest.newBuilder()

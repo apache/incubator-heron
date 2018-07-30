@@ -180,10 +180,12 @@ message CleanStatefulCheckpointResponse {
  */
 
 // This message encapsulates the info associated with
-// state of an instance/partition
+// state of an instance/partition. only one of the state_location
+// and state should be set
 message InstanceStateCheckpoint {
   required string checkpoint_id = 1;
-  required bytes state = 2;
+  optional bytes state = 2;
+  optional string state_location = 3;
 }
 
 // This message encapsulates the info associated with
@@ -200,6 +202,7 @@ message RegisterStMgrRequest {
   required string topology_name = 1;
   required string topology_id = 2;
   required string stmgr_id = 3;
+  required heron.proto.system.PhysicalPlan physical_plan = 4;
 }
 
 // This is the message that checkpoint manager
