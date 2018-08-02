@@ -373,7 +373,7 @@ TEST(StatefulRestorer, test_restore_send) {
   // Start the stmgr
   StartStMgrs(common);
 
-  // Wait untill all stmgrs registered
+  // Wait until all stmgrs registered
   while (common.tmaster_->stmgrs().size() != common.num_stmgrs_) sleep(1);
 
   // Make sure that stmgrs have not gotten any restore message
