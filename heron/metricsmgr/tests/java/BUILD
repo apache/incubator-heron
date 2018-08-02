@@ -4,22 +4,31 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
-        "//heron/common/src/java:network-java",
         "//heron/common/src/java:config-java",
+        "//heron/common/src/java:network-java",
         "//heron/common/src/java:test-helpers-java",
         "//heron/metricsmgr/src/java:metricsmgr-java",
-        "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
+        "//third_party/java:junit4",
+        "//third_party/java:mockito",
         "@com_google_guava_guava//jar",
         "@com_google_protobuf//:protobuf_java",
-        "//third_party/java:mockito",
-        "//third_party/java:junit4",
+        "@com_squareup_moshi//jar",
+        "@com_squareup_okhttp3//jar",
+        "@com_squareup_okhttp3_logging//jar",
+        "@com_squareup_okio//jar",
+        "@com_squareup_retrofit2//jar",
+        "@com_squareup_retrofit2_converter_moshi//jar",
+        "@org_influxdb//jar",
     ],
 )
 
 java_tests(
+    size = "small",
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     test_classes = [
         "org.apache.heron.metricsmgr.MetricsUtilTests",
         "org.apache.heron.metricsmgr.HandleTMasterLocationTest",
@@ -30,10 +39,9 @@ java_tests(
         "org.apache.heron.metricsmgr.sink.FileSinkTest",
         "org.apache.heron.metricsmgr.sink.WebSinkTest",
         "org.apache.heron.metricsmgr.sink.PrometheusSinkTests",
+        "org.apache.heron.metricsmgr.sink.InfluxSinkTests",
     ],
     runtime_deps = [
         ":metricsmgr-tests",
     ],
-    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
-    size = "small",
 )

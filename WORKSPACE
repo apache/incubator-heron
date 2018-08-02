@@ -756,11 +756,44 @@ maven_jar(
 
 # End Nomand dependencies
 
-# Influx DB metrics sink
+# InfluxDB dependencies
+
 maven_jar(
   name = "org_influxdb",
   artifact = "org.influxdb:influxdb-java:2.11"
 )
+
+maven_jar(
+  name = "com_squareup_okhttp3",
+  artifact = "com.squareup.okhttp3:okhttp:3.11.0"
+)
+
+maven_jar(
+  name = "com_squareup_okhttp3_logging",
+  artifact = "com.squareup.okhttp3:logging-interceptor:3.11.0"
+)
+
+maven_jar(
+  name = "com_squareup_okio",
+  artifact = "com.squareup.okio:okio:1.15.0"
+)
+
+maven_jar(
+  name = "com_squareup_moshi",
+  artifact = "com.squareup.moshi:moshi:1.6.0"
+)
+
+maven_jar(
+  name = "com_squareup_retrofit2",
+  artifact = "com.squareup.retrofit2:retrofit:2.4.0"
+)
+
+maven_jar(
+  name = "com_squareup_retrofit2_converter_moshi",
+  artifact = "com.squareup.retrofit2:converter-moshi:2.4.0"
+)
+
+# End InfluxDB dependencies
 
 # for pex repos
 PEX_SRC = "https://pypi.python.org/packages/3a/1d/cd41cd3765b78a4353bbf27d18b099f7afbcd13e7f2dc9520f304ec8981c/pex-1.2.15.tar.gz"

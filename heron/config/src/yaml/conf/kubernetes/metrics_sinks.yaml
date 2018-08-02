@@ -124,3 +124,23 @@ metricscache-sink:
 #   graphite_port: 2004 # The port of graphite to be exported metrics to
 #   metrics_prefix: "heron" # The prefix of every metrics
 #   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server
+
+### Config for the InfluxDB sink
+# influxdb-sink:
+#    class: "org.apache.heron.metricsmgr.sink.InfluxDBSink"
+#    flush-frequency-ms: 60000 # One min in ms
+#    sink-restart-attempts: -1 # Forever
+#    influx-host: "http://localhost"
+#    influx-port: 8086
+#    influx-db-name: "heron"
+#    ## If authentication is active on the Influx DB then credentials should be supplied
+#    #influx-db-username: ""
+#    #influx-db-password: ""
+#    ## If batch processing is enabled then buffer options can be configured ("true"/"false")
+#    enable-batch-processing: "true"
+#    # The number of MetricsInfo Points to buffer before sending. This will trigger a flush when
+#    # reached and may be before the flush frequency is reached under high load.
+#    main-buffer-size: 10000
+#    # The Influx Client maintains a buffer of failed writes to the DB. These will be retried. If
+#    # this buffer is full and new writes fail, the older writes will be dropped.
+#    fail-buffer-size: 10000

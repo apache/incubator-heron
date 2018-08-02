@@ -22,6 +22,12 @@ deps = [
     "//third_party/java:cli",
     "@com_google_protobuf//:protobuf_java",
     "@org_yaml_snakeyaml//jar",
+    "@com_squareup_moshi//jar",
+    "@com_squareup_okhttp3//jar",
+    "@com_squareup_okhttp3_logging//jar",
+    "@com_squareup_okio//jar",
+    "@com_squareup_retrofit2//jar",
+    "@com_squareup_retrofit2_converter_moshi//jar",
     "@org_influxdb//jar",
 ]
 
@@ -49,6 +55,12 @@ java_binary(
         "//heron/proto:proto_metrics_java",
         "//heron/spi/src/java:metricsmgr-spi-java",
         "//third_party/java:cli",
+        "@com_squareup_moshi//jar",
+        "@com_squareup_okhttp3//jar",
+        "@com_squareup_okhttp3_logging//jar",
+        "@com_squareup_okio//jar",
+        "@com_squareup_retrofit2//jar",
+        "@com_squareup_retrofit2_converter_moshi//jar",
         "@org_influxdb//jar",
     ],
 )
