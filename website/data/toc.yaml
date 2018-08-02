@@ -140,6 +140,8 @@ sections:
     sublinks:
     - name: Prometheus
       url: /docs/operators/observability/prometheus
+    - name: InfluxDB
+      url: /docs/operators/observability/influxdb
     - name: Graphite
       url: /docs/operators/observability/graphite
     - name: Scribe

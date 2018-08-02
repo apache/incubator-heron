@@ -21,6 +21,7 @@ implementing your own.
 Sink | How it works
 :----|:------------
 [Prometheus](../../operators/observability/prometheus) | [`PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
+[InfluxDB](../../operators/observability/influxdb) | [`InfluxDBSink`](/api/org/apache/heron/metricsmgr/sink/InfluxDBSink.html) sends each `MetricsInfo` instance withing each `MetricsRecord` object is sent as a measuremnt point to an [InfluxDB](https://www.influxdata.com/time-series-platform/influxdb/) instance.
 [Graphite](../../operators/observability/graphite) | [`GraphiteSink`](/api/org/apache/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
 [Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
 Local filesystem | [`FileSink`](/api/org/apache/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
