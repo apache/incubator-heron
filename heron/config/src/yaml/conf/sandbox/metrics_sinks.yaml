@@ -132,7 +132,7 @@ metricscache-sink:
 #    sink-restart-attempts: -1 # Forever
 #    influx-host: "http://localhost"
 #    influx-port: 8086
-#    influx-db-name: "heron"
+#    influx-db-prefix: "heron"
 #    ## If authentication is active on the Influx DB then credentials should be supplied
 #    influx-db-username: "user"
 #    influx-db-password: "password"

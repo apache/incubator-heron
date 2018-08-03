@@ -1,5 +1,6 @@
 package org.apache.heron.metricsmgr.sink;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -31,11 +32,19 @@ public class InfluxDBSink implements IMetricsSink {
   /** InluxDB connection instance **/
   private InfluxDB influxDB;
   /** Heron Topology ID string **/
-  private String topologyName;
+  private String topology;
+  /** Heron Cluster name **/
+  private String cluster;
+  /** The role used to launch the topology **/
+  private String role;
+  /** The environment the topology was launched in  **/
+  private String environ;
   /** The URL of the InfluxDB server host */
   private String serverHost;
   /** The port for the InfluxDB server on the host*/
   private String serverPort;
+  /** The prefix string appended to the front of all topology database names */
+  private String dbPrefix;
   /** The name of the database on InfluxDB server that metrics will sent to */
   private String dbName;
   /** Indicates if metrics should be written as soon as they are processed or batched according to
@@ -46,7 +55,7 @@ public class InfluxDBSink implements IMetricsSink {
   // Set the config key names for the metrics_sink.yaml config file
   static final String SERVER_HOST_KEY = "influx-host";
   static final String SERVER_PORT_KEY = "influx-port";
-  static final String METRIC_DB_NAME_KEY = "influx-db-name";
+  static final String METRIC_DB_PREFIX_KEY = "influx-db-prefix";
   static final String DB_USERNAME_KEY = "influx-db-username";
   static final String DB_PASSWORD_KEY = "influx-db-password";
   static final String BATCH_PROCESS_KEY = "enable-batch-processing";
@@ -64,7 +73,10 @@ public class InfluxDBSink implements IMetricsSink {
   public void init(Map<String, Object> conf, SinkContext context) {
 
     LOG.info("Configuration: " + conf.toString());
-    topologyName = context.getTopologyName();
+    topology = context.getTopologyName();
+    cluster = context.getCluster();
+    role = context.getRole();
+    environ = context.getEnvironment();
 
     serverHost = (String) conf.get(SERVER_HOST_KEY);
 
@@ -85,8 +97,6 @@ public class InfluxDBSink implements IMetricsSink {
         serverPort = String.valueOf((Integer) conf.get(SERVER_PORT_KEY));
     }
 
-    dbName = (String) conf.get(METRIC_DB_NAME_KEY);
-
     LOG.info("Creating Influx connection client");
     // Check if username and passwords fields have been set
     if(conf.containsKey(DB_USERNAME_KEY) && conf.containsKey(DB_PASSWORD_KEY)) {
@@ -96,6 +106,20 @@ public class InfluxDBSink implements IMetricsSink {
       influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort, dbUser, dbPwd);
     } else {
         influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort);
+    }
+
+    // TODO: Add config options for ssl and UDP setups
+
+    // Create and/or set the database name for the topology
+    dbPrefix = (String) conf.get(METRIC_DB_PREFIX_KEY);
+    dbName = dbPrefix + "-" + cluster + "-"  + environ + "-" + topology;
+
+    if(!influxDB.databaseExists(dbName)){
+      LOG.info("Creating topology database: " + dbName);
+      influxDB.createDatabase(dbName);
+    } else {
+      LOG.info("Topology database: " + dbName + "already exists. Metrics will be written to " +
+               "this existing database");
     }
 
     influxDB.setDatabase(dbName);
@@ -151,7 +175,10 @@ public class InfluxDBSink implements IMetricsSink {
 
           Point point = Point.measurement(metric.getName())
               .time(timestamp, TimeUnit.MILLISECONDS)
-              .tag("Topology", topologyName)
+              .tag("Topology", topology)
+              .tag("Cluster", cluster)
+              .tag("Role", role)
+              .tag("Environment", environ)
               .tag("Source", source)
               .addField("value", metric.getValue())
               .build();
@@ -169,7 +196,10 @@ public class InfluxDBSink implements IMetricsSink {
 
         BatchPoints points = BatchPoints
             .database(dbName)
-            .tag("Topology", topologyName)
+            .tag("Topology", topology)
+            .tag("Cluster", cluster)
+            .tag("Role", role)
+            .tag("Environment", environ)
             .tag("Source", source)
             .build();
 

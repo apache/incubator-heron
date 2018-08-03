@@ -17,6 +17,7 @@
 package org.apache.heron.metricsmgr.sink;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +32,9 @@ import org.apache.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
 import org.apache.heron.spi.metricsmgr.sink.SinkContext;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class InfluxSinkTests {
 
@@ -49,10 +53,12 @@ public class InfluxSinkTests {
     defaultConf = new HashMap<>();
     defaultConf.put(InfluxDBSink.SERVER_PORT_KEY, 8086);
     defaultConf.put(InfluxDBSink.SERVER_HOST_KEY, "http://localhost");
-    defaultConf.put(InfluxDBSink.METRIC_DB_NAME_KEY, "heron");
+    defaultConf.put(InfluxDBSink.METRIC_DB_PREFIX_KEY, "heron");
 
     context = Mockito.mock(SinkContext.class);
     Mockito.when(context.getTopologyName()).thenReturn("testTopology");
+    Mockito.when(context.getCluster()).thenReturn("testCluster");
+    Mockito.when(context.getEnvironment()).thenReturn("testEnviron");
     Mockito.when(context.getSinkId()).thenReturn("testId");
 
     Iterable<MetricsInfo> infos = Arrays.asList(new MetricsInfo("test/metric_1", "1.0"),

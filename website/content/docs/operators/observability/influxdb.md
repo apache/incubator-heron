@@ -16,6 +16,20 @@ changes to the `metrics_sinks.yaml` configuration file:
   [parameters](#influxdb-parameters) listed below. You can uncomment the
   existing `influxdb-sink` map to get the default configuration.
 
+## Metrics format
+
+Each topology has its own database within the InfluxDB server. The topology's
+database name will take the form:
+`{prefix}-{cluster}-{environment}-{topology}`. The prefix applied to the
+database name can be configured in the `metrics-sinks.yaml` file ([see
+below](#influx-preferences)).
+
+Within each topology database, metrics are listed as separate Influx
+measurement names. Each measurement has tags for the Topology, Cluster, Role
+and Environment that it came from. Each measurement also has a Source tag whose
+format changes depending on the metric it is for, but will contain information
+on the topology instance/system component that produced it. 
+
 ## Batch processing
 
 The InfluxDB sink has two operating modes. It can either send metrics as soon
@@ -69,7 +83,7 @@ Parameter | Description | Default
 `flush-frequency-ms` | This is the time in milliseconds between metrics being written to the InfluxDB sever. **Note**: This will have no effect if `enable-batch-processing` is set to false. | 60000
 `influx-host` | The address of the InfluxDB server host. | http://localhost
 `influx-port` | The port that the InfluxDB server is listening on. | 8086
-`influx-db-name` | The name of the database on the InfluxDB server that all metrics will be submitted to. | heron
+`influx-db-prefix` | The prefix that will be appended to the front of all database names on the InfluxDB server. Topology database names will be of the form: `{prefix}-{cluster}-{environment}-{topology}` | heron
 `influx-db-username` | If the InfluxDB server has authentication enabled then supply the username to be used for metric submissions. | None
 `influx-db-password` | If the InfluxDB server has authentication enabled then supply the password to be used for metric submissions. | None
 `enable-batch-processing` | Boolean (either "true" or "false") indicating if [batch processing](#batch-processing) should be enabled  | `"true"`
