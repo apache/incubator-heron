@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.apache.heron.metricsmgr.MetricsUtil;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
 import org.apache.heron.spi.metricsmgr.sink.IMetricsSink;
@@ -166,7 +167,14 @@ public class InfluxDBSink implements IMetricsSink {
 	    // The time stamp and source for this record will be applied to all InfluxDB points that come
       // from this record.
       Long timestamp = record.getTimestamp();
-      String source = record.getSource();
+
+      // The format for the source of the record is "host:port/componentName/instanceId"
+      // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
+      // ["host:port", componentName, instanceId]
+      String[] sources = MetricsUtil.splitRecordSource(record);
+      String hostPort = sources[0];
+      String component = sources[1];
+      String instanceID = sources[2];
 
       if(batchEnabled) {
 
@@ -179,7 +187,9 @@ public class InfluxDBSink implements IMetricsSink {
               .tag("Cluster", cluster)
               .tag("Role", role)
               .tag("Environment", environ)
-              .tag("Source", source)
+              .tag("HostPort", hostPort)
+              .tag("Component", component)
+              .tag("Instance", instanceID)
               .addField("value", metric.getValue())
               .build();
 
@@ -200,7 +210,9 @@ public class InfluxDBSink implements IMetricsSink {
             .tag("Cluster", cluster)
             .tag("Role", role)
             .tag("Environment", environ)
-            .tag("Source", source)
+            .tag("HostPort", hostPort)
+            .tag("Component", component)
+            .tag("Instance", instanceID)
             .build();
 
         // Cycle through the metrics and convert each MetricsInfo instance into a InfluxDB Point
