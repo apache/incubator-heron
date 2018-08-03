@@ -171,10 +171,18 @@ public class InfluxDBSink implements IMetricsSink {
       // The format for the source of the record is "host:port/componentName/instanceId"
       // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
       // ["host:port", componentName, instanceId]
-      String[] sources = MetricsUtil.splitRecordSource(record);
-      String hostPort = sources[0];
-      String component = sources[1];
-      String instanceID = sources[2];
+      String hostPort;
+      String component;
+      String instanceID;
+      try {
+        String[] sources = MetricsUtil.splitRecordSource(record);
+        hostPort = sources[0];
+        component = sources[1];
+        instanceID = sources[2];
+      } catch (IndexOutOfBoundsException iobe) {
+        LOG.warning("Error parsing metric record source name: " record.getSource());
+        component = record.getSource();
+      }
 
       if(batchEnabled) {
 
