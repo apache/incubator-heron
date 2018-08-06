@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
+import org.apache.heron.api.bolt.BaseRichBolt;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.streamlet.Config;
@@ -97,6 +98,21 @@ public class StreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .flatMap((num) -> Arrays.asList(num * 10));
+    assertTrue(streamlet instanceof FlatMapStreamlet);
+    FlatMapStreamlet<Double, Double> mStreamlet = (FlatMapStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testFlatMapStreamletWithBolt() throws Exception {
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    BaseRichBolt bolt = new TestFlatmapBolt();
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
+                                               .flatMap(bolt);
     assertTrue(streamlet instanceof FlatMapStreamlet);
     FlatMapStreamlet<Double, Double> mStreamlet = (FlatMapStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());

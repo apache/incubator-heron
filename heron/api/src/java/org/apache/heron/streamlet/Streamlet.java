@@ -21,6 +21,7 @@ package org.apache.heron.streamlet;
 
 import java.util.List;
 
+import org.apache.heron.api.bolt.IRichBolt;
 import org.apache.heron.classification.InterfaceStability;
 
 /**
@@ -84,6 +85,13 @@ public interface Streamlet<R> {
    */
   <T> Streamlet<T> flatMap(
       SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn);
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet and
+   * flattening the result
+   * @param flatMapBolt The rich bolt that is used to emit tuples from each input element
+   */
+  <T> Streamlet<T> flatMap(IRichBolt flatMapBolt);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet
