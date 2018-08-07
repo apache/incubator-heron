@@ -51,9 +51,9 @@ public class InfluxSinkTests {
   public void before() throws IOException {
 
     defaultConf = new HashMap<>();
-    defaultConf.put(InfluxDBSink.SERVER_PORT_KEY, 8086);
-    defaultConf.put(InfluxDBSink.SERVER_HOST_KEY, "http://localhost");
     defaultConf.put(InfluxDBSink.METRIC_DB_PREFIX_KEY, "heron");
+    defaultConf.put(InfluxDBSink.SERVER_HOST_KEY, "http://localhost");
+    defaultConf.put(InfluxDBSink.SERVER_PORT_KEY, 8086);
 
     context = Mockito.mock(SinkContext.class);
     Mockito.when(context.getTopologyName()).thenReturn("testTopology");
@@ -67,6 +67,31 @@ public class InfluxSinkTests {
     records = Arrays.asList(
         newRecord("machine/component/instance_1", infos, Collections.emptyList()),
         newRecord("machine/component/instance_2", infos, Collections.emptyList()));
+  }
+
+  @Test
+  public void testWithIntPort() {
+    InfluxDBSink influx = new InfluxDBSink();
+
+    influx.init(defaultConf, context);
+  }
+
+  @Test
+  public void testWithStringPort() {
+    InfluxDBSink influx = new InfluxDBSink();
+
+    defaultConf.put(InfluxDBSink.SERVER_PORT_KEY, "8086");
+
+    influx.init(defaultConf, context);
+  }
+
+  @Test
+  public void testWithNoHTTP() {
+    InfluxDBSink influx = new InfluxDBSink();
+
+    defaultConf.put(InfluxDBSink.SERVER_HOST_KEY, "localhost");
+
+    influx.init(defaultConf, context);
   }
 
   @Test
@@ -102,17 +127,4 @@ public class InfluxSinkTests {
     influx.init(defaultConf, context);
   }
 
-  @Test
-  public void testMetricSend() {
-    InfluxDBSink influx = new InfluxDBSink();
-
-    defaultConf.put(InfluxDBSink.BATCH_PROCESS_KEY, "false");
-
-    influx.init(defaultConf, context);
-
-    for(MetricsRecord record : records){
-      influx.processRecord(record);
-    }
-
-  }
 }
