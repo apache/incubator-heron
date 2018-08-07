@@ -1,21 +1,20 @@
 package org.apache.heron.metricsmgr.sink;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import org.influxdb.BatchOptions;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 
 import org.apache.heron.metricsmgr.MetricsUtil;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsInfo;
 import org.apache.heron.spi.metricsmgr.metrics.MetricsRecord;
 import org.apache.heron.spi.metricsmgr.sink.IMetricsSink;
 import org.apache.heron.spi.metricsmgr.sink.SinkContext;
-
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.BatchPoints;
-import org.influxdb.dto.Point;
-import org.influxdb.BatchOptions;
 
 /**
  * A metrics sink for forwarding topology metrics to an
@@ -28,31 +27,6 @@ import org.influxdb.BatchOptions;
  */
 public class InfluxDBSink implements IMetricsSink {
 
-  private static final Logger LOG = Logger.getLogger(InfluxDBSink.class.getName());
-
-  /** InluxDB connection instance **/
-  private InfluxDB influxDB;
-  /** Heron Topology ID string **/
-  private String topology;
-  /** Heron Cluster name **/
-  private String cluster;
-  /** The role used to launch the topology **/
-  private String role;
-  /** The environment the topology was launched in  **/
-  private String environ;
-  /** The URL of the InfluxDB server host */
-  private String serverHost;
-  /** The port for the InfluxDB server on the host*/
-  private String serverPort;
-  /** The prefix string appended to the front of all topology database names */
-  private String dbPrefix;
-  /** The name of the database on InfluxDB server that metrics will sent to */
-  private String dbName;
-  /** Indicates if metrics should be written as soon as they are processed or batched according to
-   * the flush frequency.
-    */
-  private boolean batchEnabled;
-
   // Set the config key names for the metrics_sink.yaml config file
   static final String SERVER_HOST_KEY = "influx-host";
   static final String SERVER_PORT_KEY = "influx-port";
@@ -62,73 +36,140 @@ public class InfluxDBSink implements IMetricsSink {
   static final String BATCH_PROCESS_KEY = "enable-batch-processing";
   static final String MAIN_BUFFER_KEY = "main-buffer-size";
   static final String FAIL_BUFFER_KEY = "fail-buffer-size";
+  private static final Logger LOG = Logger.getLogger(InfluxDBSink.class.getName());
 
   /**
-   * Initialisation method for the InfluxDB metrics sink.
+   * InluxDB connection instance
+   **/
+  private InfluxDB influxDB;
+  /**
+   * Heron Topology ID string
+   **/
+  private String topology;
+  /**
+   * Heron Cluster name
+   **/
+  private String cluster;
+  /**
+   * The role used to launch the topology
+   **/
+  private String role;
+  /**
+   * The environment the topology was launched in
+   **/
+  private String environ;
+  /**
+   * The URL of the InfluxDB server host
+   */
+  private String serverHost;
+  /**
+   * The port for the InfluxDB server on the host
+   */
+  private String serverPort;
+  /**
+   * The prefix string appended to the front of all topology database names
+   */
+  private String dbPrefix;
+  /**
+   * The name of the database on InfluxDB server that metrics will sent to
+   */
+  private String dbName;
+  /**
+   * Indicates if metrics should be written as soon as they are processed or batched according to
+   * the flush frequency.
+   */
+  private boolean batchEnabled;
+
+  /**
+   * Processes the server host name (dealing with missing http:// strings that can cause errors with
+   * the InfluxDB client) and the server port which could be a sting or integer in the config file.
    *
    * @param conf An unmodifiableMap containing basic configuration information parsed from the
-   *             metrics-sinks.yaml config file.
-   * @param context context object containing information on the Topology and Heron system this sink
-   *                is registered with.
+   * metrics-sinks.yaml config file.
    */
-  public void init(Map<String, Object> conf, SinkContext context) {
-
-    LOG.info("Configuration: " + conf.toString());
-    topology = context.getTopologyName();
-    cluster = context.getCluster();
-    role = context.getRole();
-    environ = context.getEnvironment();
+  private void setServerHostPort(Map<String, Object> conf) {
 
     serverHost = (String) conf.get(SERVER_HOST_KEY);
 
     // The InfluxDB client expects the host connection string to begin with http or https
-    if(!serverHost.contains("http://") & !serverHost.contains("https://")){
+    if (!serverHost.startsWith("http://") && !serverHost.startsWith("https://")) {
       serverHost = "http://" + serverHost;
       LOG.warning("The server host key (" + SERVER_HOST_KEY + ") did not contain the http " +
-                  "string. Setting server host string to: "+ serverHost);
+          "string. Setting server host string to: " + serverHost);
       LOG.warning("If your influx instances uses https please alter the " + SERVER_HOST_KEY +
-                  "in the appropriate metrics-sinks.yaml file");
+          "in the appropriate metrics-sinks.yaml file");
     }
 
     // Account for the fact that the port could be entered as a sting or and integer in the
     // config file
     try {
-        serverPort = (String) conf.get(SERVER_PORT_KEY);
-    } catch(ClassCastException cce) {
-        serverPort = String.valueOf((Integer) conf.get(SERVER_PORT_KEY));
+      serverPort = (String) conf.get(SERVER_PORT_KEY);
+    } catch (ClassCastException cce) {
+      serverPort = String.valueOf((Integer) conf.get(SERVER_PORT_KEY));
     }
+  }
+
+  /**
+   * Creates the InfluxDB client instance and sets the Username and password values if present in
+   * the config file.
+   * <p>
+   * TODO: Add config options for ssl and UDP setups in the InfluxDB client
+   *
+   * @param conf An unmodifiableMap containing basic configuration information parsed from the
+   * metrics-sinks.yaml config file.
+   */
+  private void createInfluxClient(Map<String, Object> conf) {
 
     LOG.info("Creating Influx connection client");
     // Check if username and passwords fields have been set
-    if(conf.containsKey(DB_USERNAME_KEY) && conf.containsKey(DB_PASSWORD_KEY)) {
+    if (conf.containsKey(DB_USERNAME_KEY) && conf.containsKey(DB_PASSWORD_KEY)) {
       String dbUser = (String) conf.get(DB_USERNAME_KEY);
-      String dbPwd= (String) conf.get(DB_PASSWORD_KEY);
+      String dbPwd = (String) conf.get(DB_PASSWORD_KEY);
       LOG.info("Configuring InfluxDB client for user: " + dbUser);
       influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort, dbUser, dbPwd);
     } else {
-        influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort);
+      influxDB = InfluxDBFactory.connect(serverHost + ":" + serverPort);
     }
 
-    // TODO: Add config options for ssl and UDP setups
+  }
+
+  /**
+   * Creates and sets the database name for the topology this sink is assigned to. Database names
+   * take the form {prefix}-{cluster}-{environment}-{topology}.
+   *
+   * @param conf An unmodifiableMap containing basic configuration information parsed from the
+   * metrics-sinks.yaml config file.
+   */
+  private void setDatabase(Map<String, Object> conf) {
 
     // Create and/or set the database name for the topology
     dbPrefix = (String) conf.get(METRIC_DB_PREFIX_KEY);
-    dbName = dbPrefix + "-" + cluster + "-"  + environ + "-" + topology;
+    dbName = dbPrefix + "-" + cluster + "-" + environ + "-" + topology;
 
-    if(!influxDB.databaseExists(dbName)){
+    if (!influxDB.databaseExists(dbName)) {
       LOG.info("Creating topology database: " + dbName);
       influxDB.createDatabase(dbName);
     } else {
       LOG.info("Topology database: " + dbName + "already exists. Metrics will be written to " +
-               "this existing database");
+          "this existing database");
     }
 
     influxDB.setDatabase(dbName);
 
+  }
+
+  /**
+   * Configures the batch processing options for the InfluxDB client.
+   *
+   * @param conf An unmodifiableMap containing basic configuration information parsed from the
+   * metrics-sinks.yaml config file.
+   */
+  private void setBatchOptions(Map<String, Object> conf) {
+
     // Check if batch processing is to be used
     batchEnabled = Boolean.valueOf((String) conf.get(BATCH_PROCESS_KEY));
 
-    if(batchEnabled){
+    if (batchEnabled) {
       LOG.info("Configuring InfluxDB client for batch processing");
       Integer flushFrequency = (Integer) conf.get("flush-frequency-ms");
       Integer mainBufferSize = (Integer) conf.get(MAIN_BUFFER_KEY);
@@ -143,13 +184,36 @@ public class InfluxDBSink implements IMetricsSink {
 
       influxDB.enableBatch(batchOptions);
       LOG.info("Influx Connection created with batch processing enabled. " +
-               "Metrics will be sent at the flush frequency.");
+          "Metrics will be sent at the flush frequency.");
     } else {
       LOG.info("Influx Connection created with batch processing disabled. " +
           "Metrics will be sent as they are received.");
     }
 
-	}
+  }
+
+  /**
+   * Initialisation method for the InfluxDB metrics sink.
+   *
+   * @param conf An unmodifiableMap containing basic configuration information parsed from the
+   * metrics-sinks.yaml config file.
+   * @param context context object containing information on the Topology and Heron system this sink
+   * is registered with.
+   */
+  public void init(Map<String, Object> conf, SinkContext context) {
+
+    LOG.info("Configuration: " + conf.toString());
+    topology = context.getTopologyName();
+    cluster = context.getCluster();
+    role = context.getRole();
+    environ = context.getEnvironment();
+
+    setServerHostPort(conf);
+    createInfluxClient(conf);
+    setDatabase(conf);
+    setBatchOptions(conf);
+
+  }
 
   /**
    * Process a {@link org.apache.heron.spi.metricsmgr.metrics.MetricsRecord MetricsRecord} and add
@@ -162,58 +226,35 @@ public class InfluxDBSink implements IMetricsSink {
    *
    * @param record The MetricsRecord to sent to InfluxDB
    */
-	public void processRecord(MetricsRecord record) {
+  public void processRecord(MetricsRecord record) {
 
-	    // The time stamp and source for this record will be applied to all InfluxDB points that come
-      // from this record.
-      Long timestamp = record.getTimestamp();
+    // The time stamp and source for this record will be applied to all InfluxDB points that come
+    // from this record.
+    Long timestamp = record.getTimestamp();
 
-      // The format for the source of the record is "host:port/componentName/instanceId"
-      // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
-      // ["host:port", componentName, instanceId]
-      String hostPort;
-      String component;
-      String instanceID;
-      try {
-        String[] sources = MetricsUtil.splitRecordSource(record);
-        hostPort = sources[0];
-        component = sources[1];
-        instanceID = sources[2];
-      } catch (IndexOutOfBoundsException iobe) {
-        LOG.warning("Error parsing metric record source name: " record.getSource());
-        component = record.getSource();
-      }
+    // The format for the source of the record is "host:port/componentName/instanceId"
+    // So MetricsRecord.getSource().split("/") would be an array with 3 elements:
+    // ["host:port", componentName, instanceId]
+    String hostPort = "NA";
+    String component = "NA";
+    String instanceID = "NA";
+    try {
+      String[] sources = MetricsUtil.splitRecordSource(record);
+      hostPort = sources[0];
+      component = sources[1];
+      instanceID = sources[2];
+    } catch (IndexOutOfBoundsException iobe) {
+      LOG.warning("Error parsing metric record source name: " + record.getSource());
+      component = record.getSource();
+    }
 
-      if(batchEnabled) {
+    if (batchEnabled) {
 
-        // Cycle through the metrics and convert each MetricsInfo instance into a InfluxDB Point
-        for (MetricsInfo metric : record.getMetrics()) {
+      // Cycle through the metrics and convert each MetricsInfo instance into a InfluxDB Point
+      for (MetricsInfo metric : record.getMetrics()) {
 
-          Point point = Point.measurement(metric.getName())
-              .time(timestamp, TimeUnit.MILLISECONDS)
-              .tag("Topology", topology)
-              .tag("Cluster", cluster)
-              .tag("Role", role)
-              .tag("Environment", environ)
-              .tag("HostPort", hostPort)
-              .tag("Component", component)
-              .tag("Instance", instanceID)
-              .addField("value", metric.getValue())
-              .build();
-
-          // As batch is enabled this will just add the point to the InfluxDB client's buffer to be
-          // sent when flush() is called on the sink (or when the main buffer is full).
-          influxDB.write(point);
-        }
-
-      } else {
-
-        // If batching is not enabled then we convert each MetricsInfo instance in the MetricsRecord
-        // into a Point and create a batch of them that are issued as one block as soon as
-        // they are all processed.
-
-        BatchPoints points = BatchPoints
-            .database(dbName)
+        Point point = Point.measurement(metric.getName())
+            .time(timestamp, TimeUnit.MILLISECONDS)
             .tag("Topology", topology)
             .tag("Cluster", cluster)
             .tag("Role", role)
@@ -221,61 +262,83 @@ public class InfluxDBSink implements IMetricsSink {
             .tag("HostPort", hostPort)
             .tag("Component", component)
             .tag("Instance", instanceID)
+            .addField("value", metric.getValue())
             .build();
 
-        // Cycle through the metrics and convert each MetricsInfo instance into a InfluxDB Point
-        for (MetricsInfo metric : record.getMetrics()) {
-
-          Point point = Point.measurement(metric.getName())
-              .time(timestamp, TimeUnit.MILLISECONDS)
-              .addField("value", metric.getValue())
-              .build();
-
-            // Add the current metric point to the batch
-            points.point(point);
-          }
-
-
-        try {
-          //Write the batch of points to InfluxDB.
-          influxDB.write(points);
-          LOG.info(points.getPoints().size() + " metrics sent to " +
-              "InfluxDB with timestamp: " + timestamp);
-        } catch (NullPointerException n) {
-          LOG.warning("Sending to InfluxDB raised a NullPointer Exception");
-          n.printStackTrace();
-        } catch (Exception e) {
-          LOG.warning("Sending to InfluxDB raised a generic exception");
-          for(Point point : points.getPoints())
-            System.err.println(point);
-          e.printStackTrace();
-        }
+        // As batch is enabled this will just add the point to the InfluxDB client's buffer to be
+        // sent when flush() is called on the sink (or when the main buffer is full).
+        influxDB.write(point);
       }
 
-	}
+    } else {
+
+      // If batching is not enabled then we convert each MetricsInfo instance in the MetricsRecord
+      // into a Point and create a batch of them that are issued as one block as soon as
+      // they are all processed.
+      BatchPoints points = BatchPoints
+          .database(dbName)
+          .tag("Topology", topology)
+          .tag("Cluster", cluster)
+          .tag("Role", role)
+          .tag("Environment", environ)
+          .tag("HostPort", hostPort)
+          .tag("Component", component)
+          .tag("Instance", instanceID)
+          .build();
+
+      // Cycle through the metrics and convert each MetricsInfo instance into a InfluxDB Point
+      for (MetricsInfo metric : record.getMetrics()) {
+
+        Point point = Point.measurement(metric.getName())
+            .time(timestamp, TimeUnit.MILLISECONDS)
+            .addField("value", metric.getValue())
+            .build();
+
+        // Add the current metric point to the batch
+        points.point(point);
+      }
+
+
+      try {
+        //Write the batch of points to InfluxDB.
+        influxDB.write(points);
+        LOG.info(points.getPoints().size() + " metrics sent to " +
+            "InfluxDB with timestamp: " + timestamp);
+      } catch (NullPointerException n) {
+        LOG.warning("Sending to InfluxDB raised a NullPointer Exception");
+        n.printStackTrace();
+      } catch (Exception e) {
+        LOG.warning("Sending to InfluxDB raised a generic exception");
+        for (Point point : points.getPoints())
+          System.err.println(point);
+        e.printStackTrace();
+      }
+    }
+
+  }
 
   /**
    * Flush the InfluxDB client's main buffer. This will only have an effect if batch processing
    * is enabled.
    */
-	public void flush() {
-	  if(batchEnabled) {
+  public void flush() {
+    if (batchEnabled) {
       LOG.info("Flushing buffered metrics to InfluxDB");
       influxDB.flush();
     }
-	}
+  }
 
   /**
    * Closes the InfluxDB client connection. This is important if batched processing is enabled, to
    * ensure that the buffers thread pool is released correctly.
    */
-	public void close() {
+  public void close() {
     LOG.info("Closing InfluxDB connection");
-    try{
-        influxDB.close();
+    try {
+      influxDB.close();
     } catch (NullPointerException npe) {
-       LOG.severe("Unable to close InfluxDB client connection as it was never created");
+      LOG.severe("Unable to close InfluxDB client connection as it was never created");
     }
-	}
+  }
 
 }
