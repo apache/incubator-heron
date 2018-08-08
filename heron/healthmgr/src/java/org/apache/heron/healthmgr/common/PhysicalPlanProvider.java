@@ -48,7 +48,7 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
   private final String topologyName;
 
-  private PhysicalPlan physicalPlan;
+  private PhysicalPlan cachedPhysicalPlan = null;
 
   @Inject
   public PhysicalPlanProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
@@ -85,7 +85,19 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
       throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
     }
 
+    cachedPhysicalPlan = physicalPlan;
     return physicalPlan;
+  }
+
+  public PhysicalPlan getCachedPhysicalPlan() {
+    try {
+      get();
+    } catch (InvalidStateException e) {
+      if (cachedPhysicalPlan == null) {
+        throw e;
+      }
+    }
+    return cachedPhysicalPlan;
   }
 
   /**
@@ -103,7 +115,8 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     return boltNames;
   }
   public Collection<String> getBoltNames() {
-    return getBoltNames(get());
+    getCachedPhysicalPlan();
+    return getBoltNames(cachedPhysicalPlan);
   }
 
   /**
@@ -121,13 +134,14 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     return spoutNames;
   }
   public Collection<String> getSpoutNames() {
-    return getSpoutNames(get());
+    getCachedPhysicalPlan();
+    return getSpoutNames(cachedPhysicalPlan);
   }
 
   public Collection<String> getSpoutBoltNames() {
-    PhysicalPlan pp = get();
-    Collection<String> ret = getBoltNames(pp);
-    ret.addAll(getSpoutNames(pp));
+    getCachedPhysicalPlan();
+    Collection<String> ret = getBoltNames(cachedPhysicalPlan);
+    ret.addAll(getSpoutNames(cachedPhysicalPlan));
     return ret;
   }
 }
