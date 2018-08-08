@@ -31,7 +31,6 @@ import com.microsoft.dhalion.core.Measurement;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 

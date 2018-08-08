@@ -36,7 +36,6 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
 

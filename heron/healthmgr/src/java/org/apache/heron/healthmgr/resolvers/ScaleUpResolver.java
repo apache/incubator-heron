@@ -45,7 +45,6 @@ import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.scheduler.client.ISchedulerClient;

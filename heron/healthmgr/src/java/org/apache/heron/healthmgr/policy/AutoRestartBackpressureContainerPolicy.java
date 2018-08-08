@@ -30,7 +30,7 @@ import com.microsoft.dhalion.events.EventManager;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.ContainerRestart;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.detectors.BackPressureDetector;
 import org.apache.heron.healthmgr.resolvers.RestartContainerResolver;
 import org.apache.heron.healthmgr.sensors.BackPressureSensor;
@@ -56,12 +56,12 @@ public class AutoRestartBackpressureContainerPolicy extends ToggleablePolicy
   @Inject
   AutoRestartBackpressureContainerPolicy(@Named(CONF_POLICY_ID) String policyId,
                                          HealthPolicyConfig policyConfig,
-                                         TopologyProvider topologyProvider,
+                                         PhysicalPlanProvider physicalPlanProvider,
                                          EventManager eventManager,
                                          BackPressureSensor backPressureSensor,
                                          BackPressureDetector backPressureDetector,
                                          RestartContainerResolver restartContainerResolver) {
-    super(policyId, policyConfig, topologyProvider);
+    super(policyId, policyConfig, physicalPlanProvider);
 
     registerSensors(backPressureSensor);
     registerDetectors(backPressureDetector);
