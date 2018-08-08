@@ -70,7 +70,7 @@ public class BackPressureSensor extends BaseSensor {
     Collection<Measurement> result = new ArrayList<>();
     Instant now = context.checkpoint();
 
-    String[] boltComponents = topologyProvider.getBoltNames();
+    Collection<String> boltComponents = topologyProvider.getBoltNames();
     Duration duration = getDuration();
     for (String component : boltComponents) {
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(component);

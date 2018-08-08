@@ -20,6 +20,7 @@
 package org.apache.heron.healthmgr.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,45 +44,20 @@ import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
  * version to any dependent components.
  */
 @Singleton
-public class TopologyProvider implements Provider<Topology>, EventHandler<TopologyUpdate> {
+public class TopologyProvider implements Provider<Topology> {
   private static final Logger LOG = Logger.getLogger(TopologyProvider.class.getName());
-  private final SchedulerStateManagerAdaptor stateManagerAdaptor;
-  private final String topologyName;
 
   private Topology topology;
+  private PhysicalPlanProvider physicalPlanProvider;
 
   @Inject
-  public TopologyProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
-                          EventManager eventManager,
-                          @Named(CONF_TOPOLOGY_NAME) String topologyName) {
-    this.stateManagerAdaptor = stateManagerAdaptor;
-    this.topologyName = topologyName;
-    eventManager.addEventListener(TopologyUpdate.class, this);
+  public TopologyProvider(PhysicalPlanProvider physicalPlanProvider) {
+    this.physicalPlanProvider = physicalPlanProvider;
   }
 
   @Override
   public synchronized Topology get() {
-    if (topology == null) {
-      fetchLatestTopology();
-    }
-    return topology;
-  }
-
-  private synchronized void fetchLatestTopology() {
-    LOG.log(Level.INFO, "Fetching topology from state manager: {0}", topologyName);
-    this.topology = stateManagerAdaptor.getPhysicalPlan(topologyName).getTopology();
-    if (topology == null) {
-      throw new InvalidStateException(topologyName, "Failed to fetch topology info");
-    }
-  }
-
-  /**
-   * Invalidates cached topology instance on receiving update notification
-   */
-  @Override
-  public synchronized void onEvent(TopologyUpdate event) {
-    LOG.info("Received topology update event, invalidating cached topology: " + event);
-    this.topology = null;
+    return physicalPlanProvider.get().getTopology();
   }
 
   /**
@@ -89,13 +65,28 @@ public class TopologyProvider implements Provider<Topology>, EventHandler<Topolo
    *
    * @return array of all bolt names
    */
-  public String[] getBoltNames() {
+  public Collection<String> getBoltNames() {
     Topology localTopology = get();
     ArrayList<String> boltNames = new ArrayList<>();
     for (TopologyAPI.Bolt bolt : localTopology.getBoltsList()) {
       boltNames.add(bolt.getComp().getName());
     }
 
-    return boltNames.toArray(new String[boltNames.size()]);
+    return boltNames;
+  }
+
+  /**
+   * A utility method to extract spout component names from the topology.
+   *
+   * @return array of all spout names
+   */
+  public Collection<String> getSpoutNames() {
+    Topology localTopology = get();
+    ArrayList<String> spoutNames = new ArrayList<>();
+    for (TopologyAPI.Bolt spout : localTopology.getBoltsList()) {
+      spoutNames.add(spout.getComp().getName());
+    }
+
+    return spoutNames;
   }
 }

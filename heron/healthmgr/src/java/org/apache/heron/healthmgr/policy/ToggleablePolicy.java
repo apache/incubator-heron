@@ -77,20 +77,22 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   public Collection<Measurement> executeSensors() {
     for (TopologyAPI.Config.KeyValue kv
         : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
-      LOG.fine("kv " + kv.getKey() + ":" + kv.getValue());
-      if (kv.getKey().equals(policyIdRuntime)) {
-        try {
-          PolicyMode val = PolicyMode.valueOf(kv.getValue());
-          if (!policyMode.equals(val)) {
-            policyMode = val;
-            LOG.info("policy " + policyId + " status changed to " + policyMode);
-          } else {
-            LOG.fine("policy " + policyId + " status remains same " + policyMode);
+      if (kv.getKey().endsWith(":runtime")) {
+        LOG.fine("kv:runtime " + kv.getKey() + " -> " + kv.getValue());
+        if (kv.getKey().equals(policyIdRuntime)) {
+          try {
+            PolicyMode val = PolicyMode.valueOf(kv.getValue());
+            if (!policyMode.equals(val)) {
+              policyMode = val;
+              LOG.info("policy " + policyId + " status changed to " + policyMode);
+            } else {
+              LOG.fine("policy " + policyId + " status remains same " + policyMode);
+            }
+            break;
+          } catch (IllegalArgumentException e) {
+            LOG.warning("policy " + policyId + " status does not change " + policyMode
+                + "; unknown input " + kv.getValue());
           }
-          break;
-        } catch (IllegalArgumentException e) {
-          LOG.warning("policy " + policyId + " status does not change " + policyMode
-              + "; unknown input " + kv.getValue());
         }
       }
     }
