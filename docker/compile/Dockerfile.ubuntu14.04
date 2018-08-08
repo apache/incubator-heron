@@ -4,6 +4,11 @@ FROM ubuntu:14.04
 ENV TARGET_PLATFORM ubuntu
 ENV bazelVersion 0.14.1
 
+RUN apt-get update && apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:george-edison55/cmake-3.x
+RUN add-apt-repository ppa:openjdk-r/ppa
+
 RUN apt-get update && apt-get -y install \
       automake \
       build-essential \
@@ -14,17 +19,12 @@ RUN apt-get update && apt-get -y install \
       python \
       python2.7-dev \
       python-software-properties \
-      software-properties-common \
       python-setuptools \
       zip \
       unzip \
-      wget
-
-RUN add-apt-repository ppa:george-edison55/cmake-3.x && apt-get -y update && \
-      apt-get -y install cmake
-
-RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update
-RUN apt-get -y install openjdk-8-jdk
+      wget \
+      cmake \
+      openjdk-8-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 

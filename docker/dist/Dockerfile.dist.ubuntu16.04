@@ -7,7 +7,7 @@ RUN apt-get -y install software-properties-common ; apt-get clean all
 RUN apt-get -y install curl ; apt-get clean all
 RUN apt-get -y install supervisor; apt-get clean all
 
-RUN apt-get -y install openjdk-8-jdk; apt-get clean all
+RUN apt-get update && apt-get -y install openjdk-8-jdk-headless; apt-get clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f

@@ -9,7 +9,7 @@ RUN apt-get -y update && apt-get -y install \
     apt-get clean all
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-8-jdk && apt-get clean all
+    apt-get -y install openjdk-8-jdk-headless && apt-get clean all
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f
