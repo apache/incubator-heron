@@ -44,6 +44,7 @@ import org.apache.heron.api.generated.TopologyAPI.Topology;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.healthmgr.common.HealthManagerEvents.TopologyUpdate;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 import org.apache.heron.proto.scheduler.Scheduler;
 import org.apache.heron.proto.system.PackingPlans;
@@ -62,7 +63,7 @@ import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BA
 public class ScaleUpResolver implements IResolver {
   private static final Logger LOG = Logger.getLogger(ScaleUpResolver.class.getName());
 
-  private TopologyProvider topologyProvider;
+  private PhysicalPlanProvider physicalPlanProvider;
   private PackingPlanProvider packingPlanProvider;
   private ISchedulerClient schedulerClient;
   private EventManager eventManager;
@@ -70,12 +71,12 @@ public class ScaleUpResolver implements IResolver {
   private ExecutionContext context;
 
   @Inject
-  public ScaleUpResolver(TopologyProvider topologyProvider,
+  public ScaleUpResolver(PhysicalPlanProvider physicalPlanProvider,
                          PackingPlanProvider packingPlanProvider,
                          ISchedulerClient schedulerClient,
                          EventManager eventManager,
                          Config config) {
-    this.topologyProvider = topologyProvider;
+    this.physicalPlanProvider = physicalPlanProvider;
     this.packingPlanProvider = packingPlanProvider;
     this.schedulerClient = schedulerClient;
     this.eventManager = eventManager;
@@ -194,7 +195,7 @@ public class ScaleUpResolver implements IResolver {
     // Create an instance of the packing class
     IRepacking packing = getRepackingClass(Context.repackingClass(config));
 
-    Topology topology = topologyProvider.get();
+    Topology topology = physicalPlanProvider.get().getTopology();
     try {
       packing.initialize(config, topology);
       return packing.repack(currentPackingPlan, componentDeltas);

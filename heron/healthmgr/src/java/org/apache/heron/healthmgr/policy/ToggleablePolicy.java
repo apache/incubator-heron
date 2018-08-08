@@ -35,6 +35,7 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.common.TopologyProvider;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
@@ -48,7 +49,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   private static final Logger LOG =
       Logger.getLogger(ToggleablePolicy.class.getName());
 
-  protected TopologyProvider topologyProvider;
+  protected PhysicalPlanProvider physicalPlanProvider;
   protected String policyId;
   private String policyIdRuntime;
   protected HealthPolicyConfig policyConfig;
@@ -64,8 +65,8 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   public ToggleablePolicy(
       @Named(CONF_POLICY_ID) String policyId,
       HealthPolicyConfig policyConfig,
-      TopologyProvider topologyProvider) {
-    this.topologyProvider = topologyProvider;
+      PhysicalPlanProvider physicalPlanProvider) {
+    this.physicalPlanProvider = physicalPlanProvider;
     this.policyId = policyId;
     this.policyConfig = policyConfig;
 
@@ -76,7 +77,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
   @Override
   public Collection<Measurement> executeSensors() {
     for (TopologyAPI.Config.KeyValue kv
-        : topologyProvider.get().getTopologyConfig().getKvsList()) {
+        : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
       if (kv.getKey().endsWith(":runtime")) {
         LOG.fine("kv:runtime " + kv.getKey() + " -> " + kv.getValue());
         if (kv.getKey().equals(policyIdRuntime)) {

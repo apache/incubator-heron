@@ -20,14 +20,17 @@
 package org.apache.heron.healthmgr.common;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
 import org.apache.heron.proto.tmaster.TopologyMaster;
 import org.apache.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -85,4 +88,46 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     return physicalPlan;
   }
 
+  /**
+   * A utility method to extract bolt component names from the topology.
+   *
+   * @return array of all bolt names
+   */
+  protected Collection<String> getBoltNames(PhysicalPlan pp) {
+    TopologyAPI.Topology localTopology = pp.getTopology();
+    ArrayList<String> boltNames = new ArrayList<>();
+    for (TopologyAPI.Bolt bolt : localTopology.getBoltsList()) {
+      boltNames.add(bolt.getComp().getName());
+    }
+
+    return boltNames;
+  }
+  public Collection<String> getBoltNames() {
+    return getBoltNames(get());
+  }
+
+  /**
+   * A utility method to extract spout component names from the topology.
+   *
+   * @return array of all spout names
+   */
+  protected Collection<String> getSpoutNames(PhysicalPlan pp) {
+    TopologyAPI.Topology localTopology = pp.getTopology();
+    ArrayList<String> spoutNames = new ArrayList<>();
+    for (TopologyAPI.Spout spout : localTopology.getSpoutsList()) {
+      spoutNames.add(spout.getComp().getName());
+    }
+
+    return spoutNames;
+  }
+  public Collection<String> getSpoutNames() {
+    return getSpoutNames(get());
+  }
+
+  public Collection<String> getSpoutBoltNames() {
+    PhysicalPlan pp = get();
+    Collection<String> ret = getBoltNames(pp);
+    ret.addAll(getSpoutNames(pp));
+    return ret;
+  }
 }
