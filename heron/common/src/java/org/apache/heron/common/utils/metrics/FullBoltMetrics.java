@@ -52,8 +52,10 @@ public class FullBoltMetrics extends BoltMetrics {
   // Time in nano-seconds spending in execute() at every interval
   private final MultiCountMetric executeTimeNs;
   private final MultiCountMetric emitCount;
-  private final MultiCountMetric deserializationTimeNs;
-  private final MultiCountMetric serializationTimeNs;
+  private final MultiCountMetric totalDeserializationTimeNs;
+  private final MultiCountMetric totalSerializationTimeNs;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> averageSerializationTimeNs;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> averageDeserializationTimeNs;
 
   // The # of times back-pressure happens on outStreamQueue
   // so instance could not produce more tuples
@@ -71,8 +73,11 @@ public class FullBoltMetrics extends BoltMetrics {
     emitCount = new MultiCountMetric();
     outQueueFullCount = new CountMetric();
 
-    deserializationTimeNs = new MultiCountMetric();
-    serializationTimeNs = new MultiCountMetric();
+    totalDeserializationTimeNs = new MultiCountMetric();
+    totalSerializationTimeNs = new MultiCountMetric();
+
+    averageSerializationTimeNs = new MultiReducedMetric<>(new MeanReducer());
+    averageDeserializationTimeNs = new MultiReducedMetric<>(new MeanReducer());
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -91,8 +96,13 @@ public class FullBoltMetrics extends BoltMetrics {
     topologyContext.registerMetric("__emit-count", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric(
-        "__tuple-deserialization-time-ns", deserializationTimeNs, interval);
-    topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
+        "__tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__tuple-serialization-time-ns", totalSerializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__av-tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__av-tuple-serialization-time-ns", totalSerializationTimeNs, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -174,17 +184,20 @@ public class FullBoltMetrics extends BoltMetrics {
   }
 
   public void deserializeDataTuple(String streamId, String sourceComponent, long latency) {
-    deserializationTimeNs.scope(streamId).incrBy(latency);
+    totalDeserializationTimeNs.scope(streamId).incrBy(latency);
+    averageDeserializationTimeNs.scope(streamId).update(latency);
 
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
     String globalStreamId =
         new StringBuilder(sourceComponent).append("/").append(streamId).toString();
-    deserializationTimeNs.scope(globalStreamId).incrBy(latency);
+    totalDeserializationTimeNs.scope(globalStreamId).incrBy(latency);
+    averageDeserializationTimeNs.scope(globalStreamId).update(latency);
   }
 
   public void serializeDataTuple(String streamId, long latency) {
-    serializationTimeNs.scope(streamId).incrBy(latency);
+    totalSerializationTimeNs.scope(streamId).incrBy(latency);
+    averageSerializationTimeNs.scope(streamId).update(latency);
   }
 }
 
