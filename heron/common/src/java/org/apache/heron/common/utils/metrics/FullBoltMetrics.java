@@ -97,10 +97,12 @@ public class FullBoltMetrics extends BoltMetrics {
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric(
         "__tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
-    topologyContext.registerMetric("__tuple-serialization-time-ns", totalSerializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__tuple-serialization-time-ns", totalSerializationTimeNs, interval);
     topologyContext.registerMetric(
         "__av-tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
-    topologyContext.registerMetric("__av-tuple-serialization-time-ns", totalSerializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__av-tuple-serialization-time-ns", totalSerializationTimeNs, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
