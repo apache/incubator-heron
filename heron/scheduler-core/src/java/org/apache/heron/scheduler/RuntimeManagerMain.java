@@ -334,7 +334,7 @@ public class RuntimeManagerMain {
       System.exit(200);
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      LOG.log(Level.FINE, "Exception when submitting topology", e);
+      LOG.log(Level.FINE, "Exception when executing command " + commandOption, e);
       System.out.println(e.getMessage());
       // Exit with status code 100 to indicate that error has happened on user-land
       // SUPPRESS CHECKSTYLE RegexpSinglelineJava
