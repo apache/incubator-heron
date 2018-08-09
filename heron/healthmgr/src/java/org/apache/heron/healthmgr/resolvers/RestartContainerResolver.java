@@ -44,8 +44,8 @@ import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_TOPOLOGY_NAME;
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_INSTANCE_BACK_PRESSURE;
 
 public class RestartContainerResolver implements IResolver {
-  public static final String RESTART_CONTAINER_RESOLVER = "RestartContainerResolver";
-  private static final Logger LOG = Logger.getLogger(RestartContainerResolver.class.getName());
+  public static final String RESTART_CONTAINER_RESOLVER = RestartContainerResolver.class.getName();
+  private static final Logger LOG = Logger.getLogger(RESTART_CONTAINER_RESOLVER);
 
   private final EventManager eventManager;
   private final String topologyName;

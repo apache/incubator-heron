@@ -75,6 +75,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   @Override
   public Collection<Measurement> executeSensors() {
+    LOG.info("----------------------------------");
     try {
       for (TopologyAPI.Config.KeyValue kv
           : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
