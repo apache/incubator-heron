@@ -216,7 +216,8 @@ public class RuntimeManagerRunner {
 
       if (newParallelism != null && !newParallelism.isEmpty()) {
         changeRequests = parseNewParallelismParam(newParallelism);
-      } else if (newContainerNumber != null && !newContainerNumber.isEmpty()) {
+      }
+      if (newContainerNumber != null && !newContainerNumber.isEmpty()) {
         newContainers = Integer.parseInt(newContainerNumber);
       }
       updatePackingPlan(topologyName, newContainers, changeRequests);
