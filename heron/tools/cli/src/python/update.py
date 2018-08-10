@@ -37,6 +37,7 @@ def create_parser(subparsers):
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
       + "[--component-parallelism <name:value>] "
+      + "[--container-number value] "
       + "[--runtime-config [component:]<name:value>]",
       add_help=True)
 
@@ -81,6 +82,21 @@ def create_parser(subparsers):
       help='Runtime configurations for topology and components '
       + 'colon-delimited: [component:]<name>:<value>')
 
+  def container_number_type(value):
+    pattern = re.compile(r"^\d+$")
+    if not pattern.match(value):
+      raise argparse.ArgumentTypeError(
+          "Invalid syntax for container number (value): %s"
+          % value)
+    return value
+
+  parser.add_argument(
+      '--container-number',
+      action='append',
+      type=container_number_type,
+      required=False,
+      help='Number of containers <value>')
+
   parser.set_defaults(subcommand='update')
   return parser
 
@@ -89,19 +105,23 @@ def build_extra_args_dict(cl_args):
   # Check parameters
   component_parallelism = cl_args['component_parallelism']
   runtime_configs = cl_args['runtime_config']
-  # Users need to provide either component-parallelism or runtime-config
-  if component_parallelism and runtime_configs:
+  container_number = cl_args['container_number']
+  # Users need to provide either (component-parallelism || container_number) or runtime-config
+  if (component_parallelism and runtime_configs) or (container_number and runtime_configs):
     raise Exception(
-        "component-parallelism and runtime-config can't be updated at the same time")
+        "(component-parallelism or container_num) and runtime-config " +
+        "can't be updated at the same time")
 
   dict_extra_args = {}
   if component_parallelism:
     dict_extra_args.update({'component_parallelism': component_parallelism})
   elif runtime_configs:
     dict_extra_args.update({'runtime_config': runtime_configs})
+  elif container_number:
+    dict_extra_args.update({'container_number': container_number})
   else:
     raise Exception(
-        "Missing arguments --component-parallelism or --runtime-config")
+        "Missing arguments --component-parallelism or --runtime-config or --container-number")
 
   if cl_args['dry_run']:
     dict_extra_args.update({'dry_run': True})
@@ -120,6 +140,9 @@ def convert_args_dict_to_list(dict_extra_args):
   if 'runtime_config' in dict_extra_args:
     list_extra_args += ["--runtime_config",
                         ','.join(dict_extra_args['runtime_config'])]
+  if 'container_number' in dict_extra_args:
+    list_extra_args += ["--container-number",
+                        ','.join(dict_extra_args['container_number'])]
   if 'dry_run' in dict_extra_args and dict_extra_args['dry_run']:
     list_extra_args += ['--dry_run']
   if 'dry_run_format' in dict_extra_args:

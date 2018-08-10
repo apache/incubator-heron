@@ -201,6 +201,14 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   }
 
   @Override
+  public PackingPlan repack(PackingPlan currentPackingPlan, int containers,
+                            Map<String, Integer> componentChanges)
+      throws PackingException, UnsupportedOperationException {
+    throw new UnsupportedOperationException("FirstFitDecreasingPacking does not currently support"
+        + " creating a new packing plan with a new number of containers.");
+  }
+
+  @Override
   public void close() {
 
   }
