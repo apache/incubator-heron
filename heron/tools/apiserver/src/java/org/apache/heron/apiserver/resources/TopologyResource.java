@@ -117,6 +117,7 @@ public class TopologyResource extends HeronResource {
   private static final String PARAM_DRY_RUN = "dry_run";
   private static final String PARAM_DRY_RUN_FORMAT = "dry_run_format";
   private static final String DEFAULT_DRY_RUN_FORMAT = DryRunFormatType.TABLE.toString();
+  private static final String PARAM_CONTAINER_NUMBER = "container_number";
 
   // path format /topologies/{cluster}/{role}/{environment}/{name}
   private static final String TOPOLOGY_PATH_FORMAT = "/topologies/%s/%s/%s/%s";
@@ -340,7 +341,7 @@ public class TopologyResource extends HeronResource {
   @Path("/{cluster}/{role}/{environment}/{name}/update")
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings({"IllegalCatch", "JavadocMethod"})
-  public Response update(
+  public Response update( /// add code here
       final @PathParam("cluster") String cluster,
       final @PathParam("role") String role,
       final @PathParam("environment") String environment,
@@ -355,9 +356,11 @@ public class TopologyResource extends HeronResource {
       } else {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
         List<String> runtimeConfigs = params.get(PARAM_RUNTIME_CONFIG_KEY);
+        String containers = params.get(PARAM_CONTAINER_NUMBER);
 
-        if (components != null && !components.isEmpty()) {
-          return updateComponentParallelism(cluster, role, environment, name, params, components);
+        if ((components != null && !components.isEmpty()) || (containers != null)) {
+          return updateComponentParallelism(cluster, role, environment, name, params,
+              components, containers);
         } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
           return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
@@ -385,13 +388,15 @@ public class TopologyResource extends HeronResource {
       String environment,
       String name,
       MultivaluedMap<String, String> params,
-      List<String> components) {
+      List<String> components,
+      String containers) {
     final List<Pair<String, Object>> keyValues = new ArrayList<>(
         Arrays.asList(
             Pair.create(Key.CLUSTER.value(), cluster),
             Pair.create(Key.ROLE.value(), role),
             Pair.create(Key.ENVIRON.value(), environment),
             Pair.create(Key.TOPOLOGY_NAME.value(), name),
+            Pair.create(Keys.PARAM_CONTAINER_NUMBER, containers),
             Pair.create(Keys.PARAM_COMPONENT_PARALLELISM,
                 String.join(",", components))
         )
