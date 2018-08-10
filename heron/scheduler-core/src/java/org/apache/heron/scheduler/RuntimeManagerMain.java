@@ -119,6 +119,13 @@ public class RuntimeManagerMain {
         .argName("component parallelism")
         .build();
 
+    Option containerNumber = Option.builder("cn")
+        .desc("Container Number for updation: <value>")
+        .longOpt("container_number")
+        .hasArgs()
+        .argName("container number")
+        .build();
+
     Option runtimeConfig = Option.builder("rc")
         .desc("Runtime config to update: [comp:]<name>:<value>,[comp:]<name>:<value>,...")
         .longOpt("runtime_config")
@@ -193,6 +200,7 @@ public class RuntimeManagerMain {
     options.addOption(heronHome);
     options.addOption(containerId);
     options.addOption(componentParallelism);
+    options.addOption(containerNumber);
     options.addOption(runtimeConfig);
     options.addOption(dryRun);
     options.addOption(dryRunFormat);
