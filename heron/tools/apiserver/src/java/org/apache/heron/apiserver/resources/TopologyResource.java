@@ -341,7 +341,7 @@ public class TopologyResource extends HeronResource {
   @Path("/{cluster}/{role}/{environment}/{name}/update")
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings({"IllegalCatch", "JavadocMethod"})
-  public Response update( /// add code here
+  public Response update(/// add code here
       final @PathParam("cluster") String cluster,
       final @PathParam("role") String role,
       final @PathParam("environment") String environment,
@@ -356,11 +356,15 @@ public class TopologyResource extends HeronResource {
       } else {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
         List<String> runtimeConfigs = params.get(PARAM_RUNTIME_CONFIG_KEY);
-        String containers = params.get(PARAM_CONTAINER_NUMBER);
+        List<String> containersList = params.get(PARAM_CONTAINER_NUMBER);
+        if (containersList.size() > 1) {
+          Utils.createMessage("only one value should be specified for container_number. "
+              + "picking first value.");
+        }
 
-        if ((components != null && !components.isEmpty()) || (containers != null)) {
+        if ((components != null && !components.isEmpty()) || (containersList.get(0) != null)) {
           return updateComponentParallelism(cluster, role, environment, name, params,
-              components, containers);
+              components, containersList.get(0));
         } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
           return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
@@ -390,6 +394,7 @@ public class TopologyResource extends HeronResource {
       MultivaluedMap<String, String> params,
       List<String> components,
       String containers) {
+
     final List<Pair<String, Object>> keyValues = new ArrayList<>(
         Arrays.asList(
             Pair.create(Key.CLUSTER.value(), cluster),
