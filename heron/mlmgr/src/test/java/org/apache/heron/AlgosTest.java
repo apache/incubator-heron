@@ -1,4 +1,4 @@
-package org.apache.samoa;
+package org.apache.heron;
 
 /*
  * #%L
