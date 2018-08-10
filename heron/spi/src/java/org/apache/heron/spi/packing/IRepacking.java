@@ -54,6 +54,20 @@ public interface IRepacking extends AutoCloseable {
                      Map<String, Integer> componentChanges) throws PackingException;
 
   /**
+   * Generates a new packing given an existing packing and component changes
+   * Packing algorithm output generates instance id and container id.
+   * @param currentPackingPlan Existing packing plan
+   * @param componentChanges Map &lt; componentName, new component parallelism &gt;
+   * that contains the parallelism for each component whose parallelism has changed.
+   * @param containers &lt; the new number of containers for the topology
+   * specified by the user
+   * @return PackingPlan describing the new packing plan.
+   * @throws PackingException if the packing plan can not be generated
+   */
+  PackingPlan repack(PackingPlan currentPackingPlan, int containers,
+                     Map<String, Integer> componentChanges) throws PackingException;
+
+  /**
    * This is to for disposing or cleaning up any internal state.
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this

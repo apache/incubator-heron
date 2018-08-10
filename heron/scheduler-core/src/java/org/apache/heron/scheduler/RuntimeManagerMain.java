@@ -501,6 +501,13 @@ public class RuntimeManagerMain {
       config.put(
           RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY, componentParallelism);
     }
+
+    String containerNumber = cmd.getOptionValue("container_number");
+    if (containerNumber != null && !containerNumber.isEmpty()) {
+      config.put(
+          RuntimeManagerRunner.RUNTIME_MANAGER_CONTAINER_NUMBER_KEY, containerNumber);
+    }
+
     String runtimeConfigurations = cmd.getOptionValue("runtime_config");
     if (runtimeConfigurations != null && !runtimeConfigurations.isEmpty()) {
       config.put(

@@ -414,4 +414,19 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     return packInternal(newNumContainer, currentComponentParallelism);
   }
+
+  @Override
+  public PackingPlan repack(PackingPlan currentPackingPlan, int containers, Map<String, Integer>
+      componentChanges) throws PackingException {
+    if (containers == currentPackingPlan.getContainers().size()) {
+      return repack(currentPackingPlan, componentChanges);
+    }
+    Map<String, Integer> currentComponentParallelism = currentPackingPlan.getComponentCounts();
+
+    for (Map.Entry<String, Integer> e : componentChanges.entrySet()) {
+      Integer newParallelism = currentComponentParallelism.get(e.getKey()) + e.getValue();
+      currentComponentParallelism.put(e.getKey(), newParallelism);
+    }
+    return packInternal(containers, currentComponentParallelism);
+  }
 }
