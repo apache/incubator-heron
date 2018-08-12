@@ -341,7 +341,7 @@ public class TopologyResource extends HeronResource {
   @Path("/{cluster}/{role}/{environment}/{name}/update")
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings({"IllegalCatch", "JavadocMethod"})
-  public Response update(/// add code here
+  public Response update(
       final @PathParam("cluster") String cluster,
       final @PathParam("role") String role,
       final @PathParam("environment") String environment,
