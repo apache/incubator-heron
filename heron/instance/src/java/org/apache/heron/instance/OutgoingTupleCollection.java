@@ -35,6 +35,7 @@ import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.FileUtils;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
+import org.apache.heron.common.utils.metrics.ComponentMetrics;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.common.utils.misc.SerializeDeSerializeHelper;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
@@ -71,12 +72,16 @@ public class OutgoingTupleCollection {
 
   private final ReentrantLock lock;
 
+  protected final ComponentMetrics metrics;
+
   public OutgoingTupleCollection(
       PhysicalPlanHelper helper,
       Communicator<Message> outQueue,
-      ReentrantLock lock) {
+      ReentrantLock lock,
+      ComponentMetrics metrics) {
     this.outQueue = outQueue;
     this.helper = helper;
+    this.metrics = metrics;
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
@@ -238,6 +243,7 @@ public class OutgoingTupleCollection {
       bldr.setData(currentDataTuple);
 
       pushTupleToQueue(bldr, outQueue);
+      metrics.addTupleToQueue();
 
       currentDataTuple = null;
     }

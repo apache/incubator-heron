@@ -28,7 +28,7 @@ import org.apache.heron.classification.InterfaceStability;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public interface ComponentMetrics {
-
   void serializeDataTuple(String streamId, long latency);
   void emittedTuple(String streamId);
+  void addTupleToQueue();
 }
