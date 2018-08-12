@@ -46,6 +46,7 @@ public class GatewayMetrics {
   private final CountMetric sentMetricsSize;
   private final CountMetric sentMetricsCount;
   private final CountMetric sentExceptionsCount;
+  private final CountMetric outStreamQueueSizeCumulative;
 
   // The # of items in inStreamQueue
   private final ReducedMetric<MeanReducerState, Number, Double> inStreamQueueSize;
@@ -77,6 +78,7 @@ public class GatewayMetrics {
     outStreamQueueExpectedCapacity = new ReducedMetric<>(new MeanReducer());
 
     inQueueFullCount = new CountMetric();
+    outStreamQueueSizeCumulative = new CountMetric();
   }
 
   /**
@@ -122,6 +124,9 @@ public class GatewayMetrics {
     metricsCollector.registerMetric("__gateway-out-stream-queue-size",
         outStreamQueueSize,
         interval);
+    metricsCollector.registerMetric("__gateway-out-stream-queue-size-cumulative",
+        outStreamQueueSizeCumulative,
+        interval);
     metricsCollector.registerMetric("__gateway-in-stream-queue-expected-capacity",
         inStreamQueueExpectedCapacity,
         interval);
@@ -165,6 +170,7 @@ public class GatewayMetrics {
   }
 
   public void setOutStreamQueueSize(long size) {
+    outStreamQueueSizeCumulative.incrBy(size);
     outStreamQueueSize.update(size);
   }
 
