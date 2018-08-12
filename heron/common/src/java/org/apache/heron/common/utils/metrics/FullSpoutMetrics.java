@@ -53,7 +53,7 @@ public class FullSpoutMetrics extends SpoutMetrics {
   private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
   private final MultiCountMetric serializationTimeNs;
-
+  private final CountMetric tupleAddedToQueue;
   // The # of times back-pressure happens on outStreamQueue so instance could not
   // produce more tuples
   private final CountMetric outQueueFullCount;
@@ -73,6 +73,7 @@ public class FullSpoutMetrics extends SpoutMetrics {
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
     serializationTimeNs = new MultiCountMetric();
+    tupleAddedToQueue = new CountMetric();
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -92,6 +93,8 @@ public class FullSpoutMetrics extends SpoutMetrics {
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
     topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
+    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
+        tupleAddedToQueue, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -133,6 +136,10 @@ public class FullSpoutMetrics extends SpoutMetrics {
   public void nextTuple(long latency) {
     nextTupleLatency.update(latency);
     nextTupleCount.incr();
+  }
+
+  public void addTupleToQueue() {
+    tupleAddedToQueue.incr();
   }
 
   public void updateOutQueueFullCount() {

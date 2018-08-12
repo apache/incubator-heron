@@ -52,6 +52,7 @@ public class FullBoltMetrics extends BoltMetrics {
   // Time in nano-seconds spending in execute() at every interval
   private final MultiCountMetric executeTimeNs;
   private final MultiCountMetric emitCount;
+  private final CountMetric tupleAddedToQueue;
   private final MultiCountMetric totalDeserializationTimeNs;
   private final MultiCountMetric totalSerializationTimeNs;
   private final MultiReducedMetric<MeanReducerState, Number, Double> averageSerializationTimeNs;
@@ -60,7 +61,6 @@ public class FullBoltMetrics extends BoltMetrics {
   // The # of times back-pressure happens on outStreamQueue
   // so instance could not produce more tuples
   private final CountMetric outQueueFullCount;
-
 
   public FullBoltMetrics() {
     ackCount = new MultiCountMetric();
@@ -72,6 +72,7 @@ public class FullBoltMetrics extends BoltMetrics {
     executeTimeNs = new MultiCountMetric();
     emitCount = new MultiCountMetric();
     outQueueFullCount = new CountMetric();
+    tupleAddedToQueue = new CountMetric();
 
     totalDeserializationTimeNs = new MultiCountMetric();
     totalSerializationTimeNs = new MultiCountMetric();
@@ -103,6 +104,8 @@ public class FullBoltMetrics extends BoltMetrics {
         "__av-tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
     topologyContext.registerMetric(
         "__av-tuple-serialization-time-ns", totalSerializationTimeNs, interval);
+    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
+        tupleAddedToQueue, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -177,6 +180,10 @@ public class FullBoltMetrics extends BoltMetrics {
 
   public void emittedTuple(String streamId) {
     emitCount.scope(streamId).incr();
+  }
+
+  public void addTupleToQueue() {
+    tupleAddedToQueue.incr();
   }
 
   public void updateOutQueueFullCount() {

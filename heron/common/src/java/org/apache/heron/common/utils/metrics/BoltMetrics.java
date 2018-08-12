@@ -80,7 +80,7 @@ public class BoltMetrics implements ComponentMetrics {
     topologyContext.registerMetric("__execute-latency/default", executeLatency, interval);
     topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
-    topologyContext.registerMetric("__data_tuple-added-to-outgoing-queue/default", tupleAddedToQueue, interval);
+    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default", tupleAddedToQueue, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
