@@ -113,13 +113,21 @@ def build_extra_args_dict(cl_args):
         "can't be updated at the same time")
 
   dict_extra_args = {}
+
+  nothing_set = True
   if component_parallelism:
     dict_extra_args.update({'component_parallelism': component_parallelism})
-  elif runtime_configs:
-    dict_extra_args.update({'runtime_config': runtime_configs})
-  elif container_number:
+    nothing_set = False
+
+  if container_number:
     dict_extra_args.update({'container_number': container_number})
-  else:
+    nothing_set = False
+
+  if runtime_configs:
+    dict_extra_args.update({'runtime_config': runtime_configs})
+    nothing_set = False
+
+  if nothing_set:
     raise Exception(
         "Missing arguments --component-parallelism or --runtime-config or --container-number")
 
