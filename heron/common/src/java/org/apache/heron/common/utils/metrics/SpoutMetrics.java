@@ -86,7 +86,8 @@ public class SpoutMetrics implements ComponentMetrics {
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
-    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default", tupleAddedToQueue, interval);
+    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
+        tupleAddedToQueue, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -117,7 +118,7 @@ public class SpoutMetrics implements ComponentMetrics {
     emitCount.incr();
   }
 
-  public void addTupleToQueue() {
+  public void addTupleToQueue(int size) {
     tupleAddedToQueue.incr();
   }
 

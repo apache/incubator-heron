@@ -182,7 +182,7 @@ public class FullBoltMetrics extends BoltMetrics {
     emitCount.scope(streamId).incr();
   }
 
-  public void addTupleToQueue() {
+  public void addTupleToQueue(int size) {
     tupleAddedToQueue.incr();
   }
 
