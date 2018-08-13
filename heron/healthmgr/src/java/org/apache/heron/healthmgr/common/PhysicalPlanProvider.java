@@ -21,9 +21,8 @@ package org.apache.heron.healthmgr.common;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -48,13 +47,30 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
   private final SchedulerStateManagerAdaptor stateManagerAdaptor;
   private final String topologyName;
 
-  private PhysicalPlan cachedPhysicalPlan = null;
+  // Cache the physical plan between two successful get() invocations.
+  private PhysicalPlan physicalPlan = null;
 
   @Inject
   public PhysicalPlanProvider(SchedulerStateManagerAdaptor stateManagerAdaptor,
                               @Named(CONF_TOPOLOGY_NAME) String topologyName) {
     this.stateManagerAdaptor = stateManagerAdaptor;
     this.topologyName = topologyName;
+  }
+
+  protected PhysicalPlan ParseResponseToPhysicalPlan(byte[] responseData) {
+    // byte to base64 string
+    String encodedString = new String(responseData);
+    LOG.fine("tmaster returns physical plan in base64 str: " + encodedString);
+    // base64 string to proto bytes
+    byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+    // construct proto obj from bytes
+    PhysicalPlan physicalPlan = null;
+    try {
+      physicalPlan = PhysicalPlan.parseFrom(decodedBytes);
+    } catch (Exception e) {
+      throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
+    }
+    return physicalPlan;
   }
 
   @Override
@@ -72,40 +88,34 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     HttpURLConnection con = NetworkUtils.getHttpConnection(url);
     NetworkUtils.sendHttpGetRequest(con);
     byte[] responseData = NetworkUtils.readHttpResponse(con);
-    // byte to base64 string
-    String encodedString = new String(responseData);
-    LOG.fine("tmaster returns physical plan in base64 str: " + encodedString);
-    // base64 string to proto bytes
-    byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-    // construct proto obj from bytes
-    PhysicalPlan physicalPlan = null;
-    try {
-      physicalPlan = PhysicalPlan.parseFrom(decodedBytes);
-    } catch (Exception e) {
-      throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
-    }
 
-    cachedPhysicalPlan = physicalPlan;
+    physicalPlan = ParseResponseToPhysicalPlan(responseData);
     return physicalPlan;
   }
 
-  public PhysicalPlan getCachedPhysicalPlan() {
+  /**
+   * try best effort to return a latest physical plan
+   * 1. refresh physical plan
+   * 2. if refreshing fails, return the last physical plan
+   * @return physical plan
+   */
+  public PhysicalPlan getPhysicalPlan() {
     try {
       get();
     } catch (InvalidStateException e) {
-      if (cachedPhysicalPlan == null) {
+      if (physicalPlan == null) {
         throw e;
       }
     }
-    return cachedPhysicalPlan;
+    return physicalPlan;
   }
 
   /**
    * A utility method to extract bolt component names from the topology.
    *
-   * @return array of all bolt names
+   * @return list of all bolt names
    */
-  protected Collection<String> getBoltNames(PhysicalPlan pp) {
+  public List<String> getBoltNames(PhysicalPlan pp) {
     TopologyAPI.Topology localTopology = pp.getTopology();
     ArrayList<String> boltNames = new ArrayList<>();
     for (TopologyAPI.Bolt bolt : localTopology.getBoltsList()) {
@@ -114,17 +124,18 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
 
     return boltNames;
   }
-  public Collection<String> getBoltNames() {
-    getCachedPhysicalPlan();
-    return getBoltNames(cachedPhysicalPlan);
+
+  public List<String> getBoltNames() {
+    PhysicalPlan pp = getPhysicalPlan();
+    return getBoltNames(pp);
   }
 
   /**
    * A utility method to extract spout component names from the topology.
    *
-   * @return array of all spout names
+   * @return list of all spout names
    */
-  protected Collection<String> getSpoutNames(PhysicalPlan pp) {
+  public List<String> getSpoutNames(PhysicalPlan pp) {
     TopologyAPI.Topology localTopology = pp.getTopology();
     ArrayList<String> spoutNames = new ArrayList<>();
     for (TopologyAPI.Spout spout : localTopology.getSpoutsList()) {
@@ -133,15 +144,10 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
 
     return spoutNames;
   }
-  public Collection<String> getSpoutNames() {
-    getCachedPhysicalPlan();
-    return getSpoutNames(cachedPhysicalPlan);
+
+  public List<String> getSpoutNames() {
+    PhysicalPlan pp = getPhysicalPlan();
+    return getSpoutNames(pp);
   }
 
-  public Collection<String> getSpoutBoltNames() {
-    getCachedPhysicalPlan();
-    Collection<String> ret = getBoltNames(cachedPhysicalPlan);
-    ret.addAll(getSpoutNames(cachedPhysicalPlan));
-    return ret;
-  }
 }
