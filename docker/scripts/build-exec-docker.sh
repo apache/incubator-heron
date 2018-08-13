@@ -70,7 +70,7 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> <output-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu14.04, ubuntu16.04, debian8, centos7"
+    echo "Platforms Supported: ubuntu14.04, ubuntu16.04, debian9, centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-exec-docker.sh ubuntu14.04 0.12.0 ."

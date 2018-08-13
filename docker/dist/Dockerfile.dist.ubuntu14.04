@@ -5,11 +5,10 @@ RUN apt-get -y update && apt-get -y install \
     unzip \
     software-properties-common \
     supervisor \
-    curl && \
-    apt-get clean all
+    curl
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get -y update && \
-    apt-get -y install openjdk-8-jdk-headless && apt-get clean all
+    apt-get -y install openjdk-8-jdk
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 RUN update-ca-certificates -f
