@@ -243,7 +243,6 @@ public class OutgoingTupleCollection {
       bldr.setData(currentDataTuple);
 
       pushTupleToQueue(bldr, outQueue);
-      //TODO: fix hack
       metrics.addTupleToQueue(currentDataTuple.getTuplesCount());
 
       currentDataTuple = null;
