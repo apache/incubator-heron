@@ -75,24 +75,33 @@ public class ToggleablePolicy extends HealthPolicyImpl {
 
   @Override
   public Collection<Measurement> executeSensors() {
-    for (TopologyAPI.Config.KeyValue kv
-        : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
-      LOG.fine("kv " + kv.getKey() + ":" + kv.getValue());
-      if (kv.getKey().equals(policyIdRuntime)) {
-        try {
-          PolicyMode val = PolicyMode.valueOf(kv.getValue());
-          if (!policyMode.equals(val)) {
-            policyMode = val;
-            LOG.info("policy " + policyId + " status changed to " + policyMode);
-          } else {
-            LOG.fine("policy " + policyId + " status remains same " + policyMode);
+    LOG.fine("--------- policy: " + policyId + " ---------");
+    try {
+      for (TopologyAPI.Config.KeyValue kv
+          : physicalPlanProvider.get().getTopology().getTopologyConfig().getKvsList()) {
+        if (kv.getKey().endsWith(":runtime")) {
+          LOG.fine("kv:runtime " + kv.getKey() + " -> " + kv.getValue());
+          if (kv.getKey().equals(policyIdRuntime)) {
+            try {
+              PolicyMode val = PolicyMode.valueOf(kv.getValue());
+              if (!policyMode.equals(val)) {
+                policyMode = val;
+                LOG.info("policy " + policyId + " status changed to " + policyMode);
+              } else {
+                LOG.fine("policy " + policyId + " status remains same " + policyMode);
+              }
+              break;
+            } catch (IllegalArgumentException e) {
+              LOG.warning("policy " + policyId + " status does not change " + policyMode
+                  + "; unknown input " + kv.getValue());
+            }
           }
-          break;
-        } catch (IllegalArgumentException e) {
-          LOG.warning("policy " + policyId + " status does not change " + policyMode
-              + "; unknown input " + kv.getValue());
         }
       }
+    } catch (Exception e) {
+      LOG.warning(
+          "failed to fetch the latest physical plan and skip policy toggle update: "
+              + e.toString());
     }
 
     if (policyMode.equals(PolicyMode.activated)) {

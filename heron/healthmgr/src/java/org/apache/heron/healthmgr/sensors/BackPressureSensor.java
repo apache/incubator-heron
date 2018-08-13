@@ -33,7 +33,7 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
 
@@ -42,20 +42,20 @@ public class BackPressureSensor extends BaseSensor {
 
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
-  private final TopologyProvider topologyProvider;
+  private final PhysicalPlanProvider physicalPlanProvider;
   private HealthManagerMetrics publishingMetrics;
 
   @Inject
   public BackPressureSensor(PackingPlanProvider packingPlanProvider,
-                            TopologyProvider topologyProvider,
+                            PhysicalPlanProvider physicalPlanProvider,
                             HealthPolicyConfig policyConfig,
                             MetricsProvider metricsProvider,
                             HealthManagerMetrics publishingMetrics) {
     super(policyConfig, METRIC_BACK_PRESSURE.text(), BackPressureSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
-    this.topologyProvider = topologyProvider;
     this.metricsProvider = metricsProvider;
     this.publishingMetrics = publishingMetrics;
+    this.physicalPlanProvider = physicalPlanProvider;
   }
 
   /**
@@ -70,7 +70,7 @@ public class BackPressureSensor extends BaseSensor {
     Collection<Measurement> result = new ArrayList<>();
     Instant now = context.checkpoint();
 
-    String[] boltComponents = topologyProvider.getBoltNames();
+    List<String> boltComponents = physicalPlanProvider.getBoltNames();
     Duration duration = getDuration();
     for (String component : boltComponents) {
       String[] boltInstanceNames = packingPlanProvider.getBoltInstanceNames(component);
