@@ -364,7 +364,7 @@ public class TopologyResource extends HeronResource {
 
         if ((components != null && !components.isEmpty()) || (containersList.get(0) != null)) {
           return updateComponentParallelism(cluster, role, environment, name, params,
-              components, containersList.get(0));
+              components, (containersList.size() > 0 ? containersList.get(0) : null));
         } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
           return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
