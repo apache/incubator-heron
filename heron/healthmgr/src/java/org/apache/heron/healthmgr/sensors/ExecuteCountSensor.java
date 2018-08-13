@@ -30,27 +30,27 @@ import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
 
 public class ExecuteCountSensor extends BaseSensor {
-  private final TopologyProvider topologyProvider;
+  private final PhysicalPlanProvider physicalPlanProvider;
   private final MetricsProvider metricsProvider;
   private Instant now;
 
   @Inject
-  ExecuteCountSensor(TopologyProvider topologyProvider,
+  ExecuteCountSensor(PhysicalPlanProvider physicalPlanProvider,
                      HealthPolicyConfig policyConfig,
                      MetricsProvider metricsProvider) {
     super(policyConfig, METRIC_EXE_COUNT.text(), ExecuteCountSensor.class.getSimpleName());
-    this.topologyProvider = topologyProvider;
+    this.physicalPlanProvider = physicalPlanProvider;
     this.metricsProvider = metricsProvider;
   }
 
   @Override
   public Collection<Measurement> fetch() {
-    List<String> bolts = Arrays.asList(topologyProvider.getBoltNames());
+    List<String> bolts = physicalPlanProvider.getBoltNames();
     now = context.checkpoint();
     return metricsProvider.getMeasurements(now, getDuration(), getMetricTypes(), bolts);
   }
