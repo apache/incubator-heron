@@ -96,6 +96,11 @@ public class FullSpoutMetrics extends SpoutMetrics {
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
     topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs,
         interval);
+
+    // The following metrics measure the rate at which tuples are added to the outgoing
+    // queues at spouts and the sizes of these queues. This allows us to measure whether
+    // the gateway thread pulls out tuples from the queue fast enough, thereby preventing
+    // the spout from becoming a bottleneck.
     topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
         tupleAddedToQueue, interval);
     topologyContext.registerMetric("__average-tuple-size-added-queue/default",
