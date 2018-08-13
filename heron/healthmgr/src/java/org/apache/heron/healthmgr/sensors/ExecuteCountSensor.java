@@ -50,7 +50,7 @@ public class ExecuteCountSensor extends BaseSensor {
 
   @Override
   public Collection<Measurement> fetch() {
-    Collection<String> bolts = physicalPlanProvider.getBoltNames();
+    List<String> bolts = physicalPlanProvider.getBoltNames();
     now = context.checkpoint();
     return metricsProvider.getMeasurements(now, getDuration(), getMetricTypes(), bolts);
   }
