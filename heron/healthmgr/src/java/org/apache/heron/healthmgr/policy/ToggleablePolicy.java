@@ -35,6 +35,7 @@ import com.microsoft.dhalion.policy.HealthPolicyImpl;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
+import org.apache.heron.healthmgr.common.InvalidStateException;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.HealthPolicyConfig.CONF_POLICY_ID;
@@ -98,7 +99,7 @@ public class ToggleablePolicy extends HealthPolicyImpl {
           }
         }
       }
-    } catch (Exception e) {
+    } catch (InvalidStateException e) {
       LOG.warning(
           "failed to fetch the latest physical plan and skip policy toggle update: "
               + e.toString());

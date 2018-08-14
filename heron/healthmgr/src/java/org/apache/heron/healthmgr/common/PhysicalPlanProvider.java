@@ -29,6 +29,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
 import org.apache.heron.proto.tmaster.TopologyMaster;
@@ -64,13 +66,13 @@ public class PhysicalPlanProvider implements Provider<PhysicalPlan> {
     // base64 string to proto bytes
     byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
     // construct proto obj from bytes
-    PhysicalPlan physicalPlan = null;
+    PhysicalPlan pp = null;
     try {
-      physicalPlan = PhysicalPlan.parseFrom(decodedBytes);
-    } catch (Exception e) {
+      pp = PhysicalPlan.parseFrom(decodedBytes);
+    } catch (InvalidProtocolBufferException e) {
       throw new InvalidStateException(topologyName, "Failed to fetch the physical plan");
     }
-    return physicalPlan;
+    return pp;
   }
 
   @Override
