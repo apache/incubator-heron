@@ -20,7 +20,6 @@
 package org.apache.heron.healthmgr.sensors;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
