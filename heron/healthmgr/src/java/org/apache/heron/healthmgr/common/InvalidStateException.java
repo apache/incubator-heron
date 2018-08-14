@@ -22,7 +22,7 @@ package org.apache.heron.healthmgr.common;
 /**
  * This exception is generated when desired state information is not found
  */
-class InvalidStateException extends RuntimeException {
+public class InvalidStateException extends RuntimeException {
   private static final long serialVersionUID = 1649354922817533118L;
 
   InvalidStateException(String topologyName, String message) {
