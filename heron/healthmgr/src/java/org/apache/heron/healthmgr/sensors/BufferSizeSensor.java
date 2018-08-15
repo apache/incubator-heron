@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,23 +33,23 @@ import com.microsoft.dhalion.core.MeasurementsTable;
 
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
 
 public class BufferSizeSensor extends BaseSensor {
   private final MetricsProvider metricsProvider;
   private final PackingPlanProvider packingPlanProvider;
-  private final TopologyProvider topologyProvider;
+  private final PhysicalPlanProvider physicalPlanProvider;
 
   @Inject
   public BufferSizeSensor(HealthPolicyConfig policyConfig,
                           PackingPlanProvider packingPlanProvider,
-                          TopologyProvider topologyProvider,
+                          PhysicalPlanProvider physicalPlanProvider,
                           MetricsProvider metricsProvider) {
     super(policyConfig, METRIC_WAIT_Q_SIZE.text(), BufferSizeSensor.class.getSimpleName());
     this.packingPlanProvider = packingPlanProvider;
-    this.topologyProvider = topologyProvider;
+    this.physicalPlanProvider = physicalPlanProvider;
     this.metricsProvider = metricsProvider;
   }
 
@@ -62,7 +63,7 @@ public class BufferSizeSensor extends BaseSensor {
     Collection<Measurement> result = new ArrayList<>();
     Instant now = context.checkpoint();
 
-    String[] boltComponents = topologyProvider.getBoltNames();
+    List<String> boltComponents = physicalPlanProvider.getBoltNames();
     Duration duration = getDuration();
 
     for (String component : boltComponents) {

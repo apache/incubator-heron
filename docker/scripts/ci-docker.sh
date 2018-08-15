@@ -127,7 +127,7 @@ case $# in
   *)
     echo "Usage: $0 <operation> <platform> <version_string> <tag-prefix> <input-output-directory> "
     echo "  "
-    echo "Platforms Supported: latest ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7"
+    echo "Platforms Supported: latest, ubuntu14.04, ubuntu16.04, centos7, debian9"
     echo "  "
     echo "Example:"
     echo "  $0 build ubuntu14.04 0.12.0 heron ."

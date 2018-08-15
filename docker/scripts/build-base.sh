@@ -75,7 +75,7 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <output-directory>"
     echo "  "
-    echo "Platforms Supported: debian8, ubuntu14.04, centos7"
+    echo "Platforms Supported: debian9, ubuntu14.04, ubuntu16.04, centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-base.sh ubuntu14.04 0.12.0 ~/ubuntu"
