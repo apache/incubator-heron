@@ -117,6 +117,7 @@ public class TopologyResource extends HeronResource {
   private static final String PARAM_DRY_RUN = "dry_run";
   private static final String PARAM_DRY_RUN_FORMAT = "dry_run_format";
   private static final String DEFAULT_DRY_RUN_FORMAT = DryRunFormatType.TABLE.toString();
+  private static final String PARAM_CONTAINER_NUMBER = "container_number";
 
   // path format /topologies/{cluster}/{role}/{environment}/{name}
   private static final String TOPOLOGY_PATH_FORMAT = "/topologies/%s/%s/%s/%s";
@@ -355,9 +356,15 @@ public class TopologyResource extends HeronResource {
       } else {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
         List<String> runtimeConfigs = params.get(PARAM_RUNTIME_CONFIG_KEY);
+        List<String> containersList = params.get(PARAM_CONTAINER_NUMBER);
+        if (containersList.size() > 1) {
+          Utils.createMessage("only one value should be specified for container_number. "
+              + "picking first value.");
+        }
 
-        if (components != null && !components.isEmpty()) {
-          return updateComponentParallelism(cluster, role, environment, name, params, components);
+        if ((components != null && !components.isEmpty()) || (containersList.get(0) != null)) {
+          return updateComponentParallelism(cluster, role, environment, name, params,
+              components, (containersList.size() > 0 ? containersList.get(0) : null));
         } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
           return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
@@ -385,13 +392,16 @@ public class TopologyResource extends HeronResource {
       String environment,
       String name,
       MultivaluedMap<String, String> params,
-      List<String> components) {
+      List<String> components,
+      String containers) {
+
     final List<Pair<String, Object>> keyValues = new ArrayList<>(
         Arrays.asList(
             Pair.create(Key.CLUSTER.value(), cluster),
             Pair.create(Key.ROLE.value(), role),
             Pair.create(Key.ENVIRON.value(), environment),
             Pair.create(Key.TOPOLOGY_NAME.value(), name),
+            Pair.create(Keys.PARAM_CONTAINER_NUMBER, containers),
             Pair.create(Keys.PARAM_COMPONENT_PARALLELISM,
                 String.join(",", components))
         )

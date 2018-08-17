@@ -25,6 +25,8 @@ public final class Keys {
 
   public static final String PARAM_COMPONENT_PARALLELISM =
       RuntimeManagerRunner.RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY;
+  public static final String PARAM_CONTAINER_NUMBER =
+      RuntimeManagerRunner.RUNTIME_MANAGER_CONTAINER_NUMBER_KEY;
   public static final String PARAM_USER_RUNTIME_CONFIG =
       RuntimeManagerRunner.RUNTIME_MANAGER_RUNTIME_CONFIG_KEY;
 
