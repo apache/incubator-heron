@@ -812,6 +812,8 @@ class HeronExecutor(object):
       if container_plan.id == container_id:
         this_container_plan = container_plan
 
+    Log.info("container_id = " + str(container_id))
+    Log.info(packing_plan)
     # make sure that our shard id is a valid one
     assert this_container_plan is not None
     return this_container_plan.instance_plans
