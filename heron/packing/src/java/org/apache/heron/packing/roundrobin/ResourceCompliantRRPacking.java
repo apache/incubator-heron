@@ -39,6 +39,7 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
 import org.apache.heron.spi.packing.IRepacking;
+import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
@@ -224,6 +225,14 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
             e.getMessage(), this.numContainers));
       }
     }
+  }
+
+  @Override
+  public PackingPlan repack(PackingPlan currentPackingPlan, int containers,
+                            Map<String, Integer> componentChanges)
+      throws PackingException, UnsupportedOperationException {
+    throw new UnsupportedOperationException("ResourceCompliantRRPacking does not "
+        + "currently support creating a new packing plan with a new number of containers.");
   }
 
   @Override

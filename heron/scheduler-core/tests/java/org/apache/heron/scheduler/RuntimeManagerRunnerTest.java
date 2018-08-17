@@ -236,7 +236,7 @@ public class RuntimeManagerRunnerTest {
 
     when(manager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(currentPlan);
     doReturn(proposedPlan).when(runner).buildNewPackingPlan(
-        eq(currentPlan), eq(changeRequests), any(TopologyAPI.Topology.class));
+        eq(currentPlan), eq(changeRequests), 1, any(TopologyAPI.Topology.class));
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
@@ -246,7 +246,7 @@ public class RuntimeManagerRunnerTest {
 
     when(client.updateTopology(updateTopologyRequest)).thenReturn(true);
     try {
-      runner.updateTopologyComponentParallelism(TOPOLOGY_NAME, newParallelism);
+      runner.updatePackingPlan(TOPOLOGY_NAME, 1, changeRequests);
     } finally {
       int expectedClientUpdateCalls = expectedResult ? 1 : 0;
       verify(client, times(expectedClientUpdateCalls)).updateTopology(updateTopologyRequest);

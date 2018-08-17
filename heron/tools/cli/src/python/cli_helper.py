@@ -129,7 +129,6 @@ def run_direct(command, cl_args, action, extra_args=[], extra_lib_jars=[]):
       "--command", command,
   ]
   new_args += extra_args
-
   lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
   lib_jars += extra_lib_jars
 
