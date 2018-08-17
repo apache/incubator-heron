@@ -46,7 +46,6 @@ public class GatewayMetrics {
   private final CountMetric sentMetricsSize;
   private final CountMetric sentMetricsCount;
   private final CountMetric sentExceptionsCount;
-
   // The # of items in inStreamQueue
   private final ReducedMetric<MeanReducerState, Number, Double> inStreamQueueSize;
   // The # of items in outStreamQueue

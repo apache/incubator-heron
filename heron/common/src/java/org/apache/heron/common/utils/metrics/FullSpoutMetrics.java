@@ -45,6 +45,7 @@ import org.apache.heron.common.utils.topology.TopologyContextImpl;
 
 public class FullSpoutMetrics extends SpoutMetrics {
   private final MultiCountMetric ackCount;
+  private final ReducedMetric<MeanReducerState, Number, Double> tupleSize;
   private final MultiReducedMetric<MeanReducerState, Number, Double> completeLatency;
   private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
   private final MultiCountMetric failCount;
@@ -53,7 +54,7 @@ public class FullSpoutMetrics extends SpoutMetrics {
   private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
   private final MultiCountMetric serializationTimeNs;
-
+  private final CountMetric tupleAddedToQueue;
   // The # of times back-pressure happens on outStreamQueue so instance could not
   // produce more tuples
   private final CountMetric outQueueFullCount;
@@ -73,6 +74,8 @@ public class FullSpoutMetrics extends SpoutMetrics {
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
     serializationTimeNs = new MultiCountMetric();
+    tupleAddedToQueue = new CountMetric();
+    tupleSize = new ReducedMetric<>(new MeanReducer());
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -91,7 +94,17 @@ public class FullSpoutMetrics extends SpoutMetrics {
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
-    topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
+    topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs,
+        interval);
+
+    // The following metrics measure the rate at which tuples are added to the outgoing
+    // queues at spouts and the sizes of these queues. This allows us to measure whether
+    // the gateway thread pulls out tuples from the queue fast enough, thereby preventing
+    // the spout from becoming a bottleneck.
+    topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
+        tupleAddedToQueue, interval);
+    topologyContext.registerMetric("__average-tuple-size-added-queue/default",
+        tupleSize, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -133,6 +146,11 @@ public class FullSpoutMetrics extends SpoutMetrics {
   public void nextTuple(long latency) {
     nextTupleLatency.update(latency);
     nextTupleCount.incr();
+  }
+
+  public void addTupleToQueue(int size) {
+    tupleAddedToQueue.incr();
+    tupleSize.update(size);
   }
 
   public void updateOutQueueFullCount() {
