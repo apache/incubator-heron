@@ -81,7 +81,7 @@ public class AbstractOutputCollector {
       }
     }
 
-    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue, lock);
+    this.outputter = new OutgoingTupleCollection(helper, streamOutQueue, lock, metrics);
   }
 
   public void updatePhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
