@@ -5,9 +5,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -182,7 +182,7 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
 
     decoder = json.JSONDecoder(strict=False)
     expected_result = decoder.decode(expected_result)
-    
+
     actual_result =[]
     for _ in range(0, RETRY_ATTEMPTS):
       actual_result = self.instance_state_actual_result_handler.fetch_results()

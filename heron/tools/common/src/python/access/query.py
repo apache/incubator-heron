@@ -64,4 +64,4 @@ class QueryHandler(object):
     :return:
     '''
     pass
-    
+
