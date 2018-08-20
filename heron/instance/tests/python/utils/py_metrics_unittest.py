@@ -35,7 +35,7 @@ class PyMetricsTest(unittest.TestCase):
     with patch("heron.instance.src.python.utils.system_config.get_sys_config",
                side_effect=lambda: {constants.HERON_METRICS_EXPORT_INTERVAL_SEC: 10}):
           self.py_metrics = PyMetrics(metrics_collector)
-  
+ $
   def test_gc(self):
     with patch("gc.get_count", side_effect=lambda:(1, 2, 3)):
       with patch("gc.get_threshold", side_effect=lambda:(4, 5, 6)):
@@ -46,14 +46,14 @@ class PyMetricsTest(unittest.TestCase):
     self.assertEqual(self.py_metrics.g1_threshold.get_value_and_reset(), 4)
     self.assertEqual(self.py_metrics.g2_threshold.get_value_and_reset(), 5)
     self.assertEqual(self.py_metrics.g3_threshold.get_value_and_reset(), 6)
-    
+   $
   def test_threads_time(self):
     # self.py_metrics.update_threads_time()
     # tmap = self.py_metrics.threads.get_value_and_reset()
     # self.assertEqual(tmap[100], (3, 5))
     # self.assertEqual(tmap[500], (7, 11))
     pass
-    
+   $
   def test_fd_num(self):
     # self.py_metrics.update_fds()
     # self.assertEqual(self.py_metrics.fd_nums.get_value_and_reset(), 3)

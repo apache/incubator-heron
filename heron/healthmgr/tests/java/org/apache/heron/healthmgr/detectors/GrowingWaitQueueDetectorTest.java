@@ -75,7 +75,7 @@ public class GrowingWaitQueueDetectorTest {
 
     assertEquals(1, symptoms.size());
     assertEquals(1, symptoms.iterator().next().assignments().size());
-    
+
     measurement1
         = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
         (1497892222), 0.0);
