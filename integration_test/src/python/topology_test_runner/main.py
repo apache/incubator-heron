@@ -182,7 +182,7 @@ class InstanceStateResultChecker(TopologyStructureResultChecker):
 
     decoder = json.JSONDecoder(strict=False)
     expected_result = decoder.decode(expected_result)
-   $
+
     actual_result =[]
     for _ in range(0, RETRY_ATTEMPTS):
       actual_result = self.instance_state_actual_result_handler.fetch_results()
