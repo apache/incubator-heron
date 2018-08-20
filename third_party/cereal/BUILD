@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 package_name = "cereal"
-package_version = "1.2.1"
+package_version = "1.2.2" # This version number needs to match the one in WORKSPACE file
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
@@ -101,7 +101,7 @@ genrule(
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t cereal.XXXXX)",
         "mkdir -p $$TMP_DIR",
-        "cp -R $(SRCS) $$TMP_DIR",
+        "cp -R $$(pwd)/external/com_github_cereal/* $$TMP_DIR",
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
@@ -116,9 +116,7 @@ genrule(
 
 cc_library(
     name = "cereal-cxx",
-    srcs = [
-        "empty.cc",
-    ] + file_list,
+    srcs = file_list,
     includes = [
         "include",
     ],
