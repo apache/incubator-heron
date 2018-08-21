@@ -35,7 +35,7 @@ public class TestWindowBolt extends BaseWindowedBolt {
 
 
   @Override
-  public void prepare(Map<String, Object> topoConf, TopologyContext context,
+  public void prepare(Map topoConf, TopologyContext context,
                       OutputCollector collector) {
     this.collector = collector;
   }

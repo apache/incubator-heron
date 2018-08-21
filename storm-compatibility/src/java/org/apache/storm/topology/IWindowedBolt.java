@@ -33,7 +33,7 @@ public interface IWindowedBolt extends IComponent {
    * {@link org.apache.storm.task.IBolt#prepare(Map, TopologyContext, OutputCollector)} except
    * that while emitting, the tuples are automatically anchored to the tuples in the inputWindow.
    */
-  void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector collector);
+  void prepare(Map topoConf, TopologyContext context, OutputCollector collector);
 
   /**
    * Process the tuple window and optionally emit new tuples based on the tuples in the input

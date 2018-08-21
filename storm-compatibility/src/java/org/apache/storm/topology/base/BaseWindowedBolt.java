@@ -524,7 +524,7 @@ public abstract class BaseWindowedBolt implements IWindowedBolt {
   }
 
   @Override
-  public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector
+  public void prepare(Map topoConf, TopologyContext context, OutputCollector
       collector) {
     // NOOP
   }

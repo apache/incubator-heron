@@ -45,7 +45,7 @@ public class IRichSpoutDelegate implements org.apache.heron.api.spout.IRichSpout
 
   @Override
   @SuppressWarnings("rawtypes")
-  public void open(Map<String, Object> conf, org.apache.heron.api.topology.TopologyContext context,
+  public void open(Map conf, org.apache.heron.api.topology.TopologyContext context,
                    SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
