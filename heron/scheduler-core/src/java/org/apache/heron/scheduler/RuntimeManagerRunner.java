@@ -264,9 +264,10 @@ public class RuntimeManagerRunner {
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
+    Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
+
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
-    Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
 
     if (!parallelismChangeDetected(currentPlan, changeRequests)) {
@@ -297,10 +298,9 @@ public class RuntimeManagerRunner {
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = manager.getTopology(topologyName);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
-    boolean parallelismChange = parallelismChangeDetected(currentPlan, changeRequests);
-    boolean containerChange = containersNumChangeDetected(currentPlan, containerNum);
 
-    if (!parallelismChange && !containerChange) {
+    if (!containersNumChangeDetected(currentPlan, containerNum)
+        && !parallelismChangeDetected(currentPlan, changeRequests)) {
       throw new TopologyRuntimeManagementException(
           String.format("Both component parallelism request and container number are the "
               + "same as in the running topology."));
