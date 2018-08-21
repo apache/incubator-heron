@@ -362,9 +362,11 @@ public class TopologyResource extends HeronResource {
               + "picking first value.");
         }
 
-        if ((components != null && !components.isEmpty()) || (containersList.get(0) != null)) {
-          return updateComponentParallelism(cluster, role, environment, name, params,
-              components, (containersList.size() > 0 ? containersList.get(0) : null));
+        if (components != null && !components.isEmpty()) {
+          return updateComponentParallelism(cluster, role, environment, name, params, components);
+        } else if (containersList != null && !containersList.isEmpty()) {
+          return updateContainerNumber(cluster, role, environment, name, params,
+              containersList.get(0));
         } else if (runtimeConfigs != null && !runtimeConfigs.isEmpty()) {
           return updateRuntimeConfig(cluster, role, environment, name, params, runtimeConfigs);
         } else {
@@ -392,8 +394,7 @@ public class TopologyResource extends HeronResource {
       String environment,
       String name,
       MultivaluedMap<String, String> params,
-      List<String> components,
-      String containers) {
+      List<String> components) {
 
     final List<Pair<String, Object>> keyValues = new ArrayList<>(
         Arrays.asList(
@@ -401,9 +402,46 @@ public class TopologyResource extends HeronResource {
             Pair.create(Key.ROLE.value(), role),
             Pair.create(Key.ENVIRON.value(), environment),
             Pair.create(Key.TOPOLOGY_NAME.value(), name),
-            Pair.create(Keys.PARAM_CONTAINER_NUMBER, containers),
             Pair.create(Keys.PARAM_COMPONENT_PARALLELISM,
                 String.join(",", components))
+        )
+    );
+
+    // has a dry run been requested?
+    if (params.containsKey(PARAM_DRY_RUN)) {
+      keyValues.add(Pair.create(Key.DRY_RUN.value(), Boolean.TRUE));
+    }
+
+    final Set<Pair<String, Object>> overrides = getUpdateOverrides(params);
+    // apply overrides if they exists
+    if (!overrides.isEmpty()) {
+      keyValues.addAll(overrides);
+    }
+
+    final Config config = createConfig(keyValues);
+    getActionFactory().createRuntimeAction(config, ActionType.UPDATE).execute();
+
+    return Response.ok()
+        .type(MediaType.APPLICATION_JSON)
+        .entity(Utils.createMessage(String.format("%s updated", name)))
+        .build();
+  }
+
+  protected Response updateContainerNumber(
+      String cluster,
+      String role,
+      String environment,
+      String name,
+      MultivaluedMap<String, String> params,
+      String containerNumber) {
+
+    final List<Pair<String, Object>> keyValues = new ArrayList<>(
+        Arrays.asList(
+            Pair.create(Key.CLUSTER.value(), cluster),
+            Pair.create(Key.ROLE.value(), role),
+            Pair.create(Key.ENVIRON.value(), environment),
+            Pair.create(Key.TOPOLOGY_NAME.value(), name),
+            Pair.create(Keys.PARAM_CONTAINER_NUMBER, containerNumber)
         )
     );
 
