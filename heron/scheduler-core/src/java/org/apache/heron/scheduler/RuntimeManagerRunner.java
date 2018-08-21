@@ -197,6 +197,9 @@ public class RuntimeManagerRunner {
     String newParallelism = updateConfig.getStringValue(RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY);
     String newContainerNumber = updateConfig.getStringValue(RUNTIME_MANAGER_CONTAINER_NUMBER_KEY);
     String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_RUNTIME_CONFIG_KEY);
+    LOG.info("userRuntimeConfig " + userRuntimeConfig
+        + "; newParallelism " + newParallelism
+        + "; newContainerNumber " + newContainerNumber);
 
     // parallelism and runtime config can not be updated at the same time.
     if (((newParallelism != null && !newParallelism.isEmpty())
@@ -209,19 +212,12 @@ public class RuntimeManagerRunner {
     if (userRuntimeConfig != null && !userRuntimeConfig.isEmpty()) {
       // Update user runtime config if userRuntimeConfig parameter is available
       updateTopologyUserRuntimeConfig(topologyName, userRuntimeConfig);
-    } else if ((newParallelism != null && !newParallelism.isEmpty())
-        || (newContainerNumber != null && !newContainerNumber.isEmpty())) {
-      int newContainers = getCurrentContainerNumber(topologyName);
-      Map<String, Integer> changeRequests = new HashMap<String, Integer>();
-
-      if (newParallelism != null && !newParallelism.isEmpty()) {
-        changeRequests = parseNewParallelismParam(newParallelism);
-      }
-      if (newContainerNumber != null && !newContainerNumber.isEmpty()) {
-        newContainers = Integer.parseInt(newContainerNumber);
-      }
-      updatePackingPlan(topologyName, newContainers, changeRequests);
-
+    } else if (newContainerNumber != null && !newContainerNumber.isEmpty()) {
+      // Update container count if newContainerNumber parameter is available
+      updateTopologyContainerCount(topologyName, newContainerNumber, newParallelism);
+    } else if (newParallelism != null && !newParallelism.isEmpty()) {
+      // Update parallelism if newParallelism parameter is available
+      updateTopologyComponentParallelism(topologyName, newParallelism);
     } else {
       throw new TopologyRuntimeManagementException("Missing arguments. Not taking action.");
     }
@@ -237,28 +233,10 @@ public class RuntimeManagerRunner {
     return cPlan.getContainers().size();
   }
 
-
-  @VisibleForTesting
-  void updatePackingPlan(String topologyName,
-                         Integer containerNum,
-                         Map<String, Integer> changeRequests)
-      throws PackingException, UpdateDryRunResponse {
-
-    SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
-    TopologyAPI.Topology topology = manager.getTopology(topologyName);
-    PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
-    boolean parallelismChange = parallelismChangeDetected(currentPlan, changeRequests);
-    boolean containerChange = containersNumChangeDetected(currentPlan, containerNum);
-
-    if (!parallelismChange && !containerChange) {
-      throw new TopologyRuntimeManagementException(
-          String.format("Both component parallelism request and container number are the "
-              + "same as in the running topology."));
-    }
-    // at least one of the two need to be changed
-    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
-        containerNum, topology);
-
+  void sendUpdateRequest(TopologyAPI.Topology topology,
+                         Map<String, Integer> changeRequests,
+                         PackingPlans.PackingPlan currentPlan,
+                         PackingPlans.PackingPlan proposedPlan) {
     if (Context.dryRun(config)) {
       PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
       PackingPlan oldPlan = deserializer.fromProto(currentPlan);
@@ -279,7 +257,59 @@ public class RuntimeManagerRunner {
               + updateTopologyRequest + "The topology can be in a strange stage. "
               + "Please check carefully or redeploy the topology !!");
     }
+  }
 
+  @VisibleForTesting
+  void updateTopologyComponentParallelism(String topologyName, String  newParallelism)
+      throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
+    LOG.fine(String.format("updateTopologyHandler called for %s with %s",
+        topologyName, newParallelism));
+    Map<String, Integer> changeRequests = parseNewParallelismParam(newParallelism);
+
+    SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
+    TopologyAPI.Topology topology = manager.getTopology(topologyName);
+    PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
+
+    if (!parallelismChangeDetected(currentPlan, changeRequests)) {
+      throw new TopologyRuntimeManagementException(
+          String.format("The component parallelism request (%s) is the same as the "
+              + "current topology parallelism. Not taking action.", newParallelism));
+    }
+
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
+        null, topology);
+
+    sendUpdateRequest(topology, changeRequests, currentPlan, proposedPlan);
+  }
+
+  @VisibleForTesting
+  void updateTopologyContainerCount(String topologyName,
+                                    String newContainerNumber,
+                                    String  newParallelism)
+      throws PackingException, UpdateDryRunResponse {
+    LOG.fine(String.format("updateTopologyHandler called for %s with %s and %s",
+        topologyName, newContainerNumber, newParallelism));
+    Integer containerNum = Integer.parseInt(newContainerNumber);
+    Map<String, Integer> changeRequests = new HashMap<String, Integer>();
+    if (newParallelism != null && !newParallelism.isEmpty()) {
+      changeRequests = parseNewParallelismParam(newParallelism);
+    }
+
+    SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
+    TopologyAPI.Topology topology = manager.getTopology(topologyName);
+    PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
+
+    if (!containersNumChangeDetected(currentPlan, containerNum)
+        && !parallelismChangeDetected(currentPlan, changeRequests)) {
+      throw new TopologyRuntimeManagementException(
+          String.format("Both component parallelism request and container number are the "
+              + "same as in the running topology."));
+    }
+
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
+        containerNum, topology);
+
+    sendUpdateRequest(topology, changeRequests, currentPlan, proposedPlan);
   }
 
   @VisibleForTesting
@@ -368,7 +398,7 @@ public class RuntimeManagerRunner {
   @VisibleForTesting
   PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
                                                Map<String, Integer> changeRequests,
-                                               int containerNum,
+                                               Integer containerNum,
                                                TopologyAPI.Topology topology)
       throws PackingException {
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
@@ -392,7 +422,12 @@ public class RuntimeManagerRunner {
     LOG.info("Updating packing plan using " + repackingClass);
     try {
       packing.initialize(config, topology);
-      PackingPlan packedPlan = packing.repack(currentPackingPlan, containerNum, componentChanges);
+      PackingPlan packedPlan = null;
+      if (containerNum == null) {
+        packedPlan = packing.repack(currentPackingPlan, componentChanges);
+      } else {
+        packedPlan = packing.repack(currentPackingPlan, containerNum, componentChanges);
+      }
       return serializer.toProto(packedPlan);
     } finally {
       SysUtils.closeIgnoringExceptions(packing);
