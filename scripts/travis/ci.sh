@@ -34,9 +34,13 @@ ${DIR}/check.sh
 #(cd website && make travis-site)
 #end_timer "$T"
 
-T="${DIR}/test.sh"
-start_timer "$T"
-${DIR}/test.sh
-end_timer "$T"
+if [ -z ${DISABLE_INTEGRATION_TESTS+x} ]; then
+  T="${DIR}/test.sh"
+  start_timer "$T"
+  ${DIR}/test.sh
+  end_timer "$T"
+else
+  echo "bypass integration tests"
+fi
 
 print_timer_summary
