@@ -195,11 +195,11 @@ public class RuntimeManagerRunner {
       throws TopologyRuntimeManagementException, PackingException, UpdateDryRunResponse {
     assert !potentialStaleExecutionData;
     String newParallelism = updateConfig.getStringValue(RUNTIME_MANAGER_COMPONENT_PARALLELISM_KEY);
-    LOG.info("newParallelism " + newParallelism);
     String newContainerNumber = updateConfig.getStringValue(RUNTIME_MANAGER_CONTAINER_NUMBER_KEY);
-    LOG.info("newContainerNumber " + newContainerNumber);
     String userRuntimeConfig = updateConfig.getStringValue(RUNTIME_MANAGER_RUNTIME_CONFIG_KEY);
-    LOG.info("userRuntimeConfig " + userRuntimeConfig);
+    LOG.info("userRuntimeConfig " + userRuntimeConfig
+        + "; newParallelism " + newParallelism
+        + "; newContainerNumber " + newContainerNumber);
 
     // parallelism and runtime config can not be updated at the same time.
     if (((newParallelism != null && !newParallelism.isEmpty())
