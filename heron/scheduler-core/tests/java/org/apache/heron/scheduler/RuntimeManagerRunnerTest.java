@@ -236,7 +236,7 @@ public class RuntimeManagerRunnerTest {
 
     when(manager.getPackingPlan(eq(TOPOLOGY_NAME))).thenReturn(currentPlan);
     doReturn(proposedPlan).when(runner).buildNewPackingPlan(
-        eq(currentPlan), eq(changeRequests), any(TopologyAPI.Topology.class));
+        eq(currentPlan), eq(changeRequests), null, any(TopologyAPI.Topology.class));
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
