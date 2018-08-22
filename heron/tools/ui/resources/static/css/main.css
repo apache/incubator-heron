@@ -1698,18 +1698,6 @@ header {
 .google-visualization-table-table img {
   height: 10px; }
 
-.icomoon-small [data-icon]:before {
-  font-size: 12px; }
-
-.icomoon-medium [data-icon]:before {
-  font-size: 24px; }
-
-.icomoon-large [data-icon]:before {
-  font-size: 36px; }
-
-.icomoon-super-large [data-icon]:before {
-  font-size: 64px; }
-
 .imp-messages, .tasks {
   width: 100%; }
   .imp-messages li, .tasks li {
