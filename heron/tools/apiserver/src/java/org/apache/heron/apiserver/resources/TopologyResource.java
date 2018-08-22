@@ -357,7 +357,7 @@ public class TopologyResource extends HeronResource {
         List<String> components = params.get(PARAM_COMPONENT_PARALLELISM);
         List<String> runtimeConfigs = params.get(PARAM_RUNTIME_CONFIG_KEY);
         List<String> containersList = params.get(PARAM_CONTAINER_NUMBER);
-        if (containersList.size() > 1) {
+        if (containersList != null && containersList.size() > 1) {
           Utils.createMessage("only one value should be specified for container_number. "
               + "picking first value.");
         }
