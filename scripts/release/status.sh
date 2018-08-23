@@ -112,7 +112,7 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -d .git];
+if [ -d .git ];
 then
   if [ -z ${HERON_TREE_STATUS+x} ];
   then
