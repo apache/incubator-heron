@@ -42,7 +42,8 @@ function disable_e_and_execute {
 }
 
 # get the release tag version or the branch name
-if [ -d .git ]; then
+if [ -d .git ];
+then
   if [ -z ${HERON_BUILD_VERSION+x} ];
   then
     cmd="git rev-parse --abbrev-ref HEAD"
@@ -63,7 +64,8 @@ fi
 echo "HERON_BUILD_VERSION ${build_version}"
 
 # The code below presents an implementation that works for git repository
-if [ -d .git ]; then
+if [ -d .git ];
+then
   if [ -z ${HERON_GIT_REV+x} ];
   then
     cmd="git rev-parse HEAD"
@@ -110,7 +112,8 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -d .git]; then
+if [ -d .git];
+then
   if [ -z ${HERON_TREE_STATUS+x} ];
   then
     status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
