@@ -205,9 +205,9 @@ public final class StatefulWordCountTopology {
 
     // configure component resources
     conf.setComponentRam("word",
-        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB));
     conf.setComponentRam("consumer",
-        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB * 2));
+        ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB));
 
     // configure container resources
     conf.setContainerDiskRequested(
