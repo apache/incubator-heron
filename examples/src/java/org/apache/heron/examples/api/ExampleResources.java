@@ -23,7 +23,7 @@ import org.apache.heron.common.basics.ByteAmount;
 
 public final class ExampleResources {
 
-  static final long COMPONENT_RAM_MB = 512;
+  static final long COMPONENT_RAM_MB = 1024;
 
   static ByteAmount getComponentRam() {
     return ByteAmount.fromMegabytes(COMPONENT_RAM_MB);
