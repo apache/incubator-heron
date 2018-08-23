@@ -22,7 +22,6 @@ import tornado.ioloop
 import tornado.escape
 import tornado.web
 
-from sets import Set
 from heron.common.src.python.utils import log
 
 RESULTS_DIRECTORY = "results"
