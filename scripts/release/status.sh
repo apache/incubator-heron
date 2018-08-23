@@ -42,28 +42,37 @@ function disable_e_and_execute {
 }
 
 # get the release tag version or the branch name
-if [ -z ${HERON_BUILD_VERSION+x} ];
-then
-  cmd="git rev-parse --abbrev-ref HEAD"
-  build_version=$($cmd) || die "Failed to run command to check head: $cmd"
-
-  if [ "${build_version}" = "HEAD" ];
+if [ -d .git ]; then
+  if [ -z ${HERON_BUILD_VERSION+x} ];
   then
-    cmd="git describe --tags --always"
-    build_version=$($cmd) || die "Failed to run command to get git release: $cmd"
+    cmd="git rev-parse --abbrev-ref HEAD"
+    build_version=$($cmd) || die "Failed to run command to check head: $cmd"
+
+    if [ "${build_version}" = "HEAD" ];
+    then
+      cmd="git describe --tags --always"
+      build_version=$($cmd) || die "Failed to run command to get git release: $cmd"
+    fi
+  else
+    build_version=${HERON_BUILD_VERSION}
   fi
 else
-  build_version=${HERON_BUILD_VERSION}
+  current_dir=$(pwd)
+  build_version=$(basename "$current_dir")
 fi
 echo "HERON_BUILD_VERSION ${build_version}"
 
 # The code below presents an implementation that works for git repository
-if [ -z ${HERON_GIT_REV+x} ];
-then
-  cmd="git rev-parse HEAD"
-  git_rev=$($cmd) || die "Failed to get git revision: $cmd"
+if [ -d .git ]; then
+  if [ -z ${HERON_GIT_REV+x} ];
+  then
+    cmd="git rev-parse HEAD"
+    git_rev=$($cmd) || die "Failed to get git revision: $cmd"
+  else
+    git_rev=${HERON_GIT_REV}
+  fi
 else
-  git_rev=${HERON_GIT_REV}
+  git_rev=$build_version
 fi
 
 echo "HERON_BUILD_SCM_REVISION ${git_rev}"
@@ -101,16 +110,20 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -z ${HERON_TREE_STATUS+x} ];
-then
-  status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
-  if [[ $status == 0 ]];
+if [ -d .git]; then
+  if [ -z ${HERON_TREE_STATUS+x} ];
   then
-    tree_status="Clean"
+    status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
+    if [[ $status == 0 ]];
+    then
+      tree_status="Clean"
+    else
+      tree_status="Modified"
+    fi
   else
-    tree_status="Modified"
+    tree_status=${HERON_TREE_STATUS}
   fi
 else
-  tree_status=${HERON_TREE_STATUS}
+  tree_status="Clean"
 fi
 echo "HERON_BUILD_RELEASE_STATUS ${tree_status}"
