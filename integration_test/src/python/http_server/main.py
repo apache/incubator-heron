@@ -106,7 +106,12 @@ class StateResultHandler(tornado.web.RequestHandler):
     data = tornado.escape.json_decode(self.request.body)
     if key:
       if key in self.result_map:
-        self.result_map[key].append(data)
+        # fix the duplicate record issue
+        for comp in self.result_map[key]:
+          if comp.keys()[0] == data.keys()[0]:
+            break
+        else:
+          self.result_map[key].append(data)
       else:
         self.result_map[key] = [data]
       self.write("Results written successfully: topology " + key + ' instance ' + data.keys()[0])
@@ -128,11 +133,11 @@ def main():
   # for instance states in stateful processing
   state_result_map = {}
   application = tornado.web.Application([
-      (r"/", MainHandler),
-      (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler),
-      (r"^/state", MemoryMapGetAllHandler, dict(state_map=state_map)),
-      (r"^/state/([a-zA-Z0-9_-]+$)", MemoryMapHandler, dict(state_map=state_map)),
-      (r"^/stateResults/([a-zA-Z0-9_-]+$)", StateResultHandler, dict(result_map=state_result_map)),
+    (r"/", MainHandler),
+    (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler),
+    (r"^/state", MemoryMapGetAllHandler, dict(state_map=state_map)),
+    (r"^/state/([a-zA-Z0-9_-]+$)", MemoryMapHandler, dict(state_map=state_map)),
+    (r"^/stateResults/([a-zA-Z0-9_-]+$)", StateResultHandler, dict(result_map=state_result_map)),
   ])
 
   if len(sys.argv) == 1:
