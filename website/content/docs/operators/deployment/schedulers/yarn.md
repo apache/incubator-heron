@@ -75,12 +75,12 @@ deployment on a multi-node YARN cluster.
 
 **Under 0.14.2 version (including 0.14.2)**
 
-`$ heron submit yarn heron-examples.jar org.apache.heron.examples.AckingTopology AckingTopology`
+`$ heron submit yarn heron-api-examples.jar org.apache.heron.examples.api.AckingTopology AckingTopology`
 
 
 **After 0.14.3 version released**
 
-`$ heron submit yarn heron-examples.jar org.apache.heron.examples.AckingTopology AckingTopology --extra-launch-classpath <extra-classpath-value>`
+`$ heron submit yarn heron-api-examples.jar org.apache.heron.examples.api.AckingTopology AckingTopology --extra-launch-classpath <extra-classpath-value>`
 
 >**Tips**
 >
