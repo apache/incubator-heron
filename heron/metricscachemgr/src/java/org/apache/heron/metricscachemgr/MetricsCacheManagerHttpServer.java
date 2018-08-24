@@ -82,8 +82,8 @@ public class MetricsCacheManagerHttpServer {
    * &lt;host:port&gt; &lt;component_name&gt; &lt;metrics_name&gt;
    * Example:
    * 1. run the example topology,
-   * ~/bin/heron submit local ~/.heron/examples/heron-examples.jar \
-   * org.apache.heron.examples.ExclamationTopology ExclamationTopology \
+   * ~/bin/heron submit local ~/.heron/examples/heron-api-examples.jar \
+   * org.apache.heron.examples.api.ExclamationTopology ExclamationTopology \
    * --deploy-deactivated --verbose
    * 2. in the [source root directory],
    * bazel run heron/metricscachemgr/src/java:metricscache-queryclient-unshaded -- \

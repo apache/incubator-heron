@@ -78,12 +78,12 @@ class SubmitTest(ClientCommandTest):
   def test(self):
     subprocess.Popen = MagicMock()
 
-    command = 'heron submit local ~/.heron/examples/heron-examples.jar ' + \
-              'org.apache.heron.examples.ExclamationTopology EX'
+    command = 'heron submit local ~/.heron/examples/heron-api-examples.jar ' + \
+              'org.apache.heron.examples.api.ExclamationTopology EX'
 
     create_defn_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
-    '~/.heron/examples/heron-examples.jar:/heron/lib/jars/third_party/* ' \
-    'org.apache.heron.examples.ExclamationTopology EX'
+    '~/.heron/examples/heron-api-examples.jar:/heron/lib/jars/third_party/* ' \
+    'org.apache.heron.examples.api.ExclamationTopology EX'
 
     submit_commands = '/usr/lib/bin/java -client -Xmx1g -cp ' \
                       ':/heron/lib/jars/scheduler/*:/heron/lib/jars/uploader/*:' \
