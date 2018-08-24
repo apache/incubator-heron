@@ -40,8 +40,8 @@ command loads the config in `$HOME/.heron/conf`. Add `--config-path=your_conf_pa
 config path.
 
 ```bash
-heron submit mesos --verbose ~/.heron/examples/heron-examples.jar \
-org.apache.heron.examples.ExclamationTopology ExclamationTopology
+heron submit mesos --verbose ~/.heron/examples/heron-api-examples.jar \
+org.apache.heron.examples.api.ExclamationTopology ExclamationTopology
 ```
 
 The following will be displayed upon a successful submit.

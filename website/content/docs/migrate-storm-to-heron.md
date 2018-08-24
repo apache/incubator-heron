@@ -95,8 +95,8 @@ Start Guide](../getting-started) guide:
 
 ```bash
 $ heron submit local \
-  ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
-  org.apache.heron.examples.ExclamationTopology \ # The topology's Java class
+  ~/.heron/examples/heron-api-examples.jar \ # The path of the topology's jar file
+  org.apache.heron.examples.api.ExclamationTopology \ # The topology's Java class
   ExclamationTopology # The name of the topology
 ```
 

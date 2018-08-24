@@ -231,7 +231,7 @@ $ mv aurora devcluster
 Now you can submit a topology to the aurora cluster. this can be done with the following command.
 
 ```bash
-$ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/examples/heron-examples.jar org.apache.heron.examples.ExclamationTopology ExclamationTopology
+$ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/examples/heron-api-examples.jar org.apache.heron.examples.api.ExclamationTopology ExclamationTopology
 ```
 
 Now you should be able to see the topology in the Aurora UI ( http://192.168.33.7:8081/scheduler/heronuser ) .
