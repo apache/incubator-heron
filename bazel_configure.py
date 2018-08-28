@@ -149,7 +149,7 @@ def fail(message):
 
 # Assumes the version is at the end of the first line consisting of digits and dots
 def get_trailing_version(line):
-  version = re.search('([\d.]+)$', line)
+  version = re.search('([\d.]+\d)$', line)
   if version and '.' in version.group(0):
     return version.group(0)
 
