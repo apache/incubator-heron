@@ -14,7 +14,7 @@ pex_library(
       "PyYAML==3.10",
       "enum34==1.1.6",
       "requests==2.12.3",
-      "netifaces==0.10.6"
+      #"netifaces==0.10.6"
     ],
 )
 
