@@ -19,6 +19,7 @@
 
 package org.apache.heron.healthmgr.diagnosers;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.sensors.BaseSensor;
 
 import static org.apache.heron.healthmgr.detectors.BaseDetector.SymptomType.SYMPTOM_COMP_BACK_PRESSURE;
@@ -55,14 +57,15 @@ public class SlowInstanceDiagnoserTest {
   private ExecutionContext context;
 
   @Before
-  public void initTestData() {
+  public void initTestData() throws IOException {
     now = Instant.now();
     measurements = new ArrayList<>();
 
     context = mock(ExecutionContext.class);
     when(context.checkpoint()).thenReturn(now);
 
-    diagnoser = new SlowInstanceDiagnoser();
+    HealthManagerMetrics publishingMetrics = mock(HealthManagerMetrics.class);
+    diagnoser = new SlowInstanceDiagnoser(publishingMetrics);
     diagnoser.initialize(context);
   }
 

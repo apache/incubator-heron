@@ -20,6 +20,7 @@
 package org.apache.heron.healthmgr.sensors;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.microsoft.dhalion.api.MetricsProvider;
@@ -30,7 +31,7 @@ import com.microsoft.dhalion.policy.PoliciesExecutor;
 import org.junit.Test;
 
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.healthmgr.sensors.BaseSensor.MetricName;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_WAIT_Q_SIZE;
@@ -41,8 +42,9 @@ import static org.mockito.Mockito.when;
 public class BufferSizeSensorTest {
   @Test
   public void providesBufferSizeMetricForBolts() {
-    TopologyProvider topologyProvider = mock(TopologyProvider.class);
-    when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
+    PhysicalPlanProvider topologyProvider = mock(PhysicalPlanProvider.class);
+    when(topologyProvider.getBoltNames()).thenReturn(
+        Arrays.asList(new String[]{"bolt-1", "bolt-2"}));
 
     String[] boltIds = new String[]{"container_1_bolt-1_1",
         "container_2_bolt-2_22",

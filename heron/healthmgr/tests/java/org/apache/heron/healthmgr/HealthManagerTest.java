@@ -68,8 +68,9 @@ public class HealthManagerTest {
         .build();
     when(adaptor.getSchedulerLocation(anyString())).thenReturn(schedulerLocation);
 
+    HealthManagerMetrics publishingMetrics = mock(HealthManagerMetrics.class);
     AbstractModule baseModule = HealthManager
-        .buildBaseModule("127.0.0.1", TrackerMetricsProvider.class.getName());
+        .buildBaseModule("127.0.0.1", TrackerMetricsProvider.class.getName(), publishingMetrics);
 
     HealthManager healthManager = new HealthManager(config, baseModule);
 

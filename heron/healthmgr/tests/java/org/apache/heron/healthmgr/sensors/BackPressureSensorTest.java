@@ -19,7 +19,9 @@
 
 package org.apache.heron.healthmgr.sensors;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -32,8 +34,9 @@ import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_BACK_PRESSURE;
@@ -45,9 +48,10 @@ import static org.mockito.Mockito.when;
 
 public class BackPressureSensorTest {
   @Test
-  public void providesBackPressureMetricForBolts() {
-    TopologyProvider topologyProvider = mock(TopologyProvider.class);
-    when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
+  public void providesBackPressureMetricForBolts() throws IOException {
+    PhysicalPlanProvider topologyProvider = mock(PhysicalPlanProvider.class);
+    when(topologyProvider.getBoltNames()).thenReturn(
+        Arrays.asList(new String[]{"bolt-1", "bolt-2"}));
 
     String[] boltIds = new String[]{"container_1_bolt-1_1",
         "container_2_bolt-2_22",
@@ -70,8 +74,10 @@ public class BackPressureSensorTest {
     }
 
 
+    HealthManagerMetrics publishingMetrics = mock(HealthManagerMetrics.class);
     BackPressureSensor backPressureSensor =
-        new BackPressureSensor(packingPlanProvider, topologyProvider, null, metricsProvider);
+        new BackPressureSensor(
+            packingPlanProvider, topologyProvider, null, metricsProvider, publishingMetrics);
 
     ExecutionContext context = mock(ExecutionContext.class);
     when(context.checkpoint()).thenReturn(Instant.now());
