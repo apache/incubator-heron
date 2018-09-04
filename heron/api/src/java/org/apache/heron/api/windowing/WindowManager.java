@@ -75,7 +75,7 @@ public class WindowManager<T extends Serializable> implements TriggerHandler {
    *
    * @param lifecycleListener the {@link WindowLifecycleListener}
    * @param queue a collection where the events in the window can be enqueued.
-   * <br/>
+   * <br>
    * <b>Note:</b> This collection has to be thread safe.
    */
   public WindowManager(WindowLifecycleListener<T> lifecycleListener, Collection<Event<T>> queue) {
@@ -88,7 +88,7 @@ public class WindowManager<T extends Serializable> implements TriggerHandler {
 
   /**
    * For testing purpose
-   * See {@Link org.apache.heron.api.windowing.WindowManagerTest}
+   * See {@link org.apache.heron.api.windowing.WindowManagerTest}
    * @param lifecycleListener
    */
   public WindowManager(WindowLifecycleListener<T> lifecycleListener) {

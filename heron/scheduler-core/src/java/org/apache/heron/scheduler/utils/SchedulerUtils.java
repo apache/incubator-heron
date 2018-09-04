@@ -470,7 +470,7 @@ public final class SchedulerUtils {
    * <br> 2. replace "(61)" and "&amp;equals;" with "="
    * <br> 3. Revert from Base64 format
    * Note that '=' is escaped in two different ways. '(61)' is the new escaping.
-   * '&equals;' was the original replacement but it is not friendly to bash and
+   * '&amp;equals;' was the original replacement but it is not friendly to bash and
    * was causing issues. The original escaping is still left there for reference
    * and backward compatibility purposes (to be removed after no topology needs
    * it)

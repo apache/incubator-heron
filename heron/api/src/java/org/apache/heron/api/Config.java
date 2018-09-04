@@ -286,13 +286,13 @@ public class Config extends HashMap<String, Object> {
   /**
    * Topology-specific environment properties to be added to an Heron instance.
    * This is added to the existing environment (that of the Heron instance).
-   * This variable contains Map<String, String>
+   * This variable contains Map&lt;String, String&gt;
    */
   public static final String TOPOLOGY_ENVIRONMENT = "topology.environment";
 
   /**
    * Timer events registered for a topology.
-   * This is a Map<String, Pair<Duration, Runnable>>.
+   * This is a Map&lt;String, Pair&lt;Duration, Runnable&gt;&gt;.
    * Where the key is the name and the value contains the frequency of the event
    * and the task to run.
    */
