@@ -38,7 +38,7 @@ import org.apache.heron.streamlet.impl.operators.JoinOperator;
  * JoinStreamlet represents a KVStreamlet that is the result of joining two KVStreamlets left
  * and right using a WindowConfig. For all left and right tuples in the window whose keys
  * match, the user supplied joinFunction is applied on the values to get the resulting value.
- * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo<K> type
+ * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo&lt;K&gt; type
  * and the value is of type VR.
  */
 public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
