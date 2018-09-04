@@ -27,7 +27,7 @@ import org.apache.heron.api.windowing.TimestampExtractor;
 import org.apache.heron.api.windowing.TupleWindow;
 
 /**
- * A bolt abstraction for supporting time and count based sliding & tumbling windows.
+ * A bolt abstraction for supporting time and count based sliding &amp; tumbling windows.
  */
 public interface IWindowedBolt extends IComponent {
   /**

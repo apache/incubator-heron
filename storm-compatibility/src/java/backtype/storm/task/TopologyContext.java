@@ -157,6 +157,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /**
    * Gets the declared output fields for the specified stream id for the component
    * this task is a part of.
+   * @param streamId The id of the output field.
    */
   public Fields getThisOutputFields(String streamId) {
     return new Fields(delegate.getThisOutputFields(streamId));
