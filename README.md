@@ -9,10 +9,12 @@ but with a wide array of architectural improvements.
 
 http://incubator.apache.org/projects/heron.html
 
-https://heron.incubator.apache.org (coming soon...)
+https://heron.incubator.apache.org
 
 ### Documentation
-http://heronstreaming.io (official until)
+Documentation and tutorials can be found on the [Heron website](http://heronstreaming.io)
+
+Developers and contributors should also take a look at [Heron developers](https://apache.github.io/incubator-heron/docs/developers/compiling/compiling/)
 
 #### Heron Requirements:
  * Java JDK 1.8
@@ -47,7 +49,7 @@ https://www.meetup.com/Apache-Heron-Bay-Area
 ## For more information:
 
 * Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
-* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](http://twitter.github.io/heron/docs/resources/)
+* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://apache.github.io/incubator-heron/docs/resources/)
 * [Twitter Heron: Stream Processing at
   Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at
