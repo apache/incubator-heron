@@ -11,10 +11,14 @@ pex_library(
         "//heron/proto:proto-py",
     ],
     reqs = [
-      "PyYAML==3.10",
+      #"PyYAML==3.10",
       "enum34==1.1.6",
       "requests==2.12.3",
       #"netifaces==0.10.6"
+    ],
+    eggs = [
+        "@yaml_macosx_whl//file",
+        "@yaml_linux_whl//file",
     ],
 )
 
