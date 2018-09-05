@@ -766,11 +766,6 @@ VIRTUALENV_SRC = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73
 VIRTUALENV_PREFIX = "virtualenv-15.1.0"
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
-WHEEL_PROTOBUF = "https://pypi.python.org/packages/b7/24/e7514e574b025bd86eed3bff69bf342abacd77e680a0b0c61f89a3197de3/protobuf-3.4.0-py2.py3-none-any.whl"
-WHEEL_SIX = "https://pypi.python.org/packages/67/4b/141a581104b1f6397bfa78ac9d43d8ad29a7ca43ea90a2d863fe3056e86a/six-1.11.0-py2.py3-none-any.whl"
-WHEEL_YAML_MACOSX = "https://svn.twitter.biz/science-binaries/home/third_party/python/dist/PyYAML-3.10-cp27-cp27m-macosx_10_4_x86_64.whl"
-WHEEL_YAML_LINUX = "https://svn.twitter.biz/science-binaries/home/third_party/python/dist/PyYAML-3.10-cp27-cp27mu-linux_x86_64.whl"
-
 http_file(
     name = 'pytest_whl',
     url = PYTEST_WHEEL,
@@ -799,26 +794,6 @@ http_file(
 http_file(
     name = "setuptools_src",
     url = SETUPTOOLS_SRC,
-)
-
-http_file(
-    name = 'protobuf_whl',
-    url = WHEEL_PROTOBUF,
-)
-
-http_file(
-    name = 'six_whl',
-    url = WHEEL_SIX,
-)
-
-http_file(
-    name = 'yaml_macosx_whl',
-    url = WHEEL_YAML_MACOSX,
-)
-
-http_file(
-    name = 'yaml_linux_whl',
-    url = WHEEL_YAML_LINUX,
 )
 
 new_http_archive(

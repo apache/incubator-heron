@@ -191,12 +191,8 @@ pex_library(
         ":proto_ckptmgr_py",
     ],
     reqs = [
-        #"protobuf==3.4.0",
+        "protobuf==3.4.0",
         "setuptools==18.0.1",
-    ],
-    eggs = [
-        "@six_whl//file",
-        "@protobuf_whl//file",
     ],
 )
 
