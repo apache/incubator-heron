@@ -20,9 +20,10 @@ set -e
 HERONPY_VERSION=$1
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 INPUT=heronpy
-TMP_DIR=$(mktemp --directory)
+TMP_DIR=$(mktemp -d)
 
-VENV="$(mktemp --directory)"
+VENV="$(mktemp -d)"
+pip install virtualenv
 virtualenv "$VENV"
 source "$VENV/bin/activate"
 # TODO: make this a virtualenv
