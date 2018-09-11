@@ -315,7 +315,7 @@ public class StormStreamBuilderTest {
   @SuppressWarnings({"rawtypes", "unchecked", "serial"})
   private class MockIWindowedBolt implements IWindowedBolt {
     @Override
-    public void prepare(Map<String, Object> topoConf,
+    public void prepare(Map topoConf,
                         TopologyContext context, OutputCollector collector) {
 
     }
