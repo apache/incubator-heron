@@ -42,13 +42,13 @@ public class TrackerMetricsProviderTest {
 
     String metric = "count";
     String comp = "bolt";
-    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
-        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
-        "{\"timeline\": {\"count\": " +
-        "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, " +
-        "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
-        "\"1497481168\": \"3\"}}}, " +
-        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
+    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, "
+        + "\"message\": \"\", \"version\": \"ver\", \"result\": "
+        + "{\"timeline\": {\"count\": "
+        + "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, "
+        + "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", "
+        + "\"1497481168\": \"3\"}}}, "
+        + "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
     doReturn(response).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
@@ -76,23 +76,23 @@ public class TrackerMetricsProviderTest {
 
     String metric = "count";
     String comp1 = "bolt-1";
-    String response1 = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
-        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
-        "{\"timeline\": {\"count\": " +
-        "{\"container_1_bolt-1_2\": {\"1497481288\": \"104\"}" +
-        "}}, " +
-        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
+    String response1 = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, "
+        + "\"message\": \"\", \"version\": \"ver\", \"result\": "
+        + "{\"timeline\": {\"count\": "
+        + "{\"container_1_bolt-1_2\": {\"1497481288\": \"104\"}"
+        + "}}, "
+        + "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
     doReturn(response1).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp1, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     String comp2 = "bolt-2";
-    String response2 = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, " +
-        "\"message\": \"\", \"version\": \"\", " +
-        "\"result\": {\"timeline\": {\"count\": " +
-        "{\"container_1_bolt-2_1\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
-        "\"1497481168\": \"3\"}}}, " +
-        "\"interval\": 60, \"component\": \"bolt-2\"}}";
+    String response2 = "{\"status\": \"\", " + "\"executiontime\": 0.0026040077209472656, "
+        + "\"message\": \"\", \"version\": \"\", "
+        + "\"result\": {\"timeline\": {\"count\": "
+        + "{\"container_1_bolt-2_1\": {\"1497481228\": \"12\", \"1497481348\": \"2\", "
+        + "\"1497481168\": \"3\"}}}, "
+        + "\"interval\": 60, \"component\": \"bolt-2\"}}";
     doReturn(response2).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp2, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
@@ -120,12 +120,12 @@ public class TrackerMetricsProviderTest {
 
     String metric = "__time_spent_back_pressure_by_compid/container_1_split_1";
     String comp = "__stmgr__";
-    String response = "{\"status\": \"success\", " +
-        "\"executiontime\": 0.30, \"message\": \"\", \"version\": \"v\", " +
-        "\"result\": " +
-        "{\"metrics\": {\"__time_spent_back_pressure_by_compid/container_1_split_1\": " +
-        "{\"stmgr-1\": {\"00\" : \"601\"}}}, " +
-        "\"interval\": 60, \"component\": \"__stmgr__\"}}";
+    String response = "{\"status\": \"success\", "
+        + "\"executiontime\": 0.30, \"message\": \"\", \"version\": \"v\", "
+        + "\"result\": "
+        + "{\"metrics\": {\"__time_spent_back_pressure_by_compid/container_1_split_1\": "
+        + "{\"stmgr-1\": {\"00\" : \"601\"}}}, "
+        + "\"interval\": 60, \"component\": \"__stmgr__\"}}";
 
     doReturn(response).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
@@ -148,9 +148,9 @@ public class TrackerMetricsProviderTest {
 
     String metric = "dummy";
     String comp = "split";
-    String response = "{\"status\": \"success\", \"executiontime\": 0.30780792236328125, " +
-        "\"message\": \"\", \"version\": \"v\", \"result\": " +
-        "{\"metrics\": {}, \"interval\": 0, \"component\": \"split\"}}";
+    String response = "{\"status\": \"success\", \"executiontime\": 0.30780792236328125, "
+        + "\"message\": \"\", \"version\": \"v\", \"result\": "
+        + "{\"metrics\": {}, \"interval\": 0, \"component\": \"split\"}}";
 
     doReturn(response).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
@@ -178,13 +178,13 @@ public class TrackerMetricsProviderTest {
 
     String metric = "count";
     String comp = "bolt";
-    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, " +
-        "\"message\": \"\", \"version\": \"ver\", \"result\": " +
-        "{\"timeline\": {\"count\": " +
-        "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, " +
-        "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", " +
-        "\"1497481168\": \"3\"}}}, " +
-        "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
+    String response = "{\"status\": \"success\", \"executiontime\": 0.002241849899291992, "
+        + "\"message\": \"\", \"version\": \"ver\", \"result\": "
+        + "{\"timeline\": {\"count\": "
+        + "{\"container_1_bolt_1\": {\"1497481288\": \"104\"}, "
+        + "\"container_1_bolt_2\": {\"1497481228\": \"12\", \"1497481348\": \"2\", "
+        + "\"1497481168\": \"3\"}}}, "
+        + "\"endtime\": 1497481388, \"component\": \"bolt\", \"starttime\": 1497481208}}";
 
     doReturn(response).when(spyMetricsProvider)
         .getMetricsFromTracker(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));

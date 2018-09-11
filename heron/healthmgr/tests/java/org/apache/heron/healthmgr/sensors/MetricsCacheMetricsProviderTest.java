@@ -88,7 +88,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Collection<Measurement> metrics =
         spyMetricsProvider.getMeasurements(Instant.ofEpochSecond(10),
@@ -126,7 +127,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response1).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp1, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp1, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     String comp2 = "bolt-2";
     TopologyMaster.MetricResponse response2 = TopologyMaster.MetricResponse.newBuilder()
@@ -153,7 +155,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response2).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp2, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp2, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Collection<Measurement> metrics =
         spyMetricsProvider.getMeasurements(Instant.ofEpochSecond(10),
@@ -193,7 +196,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
     Collection<Measurement> metrics =
         spyMetricsProvider.getMeasurements(Instant.ofEpochSecond(10),
             Duration.ofSeconds(60),
@@ -217,7 +221,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
     Collection<Measurement> metrics =
         spyMetricsProvider.getMeasurements(Instant.ofEpochSecond(10),
             Duration.ofSeconds(60),
@@ -284,7 +289,8 @@ public class MetricsCacheMetricsProviderTest {
         .build();
 
     doReturn(response).when(spyMetricsProvider)
-        .getMetricsFromMetricsCache(metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
+        .getMetricsFromMetricsCache(
+            metric, comp, Instant.ofEpochSecond(10), Duration.ofSeconds(60));
 
     Collection<Measurement> metrics =
         spyMetricsProvider.getMeasurements(Instant.ofEpochSecond(10),

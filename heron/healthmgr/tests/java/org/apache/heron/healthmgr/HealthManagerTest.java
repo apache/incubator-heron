@@ -106,7 +106,7 @@ public class HealthManagerTest {
     private final MetricsProvider metricsProvider;
 
     @Inject
-    public TestPolicy(HealthPolicyConfig config,
+    TestPolicy(HealthPolicyConfig config,
                       ISchedulerClient schedulerClient,
                       SchedulerStateManagerAdaptor stateMgrAdaptor,
                       MetricsProvider metricsProvider) {

@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BackPressureDetectorTest {
-  Instant now;
+  private Instant now;
 
   @Before
   public void setup() {
@@ -76,7 +76,7 @@ public class BackPressureDetectorTest {
 
     Assert.assertEquals(2, symptoms.size());
     SymptomsTable compSymptom = SymptomsTable.of(symptoms).type(SYMPTOM_COMP_BACK_PRESSURE.text());
-    Assert.assertEquals(1,compSymptom.size());
+    Assert.assertEquals(1, compSymptom.size());
     Assert.assertEquals(1, compSymptom.get().iterator().next().assignments().size());
 
     SymptomsTable instanceSymptom
