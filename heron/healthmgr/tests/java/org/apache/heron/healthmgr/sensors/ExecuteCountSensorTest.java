@@ -61,7 +61,8 @@ public class ExecuteCountSensorTest {
 
     Collection<String> comps = Arrays.asList("bolt-1", "bolt-2");
     when(metricsProvider.getMeasurements(
-        any(Instant.class), eq(DEFAULT_METRIC_DURATION), eq(Collections.singletonList(metric)), eq(comps)))
+        any(Instant.class),
+        eq(DEFAULT_METRIC_DURATION), eq(Collections.singletonList(metric)), eq(comps)))
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor

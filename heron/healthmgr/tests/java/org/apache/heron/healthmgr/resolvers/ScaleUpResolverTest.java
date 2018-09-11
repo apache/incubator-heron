@@ -21,7 +21,6 @@ package org.apache.heron.healthmgr.resolvers;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +41,6 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
 import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
-import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
 import org.apache.heron.proto.scheduler.Scheduler.UpdateTopologyRequest;
 import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
@@ -96,7 +94,8 @@ public class ScaleUpResolverTest {
     ScaleUpResolver spyResolver = spy(resolver);
 
     doReturn(2).when(spyResolver).computeScaleUpFactor("bolt");
-    doReturn(currentPlan).when(spyResolver).buildNewPackingPlan(any(HashMap.class), eq(currentPlan));
+    doReturn(currentPlan).when(spyResolver)
+        .buildNewPackingPlan(any(HashMap.class), eq(currentPlan));
 
     Collection<Action> result = spyResolver.resolve(diagnosis);
     verify(scheduler, times(1)).updateTopology(any(UpdateTopologyRequest.class));

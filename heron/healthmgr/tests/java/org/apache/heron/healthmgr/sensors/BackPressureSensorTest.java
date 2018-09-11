@@ -28,11 +28,9 @@ import java.util.Collections;
 import com.microsoft.dhalion.api.MetricsProvider;
 import com.microsoft.dhalion.core.Measurement;
 import com.microsoft.dhalion.core.MeasurementsTable;
-import com.microsoft.dhalion.policy.PoliciesExecutor;
 import com.microsoft.dhalion.policy.PoliciesExecutor.ExecutionContext;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
