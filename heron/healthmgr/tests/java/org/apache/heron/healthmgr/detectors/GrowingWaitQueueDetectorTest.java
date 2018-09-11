@@ -43,21 +43,16 @@ public class GrowingWaitQueueDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_LIMIT, 10.0)).thenReturn(5.0);
 
-    Measurement measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 0.0);
-    Measurement measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892270), 300.0);
-    Measurement measurement3
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892330), 700.0);
-    Measurement measurement4
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892390), 1000.0);
-    Measurement measurement5
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892450), 1300.0);
+    Measurement measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 0.0);
+    Measurement measurement2 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892270), 300.0);
+    Measurement measurement3 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892330), 700.0);
+    Measurement measurement4 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892390), 1000.0);
+    Measurement measurement5 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892450), 1300.0);
 
 
     Collection<Measurement> metrics = new ArrayList<>();
@@ -76,21 +71,16 @@ public class GrowingWaitQueueDetectorTest {
     assertEquals(1, symptoms.size());
     assertEquals(1, symptoms.iterator().next().assignments().size());
 
-    measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 0.0);
-    measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892270), 200.0);
-    measurement3
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892330), 400.0);
-    measurement4
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892390), 600.0);
-    measurement5
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892450), 800.0);
+    measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 0.0);
+    measurement2 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892270), 200.0);
+    measurement3 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892330), 400.0);
+    measurement4 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892390), 600.0);
+    measurement5 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892450), 800.0);
 
     metrics = new ArrayList<>();
     metrics.add(measurement1);

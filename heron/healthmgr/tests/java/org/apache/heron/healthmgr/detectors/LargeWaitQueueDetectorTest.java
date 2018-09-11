@@ -43,12 +43,10 @@ public class LargeWaitQueueDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_SIZE_LIMIT, 1000)).thenReturn(20);
 
-    Measurement measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 21);
-    Measurement measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892322), 21);
+    Measurement measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 21);
+    Measurement measurement2 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892322), 21);
 
     Collection<Measurement> metrics = new ArrayList<>();
     metrics.add(measurement1);
@@ -64,12 +62,10 @@ public class LargeWaitQueueDetectorTest {
     assertEquals(1, symptoms.iterator().next().assignments().size());
 
 
-    measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 11);
-    measurement2
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892322), 10);
+    measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 11);
+    measurement2 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892322), 10);
 
     metrics = new ArrayList<>();
     metrics.add(measurement1);
