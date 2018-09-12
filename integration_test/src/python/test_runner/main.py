@@ -25,6 +25,7 @@ import sys
 import time
 import uuid
 from httplib import HTTPConnection
+from threading import Lock, Thread
 
 from ..common import status
 from heron.common.src.python.utils import log
@@ -301,10 +302,11 @@ def filter_test_topologies(test_topologies, test_pattern):
     sys.exit(1)
   return test_topologies
 
+successes = []
+failures = []
 def run_tests(conf, args):
   ''' Run the test for each topology specified in the conf file '''
-  successes = []
-  failures = []
+  lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
   http_server_host_port = "%s:%d" % (args.http_server_hostname, args.http_server_port)
@@ -324,7 +326,37 @@ def run_tests(conf, args):
   else:
     raise ValueError("Unrecognized binary file type: %s" % args.tests_bin_path)
 
+  def _run_single_test(topology_name, topology_conf, args, http_server_host_port, classpath,
+    update_args, topology_args):
+    global successes, failures
+    results_checker = load_result_checker(
+      topology_name, topology_conf,
+      load_expected_result_handler(topology_name, topology_conf, args, http_server_host_port),
+      HttpBasedActualResultsHandler(http_server_host_port, topology_name))
+
+    start_secs = int(time.time())
+    try:
+      result = run_test(topology_name, classpath, results_checker,
+        args, http_server_host_port, update_args, topology_args)
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      if isinstance(result, status.TestSuccess):
+        successes += [test_tuple]
+      elif isinstance(result, status.TestFailure):
+        failures += [test_tuple]
+      else:
+        logging.error("Unrecognized test response returned for test %s: %s",
+          topology_name, str(result))
+        failures += [test_tuple]
+      lock.release()
+    except status.TestFailure:
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      failures += [test_tuple]
+      lock.release()
+
   current = 1
+  test_threads = []
   for topology_conf in test_topologies:
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     classpath = topology_classpath_prefix + topology_conf["classPath"]
@@ -344,31 +376,18 @@ def run_tests(conf, args):
                          + topology_name)
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
 
-    results_checker = load_result_checker(
-        topology_name, topology_conf,
-        load_expected_result_handler(topology_name, topology_conf, args, http_server_host_port),
-        HttpBasedActualResultsHandler(http_server_host_port, topology_name))
-
     logging.info("==== Starting test %s of %s: %s ====",
-                 current, len(test_topologies), topology_name)
-    start_secs = int(time.time())
-    try:
-      result = run_test(topology_name, classpath, results_checker,
-                        args, http_server_host_port, update_args, topology_args)
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      if isinstance(result, status.TestSuccess):
-        successes += [test_tuple]
-      elif isinstance(result, status.TestFailure):
-        failures += [test_tuple]
-      else:
-        logging.error("Unrecognized test response returned for test %s: %s",
-                      topology_name, str(result))
-        failures += [test_tuple]
-    except status.TestFailure:
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      failures += [test_tuple]
+      current, len(test_topologies), topology_name)
+
+    test_threads.append(Thread(target=_run_single_test(topology_name, topology_conf, args,
+      http_server_host_port, classpath, update_args, topology_args)))
+    test_threads[-1].start()
 
     current += 1
+
+  for thread in test_threads:
+    thread.join()
+
   return successes, failures
 
 def load_result_checker(topology_name, topology_conf,
@@ -433,8 +452,10 @@ def main():
     logging.error('Unknown argument passed to %s: %s', sys.argv[0], unknown_args[0])
     sys.exit(1)
 
+  tests_start_time = int(time.time())
   (successes, failures) = run_tests(conf, args)
   total = len(failures) + len(successes)
+  logging.info("Total integration test time = %ss" % int(time.time()) - tests_start_time)
 
   if not failures:
     logging.info("SUCCESS: %s (all) tests passed:", len(successes))
