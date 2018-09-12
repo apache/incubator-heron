@@ -25,6 +25,7 @@ import sys
 import time
 import uuid
 from httplib import HTTPConnection
+from threading import Lock, Thread
 
 from ..common import status
 from heron.common.src.python.utils import log
@@ -40,6 +41,8 @@ RETRY_ATTEMPTS = 15
 RETRY_INTERVAL = 10
 WAIT_FOR_DEACTIVATION = 5
 
+successes = []
+failures = []
 
 class TopologyStructureResultChecker(object):
   """
@@ -487,32 +490,79 @@ def cluster_token(cluster, role, env):
 
 #  Topology manipulations end
 
-
-def run_topology_tests(conf, args):
+def run_topology_tests(conf, test_args):
   """
   Run the test for each topology specified in the conf file
   """
-  successes = []
-  failures = []
+  lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
-  http_server_host_port = "%s:%d" % (args.http_hostname, args.http_port)
+  http_server_host_port = "%s:%d" % (test_args.http_hostname, test_args.http_port)
 
-  if args.tests_bin_path.endswith("scala-integration-tests.jar"):
-    test_topologies = filter_test_topologies(conf["scalaTopologies"], args.test_topology_pattern)
+  if test_args.tests_bin_path.endswith("scala-integration-tests.jar"):
+    test_topologies = filter_test_topologies(conf["scalaTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-  elif args.tests_bin_path.endswith("integration-topology-tests.jar"):
-    test_topologies = filter_test_topologies(conf["javaTopologies"], args.test_topology_pattern)
+  elif test_args.tests_bin_path.endswith("integration-topology-tests.jar"):
+    test_topologies = filter_test_topologies(conf["javaTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
-  elif args.tests_bin_path.endswith("heron_integ_topology.pex"):
-    test_topologies = filter_test_topologies(conf["pythonTopologies"], args.test_topology_pattern)
+  elif test_args.tests_bin_path.endswith("heron_integ_topology.pex"):
+    test_topologies = filter_test_topologies(conf["pythonTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = ""
   else:
-    raise ValueError("Unrecognized binary file type: %s" % args.tests_bin_path)
+    raise ValueError("Unrecognized binary file type: %s" % test_args.tests_bin_path)
 
   processing_type = conf["processingType"]
 
+  def _run_single_test(topology_name, topology_conf, test_args, http_server_host_port, classpath,
+    update_args, deactivate_args, restart_args, topology_args, expected_topo_result_file_path,
+    expected_state_result_file_path):
+    global successes, failures
+    check_type = topology_conf["checkType"]
+    if check_type == 'topology_structure':
+      results_checker = load_result_checker(
+        check_type, topology_name,
+        FileBasedExpectedResultsHandler(expected_topo_result_file_path),
+        ZkFileBasedActualResultsHandler(topology_name, test_args.cluster))
+    elif check_type == 'checkpoint_state':
+      if processing_type == 'stateful':
+        results_checker = load_result_checker(
+          check_type, topology_name,
+          FileBasedExpectedResultsHandler(expected_topo_result_file_path),
+          ZkFileBasedActualResultsHandler(topology_name, test_args.cluster),
+          FileBasedExpectedResultsHandler(expected_state_result_file_path),
+          HttpBasedActualResultsHandler(http_server_host_port, topology_name))
+      elif processing_type == 'non_stateful':
+        raise ValueError("Cannot check instance checkpoint state in non_stateful processing. "
+                         + "Not running topology: " + topology_name)
+      else:
+        raise ValueError("Unrecognized processing type for topology: " + topology_name)
+    else:
+      raise ValueError("Unrecognized check type for topology: " + topology_name)
+
+    start_secs = int(time.time())
+    try:
+      result = run_topology_test(topology_name, classpath, results_checker,
+        test_args, update_args, deactivate_args, restart_args, http_server_host_port, topology_args,
+        check_type)
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      if isinstance(result, status.TestSuccess):
+        successes += [test_tuple]
+      elif isinstance(result, status.TestFailure):
+        failures += [test_tuple]
+      else:
+        logging.error("Unrecognized test response returned for test %s: %s",
+          topology_name, str(result))
+        failures += [test_tuple]
+      lock.release()
+    except status.TestFailure:
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      failures += [test_tuple]
+      lock.release()
+
   current = 1
+  test_threads = []
   for topology_conf in test_topologies:
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     classpath = topology_classpath_prefix + topology_conf["classPath"]
@@ -532,55 +582,27 @@ def run_topology_tests(conf, args):
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
 
     expected_topo_result_file_path = \
-      args.topologies_path + "/" + topology_conf["expectedTopoResultRelativePath"]
+      test_args.topologies_path + "/" + topology_conf["expectedTopoResultRelativePath"]
+    expected_state_result_file_path = ''
     if "expectedStateResultRelativePath" in topology_conf:
       expected_state_result_file_path = \
-        args.topologies_path + "/" + topology_conf["expectedStateResultRelativePath"]
-
-    check_type = topology_conf["checkType"]
-    if check_type == 'topology_structure':
-      results_checker = load_result_checker(
-        check_type, topology_name,
-        FileBasedExpectedResultsHandler(expected_topo_result_file_path),
-        ZkFileBasedActualResultsHandler(topology_name, args.cluster))
-    elif check_type == 'checkpoint_state':
-      if processing_type == 'stateful':
-        results_checker = load_result_checker(
-          check_type, topology_name,
-          FileBasedExpectedResultsHandler(expected_topo_result_file_path),
-          ZkFileBasedActualResultsHandler(topology_name, args.cluster),
-          FileBasedExpectedResultsHandler(expected_state_result_file_path),
-          HttpBasedActualResultsHandler(http_server_host_port, topology_name))
-      elif processing_type == 'non_stateful':
-        raise ValueError("Cannot check instance checkpoint state in non_stateful processing. "
-                       + "Not running topology: " + topology_name)
-      else:
-        raise ValueError("Unrecognized processing type for topology: " + topology_name)
-    else:
-      raise ValueError("Unrecognized check type for topology: " + topology_name)
+        test_args.topologies_path + "/" + topology_conf["expectedStateResultRelativePath"]
 
     logging.info("==== Starting test %s of %s: %s ====",
       current, len(test_topologies), topology_name)
-    start_secs = int(time.time())
-    try:
-      result = run_topology_test(topology_name, classpath, results_checker,
-        args, update_args, deactivate_args, restart_args, http_server_host_port, topology_args,
-        check_type)
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      if isinstance(result, status.TestSuccess):
-        successes += [test_tuple]
-      elif isinstance(result, status.TestFailure):
-        failures += [test_tuple]
-      else:
-        logging.error("Unrecognized test response returned for test %s: %s",
-          topology_name, str(result))
-        failures += [test_tuple]
-    except status.TestFailure:
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      failures += [test_tuple]
+
+    test_threads.append(Thread(target=_run_single_test, args=(topology_name, topology_conf, test_args,
+      http_server_host_port, classpath, update_args, deactivate_args, restart_args,
+      topology_args, expected_topo_result_file_path, expected_state_result_file_path)))
 
     current += 1
-  return successes, failures
+
+  for thread in test_threads:
+    thread.start()
+  for thread in test_threads:
+    thread.join()
+
+  return
 
 
 def load_result_checker(check_type, topology_name,
@@ -638,8 +660,10 @@ def main():
     logging.error('Unknown argument passed to %s: %s', sys.argv[0], unknown_args[0])
     sys.exit(1)
 
-  (successes, failures) = run_topology_tests(conf, args)
+  tests_start_time = int(time.time())
+  run_topology_tests(conf, args)
   total = len(failures) + len(successes)
+  logging.info("Total integration topology test time = %ss" % (int(time.time()) - tests_start_time))
 
   if not failures:
     logging.info("SUCCESS: %s (all) tests passed:", len(successes))
