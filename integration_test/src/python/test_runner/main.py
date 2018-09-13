@@ -356,7 +356,6 @@ def run_tests(conf, test_args):
       failures += [test_tuple]
       lock.release()
 
-  current = 1
   test_threads = []
   for topology_conf in test_topologies:
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
@@ -377,18 +376,17 @@ def run_tests(conf, test_args):
                          + topology_name)
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
 
-    logging.info("==== Starting test %s of %s: %s ====",
-      current, len(test_topologies), topology_name)
-
     test_threads.append(Thread(target=_run_single_test, args=(topology_name, topology_conf,
       test_args, http_server_host_port, classpath, update_args, topology_args)))
 
-    current += 1
-
-  for thread in test_threads:
-    thread.start()
-  for thread in test_threads:
-    thread.join()
+  count = 0
+  while count < len(test_threads):
+    for i in range(count, min(count + int(test_args.max_thread_number), len(test_threads))):
+      logging.info("==== Starting test %s of %s ====", i + 1, len(test_threads))
+      test_threads[i].start()
+    for i in range(count, min(count + int(test_args.max_thread_number), len(test_threads))):
+      test_threads[i].join()
+    count += int(test_args.max_thread_number)
 
   return
 
@@ -443,6 +441,7 @@ def main():
   parser.add_argument('-pi', '--release-package-uri', dest='release_package_uri', default=None)
   parser.add_argument('-cd', '--cli-config-path', dest='cli_config_path',
                       default=conf['cliConfigPath'])
+  parser.add_argument('-ms', '--max-thread-number', dest='max_thread_number', default=1)
 
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
   #                    help='comma separated test case(classpath) name that will not be run')
