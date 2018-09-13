@@ -591,14 +591,16 @@ def run_topology_tests(conf, test_args):
       http_server_host_port, classpath, update_args, deactivate_args, restart_args,
       topology_args, expected_topo_result_file_path, expected_state_result_file_path)))
 
-  count = 0
-  while count < len(test_threads):
-    for i in range(count, min(count + int(test_args.max_thread_number), len(test_threads))):
+  # Run test in batches
+  start = 0
+  while start < len(test_threads):
+    end = min(start + int(test_args.max_thread_number), len(test_threads))
+    for i in range(start, end):
       logging.info("==== Starting test %s of %s ====", i + 1, len(test_threads))
       test_threads[i].start()
-    for i in range(count, min(count + int(test_args.max_thread_number), len(test_threads))):
+    for i in range(start, end):
       test_threads[i].join()
-    count += int(test_args.max_thread_number)
+    start = end
 
   return
 
