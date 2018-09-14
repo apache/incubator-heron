@@ -131,6 +131,21 @@ class EmitUntilConditionTestSpout extends IntegrationTestSpout {
     }
   }
 
+  // Clear spout state during topology parallelism update. This is because during
+  // topology parallelism update, if one instance (identified as container_id-task_id)
+  // is not changed between the old and the new packing plans, it will not be killed, instead
+  // it will be deactivated and then activated which results in instance state before the update
+  // being reserved. On the contrary, if one instance is changed, instance state before the update
+  // will be lost. The thing can happen to both spouts and bolts. But in this test, AT_LEAST_ONCE
+  // only requires tuples emitted at spouts to be a subset of tuples processed at bolts, thus clear
+  // spout state when update topology parallelism can guarantee test correctness no matter how
+  // packing plan changes.
+  @Override
+  public void activate() {
+    super.activate();
+    tuplesEmitted.clear();
+  }
+
   private final class EmitReportingTestSpoutCollector extends SpoutOutputCollector {
 
     private EmitReportingTestSpoutCollector(ISpoutOutputCollector delegate) {
