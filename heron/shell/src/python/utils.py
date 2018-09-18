@@ -194,3 +194,11 @@ def get_container_id(instance_id):
 def get_asset(asset_name):
   ''' get assset '''
   return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))
+
+def check_path(path):
+  """
+  file path should be a relative path without ".." in it
+  :param path: file path
+  :return: true if the path is relative and doesn't contain ".."
+  """
+  return not path.startswith("/") and ".." not in path

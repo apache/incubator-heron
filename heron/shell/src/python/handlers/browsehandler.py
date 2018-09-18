@@ -34,11 +34,13 @@ class BrowseHandler(tornado.web.RequestHandler):
     ''' get method '''
     if not path:
       path = "."
-    if path.startswith("/"):
+
+    if not utils.check_path(path):
       self.write("Only relative paths are allowed")
       self.set_status(403)
       self.finish()
       return
+
     t = Template(utils.get_asset("browse.html"))
     args = dict(
         path=path,

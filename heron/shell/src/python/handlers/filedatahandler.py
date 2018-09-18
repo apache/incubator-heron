@@ -32,11 +32,13 @@ class FileDataHandler(tornado.web.RequestHandler):
     """ get method """
     if path is None:
       return {}
-    if path.startswith("/"):
+
+    if not utils.check_path(path):
       self.write("Only relative paths are allowed")
       self.set_status(403)
       self.finish()
       return
+
     offset = self.get_argument("offset", default=-1)
     length = self.get_argument("length", default=-1)
     if not os.path.isfile(path):

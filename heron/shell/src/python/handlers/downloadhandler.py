@@ -37,7 +37,7 @@ class DownloadHandler(tornado.web.RequestHandler):
     self.connection_closed = False
 
     self.set_header("Content-Disposition", "attachment")
-    if path.startswith("/"):
+    if not utils.check_path(path):
       self.write("Only relative paths are allowed")
       self.set_status(403)
       self.finish()

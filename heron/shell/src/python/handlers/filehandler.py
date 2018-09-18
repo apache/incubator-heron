@@ -35,11 +35,13 @@ class FileHandler(tornado.web.RequestHandler):
       self.write("No such file")
       self.finish()
       return
-    if path.startswith("/"):
+
+    if not utils.check_path(path):
       self.write("Only relative paths are allowed")
       self.set_status(403)
       self.finish()
       return
+
     args = dict(
         filename=path,
         jquery=utils.get_asset("jquery.js"),
