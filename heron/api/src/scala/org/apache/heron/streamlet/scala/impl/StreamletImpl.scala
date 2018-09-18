@@ -20,6 +20,7 @@ package org.apache.heron.streamlet.scala.impl
 
 import scala.collection.JavaConverters
 
+import org.apache.heron.api.bolt.IRichBolt
 import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
@@ -122,6 +123,17 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     val serializableFunction =
       toSerializableFunctionWithIterable[R, T](flatMapFn)
     val newJavaStreamlet = javaStreamlet.flatMap[T](serializableFunction)
+    fromJavaStreamlet[T](newJavaStreamlet)
+  }
+
+  /**
+    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
+    * flattening the result
+    *
+    * @param flatMapFn The FlatMap Function that should be applied to each element
+    */
+  override def flatMap[T](flatMapBolt: IRichBolt): Streamlet[T] = {
+    val newJavaStreamlet = javaStreamlet.flatMap[T](flatMapBolt)
     fromJavaStreamlet[T](newJavaStreamlet)
   }
 

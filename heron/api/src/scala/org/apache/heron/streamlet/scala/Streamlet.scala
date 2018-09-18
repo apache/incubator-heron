@@ -18,6 +18,7 @@
  */
 package org.apache.heron.streamlet.scala
 
+import org.apache.heron.api.bolt.IRichBolt
 import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
@@ -90,6 +91,14 @@ trait Streamlet[R] {
     * @param flatMapFn The FlatMap Function that should be applied to each element
     */
   def flatMap[T](flatMapFn: R => Iterable[_ <: T]): Streamlet[T]
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet and
+   * flattening the result
+   *
+   * @param flatMapBolt The rich bolt that is used to emit tuples from each input element
+   */
+   def flatMap[T](flatMapBolt: IRichBolt): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet

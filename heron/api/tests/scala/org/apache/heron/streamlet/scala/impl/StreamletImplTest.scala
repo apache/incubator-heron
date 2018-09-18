@@ -43,6 +43,7 @@ import org.apache.heron.streamlet.scala.common.{
   TestIncrementSerializableTransformer,
   TestListBufferSink
 }
+import org.apache.heron.streamlet.scala.impl.TestFlatMapBolt
 
 /**
   * Tests for Scala Streamlet Implementation functionality
@@ -109,6 +110,32 @@ class StreamletImplTest extends BaseFunSuite {
       .flatMap[String] { num: Double =>
         List((num * 10).toString)
       }
+      .setName("FlatMap_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[FlatMapStreamlet[_, _]])
+    val flatMapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[FlatMapStreamlet[Double, String]]
+    assertEquals("FlatMap_Streamlet_1", flatMapStreamlet.getName)
+    assertEquals(0, flatMapStreamlet.getChildren.size())
+  }
+
+test("StreamletImpl should support flatMap transformation with a bolt") {
+    val supplierStreamlet = StreamletImpl
+      .createSupplierStreamlet(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(20)
+
+    val bolt = new TestFlatMapBolt
+    supplierStreamlet
+      .flatMap[String](bolt)
       .setName("FlatMap_Streamlet_1")
       .setNumPartitions(5)
 

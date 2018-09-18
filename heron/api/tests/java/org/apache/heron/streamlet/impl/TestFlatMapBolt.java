@@ -29,7 +29,7 @@ import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 
-public class TestFlatmapBolt extends BaseRichBolt {
+public class TestFlatMapBolt extends BaseRichBolt {
   private OutputCollector outputCollector;
   private int tupleExecuted;
 
@@ -51,5 +51,9 @@ public class TestFlatmapBolt extends BaseRichBolt {
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields("output"));
+  }
+
+  public int getExecuted() {
+    return tupleExecuted;
   }
 }

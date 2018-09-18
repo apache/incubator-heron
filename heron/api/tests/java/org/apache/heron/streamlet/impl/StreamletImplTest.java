@@ -110,7 +110,7 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testFlatMapStreamletWithBolt() throws Exception {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    BaseRichBolt bolt = new TestFlatmapBolt();
+    BaseRichBolt bolt = new TestFlatMapBolt();
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .flatMap(bolt);
     assertTrue(streamlet instanceof FlatMapStreamlet);
