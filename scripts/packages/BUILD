@@ -329,12 +329,6 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-include",
-    package_dir = "include",
-    srcs = ["//heron/api/src:cxx-hdrs"],
-)
-
-pkg_tar(
     name = "heron-lib-scheduler",
     package_dir = "lib/scheduler",
     srcs = [
