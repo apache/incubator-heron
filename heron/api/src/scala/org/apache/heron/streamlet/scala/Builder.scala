@@ -18,6 +18,7 @@
  */
 package org.apache.heron.streamlet.scala
 
+import org.apache.heron.api.spout.IRichSpout
 import org.apache.heron.streamlet.scala.impl.BuilderImpl
 
 /**
@@ -49,7 +50,14 @@ trait Builder {
     * Creates a new Streamlet using the underlying generator
     *
     * @param generator The generator that generates the tuples of the streamlet
-    * @return  a Streamlet representation of the source object
+    * @return a Streamlet representation of the source object
     */
   def newSource[R](generator: Source[R]): Streamlet[R]
+
+  /**
+   * Creates a new Streamlet using the provided spout
+   * @param spout The spout that emits the tuples of the streamlet
+   * @return a Streamlet representation of the spout object
+   */
+  def newSource[R](spout: IRichSpout): Streamlet[R]
 }

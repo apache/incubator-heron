@@ -22,13 +22,19 @@ package org.apache.heron.streamlet.impl;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.junit.Test;
 
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
@@ -49,6 +55,7 @@ import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
@@ -83,6 +90,30 @@ public class StreamletImplTest {
   public void testSupplierStreamlet() throws Exception {
     Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     assertTrue(streamlet instanceof SupplierStreamlet);
+  }
+
+  private class MySpout extends BaseRichSpout {
+    @Override
+    public void open(
+        Map<String, Object> map,
+        TopologyContext topologyContext,
+        SpoutOutputCollector spoutOutputCollector) {
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+      declarer.declare(new Fields("output"));
+    }
+
+    @Override
+    public void nextTuple() { }
+  }
+
+  @Test
+  public void testSpoutStreamlet() throws Exception {
+    MySpout spout = new MySpout();
+    Streamlet<Double> streamlet = StreamletImpl.createSpoutStreamlet(spout);
+    assertTrue(streamlet instanceof SpoutStreamlet);
   }
 
   @Test

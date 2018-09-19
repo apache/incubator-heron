@@ -21,6 +21,7 @@
 package org.apache.heron.streamlet;
 
 import org.apache.heron.streamlet.impl.BuilderImpl;
+import org.apache.heron.api.spout.IRichSpout;
 
 /**
  * Builder is used to register all sources. Builder thus keeps track
@@ -45,4 +46,12 @@ public interface Builder {
    * @return
    */
   <R> Streamlet<R> newSource(Source<R> generator);
+
+  /**
+   * Creates a new Streamlet using the provided spout
+   * @param spout The spout that emits the tuples of the streamlet
+   * @param <R>
+   * @return
+   */
+  <R> Streamlet<R> newSource(IRichSpout spout);
 }

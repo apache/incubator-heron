@@ -18,6 +18,7 @@
  */
 package org.apache.heron.streamlet.scala.impl
 
+import org.apache.heron.api.spout.IRichSpout
 import org.apache.heron.api.topology.TopologyBuilder
 import org.apache.heron.streamlet.impl.{BuilderImpl => JavaBuilderImpl}
 
@@ -36,6 +37,11 @@ class BuilderImpl(builder: org.apache.heron.streamlet.Builder)
   override def newSource[R](generator: Source[R]): Streamlet[R] = {
     val javaSourceObj = toJavaSource[R](generator)
     val newJavaStreamlet = builder.newSource(javaSourceObj)
+    StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
+  }
+
+  override def newSource[R](spout: IRichSpout): Streamlet[R] = {
+    val newJavaStreamlet = builder.newSource[R](spout)
     StreamletImpl.fromJavaStreamlet[R](newJavaStreamlet)
   }
 

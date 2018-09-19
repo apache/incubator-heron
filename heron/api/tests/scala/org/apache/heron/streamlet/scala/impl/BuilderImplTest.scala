@@ -18,12 +18,16 @@
  */
 package org.apache.heron.streamlet.scala.impl
 
+import java.util.{Map => JMap}
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 import org.junit.Assert.assertEquals
 
+import org.apache.heron.api.spout.{BaseRichSpout, IRichSpout, SpoutOutputCollector}
+import org.apache.heron.api.topology.{OutputFieldsDeclarer, TopologyContext}
+import org.apache.heron.api.tuple.{Fields, Values}
 import org.apache.heron.streamlet.Context
-
 import org.apache.heron.streamlet.scala.{Builder, Streamlet, Source}
 import org.apache.heron.streamlet.scala.common.BaseFunSuite
 
@@ -69,4 +73,44 @@ class BuilderImplTest extends BaseFunSuite {
     override def cleanup(): Unit = numbers.clear()
   }
 
+  test(
+    "BuilderImpl should support streamlet generation from a user defined spout") {
+    val source = new MySpout
+    assert(source.get == List[Int]())
+    val generatorStreamletObj = Builder.newBuilder
+      .newSource(source)
+      .setName("Generator_Streamlet_1")
+      .setNumPartitions(20)
+
+    assert(generatorStreamletObj.isInstanceOf[Streamlet[_]])
+    assertEquals("Generator_Streamlet_1", generatorStreamletObj.getName)
+    assertEquals(20, generatorStreamletObj.getNumPartitions)
+  }
+
+  private class MySpout extends BaseRichSpout {
+    private val numbers = ListBuffer[Int]()
+    private var collector: SpoutOutputCollector = _
+
+    override def open(
+        conf: JMap[String, Object],
+        context: TopologyContext,
+        collector: SpoutOutputCollector): Unit = {
+      this.collector = collector
+      this.numbers += (1, 2, 3, 4, 5)
+    }
+
+    override def nextTuple: Unit = {
+      collector.emit(new Values(numbers.toList.asJava))
+    }
+
+    override def close: Unit = {
+      numbers.clear()
+    }
+
+    override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {
+      declarer.declare(new Fields("output"))
+    }
+
+    def get = numbers
+  }
 }

@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.SerializableSupplier;
@@ -56,6 +57,14 @@ public final class BuilderImpl implements Builder {
   public <R> Streamlet<R> newSource(Source<R> generator) {
     StreamletUtils.require(generator != null, "source must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
+    retval.setNumPartitions(1);
+    sources.add(retval);
+    return retval;
+  }
+
+  @Override
+  public <R> Streamlet<R> newSource(IRichSpout spout) {
+    StreamletImpl<R> retval = StreamletImpl.createSpoutStreamlet(spout);
     retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
