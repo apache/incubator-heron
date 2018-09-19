@@ -34,25 +34,23 @@ public class JavaSerializer implements IPluggableSerializer {
 
   @Override
   public byte[] serialize(Object object) {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    try {
-      ObjectOutputStream oos = new ObjectOutputStream(bos);
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
       oos.writeObject(object);
       oos.flush();
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to serialize object: " + object.toString(), e);
+      return bos.toByteArray();
+    } catch (IOException ex) {
+      throw new RuntimeException("Failed to serialize object: " + object.toString(), ex);
     }
-    return bos.toByteArray();
   }
 
   @Override
   public Object deserialize(byte[] input) {
-    ByteArrayInputStream bis = new ByteArrayInputStream(input);
-    try {
-      ObjectInputStream ois = new ObjectInputStream(bis);
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(input);
+          ObjectInputStream ois = new ObjectInputStream(bis)) {
       return ois.readObject();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeException(e);
+    } catch (IOException | ClassNotFoundException ex) {
+      throw new RuntimeException(ex);
     }
   }
 }
