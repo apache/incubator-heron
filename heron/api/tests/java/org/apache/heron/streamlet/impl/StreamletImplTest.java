@@ -38,6 +38,7 @@ import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
+import org.apache.heron.resource.TestSpout;
 import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
@@ -92,26 +93,9 @@ public class StreamletImplTest {
     assertTrue(streamlet instanceof SupplierStreamlet);
   }
 
-  private class MySpout extends BaseRichSpout {
-    @Override
-    public void open(
-        Map<String, Object> map,
-        TopologyContext topologyContext,
-        SpoutOutputCollector spoutOutputCollector) {
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      declarer.declare(new Fields("output"));
-    }
-
-    @Override
-    public void nextTuple() { }
-  }
-
   @Test
   public void testSpoutStreamlet() throws Exception {
-    MySpout spout = new MySpout();
+    TestSpout spout = new TestSpout();
     Streamlet<Double> streamlet = StreamletImpl.createSpoutStreamlet(spout);
     assertTrue(streamlet instanceof SpoutStreamlet);
   }
