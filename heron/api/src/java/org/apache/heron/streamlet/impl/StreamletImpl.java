@@ -117,10 +117,10 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     REMAP("remap"),
     SINK("sink"),
     SOURCE("generator"),
+    SPOUT("spout"),
     SUPPLIER("supplier"),
     TRANSFORM("transform"),
-    UNION("union"),
-    SPOUT("spout");
+    UNION("union");
 
     private final String prefix;
 
