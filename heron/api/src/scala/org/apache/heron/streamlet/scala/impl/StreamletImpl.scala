@@ -20,7 +20,11 @@ package org.apache.heron.streamlet.scala.impl
 
 import scala.collection.JavaConverters
 
-import org.apache.heron.api.bolt.IRichBolt
+import org.apache.heron.api.bolt.{
+  IBasicBolt,
+  IRichBolt,
+  IWindowedBolt
+}
 import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
@@ -132,6 +136,26 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     * @param bolt The rich bolt object that should be applied to each element
     */
   override def applyBolt[T](bolt: IRichBolt): Streamlet[T] = {
+    val newJavaStreamlet = javaStreamlet.applyBolt[T](bolt)
+    fromJavaStreamlet[T](newJavaStreamlet)
+  }
+
+  /**
+    * Return a new Streamlet by applying a user provided bolt to each element of this Streamlet
+    *
+    * @param bolt The basic bolt object that should be applied to each element
+    */
+  override def applyBolt[T](bolt: IBasicBolt): Streamlet[T] = {
+    val newJavaStreamlet = javaStreamlet.applyBolt[T](bolt)
+    fromJavaStreamlet[T](newJavaStreamlet)
+  }
+
+  /**
+    * Return a new Streamlet by applying a user provided bolt to each element of this Streamlet
+    *
+    * @param bolt The windowed bolt object that should be applied to each element
+    */
+  override def applyBolt[T](bolt: IWindowedBolt): Streamlet[T] = {
     val newJavaStreamlet = javaStreamlet.applyBolt[T](bolt)
     fromJavaStreamlet[T](newJavaStreamlet)
   }

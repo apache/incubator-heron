@@ -21,7 +21,9 @@ package org.apache.heron.streamlet;
 
 import java.util.List;
 
+import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.bolt.IRichBolt;
+import org.apache.heron.api.bolt.IWindowedBolt;
 import org.apache.heron.classification.InterfaceStability;
 
 /**
@@ -91,6 +93,18 @@ public interface Streamlet<R> {
    * @param bolt The rich bolt that is used to emit tuples from each input element
    */
   <T> Streamlet<T> applyBolt(IRichBolt bolt);
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
+   * @param bolt The basic bolt that is used to emit tuples from each input element
+   */
+  <T> Streamlet<T> applyBolt(IBasicBolt bolt);
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
+   * @param bolt The windowed bolt that is used to emit tuples from each input element
+   */
+  <T> Streamlet<T> applyBolt(IWindowedBolt bolt);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet

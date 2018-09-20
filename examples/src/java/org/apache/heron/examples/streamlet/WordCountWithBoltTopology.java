@@ -21,10 +21,19 @@
 package org.apache.heron.examples.streamlet;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.bolt.BaseWindowedBolt;
+import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.api.tuple.Tuple;
+import org.apache.heron.api.tuple.Values;
+import org.apache.heron.api.windowing.TupleWindow;
 import org.apache.heron.examples.streamlet.utils.StreamletUtils;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.Config;
@@ -53,8 +62,7 @@ public final class WordCountWithBoltTopology {
       "To thine own self be true"
   );
 
-  private static class WindowSumBolt extends BaseWindowedBolt {
-    private static final long serialVersionUID = 8458595466693183050L;
+  private static class WindowedSumBolt extends BaseWindowedBolt {
     private OutputCollector collector;
 
     @Override
@@ -84,7 +92,7 @@ public final class WordCountWithBoltTopology {
   public static void main(String[] args) throws Exception {
     Builder processingGraphBuilder = Builder.newBuilder();
 
-    WindowSumBolt bolt = new WindowSumBolt()
+    BaseWindowedBolt bolt = new WindowedSumBolt()
         .withWindow(BaseWindowedBolt.Count.of(10000), BaseWindowedBolt.Count.of(5000));
 
     processingGraphBuilder
@@ -96,13 +104,12 @@ public final class WordCountWithBoltTopology {
         .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
         .setName("flatten-into-individual-words")
         // The reduce operation performs the per-key (i.e. per-word) sum within each time window
-        .flatMap(bolt)
+        .applyBolt(bolt)
         .setName("window-sum-bolt")
         // The final output is logged using a user-supplied format
-        .consume(kv -> {
-          String logMessage = String.format("(word: %s, count: %d)",
-              kv.getKey().getKey(),
-              kv.getValue()
+        .consume(v -> {
+          String logMessage = String.format("(result: %s",
+              v.toString()
           );
           LOG.info(logMessage);
         });

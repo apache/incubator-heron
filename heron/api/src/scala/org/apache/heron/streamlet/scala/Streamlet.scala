@@ -18,7 +18,11 @@
  */
 package org.apache.heron.streamlet.scala
 
-import org.apache.heron.api.bolt.IRichBolt
+import org.apache.heron.api.bolt.{
+  IBasicBolt,
+  IRichBolt,
+  IWindowedBolt
+}
 import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
@@ -98,6 +102,20 @@ trait Streamlet[R] {
    * @param bolt The rich bolt that is used to emit tuples from each input element
    */
    def applyBolt[T](bolt: IRichBolt): Streamlet[T]
+
+   /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
+   *
+   * @param bolt The basic bolt that is used to emit tuples from each input element
+   */
+   def applyBolt[T](bolt: IBasicBolt): Streamlet[T]
+
+   /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
+   *
+   * @param bolt The rich bolt that is used to emit tuples from each input element
+   */
+   def applyBolt[T](bolt: IWindowedBolt): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet

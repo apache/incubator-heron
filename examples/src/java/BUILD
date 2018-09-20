@@ -23,6 +23,7 @@ java_binary(
     srcs = glob(["org/apache/heron/examples/streamlet/**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/common/src/java:basics-java",
         "//heron/simulator/src/java:simulator-java",
         "//third_party/java:kryo",

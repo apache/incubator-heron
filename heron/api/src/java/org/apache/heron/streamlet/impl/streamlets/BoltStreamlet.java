@@ -22,7 +22,10 @@ package org.apache.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
 
+import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.bolt.IRichBolt;
+import org.apache.heron.api.bolt.IWindowedBolt;
+import org.apache.heron.api.topology.IComponent;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.StreamletImpl;
@@ -30,13 +33,25 @@ import org.apache.heron.streamlet.impl.operators.FlatMapOperator;
 
 /**
  * BoltStreamlet represents a Streamlet that is made up of applying the user
- * supplied IRichBolt object to each element of the parent streamlet.
+ * supplied bolt object to each element of the parent streamlet.
  */
 public class BoltStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private IRichBolt bolt;
+  private IComponent bolt;
+
+  public BoltStreamlet(StreamletImpl<R> parent, IBasicBolt bolt) {
+    this.parent = parent;
+    this.bolt = bolt;
+    setNumPartitions(parent.getNumPartitions());
+  }
 
   public BoltStreamlet(StreamletImpl<R> parent, IRichBolt bolt) {
+    this.parent = parent;
+    this.bolt = bolt;
+    setNumPartitions(parent.getNumPartitions());
+  }
+
+  public BoltStreamlet(StreamletImpl<R> parent, IWindowedBolt bolt) {
     this.parent = parent;
     this.bolt = bolt;
     setNumPartitions(parent.getNumPartitions());
@@ -45,8 +60,20 @@ public class BoltStreamlet<R, T> extends StreamletImpl<T> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.BOLT, stageNames);
-    bldr.setBolt(getName(), bolt,
-        getNumPartitions()).shuffleGrouping(parent.getName());
+
+    if (bolt instanceof IBasicBolt) {
+      bldr.setBolt(getName(), (IBasicBolt) bolt,
+          getNumPartitions()).shuffleGrouping(parent.getName());
+    } else if (bolt instanceof IRichBolt) {
+      bldr.setBolt(getName(), (IRichBolt) bolt,
+          getNumPartitions()).shuffleGrouping(parent.getName());
+    } else if (bolt instanceof IWindowedBolt) {
+      bldr.setBolt(getName(), (IWindowedBolt) bolt,
+          getNumPartitions()).shuffleGrouping(parent.getName());
+    } else {
+      return false;
+    }
+
     return true;
   }
 }

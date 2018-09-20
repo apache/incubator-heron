@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.bolt.IRichBolt;
+import org.apache.heron.api.bolt.IWindowedBolt;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
@@ -279,6 +281,28 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public <T> Streamlet<T> flatMap(
       SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn) {
     FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet.
+   * @param bolt The rich bolt object that is used to emit tuples from each input element
+   */
+  @Override
+  public <T> Streamlet<T> applyBolt(IBasicBolt bolt) {
+    BoltStreamlet<R, T> retval = new BoltStreamlet<>(this, bolt);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet.
+   * @param bolt The windowed bolt object that is used to emit tuples from each input element
+   */
+  @Override
+  public <T> Streamlet<T> applyBolt(IWindowedBolt bolt) {
+    BoltStreamlet<R, T> retval = new BoltStreamlet<>(this, bolt);
     addChild(retval);
     return retval;
   }
