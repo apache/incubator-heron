@@ -43,6 +43,7 @@ import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.BoltStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
@@ -101,6 +102,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   protected enum StreamletNamePrefix {
     CONSUMER("consumer"),
+    BOLT("bolt"),
     FILTER("filter"),
     FLATMAP("flatmap"),
     REDUCE("reduceByKeyAndWindow"),
@@ -282,13 +284,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Return a new Streamlet by applying a bolt to each element of this Streamlet and
-   * flattening the result
-   * @param flatMapBolt The rich bolt that is used to emit tuples from each input element
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet.
+   * @param bolt The rich bolt object that is used to emit tuples from each input element
    */
   @Override
-  public <T> Streamlet<T> flatMap(IRichBolt flatMapBolt) {
-    FlatMapStreamlet<R, T> retval = new FlatMapStreamlet<>(this, flatMapBolt);
+  public <T> Streamlet<T> applyBolt(IRichBolt bolt) {
+    BoltStreamlet<R, T> retval = new BoltStreamlet<>(this, bolt);
     addChild(retval);
     return retval;
   }

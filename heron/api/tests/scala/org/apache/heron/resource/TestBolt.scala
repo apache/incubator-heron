@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.scala.impl
+package org.apache.heron.resource
 
 import java.util.{Map => JMap}
 
@@ -29,7 +29,7 @@ import org.apache.heron.api.tuple.Fields
 import org.apache.heron.api.tuple.Tuple
 import org.apache.heron.api.tuple.Values
 
-class TestFlatMapBolt extends BaseRichBolt {
+class TestBolt extends BaseRichBolt {
   private var outputCollector: OutputCollector = _
   private var tupleExecuted: Int = _
 

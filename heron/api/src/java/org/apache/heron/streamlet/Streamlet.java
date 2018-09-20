@@ -87,11 +87,10 @@ public interface Streamlet<R> {
       SerializableFunction<R, ? extends Iterable<? extends T>> flatMapFn);
 
   /**
-   * Return a new Streamlet by applying a bolt to each element of this Streamlet and
-   * flattening the result
-   * @param flatMapBolt The rich bolt that is used to emit tuples from each input element
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
+   * @param bolt The rich bolt that is used to emit tuples from each input element
    */
-  <T> Streamlet<T> flatMap(IRichBolt flatMapBolt);
+  <T> Streamlet<T> applyBolt(IRichBolt bolt);
 
   /**
    * Return a new Streamlet by applying the filterFn on each element of this streamlet

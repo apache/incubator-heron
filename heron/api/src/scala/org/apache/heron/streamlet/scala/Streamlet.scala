@@ -93,12 +93,11 @@ trait Streamlet[R] {
   def flatMap[T](flatMapFn: R => Iterable[_ <: T]): Streamlet[T]
 
   /**
-   * Return a new Streamlet by applying a bolt to each element of this Streamlet and
-   * flattening the result
+   * Return a new Streamlet by applying a bolt to each element of this Streamlet
    *
-   * @param flatMapBolt The rich bolt that is used to emit tuples from each input element
+   * @param bolt The rich bolt that is used to emit tuples from each input element
    */
-   def flatMap[T](flatMapBolt: IRichBolt): Streamlet[T]
+   def applyBolt[T](bolt: IRichBolt): Streamlet[T]
 
   /**
     * Return a new Streamlet by applying the filterFn on each element of this streamlet

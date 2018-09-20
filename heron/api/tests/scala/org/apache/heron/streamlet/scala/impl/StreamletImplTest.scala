@@ -25,6 +25,7 @@ import org.junit.Assert.{assertEquals, assertTrue}
 import org.apache.heron.streamlet.WindowConfig
 import org.apache.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
+  BoltStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
   LogStreamlet,
@@ -43,7 +44,7 @@ import org.apache.heron.streamlet.scala.common.{
   TestIncrementSerializableTransformer,
   TestListBufferSink
 }
-import org.apache.heron.streamlet.scala.impl.TestFlatMapBolt
+import org.apache.heron.resource.TestBolt
 
 /**
   * Tests for Scala Streamlet Implementation functionality
@@ -127,16 +128,16 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, flatMapStreamlet.getChildren.size())
   }
 
-test("StreamletImpl should support flatMap transformation with a bolt") {
+test("StreamletImpl should support applyBolt transformation") {
     val supplierStreamlet = StreamletImpl
       .createSupplierStreamlet(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
-    val bolt = new TestFlatMapBolt
+    val bolt = new TestBolt
     supplierStreamlet
-      .flatMap[String](bolt)
-      .setName("FlatMap_Streamlet_1")
+      .applyBolt[String](bolt)
+      .setName("Bolt_Streamlet_1")
       .setNumPartitions(5)
 
     val supplierStreamletImpl =
@@ -145,12 +146,12 @@ test("StreamletImpl should support flatMap transformation with a bolt") {
     assertTrue(
       supplierStreamletImpl
         .getChildren(0)
-        .isInstanceOf[FlatMapStreamlet[_, _]])
-    val flatMapStreamlet = supplierStreamletImpl
+        .isInstanceOf[BoltStreamlet[_, _]])
+    val boltStreamlet = supplierStreamletImpl
       .getChildren(0)
-      .asInstanceOf[FlatMapStreamlet[Double, String]]
-    assertEquals("FlatMap_Streamlet_1", flatMapStreamlet.getName)
-    assertEquals(0, flatMapStreamlet.getChildren.size())
+      .asInstanceOf[BoltStreamlet[Double, String]]
+    assertEquals("Bolt_Streamlet_1", boltStreamlet.getName)
+    assertEquals(0, boltStreamlet.getChildren.size())
   }
 
   test("StreamletImpl should support filter transformation") {

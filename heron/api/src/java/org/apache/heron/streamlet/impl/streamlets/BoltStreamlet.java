@@ -29,25 +29,22 @@ import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.operators.FlatMapOperator;
 
 /**
- * FlatMapStreamlet represents a Streamlet that is made up of applying the user
- * supplied flatMap function to each element of the parent streamlet and flattening
- * out the result.
+ * BoltStreamlet represents a Streamlet that is made up of applying the user
+ * supplied IRichBolt object to each element of the parent streamlet.
  */
-public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
+public class BoltStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private IRichBolt bolt;
 
-  public FlatMapStreamlet(StreamletImpl<R> parent,
-                          SerializableFunction<? super R,
-                              ? extends Iterable<? extends T>> flatMapFn) {
+  public BoltStreamlet(StreamletImpl<R> parent, IRichBolt bolt) {
     this.parent = parent;
-    this.bolt = new FlatMapOperator<R, T>(flatMapFn);
+    this.bolt = bolt;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.FLATMAP, stageNames);
+    setDefaultNameIfNone(StreamletNamePrefix.BOLT, stageNames);
     bldr.setBolt(getName(), bolt,
         getNumPartitions()).shuffleGrouping(parent.getName());
     return true;

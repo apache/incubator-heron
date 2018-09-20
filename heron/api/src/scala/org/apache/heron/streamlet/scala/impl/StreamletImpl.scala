@@ -127,13 +127,12 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
   }
 
   /**
-    * Return a new Streamlet by applying flatMapFn to each element of this Streamlet and
-    * flattening the result
+    * Return a new Streamlet by applying a user provided bolt to each element of this Streamlet
     *
-    * @param flatMapFn The FlatMap Function that should be applied to each element
+    * @param bolt The rich bolt object that should be applied to each element
     */
-  override def flatMap[T](flatMapBolt: IRichBolt): Streamlet[T] = {
-    val newJavaStreamlet = javaStreamlet.flatMap[T](flatMapBolt)
+  override def applyBolt[T](bolt: IRichBolt): Streamlet[T] = {
+    val newJavaStreamlet = javaStreamlet.applyBolt[T](bolt)
     fromJavaStreamlet[T](newJavaStreamlet)
   }
 

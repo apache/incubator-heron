@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.apache.heron.api.bolt.BaseRichBolt;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.resource.TestBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.SerializableConsumer;
@@ -38,6 +39,7 @@ import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.BoltStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
@@ -108,13 +110,13 @@ public class StreamletImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testFlatMapStreamletWithBolt() throws Exception {
+  public void testBoltStreamlet() throws Exception {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    BaseRichBolt bolt = new TestFlatMapBolt();
+    BaseRichBolt bolt = new TestBolt();
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-                                               .flatMap(bolt);
-    assertTrue(streamlet instanceof FlatMapStreamlet);
-    FlatMapStreamlet<Double, Double> mStreamlet = (FlatMapStreamlet<Double, Double>) streamlet;
+                                               .applyBolt(bolt);
+    assertTrue(streamlet instanceof BoltStreamlet);
+    BoltStreamlet<Double, Double> mStreamlet = (BoltStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
