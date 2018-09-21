@@ -19,6 +19,7 @@
 
 package org.apache.heron.healthmgr.detectors;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.apache.heron.healthmgr.HealthManagerMetrics;
 import org.apache.heron.healthmgr.HealthPolicyConfig;
 
 import static org.apache.heron.healthmgr.detectors.BackPressureDetector.CONF_NOISE_FILTER;
@@ -42,14 +44,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BackPressureDetectorTest {
-  Instant now;
+  private Instant now;
 
   @Before
   public void setup() {
     now = Instant.now();
   }
   @Test
-  public void testConfigAndFilter() {
+  public void testConfigAndFilter() throws IOException {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_NOISE_FILTER, 20)).thenReturn(50);
 
@@ -65,7 +67,8 @@ public class BackPressureDetectorTest {
     metrics.add(measurement2);
     metrics.add(measurement3);
 
-    BackPressureDetector detector = new BackPressureDetector(config);
+    HealthManagerMetrics publishingMetrics = mock(HealthManagerMetrics.class);
+    BackPressureDetector detector = new BackPressureDetector(config, publishingMetrics);
     PoliciesExecutor.ExecutionContext context = mock(PoliciesExecutor.ExecutionContext.class);
     when(context.checkpoint()).thenReturn(now);
     detector.initialize(context);
@@ -73,7 +76,7 @@ public class BackPressureDetectorTest {
 
     Assert.assertEquals(2, symptoms.size());
     SymptomsTable compSymptom = SymptomsTable.of(symptoms).type(SYMPTOM_COMP_BACK_PRESSURE.text());
-    Assert.assertEquals(1,compSymptom.size());
+    Assert.assertEquals(1, compSymptom.size());
     Assert.assertEquals(1, compSymptom.get().iterator().next().assignments().size());
 
     SymptomsTable instanceSymptom
@@ -92,7 +95,7 @@ public class BackPressureDetectorTest {
     metrics.add(measurement1);
     metrics.add(measurement2);
 
-    detector = new BackPressureDetector(config);
+    detector = new BackPressureDetector(config, publishingMetrics);
     detector.initialize(context);
     symptoms = detector.detect(metrics);
 

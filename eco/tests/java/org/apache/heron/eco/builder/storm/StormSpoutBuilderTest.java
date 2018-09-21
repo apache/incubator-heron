@@ -116,7 +116,7 @@ public class StormSpoutBuilderTest {
   private class MockSpout implements IRichSpout {
 
     @Override
-    public void open(Map<String, Object> conf,
+    public void open(Map conf,
                      TopologyContext context, SpoutOutputCollector collector) {
 
     }

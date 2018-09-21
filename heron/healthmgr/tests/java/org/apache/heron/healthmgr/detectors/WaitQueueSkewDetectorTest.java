@@ -44,12 +44,10 @@ public class WaitQueueSkewDetectorTest {
     HealthPolicyConfig config = mock(HealthPolicyConfig.class);
     when(config.getConfig(CONF_SKEW_RATIO, 20.0)).thenReturn(15.0);
 
-    Measurement measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 1501);
-    Measurement measurement2
-        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 100.0);
+    Measurement measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 1501);
+    Measurement measurement2 = new Measurement(
+        "bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 100.0);
 
     Collection<Measurement> metrics = new ArrayList<>();
     metrics.add(measurement1);
@@ -63,22 +61,19 @@ public class WaitQueueSkewDetectorTest {
 
     assertEquals(3, symptoms.size());
     SymptomsTable symptomsTable = SymptomsTable.of(symptoms);
-    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+    assertEquals(1, symptomsTable.type("POSITIVE " + BaseDetector.SymptomType
         .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
-    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+    assertEquals(1, symptomsTable.type("NEGATIVE " + BaseDetector.SymptomType
         .SYMPTOM_WAIT_Q_SIZE_SKEW).size());
-    assertEquals(1, symptomsTable.type("POSITIVE "+ BaseDetector.SymptomType
+    assertEquals(1, symptomsTable.type("POSITIVE " + BaseDetector.SymptomType
         .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i1").size());
-    assertEquals(1, symptomsTable.type("NEGATIVE "+ BaseDetector.SymptomType
+    assertEquals(1, symptomsTable.type("NEGATIVE " + BaseDetector.SymptomType
         .SYMPTOM_WAIT_Q_SIZE_SKEW).assignment("i2").size());
 
-
-     measurement1
-        = new Measurement("bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 1500);
-     measurement2
-        = new Measurement("bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond
-        (1497892222), 110.0);
+    measurement1 = new Measurement(
+        "bolt", "i1", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 1500);
+    measurement2 = new Measurement(
+        "bolt", "i2", METRIC_WAIT_Q_SIZE.text(), Instant.ofEpochSecond(1497892222), 110.0);
 
     metrics = new ArrayList<>();
     metrics.add(measurement1);

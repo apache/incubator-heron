@@ -38,7 +38,7 @@ import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOper
  * applying user supplied reduceFn on all elements within each window defined by a
  * user supplied Window Config.
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo<K> type and the value is of type V.
+ * KeyWindowInfo&lt;K&gt; type and the value is of type V.
  */
 public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
     extends StreamletImpl<KeyValue<KeyedWindow<K>, VR>> {

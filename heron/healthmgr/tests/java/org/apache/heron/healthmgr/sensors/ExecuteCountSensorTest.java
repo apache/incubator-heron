@@ -32,7 +32,7 @@ import com.microsoft.dhalion.policy.PoliciesExecutor;
 
 import org.junit.Test;
 
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 
 import static org.apache.heron.healthmgr.sensors.BaseSensor.DEFAULT_METRIC_DURATION;
 import static org.apache.heron.healthmgr.sensors.BaseSensor.MetricName.METRIC_EXE_COUNT;
@@ -47,8 +47,9 @@ public class ExecuteCountSensorTest {
   public void providesBoltExecutionCountMetrics() {
     Instant now = Instant.now();
     String metric = METRIC_EXE_COUNT.text();
-    TopologyProvider topologyProvider = mock(TopologyProvider.class);
-    when(topologyProvider.getBoltNames()).thenReturn(new String[]{"bolt-1", "bolt-2"});
+    PhysicalPlanProvider topologyProvider = mock(PhysicalPlanProvider.class);
+    when(topologyProvider.getBoltNames()).thenReturn(
+        Arrays.asList(new String[]{"bolt-1", "bolt-2"}));
 
     MetricsProvider metricsProvider = mock(MetricsProvider.class);
 
@@ -60,7 +61,8 @@ public class ExecuteCountSensorTest {
 
     Collection<String> comps = Arrays.asList("bolt-1", "bolt-2");
     when(metricsProvider.getMeasurements(
-        any(Instant.class), eq(DEFAULT_METRIC_DURATION), eq(Collections.singletonList(metric)), eq(comps)))
+        any(Instant.class),
+        eq(DEFAULT_METRIC_DURATION), eq(Collections.singletonList(metric)), eq(comps)))
         .thenReturn(result);
 
     ExecuteCountSensor executeCountSensor

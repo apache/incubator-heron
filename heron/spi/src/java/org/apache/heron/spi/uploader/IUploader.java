@@ -41,6 +41,7 @@ import org.apache.heron.spi.common.Config;
 public interface IUploader extends AutoCloseable {
   /**
    * Initialize the uploader with the incoming context.
+   * @param config The config object.
    */
   void initialize(Config config);
 
@@ -55,6 +56,7 @@ public interface IUploader extends AutoCloseable {
   /**
    * If subsequent stages fail, undo will be called to free resources used by
    * uploading package. Ideally, this should try to remove the uploaded package.
+   * @return True if successful.
    */
   boolean undo();
 

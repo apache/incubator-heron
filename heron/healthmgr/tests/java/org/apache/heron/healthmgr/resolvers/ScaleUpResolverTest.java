@@ -40,9 +40,10 @@ import org.mockito.Mockito;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.healthmgr.common.PackingPlanProvider;
-import org.apache.heron.healthmgr.common.TopologyProvider;
+import org.apache.heron.healthmgr.common.PhysicalPlanProvider;
 import org.apache.heron.packing.roundrobin.RoundRobinPacking;
 import org.apache.heron.proto.scheduler.Scheduler.UpdateTopologyRequest;
+import org.apache.heron.proto.system.PhysicalPlans.PhysicalPlan;
 import org.apache.heron.scheduler.client.ISchedulerClient;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Key;
@@ -93,7 +94,8 @@ public class ScaleUpResolverTest {
     ScaleUpResolver spyResolver = spy(resolver);
 
     doReturn(2).when(spyResolver).computeScaleUpFactor("bolt");
-    doReturn(currentPlan).when(spyResolver).buildNewPackingPlan(any(HashMap.class), eq(currentPlan));
+    doReturn(currentPlan).when(spyResolver)
+        .buildNewPackingPlan(any(HashMap.class), eq(currentPlan));
 
     Collection<Action> result = spyResolver.resolve(diagnosis);
     verify(scheduler, times(1)).updateTopology(any(UpdateTopologyRequest.class));
@@ -103,7 +105,7 @@ public class ScaleUpResolverTest {
   @Test
   public void testBuildPackingPlan() {
     TopologyAPI.Topology topology = createTestTopology();
-    TopologyProvider topologyProvider = createTopologyProvider(topology);
+    PhysicalPlanProvider topologyProvider = createPhysicalPlanProvider(topology);
     Config config = createConfig(topology);
     PackingPlan currentPlan = createPacking(topology, config);
 
@@ -139,10 +141,12 @@ public class ScaleUpResolverTest {
         .build();
   }
 
-  private TopologyProvider createTopologyProvider(TopologyAPI.Topology topology) {
-    TopologyProvider topologyProvider = mock(TopologyProvider.class);
-    when(topologyProvider.get()).thenReturn(topology);
-    return topologyProvider;
+  private PhysicalPlanProvider createPhysicalPlanProvider(TopologyAPI.Topology topology) {
+    PhysicalPlan pp = PhysicalPlan.newBuilder().setTopology(topology).build();
+
+    PhysicalPlanProvider physicalPlanProvider = mock(PhysicalPlanProvider.class);
+    when(physicalPlanProvider.get()).thenReturn(pp);
+    return physicalPlanProvider;
   }
 
   private TopologyAPI.Topology createTestTopology() {

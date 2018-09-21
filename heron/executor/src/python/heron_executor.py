@@ -171,10 +171,8 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def init_parsed_args(self, args):
+  def init_parsed_args(self, parsed_args):
     """ initialize from parsed arguments """
-    parsed_args = self.parse_args(args)
-
     self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
     self.topology_id = parsed_args.topology_id
@@ -264,7 +262,8 @@ class HeronExecutor(object):
         if parsed_args.jvm_remote_debugger_ports else None
 
   def __init__(self, args, shell_env):
-    self.init_parsed_args(args)
+    parsed_args = self.parse_args(args)
+    self.init_parsed_args(parsed_args)
 
     self.shell_env = shell_env
     self.max_runs = 100
@@ -291,6 +290,8 @@ class HeronExecutor(object):
   @staticmethod
   def parse_args(args):
     """Uses python argparse to collect positional args"""
+    Log.info("Input args: %r" % args)
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--shard", type=int, required=True)

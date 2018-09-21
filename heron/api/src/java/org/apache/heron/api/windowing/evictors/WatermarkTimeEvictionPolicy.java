@@ -56,7 +56,7 @@ public class WatermarkTimeEvictionPolicy<T extends Serializable> extends TimeEvi
 
   /**
    * {@inheritDoc}
-   * <p/>
+   * <p>
    * Keeps events with future ts in the queue for processing in the next
    * window. If the ts difference is more than the lag, stops scanning
    * the queue for the current window.
