@@ -70,3 +70,16 @@ java_library(
     srcs = glob(["org/apache/heron/classification/**/*.java"]),
     resources = ["//heron/api/src:processor-service-conf"],
 )
+
+genrule(
+    name = "pom",
+    outs = ["pom.xml"],
+    cmd = "$(location generate_pom) >$@",
+    output_to_bindir = 1,
+    tools = [":generate_pom"],
+)
+
+cc_binary(
+    name = "generate_pom",
+    srcs = ["generate_pom.cc"],
+)
