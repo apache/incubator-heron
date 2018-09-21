@@ -20,11 +20,7 @@
 
 package org.apache.heron.streamlet.impl.operators;
 
-import java.io.Serializable;
-
 import org.apache.heron.api.bolt.BaseRichBolt;
-import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.tuple.Fields;
 
