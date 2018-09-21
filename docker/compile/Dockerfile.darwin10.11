@@ -1,0 +1,89 @@
+FROM ubuntu:17.04
+
+# This is passed to the heron build command via the --config flag
+ENV TARGET_PLATFORM darwin
+ENV bazelVersion 0.7.0
+
+ENV USER root
+
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    openssh-client \
+    libssl-dev \
+    pkg-config \
+    autotools-dev \
+    automake \
+    cmake \
+    libfuse-dev \
+    clang \
+    python \
+    file \
+    llvm-3.8 \
+    llvm-3.8-dev \
+    clang-3.8
+
+RUN apt-get update && apt-get -y install \
+      automake \
+      build-essential \
+      cmake \
+      curl \
+      libssl-dev \
+      git \
+      libtool-bin \
+      libunwind8 \
+      libunwind-setjmp0-dev \
+      python \
+      python2.7-dev \
+      python-software-properties \
+      software-properties-common \
+      python-setuptools \
+      zip \
+      unzip \
+      wget
+
+ENV OSXCROSS_SDK_VERSION=10.11
+ENV OSX_VERSION_MIN=10.7
+RUN mkdir /opt/osxcross && \
+  cd /opt && \
+  git clone https://github.com/tpoechtrager/osxcross.git && \
+  cd osxcross && \
+  git checkout 474f359d2f27ff68916a064f0138c9188c63db7d && \
+  sed -i -e 's|-march=native||g' ./build_clang.sh ./wrapper/build.sh && \
+  ./tools/get_dependencies.sh && \
+  curl -L -o ./tarballs/MacOSX${OSXCROSS_SDK_VERSION}.sdk.tar.xz \
+    https://s3.amazonaws.com/andrew-osx-sdks/MacOSX${OSXCROSS_SDK_VERSION}.sdk.tar.xz && \
+  yes | PORTABLE=true ./build.sh && \
+  ./build_compiler_rt.sh
+
+ENV PATH $PATH:/opt/osxcross/target/bin
+
+RUN apt-get -y install openjdk-8-jdk
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+
+# Install bazel
+ENV bazelVersion 0.7.0
+
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
+      && chmod +x /tmp/bazel.sh \
+      && /tmp/bazel.sh
+
+
+# Make sure Weld uses the correct version of LLVM.
+RUN ln -s /usr/bin/llvm-config-3.8 /usr/local/bin/llvm-config
+
+# Cleanup
+RUN DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y curl && \
+  DEBIAN_FRONTEND=noninteractive apt-get autoremove -y && \
+  rm -rf \
+    rustup-init \
+    /var/lib/apt/lists/* \
+    /tmp/* \
+    /var/tmp/*
+
+ADD bazelrc /root/.bazelrc
+ADD scripts/compile-platform.sh /compile-platform.sh
