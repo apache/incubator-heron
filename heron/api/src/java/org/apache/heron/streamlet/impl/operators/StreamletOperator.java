@@ -36,14 +36,6 @@ public abstract class StreamletOperator extends BaseRichBolt {
   private static final long serialVersionUID = 8524238140745238942L;
   private static final String OUTPUT_FIELD_NAME = "output";
 
-  /*
-  @Override
-  public void initState(State<Serializable, Serializable> state) { }
-
-  @Override
-  public void preSave(String checkpointId) { }
-*/
-
   /**
    * The operators implementing streamlet functionality have some properties.
    * 1. They all output only one stream
