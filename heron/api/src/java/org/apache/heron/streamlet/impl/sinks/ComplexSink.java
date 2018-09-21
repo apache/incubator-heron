@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.streamlet.Context;
@@ -36,7 +37,8 @@ import org.apache.heron.streamlet.impl.operators.StreamletOperator;
  * ConsumerSink is a very simple Sink that basically invokes a user supplied
  * consume function for every tuple.
  */
-public class ComplexSink<R> extends StreamletOperator {
+public class ComplexSink<R> extends StreamletOperator
+    implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 8717991188885786658L;
   private Sink<R> sink;
   private OutputCollector collector;
@@ -49,6 +51,11 @@ public class ComplexSink<R> extends StreamletOperator {
   @Override
   public void initState(State<Serializable, Serializable> startupState) {
     this.state = startupState;
+  }
+
+  @Override
+  public void preSave(String checkpointId) {
+    // TODO
   }
 
   @SuppressWarnings("rawtypes")
