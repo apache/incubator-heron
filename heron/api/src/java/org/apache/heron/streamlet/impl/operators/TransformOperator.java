@@ -59,7 +59,6 @@ public class TransformOperator<R, T> extends StreamletOperator
 
   @Override
   public void preSave(String checkpointId) {
-    // TODO
   }
 
   @Override

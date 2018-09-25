@@ -55,7 +55,6 @@ public class ComplexSink<R> extends StreamletOperator
 
   @Override
   public void preSave(String checkpointId) {
-    // TODO
   }
 
   @SuppressWarnings("rawtypes")
