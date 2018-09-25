@@ -37,7 +37,7 @@ import org.apache.heron.streamlet.impl.streamlets.{
   UnionStreamlet
 }
 
-import org.apache.heron.streamlet.scala.Streamlet
+import org.apache.heron.streamlet.scala.{Builder, Streamlet}
 import org.apache.heron.streamlet.scala.common.{
   BaseFunSuite,
   TestIncrementSerializableTransformer,
@@ -49,10 +49,12 @@ import org.apache.heron.streamlet.scala.common.{
   */
 class StreamletImplTest extends BaseFunSuite {
 
+  val builder = Builder.newBuilder
+
   test(
     "StreamletImpl should support setting name and number of partitions per streamlet") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
@@ -73,8 +75,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support map transformation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
@@ -100,8 +102,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support flatMap transformation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
@@ -127,8 +129,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support filter transformation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
@@ -154,8 +156,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support repartition transformation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => "aa bb cc dd ee")
+    val supplierStreamlet = builder
+      .newSource(() => "aa bb cc dd ee")
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(5)
 
@@ -182,8 +184,8 @@ class StreamletImplTest extends BaseFunSuite {
 
   test(
     "StreamletImpl should support repartition transformation with partition function") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => "aa bb cc dd ee")
+    val supplierStreamlet = builder
+      .newSource(() => "aa bb cc dd ee")
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(5)
 
@@ -213,13 +215,13 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support union transformation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => "aa bb cc dd ee")
+    val supplierStreamlet = builder
+      .newSource(() => "aa bb cc dd ee")
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(2)
 
-    val supplierStreamlet2 = StreamletImpl
-      .createSupplierStreamlet(() => "fff ggg hhh")
+    val supplierStreamlet2 = builder
+      .newSource(() => "fff ggg hhh")
       .setName("Supplier_Streamlet_2")
       .setNumPartitions(3)
 
@@ -233,8 +235,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support consume function") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(20)
 
@@ -259,8 +261,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support log sink") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(10)
 
@@ -283,8 +285,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support custom sink") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Random.nextInt(10))
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(10)
 
@@ -307,13 +309,13 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support join transformation") {
-    val numberStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Random.nextInt(10))
+    val numberStreamlet = builder
+      .newSource(() => Random.nextInt(10))
       .setName("Supplier_Streamlet_with_Numbers")
       .setNumPartitions(4)
 
-    val textStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Random.nextString(3))
+    val textStreamlet = builder
+      .newSource(() => Random.nextString(3))
       .setName("Supplier_Streamlet_with_Strings")
       .setNumPartitions(3)
 
@@ -335,8 +337,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support clone operation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Math.random)
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(5)
 
@@ -349,8 +351,8 @@ class StreamletImplTest extends BaseFunSuite {
   test("StreamletImpl should support transform operation") {
     val incrementTransformer =
       new TestIncrementSerializableTransformer(factor = 100)
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Random.nextInt(10))
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(3)
 
@@ -393,8 +395,8 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support reduce operation") {
-    val supplierStreamlet = StreamletImpl
-      .createSupplierStreamlet(() => Random.nextInt(10))
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
       .setName("Supplier_Streamlet_1")
       .setNumPartitions(3)
 
