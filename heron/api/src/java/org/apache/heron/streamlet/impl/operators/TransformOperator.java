@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
@@ -38,7 +39,8 @@ import org.apache.heron.streamlet.impl.ContextImpl;
  * It calls the transformFunction setup/cleanup at the beginning/end of the
  * processing. And for every tuple, it applies the transformFunction, and emits the resulting value
  */
-public class TransformOperator<R, T> extends StreamletOperator {
+public class TransformOperator<R, T> extends StreamletOperator
+    implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 429297144878185182L;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
@@ -56,13 +58,18 @@ public class TransformOperator<R, T> extends StreamletOperator {
   }
 
   @Override
+  public void preSave(String checkpointId) {
+  }
+
+  @Override
   public void cleanup() {
     serializableTransformer.cleanup();
   }
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(Map<String, Object> map, TopologyContext topologyContext,
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
                       OutputCollector outputCollector) {
     collector = outputCollector;
     Context context = new ContextImpl(topologyContext, map, state);
