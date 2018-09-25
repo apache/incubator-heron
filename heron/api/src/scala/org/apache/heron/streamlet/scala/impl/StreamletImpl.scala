@@ -44,26 +44,13 @@ object StreamletImpl {
 
   def toJavaStreamlet[R](streamlet: Streamlet[R]): JavaStreamlet[R] =
     streamlet.asInstanceOf[StreamletImpl[R]].javaStreamlet
-
-  /**
-    * Create a Streamlet based on the supplier function
-    *
-    * @param supplier The Supplier function to generate the elements
-    */
-  private[impl] def createSupplierStreamlet[R](supplier: () => R) = {
-    val serializableSupplier = toSerializableSupplier[R](supplier)
-    val newJavaStreamlet =
-      new SupplierStreamlet[R](serializableSupplier)
-    fromJavaStreamlet[R](newJavaStreamlet)
-  }
-
 }
 
 /**
-  * This class provides Scala Streamlet Implementation by wrapping Java Streamlet API.
-  * Passed User defined Scala Functions are transformed to related FunctionalInterface versions and
-  * related Java Streamlet is transformed to Scala version again.
-  */
+ * This class provides Scala Streamlet Implementation by wrapping Java Streamlet API.
+ * Passed User defined Scala Functions are transformed to related FunctionalInterface versions and
+ * related Java Streamlet is transformed to Scala version again.
+ */
 class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     extends Streamlet[R] {
 
