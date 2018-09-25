@@ -20,11 +20,7 @@
 
 package org.apache.heron.streamlet.impl.operators;
 
-import java.io.Serializable;
-
 import org.apache.heron.api.bolt.BaseRichBolt;
-import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.tuple.Fields;
 
@@ -32,16 +28,9 @@ import org.apache.heron.api.tuple.Fields;
  * The Bolt interface that other operators of the streamlet packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class StreamletOperator extends BaseRichBolt
-    implements IStatefulComponent<Serializable, Serializable> {
+public abstract class StreamletOperator extends BaseRichBolt {
   private static final long serialVersionUID = 8524238140745238942L;
   private static final String OUTPUT_FIELD_NAME = "output";
-
-  @Override
-  public void initState(State<Serializable, Serializable> state) { }
-
-  @Override
-  public void preSave(String checkpointId) { }
 
   /**
    * The operators implementing streamlet functionality have some properties.
