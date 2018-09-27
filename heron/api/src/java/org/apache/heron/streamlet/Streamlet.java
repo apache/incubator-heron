@@ -22,6 +22,8 @@ package org.apache.heron.streamlet;
 import java.util.List;
 
 import org.apache.heron.classification.InterfaceStability;
+import org.apache.heron.streamlet.impl.operators.ICustomBasicOperator;
+import org.apache.heron.streamlet.impl.operators.ICustomOperator;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
