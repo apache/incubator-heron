@@ -22,6 +22,8 @@ package org.apache.heron.streamlet;
 import java.util.List;
 
 import org.apache.heron.classification.InterfaceStability;
+import org.apache.heron.streamlet.impl.operators.ICustomBasicOperator;
+import org.apache.heron.streamlet.impl.operators.ICustomOperator;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -191,7 +193,7 @@ public interface Streamlet<R> {
   Streamlet<R> union(Streamlet<? extends R> other);
 
   /**
-   * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
+   * Returns a new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
@@ -200,6 +202,22 @@ public interface Streamlet<R> {
    */
   <T> Streamlet<T> transform(
       SerializableTransformer<R, ? extends T> serializableTransformer);
+
+  /**
+   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
+   * @param operator The user defined operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> custom(ICustomOperator<R, T> operator);
+
+  /**
+   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
+   * @param operator The user defined operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> custom(ICustomBasicOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

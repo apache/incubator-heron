@@ -41,7 +41,11 @@ import org.apache.heron.streamlet.Sink;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.impl.operators.ICustomBasicOperator;
+import org.apache.heron.streamlet.impl.operators.ICustomOperator;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CustomBasicStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
@@ -100,6 +104,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   protected enum StreamletNamePrefix {
     CONSUMER("consumer"),
+    CUSTOM("custom"),
     FILTER("filter"),
     FLATMAP("flatmap"),
     REDUCE("reduceByKeyAndWindow"),
@@ -481,6 +486,34 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
+  }
+
+  /**
+   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
+   * @param operator The user defined operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> custom(ICustomOperator<R, T> operator) {
+    CustomStreamlet<R, T> customStreamlet =
+        new CustomStreamlet<>(this, operator);
+    addChild(customStreamlet);
+    return customStreamlet;
+  }
+
+  /**
+   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
+   * @param operator The user defined operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> custom(ICustomBasicOperator<R, T> operator) {
+    CustomBasicStreamlet<R, T> customStreamlet =
+        new CustomBasicStreamlet<>(this, operator);
+    addChild(customStreamlet);
+    return customStreamlet;
   }
 
   /**
