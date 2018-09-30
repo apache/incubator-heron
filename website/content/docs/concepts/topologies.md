@@ -101,7 +101,7 @@ For sliding windows, you need to specify two things:
 1. The length or duration of the window (length if the window is a [count window](#count-windows), duration if the window is a [time window](#time-windows)).
 1. The sliding interval, which determines when the window slides, i.e. at what point during the current window the new window begins.
 
-In the figure above, the duration of the window is 10 seconds, while the sliding interval is 5 seconds. Each new window begins five seconds into the current window.
+In the figure above, the duration of the window is 20 seconds, while the sliding interval is 10 seconds. Each new window begins five seconds into the current window.
 
 > With sliding time windows, data can be processed in more than one window. Tuples 3, 4, and 5 above are processed in both window 1 and window 2 while tuples 6, 7, and 8 are processed in both window 2 and window 3.
 
@@ -119,7 +119,7 @@ Here, the sliding interval determines that a new window is always created 12 sec
 
 Tumbling windows don't overlap because a new window doesn't begin until the current window has elapsed. For tumbling windows, you only need to specify the length or duration of the window but *no sliding interval*.
 
-> With tumbling windows, data are *never* processed in more than one window because the windows never overlap.
+> With tumbling windows, data are *never* processed in more than one window because the windows never overlap. Also, in the figure above, the duration of the window is 20 seconds.
 
 ### Count windows
 
