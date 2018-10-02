@@ -23,7 +23,8 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.tuple.Fields;
 
 /**
- * This is the stream grouping strategy that.
+ * This is the stream grouping strategy that tuples are sent to the particular instance of
+ * the downstream bolt based on the values of a specified fields.
  */
 public class FieldsStreamGrouping implements StreamGrouping {
   private Fields fields;

@@ -22,7 +22,7 @@ package org.apache.heron.api.grouping;
 import org.apache.heron.api.generated.TopologyAPI;
 
 /**
- * This is the stream grouping strategy that.
+ * This is the stream grouping strategy that tuples are sent to the instance of choice.
  */
 public class DirectStreamGrouping implements StreamGrouping {
 

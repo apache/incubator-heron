@@ -33,9 +33,9 @@ import org.apache.heron.api.utils.Utils;
 public interface CustomStreamGrouping extends StreamGrouping {
 
   /**
-   * Tells the stream groupisng at runtime the tasks in the target bolt.
+   * Tells the stream grouping at runtime the tasks in the target bolt.
    * This information should be used in chooseTasks to determine the target tasks.
-   * <p>s
+   * <p>
    * It also tells the grouping the metadata on the stream this grouping will be used on.
    */
   void prepare(
@@ -48,7 +48,7 @@ public interface CustomStreamGrouping extends StreamGrouping {
    * This function implements a custom stream grouping. It takes in as input
    * the number of tasks in the target bolt in prepare and returns the
    * tasks to send the tuples to.
-   *s
+   *
    * @param values the values to group on
    */
   List<Integer> chooseTasks(List<Object> values);
