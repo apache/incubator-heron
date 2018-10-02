@@ -59,9 +59,7 @@ public interface CustomStreamGrouping extends StreamGrouping {
    * @param streamId The id of the input stream
    * @return An InputStream builder to be used by BoltDeclarer
    */
-  default TopologyAPI.InputStream.Builder buildStream(
-      String componentName, String streamId) {
-
+  default TopologyAPI.InputStream.Builder buildStream(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
 
     bldr.setStream(
