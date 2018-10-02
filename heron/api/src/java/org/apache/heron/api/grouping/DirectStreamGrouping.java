@@ -31,6 +31,8 @@ public class DirectStreamGrouping implements StreamGrouping {
   public TopologyAPI.InputStream.Builder buildStream(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
 
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.DIRECT);
     bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
 
