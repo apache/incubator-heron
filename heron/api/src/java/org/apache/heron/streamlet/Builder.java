@@ -20,8 +20,8 @@
 
 package org.apache.heron.streamlet;
 
-import org.apache.heron.streamlet.impl.BuilderImpl;
 import org.apache.heron.api.spout.IRichSpout;
+import org.apache.heron.streamlet.impl.BuilderImpl;
 
 /**
  * Builder is used to register all sources. Builder thus keeps track

@@ -23,9 +23,7 @@ import java.util.Set;
 
 import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.SerializableSupplier;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.sources.SupplierSource;
 
 /**
  * SpoutStreamlet is a quick way of creating a Streamlet
