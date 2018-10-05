@@ -22,18 +22,12 @@ out_files = [
 ]
 
 exports_files([
-    "libunwind-1.1-cache.patch",
-    "libunwind-1.1-config.patch",
-    "libunwind-1.1-lzma-link.patch",
     "libunwind.BUILD",
 ])
 
 genrule(
     name = "libunwind-srcs",
     srcs = [
-        "@org_apache_heron//third_party/libunwind:libunwind-1.1-cache.patch",
-        "@org_apache_heron//third_party/libunwind:libunwind-1.1-config.patch",
-        "@org_apache_heron//third_party/libunwind:libunwind-1.1-lzma-link.patch",
     ],
     outs = out_files,
     cmd = "\n".join([
@@ -43,10 +37,7 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -LR $$(pwd)/external/org_nongnu_libunwind/* $$TMP_DIR",
         "cd $$TMP_DIR",
-        "patch -p1 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-lzma-link.patch)",
-        "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-config.patch)",
-        "patch -p0 < $$SOURCE_DIR/$(location @org_apache_heron//third_party/libunwind:libunwind-1.1-cache.patch)",
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --disable-minidebuginfo",
+        "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         'make install SUBDIRS="src tests"',
         "rm -rf $$TMP_DIR",
     ]),
