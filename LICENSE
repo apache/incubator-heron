@@ -217,7 +217,7 @@ The following components are provided under the Apache 2.0 License.
 See project link for details.
 
     Bootstrap(v2.0.3, https://github.com/twbs/bootstrap/blob/v2.0.3/LICENSE)
-    -> heron/shell/assets/bootstrap.css
+      -> heron/shell/assets/bootstrap.css
     Bootstrap(v2.2.2, https://github.com/twbs/bootstrap/blob/v2.2.2/LICENSE)
       -> heron/tools/ui/resources/static/js/bootstrap.js
     Bootstrap(v3.0.0, https://github.com/twbs/bootstrap/blob/v3.0.0/LICENSE)
@@ -241,6 +241,8 @@ See project link for details.
       -> heronpy/api/bolt/stream.py
       -> heronpy/api/bolt/generator.py
       -> heronpy/api/bolt/transformoperator.py
+    k8s-zookeeper-docker(https://github.com/muxinc/k8s-zookeeper-docker/blob/master/LICENSE)
+      -> docker/base/scripts/generate-zookeeper-config.sh
 
 ========================================================================
 Third party MIT licenses
