@@ -2,10 +2,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-lzma_patch = "libunwind-1.1-lzma-link.patch"
-config_patch = "libunwind-1.1-config.patch"
-cache_patch = "libunwind-1.1-cache.patch"
-
 out_files = [
     "include/libunwind-common.h",
     "include/libunwind-coredump.h",
@@ -21,14 +17,8 @@ out_files = [
     "lib/libunwind-x86_64.a",
 ]
 
-exports_files([
-    "libunwind.BUILD",
-])
-
 genrule(
     name = "libunwind-srcs",
-    srcs = [
-    ],
     outs = out_files,
     cmd = "\n".join([
         "export SOURCE_DIR=$$(pwd)",
