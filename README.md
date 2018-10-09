@@ -17,15 +17,9 @@ Heron is realtime analytics platform developed by Twitter.  It has a wide array 
  * Python 2.7
  * Bazel latest
 
-
 ## Contact
 
 #### Mailing lists
-
-Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
-
-Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
-
 
 | Name                                                                      | Scope                           |                                                                |                                                                    |                                                                           |
 |:--------------------------------------------------------------------------|:--------------------------------|:---------------------------------------------------------------|:-------------------------------------------------------------------|:--------------------------------------------------------------------------|
@@ -40,6 +34,8 @@ Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
 [Bay Area Heron Meetup](https://www.meetup.com/Apache-Heron-Bay-Area), *We meet on Third Monday of Every Month in Palo Alto.*
 
+#### Twitter
+Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
 ## For more information:
 
