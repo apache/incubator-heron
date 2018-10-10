@@ -146,8 +146,8 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=100M " \
            "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 " \
-           "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
-           "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
+           "-Xloggc:log-files/gc.%s.log -Djava.net.preferIPv4Stack=true " \
+           "-cp instance_classpath:classpath -XX:+HeapDumpOnOutOfMemoryError " \
            "org.apache.heron.instance.HeronInstance -topology_name topname -topology_id topid -instance_id %s -component_name %s -task_id %d -component_index 0 -stmgr_id stmgr-%d " \
            "-stmgr_port tmaster_controller_port -metricsmgr_port metricsmgr_port -system_config_file %s -override_config_file %s" \
            % (instance_name, instance_name, component_name, instance_id,
