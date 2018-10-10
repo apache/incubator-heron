@@ -171,7 +171,7 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def init_parsed_args(self, parsed_args):
+  def init_from_parsed_args(self, parsed_args):
     """ initialize from parsed arguments """
     self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
@@ -261,8 +261,9 @@ class HeronExecutor(object):
       parsed_args.jvm_remote_debugger_ports.split(",") \
         if parsed_args.jvm_remote_debugger_ports else None
 
-  def __init__(self, parsed_args, shell_env):
-    self.init_parsed_args(parsed_args)
+  def __init__(self, args, shell_env):
+    parsed_args = self.parse_args(args)
+    self.init_from_parsed_args(parsed_args)
 
     self.shell_env = shell_env
     self.max_runs = 100
@@ -285,6 +286,70 @@ class HeronExecutor(object):
 
     self.state_managers = []
     self.jvm_version = None
+
+  @staticmethod
+  def parse_args(args):
+    """Uses python argparse to collect positional args"""
+    Log.info("Input args: %r" % args)
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--shard", type=int, required=True)
+    parser.add_argument("--topology-name", required=True)
+    parser.add_argument("--topology-id", required=True)
+    parser.add_argument("--topology-defn-file", required=True)
+    parser.add_argument("--state-manager-connection", required=True)
+    parser.add_argument("--state-manager-root", required=True)
+    parser.add_argument("--state-manager-config-file", required=True)
+    parser.add_argument("--tmaster-binary", required=True)
+    parser.add_argument("--stmgr-binary", required=True)
+    parser.add_argument("--metrics-manager-classpath", required=True)
+    parser.add_argument("--instance-jvm-opts", required=True)
+    parser.add_argument("--classpath", required=True)
+    parser.add_argument("--master-port", required=True)
+    parser.add_argument("--tmaster-controller-port", required=True)
+    parser.add_argument("--tmaster-stats-port", required=True)
+    parser.add_argument("--heron-internals-config-file", required=True)
+    parser.add_argument("--override-config-file", required=True)
+    parser.add_argument("--component-ram-map", required=True)
+    parser.add_argument("--component-jvm-opts", required=True)
+    parser.add_argument("--pkg-type", required=True)
+    parser.add_argument("--topology-binary-file", required=True)
+    parser.add_argument("--heron-java-home", required=True)
+    parser.add_argument("--shell-port", required=True)
+    parser.add_argument("--heron-shell-binary", required=True)
+    parser.add_argument("--metrics-manager-port", required=True)
+    parser.add_argument("--cluster", required=True)
+    parser.add_argument("--role", required=True)
+    parser.add_argument("--environment", required=True)
+    parser.add_argument("--instance-classpath", required=True)
+    parser.add_argument("--metrics-sinks-config-file", required=True)
+    parser.add_argument("--scheduler-classpath", required=True)
+    parser.add_argument("--scheduler-port", required=True)
+    parser.add_argument("--python-instance-binary", required=True)
+    parser.add_argument("--cpp-instance-binary", required=True)
+    parser.add_argument("--metricscache-manager-classpath", required=True)
+    parser.add_argument("--metricscache-manager-master-port", required=True)
+    parser.add_argument("--metricscache-manager-stats-port", required=True)
+    parser.add_argument("--metricscache-manager-mode", required=False)
+    parser.add_argument("--is-stateful", required=True)
+    parser.add_argument("--checkpoint-manager-classpath", required=True)
+    parser.add_argument("--checkpoint-manager-port", required=True)
+    parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
+    parser.add_argument("--stateful-config-file", required=True)
+    parser.add_argument("--health-manager-mode", required=True)
+    parser.add_argument("--health-manager-classpath", required=True)
+    parser.add_argument("--jvm-remote-debugger-ports", required=False,
+                        help="ports to be used by a remote debugger for JVM instances")
+
+    parsed_args, unknown_args = parser.parse_known_args(args[1:])
+
+    if unknown_args:
+      Log.error('Unknown argument: %s' % unknown_args[0])
+      parser.print_help()
+      sys.exit(1)
+
+    return parsed_args
 
   def run_command_or_exit(self, command):
     if self._run_blocking_process(command, True, self.shell_env) != 0:
@@ -562,7 +627,8 @@ class HeronExecutor(object):
         '-XX:ParallelGCThreads=4',
         '-Xloggc:log-files/gc.%s.log' % instance_id,
         '-Djava.net.preferIPv4Stack=true',
-        '-cp %s:%s'% (self.instance_classpath, self.classpath)]
+        '-cp',
+        '%s:%s'% (self.instance_classpath, self.classpath)]
 
     # Append debugger ports when it is available
     if remote_debugger_port:
@@ -1022,69 +1088,6 @@ class HeronExecutor(object):
     for state_manager in self.state_managers:
       state_manager.stop()
 
-def parse_args(args):
-  """Uses python argparse to collect positional args"""
-  Log.info("Input args: %r" % args)
-
-  parser = argparse.ArgumentParser()
-
-  parser.add_argument("--shard", type=int, required=True)
-  parser.add_argument("--topology-name", required=True)
-  parser.add_argument("--topology-id", required=True)
-  parser.add_argument("--topology-defn-file", required=True)
-  parser.add_argument("--state-manager-connection", required=True)
-  parser.add_argument("--state-manager-root", required=True)
-  parser.add_argument("--state-manager-config-file", required=True)
-  parser.add_argument("--tmaster-binary", required=True)
-  parser.add_argument("--stmgr-binary", required=True)
-  parser.add_argument("--metrics-manager-classpath", required=True)
-  parser.add_argument("--instance-jvm-opts", required=True)
-  parser.add_argument("--classpath", required=True)
-  parser.add_argument("--master-port", required=True)
-  parser.add_argument("--tmaster-controller-port", required=True)
-  parser.add_argument("--tmaster-stats-port", required=True)
-  parser.add_argument("--heron-internals-config-file", required=True)
-  parser.add_argument("--override-config-file", required=True)
-  parser.add_argument("--component-ram-map", required=True)
-  parser.add_argument("--component-jvm-opts", required=True)
-  parser.add_argument("--pkg-type", required=True)
-  parser.add_argument("--topology-binary-file", required=True)
-  parser.add_argument("--heron-java-home", required=True)
-  parser.add_argument("--shell-port", required=True)
-  parser.add_argument("--heron-shell-binary", required=True)
-  parser.add_argument("--metrics-manager-port", required=True)
-  parser.add_argument("--cluster", required=True)
-  parser.add_argument("--role", required=True)
-  parser.add_argument("--environment", required=True)
-  parser.add_argument("--instance-classpath", required=True)
-  parser.add_argument("--metrics-sinks-config-file", required=True)
-  parser.add_argument("--scheduler-classpath", required=True)
-  parser.add_argument("--scheduler-port", required=True)
-  parser.add_argument("--python-instance-binary", required=True)
-  parser.add_argument("--cpp-instance-binary", required=True)
-  parser.add_argument("--metricscache-manager-classpath", required=True)
-  parser.add_argument("--metricscache-manager-master-port", required=True)
-  parser.add_argument("--metricscache-manager-stats-port", required=True)
-  parser.add_argument("--metricscache-manager-mode", required=False)
-  parser.add_argument("--is-stateful", required=True)
-  parser.add_argument("--checkpoint-manager-classpath", required=True)
-  parser.add_argument("--checkpoint-manager-port", required=True)
-  parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
-  parser.add_argument("--stateful-config-file", required=True)
-  parser.add_argument("--health-manager-mode", required=True)
-  parser.add_argument("--health-manager-classpath", required=True)
-  parser.add_argument("--jvm-remote-debugger-ports", required=False,
-                      help="ports to be used by a remote debugger for JVM instances")
-
-  parsed_args, unknown_args = parser.parse_known_args(args[1:])
-
-  if unknown_args:
-    Log.error('Unknown argument: %s' % unknown_args[0])
-    parser.print_help()
-    sys.exit(1)
-
-  return parsed_args
-
 def setup(executor):
   """Set up log, process and signal handlers"""
   # pylint: disable=unused-argument
@@ -1145,8 +1148,7 @@ def main():
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
 
   # Instantiate the executor, bind it to signal handlers and launch it
-  parsed_args = parse_args(sys.argv)
-  executor = HeronExecutor(parsed_args, shell_env)
+  executor = HeronExecutor(sys.argv, shell_env)
   executor.initialize()
 
   start(executor)
