@@ -90,20 +90,32 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
   @Override
   public void execute(TupleWindow inputWindow) {
     Map<K, Pair<List<V1>, List<V2>>> joinMap = new HashMap<>();
-    for (Tuple tuple : inputWindow.get()) {
-      if (tuple.getSourceComponent().equals(leftComponent)) {
-        V1 tup = (V1) tuple.getValue(0);
-        if (tup != null) {
-          addMapLeft(joinMap, tup);
-        }
-      } else {
-        V2 tup = (V2) tuple.getValue(0);
-        if (tup != null) {
-          addMapRight(joinMap, tup);
+    try {
+      for (Tuple tuple : inputWindow.get()) {
+        if (tuple.getSourceComponent().equals(leftComponent)) {
+          V1 tup = (V1) tuple.getValue(0);
+          if (tup != null) {
+            addMapLeft(joinMap, tup);
+          }
+        } else {
+          V2 tup = (V2) tuple.getValue(0);
+          if (tup != null) {
+            addMapRight(joinMap, tup);
+          }
         }
       }
+      evaluateJoinMap(joinMap, inputWindow);
+
+      for (Tuple tuple : inputWindow.get()) {
+        collector.ack(tuple);
+      }
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      e.printStackTrace();
+      for (Tuple tuple : inputWindow.get()) {
+        collector.fail(tuple);
+      }
     }
-    evaluateJoinMap(joinMap, inputWindow);
   }
 
   private void evaluateJoinMap(Map<K, Pair<List<V1>, List<V2>>> joinMap, TupleWindow tupleWindow) {
