@@ -28,6 +28,7 @@ import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.impl.StreamletImpl;
+import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 
 /**
  * CustomStreamlet represents a Streamlet that is made up of applying the user

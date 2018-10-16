@@ -51,9 +51,7 @@ import org.apache.heron.api.tuple.Values;
  *   .CustomOperator(new MyOperator)
  *   ....
  */
-public abstract class CustomOperator<R, T>
-    extends StreamletOperator
-    implements ICustomOperator<R, T> {
+public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
 
   private OutputCollector outputCollector;
 

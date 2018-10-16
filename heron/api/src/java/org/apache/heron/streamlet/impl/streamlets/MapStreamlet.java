@@ -25,7 +25,11 @@ import java.util.Set;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.StreamletImpl;
+<<<<<<< a9fdd20018604d0fc75632ad69cd033e0c9ab591:heron/api/src/java/org/apache/heron/streamlet/impl/streamlets/MapStreamlet.java
 import org.apache.heron.streamlet.impl.operators.MapOperator;
+=======
+import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
+>>>>>>> Refactor ICustomOperator to IStreamletOperator:heron/api/src/java/org/apache/heron/streamlet/impl/streamlets/CustomBasicStreamlet.java
 
 /**
  * MapStreamlet represents a Streamlet that is made up of applying the user

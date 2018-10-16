@@ -25,5 +25,5 @@ import org.apache.heron.api.bolt.IBasicBolt;
 /**
  * The interface for custom basic operators. It is used for existing bolts (subclasses of IBasicBolt).
  */
-public interface ICustomBasicOperator<R, T> extends IBasicBolt {
+public interface IStreamletBasicOperator<R, T> extends IBasicBolt {
 }

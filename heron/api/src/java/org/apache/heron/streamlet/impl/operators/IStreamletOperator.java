@@ -26,5 +26,5 @@ import org.apache.heron.api.bolt.IRichBolt;
  * The interface for custom operators: including new user defined operators as well as
  * operators based on existing Bolts (subclasses of IRichBolt).
  */
-public interface ICustomOperator<R, T> extends IRichBolt {
+public interface IStreamletOperator<R, T> extends IRichBolt {
 }
