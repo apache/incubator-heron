@@ -40,7 +40,7 @@ import org.apache.heron.api.tuple.Values;
  *     }
  *
  *     @override
- *     public CustomOperatorOutput<String> CustomOperatorOutput<T> process(String data) {
+ *     public Optional<CustomOperatorOutput<String>> CustomOperatorOutput<T> process(String data) {
  *       ...
  *     }
  *   }
@@ -48,7 +48,7 @@ import org.apache.heron.api.tuple.Values;
  * to implement more advanced features.
  * 2. Use it in Streamlet
  *   ....
- *   .CustomOperator(new MyOperator)
+ *   .perform(new MyOperator())
  *   ....
  */
 public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
