@@ -489,13 +489,13 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
-   * @param operator The user defined operator
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be performed
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
   @Override
-  public <T> Streamlet<T> custom(IStreamletOperator<R, T> operator) {
+  public <T> Streamlet<T> perform(IStreamletOperator<R, T> operator) {
     CustomStreamlet<R, T> customStreamlet =
         new CustomStreamlet<>(this, operator);
     addChild(customStreamlet);
@@ -503,13 +503,13 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
-   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
-   * @param operator The user defined operator
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be performed
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
   @Override
-  public <T> Streamlet<T> custom(IStreamletBasicOperator<R, T> operator) {
+  public <T> Streamlet<T> perform(IStreamletBasicOperator<R, T> operator) {
     CustomBasicStreamlet<R, T> customStreamlet =
         new CustomBasicStreamlet<>(this, operator);
     addChild(customStreamlet);

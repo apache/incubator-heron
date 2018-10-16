@@ -204,20 +204,20 @@ public interface Streamlet<R> {
       SerializableTransformer<R, ? extends T> serializableTransformer);
 
   /**
-   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
-   * @param operator The user defined operator
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be performed
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> custom(IStreamletOperator<R, T> operator);
+  <T> Streamlet<T> perform(IStreamletOperator<R, T> operator);
 
   /**
-   * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
-   * @param operator The user defined operator
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be performed
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> custom(IStreamletBasicOperator<R, T> operator);
+  <T> Streamlet<T> perform(IStreamletBasicOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
