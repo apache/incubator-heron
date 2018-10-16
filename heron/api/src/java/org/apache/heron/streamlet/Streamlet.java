@@ -22,8 +22,8 @@ package org.apache.heron.streamlet;
 import java.util.List;
 
 import org.apache.heron.classification.InterfaceStability;
-import org.apache.heron.streamlet.impl.operators.ICustomBasicOperator;
-import org.apache.heron.streamlet.impl.operators.ICustomOperator;
+import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
+import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -209,7 +209,7 @@ public interface Streamlet<R> {
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> custom(ICustomOperator<R, T> operator);
+  <T> Streamlet<T> custom(IStreamletOperator<R, T> operator);
 
   /**
    * Returns a new Streamlet by applying the user defined operator on each element of this streamlet.
@@ -217,7 +217,7 @@ public interface Streamlet<R> {
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> custom(ICustomBasicOperator<R, T> operator);
+  <T> Streamlet<T> custom(IStreamletBasicOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

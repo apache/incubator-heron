@@ -31,7 +31,7 @@ import org.apache.heron.api.tuple.Values;
  * UnionOperator is the class that implements the union functionality.
  * Its a very simple bolt that re-emits every tuple that it sees.
  */
-public class UnionOperator<I> extends StreamletOperator {
+public class UnionOperator<I> extends StreamletOperator<I, I> {
   private static final long serialVersionUID = -7326832064961413315L;
   private OutputCollector collector;
 

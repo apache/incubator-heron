@@ -41,8 +41,8 @@ import org.apache.heron.streamlet.Sink;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
-import org.apache.heron.streamlet.impl.operators.ICustomBasicOperator;
-import org.apache.heron.streamlet.impl.operators.ICustomOperator;
+import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
+import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomBasicStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
@@ -495,7 +495,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @return Streamlet containing the output of the operation
    */
   @Override
-  public <T> Streamlet<T> custom(ICustomOperator<R, T> operator) {
+  public <T> Streamlet<T> custom(IStreamletOperator<R, T> operator) {
     CustomStreamlet<R, T> customStreamlet =
         new CustomStreamlet<>(this, operator);
     addChild(customStreamlet);
@@ -509,7 +509,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @return Streamlet containing the output of the operation
    */
   @Override
-  public <T> Streamlet<T> custom(ICustomBasicOperator<R, T> operator) {
+  public <T> Streamlet<T> custom(IStreamletBasicOperator<R, T> operator) {
     CustomBasicStreamlet<R, T> customStreamlet =
         new CustomBasicStreamlet<>(this, operator);
     addChild(customStreamlet);

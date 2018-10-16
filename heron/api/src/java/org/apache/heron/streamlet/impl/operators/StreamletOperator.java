@@ -28,7 +28,9 @@ import org.apache.heron.api.tuple.Fields;
  * The Bolt interface that other operators of the streamlet packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class StreamletOperator extends BaseRichBolt {
+public abstract class StreamletOperator<R, T>
+    extends BaseRichBolt
+    implements IStreamletOperator<R, T> {
   private static final long serialVersionUID = 8524238140745238942L;
   private static final String OUTPUT_FIELD_NAME = "output";
 

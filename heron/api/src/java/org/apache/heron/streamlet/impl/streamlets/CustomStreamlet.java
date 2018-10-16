@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.operators.ICustomOperator;
+import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 
 /**
  * CustomStreamlet represents a Streamlet that is made up of applying the user
@@ -32,7 +32,7 @@ import org.apache.heron.streamlet.impl.operators.ICustomOperator;
  */
 public class CustomStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private ICustomOperator<R, T> op;
+  private IStreamletOperator<R, T> op;
 
   /**
    * Create a custom streamlet from user defined CustomOperator object.
@@ -40,7 +40,7 @@ public class CustomStreamlet<R, T> extends StreamletImpl<T> {
    * @param op The user defined CustomeOperator
    */
   public CustomStreamlet(StreamletImpl<R> parent,
-                         ICustomOperator<R, T> op) {
+                         IStreamletOperator<R, T> op) {
     this.parent = parent;
     this.op = op;
     setNumPartitions(parent.getNumPartitions());

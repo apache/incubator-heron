@@ -33,7 +33,7 @@ import org.apache.heron.streamlet.SerializableFunction;
  * It takes in the mapFunction Function as the input.
  * For every tuple, it applies the mapFunction, and emits the resulting value
  */
-public class MapOperator<R, T> extends StreamletOperator {
+public class MapOperator<R, T> extends StreamletOperator<R, T> {
   private static final long serialVersionUID = -1303096133107278700L;
   private SerializableFunction<? super R, ? extends T> mapFn;
 
