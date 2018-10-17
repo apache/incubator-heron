@@ -19,25 +19,93 @@
 
 package org.apache.heron.streamlet.impl.operators;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Test;
 
+import org.apache.heron.api.utils.Utils;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CustomOperatorOutputTest {
   @Test
   public void testOutputSucceed() {
-    Optional<CustomOperatorOutput<Integer>> output = CustomOperatorOutput.succeed();
-    assertTrue(output.isPresent());
-    assertTrue(output.get().getData().isEmpty());
-    assertTrue(output.get().isAnchored());
+    CustomOperatorOutput<Integer> output = CustomOperatorOutput.succeed();
+    assertTrue(output.isSuccessful());
+    assertTrue(output.getData().isEmpty());
+    assertTrue(output.isAnchored());
+  }
+
+  @Test
+  public void testOutputSucceedWithObject() {
+    CustomOperatorOutput<Integer> output = CustomOperatorOutput.succeed(100);
+    assertTrue(output.isSuccessful());
+    assertEquals(output.getData().size(), 1);
+    assertTrue(output.getData().containsKey(Utils.DEFAULT_STREAM_ID));
+
+    List<Integer> data = output.getData().get(Utils.DEFAULT_STREAM_ID);
+    assertEquals(data.size(), 1);
+    assertEquals(data.toArray()[0], 100);
+    assertTrue(output.isAnchored());
+  }
+
+  @Test
+  public void testOutputSucceedWithList() {
+    CustomOperatorOutput<Integer> output =
+        CustomOperatorOutput.succeed(Arrays.asList(100));
+    assertTrue(output.isSuccessful());
+    assertEquals(output.getData().size(), 1);
+    assertTrue(output.getData().containsKey(Utils.DEFAULT_STREAM_ID));
+
+    List<Integer> data = output.getData().get(Utils.DEFAULT_STREAM_ID);
+    assertEquals(data.size(), 1);
+    assertEquals(data.toArray()[0], 100);
+    assertTrue(output.isAnchored());
+  }
+
+  @Test
+  public void testOutputSucceedWithMap() {
+    HashMap<String, List<Integer>> map = new HashMap<String, List<Integer>>();
+    List<Integer> list1 = Arrays.asList(100);
+    List<Integer> list2 = Arrays.asList(200);
+    map.put("stream1", list1);
+    map.put("stream2", list2);
+
+    CustomOperatorOutput<Integer> output = CustomOperatorOutput.succeed(map);
+    assertTrue(output.isSuccessful());
+    assertEquals(output.getData().size(), 2);
+    assertTrue(output.getData().containsKey("stream1"));
+    assertTrue(output.getData().containsKey("stream2"));
+
+    List<Integer> data = output.getData().get("stream1");
+    assertEquals(data.size(), 1);
+    assertEquals(data.toArray()[0], 100);
+    assertTrue(output.isAnchored());
+
+    data = output.getData().get("stream2");
+    assertEquals(data.size(), 1);
+    assertEquals(data.toArray()[0], 200);
+    assertTrue(output.isAnchored());
   }
 
   @Test
   public void testOutputFail() {
-    Optional<CustomOperatorOutput<Integer>> output = CustomOperatorOutput.fail();
-    assertFalse(output.isPresent());
+    CustomOperatorOutput<Integer> output = CustomOperatorOutput.fail();
+    assertFalse(output.isSuccessful());
+  }
+
+  @Test
+  public void testOutputWithAnchor() {
+    CustomOperatorOutput<Integer> anchored =
+        CustomOperatorOutput.<Integer>create().withAnchor(true);
+    assertTrue(anchored.isAnchored());
+
+    CustomOperatorOutput<Integer> unanchored =
+        CustomOperatorOutput.<Integer>create().withAnchor(false);
+    assertFalse(unanchored.isAnchored());
   }
 }
