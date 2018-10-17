@@ -19,14 +19,12 @@
 
 package org.apache.heron.resource;
 
-import java.util.Optional;
-
 import org.apache.heron.streamlet.impl.operators.CustomOperator;
 import org.apache.heron.streamlet.impl.operators.CustomOperatorOutput;
 
 public class TestCustomOperator<T extends Number> extends CustomOperator<T, T> {
   @Override
-  public Optional<CustomOperatorOutput<T>> process(T data) {
+  public CustomOperatorOutput<T> process(T data) {
     // Success if data is positive
     if (data.intValue() > 0) {
       if (data.intValue() <= 100) {
@@ -34,11 +32,11 @@ public class TestCustomOperator<T extends Number> extends CustomOperator<T, T> {
         return CustomOperatorOutput.succeed(data);
       } else {
         // Ignore data if it is greater than 100
-        return CustomOperatorOutput.succeed();
+        return CustomOperatorOutput.<T>succeed();
       }
     } else {
       // Error if it is 0 or negative
-      return CustomOperatorOutput.fail();
+      return CustomOperatorOutput.<T>fail();
     }
   }
 }

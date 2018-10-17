@@ -21,14 +21,11 @@
 package org.apache.heron.streamlet.impl.operators;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.heron.api.utils.Utils;
-
-
 
 /**
  * CustomOperatorOutput is the class for data returned by CustomOperators' process() function.
@@ -39,21 +36,32 @@ import org.apache.heron.api.utils.Utils;
  *     return CustomOperatorOutput.apply(data);
  */
 public final class CustomOperatorOutput<T> {
-  private boolean anchored;                   // If anchors should be added when emitting tuples?
-  private Map<String, Collection<T>> output;    // Stream id to output data to be emitted.
+  private Map<String, List<T>> output;    // Stream id to output data to be emitted.
+  private boolean successful;             // If the execution succeeded?
+  private boolean anchored;               // If anchors should be added when emitting tuples?
 
   // Disable constructor. User should use the static functions below to create objects
-  private CustomOperatorOutput(Map<String, Collection<T>> data) {
-    this.anchored = true;
+  private CustomOperatorOutput(Map<String, List<T>> data) {
     this.output = data;
+    this.successful = data != null;
+    this.anchored = true;
   }
 
   /**
    * Get collected data
-   * @return data to be emitted. The data is a map of stream id to collection of objects
+   * @return data to be emitted. The data is a map of stream id to list of objects
    */
-  public Map<String, Collection<T>> getData() {
+  public Map<String, List<T>> getData() {
     return output;
+  }
+
+  /**
+   * Check successful flag
+   * @return true if the execution succeeded. If not successful, fail() will be called
+   * instead of ack() in bolt
+   */
+  public boolean isSuccessful() {
+    return successful;
   }
 
   /**
@@ -65,50 +73,27 @@ public final class CustomOperatorOutput<T> {
   }
 
   /**
-   * Append a collection of data to the default output stream
-   * @param newData collection of data to append
-   * @return this object itself
-   */
-  public CustomOperatorOutput append(Collection<T> newData) {
-    return append(Utils.DEFAULT_STREAM_ID, newData);
-  }
-
-  /**
-   * Append a collection of data to the specified output stream
-   * @param streamId the name of the output stream
-   * @param newData collection of data to append
-   * @return this object itself
-   */
-  public CustomOperatorOutput append(String streamId, Collection<T> newData) {
-    if (output.containsKey(streamId)) {
-      Collection<T> collection = output.get(streamId);
-      collection.addAll(newData);
-      output.put(streamId, newData);
-    } else {
-      output.put(streamId, newData);
-    }
-
-    return this;
-  }
-
-  /**
    * If the output data needs to be anchored or not
    * @param flag the anchored flag
    * @return this object itself
    */
-  public CustomOperatorOutput withAnchor(boolean flag) {
+  public CustomOperatorOutput<T> withAnchor(boolean flag) {
     anchored = flag;
     return this;
   }
 
   /* Util static functions. Users should use them to create objects */
+  public static <R> CustomOperatorOutput<R> create() {
+    Map<String, List<R>> dataMap = new HashMap<String, List<R>>();
+    return new CustomOperatorOutput<R>(dataMap);
+  }
 
   /**
    * Generate a CustomOperatorOutput object with empty output
    * @return a CustomOperatorOutput object with empty output
    */
-  public static <R> Optional<CustomOperatorOutput<R>> succeed() {
-    Map<String, Collection<R>> dataMap = new HashMap<String, Collection<R>>();
+  public static <R> CustomOperatorOutput<R> succeed() {
+    Map<String, List<R>> dataMap = new HashMap<String, List<R>>();
     return succeed(dataMap);
   }
 
@@ -117,37 +102,38 @@ public final class CustomOperatorOutput<T> {
    * @param data the data object to be added
    * @return the generated CustomOperatorOutput object
    */
-  public static <R> Optional<CustomOperatorOutput<R>> succeed(R data) {
+  public static <R> CustomOperatorOutput<R> succeed(R data) {
     return succeed(Arrays.asList(data));
   }
 
   /**
-   * Generate a CustomOperatorOutput object with a collection of output objects
+   * Generate a CustomOperatorOutput object with a list of output objects
    * in the default stream
-   * @param data the collection of data to be added
+   * @param data the list of data to be added
    * @return the generated CustomOperatorOutput object
    */
-  public static <R> Optional<CustomOperatorOutput<R>> succeed(Collection<R> data) {
-    Map<String, Collection<R>> dataMap = new HashMap<String, Collection<R>>();
+  public static <R> CustomOperatorOutput<R> succeed(List<R> data) {
+    Map<String, List<R>> dataMap = new HashMap<String, List<R>>();
     dataMap.put(Utils.DEFAULT_STREAM_ID, data);
     return succeed(dataMap);
   }
 
   /**
-   * Generate a CustomOperatorOutput object with a map of stream id to collection of output objects
-   * @param data the output data in a map of stream id to collection of output objects
+   * Generate a CustomOperatorOutput object with a map of stream id to list of output objects
+   * @param data the output data in a map of stream id to list of output objects
    * @return the generated CustomOperatorOutput object
    */
-  public static <R> Optional<CustomOperatorOutput<R>> succeed(Map<String, Collection<R>> data) {
+  public static <R> CustomOperatorOutput<R> succeed(Map<String, List<R>> data) {
     CustomOperatorOutput<R> retval = new CustomOperatorOutput<R>(data);
-    return Optional.of(retval);
+    return retval;
   }
 
   /**
-   * Generate a result that represents a fail result (Optional.empty)
-   * @return a result that represents a fail result (Optional.empty)
+   * Generate a result that represents a fail result
+   * @return a result that represents a fail result
    */
-  public static <R> Optional<CustomOperatorOutput<R>> fail() {
-    return Optional.empty();
+  public static <R> CustomOperatorOutput<R> fail() {
+    CustomOperatorOutput<R> failed = new CustomOperatorOutput<R>(null);
+    return failed;
   }
 }

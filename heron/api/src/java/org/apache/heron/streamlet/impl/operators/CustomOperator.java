@@ -21,9 +21,8 @@
 package org.apache.heron.streamlet.impl.operators;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.topology.TopologyContext;
@@ -40,7 +39,7 @@ import org.apache.heron.api.tuple.Values;
  *     }
  *
  *     @override
- *     public Optional<CustomOperatorOutput<String>> CustomOperatorOutput<T> process(String data) {
+ *     public CustomOperatorOutput<String> CustomOperatorOutput<T> process(String data) {
  *       ...
  *     }
  *   }
@@ -58,10 +57,9 @@ public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
   /**
    * Process function to be implemented by all custom operators.
    * @param data The data object to be processed
-   * @return a CustomOperatorOutput that contains process results and other flags. The output is wrapped
-   *     in Optional. When the process failed, return none
+   * @return a CustomOperatorOutput that contains process results and other flags.
    */
-  public abstract Optional<CustomOperatorOutput<T>> process(R data);
+  public abstract CustomOperatorOutput<T> process(R data);
 
   /**
    * Called when a task for this component is initialized within a worker on the cluster.
@@ -88,11 +86,11 @@ public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
   @Override
   public void execute(Tuple tuple) {
     R data = (R) tuple.getValue(0);
-    Optional<CustomOperatorOutput<T>> results = process(data);
+    CustomOperatorOutput<T> results = process(data);
 
-    if (results.isPresent()) {
-      Collection<Tuple> anchors = results.get().isAnchored() ? Arrays.asList(tuple) : null;
-      emitResults(results.get().getData(), anchors);
+    if (results.isSuccessful()) {
+      List<Tuple> anchors = results.isAnchored() ? Arrays.asList(tuple) : null;
+      emitResults(results.getData(), anchors);
       outputCollector.ack(tuple);
     } else {
       outputCollector.fail(tuple);
@@ -101,11 +99,11 @@ public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
 
   /**
    * Convert process results to tuples and emit out to the downstream
-   * @param data results collections with corresponding stream id
+   * @param data results lists with corresponding stream id
    * @param anchors anchors to be used when emitting tuples
    */
-  private void emitResults(Map<String, Collection<T>> data, Collection<Tuple> anchors) {
-    for (Map.Entry<String, Collection<T>> entry : data.entrySet()) {
+  private void emitResults(Map<String, List<T>> data, List<Tuple> anchors) {
+    for (Map.Entry<String, List<T>> entry : data.entrySet()) {
       String streamId = entry.getKey();
       for (T value: entry.getValue()) {
         outputCollector.emit(streamId, anchors, new Values(value));
