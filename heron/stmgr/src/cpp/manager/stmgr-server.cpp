@@ -30,37 +30,61 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
+#include "metrics/metrics.h"
 
 namespace heron {
 namespace stmgr {
 
 // Num data tuples received from other stream managers
-const sp_string METRIC_DATA_TUPLES_FROM_STMGRS = "__tuples_from_stmgrs";
+const sp_string METRIC_DATA_TUPLES_FROM_STMGRS = "__server/__tuples_from_stmgrs";
 // Num ack tuples received from other stream managers
-const sp_string METRIC_ACK_TUPLES_FROM_STMGRS = "__ack_tuples_from_stmgrs";
+const sp_string METRIC_ACK_TUPLES_FROM_STMGRS = "__server/__ack_tuples_from_stmgrs";
 // Num fail tuples received from other stream managers
-const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__fail_tuples_from_stmgrs";
+const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__server/__fail_tuples_from_stmgrs";
 // Bytes received from other stream managers
-const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
+const sp_string METRIC_BYTES_FROM_STMGRS = "__server/__bytes_from_stmgrs";
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
-                         const sp_string& _stmgr_id, StMgr* _stmgr)
+                         const sp_string& _stmgr_id, StMgr* _stmgr,
+                         heron::common::MetricsMgrSt* _metrics_manager_client)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
-      stmgr_(_stmgr) {
+      stmgr_(_stmgr),
+      metrics_manager_client_(_metrics_manager_client) {
   // stmgr related handlers
   InstallRequestHandler(&StMgrServer::HandleStMgrHelloRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
   InstallMessageHandler(&StMgrServer::HandleStartBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleStopBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
+
+  tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(METRIC_DATA_TUPLES_FROM_STMGRS,
+                                           tuples_from_stmgrs_metrics_);
+  ack_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(METRIC_ACK_TUPLES_FROM_STMGRS,
+                                           ack_tuples_from_stmgrs_metrics_);
+  fail_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(METRIC_FAIL_TUPLES_FROM_STMGRS,
+                                           fail_tuples_from_stmgrs_metrics_);
+  bytes_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(METRIC_BYTES_FROM_STMGRS,
+                                           bytes_from_stmgrs_metrics_);
 }
 
 StMgrServer::~StMgrServer() {
   Stop();
+  metrics_manager_client_->unregister_metric(METRIC_DATA_TUPLES_FROM_STMGRS);
+  delete tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(METRIC_ACK_TUPLES_FROM_STMGRS);
+  delete ack_tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(METRIC_FAIL_TUPLES_FROM_STMGRS);
+  delete fail_tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(METRIC_BYTES_FROM_STMGRS);
+  delete bytes_from_stmgrs_metrics_;
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {
@@ -135,6 +159,18 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
     __global_protobuf_pool_release__(_message);
   } else {
+    proto::system::HeronTupleSet2* tuple_set = nullptr;
+    tuple_set = __global_protobuf_pool_acquire__(tuple_set);
+    tuple_set->ParsePartialFromString(_message->set());
+
+    bytes_from_stmgrs_metrics_->incr_by(_message->ByteSize());
+    if (tuple_set->has_data()) {
+      tuples_from_stmgrs_metrics_->incr_by(tuple_set->data().tuples_size());
+    } else if (tuple_set->has_control()) {
+      ack_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().acks_size());
+      fail_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().fails_size());
+    }
+
     stmgr_->HandleStreamManagerData(iter->second, _message);
   }
 }
