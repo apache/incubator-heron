@@ -42,8 +42,6 @@ import org.apache.heron.streamlet.Sink;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
-import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
-import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
