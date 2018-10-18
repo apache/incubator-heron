@@ -23,8 +23,8 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
 
 /**
  * CustomBasicStreamlet represents a Streamlet that is made up of applying the user

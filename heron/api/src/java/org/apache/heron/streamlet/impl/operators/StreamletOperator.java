@@ -23,6 +23,7 @@ package org.apache.heron.streamlet.impl.operators;
 import org.apache.heron.api.bolt.BaseRichBolt;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.streamlet.IStreamletOperator;
 
 /**
  * The Bolt interface that other operators of the streamlet packages extend.

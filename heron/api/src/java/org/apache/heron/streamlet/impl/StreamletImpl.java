@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.IStreamletBasicOperator;
+import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
@@ -41,8 +43,6 @@ import org.apache.heron.streamlet.Sink;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
-import org.apache.heron.streamlet.impl.operators.IStreamletBasicOperator;
-import org.apache.heron.streamlet.impl.operators.IStreamletOperator;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomBasicStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
