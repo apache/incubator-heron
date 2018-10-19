@@ -31,18 +31,18 @@ import org.apache.heron.api.tuple.Values
 import org.apache.heron.api.windowing.TupleWindow
 
 class TestWindowBolt extends BaseWindowedBolt {
-  var collector: OutputCollector = _
+  var outputCollector: OutputCollector = _
   var tupleExecuted: Int = 0
   
   override def prepare(topoConf: JMap[String, Object], context: TopologyContext,
                        collector: OutputCollector): Unit = {
-    this.collector = collector
+    this.outputCollector = collector
   }
 
   override def execute(inputWindow: TupleWindow): Unit = {
     tupleExecuted = tupleExecuted + 1
     val size: JDouble = inputWindow.get().size()
-    collector.emit(new Values(size))
+    outputCollector.emit(new Values(size))
   }
 
   override def declareOutputFields(declarer: OutputFieldsDeclarer): Unit = {

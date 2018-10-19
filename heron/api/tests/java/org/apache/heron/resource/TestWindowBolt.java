@@ -30,20 +30,20 @@ import org.apache.heron.api.tuple.Values;
 import org.apache.heron.api.windowing.TupleWindow;
 
 public class TestWindowBolt extends BaseWindowedBolt {
-  private OutputCollector collector;
+  private OutputCollector outputCollector;
   private int tupleExecuted;
 
   @Override
   public void prepare(Map<String, Object> topoConf, TopologyContext context,
                       OutputCollector collector) {
-    this.collector = collector;
+    this.outputCollector = collector;
     this.tupleExecuted = 0;
   }
 
   @Override
   public void execute(TupleWindow inputWindow) {
     tupleExecuted++;
-    collector.emit(new Values(inputWindow.get().size()));
+    outputCollector.emit(new Values(inputWindow.get().size()));
   }
 
   @Override
