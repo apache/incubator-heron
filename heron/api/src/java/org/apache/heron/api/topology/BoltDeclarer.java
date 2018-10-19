@@ -23,11 +23,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.protobuf.ByteString;
-
 import org.apache.heron.api.bolt.IRichBolt;
 import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.grouping.AllStreamGrouping;
 import org.apache.heron.api.grouping.CustomStreamGrouping;
+import org.apache.heron.api.grouping.DirectStreamGrouping;
+import org.apache.heron.api.grouping.FieldsStreamGrouping;
+import org.apache.heron.api.grouping.GlobalStreamGrouping;
+import org.apache.heron.api.grouping.NoneStreamGrouping;
+import org.apache.heron.api.grouping.ShuffleStreamGrouping;
+import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.utils.Utils;
 
@@ -77,20 +82,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer fieldsGrouping(String componentName, String streamId, Fields fields) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.FIELDS);
-    TopologyAPI.StreamSchema.Builder gfbldr = TopologyAPI.StreamSchema.newBuilder();
-    for (int i = 0; i < fields.size(); ++i) {
-      TopologyAPI.StreamSchema.KeyType.Builder ktBldr =
-          TopologyAPI.StreamSchema.KeyType.newBuilder();
-      ktBldr.setKey(fields.get(i));
-      ktBldr.setType(TopologyAPI.Type.OBJECT);
-      gfbldr.addKeys(ktBldr);
-    }
-    bldr.setGroupingFields(gfbldr);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new FieldsStreamGrouping(fields));
   }
 
   public BoltDeclarer globalGrouping(String componentName) {
@@ -98,11 +90,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer globalGrouping(String componentName, String streamId) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.LOWEST);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new GlobalStreamGrouping());
   }
 
   public BoltDeclarer shuffleGrouping(String componentName) {
@@ -110,11 +98,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer shuffleGrouping(String componentName, String streamId) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.SHUFFLE);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new ShuffleStreamGrouping());
   }
 
   public BoltDeclarer localOrShuffleGrouping(String componentName) {
@@ -132,11 +116,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer noneGrouping(String componentName, String streamId) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.NONE);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new NoneStreamGrouping());
   }
 
   public BoltDeclarer allGrouping(String componentName) {
@@ -144,11 +124,7 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer allGrouping(String componentName, String streamId) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.ALL);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new AllStreamGrouping());
   }
 
   public BoltDeclarer directGrouping(String componentName) {
@@ -156,33 +132,27 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
   }
 
   public BoltDeclarer directGrouping(String componentName, String streamId) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.DIRECT);
-    bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
-    return grouping(bldr);
+    return grouping(componentName, streamId, new DirectStreamGrouping());
   }
 
-  public BoltDeclarer customGrouping(String componentName, CustomStreamGrouping grouping) {
-    return customGrouping(componentName, Utils.DEFAULT_STREAM_ID, grouping);
+  public BoltDeclarer customGrouping(String componentName, CustomStreamGrouping grouper) {
+    return customGrouping(componentName, Utils.DEFAULT_STREAM_ID, grouper);
   }
 
   public BoltDeclarer customGrouping(
       String componentName,
       String streamId,
-      CustomStreamGrouping grouping) {
-    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(
-        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
-    bldr.setGtype(TopologyAPI.Grouping.CUSTOM);
-    bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
-    bldr.setCustomGroupingObject(ByteString.copyFrom(Utils.serialize(grouping)));
-    return grouping(bldr);
+      CustomStreamGrouping grouper) {
+
+    return grouping(componentName, streamId, grouper);
   }
 
-  private BoltDeclarer grouping(TopologyAPI.InputStream.Builder stream) {
-    inputs.add(stream);
+  public BoltDeclarer grouping(
+      String componentName,
+      String streamId,
+      StreamGrouping grouper) {
+
+    inputs.add(grouper.buildStream(componentName, streamId));
     return this;
   }
 }

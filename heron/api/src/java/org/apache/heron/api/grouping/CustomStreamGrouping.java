@@ -19,12 +19,18 @@
 
 package org.apache.heron.api.grouping;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.apache.heron.api.topology.TopologyContext;
+import com.google.protobuf.ByteString;
 
-public interface CustomStreamGrouping extends Serializable {
+import org.apache.heron.api.generated.TopologyAPI;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.utils.Utils;
+
+/**
+ * This is the interface for user defined stream grouping strategies.
+ */
+public interface CustomStreamGrouping extends StreamGrouping {
 
   /**
    * Tells the stream grouping at runtime the tasks in the target bolt.
@@ -46,4 +52,22 @@ public interface CustomStreamGrouping extends Serializable {
    * @param values the values to group on
    */
   List<Integer> chooseTasks(List<Object> values);
+
+  /**
+   * Build InputStream for CustomStreamGrouping implementations.
+   * @param componentName The parent component of this grouping logic
+   * @param streamId The id of the input stream
+   * @return An InputStream builder to be used by BoltDeclarer
+   */
+  default TopologyAPI.InputStream.Builder buildStream(String componentName, String streamId) {
+    TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
+
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setGtype(TopologyAPI.Grouping.CUSTOM);
+    bldr.setType(TopologyAPI.CustomGroupingObjectType.JAVA_OBJECT);
+    bldr.setCustomGroupingObject(ByteString.copyFrom(Utils.serialize(this)));
+
+    return bldr;
+  }
 }
