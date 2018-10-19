@@ -35,14 +35,16 @@
 namespace heron {
 namespace stmgr {
 
+// The scope the metrics in this file are under
+const sp_string SERVER_SCOPE = "__server/";
 // Num data tuples received from other stream managers
-const sp_string METRIC_DATA_TUPLES_FROM_STMGRS = "__server/__tuples_from_stmgrs";
+const sp_string METRIC_DATA_TUPLES_FROM_STMGRS = "__tuples_from_stmgrs";
 // Num ack tuples received from other stream managers
-const sp_string METRIC_ACK_TUPLES_FROM_STMGRS = "__server/__ack_tuples_from_stmgrs";
+const sp_string METRIC_ACK_TUPLES_FROM_STMGRS = "__ack_tuples_from_stmgrs";
 // Num fail tuples received from other stream managers
-const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__server/__fail_tuples_from_stmgrs";
+const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__fail_tuples_from_stmgrs";
 // Bytes received from other stream managers
-const sp_string METRIC_BYTES_FROM_STMGRS = "__server/__bytes_from_stmgrs";
+const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
@@ -61,29 +63,32 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   InstallMessageHandler(&StMgrServer::HandleStopBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
 
+  // The metrics need to be registered one by one here because the "__server" scope
+  // is already registered in heron::stmgr::InstanceServer. Duplicated registrations
+  // will only have one successfully registered.
   tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
-  metrics_manager_client_->register_metric(METRIC_DATA_TUPLES_FROM_STMGRS,
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS,
                                            tuples_from_stmgrs_metrics_);
   ack_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
-  metrics_manager_client_->register_metric(METRIC_ACK_TUPLES_FROM_STMGRS,
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS,
                                            ack_tuples_from_stmgrs_metrics_);
   fail_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
-  metrics_manager_client_->register_metric(METRIC_FAIL_TUPLES_FROM_STMGRS,
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS,
                                            fail_tuples_from_stmgrs_metrics_);
   bytes_from_stmgrs_metrics_ = new heron::common::CountMetric();
-  metrics_manager_client_->register_metric(METRIC_BYTES_FROM_STMGRS,
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS,
                                            bytes_from_stmgrs_metrics_);
 }
 
 StMgrServer::~StMgrServer() {
   Stop();
-  metrics_manager_client_->unregister_metric(METRIC_DATA_TUPLES_FROM_STMGRS);
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS);
   delete tuples_from_stmgrs_metrics_;
-  metrics_manager_client_->unregister_metric(METRIC_ACK_TUPLES_FROM_STMGRS);
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS);
   delete ack_tuples_from_stmgrs_metrics_;
-  metrics_manager_client_->unregister_metric(METRIC_FAIL_TUPLES_FROM_STMGRS);
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS);
   delete fail_tuples_from_stmgrs_metrics_;
-  metrics_manager_client_->unregister_metric(METRIC_BYTES_FROM_STMGRS);
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS);
   delete bytes_from_stmgrs_metrics_;
 }
 
