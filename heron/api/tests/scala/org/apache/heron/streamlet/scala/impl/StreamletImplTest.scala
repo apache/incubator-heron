@@ -22,9 +22,22 @@ import scala.util.Random
 
 import org.junit.Assert.{assertEquals, assertTrue}
 
-import org.apache.heron.streamlet.WindowConfig
+import org.apache.heron.resource.{
+  TestBasicBolt,
+  TestBolt,
+  TestWindowBolt
+}
+import org.apache.heron.streamlet.{
+  IStreamletBasicOperator,
+  IStreamletOperator,
+  IStreamletWindowOperator,
+  WindowConfig
+}
 import org.apache.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
+  CustomBasicStreamlet,
+  CustomStreamlet,
+  CustomWindowStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
   LogStreamlet,
@@ -392,6 +405,153 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals("Transformer_Streamlet_1", transformStreamlet.getName)
     assertEquals(7, transformStreamlet.getNumPartitions)
     assertEquals(0, transformStreamlet.getChildren.size())
+  }
+
+  private class MyBoltOperator extends TestBolt with IStreamletOperator[Double, Double] {
+  }
+
+  test("StreamletImpl should support applyOperator operation on IStreamletOperator") {
+    
+    val testOperator = new MyBoltOperator()
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextDouble())
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .map[Double] { num: Double =>
+        num * 10
+      }
+      .setName("Map_Streamlet_1")
+      .setNumPartitions(2)
+      .applyOperator(testOperator)
+      .setName("Custom_Streamlet_1")
+      .setNumPartitions(7)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    val mapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[MapStreamlet[Double, Double]]
+    assertEquals("Map_Streamlet_1", mapStreamlet.getName)
+    assertEquals(2, mapStreamlet.getNumPartitions)
+    assertEquals(1, mapStreamlet.getChildren.size())
+
+    assertTrue(
+      mapStreamlet
+        .getChildren()
+        .get(0)
+        .isInstanceOf[CustomStreamlet[_, _]])
+    val customStreamlet = mapStreamlet
+      .getChildren()
+      .get(0)
+      .asInstanceOf[CustomStreamlet[Double, Double]]
+    assertEquals("Custom_Streamlet_1", customStreamlet.getName)
+    assertEquals(7, customStreamlet.getNumPartitions)
+    assertEquals(0, customStreamlet.getChildren.size())
+  }
+
+  private class MyBasicBoltOperator extends TestBasicBolt
+      with IStreamletBasicOperator[Double, Double] {
+  }
+
+  test("StreamletImpl should support applyOperator operation on IStreamletBasicOperator") {
+    val testOperator = new MyBasicBoltOperator()
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextDouble())
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .map[Double] { num: Double =>
+        num * 10
+      }
+      .setName("Map_Streamlet_1")
+      .setNumPartitions(2)
+      .applyOperator(testOperator)
+      .setName("CustomBasic_Streamlet_1")
+      .setNumPartitions(7)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    val mapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[MapStreamlet[Double, Double]]
+    assertEquals("Map_Streamlet_1", mapStreamlet.getName)
+    assertEquals(2, mapStreamlet.getNumPartitions)
+    assertEquals(1, mapStreamlet.getChildren.size())
+
+    assertTrue(
+      mapStreamlet
+        .getChildren()
+        .get(0)
+        .isInstanceOf[CustomBasicStreamlet[_, _]])
+    val customStreamlet = mapStreamlet
+      .getChildren()
+      .get(0)
+      .asInstanceOf[CustomBasicStreamlet[Double, Double]]
+    assertEquals("CustomBasic_Streamlet_1", customStreamlet.getName)
+    assertEquals(7, customStreamlet.getNumPartitions)
+    assertEquals(0, customStreamlet.getChildren.size())
+  }
+
+  private class MyWindowBoltOperator extends TestWindowBolt
+      with IStreamletWindowOperator[Double, Double] {
+  }
+
+  test("StreamletImpl should support applyOperator operation on IStreamletWindowOperator") {
+    val testOperator = new MyWindowBoltOperator()
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextDouble())
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .map[Double] { num: Double =>
+        num * 10
+      }
+      .setName("Map_Streamlet_1")
+      .setNumPartitions(2)
+      .applyOperator(testOperator)
+      .setName("CustomWindow_Streamlet_1")
+      .setNumPartitions(7)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    val mapStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[MapStreamlet[Double, Double]]
+    assertEquals("Map_Streamlet_1", mapStreamlet.getName)
+    assertEquals(2, mapStreamlet.getNumPartitions)
+    assertEquals(1, mapStreamlet.getChildren.size())
+
+    assertTrue(
+      mapStreamlet
+        .getChildren()
+        .get(0)
+        .isInstanceOf[CustomWindowStreamlet[_, _]])
+    val customStreamlet = mapStreamlet
+      .getChildren()
+      .get(0)
+      .asInstanceOf[CustomWindowStreamlet[Double, Double]]
+    assertEquals("CustomWindow_Streamlet_1", customStreamlet.getName)
+    assertEquals(7, customStreamlet.getNumPartitions)
+    assertEquals(0, customStreamlet.getChildren.size())
   }
 
   test("StreamletImpl should support reduce operation") {

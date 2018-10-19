@@ -32,7 +32,7 @@ import org.apache.heron.streamlet.impl.operators.StreamletOperator;
  * LogSink is a very simple Bolt that implements the log functionality.
  * It basically logs every tuple.
  */
-public class LogSink<R> extends StreamletOperator {
+public class LogSink<R> extends StreamletOperator<R, R> {
   private static final long serialVersionUID = -6392422646613189818L;
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
   private OutputCollector collector;

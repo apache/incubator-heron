@@ -37,7 +37,7 @@ import org.apache.heron.streamlet.impl.operators.StreamletOperator;
  * ConsumerSink is a very simple Sink that basically invokes a user supplied
  * consume function for every tuple.
  */
-public class ComplexSink<R> extends StreamletOperator
+public class ComplexSink<R> extends StreamletOperator<R, R>
     implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 8717991188885786658L;
   private Sink<R> sink;

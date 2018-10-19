@@ -17,38 +17,38 @@
  * under the License.
  */
 
-
-package org.apache.heron.streamlet.impl.operators;
+package org.apache.heron.resource;
 
 import java.util.Map;
 
-import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.bolt.BaseBasicBolt;
+import org.apache.heron.api.bolt.BasicOutputCollector;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 
-/**
- * UnionOperator is the class that implements the union functionality.
- * Its a very simple bolt that re-emits every tuple that it sees.
- */
-public class UnionOperator<I> extends StreamletOperator<I, I> {
-  private static final long serialVersionUID = -7326832064961413315L;
-  private OutputCollector collector;
+public class TestBasicBolt extends BaseBasicBolt {
+  private int tupleExecuted;
 
-  public UnionOperator() {
+  @Override
+  public void prepare(Map<String, Object> heronConf, TopologyContext context) {
+    this.tupleExecuted = 0;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
+  public void execute(Tuple input, BasicOutputCollector collector) {
+    tupleExecuted++;
+    collector.emit(new Values(input.getString(0)));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void execute(Tuple tuple) {
-    I obj = (I) tuple.getValue(0);
-    collector.emit(new Values(obj));
-    collector.ack(tuple);
+  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+    outputFieldsDeclarer.declare(new Fields("output"));
+  }
+
+  public int getExecuted() {
+    return tupleExecuted;
   }
 }

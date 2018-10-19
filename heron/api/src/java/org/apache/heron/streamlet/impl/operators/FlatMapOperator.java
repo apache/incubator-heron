@@ -34,7 +34,7 @@ import org.apache.heron.streamlet.SerializableFunction;
  * For every tuple, it applies the flatMapFunction, flattens the resulting
  * tuples and emits them
  */
-public class FlatMapOperator<R, T> extends StreamletOperator {
+public class FlatMapOperator<R, T> extends StreamletOperator<R, T> {
   private static final long serialVersionUID = -2418329215159618998L;
   private SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn;
 
