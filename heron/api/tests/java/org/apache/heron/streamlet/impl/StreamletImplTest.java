@@ -256,7 +256,7 @@ public class StreamletImplTest {
   public void testCustomStreamlet() throws Exception {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-        .perform(new TestCustomOperator<Double>());
+        .applyOperator(new TestCustomOperator<Double>());
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
@@ -272,7 +272,8 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testCustomStreamletFromBolt() throws Exception {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).perform(new MyBoltOperator());
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).
+                                                applyOperator(new MyBoltOperator());
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
