@@ -203,19 +203,19 @@ public interface Streamlet<R> {
 
   /**
    * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be performed
+   * @param operator The operator to be applied
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> perform(IStreamletOperator<R, T> operator);
+  <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
 
   /**
    * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be performed
+   * @param operator The operator to be applied
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> perform(IStreamletBasicOperator<R, T> operator);
+  <T> Streamlet<T> applyOperator(IStreamletBasicOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function
