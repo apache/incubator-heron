@@ -188,20 +188,45 @@ void StMgrClient::SendHelloRequest() {
 }
 
 bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg) {
-  if (!IsConnected()) {
+  proto::system::HeronTupleSet2* tuple_set = nullptr;
+  tuple_set = __global_protobuf_pool_acquire__(tuple_set);
+  tuple_set->ParsePartialFromString(_msg.set());
+
+  if (!IsConnected() || (droptuples_upon_backpressure_ && HasCausedBackPressure())) {
+    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS_LOST)->incr_by(_msg.ByteSize());
+    if (tuple_set->has_data()) {
+      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS_LOST)
+          ->incr_by(tuple_set->data().tuples_size());
+    } else if (tuple_set->has_control()) {
+      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS_LOST)
+          ->incr_by(tuple_set->control().acks_size());
+      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS_LOST)
+          ->incr_by(tuple_set->control().fails_size());
+    }
+
     if (++ndropped_messages_ % 100 == 0) {
-      LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
-                << other_stmgr_id_ << " because it is not connected";
+      if (!IsConnected()) {
+        LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
+                  << other_stmgr_id_ << " because it is not connected";
+      } else {
+        LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
+                        << other_stmgr_id_ << " because it is causing backpressure and "
+                        << "droptuples_upon_backpressure is set";
       }
-    return false;
-  } else if (droptuples_upon_backpressure_ && HasCausedBackPressure()) {
-    if (++ndropped_messages_ % 100 == 0) {
-      LOG(INFO) << "Dropping " << ndropped_messages_ << "th tuple message to stmgr "
-                << other_stmgr_id_ << " because it is causing backpressure and "
-                << "droptuples_upon_backpressure is set";
     }
     return false;
   } else {
+    stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg.ByteSize());
+    if (tuple_set->has_data()) {
+      stmgr_client_metrics_->scope(METRIC_DATA_TUPLES_TO_STMGRS)
+          ->incr_by(tuple_set->data().tuples_size());
+    } else if (tuple_set->has_control()) {
+      stmgr_client_metrics_->scope(METRIC_ACK_TUPLES_TO_STMGRS)
+          ->incr_by(tuple_set->control().acks_size());
+      stmgr_client_metrics_->scope(METRIC_FAIL_TUPLES_TO_STMGRS)
+          ->incr_by(tuple_set->control().fails_size());
+    }
+
     SendMessage(_msg);
     return true;
   }
