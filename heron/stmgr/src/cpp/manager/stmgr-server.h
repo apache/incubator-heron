@@ -31,6 +31,8 @@
 
 namespace heron {
 namespace common {
+class MetricsMgrSt;
+class CountMetric;
 }
 }
 
@@ -42,7 +44,8 @@ class StMgr;
 class StMgrServer : public Server {
  public:
   StMgrServer(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& _topology_name,
-              const sp_string& _topology_id, const sp_string& _stmgr_id, StMgr* _stmgr);
+              const sp_string& _topology_id, const sp_string& _stmgr_id, StMgr* _stmgr,
+              heron::common::MetricsMgrSt* _metrics_manager_client);
   virtual ~StMgrServer();
 
   // Do back pressure
@@ -93,6 +96,13 @@ class StMgrServer : public Server {
   sp_string topology_id_;
   sp_string stmgr_id_;
   StMgr* stmgr_;
+
+  // Metrics
+  heron::common::MetricsMgrSt* metrics_manager_client_;
+  heron::common::CountMetric* tuples_from_stmgrs_metrics_;
+  heron::common::CountMetric* ack_tuples_from_stmgrs_metrics_;
+  heron::common::CountMetric* fail_tuples_from_stmgrs_metrics_;
+  heron::common::CountMetric* bytes_from_stmgrs_metrics_;
 };
 
 }  // namespace stmgr
