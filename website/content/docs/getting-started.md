@@ -27,6 +27,8 @@ Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https:
 The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh):
 
 ```bash
+$ brew tap streamlio/homebrew-formulae
+$ brew update
 $ brew install heron
 ```
 
