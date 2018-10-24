@@ -23,12 +23,15 @@ package org.apache.heron.streamlet.impl.operators;
 import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.streamlet.IStreamletWindowOperator;
 
 /**
  * The Bolt interface that other windowed operators of the streamlet packages extend.
  * The only common stuff amongst all of them is the output streams
  */
-public abstract class StreamletWindowOperator extends BaseWindowedBolt {
+public abstract class StreamletWindowOperator<R, T>
+    extends BaseWindowedBolt
+    implements IStreamletWindowOperator<R, T> {
   private static final long serialVersionUID = -4836560876041237959L;
   private static final String OUTPUT_FIELD_NAME = "output";
 

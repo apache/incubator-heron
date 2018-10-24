@@ -191,7 +191,7 @@ public interface Streamlet<R> {
   Streamlet<R> union(Streamlet<? extends R> other);
 
   /**
-   * Returns a  new Streamlet by applying the transformFunction on each element of this streamlet.
+   * Returns a new Streamlet by applying the transformFunction on each element of this streamlet.
    * Before starting to cycle the transformFunction over the Streamlet, the open function is called.
    * This allows the transform Function to do any kind of initialization/loading, etc.
    * @param serializableTransformer The transformation function to be applied
@@ -200,6 +200,30 @@ public interface Streamlet<R> {
    */
   <T> Streamlet<T> transform(
       SerializableTransformer<R, ? extends T> serializableTransformer);
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> applyOperator(IStreamletBasicOperator<R, T> operator);
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> applyOperator(IStreamletWindowOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

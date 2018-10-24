@@ -39,7 +39,7 @@ import org.apache.heron.streamlet.impl.ContextImpl;
  * It calls the transformFunction setup/cleanup at the beginning/end of the
  * processing. And for every tuple, it applies the transformFunction, and emits the resulting value
  */
-public class TransformOperator<R, T> extends StreamletOperator
+public class TransformOperator<R, T> extends StreamletOperator<R, T>
     implements IStatefulComponent<Serializable, Serializable> {
   private static final long serialVersionUID = 429297144878185182L;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;

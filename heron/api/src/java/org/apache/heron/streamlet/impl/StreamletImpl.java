@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.IStreamletBasicOperator;
+import org.apache.heron.streamlet.IStreamletOperator;
+import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
@@ -42,6 +45,9 @@ import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CustomBasicStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CustomWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
@@ -100,6 +106,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   protected enum StreamletNamePrefix {
     CONSUMER("consumer"),
+    CUSTOM("custom"),
+    CUSTOM_BASIC("customBasic"),
+    CUSTOM_WINDOW("customWindow"),
     FILTER("filter"),
     FLATMAP("flatmap"),
     REDUCE("reduceByKeyAndWindow"),
@@ -481,6 +490,46 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new TransformStreamlet<>(this, serializableTransformer);
     addChild(transformStreamlet);
     return transformStreamlet;
+  }
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) {
+    CustomStreamlet<R, T> customStreamlet = new CustomStreamlet<>(this, operator);
+    addChild(customStreamlet);
+    return customStreamlet;
+  }
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> applyOperator(IStreamletBasicOperator<R, T> operator) {
+    CustomBasicStreamlet<R, T> customStreamlet = new CustomBasicStreamlet<>(this, operator);
+    addChild(customStreamlet);
+    return customStreamlet;
+  }
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> applyOperator(IStreamletWindowOperator<R, T> operator) {
+    CustomWindowStreamlet<R, T> customStreamlet =
+        new CustomWindowStreamlet<>(this, operator);
+    addChild(customStreamlet);
+    return customStreamlet;
   }
 
   /**
