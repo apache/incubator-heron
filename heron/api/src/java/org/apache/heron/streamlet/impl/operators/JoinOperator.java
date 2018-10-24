@@ -44,7 +44,7 @@ import org.apache.heron.streamlet.Window;
  * a config parameter. Also taken as parameters are which source is left and right.
  * This is needed for the semantics of outer/left/inner joins.
  */
-public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator {
+public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator<V1, VR> {
   private static final long serialVersionUID = 4875450390444745407L;
   private static final String LEFT_COMPONENT_NAME = "_streamlet_joinbolt_left_component_name_";
   private static final String RIGHT_COMPONENT_NAME = "_streamlet_joinbolt_right_component_name_";

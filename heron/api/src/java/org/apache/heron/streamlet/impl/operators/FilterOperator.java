@@ -34,7 +34,7 @@ import org.apache.heron.streamlet.SerializablePredicate;
  * For every tuple that it encounters, the filter function is run
  * and the tuple is re-emitted if the predicate evaluates to true
  */
-public class FilterOperator<R> extends StreamletOperator {
+public class FilterOperator<R> extends StreamletOperator<R, R> {
   private static final long serialVersionUID = -4748646871471052706L;
   private SerializablePredicate<? super R> filterFn;
 
