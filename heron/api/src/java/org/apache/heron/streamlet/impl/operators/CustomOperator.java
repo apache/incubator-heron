@@ -47,7 +47,7 @@ import org.apache.heron.api.tuple.Values;
  * to implement more advanced features.
  * 2. Use it in Streamlet
  *   ....
- *   .perform(new MyOperator())
+ *   .applyOperator(new MyOperator())
  *   ....
  */
 public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
@@ -68,6 +68,7 @@ public abstract class CustomOperator<R, T> extends StreamletOperator<R, T> {
    * @param context This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
    * @param collector The collector is used to emit tuples from this bolt. Tuples can be emitted at any time, including the prepare and cleanup methods. The collector is thread-safe and should be saved as an instance variable of this bolt object.
    */
+  @Override
   public void prepare(Map<String, Object> heronConf,
                       TopologyContext context,
                       OutputCollector collector) {

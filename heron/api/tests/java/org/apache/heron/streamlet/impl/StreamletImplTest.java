@@ -32,8 +32,8 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
-import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.resource.TestCustomOperator;
+import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
@@ -257,23 +257,6 @@ public class StreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
         .applyOperator(new TestCustomOperator<Double>());
-    assertTrue(streamlet instanceof CustomStreamlet);
-    CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
-    assertEquals(20, mStreamlet.getNumPartitions());
-    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
-    assertEquals(supplierStreamlet.getChildren().size(), 1);
-    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-  }
-
-  private class MyBoltOperator extends TestBolt implements IStreamletOperator<Double, Double> {
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testCustomStreamletFromBolt() throws Exception {
-    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20).
-                                                applyOperator(new MyBoltOperator());
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());

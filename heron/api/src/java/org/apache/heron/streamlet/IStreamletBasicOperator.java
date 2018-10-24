@@ -23,8 +23,8 @@ package org.apache.heron.streamlet;
 import org.apache.heron.api.bolt.IBasicBolt;
 
 /**
- * The interface for streamlet basic operators. It is used to support existing user bolts
- * extended from IBasicBolt only. It shouldn't be used to create streamlet operators.
+ * The interface for streamlet operators. It can be used to create
+ * operators based on existing Bolts (subclasses of IBasicBolt).
  */
 public interface IStreamletBasicOperator<R, T> extends IStreamletOperator<R, T>, IBasicBolt {
 }

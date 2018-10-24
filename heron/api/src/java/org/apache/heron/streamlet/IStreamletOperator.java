@@ -21,7 +21,12 @@
 package org.apache.heron.streamlet;
 
 /**
+<<<<<<< 3598935c369f2c0de4832c6c1a3e4db2219edcd4
  * The base interface for all Streamlet operator interfaces.
+=======
+ * The interface for custom operators: it can be used to create
+ * operators based on existing Bolts (subclasses of IRichBolt).
+>>>>>>> Clean up after rebase
  */
 public interface IStreamletOperator<R, T> {
 }
