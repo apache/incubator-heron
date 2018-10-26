@@ -413,7 +413,12 @@ def parse_override_config(namespace):
     kv = config.split("=")
     if len(kv) != 2:
       raise Exception("Invalid config property format (%s) expected key=value" % config)
-    overrides[kv[0]] = kv[1]
+    if kv[1] in ['true', 'True', 'TRUE']:
+      overrides[kv[0]] = True
+    elif kv[1] in ['false', 'False', 'FALSE']:
+      overrides[kv[0]] = False
+    else:
+      overrides[kv[0]] = kv[1]
   return overrides
 
 
