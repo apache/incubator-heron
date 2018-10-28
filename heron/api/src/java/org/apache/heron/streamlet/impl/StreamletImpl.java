@@ -216,7 +216,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   public void build(TopologyBuilder bldr, Set<String> stageNames) {
     if (built) {
-      throw new RuntimeException("Logic Error While building " + getName());
+      throw new RuntimeException("Logic Error While building stage: " + getName());
     }
     if (doBuild(bldr, stageNames)) {
       built = true;
@@ -329,7 +329,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public List<Streamlet<R>> clone(int numClones) {
-    List<Streamlet<R>> retval = new ArrayList<>();
+    require(numClones > 0, "Streamlet's clone number should be > 0");
+    List<Streamlet<R>> retval = new ArrayList<>(numClones);
     for (int i = 0; i < numClones; ++i) {
       retval.add(repartition(getNumPartitions()));
     }

@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.SerializableSupplier;
@@ -44,6 +46,7 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
+    Preconditions.checkNotNull(supplier, "supplier must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
     retval.setNumPartitions(1);
     sources.add(retval);
@@ -52,6 +55,7 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(Source<R> generator) {
+    Preconditions.checkNotNull(generator, "source must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
     retval.setNumPartitions(1);
     sources.add(retval);
