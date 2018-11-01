@@ -25,6 +25,7 @@ import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
+  StreamGrouper,
   Streamlet => JavaStreamlet,
   WindowConfig
 }
@@ -327,6 +328,18 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    */
   override def applyOperator[T](operator: IStreamletOperator[R, T]): Streamlet[T] = {
     val newJavaStreamlet = javaStreamlet.applyOperator[T](operator)
+    fromJavaStreamlet(newJavaStreamlet)
+  }
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param grouper The grouper to be applied with the operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  override def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouper): Streamlet[T] = {
+    val newJavaStreamlet = javaStreamlet.applyOperator[T](operator, grouper)
     fromJavaStreamlet(newJavaStreamlet)
   }
 

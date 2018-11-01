@@ -23,6 +23,7 @@ import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
+  StreamGrouper,
   WindowConfig
 }
 
@@ -230,6 +231,15 @@ trait Streamlet[R] {
    * @return Streamlet containing the output of the operation
    */
   def applyOperator[T](operator: IStreamletOperator[R, T]): Streamlet[T]
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param grouper The grouper to be applied with the operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouper): Streamlet[T]
 
   /**
     * Logs every element of the streamlet using String.valueOf function

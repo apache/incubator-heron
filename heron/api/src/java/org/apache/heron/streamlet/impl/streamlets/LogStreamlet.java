@@ -19,11 +19,8 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.sinks.LogSink;
@@ -52,5 +49,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
     setDefaultNameIfNone(StreamletNamePrefix.LOGGER, stageNames);
     bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
+
+    return true;
   }
 }

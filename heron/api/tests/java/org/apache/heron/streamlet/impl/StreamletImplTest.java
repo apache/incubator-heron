@@ -259,22 +259,6 @@ public class StreamletImplTest {
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
   }
 
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testCustomStreamletWithGrouperFromBasicBolt() throws Exception {
-    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-                                               .applyOperator(new MyBasicBoltOperator(), grouper);
-    assertTrue(streamlet instanceof CustomBasicStreamlet);
-    CustomBasicStreamlet<Double, Double> mStreamlet =
-        (CustomBasicStreamlet<Double, Double>) streamlet;
-    assertEquals(20, mStreamlet.getNumPartitions());
-    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
-    assertEquals(supplierStreamlet.getChildren().size(), 1);
-    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-  }
-
   private class MyWindowBoltOperator extends TestWindowBolt
       implements IStreamletWindowOperator<Double, Double> {
   }
