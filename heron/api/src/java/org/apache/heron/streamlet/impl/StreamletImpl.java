@@ -36,6 +36,7 @@ import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Sink;
+import org.apache.heron.streamlet.StreamGrouper;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -527,4 +528,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return customStreamlet;
   }
 
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param grouper The grouper to be applied with the operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouper grouper) {
+    StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator, grouper);
+    addChild(customStreamlet);
+    return customStreamlet;
+  }
 }

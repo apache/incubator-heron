@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
+import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
@@ -41,6 +42,7 @@ import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.StreamGrouper;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -223,6 +225,21 @@ public class StreamletImplTest {
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
   }
 
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCustomStreamletWithGrouperFromBolt() throws Exception {
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
+                                               .applyOperator(new MyBoltOperator(), grouper);
+    assertTrue(streamlet instanceof CustomStreamlet);
+    CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
   private class MyBasicBoltOperator extends TestBasicBolt
       implements IStreamletBasicOperator<Double, Double> {
   }
@@ -236,6 +253,22 @@ public class StreamletImplTest {
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet =
         (CustomStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCustomStreamletWithGrouperFromBasicBolt() throws Exception {
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
+                                               .applyOperator(new MyBasicBoltOperator(), grouper);
+    assertTrue(streamlet instanceof CustomBasicStreamlet);
+    CustomBasicStreamlet<Double, Double> mStreamlet =
+        (CustomBasicStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
@@ -263,7 +296,23 @@ public class StreamletImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testSimpleBuild() {
+  public void testCustomStreamletWithGrouperFromWindowBolt() throws Exception {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
+                                               .applyOperator(new MyWindowBoltOperator(), grouper);
+    assertTrue(streamlet instanceof CustomWindowStreamlet);
+    CustomWindowStreamlet<Double, Double> mStreamlet =
+        (CustomWindowStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testSimpleBuild() throws Exception {
     Streamlet<String> baseStreamlet = builder.newSource(() -> "sa re ga ma");
     baseStreamlet.flatMap(x -> Arrays.asList(x.split(" ")))
                  .reduceByKeyAndWindow(x -> x, x -> 1, WindowConfig.TumblingCountWindow(10),

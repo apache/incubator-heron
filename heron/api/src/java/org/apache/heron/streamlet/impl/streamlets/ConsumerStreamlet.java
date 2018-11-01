@@ -20,8 +20,12 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.apache.heron.api.grouping.StreamGrouping;
+import org.apache.heron.api.topology.BoltDeclarer;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.impl.StreamletImpl;
@@ -42,6 +46,27 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
     setNumPartitions(parent.getNumPartitions());
   }
 
+  /**
+   * Create a custom streamlet from user defined CustomWindowOperator object.
+   * @param parent The parent(upstream) streamlet object
+   * @param operator The user defined CustomeWindowOperator
+   * @param grouper The StreamGrouper to be used with the operator
+   */
+  public CustomWindowStreamlet(StreamletImpl<R> parent,
+                               IStreamletWindowOperator<R, T> operator,
+                               StreamGrouper grouper) {
+    this.parent = parent;
+    this.operator = operator;
+    this.grouper = Optional.of(grouper);
+    setNumPartitions(parent.getNumPartitions());
+  }
+
+  /**
+   * Connect this streamlet to TopologyBuilder.
+   * @param bldr The TopologyBuilder for the topology
+   * @param stageNames The existing stage names
+   * @return True if successful
+   */
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.CONSUMER, stageNames);
