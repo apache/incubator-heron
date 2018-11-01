@@ -61,6 +61,7 @@ import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
+import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * A Streamlet is a (potentially unbounded) ordered collection of tuples.
@@ -151,7 +152,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setName(String sName) {
-    require(sName != null && !sName.trim().isEmpty(),
+    StreamletUtils.require(sName != null && !sName.trim().isEmpty(),
         "Streamlet name cannot be null/blank");
     this.name = sName;
     return this;
@@ -190,7 +191,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> setNumPartitions(int numPartitions) {
-    require(numPartitions > 0,
+    StreamletUtils.require(numPartitions > 0,
         "Streamlet's partitions number should be > 0");
     this.nPartitions = numPartitions;
     return this;
@@ -216,7 +217,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   public void build(TopologyBuilder bldr, Set<String> stageNames) {
     if (built) {
-      throw new RuntimeException("Logic Error While building stage: " + getName());
+      throw new RuntimeException("Logic Error While building " + getName());
     }
     if (doBuild(bldr, stageNames)) {
       built = true;
@@ -329,7 +330,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public List<Streamlet<R>> clone(int numClones) {
-    require(numClones > 0, "Streamlet's clone number should be > 0");
+    StreamletUtils.require(numClones > 0,
+        "Streamlet's clone number should be > 0");
     List<Streamlet<R>> retval = new ArrayList<>(numClones);
     for (int i = 0; i < numClones; ++i) {
       retval.add(repartition(getNumPartitions()));
@@ -533,15 +535,4 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return customStreamlet;
   }
 
-  /**
-   * Verifies the requirement as the utility function.
-   * @param requirement The requirement to verify
-   * @param errorMessage The error message
-   * @throws IllegalArgumentException if the requirement fails
-   */
-  private void require(Boolean requirement, String errorMessage) {
-    if (!requirement) {
-      throw new IllegalArgumentException(errorMessage);
-    }
-  }
 }
