@@ -207,7 +207,7 @@ public interface Streamlet<R> {
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) throws Exception;
+  <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

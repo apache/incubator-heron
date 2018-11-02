@@ -35,9 +35,7 @@ import org.apache.heron.streamlet.{
 }
 import org.apache.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
-  CustomBasicStreamlet,
   CustomStreamlet,
-  CustomWindowStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
   LogStreamlet,
@@ -495,11 +493,11 @@ class StreamletImplTest extends BaseFunSuite {
       mapStreamlet
         .getChildren()
         .get(0)
-        .isInstanceOf[CustomBasicStreamlet[_, _]])
+        .isInstanceOf[CustomStreamlet[_, _]])
     val customStreamlet = mapStreamlet
       .getChildren()
       .get(0)
-      .asInstanceOf[CustomBasicStreamlet[Double, Double]]
+      .asInstanceOf[CustomStreamlet[Double, Double]]
     assertEquals("CustomBasic_Streamlet_1", customStreamlet.getName)
     assertEquals(7, customStreamlet.getNumPartitions)
     assertEquals(0, customStreamlet.getChildren.size())
@@ -544,11 +542,11 @@ class StreamletImplTest extends BaseFunSuite {
       mapStreamlet
         .getChildren()
         .get(0)
-        .isInstanceOf[CustomWindowStreamlet[_, _]])
+        .isInstanceOf[CustomStreamlet[_, _]])
     val customStreamlet = mapStreamlet
       .getChildren()
       .get(0)
-      .asInstanceOf[CustomWindowStreamlet[Double, Double]]
+      .asInstanceOf[CustomStreamlet[Double, Double]]
     assertEquals("CustomWindow_Streamlet_1", customStreamlet.getName)
     assertEquals(7, customStreamlet.getNumPartitions)
     assertEquals(0, customStreamlet.getChildren.size())
