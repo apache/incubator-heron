@@ -76,11 +76,11 @@ class BuilderImplTest extends BaseFunSuite {
     val spout = new TestSpout
     val generatorStreamletObj = Builder.newBuilder
       .newSource(spout)
-      .setName("Generator_Streamlet_1")
+      .setName("Spout_Streamlet_1")
       .setNumPartitions(20)
 
     assert(generatorStreamletObj.isInstanceOf[Streamlet[_]])
-    assertEquals("Generator_Streamlet_1", generatorStreamletObj.getName)
+    assertEquals("Spout_Streamlet_1", generatorStreamletObj.getName)
     assertEquals(20, generatorStreamletObj.getNumPartitions)
   }
 }

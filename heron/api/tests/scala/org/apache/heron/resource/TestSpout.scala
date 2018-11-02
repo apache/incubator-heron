@@ -40,10 +40,10 @@ import org.apache.heron.api.tuple.Values
 
 @Ignore
 class TestSpout extends BaseRichSpout {
-  private final val EMIT_COUNT = 10
-  private final val MESSAGE_ID = "MESSAGE_ID"
+  private val EMIT_COUNT = 10
+  private val MESSAGE_ID = "MESSAGE_ID"
 
-  private final val toSend = Array("A", "B")
+  private val toSend = Array("A", "B")
   private var outputCollector: SpoutOutputCollector = _
   private var emitted = 0
 
