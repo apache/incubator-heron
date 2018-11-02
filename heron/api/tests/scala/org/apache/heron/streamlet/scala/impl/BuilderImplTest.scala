@@ -74,13 +74,13 @@ class BuilderImplTest extends BaseFunSuite {
   test(
     "BuilderImpl should support streamlet generation from a user defined spout") {
     val spout = new TestSpout
-    val generatorStreamletObj = Builder.newBuilder
+    val spoutStreamletObj = Builder.newBuilder
       .newSource(spout)
       .setName("Spout_Streamlet_1")
       .setNumPartitions(20)
 
-    assert(generatorStreamletObj.isInstanceOf[Streamlet[_]])
-    assertEquals("Spout_Streamlet_1", generatorStreamletObj.getName)
-    assertEquals(20, generatorStreamletObj.getNumPartitions)
+    assert(spoutStreamletObj.isInstanceOf[Streamlet[_]])
+    assertEquals("Spout_Streamlet_1", spoutStreamletObj.getName)
+    assertEquals(20, spoutStreamletObj.getNumPartitions)
   }
 }
