@@ -29,7 +29,7 @@ import org.apache.heron.resource.{
 }
 import org.apache.heron.streamlet.{
   IStreamletBasicOperator,
-  IStreamletOperator,
+  IStreamletRichOperator,
   IStreamletWindowOperator,
   WindowConfig
 }
@@ -407,10 +407,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, transformStreamlet.getChildren.size())
   }
 
-  private class MyBoltOperator extends TestBolt with IStreamletOperator[Double, Double] {
+  private class MyBoltOperator extends TestBolt with IStreamletRichOperator[Double, Double] {
   }
 
-  test("StreamletImpl should support applyOperator operation on IStreamletOperator") {
+  test("StreamletImpl should support applyOperator operation on IStreamletRichOperator") {
     
     val testOperator = new MyBoltOperator()
     val supplierStreamlet = builder

@@ -36,7 +36,7 @@ import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
-import org.apache.heron.streamlet.IStreamletOperator;
+import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializableTransformer;
@@ -197,7 +197,7 @@ public class StreamletImplTest {
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
   }
 
-  private class MyBoltOperator extends TestBolt implements IStreamletOperator<Double, Double> {
+  private class MyBoltOperator extends TestBolt implements IStreamletRichOperator<Double, Double> {
   }
 
   @Test

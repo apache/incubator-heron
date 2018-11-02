@@ -23,7 +23,7 @@ package org.apache.heron.streamlet.impl.operators;
 import org.apache.heron.api.bolt.BaseRichBolt;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.tuple.Fields;
-import org.apache.heron.streamlet.IStreamletOperator;
+import org.apache.heron.streamlet.IStreamletRichOperator;
 
 /**
  * The Bolt interface that other operators of the streamlet packages extend.
@@ -31,7 +31,7 @@ import org.apache.heron.streamlet.IStreamletOperator;
  */
 public abstract class StreamletOperator<R, T>
     extends BaseRichBolt
-    implements IStreamletOperator<R, T> {
+    implements IStreamletRichOperator<R, T> {
   private static final long serialVersionUID = 8524238140745238942L;
   private static final String OUTPUT_FIELD_NAME = "output";
 

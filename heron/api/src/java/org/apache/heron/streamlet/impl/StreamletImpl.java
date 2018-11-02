@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletOperator;
+import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
@@ -218,6 +219,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     if (built) {
       throw new RuntimeException("Logic Error While building " + getName());
     }
+
     if (doBuild(bldr, stageNames)) {
       built = true;
       for (StreamletImpl<?> streamlet : children) {
@@ -497,37 +499,24 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param operator The operator to be applied
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
+   * @throws Exception if the class is not supported
    */
   @Override
-  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) {
-    CustomStreamlet<R, T> customStreamlet = new CustomStreamlet<>(this, operator);
-    addChild(customStreamlet);
-    return customStreamlet;
-  }
+  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) throws Exception {
+    StreamletImpl<T> customStreamlet;
+    if (operator instanceof IStreamletBasicOperator) {
+      IStreamletBasicOperator<R, T> op = (IStreamletBasicOperator<R, T>) operator;
+      customStreamlet = new CustomBasicStreamlet<>(this, op);
+    } else if (operator instanceof IStreamletRichOperator) {
+      IStreamletRichOperator<R, T> op = (IStreamletRichOperator<R, T>) operator;
+      customStreamlet = new CustomStreamlet<>(this, op);
+    } else if (operator instanceof IStreamletWindowOperator) {
+      IStreamletWindowOperator<R, T> op = (IStreamletWindowOperator<R, T>) operator;
+      customStreamlet = new CustomWindowStreamlet<>(this, op);
+    } else {
+      throw new Exception("Unhandled operator class is found!");
+    }
 
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  @Override
-  public <T> Streamlet<T> applyOperator(IStreamletBasicOperator<R, T> operator) {
-    CustomBasicStreamlet<R, T> customStreamlet = new CustomBasicStreamlet<>(this, operator);
-    addChild(customStreamlet);
-    return customStreamlet;
-  }
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  @Override
-  public <T> Streamlet<T> applyOperator(IStreamletWindowOperator<R, T> operator) {
-    CustomWindowStreamlet<R, T> customStreamlet =
-        new CustomWindowStreamlet<>(this, operator);
     addChild(customStreamlet);
     return customStreamlet;
   }

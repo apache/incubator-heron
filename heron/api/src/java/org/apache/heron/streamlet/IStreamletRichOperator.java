@@ -20,8 +20,11 @@
 
 package org.apache.heron.streamlet;
 
+import org.apache.heron.api.bolt.IRichBolt;
+
 /**
- * The base interface for all Streamlet operator interfaces.
+ * The interface for custom operators: it can be used to create
+ * operators based on existing Bolts (subclasses of IRichBolt).
  */
-public interface IStreamletOperator<R, T> {
+public interface IStreamletRichOperator<R, T> extends IStreamletOperator<R, T>, IRichBolt {
 }
