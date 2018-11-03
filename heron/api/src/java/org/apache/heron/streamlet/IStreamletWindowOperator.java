@@ -26,5 +26,5 @@ import org.apache.heron.api.bolt.IWindowedBolt;
  * The interface for streamlet operators. It can be used to create
  * operators based on existing Bolts (subclasses of IWindowedBolt).
  */
-public interface IStreamletWindowOperator<R, T> extends IWindowedBolt {
+public interface IStreamletWindowOperator<R, T> extends IStreamletOperator<R, T>, IWindowedBolt {
 }

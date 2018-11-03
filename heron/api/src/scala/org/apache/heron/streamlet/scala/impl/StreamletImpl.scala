@@ -21,9 +21,7 @@ package org.apache.heron.streamlet.scala.impl
 import scala.collection.JavaConverters
 
 import org.apache.heron.streamlet.{
-  IStreamletBasicOperator,
   IStreamletOperator,
-  IStreamletWindowOperator,
   JoinType,
   KeyValue,
   KeyedWindow,
@@ -328,28 +326,6 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    * @return Streamlet containing the output of the operation
    */
   override def applyOperator[T](operator: IStreamletOperator[R, T]): Streamlet[T] = {
-    val newJavaStreamlet = javaStreamlet.applyOperator[T](operator)
-    fromJavaStreamlet(newJavaStreamlet)
-  }
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  override def applyOperator[T](operator: IStreamletBasicOperator[R, T]): Streamlet[T] = {
-    val newJavaStreamlet = javaStreamlet.applyOperator[T](operator)
-    fromJavaStreamlet(newJavaStreamlet)
-  }
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  override def applyOperator[T](operator: IStreamletWindowOperator[R, T]): Streamlet[T] = {
     val newJavaStreamlet = javaStreamlet.applyOperator[T](operator)
     fromJavaStreamlet(newJavaStreamlet)
   }

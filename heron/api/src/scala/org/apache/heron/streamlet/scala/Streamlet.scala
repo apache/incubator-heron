@@ -19,9 +19,7 @@
 package org.apache.heron.streamlet.scala
 
 import org.apache.heron.streamlet.{
-  IStreamletBasicOperator,
   IStreamletOperator,
-  IStreamletWindowOperator,
   JoinType,
   KeyValue,
   KeyedWindow,
@@ -232,22 +230,6 @@ trait Streamlet[R] {
    * @return Streamlet containing the output of the operation
    */
   def applyOperator[T](operator: IStreamletOperator[R, T]): Streamlet[T]
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  def applyOperator[T](operator: IStreamletBasicOperator[R, T]): Streamlet[T]
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  def applyOperator[T](operator: IStreamletWindowOperator[R, T]): Streamlet[T]
 
   /**
     * Logs every element of the streamlet using String.valueOf function
