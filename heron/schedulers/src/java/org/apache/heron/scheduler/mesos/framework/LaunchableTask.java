@@ -67,7 +67,7 @@ public class LaunchableTask {
 
     String role = "*";
     for (Protos.Resource resource : reservedResources) {
-      if (resource.getName().equalsIgnoreCase(name) && resource.getScalar().getValue() >= value) {
+      if (resource.getName().equals(name) && resource.getScalar().getValue() >= value) {
         role = resource.getRole();
         break;
 
@@ -95,7 +95,7 @@ public class LaunchableTask {
 
     String role = "*";
     for (Protos.Resource resource : reservedResources) {
-      if (resource.getName().equalsIgnoreCase(name)) {
+      if (resource.getName().equals(name)) {
         Protos.Value.Ranges ranges = resource.getRanges();
         for (Protos.Value.Range range : ranges.getRangeList()) {
           if (range.getBegin() <= begin && range.getEnd() >= end) {
