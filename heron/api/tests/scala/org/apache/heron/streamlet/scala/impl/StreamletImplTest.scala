@@ -29,15 +29,13 @@ import org.apache.heron.resource.{
 }
 import org.apache.heron.streamlet.{
   IStreamletBasicOperator,
-  IStreamletOperator,
+  IStreamletRichOperator,
   IStreamletWindowOperator,
   WindowConfig
 }
 import org.apache.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
-  CustomBasicStreamlet,
   CustomStreamlet,
-  CustomWindowStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
   LogStreamlet,
@@ -407,10 +405,10 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, transformStreamlet.getChildren.size())
   }
 
-  private class MyBoltOperator extends TestBolt with IStreamletOperator[Double, Double] {
+  private class MyBoltOperator extends TestBolt with IStreamletRichOperator[Double, Double] {
   }
 
-  test("StreamletImpl should support applyOperator operation on IStreamletOperator") {
+  test("StreamletImpl should support applyOperator operation on IStreamletRichOperator") {
     
     val testOperator = new MyBoltOperator()
     val supplierStreamlet = builder
@@ -495,11 +493,11 @@ class StreamletImplTest extends BaseFunSuite {
       mapStreamlet
         .getChildren()
         .get(0)
-        .isInstanceOf[CustomBasicStreamlet[_, _]])
+        .isInstanceOf[CustomStreamlet[_, _]])
     val customStreamlet = mapStreamlet
       .getChildren()
       .get(0)
-      .asInstanceOf[CustomBasicStreamlet[Double, Double]]
+      .asInstanceOf[CustomStreamlet[Double, Double]]
     assertEquals("CustomBasic_Streamlet_1", customStreamlet.getName)
     assertEquals(7, customStreamlet.getNumPartitions)
     assertEquals(0, customStreamlet.getChildren.size())
@@ -544,11 +542,11 @@ class StreamletImplTest extends BaseFunSuite {
       mapStreamlet
         .getChildren()
         .get(0)
-        .isInstanceOf[CustomWindowStreamlet[_, _]])
+        .isInstanceOf[CustomStreamlet[_, _]])
     val customStreamlet = mapStreamlet
       .getChildren()
       .get(0)
-      .asInstanceOf[CustomWindowStreamlet[Double, Double]]
+      .asInstanceOf[CustomStreamlet[Double, Double]]
     assertEquals("CustomWindow_Streamlet_1", customStreamlet.getName)
     assertEquals(7, customStreamlet.getNumPartitions)
     assertEquals(0, customStreamlet.getChildren.size())

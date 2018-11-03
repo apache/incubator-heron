@@ -36,16 +36,14 @@ import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
-import org.apache.heron.streamlet.IStreamletOperator;
+import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.CustomBasicStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.CustomWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
@@ -197,7 +195,7 @@ public class StreamletImplTest {
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
   }
 
-  private class MyBoltOperator extends TestBolt implements IStreamletOperator<Double, Double> {
+  private class MyBoltOperator extends TestBolt implements IStreamletRichOperator<Double, Double> {
   }
 
   @Test
@@ -224,9 +222,9 @@ public class StreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .applyOperator(new MyBasicBoltOperator());
-    assertTrue(streamlet instanceof CustomBasicStreamlet);
-    CustomBasicStreamlet<Double, Double> mStreamlet =
-        (CustomBasicStreamlet<Double, Double>) streamlet;
+    assertTrue(streamlet instanceof CustomStreamlet);
+    CustomStreamlet<Double, Double> mStreamlet =
+        (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
@@ -243,9 +241,9 @@ public class StreamletImplTest {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .applyOperator(new MyWindowBoltOperator());
-    assertTrue(streamlet instanceof CustomWindowStreamlet);
-    CustomWindowStreamlet<Double, Double> mStreamlet =
-        (CustomWindowStreamlet<Double, Double>) streamlet;
+    assertTrue(streamlet instanceof CustomStreamlet);
+    CustomStreamlet<Double, Double> mStreamlet =
+        (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);

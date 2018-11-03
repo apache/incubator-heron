@@ -210,22 +210,6 @@ public interface Streamlet<R> {
   <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
 
   /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  <T> Streamlet<T> applyOperator(IStreamletBasicOperator<R, T> operator);
-
-  /**
-   * Returns a new Streamlet by applying the operator on each element of this streamlet.
-   * @param operator The operator to be applied
-   * @param <T> The return type of the transform
-   * @return Streamlet containing the output of the operation
-   */
-  <T> Streamlet<T> applyOperator(IStreamletWindowOperator<R, T> operator);
-
-  /**
    * Logs every element of the streamlet using String.valueOf function
    * This is one of the sink functions in the sense that this operation returns void
    */
