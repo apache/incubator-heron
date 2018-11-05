@@ -31,6 +31,7 @@ java_tests(
     "org.apache.heron.streamlet.impl.operators.JoinOperatorTest",
     "org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
+    "org.apache.heron.streamlet.impl.utils.StreamletUtilsTest",
     "org.apache.heron.api.ConfigTest",
     "org.apache.heron.api.HeronSubmitterTest",
     "org.apache.heron.api.utils.UtilsTest"

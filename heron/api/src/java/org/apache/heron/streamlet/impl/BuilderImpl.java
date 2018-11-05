@@ -29,6 +29,7 @@ import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.SerializableSupplier;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
+import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * BuilderImpl implements the Builder interface.
@@ -44,6 +45,7 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
+    StreamletUtils.require(supplier != null, "supplier must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
     retval.setNumPartitions(1);
     sources.add(retval);
@@ -52,6 +54,7 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(Source<R> generator) {
+    StreamletUtils.require(generator != null, "source must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
     retval.setNumPartitions(1);
     sources.add(retval);
