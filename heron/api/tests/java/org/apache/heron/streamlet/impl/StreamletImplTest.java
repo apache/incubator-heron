@@ -141,7 +141,7 @@ public class StreamletImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testCloneStreamlet() throws Exception {
+  public void testCloneStreamlet() {
     Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     List<Streamlet<Double>> streamlets = baseStreamlet.setNumPartitions(20).clone(2);
     assertEquals(streamlets.size(), 2);
@@ -453,6 +453,13 @@ public class StreamletImplTest {
   public void testSetNumPartitionsWithInvalidValue() {
     Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     streamlet.setNumPartitions(0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  @SuppressWarnings("unchecked")
+  public void testCloneStreamletWithInvalidNumberOfClone() {
+    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    baseStreamlet.setNumPartitions(20).clone(0);
   }
 
   private void testByFunction(Function<String, Streamlet<Double>> function, String sName) {
