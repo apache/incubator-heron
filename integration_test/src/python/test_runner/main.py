@@ -258,7 +258,7 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit --config-path=%s %s %s %s %s" %\
+  cmd = "%s submit --verbose --config-path=%s %s %s %s %s" %\
         (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
          jar_path, classpath, args)
 
