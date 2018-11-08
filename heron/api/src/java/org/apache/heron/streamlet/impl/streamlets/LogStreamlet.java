@@ -24,10 +24,7 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-<<<<<<< 91d465b9f160581bcd3715384a659a7bb88b641d:heron/api/src/java/org/apache/heron/streamlet/impl/streamlets/LogStreamlet.java
 import org.apache.heron.streamlet.impl.sinks.LogSink;
-=======
->>>>>>> Move IStreamletOperator and update comments:heron/api/src/java/org/apache/heron/streamlet/impl/streamlets/CustomBasicStreamlet.java
 
 /**
  * LogStreamlet represents en empty Streamlet that is made up of elements from the parent
