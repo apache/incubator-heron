@@ -57,7 +57,7 @@ class ScalaStreamletWithFilterAndTransform(args: Array[String])
       .newSource(() => atomicInteger.getAndIncrement())
       .setName("incremented-numbers")
       .filter((i: Int) => i <= 7)
-      .setName("positive-numbers-lower-than-8")
+      .setName("numbers-lower-than-8")
       .transform[String](new TextTransformer())
       .setName("numbers-transformed-to-text")
 

@@ -128,6 +128,16 @@
       "topologyName" : "IntegrationTest_StatefulWindowingTest",
       "classPath"    : "windowing.stateful.StatefulWindowingTest",
       "expectedResultRelativePath" : "windowing/stateful/StatefulWindowingTestResults.json"
+    },
+    {
+      "topologyName": "IntegrationTest_StreamletWithFilterAndTransform",
+      "classPath": "streamlet_with_filter_and_transform.StreamletWithFilterAndTransform",
+      "expectedResultRelativePath": "streamlet_with_filter_and_transform/StreamletWithFilterAndTransformResults.json"
+    },
+    {
+      "topologyName": "IntegrationTest_StreamletWithMapAndFlatMapAndFilterAndClone",
+      "classPath": "streamlet_with_map_and_flatmap_and_filter_and_clone.StreamletWithMapAndFlatMapAndFilterAndClone",
+      "expectedResultRelativePath": "streamlet_with_map_and_flatmap_and_filter_and_clone/StreamletWithMapAndFlatMapAndFilterAndCloneResults.json"
     }
   ],
   "pythonTopologies": [
