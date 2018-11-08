@@ -410,7 +410,6 @@ class StreamletImplTest extends BaseFunSuite {
   }
 
   test("StreamletImpl should support applyOperator operation on IStreamletRichOperator") {
-    
     val testOperator = new MyBoltOperator()
     val supplierStreamlet = builder
       .newSource(() => Random.nextDouble())
@@ -553,7 +552,7 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, customStreamlet.getChildren.size())
   }
 
-    test("StreamletImpl should support applyOperator operation on CustomOperator") {
+  test("StreamletImpl should support applyOperator operation on CustomOperator") {
     val testOperator = new MyWindowBoltOperator()
     val supplierStreamlet = builder
       .newSource(() => Random.nextDouble())
