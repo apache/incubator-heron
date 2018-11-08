@@ -19,7 +19,6 @@
 
 package org.apache.heron.api.metric;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,7 +45,7 @@ public class MultiReducedMetric<T, U, V> implements IMetric<Map<String, V>> {
 
   @Override
   public Map<String, V> getValueAndReset() {
-    Map<String, V> ret = new HashMap<>();
+    Map<String, V> ret = new ConcurrentHashMap<>();
     for (String key : value.keySet()) {
       V val = value.get(key).getValueAndReset();
       if (val != null) {

@@ -18,7 +18,6 @@
 
 package org.apache.storm.metric.api;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +39,7 @@ public class MultiReducedMetric implements IMetric {
   }
 
   public Object getValueAndReset() {
-    Map<String, Object> ret = new HashMap<>();
+    Map<String, Object> ret = new ConcurrentHashMap<>();
     for (Map.Entry<String, ReducedMetric> e : value.entrySet()) {
       Object val = e.getValue().getValueAndReset();
       if (val != null) {
