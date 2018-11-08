@@ -19,8 +19,8 @@
 
 package org.apache.heron.api.metric;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
  * A reduce metric that can hold multiple scoped values.
@@ -29,7 +29,7 @@ import java.util.Map;
  * @param <V> type of reduced value
  */
 public class MultiReducedMetric<T, U, V> implements IMetric<Map<String, V>> {
-  private Map<String, ReducedMetric<T, U, V>> value = new HashMap<>();
+  private Map<String, ReducedMetric<T, U, V>> value = new ConcurrentHashMap<>();
   private IReducer<T, U, V> reducer;
 
   public MultiReducedMetric(IReducer<T, U, V> reducer) {
@@ -45,7 +45,7 @@ public class MultiReducedMetric<T, U, V> implements IMetric<Map<String, V>> {
 
   @Override
   public Map<String, V> getValueAndReset() {
-    Map<String, V> ret = new HashMap<>();
+    Map<String, V> ret = new ConcurrentHashMap<>();
     for (String key : value.keySet()) {
       V val = value.get(key).getValueAndReset();
       if (val != null) {

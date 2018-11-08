@@ -18,11 +18,11 @@
 
 package org.apache.storm.metric.api;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiCountMetric implements IMetric {
-  private Map<String, CountMetric> value = new HashMap<>();
+  private Map<String, CountMetric> value = new ConcurrentHashMap<>();
 
   public MultiCountMetric() {
   }
@@ -36,7 +36,7 @@ public class MultiCountMetric implements IMetric {
   }
 
   public Object getValueAndReset() {
-    Map<String, Object> ret = new HashMap<>();
+    Map<String, Object> ret = new ConcurrentHashMap<>();
     for (Map.Entry<String, CountMetric> e : value.entrySet()) {
       ret.put(e.getKey(), e.getValue().getValueAndReset());
     }

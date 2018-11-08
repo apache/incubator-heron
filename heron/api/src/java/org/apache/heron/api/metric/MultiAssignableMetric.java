@@ -19,11 +19,11 @@
 
 package org.apache.heron.api.metric;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiAssignableMetric<T extends Number> implements IMetric<Map<String, T>> {
-  private final Map<String, AssignableMetric<T>> value = new HashMap<>();
+  private final Map<String, AssignableMetric<T>> value = new ConcurrentHashMap<>();
   private T initialValue;
 
   public MultiAssignableMetric(T initialValue) {
@@ -51,7 +51,7 @@ public class MultiAssignableMetric<T extends Number> implements IMetric<Map<Stri
 
   @Override
   public Map<String, T> getValueAndReset() {
-    Map<String, T> ret = new HashMap<>();
+    Map<String, T> ret = new ConcurrentHashMap<>();
     synchronized (value) {
       for (Map.Entry<String, AssignableMetric<T>> e : value.entrySet()) {
         ret.put(e.getKey(), e.getValue().getValueAndReset());
