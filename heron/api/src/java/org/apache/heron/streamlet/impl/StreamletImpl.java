@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
@@ -54,6 +55,7 @@ import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
@@ -115,6 +117,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     REMAP("remap"),
     SINK("sink"),
     SOURCE("generator"),
+    SPOUT("spout"),
     SUPPLIER("supplier"),
     TRANSFORM("transform"),
     UNION("union");
@@ -261,6 +264,14 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   static <T> StreamletImpl<T> createGeneratorStreamlet(Source<T> generator) {
     return new SourceStreamlet<T>(generator);
+  }
+
+  /**
+   * Create a Streamlet based on a Spout object
+   * @param spout The Spout function to generate the elements
+   */
+  static <T> StreamletImpl<T> createSpoutStreamlet(IRichSpout spout) {
+    return new SpoutStreamlet<T>(spout);
   }
 
   /**

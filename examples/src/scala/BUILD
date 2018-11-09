@@ -8,6 +8,7 @@ scala_binary(
     deps = [
         "@org_apache_commons_commons_lang3//jar",
         "//heron/api/src/java:api-java",
+        "//heron/api/src/java:api-java-low-level",
         "//heron/api/src/scala:api-scala",
         "//third_party/java:kryo"
     ],
