@@ -28,6 +28,8 @@ java_tests(
     "org.apache.heron.api.metric.LatencyStatAndMetricTest",
     "org.apache.heron.api.bolt.BaseWindowedBoltTest",
     "org.apache.heron.streamlet.impl.StreamletImplTest",
+    "org.apache.heron.streamlet.impl.operators.CustomOperatorOutputTest",
+    "org.apache.heron.streamlet.impl.operators.CustomOperatorTest",
     "org.apache.heron.streamlet.impl.operators.JoinOperatorTest",
     "org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",

@@ -504,5 +504,4 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     addChild(customStreamlet);
     return customStreamlet;
   }
-
 }
