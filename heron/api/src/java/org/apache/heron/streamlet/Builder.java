@@ -20,6 +20,7 @@
 
 package org.apache.heron.streamlet;
 
+import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.streamlet.impl.BuilderImpl;
 
 /**
@@ -45,4 +46,12 @@ public interface Builder {
    * @return
    */
   <R> Streamlet<R> newSource(Source<R> generator);
+
+  /**
+   * Creates a new Streamlet using the provided spout
+   * @param spout The spout that emits the tuples of the streamlet
+   * @param <R>
+   * @return
+   */
+  <R> Streamlet<R> newSource(IRichSpout spout);
 }

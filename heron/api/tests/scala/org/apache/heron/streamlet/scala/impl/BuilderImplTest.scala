@@ -18,12 +18,14 @@
  */
 package org.apache.heron.streamlet.scala.impl
 
+import java.util.{Map => JMap}
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 import org.junit.Assert.assertEquals
 
+import org.apache.heron.resource.TestSpout
 import org.apache.heron.streamlet.Context
-
 import org.apache.heron.streamlet.scala.{Builder, Streamlet, Source}
 import org.apache.heron.streamlet.scala.common.BaseFunSuite
 
@@ -69,4 +71,16 @@ class BuilderImplTest extends BaseFunSuite {
     override def cleanup(): Unit = numbers.clear()
   }
 
+  test(
+    "BuilderImpl should support streamlet generation from a user defined spout") {
+    val spout = new TestSpout
+    val spoutStreamletObj = Builder.newBuilder
+      .newSource(spout)
+      .setName("Spout_Streamlet_1")
+      .setNumPartitions(20)
+
+    assert(spoutStreamletObj.isInstanceOf[Streamlet[_]])
+    assertEquals("Spout_Streamlet_1", spoutStreamletObj.getName)
+    assertEquals(20, spoutStreamletObj.getNumPartitions)
+  }
 }

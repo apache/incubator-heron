@@ -32,6 +32,7 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
+import org.apache.heron.resource.TestSpout;
 import org.apache.heron.resource.TestWindowBolt;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Context;
@@ -49,6 +50,7 @@ import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
@@ -83,6 +85,13 @@ public class StreamletImplTest {
   public void testSupplierStreamlet() throws Exception {
     Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
     assertTrue(streamlet instanceof SupplierStreamlet);
+  }
+
+  @Test
+  public void testSpoutStreamlet() throws Exception {
+    TestSpout spout = new TestSpout();
+    Streamlet<Double> streamlet = StreamletImpl.createSpoutStreamlet(spout);
+    assertTrue(streamlet instanceof SpoutStreamlet);
   }
 
   @Test
