@@ -48,7 +48,6 @@ public final class BuilderImpl implements Builder {
   public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
     StreamletUtils.require(supplier != null, "supplier must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
-    retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
   }
@@ -57,15 +56,14 @@ public final class BuilderImpl implements Builder {
   public <R> Streamlet<R> newSource(Source<R> generator) {
     StreamletUtils.require(generator != null, "source must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
-    retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
   }
 
   @Override
   public <R> Streamlet<R> newSource(IRichSpout spout) {
+    StreamletUtils.require(spout != null, "spout must not be null.");
     StreamletImpl<R> retval = StreamletImpl.createSpoutStreamlet(spout);
-    retval.setNumPartitions(1);
     sources.add(retval);
     return retval;
   }
