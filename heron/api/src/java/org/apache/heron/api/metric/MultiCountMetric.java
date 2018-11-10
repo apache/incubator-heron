@@ -19,6 +19,7 @@
 
 package org.apache.heron.api.metric;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +39,7 @@ public class MultiCountMetric implements IMetric<Map<String, Long>> {
 
   @Override
   public Map<String, Long> getValueAndReset() {
-    Map<String, Long> ret = new ConcurrentHashMap<>();
+    Map<String, Long> ret = new HashMap<>();
     for (String key : value.keySet()) {
       ret.put(key, value.get(key).getValueAndReset());
     }
