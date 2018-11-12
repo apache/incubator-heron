@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.heron.api.grouping.NoneStreamGrouping;
 import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
@@ -81,6 +82,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   private static final Logger LOG = Logger.getLogger(StreamletImpl.class.getName());
   protected String name;
   protected int nPartitions;
+  protected String streamId;
   private List<StreamletImpl<?>> children;
   private boolean built;
 
@@ -203,10 +205,36 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   }
 
   /**
+   * Set the id of the stream to be used by the children nodes.
+   * Usage (assuming source is a Streamlet object with two output streams: stream1 and stream2):
+   *   source.withStream("stream1").filter(...).log();
+   *   source.withStream("stream2").filter(...).log();
+   * @param streamId The specified stream id
+   * @return Returns back the Streamlet with changed stream id
+   */
+  @SuppressWarnings("HiddenField")
+  @Override
+  public Streamlet<R> withStream(String streamId) {
+    StreamletUtils.require(streamId != null && !streamId.isEmpty(), "streamId can't be empty");
+    this.streamId = streamId;
+    return this;
+  }
+
+  /**
+   * Gets the stream id of this Streamlet.
+   * @return the stream id of this Streamlet`
+   */
+  @Override
+  public String getStreamId() {
+    return streamId;
+  }
+
+  /**
    * Only used by the implementors
    */
   protected StreamletImpl() {
     this.nPartitions = -1;
+    this.streamId = Utils.DEFAULT_STREAM_ID;
     this.children = new LinkedList<>();
     this.built = false;
   }

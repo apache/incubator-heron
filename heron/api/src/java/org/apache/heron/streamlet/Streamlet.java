@@ -73,6 +73,22 @@ public interface Streamlet<R> {
   int getNumPartitions();
 
   /**
+   * Set the id of the stream to be used by the children nodes.
+   * Usage (assuming source is a Streamlet object with two output streams: stream1 and stream2):
+   *   source.withStream("stream1").filter(...).log();
+   *   source.withStream("stream2").filter(...).log();
+   * @param streamId The specified stream id
+   * @return Returns back the Streamlet with changed stream id
+   */
+  Streamlet<R> withStream(String streamId);
+
+  /**
+   * Gets the stream id of this Streamlet.
+   * @return the stream id of this Streamlet
+   */
+  String getStreamId();
+
+  /**
    * Return a new Streamlet by applying mapFn to each element of this Streamlet
    * @param mapFn The Map Function that should be applied to each element
   */

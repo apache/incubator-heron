@@ -33,10 +33,16 @@ import org.apache.heron.streamlet.impl.operators.MapOperator;
  */
 public class MapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
+  private String parentStream;
   private SerializableFunction<? super R, ? extends T> mapFn;
+
+  public String getParentStream() {
+    return parentStream;
+  }
 
   public MapStreamlet(StreamletImpl<R> parent, SerializableFunction<? super R, ? extends T> mapFn) {
     this.parent = parent;
+    this.parentStream = parent.getStreamId();
     this.mapFn = mapFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -45,7 +51,7 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.MAP, stageNames);
     bldr.setBolt(getName(), new MapOperator<R, T>(mapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+        getNumPartitions()).shuffleGrouping(parent.getName(), parentStream);
     return true;
   }
 }

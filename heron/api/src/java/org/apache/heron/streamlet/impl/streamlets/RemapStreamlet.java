@@ -38,11 +38,13 @@ import org.apache.heron.streamlet.impl.operators.MapOperator;
  */
 public class RemapStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
+  private String parentStream;
   private SerializableBiFunction<? super R, Integer, List<Integer>> remapFn;
 
   public RemapStreamlet(StreamletImpl<R> parent,
                         SerializableBiFunction<? super R, Integer, List<Integer>> remapFn) {
     this.parent = parent;
+    this.parentStream = parent.getStreamId();
     this.remapFn = remapFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -50,9 +52,9 @@ public class RemapStreamlet<R> extends StreamletImpl<R> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REMAP, stageNames);
-    bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a),
-        getNumPartitions())
-        .customGrouping(parent.getName(), new RemapCustomGrouping<R>(remapFn));
+    bldr.setBolt(getName(), new MapOperator<R, R>((a) -> a), getNumPartitions())
+        .customGrouping(parent.getName(), parentStream,
+            new RemapCustomGrouping<R>(remapFn));
     return true;
   }
 }

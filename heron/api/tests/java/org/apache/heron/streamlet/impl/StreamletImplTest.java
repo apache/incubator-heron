@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
@@ -82,6 +83,22 @@ public class StreamletImplTest {
     StreamletImpl<Double> bStreamlet = (StreamletImpl<Double>) sample;
     assertFalse(bStreamlet.isBuilt());
     assertEquals(bStreamlet.getChildren().size(), 0);
+  }
+
+  @Test
+  public void testWithStream() {
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> mapStreamlet = streamlet.map((num) -> num * 10);
+    Streamlet<Double> streamlet2 = streamlet.withStream("test_stream2");
+    Streamlet<Double> mapStreamlet2 = streamlet2.map((num) -> num * 10);
+    Streamlet<Double> streamlet3 = streamlet.withStream("test_stream3");
+    Streamlet<Double> mapStreamlet3 = streamlet3.map((num) -> num * 10);
+
+    // Children streamlets should have the right parent stream id
+    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet).getParentStream(),
+                 Utils.DEFAULT_STREAM_ID);
+    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet2).getParentStream(), "test_stream2");
+    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet3).getParentStream(), "test_stream3");
   }
 
   @Test
@@ -480,6 +497,12 @@ public class StreamletImplTest {
   public void testSetNumPartitionsWithInvalidValue() {
     Streamlet<Double> streamlet = builder.newSource(() -> Math.random());
     streamlet.setNumPartitions(0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testWithStreamWithInvalidValue() {
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    streamlet.withStream("");
   }
 
   @Test(expected = IllegalArgumentException.class)

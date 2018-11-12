@@ -34,10 +34,12 @@ import org.apache.heron.streamlet.impl.sinks.ComplexSink;
  */
 public class SinkStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
+  private String parentStream;
   private Sink<R> sink;
 
   public SinkStreamlet(StreamletImpl<R> parent, Sink<R> sink) {
     this.parent = parent;
+    this.parentStream = parent.getStreamId();
     this.sink = sink;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -46,7 +48,7 @@ public class SinkStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.SINK, stageNames);
     bldr.setBolt(getName(), new ComplexSink<>(sink),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+        getNumPartitions()).shuffleGrouping(parent.getName(), parentStream);
     return true;
   }
 }

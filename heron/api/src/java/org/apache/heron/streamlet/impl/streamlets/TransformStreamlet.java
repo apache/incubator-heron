@@ -35,11 +35,13 @@ import org.apache.heron.streamlet.impl.operators.TransformOperator;
  */
 public class TransformStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
+  private String parentStream;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
   public TransformStreamlet(StreamletImpl<R> parent,
                        SerializableTransformer<? super R, ? extends T> serializableTransformer) {
     this.parent = parent;
+    this.parentStream = parent.getStreamId();
     this.serializableTransformer = serializableTransformer;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -48,7 +50,7 @@ public class TransformStreamlet<R, T> extends StreamletImpl<T> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.TRANSFORM, stageNames);
     bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+        getNumPartitions()).shuffleGrouping(parent.getName(), parentStream);
     return true;
   }
 }
