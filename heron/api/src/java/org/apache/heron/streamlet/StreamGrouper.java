@@ -19,11 +19,12 @@
 
 package org.apache.heron.streamlet;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.utils.Utils;
+import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * StreamGrouper is the class to config grouping strategy in Streamlet API. Note that
@@ -36,14 +37,15 @@ public class StreamGrouper {
    * and each stream needs a grouping strategies. Hence it is possible for an operator to have
    * more than one entries.
    */
-  private HashMap<String, StreamGrouping> groupingMap;
+  private Map<String, StreamGrouping> groupingMap;
 
   /**
    * Construct a Grouper object with specific grouping strategy and default stream id
    * @param grouping The grouping strategy to be applied
    */
   public StreamGrouper(StreamGrouping grouping) {
-    groupingMap = new HashMap<>();
+    StreamletUtils.require(grouping != null, "grouping strategy can't be null");
+    groupingMap = new ConcurrentHashMap<>();
     append(Utils.DEFAULT_STREAM_ID, grouping);
   }
 
@@ -53,7 +55,9 @@ public class StreamGrouper {
    * @param grouping The grouping strategy to be applied
    */
   public StreamGrouper(String streamId, StreamGrouping grouping) {
-    groupingMap = new HashMap<>();
+    StreamletUtils.require(streamId != null && !streamId.isEmpty(), "streamId can't be empty");
+    StreamletUtils.require(grouping != null, "grouping strategy can't be null");
+    groupingMap = new ConcurrentHashMap<>();
     append(streamId, grouping);
 
   }
@@ -65,6 +69,8 @@ public class StreamGrouper {
    * @param grouping The grouping strategy to be applied
    */
   public void append(String streamId, StreamGrouping grouping) {
+    StreamletUtils.require(streamId != null && !streamId.isEmpty(), "streamId can't be empty");
+    StreamletUtils.require(grouping != null, "grouping strategy can't be null");
     groupingMap.put(streamId, grouping);
   }
 

@@ -318,8 +318,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public List<Streamlet<R>> clone(int numClones) {
-    require(numClones > 0,
-        "Streamlet's clone number should be > 0");
+    require(numClones > 0, "Streamlet's clone number should be > 0");
     List<Streamlet<R>> retval = new ArrayList<>(numClones);
     for (int i = 0; i < numClones; ++i) {
       retval.add(repartition(getNumPartitions()));
@@ -537,6 +536,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouper grouper) {
+    checkNotNull(operator, "operator can't be null");
+    checkNotNull(grouper, "grouper can't be null");
+
     StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator, grouper);
     addChild(customStreamlet);
     return customStreamlet;
