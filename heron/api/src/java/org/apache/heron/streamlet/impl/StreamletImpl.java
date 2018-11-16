@@ -52,6 +52,7 @@ import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SplitStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
 
@@ -109,13 +110,14 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     CUSTOM_WINDOW("customWindow"),
     FILTER("filter"),
     FLATMAP("flatmap"),
-    REDUCE("reduceByKeyAndWindow"),
     JOIN("join"),
     LOGGER("logger"),
     MAP("map"),
+    SOURCE("generator"),
+    REDUCE("reduceByKeyAndWindow"),
     REMAP("remap"),
     SINK("sink"),
-    SOURCE("generator"),
+    SPLIT("split"),
     SPOUT("spout"),
     SUPPLIER("supplier"),
     TRANSFORM("transform"),
@@ -572,5 +574,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator, grouper);
     addChild(customStreamlet);
     return customStreamlet;
+  }
+
+  /**
+   * Returns multiple streams by splitting incoming stream.
+   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * Note that there could be 0 or multiple target stream ids
+   */
+  @Override
+  public Streamlet<R> split(SerializableFunction<R, List<String>> splitFn) {
+    SplitStreamlet<R> splitStreamlet = new SplitStreamlet<>(this, splitFn);
+    addChild(splitStreamlet);
+    return splitStreamlet;
   }
 }

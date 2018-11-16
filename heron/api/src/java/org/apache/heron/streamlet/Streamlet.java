@@ -236,6 +236,13 @@ public interface Streamlet<R> {
   <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouping grouper);
 
   /**
+   * Returns multiple streams by splitting incoming stream.
+   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * Note that there could be 0 or multiple target stream ids
+   */
+  Streamlet<R> split(SerializableFunction<R, List<String>> splitFn);
+
+  /**
    * Logs every element of the streamlet using String.valueOf function
    * This is one of the sink functions in the sense that this operation returns void
    */

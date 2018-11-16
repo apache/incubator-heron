@@ -20,34 +20,36 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.Sink;
+import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.sinks.ComplexSink;
+import org.apache.heron.streamlet.impl.operators.SplitOperator;
 
 /**
- * SinkStreamlet represents en empty Streamlet that is made up of elements from the parent
- * streamlet after consuming every element. Since elements of the parents are just consumed
- * by the user passed consumer function, nothing is emitted, thus this streamlet is empty.
+ * SplitStreamlet represents a Streamlet that splits an incoming
+ * stream into multiple streams using a split function. Each tuple
+ * can be emitted into no or multiple streams.
  */
-public class SinkStreamlet<R> extends StreamletImpl<R> {
+public class SplitStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
   private String parentStreamId;
-  private Sink<R> sink;
+  private SerializableFunction<? super R, List<String>> splitFn;
 
-  public SinkStreamlet(StreamletImpl<R> parent, Sink<R> sink) {
+  public SplitStreamlet(StreamletImpl<R> parent,
+                        SerializableFunction<? super R, List<String>> splitFn) {
     this.parent = parent;
     this.parentStreamId = parent.getStreamId();
-    this.sink = sink;
+    this.splitFn = splitFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.SINK, stageNames);
-    bldr.setBolt(getName(), new ComplexSink<>(sink),
+    setDefaultNameIfNone(StreamletNamePrefix.SPLIT, stageNames);
+    bldr.setBolt(getName(), new SplitOperator<R>(splitFn),
         getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
     return true;
   }

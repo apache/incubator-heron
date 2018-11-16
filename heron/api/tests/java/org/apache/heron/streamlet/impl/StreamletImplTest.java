@@ -18,6 +18,7 @@
  */
 package org.apache.heron.streamlet.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +30,6 @@ import org.junit.Test;
 
 import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
@@ -88,17 +88,31 @@ public class StreamletImplTest {
   @Test
   public void testWithStream() {
     Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Streamlet<Double> mapStreamlet = streamlet.map((num) -> num * 10);
-    Streamlet<Double> streamlet2 = streamlet.withStream("test_stream2");
-    Streamlet<Double> mapStreamlet2 = streamlet2.map((num) -> num * 10);
-    Streamlet<Double> streamlet3 = streamlet.withStream("test_stream3");
-    Streamlet<Double> mapStreamlet3 = streamlet3.map((num) -> num * 10);
+    Streamlet<Double> multiStreams = streamlet.split((num) -> {
+      List out = new ArrayList<String>();
+      out.add("all");
+      if (num > 0) {
+        out.add("positive");
+      }
+      if (num < 0) {
+        out.add("negative");
+      }
+
+      return out;
+    });
+
+    // Default stream is used
+    Streamlet<Double> positiveStream = multiStreams.withStream("positive");
+    Streamlet<Double> negativeStream = multiStreams.withStream("negative");
+
+    Streamlet<Double> allMap = multiStreams.withStream("all").map((num) -> num * 10);
+    Streamlet<Double> positiveMap = positiveStream.map((num) -> num * 10);
+    Streamlet<Double> negativeMap = negativeStream.map((num) -> num * 10);
 
     // Children streamlets should have the right parent stream id
-    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet).getParentStream(),
-                 Utils.DEFAULT_STREAM_ID);
-    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet2).getParentStream(), "test_stream2");
-    assertEquals(((MapStreamlet<Double, Double>) mapStreamlet3).getParentStream(), "test_stream3");
+    assertEquals(((MapStreamlet<Double, Double>) allMap).getParentStreamId(), "all");
+    assertEquals(((MapStreamlet<Double, Double>) positiveMap).getParentStreamId(), "positive");
+    assertEquals(((MapStreamlet<Double, Double>) negativeMap).getParentStreamId(), "negative");
   }
 
   @Test

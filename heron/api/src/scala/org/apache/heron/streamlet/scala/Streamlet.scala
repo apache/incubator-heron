@@ -240,7 +240,7 @@ trait Streamlet[R] {
   def transform[T](
       serializableTransformer: SerializableTransformer[R, _ <: T]): Streamlet[T]
 
-/**
+  /**
    * Returns a new Streamlet by applying the operator on each element of this streamlet.
    * @param operator The operator to be applied
    * @param <T> The return type of the transform
@@ -256,6 +256,13 @@ trait Streamlet[R] {
    * @return Streamlet containing the output of the operation
    */
   def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouping): Streamlet[T]
+
+  /**
+   * Returns multiple streams by splitting incoming stream.
+   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * Note that there could be 0 or multiple target stream ids
+   */
+  def split(splitFn: R => Seq[String]): Streamlet[R]
 
   /**
     * Logs every element of the streamlet using String.valueOf function

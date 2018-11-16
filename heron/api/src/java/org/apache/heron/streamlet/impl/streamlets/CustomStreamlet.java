@@ -36,7 +36,6 @@ import org.apache.heron.streamlet.impl.StreamletImpl;
  */
 public class CustomStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private String parentStream;
   private IStreamletOperator<R, T> operator;
   private StreamGrouping grouper;
 
@@ -69,17 +68,17 @@ public class CustomStreamlet<R, T> extends StreamletImpl<T> {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM, stageNames);
       IStreamletBasicOperator<R, T> op = (IStreamletBasicOperator<R, T>) operator;
       bldr.setBolt(getName(), op,  getNumPartitions())
-          .grouping(parent.getName(), parentStream, grouper);
+          .grouping(parent.getName(), parent.getStreamId(), grouper);
     } else if (operator instanceof IStreamletRichOperator) {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM_BASIC, stageNames);
       IStreamletRichOperator<R, T> op = (IStreamletRichOperator<R, T>) operator;
       bldr.setBolt(getName(), op,  getNumPartitions())
-          .grouping(parent.getName(), parentStream, grouper);
+          .grouping(parent.getName(), parent.getStreamId(), grouper);
     } else if (operator instanceof IStreamletWindowOperator) {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM_WINDOW, stageNames);
       IStreamletWindowOperator<R, T> op = (IStreamletWindowOperator<R, T>) operator;
       bldr.setBolt(getName(), op,  getNumPartitions())
-          .grouping(parent.getName(), parentStream, grouper);
+          .grouping(parent.getName(), parent.getStreamId(), grouper);
     } else {
       throw new RuntimeException("Unhandled operator class is found!");
     }

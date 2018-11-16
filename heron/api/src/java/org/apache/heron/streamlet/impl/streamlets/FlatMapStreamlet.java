@@ -34,14 +34,14 @@ import org.apache.heron.streamlet.impl.operators.FlatMapOperator;
  */
 public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
-  private String parentStream;
+  private String parentStreamId;
   private SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn;
 
   public FlatMapStreamlet(StreamletImpl<R> parent,
                           SerializableFunction<? super R,
                                                ? extends Iterable<? extends T>> flatMapFn) {
     this.parent = parent;
-    this.parentStream = parent.getStreamId();
+    this.parentStreamId = parent.getStreamId();
     this.flatMapFn = flatMapFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -50,7 +50,7 @@ public class FlatMapStreamlet<R, T> extends StreamletImpl<T> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.FLATMAP, stageNames);
     bldr.setBolt(getName(), new FlatMapOperator<R, T>(flatMapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName(), parentStream);
+        getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
     return true;
   }
 }

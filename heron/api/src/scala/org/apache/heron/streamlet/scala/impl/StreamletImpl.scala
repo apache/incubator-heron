@@ -361,6 +361,17 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     fromJavaStreamlet(newJavaStreamlet)
   }
 
+  /*
+   * Returns multiple streams by splitting incoming stream.
+   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * Note that there could be 0 or multiple target stream ids
+   */
+  override def split(splitFn: R => Seq[String]): Streamlet[R] = {
+    val serializableFunction = toSerializableFunctionWithSeq[R, String](splitFn)
+    val newJavaStreamlet = javaStreamlet.split(serializableFunction)
+    fromJavaStreamlet[R](newJavaStreamlet)
+  }
+
   /**
     * Logs every element of the streamlet using String.valueOf function
     * This is one of the sink functions in the sense that this operation returns void
