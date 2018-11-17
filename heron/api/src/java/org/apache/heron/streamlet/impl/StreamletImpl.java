@@ -368,7 +368,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * The join is done over elements accumulated over a time window defined by windowCfg.
    * The elements are compared using the thisKeyExtractor for this streamlet with the
    * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
-   * @param other The Streamlet that we are joining with.
+   * @param otherStreamlet The Streamlet that we are joining with.
    * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
    * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to
@@ -377,16 +377,16 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+        join(Streamlet<S> otherStreamlet, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              SerializableBiFunction<R, S, ? extends T> joinFunction) {
-    checkNotNull(other, "other cannot be null");
+    checkNotNull(otherStreamlet, "otherStreamlet cannot be null");
     checkNotNull(thisKeyExtractor, "thisKeyExtractor cannot be null");
     checkNotNull(otherKeyExtractor, "otherKeyExtractor cannot be null");
     checkNotNull(windowCfg, "windowCfg cannot be null");
     checkNotNull(joinFunction, "joinFunction cannot be null");
 
-    return join(other, thisKeyExtractor, otherKeyExtractor,
+    return join(otherStreamlet, thisKeyExtractor, otherKeyExtractor,
         windowCfg, JoinType.INNER, joinFunction);
   }
 
@@ -397,7 +397,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * The elements are compared using the thisKeyExtractor for this streamlet with the
    * otherKeyExtractor for the other streamlet. On each matching pair, the joinFunction is applied.
    * Types of joins {@link JoinType}
-   * @param other The Streamlet that we are joining with.
+   * @param otherStreamlet The Streamlet that we are joining with.
    * @param thisKeyExtractor The function applied to a tuple of this streamlet to get the key
    * @param otherKeyExtractor The function applied to a tuple of the other streamlet to get the key
    * @param windowCfg This is a specification of what kind of windowing strategy you like to
@@ -407,17 +407,17 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
-        join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
+        join(Streamlet<S> otherStreamlet, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction) {
-    checkNotNull(other, "other cannot be null");
+    checkNotNull(otherStreamlet, "otherStreamlet cannot be null");
     checkNotNull(thisKeyExtractor, "thisKeyExtractor cannot be null");
     checkNotNull(otherKeyExtractor, "otherKeyExtractor cannot be null");
     checkNotNull(windowCfg, "windowCfg cannot be null");
     checkNotNull(joinType, "joinType cannot be null");
     checkNotNull(joinFunction, "joinFunction cannot be null");
 
-    StreamletImpl<S> joinee = (StreamletImpl<S>) other;
+    StreamletImpl<S> joinee = (StreamletImpl<S>) otherStreamlet;
     JoinStreamlet<K, R, S, T> retval = JoinStreamlet.createJoinStreamlet(
         this, joinee, thisKeyExtractor, otherKeyExtractor, windowCfg, joinType, joinFunction);
     addChild(retval);
@@ -485,10 +485,10 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * the new streamlet will contain tuples belonging to both Streamlets
   */
   @Override
-  public Streamlet<R> union(Streamlet<? extends R> other) {
-    checkNotNull(other, "other cannot be null");
+  public Streamlet<R> union(Streamlet<? extends R> otherStreamlet) {
+    checkNotNull(otherStreamlet, "otherStreamlet cannot be null");
 
-    StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) other;
+    StreamletImpl<? extends R> joinee = (StreamletImpl<? extends R>) otherStreamlet;
     UnionStreamlet<R> retval = new UnionStreamlet<>(this, joinee);
     addChild(retval);
     joinee.addChild(retval);
