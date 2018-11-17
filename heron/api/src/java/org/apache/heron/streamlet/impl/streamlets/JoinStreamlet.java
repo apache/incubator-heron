@@ -44,9 +44,7 @@ import org.apache.heron.streamlet.impl.operators.JoinOperator;
 public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
   private JoinType joinType;
   private StreamletImpl<R> left;
-  private String leftStream;
   private StreamletImpl<S> right;
-  private String rightStream;
   private SerializableFunction<R, K> leftKeyExtractor;
   private SerializableFunction<S, K> rightKeyExtractor;
   private WindowConfigImpl windowCfg;
@@ -72,9 +70,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
                         SerializableBiFunction<R, S, ? extends T> joinFn) {
     this.joinType = joinType;
     this.left = left;
-    this.leftStream = left.getStreamId();
     this.right = right;
-    this.rightStream = right.getStreamId();
     this.leftKeyExtractor = leftKeyExtractor;
     this.rightKeyExtractor = rightKeyExtractor;
     this.windowCfg = (WindowConfigImpl) windowCfg;
@@ -96,9 +92,9 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
         right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(left.getName(), leftStream,
+        .customGrouping(left.getName(), left.getStreamId(),
             new JoinCustomGrouping<K, R>(leftKeyExtractor))
-        .customGrouping(right.getName(), rightStream,
+        .customGrouping(right.getName(), right.getStreamId(),
             new JoinCustomGrouping<K, S>(rightKeyExtractor));
     return true;
   }

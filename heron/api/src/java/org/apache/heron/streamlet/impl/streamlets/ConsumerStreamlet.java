@@ -34,12 +34,10 @@ import org.apache.heron.streamlet.impl.sinks.ConsumerSink;
  */
 public class ConsumerStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private String parentStreamId;
   private SerializableConsumer<R> consumer;
 
   public ConsumerStreamlet(StreamletImpl<R> parent, SerializableConsumer<R> consumer) {
     this.parent = parent;
-    this.parentStreamId = parent.getStreamId();
     this.consumer = consumer;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -54,7 +52,7 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.CONSUMER, stageNames);
     bldr.setBolt(getName(), new ConsumerSink<>(consumer),
-        getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

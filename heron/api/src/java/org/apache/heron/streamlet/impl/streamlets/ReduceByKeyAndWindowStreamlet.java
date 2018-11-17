@@ -43,7 +43,6 @@ import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
 public class ReduceByKeyAndWindowStreamlet<K, V, R>
     extends StreamletImpl<KeyValue<KeyedWindow<K>, V>> {
   private StreamletImpl<R> parent;
-  private String parentStreamId;
   private SerializableFunction<R, K> keyExtractor;
   private SerializableFunction<R, V> valueExtractor;
   private WindowConfigImpl windowCfg;
@@ -55,7 +54,6 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
                        WindowConfig windowCfg,
                        SerializableBinaryOperator<V> reduceFn) {
     this.parent = parent;
-    this.parentStreamId = parent.getStreamId();
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
     this.windowCfg = (WindowConfigImpl) windowCfg;
@@ -70,7 +68,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
         valueExtractor, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), parentStreamId,
+        .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
     return true;
   }

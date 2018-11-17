@@ -35,13 +35,11 @@ import org.apache.heron.streamlet.impl.operators.SplitOperator;
  */
 public class SplitStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private String parentStreamId;
   private SerializableFunction<? super R, List<String>> splitFn;
 
   public SplitStreamlet(StreamletImpl<R> parent,
                         SerializableFunction<? super R, List<String>> splitFn) {
     this.parent = parent;
-    this.parentStreamId = parent.getStreamId();
     this.splitFn = splitFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -50,7 +48,7 @@ public class SplitStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.SPLIT, stageNames);
     bldr.setBolt(getName(), new SplitOperator<R>(splitFn),
-        getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

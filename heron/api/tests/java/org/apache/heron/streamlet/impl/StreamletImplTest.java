@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
@@ -109,10 +110,19 @@ public class StreamletImplTest {
     Streamlet<Double> positiveMap = positiveStream.map((num) -> num * 10);
     Streamlet<Double> negativeMap = negativeStream.map((num) -> num * 10);
 
+    // Original streamlet should still have the default strean id. Other
+    // shadow streamlets should have the correct stream ids.
+    assertEquals(multiStreams.getStreamId(), Utils.DEFAULT_STREAM_ID);
+    assertEquals(positiveStream.getStreamId(), "positive");
+    assertEquals(negativeStream.getStreamId(), "negative");
+
     // Children streamlets should have the right parent stream id
-    assertEquals(((MapStreamlet<Double, Double>) allMap).getParentStreamId(), "all");
-    assertEquals(((MapStreamlet<Double, Double>) positiveMap).getParentStreamId(), "positive");
-    assertEquals(((MapStreamlet<Double, Double>) negativeMap).getParentStreamId(), "negative");
+    assertEquals(((MapStreamlet<Double, Double>) allMap).getParent().getStreamId(),
+        "all");
+    assertEquals(((MapStreamlet<Double, Double>) positiveMap).getParent().getStreamId(),
+        "positive");
+    assertEquals(((MapStreamlet<Double, Double>) negativeMap).getParent().getStreamId(),
+        "negative");
   }
 
   @Test

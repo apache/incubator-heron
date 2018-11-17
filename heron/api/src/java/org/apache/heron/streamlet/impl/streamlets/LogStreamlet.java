@@ -32,11 +32,9 @@ import org.apache.heron.streamlet.impl.sinks.LogSink;
  */
 public class LogStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private String parentStreamId;
 
   public LogStreamlet(StreamletImpl<R> parent) {
     this.parent = parent;
-    this.parentStreamId = parent.getStreamId();
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -50,7 +48,7 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.LOGGER, stageNames);
     bldr.setBolt(getName(), new LogSink<R>(),
-        getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

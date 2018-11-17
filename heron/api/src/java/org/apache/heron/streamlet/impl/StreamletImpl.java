@@ -83,7 +83,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   private static final Logger LOG = Logger.getLogger(StreamletImpl.class.getName());
   protected String name;
   protected int nPartitions;
-  protected String streamId;
   private List<StreamletImpl<?>> children;
   private boolean built;
 
@@ -218,8 +217,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public Streamlet<R> withStream(String streamId) {
     StreamletUtils.require(streamId != null && !streamId.isEmpty(), "streamId can't be empty");
-    this.streamId = streamId;
-    return this;
+    StreamletShadow<R> shadow = new StreamletShadow<R>(this);
+    shadow.setStreamId(streamId);
+    return shadow;
   }
 
   /**
@@ -228,7 +228,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public String getStreamId() {
-    return streamId;
+    return Utils.DEFAULT_STREAM_ID;
   }
 
   /**
@@ -236,7 +236,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   protected StreamletImpl() {
     this.nPartitions = -1;
-    this.streamId = Utils.DEFAULT_STREAM_ID;
     this.children = new LinkedList<>();
     this.built = false;
   }

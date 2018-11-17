@@ -33,12 +33,10 @@ import org.apache.heron.streamlet.impl.operators.FilterOperator;
  */
 public class FilterStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private String parentStreamId;
   private SerializablePredicate<? super R> filterFn;
 
   public FilterStreamlet(StreamletImpl<R> parent, SerializablePredicate<? super R> filterFn) {
     this.parent = parent;
-    this.parentStreamId = parent.getStreamId();
     this.filterFn = filterFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -47,7 +45,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.FILTER, stageNames);
     bldr.setBolt(getName(), new FilterOperator<R>(filterFn),
-        getNumPartitions()).shuffleGrouping(parent.getName(), parentStreamId);
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

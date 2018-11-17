@@ -32,15 +32,11 @@ import org.apache.heron.streamlet.impl.operators.UnionOperator;
  */
 public class UnionStreamlet<I> extends StreamletImpl<I> {
   private StreamletImpl<I> left;
-  private String leftStream;
   private StreamletImpl<? extends I> right;
-  private String rightStream;
 
   public UnionStreamlet(StreamletImpl<I> left, StreamletImpl<? extends I> right) {
     this.left = left;
-    this.leftStream = left.getStreamId();
     this.right = right;
-    this.rightStream = right.getStreamId();
     setNumPartitions(left.getNumPartitions());
   }
 
@@ -54,8 +50,8 @@ public class UnionStreamlet<I> extends StreamletImpl<I> {
     setDefaultNameIfNone(StreamletNamePrefix.UNION, stageNames);
     bldr.setBolt(getName(), new UnionOperator<I>(),
         getNumPartitions())
-          .shuffleGrouping(left.getName(), leftStream)
-          .shuffleGrouping(right.getName(), rightStream);
+          .shuffleGrouping(left.getName(), left.getStreamId())
+          .shuffleGrouping(right.getName(), right.getStreamId());
     return true;
   }
 }
