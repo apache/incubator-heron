@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
 import java.util.HashMap;
@@ -26,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.heron.api.Pair;
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.api.windowing.TupleWindow;
@@ -58,7 +55,6 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator<V1, VR>
   private SerializableFunction<V2, K> rightKeyExtractor;
   // The user supplied join function
   private SerializableBiFunction<V1, V2, ? extends VR> joinFn;
-  private OutputCollector collector;
 
   public JoinOperator(JoinType joinType, String leftComponent, String rightComponent,
                       SerializableFunction<V1, K> leftKeyExtractor,
@@ -70,12 +66,6 @@ public class JoinOperator<K, V1, V2, VR> extends StreamletWindowOperator<V1, VR>
     this.leftKeyExtractor = leftKeyExtractor;
     this.rightKeyExtractor = rightKeyExtractor;
     this.joinFn = joinFn;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @Override

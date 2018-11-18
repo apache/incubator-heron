@@ -17,13 +17,8 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
-import java.util.Map;
-
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.streamlet.SerializablePredicate;
@@ -38,16 +33,8 @@ public class FilterOperator<R> extends StreamletOperator<R, R> {
   private static final long serialVersionUID = -4748646871471052706L;
   private SerializablePredicate<? super R> filterFn;
 
-  private OutputCollector collector;
-
   public FilterOperator(SerializablePredicate<? super R> filterFn) {
     this.filterFn = filterFn;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")
