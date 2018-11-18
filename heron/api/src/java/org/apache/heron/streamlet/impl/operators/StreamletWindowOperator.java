@@ -42,7 +42,9 @@ public abstract class StreamletWindowOperator<R, T>
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void prepare(Map<String, Object> map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 
