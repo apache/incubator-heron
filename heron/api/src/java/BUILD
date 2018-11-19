@@ -33,7 +33,8 @@ java_library(
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
-        "//third_party/java:kryo-neverlink"
+        "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
     ]
 )
 
@@ -42,13 +43,19 @@ java_library(
     name = "api-java-low-level-functional",
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
-    deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
+    deps = api_deps_files + [
+        "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
+    ]
 )
 
 java_binary(
     name = "api-unshaded",
     srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
-    deps = api_deps_files + ["//third_party/java:kryo-neverlink"]
+    deps = api_deps_files + [
+        "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
+    ]
 )
 
 jarjar_binary(

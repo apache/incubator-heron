@@ -19,6 +19,8 @@
 
 package org.apache.heron.streamlet.impl.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 public final class StreamletUtils {
 
   private StreamletUtils() {
@@ -34,6 +36,33 @@ public final class StreamletUtils {
     if (!requirement) {
       throw new IllegalArgumentException(errorMessage);
     }
+  }
+
+  /**
+   * Verifies not blank text as the utility function.
+   * @param text The text to verify
+   * @param errorMessage The error message
+   * @throws IllegalArgumentException if the requirement fails
+   */
+  public static String checkNotBlank(String text, String errorMessage) {
+    if (StringUtils.isBlank(text)) {
+      throw new IllegalArgumentException(errorMessage);
+    } else {
+      return text;
+    }
+  }
+
+  /**
+   * Verifies not null reference as the utility function.
+   * @param reference The reference to verify
+   * @param errorMessage The error message
+   * @throws NullPointerException if the requirement fails
+   */
+  public static <T> T checkNotNull(T reference, String errorMessage) {
+    if (reference == null) {
+      throw new NullPointerException(errorMessage);
+    }
+    return reference;
   }
 
 }

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
@@ -40,7 +39,7 @@ public class CustomStreamlet<R, T> extends StreamletImpl<T> {
   /**
    * Create a custom streamlet from user defined CustomOperator object.
    * @param parent The parent(upstream) streamlet object
-   * @param operator The user defined CustomeOperator
+   * @param operator The user defined CustomOperator
    */
   public CustomStreamlet(StreamletImpl<R> parent,
                          IStreamletOperator<R, T> operator) {

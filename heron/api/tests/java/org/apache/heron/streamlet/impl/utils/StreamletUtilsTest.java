@@ -21,18 +21,53 @@ package org.apache.heron.streamlet.impl.utils;
 
 import org.junit.Test;
 
+import static org.apache.heron.streamlet.impl.utils.StreamletUtils.checkNotBlank;
+import static org.apache.heron.streamlet.impl.utils.StreamletUtils.checkNotNull;
+import static org.apache.heron.streamlet.impl.utils.StreamletUtils.require;
+
 public class StreamletUtilsTest {
 
   @Test
   public void testRequire() {
     String text = "test_text";
-    StreamletUtils.require(!text.isEmpty(), "text should not be blank");
+    require(!text.isEmpty(), "text should not be blank");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequireWithNegativeCase() {
     String text = "";
-    StreamletUtils.require(!text.isEmpty(), "text should not be blank");
+    require(!text.isEmpty(), "text should not be blank");
+  }
+
+  @Test
+  public void testCheckNotBlank() {
+    checkNotBlank("test_text", "text should not be blank");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testCheckNotBlankWithNullReference() {
+    checkNotBlank(null, "text should not be blank");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testCheckNotBlankWithEmptyString() {
+    checkNotBlank("", "text should not be blank");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testCheckNotBlankWithBlankString() {
+    checkNotBlank(" ", "text should not be blank");
+  }
+
+  @Test
+  public void testCheckNotNull() {
+    checkNotNull(new String(), "text should not be null");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testCheckNotNullWithNullReference() {
+    String text = null;
+    checkNotNull(text, "text should not be null");
   }
 
 }
