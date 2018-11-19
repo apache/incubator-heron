@@ -32,7 +32,7 @@ sections:
         url: /docs/operators/deployment/configuration
       - name: The Heron API server
         url: /docs/operators/heron-api-server
-  - name: Topology development APIs
+  - name: Topology Development APIs
     sublinks:
     - name: The Heron Streamlet API for Java
       url: /docs/developers/java/streamlet-api
