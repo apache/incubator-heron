@@ -70,7 +70,7 @@ public class TransformOperator<R, T> extends StreamletOperator<R, T>
   public void prepare(Map<String, Object> map,
                       TopologyContext topologyContext,
                       OutputCollector outputCollector) {
-    collector = outputCollector;
+    super.prepare(map, topologyContext, outputCollector);
     Context context = new ContextImpl(topologyContext, map, state);
     serializableTransformer.setup(context);
   }
