@@ -17,14 +17,11 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.api.windowing.TupleWindow;
@@ -45,19 +42,12 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
   private SerializableFunction<V, K> keyExtractor;
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
-  private OutputCollector collector;
 
   public GeneralReduceByKeyAndWindowOperator(SerializableFunction<V, K> keyExtractor, VR identity,
                             SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
     this.keyExtractor = keyExtractor;
     this.identity = identity;
     this.reduceFn = reduceFn;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")

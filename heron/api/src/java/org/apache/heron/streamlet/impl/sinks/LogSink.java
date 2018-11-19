@@ -17,14 +17,10 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.sinks;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.streamlet.impl.operators.StreamletOperator;
 
@@ -33,17 +29,11 @@ import org.apache.heron.streamlet.impl.operators.StreamletOperator;
  * It basically logs every tuple.
  */
 public class LogSink<R> extends StreamletOperator<R, R> {
+
   private static final long serialVersionUID = -6392422646613189818L;
   private static final Logger LOG = Logger.getLogger(LogSink.class.getName());
-  private OutputCollector collector;
 
   public LogSink() {
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    this.collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")

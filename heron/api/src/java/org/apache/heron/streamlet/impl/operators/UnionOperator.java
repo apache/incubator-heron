@@ -17,13 +17,8 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
-import java.util.Map;
-
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 
@@ -33,15 +28,8 @@ import org.apache.heron.api.tuple.Values;
  */
 public class UnionOperator<I> extends StreamletOperator<I, I> {
   private static final long serialVersionUID = -7326832064961413315L;
-  private OutputCollector collector;
 
   public UnionOperator() {
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")

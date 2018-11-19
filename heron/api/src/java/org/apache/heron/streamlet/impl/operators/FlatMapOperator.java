@@ -17,13 +17,8 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
-import java.util.Map;
-
-import org.apache.heron.api.bolt.OutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.streamlet.SerializableFunction;
@@ -38,17 +33,9 @@ public class FlatMapOperator<R, T> extends StreamletOperator<R, T> {
   private static final long serialVersionUID = -2418329215159618998L;
   private SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn;
 
-  private OutputCollector collector;
-
   public FlatMapOperator(
       SerializableFunction<? super R, ? extends Iterable<? extends T>> flatMapFn) {
     this.flatMapFn = flatMapFn;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")

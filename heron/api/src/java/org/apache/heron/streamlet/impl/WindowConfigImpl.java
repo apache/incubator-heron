@@ -17,9 +17,7 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl;
-
 
 import java.time.Duration;
 
@@ -42,7 +40,7 @@ public final class WindowConfigImpl implements WindowConfig {
   private TriggerPolicy<Tuple, ?> triggerPolicy;
   private EvictionPolicy<Tuple, ?> evictionPolicy;
 
-  public  WindowConfigImpl(Duration windowDuration, Duration slidingIntervalDuration) {
+  public WindowConfigImpl(Duration windowDuration, Duration slidingIntervalDuration) {
     this.windowType = WindowType.TIME;
     this.windowDuration = windowDuration;
     this.slidingIntervalDuration = slidingIntervalDuration;
