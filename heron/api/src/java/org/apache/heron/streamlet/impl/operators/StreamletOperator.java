@@ -17,11 +17,14 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
+import java.util.Map;
+
 import org.apache.heron.api.bolt.BaseRichBolt;
+import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 
@@ -34,6 +37,16 @@ public abstract class StreamletOperator<R, T>
     implements IStreamletRichOperator<R, T> {
   private static final long serialVersionUID = 8524238140745238942L;
   private static final String OUTPUT_FIELD_NAME = "output";
+
+  protected OutputCollector collector;
+
+  @SuppressWarnings("rawtypes")
+  @Override
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
+    collector = outputCollector;
+  }
 
   /**
    * The operators implementing streamlet functionality have some properties.

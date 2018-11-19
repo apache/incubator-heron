@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.operators;
 
 import java.io.Serializable;
@@ -41,10 +40,10 @@ import org.apache.heron.streamlet.impl.ContextImpl;
  */
 public class TransformOperator<R, T> extends StreamletOperator<R, T>
     implements IStatefulComponent<Serializable, Serializable> {
+
   private static final long serialVersionUID = 429297144878185182L;
   private SerializableTransformer<? super R, ? extends T> serializableTransformer;
 
-  private OutputCollector collector;
   private State<Serializable, Serializable> state;
 
   public TransformOperator(
@@ -71,7 +70,7 @@ public class TransformOperator<R, T> extends StreamletOperator<R, T>
   public void prepare(Map<String, Object> map,
                       TopologyContext topologyContext,
                       OutputCollector outputCollector) {
-    collector = outputCollector;
+    super.prepare(map, topologyContext, outputCollector);
     Context context = new ContextImpl(topologyContext, map, state);
     serializableTransformer.setup(context);
   }
