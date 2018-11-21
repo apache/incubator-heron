@@ -95,9 +95,9 @@ public class StreamletImplTest {
     splitter.put("positive", i -> i > 0);
     splitter.put("negative", i -> i < 0);
 
-    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
     // The streamlet should have three output streams after split()
-    Streamlet<Double> multiStreams = streamlet.split(splitter);
+    Streamlet<Double> multiStreams = baseStreamlet.split(splitter);
 
     // Default stream is used
     Streamlet<Double> positiveStream = multiStreams.withStream("positive");
@@ -525,8 +525,8 @@ public class StreamletImplTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testWithStreamWithInvalidValue() {
-    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    streamlet.withStream("");
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    baseStreamlet.withStream("");
   }
 
   @Test(expected = IllegalArgumentException.class)

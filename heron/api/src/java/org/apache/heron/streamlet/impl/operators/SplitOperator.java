@@ -21,9 +21,7 @@ package org.apache.heron.streamlet.impl.operators;
 
 import java.util.Map;
 
-import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
@@ -37,23 +35,14 @@ import org.apache.heron.streamlet.impl.utils.StreamletUtils;
  * Note that one tuple can be emitted to multiple or zero streams.
  */
 public class SplitOperator<R> extends StreamletOperator<R, R> {
-  private OutputCollector collector;
   private Map<String, SerializablePredicate<R>> splitFns;
 
   public SplitOperator(Map<String, SerializablePredicate<R>> splitFns) {
     this.splitFns = splitFns;
     // Make sure stream ids are not empty
     for (String stream: splitFns.keySet()) {
-      StreamletUtils.require(stream != null && !stream.isEmpty(), "Stream id can not be empty");
+      StreamletUtils.checkNotBlank(stream, "Stream id can not be empty");
     }
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void prepare(Map map,
-                      TopologyContext topologyContext,
-                      OutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @SuppressWarnings("unchecked")

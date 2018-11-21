@@ -43,7 +43,7 @@ public class SplitStreamlet<R> extends StreamletImpl<R> {
     // Make sure map and stream ids are not empty
     StreamletUtils.require(splitFns.size() > 0, "At least one entry is required");
     for (String stream: splitFns.keySet()) {
-      StreamletUtils.require(stream != null && !stream.isEmpty(), "Stream id can not be empty");
+      StreamletUtils.checkNotBlank(stream, "Stream id can not be empty");
     }
 
     this.parent = parent;

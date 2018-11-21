@@ -54,6 +54,7 @@ import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SplitStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.StreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
 
@@ -217,7 +218,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @SuppressWarnings("HiddenField")
   @Override
   public Streamlet<R> withStream(String streamId) {
-    StreamletUtils.require(streamId != null && !streamId.isEmpty(), "streamId can't be empty");
+    checkNotBlank(streamId, "streamId can't be empty");
     StreamletShadow<R> shadow = new StreamletShadow<R>(this);
     shadow.setStreamId(streamId);
     return shadow;
