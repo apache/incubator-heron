@@ -42,7 +42,6 @@ import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializableTransformer;
-import org.apache.heron.streamlet.StreamGrouper;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -229,9 +228,9 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testCustomStreamletWithGrouperFromBolt() throws Exception {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-                                               .applyOperator(new MyBoltOperator(), grouper);
+                                               .applyOperator(new MyBoltOperator(),
+                                                              new ShuffleStreamGrouping());
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());

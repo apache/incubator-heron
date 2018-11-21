@@ -19,8 +19,6 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.heron.api.grouping.StreamGrouping;
@@ -30,7 +28,6 @@ import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
-import org.apache.heron.streamlet.StreamGrouper;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 
 /**
@@ -40,20 +37,7 @@ import org.apache.heron.streamlet.impl.StreamletImpl;
 public class CustomStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private IStreamletOperator<R, T> operator;
-  private Optional<StreamGrouper> grouper;
-
-  /**
-   * Create a custom streamlet from user defined CustomOperator object.
-   * @param parent The parent(upstream) streamlet object
-   * @param operator The user defined CustomOperator
-   */
-  public CustomStreamlet(StreamletImpl<R> parent,
-                         IStreamletOperator<R, T> operator) {
-    this.parent = parent;
-    this.operator = operator;
-    this.grouper = Optional.empty();
-    setNumPartitions(parent.getNumPartitions());
-  }
+  private StreamGrouping grouper;
 
   /**
    * Create a custom streamlet from user defined CustomOperator object.
@@ -63,10 +47,10 @@ public class CustomStreamlet<R, T> extends StreamletImpl<T> {
    */
   public CustomStreamlet(StreamletImpl<R> parent,
                          IStreamletOperator<R, T> operator,
-                         StreamGrouper grouper) {
+                         StreamGrouping grouper) {
     this.parent = parent;
     this.operator = operator;
-    this.grouper = Optional.of(grouper);
+    this.grouper = grouper;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -97,12 +81,7 @@ public class CustomStreamlet<R, T> extends StreamletImpl<T> {
     }
 
     // Apply grouping
-    if (grouper.isPresent()) {
-      Map<String, StreamGrouping> groupingMap = grouper.get().getGroupings();
-      groupingMap.forEach((id, grouping) -> declarer.grouping(parent.getName(), id, grouping));
-    } else {
-      declarer.noneGrouping(parent.getName());
-    }
+    declarer.grouping(parent.getName(), grouper);
 
     return true;
   }

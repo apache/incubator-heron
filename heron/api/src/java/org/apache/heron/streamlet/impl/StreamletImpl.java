@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.grouping.NoneStreamGrouping;
+import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
@@ -36,7 +38,6 @@ import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Sink;
-import org.apache.heron.streamlet.StreamGrouper;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -522,9 +523,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) {
     checkNotNull(operator, "operator cannot be null");
 
-    StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator);
-    addChild(customStreamlet);
-    return customStreamlet;
+    return applyOperator(operator, new NoneStreamGrouping());
   }
 
   /**
@@ -535,7 +534,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @return Streamlet containing the output of the operation
    */
   @Override
-  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouper grouper) {
+  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouping grouper) {
     checkNotNull(operator, "operator can't be null");
     checkNotNull(grouper, "grouper can't be null");
 

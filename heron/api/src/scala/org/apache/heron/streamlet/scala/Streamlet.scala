@@ -18,12 +18,12 @@
  */
 package org.apache.heron.streamlet.scala
 
+import org.apache.heron.api.grouping.StreamGrouping
 import org.apache.heron.streamlet.{
   IStreamletOperator,
   JoinType,
   KeyValue,
   KeyedWindow,
-  StreamGrouper,
   WindowConfig
 }
 
@@ -239,7 +239,7 @@ trait Streamlet[R] {
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouper): Streamlet[T]
+  def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouping): Streamlet[T]
 
   /**
     * Logs every element of the streamlet using String.valueOf function

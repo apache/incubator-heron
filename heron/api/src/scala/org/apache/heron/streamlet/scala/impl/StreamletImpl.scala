@@ -20,12 +20,12 @@ package org.apache.heron.streamlet.scala.impl
 
 import scala.collection.JavaConverters
 
+import org.apache.heron.api.grouping.StreamGrouping
 import org.apache.heron.streamlet.{
   IStreamletOperator,
   JoinType,
   KeyValue,
   KeyedWindow,
-  StreamGrouper,
   Streamlet => JavaStreamlet,
   WindowConfig
 }
@@ -338,7 +338,8 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    * @param <T> The return type of the transform
    * @return Streamlet containing the output of the operation
    */
-  override def applyOperator[T](operator: IStreamletOperator[R, T], grouper: StreamGrouper): Streamlet[T] = {
+  override def applyOperator[T](operator: IStreamletOperator[R, T],
+                                grouper: StreamGrouping): Streamlet[T] = {
     val newJavaStreamlet = javaStreamlet.applyOperator[T](operator, grouper)
     fromJavaStreamlet(newJavaStreamlet)
   }
