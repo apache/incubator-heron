@@ -228,7 +228,7 @@ public class StreamletImplTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testCustomStreamletWithGrouperFromBolt() throws Exception {
-    Streamlet<Double> baseStreamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
     StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
     Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
                                                .applyOperator(new MyBoltOperator(), grouper);
@@ -272,22 +272,6 @@ public class StreamletImplTest {
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet =
         (CustomStreamlet<Double, Double>) streamlet;
-    assertEquals(20, mStreamlet.getNumPartitions());
-    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
-    assertEquals(supplierStreamlet.getChildren().size(), 1);
-    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void testCustomStreamletWithGrouperFromWindowBolt() throws Exception {
-    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    StreamGrouper grouper = new StreamGrouper(new ShuffleStreamGrouping());
-    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
-                                               .applyOperator(new MyWindowBoltOperator(), grouper);
-    assertTrue(streamlet instanceof CustomWindowStreamlet);
-    CustomWindowStreamlet<Double, Double> mStreamlet =
-        (CustomWindowStreamlet<Double, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
