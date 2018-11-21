@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.heron.streamlet.impl;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.heron.api.spout.IRichSpout;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
@@ -36,10 +34,8 @@ import org.apache.heron.streamlet.SerializableBinaryOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.SerializablePredicate;
-import org.apache.heron.streamlet.SerializableSupplier;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Sink;
-import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -53,9 +49,6 @@ import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
-import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
 
@@ -250,36 +243,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     }
     LOG.info("Calculated stage Name as " + calculatedName);
     return calculatedName;
-  }
-
-  /**
-   * Create a Streamlet based on the supplier function
-   * @param supplier The Supplier function to generate the elements
-   */
-  static <T> StreamletImpl<T> createSupplierStreamlet(SerializableSupplier<T> supplier) {
-    checkNotNull(supplier, "supplier cannot not be null");
-
-    return new SupplierStreamlet<T>(supplier);
-  }
-
-  /**
-   * Create a Streamlet based on the generator function
-   * @param generator The Generator function to generate the elements
-   */
-  static <T> StreamletImpl<T> createGeneratorStreamlet(Source<T> generator) {
-    checkNotNull(generator, "generator cannot not be null");
-
-    return new SourceStreamlet<T>(generator);
-  }
-
-  /**
-   * Create a Streamlet based on a Spout object
-   * @param spout The Spout function to generate the elements
-   */
-  static <T> StreamletImpl<T> createSpoutStreamlet(IRichSpout spout) {
-    checkNotNull(spout, "spout cannot not be null");
-
-    return new SpoutStreamlet<T>(spout);
   }
 
   /**

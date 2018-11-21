@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.heron.streamlet.impl;
 
 import java.util.HashSet;
@@ -30,6 +29,9 @@ import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.SerializableSupplier;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
+import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 
 import static org.apache.heron.streamlet.impl.utils.StreamletUtils.checkNotNull;
 
@@ -47,21 +49,27 @@ public final class BuilderImpl implements Builder {
 
   @Override
   public <R> Streamlet<R> newSource(SerializableSupplier<R> supplier) {
-    StreamletImpl<R> retval = StreamletImpl.createSupplierStreamlet(supplier);
+    checkNotNull(supplier, "supplier cannot not be null");
+
+    StreamletImpl<R> retval = new SupplierStreamlet<>(supplier);
     sources.add(retval);
     return retval;
   }
 
   @Override
   public <R> Streamlet<R> newSource(Source<R> generator) {
-    StreamletImpl<R> retval = StreamletImpl.createGeneratorStreamlet(generator);
+    checkNotNull(generator, "generator cannot not be null");
+
+    StreamletImpl<R> retval = new SourceStreamlet<>(generator);
     sources.add(retval);
     return retval;
   }
 
   @Override
   public <R> Streamlet<R> newSource(IRichSpout spout) {
-    StreamletImpl<R> retval = StreamletImpl.createSpoutStreamlet(spout);
+    checkNotNull(spout, "spout cannot not be null");
+
+    StreamletImpl<R> retval = new SpoutStreamlet<>(spout);
     sources.add(retval);
     return retval;
   }
