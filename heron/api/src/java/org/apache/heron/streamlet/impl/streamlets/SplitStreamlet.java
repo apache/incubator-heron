@@ -20,13 +20,14 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.SerializableFunction;
+import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.operators.SplitOperator;
+import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * SplitStreamlet represents a Streamlet that splits an incoming
@@ -35,19 +36,25 @@ import org.apache.heron.streamlet.impl.operators.SplitOperator;
  */
 public class SplitStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private SerializableFunction<? super R, List<String>> splitFn;
+  private Map<String, SerializablePredicate<R>> splitFns;
 
   public SplitStreamlet(StreamletImpl<R> parent,
-                        SerializableFunction<? super R, List<String>> splitFn) {
+                        Map<String, SerializablePredicate<R>> splitFns) {
+    // Make sure map and stream ids are not empty
+    StreamletUtils.require(splitFns.size() > 0, "At least one entry is required");
+    for (String stream: splitFns.keySet()) {
+      StreamletUtils.require(stream != null && !stream.isEmpty(), "Stream id can not be empty");
+    }
+
     this.parent = parent;
-    this.splitFn = splitFn;
+    this.splitFns = splitFns;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.SPLIT, stageNames);
-    bldr.setBolt(getName(), new SplitOperator<R>(splitFn),
+    bldr.setBolt(getName(), new SplitOperator<R>(splitFns),
         getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }

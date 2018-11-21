@@ -18,10 +18,11 @@
  */
 package org.apache.heron.streamlet.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -43,6 +44,7 @@ import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
+import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
@@ -87,20 +89,15 @@ public class StreamletImplTest {
   }
 
   @Test
-  public void testWithStream() {
-    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
-    Streamlet<Double> multiStreams = streamlet.split((num) -> {
-      List out = new ArrayList<String>();
-      out.add("all");
-      if (num > 0) {
-        out.add("positive");
-      }
-      if (num < 0) {
-        out.add("negative");
-      }
+  public void testSplitAndWithStream() {
+    Map<String, SerializablePredicate<Double>> splitter = new HashMap();
+    splitter.put("all", i -> true);
+    splitter.put("positive", i -> i > 0);
+    splitter.put("negative", i -> i < 0);
 
-      return out;
-    });
+    Streamlet<Double> streamlet = StreamletImpl.createSupplierStreamlet(() -> Math.random());
+    // The streamlet should have three output streams after split()
+    Streamlet<Double> multiStreams = streamlet.split(splitter);
 
     // Default stream is used
     Streamlet<Double> positiveStream = multiStreams.withStream("positive");
@@ -110,11 +107,14 @@ public class StreamletImplTest {
     Streamlet<Double> positiveMap = positiveStream.map((num) -> num * 10);
     Streamlet<Double> negativeMap = negativeStream.map((num) -> num * 10);
 
-    // Original streamlet should still have the default strean id. Other
-    // shadow streamlets should have the correct stream ids.
+    // Original streamlet should still have the default strean id eventhough the id
+    // is not available. Other shadow streamlets should have the correct stream ids.
     assertEquals(multiStreams.getStreamId(), Utils.DEFAULT_STREAM_ID);
     assertEquals(positiveStream.getStreamId(), "positive");
     assertEquals(negativeStream.getStreamId(), "negative");
+
+    StreamletImpl<Double> impl = (StreamletImpl<Double>) multiStreams;
+    assertEquals(impl.getChildren().size(), 3);
 
     // Children streamlets should have the right parent stream id
     assertEquals(((MapStreamlet<Double, Double>) allMap).getParent().getStreamId(),

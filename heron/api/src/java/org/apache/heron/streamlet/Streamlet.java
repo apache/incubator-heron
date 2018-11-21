@@ -20,6 +20,7 @@
 package org.apache.heron.streamlet;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.classification.InterfaceStability;
@@ -237,10 +238,10 @@ public interface Streamlet<R> {
 
   /**
    * Returns multiple streams by splitting incoming stream.
-   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * @param splitFns The Split Functions that test if the tuple should be emitted into each stream
    * Note that there could be 0 or multiple target stream ids
    */
-  Streamlet<R> split(SerializableFunction<R, List<String>> splitFn);
+  Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

@@ -19,14 +19,16 @@
 
 package org.apache.heron.streamlet.impl.operators;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
-import org.apache.heron.streamlet.SerializableFunction;
+import org.apache.heron.streamlet.SerializablePredicate;
+import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * SplitOperator is the class that implements the split functionality.
@@ -36,10 +38,14 @@ import org.apache.heron.streamlet.SerializableFunction;
  */
 public class SplitOperator<R> extends StreamletOperator<R, R> {
   private OutputCollector collector;
-  private SerializableFunction<? super R, List<String>> splitFn;
+  private Map<String, SerializablePredicate<R>> splitFns;
 
-  public SplitOperator(SerializableFunction<? super R, List<String>> splitFn) {
-    this.splitFn = splitFn;
+  public SplitOperator(Map<String, SerializablePredicate<R>> splitFns) {
+    this.splitFns = splitFns;
+    // Make sure stream ids are not empty
+    for (String stream: splitFns.keySet()) {
+      StreamletUtils.require(stream != null && !stream.isEmpty(), "Stream id can not be empty");
+    }
   }
 
   @SuppressWarnings("rawtypes")
@@ -54,9 +60,19 @@ public class SplitOperator<R> extends StreamletOperator<R, R> {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    for (String stream: splitFn.apply(obj)) {
-      collector.emit(stream, new Values(obj));
+    for (Map.Entry<String, SerializablePredicate<R>> entry: splitFns.entrySet()) {
+      if (entry.getValue().test(obj)) {
+        collector.emit(entry.getKey(), new Values(obj));
+      }
     }
     collector.ack(tuple);
+  }
+
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    //super.declareOutputFields(declarer);
+    for (String stream: splitFns.keySet()) {
+      declarer.declareStream(stream, new Fields(OUTPUT_FIELD_NAME));
+    }
   }
 }

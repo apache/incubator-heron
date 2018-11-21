@@ -82,16 +82,6 @@ object ScalaToJavaConverter {
       override def apply(t1: T, t2: T): T = f(t1, t2)
     }
 
-  def toSerializableFunctionWithSeq[R, T](f: (R) => Seq[T]) =
-    new SerializableFunction[R, JavaList[T]] {
-      override def apply(r: R): JavaList[T] = {
-        val result = f(r)
-        JavaConverters
-          .seqAsJavaListConverter[T](result)
-          .asJava
-      }
-    }
-
   def toSerializableBiFunctionWithSeq[R](f: (R, Int) => Seq[Int]) =
     new SerializableBiFunction[R, Integer, JavaList[Integer]] {
       override def apply(r: R, s: Integer): JavaList[Integer] = {

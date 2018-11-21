@@ -259,10 +259,10 @@ trait Streamlet[R] {
 
   /**
    * Returns multiple streams by splitting incoming stream.
-   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * @param splitFns The Split Functions that test if the tuple should be emitted into each stream
    * Note that there could be 0 or multiple target stream ids
    */
-  def split(splitFn: R => Seq[String]): Streamlet[R]
+  def split(splitFns: Map[String, R => Boolean]): Streamlet[R]
 
   /**
     * Logs every element of the streamlet using String.valueOf function

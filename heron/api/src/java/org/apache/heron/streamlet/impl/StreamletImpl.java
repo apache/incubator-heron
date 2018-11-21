@@ -21,6 +21,7 @@ package org.apache.heron.streamlet.impl;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -577,12 +578,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
   /**
    * Returns multiple streams by splitting incoming stream.
-   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * @param splitFns The Split Functions that test if the tuple should be emitted into each stream
    * Note that there could be 0 or multiple target stream ids
    */
   @Override
-  public Streamlet<R> split(SerializableFunction<R, List<String>> splitFn) {
-    SplitStreamlet<R> splitStreamlet = new SplitStreamlet<>(this, splitFn);
+  public Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns) {
+    SplitStreamlet<R> splitStreamlet = new SplitStreamlet<R>(this, splitFns);
     addChild(splitStreamlet);
     return splitStreamlet;
   }

@@ -18,6 +18,9 @@
  */
 package org.apache.heron.streamlet.scala.impl
 
+import java.util.{Map => JMap}
+import java.util.{HashMap => JHashMap}
+
 import scala.collection.JavaConverters
 
 import org.apache.heron.api.grouping.StreamGrouping
@@ -26,6 +29,7 @@ import org.apache.heron.streamlet.{
   JoinType,
   KeyValue,
   KeyedWindow,
+  SerializablePredicate,
   Streamlet => JavaStreamlet,
   WindowConfig
 }
@@ -363,12 +367,15 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
 
   /*
    * Returns multiple streams by splitting incoming stream.
-   * @param splitFn The Split Function that returns the target stream ids for each tuple
+   * @param splitFns The Split Functions that test if the tuple should be emitted into each stream
    * Note that there could be 0 or multiple target stream ids
    */
-  override def split(splitFn: R => Seq[String]): Streamlet[R] = {
-    val serializableFunction = toSerializableFunctionWithSeq[R, String](splitFn)
-    val newJavaStreamlet = javaStreamlet.split(serializableFunction)
+  override def split(splitFns: Map[String, R => Boolean]): Streamlet[R] = {
+    val javaSerializablePredicates: JMap[String, SerializablePredicate[R]] = new JHashMap()
+    splitFns.foreach { case (key, func) =>
+      javaSerializablePredicates.put(key, toSerializablePredicate[R](func))
+    }
+    val newJavaStreamlet = javaStreamlet.split(javaSerializablePredicates)
     fromJavaStreamlet[R](newJavaStreamlet)
   }
 
