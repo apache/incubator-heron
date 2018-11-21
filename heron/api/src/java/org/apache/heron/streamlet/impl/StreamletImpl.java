@@ -523,6 +523,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) {
     checkNotNull(operator, "operator cannot be null");
 
+    // By default, NoneStreamGrouping stategy is used. In this stategy, tuples are forwarded
+    // from parent component to a ramdon one of all the instances of the child component,
+    // which is the same logic as shuffle grouping.
     return applyOperator(operator, new NoneStreamGrouping());
   }
 
