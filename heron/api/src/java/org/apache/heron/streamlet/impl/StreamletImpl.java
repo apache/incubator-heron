@@ -19,6 +19,7 @@
 package org.apache.heron.streamlet.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -220,9 +221,30 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public Streamlet<R> withStream(String streamId) {
     checkNotBlank(streamId, "streamId can't be empty");
-    StreamletShadow<R> shadow = new StreamletShadow<R>(this);
-    shadow.setStreamId(streamId);
-    return shadow;
+
+    Set<String> availableIds = getAvailableStreamIds();
+    if (availableIds.contains(streamId)) {
+      StreamletShadow<R> shadow = new StreamletShadow<R>(this);
+      shadow.setStreamId(streamId);
+      return shadow;
+    } else {
+      throw new RuntimeException(
+          String.format("Stream id %s is not available in %s. Available ids are: %s.",
+                        streamId, getName(), availableIds.toString()));
+    }
+  }
+
+
+  /**
+   * Get the available stream ids in the Streamlet. For most Streamlets,
+   * there is only one internal stream id, therefore the function
+   * returns a set of one single stream id.
+   * @return Returns a set of one single stream id.
+   */
+  protected Set<String> getAvailableStreamIds() {
+    HashSet<String> ids = new HashSet<String>();
+    ids.add(getStreamId());
+    return ids;
   }
 
   /**

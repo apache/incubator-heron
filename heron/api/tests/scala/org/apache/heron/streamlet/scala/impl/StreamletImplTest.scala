@@ -254,7 +254,7 @@ class StreamletImplTest extends BaseFunSuite {
 
     val splitted = supplierStreamlet
       .split(Map(
-        "position" -> { num: Double => num > 0 },
+        "positive" -> { num: Double => num > 0 },
         "negative" -> { num: Double => num < 0 }
       ))
       .setName("Split_Streamlet_1")

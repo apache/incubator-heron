@@ -125,6 +125,31 @@ public class StreamletImplTest {
         "negative");
   }
 
+  @Test(expected = RuntimeException.class)
+  public void testSplitAndWithWrongStream() {
+    Map<String, SerializablePredicate<Double>> splitter = new HashMap();
+    splitter.put("all", i -> true);
+    splitter.put("positive", i -> i > 0);
+    splitter.put("negative", i -> i < 0);
+
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    // The streamlet should have three output streams after split()
+    Streamlet<Double> multiStreams = baseStreamlet.split(splitter);
+
+    // Select a good stream id and a bad stream id
+    Streamlet<Double> goodStream = multiStreams.withStream("positive");
+    Streamlet<Double> badStream = multiStreams.withStream("wrong-id");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testWithWrongStream() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    // Normal Streamlet objects, including sources, have only the default stream id.
+    // Selecting any other stream using withStream() should trigger a runtime
+    // exception
+    Streamlet<Double> badStream = baseStreamlet.withStream("wrong-id");
+  }
+
   @Test
   public void testSupplierStreamlet() {
     Streamlet<Double> streamlet = builder.newSource(() -> Math.random());

@@ -100,6 +100,17 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
     real.addChild(child);
   }
 
+  /**
+   * Gets all the children of this streamlet.
+   * Children of a streamlet are streamlets that are resulting from transformations of elements of
+   * this and potentially other streamlets.
+   * @return The kid streamlets
+   */
+  @Override
+  public List<StreamletImpl<?>> getChildren() {
+    return real.getChildren();
+  }
+
   @Override
   public void build(TopologyBuilder bldr, Set<String> stageNames) {
     throw new UnsupportedOperationException("build() in StreamletShadow should NOT be invoked");
@@ -108,15 +119,5 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     throw new UnsupportedOperationException("build() in StreamletShadow should NOT be invoked");
-  }
-
-  /**
-   * Gets all the children of this streamlet.
-   * Children of a streamlet are streamlets that are resulting from transformations of elements of
-   * this and potentially other streamlets.
-   * @return The kid streamlets
-   */
-  public List<StreamletImpl<?>> getChildren() {
-    return real.getChildren();
   }
 }

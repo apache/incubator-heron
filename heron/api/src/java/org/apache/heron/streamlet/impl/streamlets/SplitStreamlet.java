@@ -45,6 +45,15 @@ public class SplitStreamlet<R> extends StreamletImpl<R> {
     setNumPartitions(parent.getNumPartitions());
   }
 
+  /**
+   * Get the available stream ids in the Streamlet.
+   * @return Returns the set of available stream ids
+   */
+  @Override
+  protected Set<String> getAvailableStreamIds() {
+    return splitFns.keySet();
+  }
+
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.SPLIT, stageNames);
