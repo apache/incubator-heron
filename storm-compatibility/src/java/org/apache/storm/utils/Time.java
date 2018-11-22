@@ -6,15 +6,14 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.apache.storm.utils;
@@ -35,13 +34,16 @@ import java.util.logging.Logger;
  * Methods using units higher than nanoseconds will pass through to System.currentTimeMillis().
  * Methods supporting nanoseconds will pass through to System.nanoTime().
  */
-public class Time {
+public final class Time {
   private static final Logger LOG = Logger.getLogger(Time.class.getName());
   private static final AtomicBoolean SIMULATING = new AtomicBoolean(false);
   private static final AtomicLong AUTO_ADVANCE_NANOS_ON_SLEEP = new AtomicLong(0);
   private static final Map<Thread, AtomicLong> THREAD_SLEEP_TIMES_NANOS = new ConcurrentHashMap<>();
   private static final Object SLEEP_TIMES_LOCK = new Object();
   private static final AtomicLong SIMULATED_CURR_TIME_NANOS = new AtomicLong(0);
+
+  private Time() {
+  }
 
   public static boolean isSimulating() {
     return SIMULATING.get();
