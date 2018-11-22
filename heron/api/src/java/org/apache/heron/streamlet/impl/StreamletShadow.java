@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * StreamletShadow is a special kind of StreamletImpl object:
@@ -103,13 +102,12 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
 
   @Override
   public void build(TopologyBuilder bldr, Set<String> stageNames) {
-    StreamletUtils.require(false, "build() in StreamletShadow should NOT be invoked");
+    throw new UnsupportedOperationException("build() in StreamletShadow should NOT be invoked");
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    StreamletUtils.require(false, "doBuild() in StreamletShadow should NOT be invoked");
-    return false;
+    throw new UnsupportedOperationException("build() in StreamletShadow should NOT be invoked");
   }
 
   /**

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.heron.api.grouping.NoneStreamGrouping;
 import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
@@ -584,6 +585,11 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns) {
+    // Make sure map and stream ids are not empty
+    require(splitFns.size() > 0, "At least one entry is required");
+    require(splitFns.keySet().stream().allMatch(stream -> StringUtils.isNotBlank(stream)),
+            "Stream Id can not be blank");
+
     SplitStreamlet<R> splitStreamlet = new SplitStreamlet<R>(this, splitFns);
     addChild(splitStreamlet);
     return splitStreamlet;

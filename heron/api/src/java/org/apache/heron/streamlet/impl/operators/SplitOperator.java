@@ -26,7 +26,6 @@ import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.streamlet.SerializablePredicate;
-import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * SplitOperator is the class that implements the split functionality.
@@ -39,10 +38,6 @@ public class SplitOperator<R> extends StreamletOperator<R, R> {
 
   public SplitOperator(Map<String, SerializablePredicate<R>> splitFns) {
     this.splitFns = splitFns;
-    // Make sure stream ids are not empty
-    for (String stream: splitFns.keySet()) {
-      StreamletUtils.checkNotBlank(stream, "Stream id can not be empty");
-    }
   }
 
   @SuppressWarnings("unchecked")

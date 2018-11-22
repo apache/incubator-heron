@@ -27,7 +27,6 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.operators.SplitOperator;
-import org.apache.heron.streamlet.impl.utils.StreamletUtils;
 
 /**
  * SplitStreamlet represents a Streamlet that splits an incoming
@@ -40,11 +39,6 @@ public class SplitStreamlet<R> extends StreamletImpl<R> {
 
   public SplitStreamlet(StreamletImpl<R> parent,
                         Map<String, SerializablePredicate<R>> splitFns) {
-    // Make sure map and stream ids are not empty
-    StreamletUtils.require(splitFns.size() > 0, "At least one entry is required");
-    for (String stream: splitFns.keySet()) {
-      StreamletUtils.checkNotBlank(stream, "Stream id can not be empty");
-    }
 
     this.parent = parent;
     this.splitFns = splitFns;
