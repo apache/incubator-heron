@@ -21,6 +21,7 @@ package org.apache.heron.streamlet;
 
 import java.util.List;
 
+import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.classification.InterfaceStability;
 
 /**
@@ -208,6 +209,15 @@ public interface Streamlet<R> {
    * @return Streamlet containing the output of the operation
    */
   <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator);
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param grouper The grouper to be applied with the operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouping grouper);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

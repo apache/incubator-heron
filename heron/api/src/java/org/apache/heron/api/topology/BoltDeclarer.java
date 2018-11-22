@@ -147,6 +147,10 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
     return grouping(componentName, streamId, grouper);
   }
 
+  public BoltDeclarer grouping(String componentName, StreamGrouping grouper) {
+    return grouping(componentName, Utils.DEFAULT_STREAM_ID, grouper);
+  }
+
   public BoltDeclarer grouping(
       String componentName,
       String streamId,
