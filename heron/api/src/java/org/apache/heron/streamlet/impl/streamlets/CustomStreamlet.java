@@ -21,6 +21,8 @@ package org.apache.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
 
+import org.apache.heron.api.grouping.StreamGrouping;
+import org.apache.heron.api.topology.BoltDeclarer;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletOperator;
@@ -35,36 +37,51 @@ import org.apache.heron.streamlet.impl.StreamletImpl;
 public class CustomStreamlet<R, T> extends StreamletImpl<T> {
   private StreamletImpl<R> parent;
   private IStreamletOperator<R, T> operator;
+  private StreamGrouping grouper;
 
   /**
    * Create a custom streamlet from user defined CustomOperator object.
    * @param parent The parent(upstream) streamlet object
-   * @param operator The user defined CustomOperator
+   * @param operator The user defined CustomeOperator
+   * @param grouper The StreamGrouper to be used with the operator
    */
   public CustomStreamlet(StreamletImpl<R> parent,
-                         IStreamletOperator<R, T> operator) {
+                         IStreamletOperator<R, T> operator,
+                         StreamGrouping grouper) {
     this.parent = parent;
     this.operator = operator;
+    this.grouper = grouper;
     setNumPartitions(parent.getNumPartitions());
   }
 
+  /**
+   * Connect this streamlet to TopologyBuilder.
+   * @param bldr The TopologyBuilder for the topology
+   * @param stageNames The existing stage names
+   * @return True if successful
+   */
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
+    // Create and set bolt
+    BoltDeclarer declarer;
     if (operator instanceof IStreamletBasicOperator) {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM, stageNames);
       IStreamletBasicOperator<R, T> op = (IStreamletBasicOperator<R, T>) operator;
-      bldr.setBolt(getName(), op,  getNumPartitions()).shuffleGrouping(parent.getName());
+      declarer = bldr.setBolt(getName(), op,  getNumPartitions());
     } else if (operator instanceof IStreamletRichOperator) {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM_BASIC, stageNames);
       IStreamletRichOperator<R, T> op = (IStreamletRichOperator<R, T>) operator;
-      bldr.setBolt(getName(), op,  getNumPartitions()).shuffleGrouping(parent.getName());
+      declarer = bldr.setBolt(getName(), op,  getNumPartitions());
     } else if (operator instanceof IStreamletWindowOperator) {
       setDefaultNameIfNone(StreamletNamePrefix.CUSTOM_WINDOW, stageNames);
       IStreamletWindowOperator<R, T> op = (IStreamletWindowOperator<R, T>) operator;
-      bldr.setBolt(getName(), op,  getNumPartitions()).shuffleGrouping(parent.getName());
+      declarer = bldr.setBolt(getName(), op,  getNumPartitions());
     } else {
       throw new RuntimeException("Unhandled operator class is found!");
     }
+
+    // Apply grouping
+    declarer.grouping(parent.getName(), grouper);
 
     return true;
   }

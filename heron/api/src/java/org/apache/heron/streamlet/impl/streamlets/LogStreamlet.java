@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.heron.streamlet.impl.streamlets;
 
 import java.util.Set;
@@ -39,11 +38,18 @@ public class LogStreamlet<R> extends StreamletImpl<R> {
     setNumPartitions(parent.getNumPartitions());
   }
 
+  /**
+   * Connect this streamlet to TopologyBuilder.
+   * @param bldr The TopologyBuilder for the topology
+   * @param stageNames The existing stage names
+   * @return True if successful
+   */
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.LOGGER, stageNames);
     bldr.setBolt(getName(), new LogSink<R>(),
         getNumPartitions()).shuffleGrouping(parent.getName());
+
     return true;
   }
 }

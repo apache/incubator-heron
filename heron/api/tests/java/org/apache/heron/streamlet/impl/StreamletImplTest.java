@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
+import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
@@ -223,6 +224,21 @@ public class StreamletImplTest {
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
   }
 
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCustomStreamletWithGrouperFromBolt() throws Exception {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    Streamlet<Double> streamlet = baseStreamlet.setNumPartitions(20)
+                                               .applyOperator(new MyBoltOperator(),
+                                                              new ShuffleStreamGrouping());
+    assertTrue(streamlet instanceof CustomStreamlet);
+    CustomStreamlet<Double, Double> mStreamlet = (CustomStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
   private class MyBasicBoltOperator extends TestBasicBolt
       implements IStreamletBasicOperator<Double, Double> {
   }
@@ -263,7 +279,7 @@ public class StreamletImplTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testSimpleBuild() {
+  public void testSimpleBuild() throws Exception {
     Streamlet<String> baseStreamlet = builder.newSource(() -> "sa re ga ma");
     baseStreamlet.flatMap(x -> Arrays.asList(x.split(" ")))
                  .reduceByKeyAndWindow(x -> x, x -> 1, WindowConfig.TumblingCountWindow(10),

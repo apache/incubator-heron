@@ -42,6 +42,12 @@ public class ConsumerStreamlet<R> extends StreamletImpl<R> {
     setNumPartitions(parent.getNumPartitions());
   }
 
+  /**
+   * Connect this streamlet to TopologyBuilder.
+   * @param bldr The TopologyBuilder for the topology
+   * @param stageNames The existing stage names
+   * @return True if successful
+   */
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.CONSUMER, stageNames);

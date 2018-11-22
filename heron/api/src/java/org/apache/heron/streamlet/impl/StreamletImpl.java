@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.grouping.NoneStreamGrouping;
+import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
@@ -317,8 +319,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public List<Streamlet<R>> clone(int numClones) {
-    require(numClones > 0,
-        "Streamlet's clone number should be > 0");
+    require(numClones > 0, "Streamlet's clone number should be > 0");
     List<Streamlet<R>> retval = new ArrayList<>(numClones);
     for (int i = 0; i < numClones; ++i) {
       retval.add(repartition(getNumPartitions()));
@@ -522,9 +523,26 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator) {
     checkNotNull(operator, "operator cannot be null");
 
-    StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator);
+    // By default, NoneStreamGrouping stategy is used. In this stategy, tuples are forwarded
+    // from parent component to a ramdon one of all the instances of the child component,
+    // which is the same logic as shuffle grouping.
+    return applyOperator(operator, new NoneStreamGrouping());
+  }
+
+  /**
+   * Returns a new Streamlet by applying the operator on each element of this streamlet.
+   * @param operator The operator to be applied
+   * @param grouper The grouper to be applied with the operator
+   * @param <T> The return type of the transform
+   * @return Streamlet containing the output of the operation
+   */
+  @Override
+  public <T> Streamlet<T> applyOperator(IStreamletOperator<R, T> operator, StreamGrouping grouper) {
+    checkNotNull(operator, "operator can't be null");
+    checkNotNull(grouper, "grouper can't be null");
+
+    StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator, grouper);
     addChild(customStreamlet);
     return customStreamlet;
   }
-
 }
