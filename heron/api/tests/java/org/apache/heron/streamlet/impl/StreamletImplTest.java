@@ -19,6 +19,7 @@
 package org.apache.heron.streamlet.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
@@ -55,6 +57,7 @@ import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
@@ -154,6 +157,12 @@ public class StreamletImplTest {
   public void testSupplierStreamlet() {
     Streamlet<Double> streamlet = builder.newSource(() -> Math.random());
     assertTrue(streamlet instanceof SupplierStreamlet);
+  }
+
+  @Test
+  public void testSourceStreamlet() {
+    Streamlet<String> streamlet = builder.newSource(new TestSource());
+    assertTrue(streamlet instanceof SourceStreamlet);
   }
 
   @Test
@@ -567,6 +576,25 @@ public class StreamletImplTest {
       fail("Should have thrown an IllegalArgumentException because streamlet name is invalid");
     } catch (IllegalArgumentException e) {
       assertEquals("Streamlet name cannot be null/blank", e.getMessage());
+    }
+  }
+
+  private class TestSource implements Source<String> {
+
+    private List<String> list;
+    @Override
+    public void setup(Context context) {
+      list = Arrays.asList("aa", "bb", "cc");
+    }
+
+    @Override
+    public Collection<String> get() {
+      return list;
+    }
+
+    @Override
+    public void cleanup() {
+      list.clear();
     }
   }
 
