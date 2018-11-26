@@ -22,6 +22,11 @@
       "topologyName": "IntegrationTest_ScalaStreamletWithSplitAndWithStream",
       "classPath": "scala_streamlet_with_split_and_with_stream.ScalaStreamletWithSplitAndWithStream",
       "expectedResultRelativePath": "scala_streamlet_with_split_and_with_stream/ScalaStreamletWithSplitAndWithStreamResults.json"
+    },
+    {
+      "topologyName" : "IntegrationTest_ScalaStreamletWithMapAndFilterAndUnion",
+      "classPath"    : "scala_streamlet_with_map_and_filter_and_union.ScalaStreamletWithMapAndFilterAndUnion",
+      "expectedResultRelativePath" : "scala_streamlet_with_map_and_filter_and_union/ScalaStreamletWithMapAndFilterAndUnionResults.json"
     }
   ],
   "javaTopologies": [
