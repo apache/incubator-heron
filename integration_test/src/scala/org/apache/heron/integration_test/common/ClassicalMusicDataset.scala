@@ -23,6 +23,9 @@ case class ClassicalMusic(composer: String,
                           year: Int,
                           keyword: String)
 
+/**
+  * Common Dataset to be used by Scala Streamlet Integration Tests
+  */
 object ClassicalMusicDataset {
 
   val firstClassicalMusicList = List(

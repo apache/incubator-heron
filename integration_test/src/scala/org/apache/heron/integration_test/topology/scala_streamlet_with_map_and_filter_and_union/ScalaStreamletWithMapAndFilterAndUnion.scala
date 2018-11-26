@@ -31,9 +31,6 @@ import org.apache.heron.streamlet.scala.{Builder, Source}
 
 import scala.collection.mutable.Set
 
-/**
-  * Classical Music Model
-  */
 object ScalaStreamletWithMapAndFilterAndUnion {
 
   val filterSet = Set[String]()
@@ -46,12 +43,14 @@ object ScalaStreamletWithMapAndFilterAndUnion {
 
 }
 
+/**
+  * Scala Streamlet Integration Test by covering source, map, filter and union operations.
+  */
 class ScalaStreamletWithMapAndFilterAndUnion(args: Array[String])
     extends AbstractTestTopology(args)
     with ScalaIntegrationTestBase {
 
   import ScalaStreamletWithMapAndFilterAndUnion._
-//  import org.apache.heron.integration_test.common.ClassicalMusicDataset._
 
   override protected def buildTopology(
       testTopologyBuilder: TestTopologyBuilder): TestTopologyBuilder = {
@@ -79,7 +78,9 @@ class ScalaStreamletWithMapAndFilterAndUnion(args: Array[String])
     unionStreamlet
       .map[String](classicalMusic =>
         s"${classicalMusic.composer}-${classicalMusic.year}")
+      .setName("classical-musics-with-composer-and-year")
       .filter(filterSet.add(_))
+      .setName("filtered-classical-musics")
 
     build(testTopologyBuilder, streamletBuilder)
   }
