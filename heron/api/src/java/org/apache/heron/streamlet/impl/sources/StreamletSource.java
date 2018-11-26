@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 
 /**
@@ -38,11 +39,20 @@ public abstract class StreamletSource extends BaseRichSpout
   private static final long serialVersionUID = 8583965332619565343L;
   private static final String OUTPUT_FIELD_NAME = "output";
 
+  protected SpoutOutputCollector collector;
+
   @Override
   public void initState(State<Serializable, Serializable> state) { }
 
   @Override
   public void preSave(String checkpointId) { }
+
+  @SuppressWarnings("rawtypes")
+  @Override
+  public void open(Map<String, Object> map, TopologyContext topologyContext,
+                   SpoutOutputCollector outputCollector) {
+    collector = outputCollector;
+  }
 
   /**
    * The sources implementing streamlet functionality have some properties.
