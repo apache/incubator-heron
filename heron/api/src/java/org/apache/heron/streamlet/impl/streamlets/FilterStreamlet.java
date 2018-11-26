@@ -45,7 +45,7 @@ public class FilterStreamlet<R> extends StreamletImpl<R> {
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.FILTER, stageNames);
     bldr.setBolt(getName(), new FilterOperator<R>(filterFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

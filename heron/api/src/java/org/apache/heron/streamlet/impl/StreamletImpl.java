@@ -19,14 +19,18 @@
 package org.apache.heron.streamlet.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.heron.api.grouping.NoneStreamGrouping;
 import org.apache.heron.api.grouping.StreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
 import org.apache.heron.streamlet.KeyValue;
@@ -51,6 +55,8 @@ import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.RemapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SinkStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.SplitStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.StreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.TransformStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.UnionStreamlet;
 
@@ -107,13 +113,14 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     CUSTOM_WINDOW("customWindow"),
     FILTER("filter"),
     FLATMAP("flatmap"),
-    REDUCE("reduceByKeyAndWindow"),
     JOIN("join"),
     LOGGER("logger"),
     MAP("map"),
+    SOURCE("generator"),
+    REDUCE("reduceByKeyAndWindow"),
     REMAP("remap"),
     SINK("sink"),
-    SOURCE("generator"),
+    SPLIT("split"),
     SPOUT("spout"),
     SUPPLIER("supplier"),
     TRANSFORM("transform"),
@@ -200,6 +207,53 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
   @Override
   public int getNumPartitions() {
     return nPartitions;
+  }
+
+  /**
+   * Set the id of the stream to be used by the children nodes.
+   * Usage (assuming source is a Streamlet object with two output streams: stream1 and stream2):
+   *   source.withStream("stream1").filter(...).log();
+   *   source.withStream("stream2").filter(...).log();
+   * @param streamId The specified stream id
+   * @return Returns back the Streamlet with changed stream id
+   */
+  @SuppressWarnings("HiddenField")
+  @Override
+  public Streamlet<R> withStream(String streamId) {
+    checkNotBlank(streamId, "streamId can't be empty");
+
+    Set<String> availableIds = getAvailableStreamIds();
+    if (availableIds.contains(streamId)) {
+      StreamletShadow<R> shadow = new StreamletShadow<R>(this);
+      shadow.setStreamId(streamId);
+      return shadow;
+    } else {
+      throw new RuntimeException(
+          String.format("Stream id %s is not available in %s. Available ids are: %s.",
+                        streamId, getName(), availableIds.toString()));
+    }
+  }
+
+
+  /**
+   * Get the available stream ids in the Streamlet. For most Streamlets,
+   * there is only one internal stream id, therefore the function
+   * returns a set of one single stream id.
+   * @return Returns a set of one single stream id.
+   */
+  protected Set<String> getAvailableStreamIds() {
+    HashSet<String> ids = new HashSet<String>();
+    ids.add(getStreamId());
+    return ids;
+  }
+
+  /**
+   * Gets the stream id of this Streamlet.
+   * @return the stream id of this Streamlet`
+   */
+  @Override
+  public String getStreamId() {
+    return Utils.DEFAULT_STREAM_ID;
   }
 
   /**
@@ -544,5 +598,22 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     StreamletImpl<T> customStreamlet = new CustomStreamlet<>(this, operator, grouper);
     addChild(customStreamlet);
     return customStreamlet;
+  }
+
+  /**
+   * Returns multiple streams by splitting incoming stream.
+   * @param splitFns The Split Functions that test if the tuple should be emitted into each stream
+   * Note that there could be 0 or multiple target stream ids
+   */
+  @Override
+  public Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns) {
+    // Make sure map and stream ids are not empty
+    require(splitFns.size() > 0, "At least one entry is required");
+    require(splitFns.keySet().stream().allMatch(stream -> StringUtils.isNotBlank(stream)),
+            "Stream Id can not be blank");
+
+    SplitStreamlet<R> splitStreamlet = new SplitStreamlet<R>(this, splitFns);
+    addChild(splitStreamlet);
+    return splitStreamlet;
   }
 }

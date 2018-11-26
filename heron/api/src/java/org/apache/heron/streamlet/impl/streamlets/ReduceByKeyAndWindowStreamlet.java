@@ -68,7 +68,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
         valueExtractor, reduceFn);
     windowCfg.attachWindowConfig(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(),
+        .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
     return true;
   }

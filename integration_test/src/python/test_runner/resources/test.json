@@ -17,6 +17,11 @@
       "topologyName" : "IntegrationTest_ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
       "classPath"    : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone.ScalaStreamletWithMapAndFlatMapAndFilterAndClone",
       "expectedResultRelativePath" : "scala_streamlet_with_map_and_flatmap_and_filter_and_clone/ScalaStreamletWithMapAndFlatMapAndFilterAndCloneResults.json"
+    },
+    {
+      "topologyName": "IntegrationTest_ScalaStreamletWithSplitAndWithStream",
+      "classPath": "scala_streamlet_with_split_and_with_stream.ScalaStreamletWithSplitAndWithStream",
+      "expectedResultRelativePath": "scala_streamlet_with_split_and_with_stream/ScalaStreamletWithSplitAndWithStreamResults.json"
     }
   ],
   "javaTopologies": [
@@ -138,6 +143,11 @@
       "topologyName": "IntegrationTest_StreamletWithMapAndFlatMapAndFilterAndClone",
       "classPath": "streamlet_with_map_and_flatmap_and_filter_and_clone.StreamletWithMapAndFlatMapAndFilterAndClone",
       "expectedResultRelativePath": "streamlet_with_map_and_flatmap_and_filter_and_clone/StreamletWithMapAndFlatMapAndFilterAndCloneResults.json"
+    },
+    {
+      "topologyName": "IntegrationTest_StreamletWithSplitAndWithStream",
+      "classPath": "streamlet_with_split_and_with_stream.StreamletWithSplitAndWithStream",
+      "expectedResultRelativePath": "streamlet_with_split_and_with_stream/StreamletWithSplitAndWithStreamResults.json"
     }
   ],
   "pythonTopologies": [

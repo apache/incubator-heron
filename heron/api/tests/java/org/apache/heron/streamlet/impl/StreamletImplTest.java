@@ -20,8 +20,10 @@ package org.apache.heron.streamlet.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,6 +32,7 @@ import org.junit.Test;
 
 import org.apache.heron.api.grouping.ShuffleStreamGrouping;
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.resource.TestBasicBolt;
 import org.apache.heron.resource.TestBolt;
@@ -42,6 +45,7 @@ import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
 import org.apache.heron.streamlet.SerializableConsumer;
+import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
@@ -85,6 +89,68 @@ public class StreamletImplTest {
     StreamletImpl<Double> bStreamlet = (StreamletImpl<Double>) sample;
     assertFalse(bStreamlet.isBuilt());
     assertEquals(bStreamlet.getChildren().size(), 0);
+  }
+
+  @Test
+  public void testSplitAndWithStream() {
+    Map<String, SerializablePredicate<Double>> splitter = new HashMap();
+    splitter.put("all", i -> true);
+    splitter.put("positive", i -> i > 0);
+    splitter.put("negative", i -> i < 0);
+
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    // The streamlet should have three output streams after split()
+    Streamlet<Double> multiStreams = baseStreamlet.split(splitter);
+
+    // Default stream is used
+    Streamlet<Double> positiveStream = multiStreams.withStream("positive");
+    Streamlet<Double> negativeStream = multiStreams.withStream("negative");
+
+    Streamlet<Double> allMap = multiStreams.withStream("all").map((num) -> num * 10);
+    Streamlet<Double> positiveMap = positiveStream.map((num) -> num * 10);
+    Streamlet<Double> negativeMap = negativeStream.map((num) -> num * 10);
+
+    // Original streamlet should still have the default strean id eventhough the id
+    // is not available. Other shadow streamlets should have the correct stream ids.
+    assertEquals(multiStreams.getStreamId(), Utils.DEFAULT_STREAM_ID);
+    assertEquals(positiveStream.getStreamId(), "positive");
+    assertEquals(negativeStream.getStreamId(), "negative");
+
+    StreamletImpl<Double> impl = (StreamletImpl<Double>) multiStreams;
+    assertEquals(impl.getChildren().size(), 3);
+
+    // Children streamlets should have the right parent stream id
+    assertEquals(((MapStreamlet<Double, Double>) allMap).getParent().getStreamId(),
+        "all");
+    assertEquals(((MapStreamlet<Double, Double>) positiveMap).getParent().getStreamId(),
+        "positive");
+    assertEquals(((MapStreamlet<Double, Double>) negativeMap).getParent().getStreamId(),
+        "negative");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testSplitAndWithWrongStream() {
+    Map<String, SerializablePredicate<Double>> splitter = new HashMap();
+    splitter.put("all", i -> true);
+    splitter.put("positive", i -> i > 0);
+    splitter.put("negative", i -> i < 0);
+
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    // The streamlet should have three output streams after split()
+    Streamlet<Double> multiStreams = baseStreamlet.split(splitter);
+
+    // Select a good stream id and a bad stream id
+    Streamlet<Double> goodStream = multiStreams.withStream("positive");
+    Streamlet<Double> badStream = multiStreams.withStream("wrong-id");
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testWithWrongStream() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    // Normal Streamlet objects, including sources, have only the default stream id.
+    // Selecting any other stream using withStream() should trigger a runtime
+    // exception
+    Streamlet<Double> badStream = baseStreamlet.withStream("wrong-id");
   }
 
   @Test
@@ -489,6 +555,12 @@ public class StreamletImplTest {
   public void testSetNumPartitionsWithInvalidValue() {
     Streamlet<Double> streamlet = builder.newSource(() -> Math.random());
     streamlet.setNumPartitions(0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testWithStreamWithInvalidValue() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    baseStreamlet.withStream("");
   }
 
   @Test(expected = IllegalArgumentException.class)

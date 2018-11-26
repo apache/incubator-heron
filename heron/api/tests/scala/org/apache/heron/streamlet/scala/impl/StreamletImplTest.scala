@@ -45,6 +45,7 @@ import org.apache.heron.streamlet.impl.streamlets.{
   RemapStreamlet,
   TransformStreamlet,
   SinkStreamlet,
+  SplitStreamlet,
   UnionStreamlet
 }
 
@@ -243,6 +244,62 @@ class StreamletImplTest extends BaseFunSuite {
 
     verifySupplierStreamlet(supplierStreamlet)
     verifySupplierStreamlet(supplierStreamlet2)
+  }
+
+  test("StreamletImpl should support split and withStream transformation") {
+    val supplierStreamlet = builder
+      .newSource(() => Math.random)
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(20)
+
+    val splitted = supplierStreamlet
+      .split(Map(
+        "positive" -> { num: Double => num > 0 },
+        "negative" -> { num: Double => num < 0 }
+      ))
+      .setName("Split_Streamlet_1")
+      .setNumPartitions(5)
+
+    splitted.withStream("positive")
+      .map { num: Double =>
+        num * 10
+      }
+
+    splitted.withStream("negative")
+      .map { num: Double =>
+        num * -10
+      }
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Double]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[SplitStreamlet[_]])
+
+    val splitStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[SplitStreamlet[Double]]
+    assertEquals("Split_Streamlet_1", splitStreamlet.getName)
+    assertEquals(2, splitStreamlet.getChildren.size())
+    assertTrue(
+      splitStreamlet
+        .getChildren.get(0)
+        .isInstanceOf[MapStreamlet[_, _]])
+    assertTrue(
+      splitStreamlet
+        .getChildren.get(1)
+        .isInstanceOf[MapStreamlet[_, _]])
+    
+    val mapStreamlet1 = splitStreamlet
+      .getChildren.get(0)
+      .asInstanceOf[MapStreamlet[Double, Double]]
+    assertEquals("positive", mapStreamlet1.getParent.getStreamId)
+    val mapStreamlet2 = splitStreamlet
+      .getChildren.get(1)
+      .asInstanceOf[MapStreamlet[Double, Double]]
+    assertEquals("negative", mapStreamlet2.getParent.getStreamId)
   }
 
   test("StreamletImpl should support consume function") {
