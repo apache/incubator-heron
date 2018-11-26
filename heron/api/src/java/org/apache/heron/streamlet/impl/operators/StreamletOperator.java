@@ -36,7 +36,7 @@ public abstract class StreamletOperator<R, T>
     extends BaseRichBolt
     implements IStreamletRichOperator<R, T> {
   private static final long serialVersionUID = 8524238140745238942L;
-  private static final String OUTPUT_FIELD_NAME = "output";
+  protected static final String OUTPUT_FIELD_NAME = "output";
 
   protected OutputCollector collector;
 

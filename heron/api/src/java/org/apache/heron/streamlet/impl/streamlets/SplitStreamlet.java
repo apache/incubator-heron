@@ -20,34 +20,44 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.operators.TransformOperator;
+import org.apache.heron.streamlet.impl.operators.SplitOperator;
 
 /**
- * TransformStreamlet represents a Streamlet that is made up of applying the user
- * supplied transform function to each element of the parent streamlet. It differs
- * from the simple MapStreamlet in the sense that it provides setup/cleanup flexibility
- * for the users to setup things and cleanup before the beginning of the computation
+ * SplitStreamlet represents a Streamlet that splits an incoming
+ * stream into multiple streams using a split function. Each tuple
+ * can be emitted into no or multiple streams.
  */
-public class TransformStreamlet<R, T> extends StreamletImpl<T> {
+public class SplitStreamlet<R> extends StreamletImpl<R> {
   private StreamletImpl<R> parent;
-  private SerializableTransformer<? super R, ? extends T> serializableTransformer;
+  private Map<String, SerializablePredicate<R>> splitFns;
 
-  public TransformStreamlet(StreamletImpl<R> parent,
-                       SerializableTransformer<? super R, ? extends T> serializableTransformer) {
+  public SplitStreamlet(StreamletImpl<R> parent,
+                        Map<String, SerializablePredicate<R>> splitFns) {
+
     this.parent = parent;
-    this.serializableTransformer = serializableTransformer;
+    this.splitFns = splitFns;
     setNumPartitions(parent.getNumPartitions());
+  }
+
+  /**
+   * Get the available stream ids in the Streamlet.
+   * @return Returns the set of available stream ids
+   */
+  @Override
+  protected Set<String> getAvailableStreamIds() {
+    return splitFns.keySet();
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.TRANSFORM, stageNames);
-    bldr.setBolt(getName(), new TransformOperator<R, T>(serializableTransformer),
+    setDefaultNameIfNone(StreamletNamePrefix.SPLIT, stageNames);
+    bldr.setBolt(getName(), new SplitOperator<R>(splitFns),
         getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }

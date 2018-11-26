@@ -41,11 +41,15 @@ public class MapStreamlet<R, T> extends StreamletImpl<T> {
     setNumPartitions(parent.getNumPartitions());
   }
 
+  public StreamletImpl<R> getParent() {
+    return parent;
+  }
+
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.MAP, stageNames);
     bldr.setBolt(getName(), new MapOperator<R, T>(mapFn),
-        getNumPartitions()).shuffleGrouping(parent.getName());
+        getNumPartitions()).shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }
