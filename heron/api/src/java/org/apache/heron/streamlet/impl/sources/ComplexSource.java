@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
@@ -38,10 +36,9 @@ import org.apache.heron.streamlet.impl.ContextImpl;
  * to generate the next tuple.
  */
 public class ComplexSource<R> extends StreamletSource {
+
   private static final long serialVersionUID = -5086763670301450007L;
   private Source<R> generator;
-
-  private SpoutOutputCollector collector;
   private State<Serializable, Serializable> state;
 
   public ComplexSource(Source<R> generator) {
@@ -57,18 +54,16 @@ public class ComplexSource<R> extends StreamletSource {
   @Override
   public void open(Map<String, Object> map, TopologyContext topologyContext,
                    SpoutOutputCollector outputCollector) {
-    collector = outputCollector;
+    super.open(map, topologyContext, outputCollector);
     Context context = new ContextImpl(topologyContext, map, state);
     generator.setup(context);
   }
 
   @Override
   public void nextTuple() {
-    Collection<R> val = generator.get();
-    if (val != null) {
-      for (R tuple : val) {
-        collector.emit(new Values(tuple));
-      }
+    Collection<R> tuples = generator.get();
+    if (tuples != null) {
+      tuples.forEach(tuple -> collector.emit(new Values(tuple)));
     }
   }
 }

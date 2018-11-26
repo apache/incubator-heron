@@ -16,14 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.heron.streamlet.impl.sources;
 
-import java.util.Map;
-
-import org.apache.heron.api.spout.SpoutOutputCollector;
-import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.streamlet.SerializableSupplier;
 
@@ -33,19 +27,12 @@ import org.apache.heron.streamlet.SerializableSupplier;
  * to generate the next tuple.
  */
 public class SupplierSource<R> extends StreamletSource {
+
   private static final long serialVersionUID = 6476611751545430216L;
   private SerializableSupplier<R> supplier;
 
-  private SpoutOutputCollector collector;
-
   public SupplierSource(SerializableSupplier<R> supplier) {
     this.supplier = supplier;
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector outputCollector) {
-    collector = outputCollector;
   }
 
   @Override
