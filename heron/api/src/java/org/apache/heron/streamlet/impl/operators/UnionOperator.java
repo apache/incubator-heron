@@ -36,7 +36,13 @@ public class UnionOperator<I> extends StreamletOperator<I, I> {
   @Override
   public void execute(Tuple tuple) {
     I obj = (I) tuple.getValue(0);
-    collector.emit(new Values(obj));
-    collector.ack(tuple);
+    try {
+      collector.emit(new Values(obj));
+      collector.ack(tuple);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      e.printStackTrace();
+      collector.fail(tuple);
+    }
   }
 }

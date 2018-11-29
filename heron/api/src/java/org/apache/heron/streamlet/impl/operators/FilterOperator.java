@@ -41,9 +41,16 @@ public class FilterOperator<R> extends StreamletOperator<R, R> {
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
+    try {
+      Boolean passed = filterFn.test(obj);
+      if (passed) {
+        collector.emit(new Values(obj));
+      }
+      collector.ack(tuple);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch(Exception e) {
+      e.printStackTrace();
+      collector.fail(tuple);
     }
-    collector.ack(tuple);
   }
 }

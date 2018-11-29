@@ -41,11 +41,17 @@ public class FlatMapOperator<R, T> extends StreamletOperator<R, T> {
   @SuppressWarnings("unchecked")
   @Override
   public void execute(Tuple tuple) {
-    R obj = (R) tuple.getValue(0);
-    Iterable<? extends T> result = flatMapFn.apply(obj);
-    for (T o : result) {
-      collector.emit(new Values(o));
+    try {
+      R obj = (R) tuple.getValue(0);
+      Iterable<? extends T> result = flatMapFn.apply(obj);
+      for (T o : result) {
+        collector.emit(new Values(o));
+      }
+      collector.ack(tuple);
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      e.printStackTrace();
+      collector.fail(tuple);
     }
-    collector.ack(tuple);
   }
 }

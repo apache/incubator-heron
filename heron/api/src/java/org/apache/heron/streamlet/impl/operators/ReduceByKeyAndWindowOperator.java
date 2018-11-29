@@ -57,10 +57,20 @@ public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperat
   public void execute(TupleWindow inputWindow) {
     Map<K, V> reduceMap = new HashMap<>();
     Map<K, Integer> windowCountMap = new HashMap<>();
-    for (Tuple tuple : inputWindow.get()) {
-      R tup = (R) tuple.getValue(0);
-      addMap(reduceMap, windowCountMap, tup);
+    try {
+      for (Tuple tuple : inputWindow.get()) {
+        R tup = (R) tuple.getValue(0);
+        addMap(reduceMap, windowCountMap, tup);
+      }
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      e.printStackTrace();
+      for (Tuple tuple : inputWindow.get()) {
+        collector.fail(tuple);
+      }
+      return;  // Early out
     }
+
     long startWindow;
     long endWindow;
     if (inputWindow.getStartTimestamp() == null) {
@@ -77,6 +87,10 @@ public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperat
       Window window = new Window(startWindow, endWindow, windowCountMap.get(key));
       KeyedWindow<K> keyedWindow = new KeyedWindow<>(key, window);
       collector.emit(new Values(new KeyValue<>(keyedWindow, reduceMap.get(key))));
+    }
+
+    for (Tuple tuple : inputWindow.get()) {
+      collector.ack(tuple);
     }
   }
 
