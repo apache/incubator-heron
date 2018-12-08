@@ -813,6 +813,8 @@ http_file(
     url = SETUPTOOLS_SRC,
 )
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 new_http_archive(
     name = "virtualenv",
     url = VIRTUALENV_SRC,
@@ -974,15 +976,19 @@ new_http_archive(
 )
 
 # scala integration
-rules_scala_version="5cdae2f034581a05e23c3473613b409de5978833" # update this as needed
+rules_scala_version="a89d44f7ef67d93dedfc9888630f48d7723516f7" # update this as needed
 
 http_archive(
-    name = "io_bazel_rules_scala",
-    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
-    type = "zip",
-    strip_prefix= "rules_scala-%s" % rules_scala_version,
-    sha256 = "bd66b178da5b9b6845f677bdfb2594de8f1050f831a8d69527c6737969376065",
+     name = "io_bazel_rules_scala",
+     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip"%rules_scala_version,
+     type = "zip",
+     strip_prefix= "rules_scala-%s" % rules_scala_version,
+     sha256 = "e341dc30a397c77e6723a953d4a84539c050b49f163b4c50cf865c698ea598fe"
 )
 
+
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+scala_register_toolchains()
 scala_repositories()

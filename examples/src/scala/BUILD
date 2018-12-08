@@ -12,6 +12,7 @@ scala_binary(
         "//heron/api/src/scala:api-scala",
         "//third_party/java:kryo"
     ],
+     scalacopts = ["-target:jvm-1.8"],
     main_class = "org.apache.heron.examples.streamlet.scala.ScalaIntegerProcessingTopology"
 )
 

@@ -22,6 +22,7 @@ build --python2_path /usr/bin/python2.7
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh
 
+
 # For centos
 # To use it: bazel build --config=centos
 build:centos --experimental_action_listener=tools/cpp:compile_cpp
@@ -60,6 +61,10 @@ build:darwin --ignore_unsupported_sandboxing
 build:darwin --python2_path /usr/bin/python2.7
 build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
+build:darwin --javacopt="-XepDisableAllChecks"
+build:darwin --javacopt="-source 8"
+build:darwin --javacopt="-target 8"
+
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
