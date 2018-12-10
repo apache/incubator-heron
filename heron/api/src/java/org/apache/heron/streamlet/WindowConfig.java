@@ -23,10 +23,13 @@ package org.apache.heron.streamlet;
 
 import java.time.Duration;
 
+import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
 import org.apache.heron.api.windowing.TriggerPolicy;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
+import org.apache.heron.streamlet.impl.CountWindowConfig;
+import org.apache.heron.streamlet.impl.CustomWindowConfig;
+import org.apache.heron.streamlet.impl.TimeWindowConfig;
 
 /**
  * WindowConfig allows Streamlet API users to program window configuration for operations
@@ -35,12 +38,18 @@ import org.apache.heron.streamlet.impl.WindowConfigImpl;
  */
 public interface WindowConfig {
   /**
+   * Attach this WindowConfig object to a WindowedBolt
+   * @param bolt the windowed bolt to attach
+   */
+  void attachWindowConfig(BaseWindowedBolt bolt);
+
+  /**
    * Creates a time based tumbling window of windowDuration
    * @param windowDuration the duration of the tumbling window
    * @return WindowConfig that can be passed to the transformation
    */
   static WindowConfig TumblingTimeWindow(Duration windowDuration) {
-    return new WindowConfigImpl(windowDuration, windowDuration);
+    return new TimeWindowConfig(windowDuration, windowDuration);
   }
 
   /**
@@ -51,7 +60,7 @@ public interface WindowConfig {
    * @return WindowConfig that can be passed to the transformation
    */
   static WindowConfig SlidingTimeWindow(Duration windowDuration, Duration slideInterval) {
-    return new WindowConfigImpl(windowDuration, slideInterval);
+    return new TimeWindowConfig(windowDuration, slideInterval);
   }
 
   /**
@@ -60,7 +69,7 @@ public interface WindowConfig {
    * @return WindowConfig that can be passed to the transformation
    */
   static WindowConfig TumblingCountWindow(int windowSize) {
-    return new WindowConfigImpl(windowSize, windowSize);
+    return new CountWindowConfig(windowSize, windowSize);
   }
 
   /**
@@ -71,7 +80,7 @@ public interface WindowConfig {
    * @return WindowConfig that can be passed to the transformation
    */
   static WindowConfig SlidingCountWindow(int windowSize, int slideSize) {
-    return new WindowConfigImpl(windowSize, slideSize);
+    return new CountWindowConfig(windowSize, slideSize);
   }
 
   /**
@@ -82,6 +91,6 @@ public interface WindowConfig {
    */
   static WindowConfig CustomWindow(TriggerPolicy<Tuple, ?> triggerPolicy,
                                    EvictionPolicy<Tuple, ?> evictionPolicy) {
-    return new WindowConfigImpl(triggerPolicy, evictionPolicy);
+    return new CustomWindowConfig(triggerPolicy, evictionPolicy);
   }
 }

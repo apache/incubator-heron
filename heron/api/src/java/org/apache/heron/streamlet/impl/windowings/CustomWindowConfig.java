@@ -19,8 +19,6 @@
 
 package org.apache.heron.streamlet.impl;
 
-import java.time.Duration;
-
 import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
@@ -28,50 +26,21 @@ import org.apache.heron.api.windowing.TriggerPolicy;
 import org.apache.heron.streamlet.WindowConfig;
 
 /**
- * WindowConfigImpl implements the WindowConfig interface.
+ * CustomWindowConfig implements a trigger/eviction based WindowConfig.
  */
-public final class WindowConfigImpl implements WindowConfig {
-  private enum WindowType { TIME, COUNT, CUSTOM }
-  private WindowType windowType;
-  private int windowSize;
-  private int slideInterval;
-  private Duration windowDuration;
-  private Duration slidingIntervalDuration;
+public final class CustomWindowConfig implements WindowConfig {
   private TriggerPolicy<Tuple, ?> triggerPolicy;
   private EvictionPolicy<Tuple, ?> evictionPolicy;
 
-  public WindowConfigImpl(Duration windowDuration, Duration slidingIntervalDuration) {
-    this.windowType = WindowType.TIME;
-    this.windowDuration = windowDuration;
-    this.slidingIntervalDuration = slidingIntervalDuration;
-  }
-  public WindowConfigImpl(int windowSize, int slideInterval) {
-    this.windowType = WindowType.COUNT;
-    this.windowSize = windowSize;
-    this.slideInterval = slideInterval;
-  }
-  public WindowConfigImpl(TriggerPolicy<Tuple, ?> triggerPolicy,
+  public CustomWindowConfig(TriggerPolicy<Tuple, ?> triggerPolicy,
                           EvictionPolicy<Tuple, ?> evictionPolicy) {
-    this.windowType = WindowType.CUSTOM;
     this.triggerPolicy = triggerPolicy;
     this.evictionPolicy = evictionPolicy;
   }
 
+  @Override
   public void attachWindowConfig(BaseWindowedBolt bolt) {
-    switch(windowType) {
-      case COUNT:
-        bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
-                        BaseWindowedBolt.Count.of(slideInterval));
-        break;
-      case TIME:
-        bolt.withWindow(windowDuration, slidingIntervalDuration);
-        break;
-      case CUSTOM:
-        bolt.withCustomEvictor(evictionPolicy);
-        bolt.withCustomTrigger(triggerPolicy);
-        break;
-      default:
-        throw new RuntimeException("Unknown windowType " + String.valueOf(windowType));
-    }
+    bolt.withCustomEvictor(evictionPolicy);
+    bolt.withCustomTrigger(triggerPolicy);
   }
 }

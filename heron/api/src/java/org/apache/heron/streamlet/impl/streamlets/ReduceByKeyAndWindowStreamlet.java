@@ -29,7 +29,6 @@ import org.apache.heron.streamlet.SerializableBinaryOperator;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
 
@@ -45,7 +44,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private SerializableFunction<R, V> valueExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private SerializableBinaryOperator<V> reduceFn;
 
   public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
@@ -56,7 +55,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
     this.parent = parent;
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
-    this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.windowCfg = windowCfg;
     this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
@@ -64,10 +63,10 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
-    ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
-        valueExtractor, reduceFn);
-    windowCfg.attachWindowConfig(bolt);
-    bldr.setBolt(getName(), bolt, getNumPartitions())
+    ReduceByKeyAndWindowOperator<K, V, R> operator =
+        new ReduceByKeyAndWindowOperator<>(keyExtractor, valueExtractor, reduceFn);
+    windowCfg.attachWindowConfig(operator);
+    bldr.setBolt(getName(), operator, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
     return true;

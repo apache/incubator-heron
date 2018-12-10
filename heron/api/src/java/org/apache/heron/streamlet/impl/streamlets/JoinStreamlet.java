@@ -30,7 +30,6 @@ import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 import org.apache.heron.streamlet.impl.groupings.JoinCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.JoinOperator;
 
@@ -47,7 +46,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
   private StreamletImpl<S> right;
   private SerializableFunction<R, K> leftKeyExtractor;
   private SerializableFunction<S, K> rightKeyExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private SerializableBiFunction<R, S, ? extends T> joinFn;
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
@@ -73,7 +72,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     this.right = right;
     this.leftKeyExtractor = leftKeyExtractor;
     this.rightKeyExtractor = rightKeyExtractor;
-    this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.windowCfg = windowCfg;
     this.joinFn = joinFn;
     setNumPartitions(left.getNumPartitions());
   }

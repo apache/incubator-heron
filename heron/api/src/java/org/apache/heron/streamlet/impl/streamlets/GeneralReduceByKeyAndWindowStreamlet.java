@@ -29,7 +29,6 @@ import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
 
@@ -44,7 +43,7 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
     extends StreamletImpl<KeyValue<KeyedWindow<K>, VR>> {
   private StreamletImpl<V> parent;
   private SerializableFunction<V, K> keyExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
 
@@ -55,7 +54,7 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
                             SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
-    this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.windowCfg = windowCfg;
     this.identity = identity;
     this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
@@ -64,10 +63,10 @@ public class GeneralReduceByKeyAndWindowStreamlet<K, V, VR>
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
-    GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
+    GeneralReduceByKeyAndWindowOperator<K, V, VR> operator =
         new GeneralReduceByKeyAndWindowOperator<K, V, VR>(keyExtractor, identity, reduceFn);
-    windowCfg.attachWindowConfig(bolt);
-    bldr.setBolt(getName(), bolt, getNumPartitions())
+    windowCfg.attachWindowConfig(operator);
+    bldr.setBolt(getName(), operator, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<K, V>(keyExtractor));
     return true;
