@@ -17,18 +17,18 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl;
+package org.apache.heron.streamlet.impl.windowings;
 
 import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
 import org.apache.heron.api.windowing.TriggerPolicy;
-import org.apache.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.impl.WindowConfigImpl;
 
 /**
  * CustomWindowConfig implements a trigger/eviction based WindowConfig.
  */
-public final class CustomWindowConfig implements WindowConfig {
+public final class CustomWindowConfig extends WindowConfigImpl {
   private TriggerPolicy<Tuple, ?> triggerPolicy;
   private EvictionPolicy<Tuple, ?> evictionPolicy;
 

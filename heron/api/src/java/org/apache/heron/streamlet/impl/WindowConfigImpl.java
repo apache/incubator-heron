@@ -17,27 +17,14 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl.windowings;
-
-import java.time.Duration;
+package org.apache.heron.streamlet.impl;
 
 import org.apache.heron.api.bolt.BaseWindowedBolt;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
+import org.apache.heron.streamlet.WindowConfig;
 
 /**
- * TimeWindowConfig implements a time based WindowConfig.
+ * WindowConfigImpl implements the WindowConfig interface.
  */
-public final class TimeWindowConfig extends WindowConfigImpl {
-  private Duration windowDuration;
-  private Duration slidingIntervalDuration;
-
-  public TimeWindowConfig(Duration windowDuration, Duration slidingIntervalDuration) {
-    this.windowDuration = windowDuration;
-    this.slidingIntervalDuration = slidingIntervalDuration;
-  }
-
-  @Override
-  public void attachWindowConfig(BaseWindowedBolt bolt) {
-    bolt.withWindow(windowDuration, slidingIntervalDuration);
-  }
+public abstract class WindowConfigImpl implements WindowConfig {
+  public abstract void attachWindowConfig(BaseWindowedBolt bolt);
 }

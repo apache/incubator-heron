@@ -23,13 +23,13 @@ package org.apache.heron.streamlet;
 
 import java.time.Duration;
 
-import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
 import org.apache.heron.api.windowing.TriggerPolicy;
-import org.apache.heron.streamlet.impl.CountWindowConfig;
-import org.apache.heron.streamlet.impl.CustomWindowConfig;
-import org.apache.heron.streamlet.impl.TimeWindowConfig;
+import org.apache.heron.streamlet.impl.windowings.CountWindowConfig;
+import org.apache.heron.streamlet.impl.windowings.CustomWindowConfig;
+import org.apache.heron.streamlet.impl.windowings.TimeWindowConfig;
+//import org.apache.heron.streamlet.impl.WindowConfigImpl;
 
 /**
  * WindowConfig allows Streamlet API users to program window configuration for operations
@@ -37,12 +37,6 @@ import org.apache.heron.streamlet.impl.TimeWindowConfig;
  * sliding/tumbling windows.
  */
 public interface WindowConfig {
-  /**
-   * Attach this WindowConfig object to a WindowedBolt
-   * @param bolt the windowed bolt to attach
-   */
-  void attachWindowConfig(BaseWindowedBolt bolt);
-
   /**
    * Creates a time based tumbling window of windowDuration
    * @param windowDuration the duration of the tumbling window

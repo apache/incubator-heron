@@ -17,15 +17,15 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl;
+package org.apache.heron.streamlet.impl.windowings;
 
 import org.apache.heron.api.bolt.BaseWindowedBolt;
-import org.apache.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.impl.WindowConfigImpl;
 
 /**
  * CountWindowConfig implements a count based WindowConfig.
  */
-public final class CountWindowConfig implements WindowConfig {
+public final class CountWindowConfig extends WindowConfigImpl {
   private int windowSize;
   private int slideInterval;
 
@@ -34,6 +34,7 @@ public final class CountWindowConfig implements WindowConfig {
     this.slideInterval = slideInterval;
   }
 
+  @Override
   public void attachWindowConfig(BaseWindowedBolt bolt) {
     bolt.withWindow(BaseWindowedBolt.Count.of(windowSize),
                     BaseWindowedBolt.Count.of(slideInterval));
