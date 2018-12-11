@@ -37,7 +37,7 @@ import org.apache.heron.streamlet.Window;
  * For every time window, the bolt goes over all the tuples in that window and applies the reduce
  * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
  */
-public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator<V, V> {
+public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator<V, VR> {
   private static final long serialVersionUID = 2833576046687752396L;
   private SerializableFunction<V, K> keyExtractor;
   private VR identity;
