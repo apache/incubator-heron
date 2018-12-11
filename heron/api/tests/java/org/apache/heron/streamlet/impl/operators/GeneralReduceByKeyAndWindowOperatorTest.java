@@ -59,7 +59,7 @@ public class GeneralReduceByKeyAndWindowOperatorTest {
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testReduceByWindowOperator() {
-    GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer> reduceOperator =
+    GeneralReduceByKeyAndWindowOperator<KeyValue<String, Integer>, String, Integer> reduceOperator =
         getReduceByWindowOperator(12);
 
     TupleWindow tupleWindow = getTupleWindow(3, 5);
@@ -106,9 +106,9 @@ public class GeneralReduceByKeyAndWindowOperatorTest {
 
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer>
+  private GeneralReduceByKeyAndWindowOperator<KeyValue<String, Integer>, String, Integer>
         getReduceByWindowOperator(Integer identity) {
-    GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer>
+    GeneralReduceByKeyAndWindowOperator<KeyValue<String, Integer>, String, Integer>
         reduceByWindowOperator = new GeneralReduceByKeyAndWindowOperator<>(
             x -> x.getKey(), identity, (o, o2) -> o + o2.getValue());
 

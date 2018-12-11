@@ -37,21 +37,21 @@ import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
  * applying user supplied reduceFn on all elements within each window defined by a
  * user supplied Window Config.
  * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo&lt;K&gt; type and the value is of type V.
+ * KeyWindowInfo&lt;K&gt; type and the value is of type T.
  */
-public class ReduceByKeyAndWindowStreamlet<K, V, R>
-    extends StreamletImpl<KeyValue<KeyedWindow<K>, V>> {
+public class ReduceByKeyAndWindowStreamlet<R, K, T>
+    extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
-  private SerializableFunction<R, V> valueExtractor;
-  private WindowConfig windowCfg;
-  private SerializableBinaryOperator<V> reduceFn;
+  private SerializableFunction<R, T> valueExtractor;
+  private WindowConfigImpl windowCfg;
+  private SerializableBinaryOperator<T> reduceFn;
 
   public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
                        SerializableFunction<R, K> keyExtractor,
-                       SerializableFunction<R, V> valueExtractor,
+                       SerializableFunction<R, T> valueExtractor,
                        WindowConfig windowCfg,
-                       SerializableBinaryOperator<V> reduceFn) {
+                       SerializableBinaryOperator<T> reduceFn) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
@@ -63,12 +63,12 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
-    ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
+    ReduceByKeyAndWindowOperator<R, K, T> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
         valueExtractor, reduceFn);
     windowCfg.applyTo(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
-            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
+            new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));
     return true;
   }
 }
