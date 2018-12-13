@@ -35,12 +35,15 @@ import org.apache.heron.streamlet.{
 }
 import org.apache.heron.streamlet.impl.streamlets.{
   ConsumerStreamlet,
+  CountByKeyStreamlet,
+  CountByKeyAndWindowStreamlet,
   CustomStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
   LogStreamlet,
   JoinStreamlet,
   MapStreamlet,
+  ReduceByKeyStreamlet,
   ReduceByKeyAndWindowStreamlet,
   RemapStreamlet,
   TransformStreamlet,
@@ -609,7 +612,35 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals(0, customStreamlet.getChildren.size())
   }
 
-  test("StreamletImpl should support reduce operation") {
+  test("StreamletImpl should support reduce by key operation") {
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .reduceByKey[Int, Int]((key: Int) => key * 100,
+                             (value: Int) => value,
+                             (x: Int, y: Int) => x + y)  // sum operation
+      .setName("Reduce_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[ReduceByKeyStreamlet[_, _, _]])
+    val reduceStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[ReduceByKeyStreamlet[Int, Int, Int]]
+    assertEquals("Reduce_Streamlet_1", reduceStreamlet.getName)
+    assertEquals(5, reduceStreamlet.getNumPartitions)
+    assertEquals(0, reduceStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support reduce by key and window operation") {
     val supplierStreamlet = builder
       .newSource(() => Random.nextInt(10))
       .setName("Supplier_Streamlet_1")
@@ -630,12 +661,65 @@ class StreamletImplTest extends BaseFunSuite {
       supplierStreamletImpl
         .getChildren(0)
         .isInstanceOf[ReduceByKeyAndWindowStreamlet[_, _, _]])
-    val mapStreamlet = supplierStreamletImpl
+    val reduceStreamlet = supplierStreamletImpl
       .getChildren(0)
       .asInstanceOf[ReduceByKeyAndWindowStreamlet[Int, Int, Int]]
-    assertEquals("Reduce_Streamlet_1", mapStreamlet.getName)
-    assertEquals(5, mapStreamlet.getNumPartitions)
-    assertEquals(0, mapStreamlet.getChildren.size())
+    assertEquals("Reduce_Streamlet_1", reduceStreamlet.getName)
+    assertEquals(5, reduceStreamlet.getNumPartitions)
+    assertEquals(0, reduceStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support count by key operation") {
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .countByKey[Int]((x: Int) => x * 100)
+      .setName("Count_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[CountByKeyStreamlet[_, _]])
+    val countStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[CountByKeyStreamlet[Int, Int]]
+    assertEquals("Count_Streamlet_1", countStreamlet.getName)
+    assertEquals(5, countStreamlet.getNumPartitions)
+    assertEquals(0, countStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support count by key and window operation") {
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .countByKeyAndWindow[Int]((x: Int) => x * 100,
+                                WindowConfig.TumblingCountWindow(10))
+      .setName("Count_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[CountByKeyAndWindowStreamlet[_, _]])
+    val countStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[CountByKeyAndWindowStreamlet[Int, Int]]
+    assertEquals("Count_Streamlet_1", countStreamlet.getName)
+    assertEquals(5, countStreamlet.getNumPartitions)
+    assertEquals(0, countStreamlet.getChildren.size())
   }
 
   private def verifyClonedStreamlets[R](supplierStreamlet: Streamlet[R],

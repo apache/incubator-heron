@@ -44,6 +44,8 @@ import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
+import org.apache.heron.streamlet.KeyValue;
+import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
@@ -51,12 +53,15 @@ import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CountByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.CountByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SpoutStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet;
@@ -346,6 +351,58 @@ public class StreamletImplTest {
     assertTrue(streamlet instanceof CustomStreamlet);
     CustomStreamlet<Double, Double> mStreamlet =
         (CustomStreamlet<Double, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testReduceByKeyStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    Streamlet<KeyValue<String, Double>> streamlet = baseStreamlet.setNumPartitions(20)
+        .reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
+            x -> x,
+            0.0,
+            (x, y) -> x + y);  // A sum operation
+
+    assertTrue(streamlet instanceof ReduceByKeyStreamlet);
+    ReduceByKeyStreamlet<Double, String, Double> mStreamlet =
+        (ReduceByKeyStreamlet<Double, String, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCountByKeyStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    Streamlet<KeyValue<String, Long>> streamlet = baseStreamlet.setNumPartitions(20)
+        .countByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"));
+
+    assertTrue(streamlet instanceof CountByKeyStreamlet);
+    CountByKeyStreamlet<Double, String> mStreamlet =
+        (CountByKeyStreamlet<Double, String>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testCountByKeyAndWindowStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    Streamlet<KeyValue<KeyedWindow<String>, Long>> streamlet = baseStreamlet.setNumPartitions(20)
+        .countByKeyAndWindow(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
+                             WindowConfig.TumblingCountWindow(10));
+
+    assertTrue(streamlet instanceof CountByKeyAndWindowStreamlet);
+    CountByKeyAndWindowStreamlet<Double, String> mStreamlet =
+        (CountByKeyAndWindowStreamlet<Double, String>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
