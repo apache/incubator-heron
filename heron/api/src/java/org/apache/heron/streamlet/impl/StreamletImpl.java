@@ -33,7 +33,7 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.streamlet.IStreamletOperator;
 import org.apache.heron.streamlet.JoinType;
-import org.apache.heron.streamlet.KeyValue;
+import org.apache.heron.streamlet.KVStreamlet;
 import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableBinaryOperator;
@@ -50,6 +50,7 @@ import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.LogStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
@@ -114,6 +115,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     FILTER("filter"),
     FLATMAP("flatmap"),
     JOIN("join"),
+    KEYBY("keyBy"),
     LOGGER("logger"),
     MAP("map"),
     SOURCE("generator"),
@@ -394,7 +396,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+  public <K, S, T> KVStreamlet<KeyedWindow<K>, T>
         join(Streamlet<S> otherStreamlet, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              SerializableBiFunction<R, S, ? extends T> joinFunction) {
@@ -424,7 +426,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param joinFunction The join function that needs to be applied
    */
   @Override
-  public <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+  public <K, S, T> KVStreamlet<KeyedWindow<K>, T>
         join(Streamlet<S> otherStreamlet, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction) {
@@ -454,7 +456,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   @Override
-  public <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+  public <K, T> KVStreamlet<KeyedWindow<K>, T> reduceByKeyAndWindow(
       SerializableFunction<R, K> keyExtractor, SerializableFunction<R, T> valueExtractor,
       WindowConfig windowCfg, SerializableBinaryOperator<T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
@@ -483,7 +485,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * and the next element of the stream. It returns a new partial result.
    */
   @Override
-  public <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+  public <K, T> KVStreamlet<KeyedWindow<K>, T> reduceByKeyAndWindow(
       SerializableFunction<R, K> keyExtractor, WindowConfig windowCfg,
       T identity, SerializableBiFunction<T, R, ? extends T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
@@ -615,5 +617,31 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     SplitStreamlet<R> splitStreamlet = new SplitStreamlet<R>(this, splitFns);
     addChild(splitStreamlet);
     return splitStreamlet;
+  }
+
+  /**
+   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   */
+  @Override
+  public <K> KVStreamlet<K, R> keyBy(SerializableFunction<R, K> keyExtractor) {
+    return keyBy(keyExtractor, (a) -> a);
+  }
+
+  /**
+   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
+   * Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   */
+  public <K, V> KVStreamlet<K, V> keyBy(SerializableFunction<R, K> keyExtractor,
+                                        SerializableFunction<R, V> valueExtractor) {
+    checkNotNull(keyExtractor, "keyExtractor cannot be null");
+    checkNotNull(valueExtractor, "valueExtractor cannot be null");
+
+    KeyByStreamlet<R, K, V> retval =
+        new KeyByStreamlet<R, K, V>(this, keyExtractor, valueExtractor);
+    addChild(retval);
+    return retval;
   }
 }

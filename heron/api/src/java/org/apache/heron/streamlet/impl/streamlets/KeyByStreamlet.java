@@ -23,52 +23,38 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.KeyedWindow;
-import org.apache.heron.streamlet.SerializableBinaryOperator;
 import org.apache.heron.streamlet.SerializableFunction;
-import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
-import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
+import org.apache.heron.streamlet.impl.operators.KeyByOperator;
 
 /**
- * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
- * applying user supplied reduceFn on all elements within each window defined by a
- * user supplied Window Config.
- * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo&lt;K&gt; type and the value is of type T.
+ * KeyByStreamlet represents a KVStreamlet that is the result of applying key and value extractors
+ * on all elements.
  */
-public class ReduceByKeyAndWindowStreamlet<R, K, T>
-    extends KVStreamletImpl<KeyedWindow<K>, T> {
+public class KeyByStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
-  private SerializableFunction<R, T> valueExtractor;
-  private WindowConfig windowCfg;
-  private SerializableBinaryOperator<T> reduceFn;
+  private SerializableFunction<R, V> valueExtractor;
 
-  public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,
-                       SerializableFunction<R, K> keyExtractor,
-                       SerializableFunction<R, T> valueExtractor,
-                       WindowConfig windowCfg,
-                       SerializableBinaryOperator<T> reduceFn) {
+  public KeyByStreamlet(StreamletImpl<R> parent,
+                        SerializableFunction<R, K> keyExtractor,
+                        SerializableFunction<R, V> valueExtractor) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
-    this.windowCfg = windowCfg;
-    this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
-    ReduceByKeyAndWindowOperator<R, K, T> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
-        valueExtractor, reduceFn);
-    windowCfg.applyTo(bolt);
+    setDefaultNameIfNone(StreamletNamePrefix.KEYBY, stageNames);
+    KeyByOperator<R, K, V> bolt = new KeyByOperator<>(keyExtractor, valueExtractor);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
-            new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));
+            // TODO: rename this grouping class to be more general
+            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
     return true;
   }
 }

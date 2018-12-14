@@ -44,6 +44,7 @@ import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
+import org.apache.heron.streamlet.KVStreamlet;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
@@ -55,6 +56,7 @@ import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.SourceStreamlet;
@@ -350,6 +352,20 @@ public class StreamletImplTest {
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
     assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  public void testKeyByStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    KVStreamlet<Long, Double> kvStream = baseStreamlet.keyBy(x -> Math.round(x));
+
+    assertTrue(kvStream instanceof KeyByStreamlet);
+    KeyByStreamlet<Double, Long, Double> mStreamlet =
+        (KeyByStreamlet<Double, Long, Double>) kvStream;
+    assertEquals(1, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), kvStream);
   }
 
   @Test
