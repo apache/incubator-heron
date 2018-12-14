@@ -630,6 +630,33 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_ENVIRONMENT, env);
   }
 
+  /**
+   * Registers a timer event that executes periodically
+   * @param conf the map with the existing topology configs
+   * @param name the name of the timer
+   * @param interval the frequency in which to run the task
+   * @param task the task to run
+   */
+  @SuppressWarnings("unchecked")
+  public static void registerTopologyTimerEvents(Map<String, Object> conf,
+                                                 String name, Duration interval,
+                                                 Runnable task) {
+    if (interval.isZero() || interval.isNegative()) {
+      throw new IllegalArgumentException("Timer duration needs to be positive");
+    }
+    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
+      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
+    }
+
+    Map<String, Pair<Duration, Runnable>> timers
+        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
+
+    if (timers.containsKey(name)) {
+      throw new IllegalArgumentException("Timer with name " + name + " already exists");
+    }
+    timers.put(name, Pair.of(interval, task));
+  }
+
   public void setDebug(boolean isOn) {
     setDebug(this, isOn);
   }
@@ -811,31 +838,8 @@ public class Config extends HashMap<String, Object> {
     setMetricsmgrRam(this, ramInBytes);
   }
 
-  /**
-   * Registers a timer event that executes periodically
-   * @param conf the map with the existing topology configs
-   * @param name the name of the timer
-   * @param interval the frequency in which to run the task
-   * @param task the task to run
-   */
-  @SuppressWarnings("unchecked")
-  public static void registerTopologyTimerEvents(Map<String, Object> conf,
-                                                 String name, Duration interval,
-                                                 Runnable task) {
-    if (interval.isZero() || interval.isNegative()) {
-      throw new IllegalArgumentException("Timer duration needs to be positive");
-    }
-    if (!conf.containsKey(Config.TOPOLOGY_TIMER_EVENTS)) {
-      conf.put(Config.TOPOLOGY_TIMER_EVENTS, new HashMap<String, Pair<Duration, Runnable>>());
-    }
-
-    Map<String, Pair<Duration, Runnable>> timers
-        = (Map<String, Pair<Duration, Runnable>>) conf.get(Config.TOPOLOGY_TIMER_EVENTS);
-
-    if (timers.containsKey(name)) {
-      throw new IllegalArgumentException("Timer with name " + name + " already exists");
-    }
-    timers.put(name, Pair.of(interval, task));
+  public void registerTopologyTimerEvents(String name, Duration interval, Runnable task) {
+    registerTopologyTimerEvents(this, name, interval, task);
   }
 
   public void setTopologyRemoteDebugging(boolean isOn) {
