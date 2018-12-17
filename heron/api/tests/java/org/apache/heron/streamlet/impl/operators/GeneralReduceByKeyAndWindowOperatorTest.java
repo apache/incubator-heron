@@ -44,6 +44,7 @@ import org.apache.heron.common.utils.topology.TopologyContextImpl;
 import org.apache.heron.common.utils.tuple.TupleImpl;
 import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
+import org.apache.heron.streamlet.WindowConfig;
 
 public class GeneralReduceByKeyAndWindowOperatorTest {
 
@@ -110,7 +111,8 @@ public class GeneralReduceByKeyAndWindowOperatorTest {
         getReduceByWindowOperator(Integer identity) {
     GeneralReduceByKeyAndWindowOperator<String, KeyValue<String, Integer>, Integer>
         reduceByWindowOperator = new GeneralReduceByKeyAndWindowOperator<>(
-            x -> x.getKey(), identity, (o, o2) -> o + o2.getValue());
+            x -> x.getKey(), identity, (o, o2) -> o + o2.getValue(),
+            WindowConfig.TumblingCountWindow(10));
 
     reduceByWindowOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {

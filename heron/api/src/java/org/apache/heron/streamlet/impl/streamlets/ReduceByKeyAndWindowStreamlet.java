@@ -64,8 +64,7 @@ public class ReduceByKeyAndWindowStreamlet<K, V, R>
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
     ReduceByKeyAndWindowOperator<K, V, R> bolt = new ReduceByKeyAndWindowOperator<>(keyExtractor,
-        valueExtractor, reduceFn);
-    bolt.applyWindowConfig(windowCfg);
+        valueExtractor, reduceFn, windowCfg);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));

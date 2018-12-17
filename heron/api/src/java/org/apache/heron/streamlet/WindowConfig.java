@@ -29,7 +29,6 @@ import org.apache.heron.api.windowing.TriggerPolicy;
 import org.apache.heron.streamlet.impl.windowings.CountWindowConfig;
 import org.apache.heron.streamlet.impl.windowings.CustomWindowConfig;
 import org.apache.heron.streamlet.impl.windowings.TimeWindowConfig;
-//import org.apache.heron.streamlet.impl.WindowConfigImpl;
 
 /**
  * WindowConfig allows Streamlet API users to program window configuration for operations
