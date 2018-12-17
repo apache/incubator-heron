@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.metric.CountMetric;
+import org.apache.heron.api.metric.CumulativeCountMetric;
 import org.apache.heron.api.metric.MeanReducer;
 import org.apache.heron.api.metric.MeanReducerState;
 import org.apache.heron.api.metric.MultiCountMetric;
@@ -39,9 +40,12 @@ import org.apache.heron.common.utils.topology.TopologyContextImpl;
  * 2. New them in the constructor
  * 3. Register them in registerMetrics(...) by using MetricsCollector's registerMetric(...)
  * 4. Expose methods which could be called externally to change the value of metrics
+ *
+ * This is a bolt metrics object with more information and it is used in heron core. To change to a faster
+ * metrics object, go to BoltInstance.java and replace "new FullBoltMetrcs" to "new BoltMetrics"
  */
 
-public class FullBoltMetrics extends BoltMetrics {
+public class FullBoltMetrics implements IBoltMetrics {
   private final MultiCountMetric ackCount;
   private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
   private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
@@ -61,6 +65,18 @@ public class FullBoltMetrics extends BoltMetrics {
   // The # of times back-pressure happens on outStreamQueue
   // so instance could not produce more tuples
   private final CountMetric outQueueFullCount;
+  /*
+   * Metrics for how many times spout instance task is run.
+   */
+  private CumulativeCountMetric taskRunCount;
+  /*
+   * Metrics for how many times spout produceTuple is called.
+   */
+  private CumulativeCountMetric executionCount;
+  /*
+   * Metrics for how many times spout continue work is true.
+   */
+  private CumulativeCountMetric continueWorkCount;
 
   public FullBoltMetrics() {
     ackCount = new MultiCountMetric();
@@ -73,6 +89,9 @@ public class FullBoltMetrics extends BoltMetrics {
     emitCount = new MultiCountMetric();
     outQueueFullCount = new CountMetric();
     tupleAddedToQueue = new CountMetric();
+    taskRunCount = new CumulativeCountMetric();
+    executionCount = new CumulativeCountMetric();
+    continueWorkCount = new CumulativeCountMetric();
 
     totalDeserializationTimeNs = new MultiCountMetric();
     totalSerializationTimeNs = new MultiCountMetric();
@@ -96,6 +115,10 @@ public class FullBoltMetrics extends BoltMetrics {
     topologyContext.registerMetric("__execute-time-ns", executeTimeNs, interval);
     topologyContext.registerMetric("__emit-count", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
+    topologyContext.registerMetric("__task-run-count", taskRunCount, interval);
+    topologyContext.registerMetric("__execution-count", executionCount, interval);
+    topologyContext.registerMetric("__continue-work-count", continueWorkCount, interval);
+
     topologyContext.registerMetric(
         "__tuple-deserialization-time-ns", totalDeserializationTimeNs, interval);
     topologyContext.registerMetric(
@@ -205,6 +228,18 @@ public class FullBoltMetrics extends BoltMetrics {
   public void serializeDataTuple(String streamId, long latency) {
     totalSerializationTimeNs.scope(streamId).incrBy(latency);
     averageSerializationTimeNs.scope(streamId).update(latency);
+  }
+
+  public void updateTaskRunCount() {
+    taskRunCount.incr();
+  }
+
+  public void updateExecutionCount() {
+    executionCount.incr();
+  }
+
+  public void updateContinueWorkCount() {
+    continueWorkCount.incr();
   }
 }
 

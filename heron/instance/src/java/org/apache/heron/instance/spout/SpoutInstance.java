@@ -46,7 +46,7 @@ import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.utils.metrics.FullSpoutMetrics;
-import org.apache.heron.common.utils.metrics.SpoutMetrics;
+import org.apache.heron.common.utils.metrics.ISpoutMetrics;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.common.utils.misc.SerializeDeSerializeHelper;
 import org.apache.heron.common.utils.topology.TopologyContextImpl;
@@ -60,7 +60,7 @@ public class SpoutInstance implements IInstance {
 
   protected final ISpout spout;
   protected final SpoutOutputCollectorImpl collector;
-  protected final SpoutMetrics spoutMetrics;
+  protected final ISpoutMetrics spoutMetrics;
   // The spout will read Control tuples from streamInQueue
   private final Communicator<Message> streamInQueue;
 
@@ -255,8 +255,11 @@ public class SpoutInstance implements IInstance {
     Runnable spoutTasks = new Runnable() {
       @Override
       public void run() {
+        spoutMetrics.updateTaskRunCount();
+
         // Check whether we should produce more tuples
         if (isProduceTuple()) {
+          spoutMetrics.updateProduceTupleCount();
           produceTuple();
           // Though we may execute MAX_READ tuples, finally we will packet it as
           // one outgoingPacket and push to out queues
@@ -281,6 +284,7 @@ public class SpoutInstance implements IInstance {
 
         // If we have more work to do
         if (isContinueWork()) {
+          spoutMetrics.updateContinueWorkCount();
           looper.wakeUp();
         }
       }
