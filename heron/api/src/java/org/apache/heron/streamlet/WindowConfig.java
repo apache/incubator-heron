@@ -23,6 +23,7 @@ package org.apache.heron.streamlet;
 
 import java.time.Duration;
 
+import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
 import org.apache.heron.api.windowing.TriggerPolicy;
@@ -36,6 +37,20 @@ import org.apache.heron.streamlet.impl.windowings.TimeWindowConfig;
  * sliding/tumbling windows.
  */
 public interface WindowConfig {
+
+  /**
+   * Apply this WindowConfig object to a bolt object
+   * @param bolt the target bolt object
+   */
+  void applyTo(BaseWindowedBolt bolt);
+
+  /**
+   * This is just a dummy function to avoid WindowConfig objects to be matched with Java functional interface
+   * and cause ambiguous reference compiling error. In case new virtual functions are needed in WindowConfig,
+   * this dummy function can be safely removed.
+   */
+  void Dummy();
+
   /**
    * Creates a time based tumbling window of windowDuration
    * @param windowDuration the duration of the tumbling window

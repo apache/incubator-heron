@@ -22,12 +22,12 @@ package org.apache.heron.streamlet.impl.windowings;
 import java.time.Duration;
 
 import org.apache.heron.api.bolt.BaseWindowedBolt;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
+import org.apache.heron.streamlet.WindowConfig;
 
 /**
  * TimeWindowConfig implements a time based WindowConfig.
  */
-public final class TimeWindowConfig extends WindowConfigImpl {
+public final class TimeWindowConfig implements WindowConfig {
   private Duration windowDuration;
   private Duration slidingIntervalDuration;
 
@@ -36,8 +36,15 @@ public final class TimeWindowConfig extends WindowConfigImpl {
     this.slidingIntervalDuration = slidingIntervalDuration;
   }
 
+  /**
+   * Apply this WindowConfig object to a bolt object
+   * @param bolt the target bolt object
+   */
   @Override
-  public void attachWindowConfig(BaseWindowedBolt bolt) {
+  public void applyTo(BaseWindowedBolt bolt) {
     bolt.withWindow(windowDuration, slidingIntervalDuration);
   }
+
+  @Override
+  public void Dummy() { }
 }

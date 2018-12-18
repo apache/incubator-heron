@@ -30,7 +30,6 @@ import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableBinaryOperator;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.Window;
-import org.apache.heron.streamlet.WindowConfig;
 
 /**
  * ReduceByKeyAndWindowOperator is the class that implements reduceByKeyAndWindow functionality.
@@ -47,12 +46,10 @@ public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperat
 
   public ReduceByKeyAndWindowOperator(SerializableFunction<R, K> keyExtractor,
                                       SerializableFunction<R, V> valueExtractor,
-                                      SerializableBinaryOperator<V> reduceFn,
-                                      WindowConfig conf) {
+                                      SerializableBinaryOperator<V> reduceFn) {
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
     this.reduceFn = reduceFn;
-    applyWindowConfig(conf);
   }
 
   @SuppressWarnings("unchecked")

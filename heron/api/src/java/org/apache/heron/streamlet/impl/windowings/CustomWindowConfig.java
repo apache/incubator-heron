@@ -23,12 +23,12 @@ import org.apache.heron.api.bolt.BaseWindowedBolt;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.windowing.EvictionPolicy;
 import org.apache.heron.api.windowing.TriggerPolicy;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
+import org.apache.heron.streamlet.WindowConfig;
 
 /**
  * CustomWindowConfig implements a trigger/eviction based WindowConfig.
  */
-public final class CustomWindowConfig extends WindowConfigImpl {
+public final class CustomWindowConfig implements WindowConfig {
   private TriggerPolicy<Tuple, ?> triggerPolicy;
   private EvictionPolicy<Tuple, ?> evictionPolicy;
 
@@ -38,9 +38,16 @@ public final class CustomWindowConfig extends WindowConfigImpl {
     this.evictionPolicy = evictionPolicy;
   }
 
+  /**
+   * Apply this WindowConfig object to a bolt object
+   * @param bolt the target bolt object
+   */
   @Override
-  public void attachWindowConfig(BaseWindowedBolt bolt) {
+  public void applyTo(BaseWindowedBolt bolt) {
     bolt.withCustomEvictor(evictionPolicy);
     bolt.withCustomTrigger(triggerPolicy);
   }
+
+  @Override
+  public void Dummy() { }
 }

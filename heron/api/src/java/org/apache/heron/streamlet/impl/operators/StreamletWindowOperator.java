@@ -27,8 +27,6 @@ import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
-import org.apache.heron.streamlet.WindowConfig;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 
 /**
  * The Bolt interface that other windowed operators of the streamlet packages extend.
@@ -59,14 +57,5 @@ public abstract class StreamletWindowOperator<R, T>
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields(OUTPUT_FIELD_NAME));
-  }
-
-  /**
-   * Apply streamlet window config onto this object.
-   * @param conf The window config to apply.
-   */
-  public void applyWindowConfig(WindowConfig conf) {
-    WindowConfigImpl impl = (WindowConfigImpl) conf;
-    impl.attachWindowConfig(this);
   }
 }
