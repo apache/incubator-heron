@@ -43,8 +43,9 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
   private VR identity;
   private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
 
-  public GeneralReduceByKeyAndWindowOperator(SerializableFunction<V, K> keyExtractor, VR identity,
-                            SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
+  public GeneralReduceByKeyAndWindowOperator(SerializableFunction<V, K> keyExtractor,
+                                             VR identity,
+                                             SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
     this.keyExtractor = keyExtractor;
     this.identity = identity;
     this.reduceFn = reduceFn;
