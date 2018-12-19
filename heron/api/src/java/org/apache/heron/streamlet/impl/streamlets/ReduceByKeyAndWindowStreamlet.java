@@ -44,7 +44,7 @@ public class ReduceByKeyAndWindowStreamlet<R, K, T>
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private SerializableFunction<R, T> valueExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private SerializableBinaryOperator<T> reduceFn;
 
   public ReduceByKeyAndWindowStreamlet(StreamletImpl<R> parent,

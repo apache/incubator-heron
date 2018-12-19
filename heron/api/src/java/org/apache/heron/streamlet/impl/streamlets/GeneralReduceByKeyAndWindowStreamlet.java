@@ -43,7 +43,7 @@ public class GeneralReduceByKeyAndWindowStreamlet<R, K, T>
     extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private T identity;
   private SerializableBiFunction<T, R, ? extends T> reduceFn;
 
@@ -63,15 +63,9 @@ public class GeneralReduceByKeyAndWindowStreamlet<R, K, T>
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
     setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
-<<<<<<< d84a7d4b6ffb67e5f4dce6f9194f5edeba95df78
-    GeneralReduceByKeyAndWindowOperator<K, V, VR> bolt =
-        new GeneralReduceByKeyAndWindowOperator<K, V, VR>(keyExtractor, identity, reduceFn);
-    windowCfg.applyTo(bolt);
-=======
     GeneralReduceByKeyAndWindowOperator<R, K, T> bolt =
         new GeneralReduceByKeyAndWindowOperator<R, K, T>(keyExtractor, identity, reduceFn);
-    windowCfg.attachWindowConfig(bolt);
->>>>>>> Clean up generic types in reduce operators and groupings
+    windowCfg.applyTo(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));
