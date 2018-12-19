@@ -33,7 +33,7 @@ import org.apache.heron.api.bolt.IOutputCollector;
 import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.common.basics.Communicator;
-import org.apache.heron.common.utils.metrics.BoltMetrics;
+import org.apache.heron.common.utils.metrics.IBoltMetrics;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.common.utils.tuple.TupleImpl;
 import org.apache.heron.instance.AbstractOutputCollector;
@@ -61,12 +61,12 @@ public class BoltOutputCollectorImpl extends AbstractOutputCollector implements 
   private static final Logger LOG = Logger.getLogger(BoltOutputCollectorImpl.class.getName());
 
   // Reference to update the bolt metrics
-  private final BoltMetrics boltMetrics;
+  private final IBoltMetrics boltMetrics;
 
   protected BoltOutputCollectorImpl(IPluggableSerializer serializer,
                                     PhysicalPlanHelper helper,
                                     Communicator<Message> streamOutQueue,
-                                    BoltMetrics boltMetrics) {
+                                    IBoltMetrics boltMetrics) {
     super(serializer, helper, streamOutQueue, boltMetrics);
     this.boltMetrics = boltMetrics;
 
