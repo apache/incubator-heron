@@ -33,12 +33,12 @@ import org.apache.heron.streamlet.SerializableFunction;
  * JoinOperator. It essentially ensures that the values being routed are of type
  * KeyValue uses the key to route the tuple to the destination.
  */
-public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
+public class JoinCustomGrouping<R, K> implements CustomStreamGrouping {
   private static final long serialVersionUID = 2007892247960031525L;
-  private SerializableFunction<V, K> keyExtractor;
+  private SerializableFunction<R, K> keyExtractor;
   private List<Integer> taskIds;
 
-  public JoinCustomGrouping(SerializableFunction<V, K> keyExtractor) {
+  public JoinCustomGrouping(SerializableFunction<R, K> keyExtractor) {
     this.keyExtractor = keyExtractor;
   }
 
@@ -52,7 +52,7 @@ public class JoinCustomGrouping<K, V> implements CustomStreamGrouping {
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
-    V obj = (V) values.get(0);
+    R obj = (R) values.get(0);
     int key = keyExtractor.apply(obj).hashCode();
     ret.add(Utils.assignKeyToTask(key, taskIds));
     return ret;

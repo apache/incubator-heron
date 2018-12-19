@@ -36,12 +36,12 @@ import org.apache.heron.streamlet.SerializableFunction;
  * The current implementation is identical to JoinCustomGrouping but it might
  * evolve in the future.
  */
-public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGrouping {
+public class ReduceByKeyAndWindowCustomGrouping<R, K> implements CustomStreamGrouping {
   private static final long serialVersionUID = -7630948017550637716L;
-  private SerializableFunction<V, K> keyExtractor;
+  private SerializableFunction<R, K> keyExtractor;
   private List<Integer> taskIds;
 
-  public ReduceByKeyAndWindowCustomGrouping(SerializableFunction<V, K> keyExtractor) {
+  public ReduceByKeyAndWindowCustomGrouping(SerializableFunction<R, K> keyExtractor) {
     this.keyExtractor = keyExtractor;
   }
 
@@ -55,7 +55,7 @@ public class ReduceByKeyAndWindowCustomGrouping<K, V> implements CustomStreamGro
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     List<Integer> ret = new ArrayList<>();
-    V obj = (V) values.get(0);
+    R obj = (R) values.get(0);
     int key = keyExtractor.apply(obj).hashCode();
     ret.add(Utils.assignKeyToTask(key, taskIds));
     return ret;

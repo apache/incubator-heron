@@ -92,9 +92,9 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     windowCfg.applyTo(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(left.getName(), left.getStreamId(),
-            new JoinCustomGrouping<K, R>(leftKeyExtractor))
+            new JoinCustomGrouping<R, K>(leftKeyExtractor))
         .customGrouping(right.getName(), right.getStreamId(),
-            new JoinCustomGrouping<K, S>(rightKeyExtractor));
+            new JoinCustomGrouping<S, K>(rightKeyExtractor));
     return true;
   }
 }
