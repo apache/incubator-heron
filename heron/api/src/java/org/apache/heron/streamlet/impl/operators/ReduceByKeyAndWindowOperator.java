@@ -36,17 +36,18 @@ import org.apache.heron.streamlet.Window;
  * It takes in a reduceFunction Function as an input.
  * For every time window, the bolt goes over all the tuples in that window and applies the reduce
  * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
+ * R: Incoming data type, K: Key type, T: Result data type
  */
-public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperator<R, V> {
+public class ReduceByKeyAndWindowOperator<R, K, T>
+    extends StreamletWindowOperator<R, KeyValue<KeyedWindow<K>, T>> {
 
-  private static final long serialVersionUID = 2833576046687750496L;
   private SerializableFunction<R, K> keyExtractor;
-  private SerializableFunction<R, V> valueExtractor;
-  private SerializableBinaryOperator<V> reduceFn;
+  private SerializableFunction<R, T> valueExtractor;
+  private SerializableBinaryOperator<T> reduceFn;
 
   public ReduceByKeyAndWindowOperator(SerializableFunction<R, K> keyExtractor,
-                                      SerializableFunction<R, V> valueExtractor,
-                                      SerializableBinaryOperator<V> reduceFn) {
+                                      SerializableFunction<R, T> valueExtractor,
+                                      SerializableBinaryOperator<T> reduceFn) {
     this.keyExtractor = keyExtractor;
     this.valueExtractor = valueExtractor;
     this.reduceFn = reduceFn;
@@ -55,7 +56,7 @@ public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperat
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    Map<K, V> reduceMap = new HashMap<>();
+    Map<K, T> reduceMap = new HashMap<>();
     Map<K, Integer> windowCountMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
       R tup = (R) tuple.getValue(0);
@@ -80,7 +81,7 @@ public class ReduceByKeyAndWindowOperator<K, V, R> extends StreamletWindowOperat
     }
   }
 
-  private void addMap(Map<K, V> reduceMap, Map<K, Integer> windowCountMap, R tup) {
+  private void addMap(Map<K, T> reduceMap, Map<K, Integer> windowCountMap, R tup) {
     K key = keyExtractor.apply(tup);
     if (reduceMap.containsKey(key)) {
       reduceMap.put(key, reduceFn.apply(reduceMap.get(key), valueExtractor.apply(tup)));

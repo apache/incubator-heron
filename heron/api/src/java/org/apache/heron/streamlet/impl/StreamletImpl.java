@@ -454,15 +454,15 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   @Override
-  public <K, V> Streamlet<KeyValue<KeyedWindow<K>, V>> reduceByKeyAndWindow(
-      SerializableFunction<R, K> keyExtractor, SerializableFunction<R, V> valueExtractor,
-      WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn) {
+  public <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+      SerializableFunction<R, K> keyExtractor, SerializableFunction<R, T> valueExtractor,
+      WindowConfig windowCfg, SerializableBinaryOperator<T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
     checkNotNull(valueExtractor, "valueExtractor cannot be null");
     checkNotNull(windowCfg, "windowCfg cannot be null");
     checkNotNull(reduceFn, "reduceFn cannot be null");
 
-    ReduceByKeyAndWindowStreamlet<K, V, R> retval =
+    ReduceByKeyAndWindowStreamlet<R, K, T> retval =
         new ReduceByKeyAndWindowStreamlet<>(this, keyExtractor, valueExtractor,
             windowCfg, reduceFn);
     addChild(retval);
@@ -491,7 +491,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     checkNotNull(identity, "identity cannot be null");
     checkNotNull(reduceFn, "reduceFn cannot be null");
 
-    GeneralReduceByKeyAndWindowStreamlet<K, R, T> retval =
+    GeneralReduceByKeyAndWindowStreamlet<R, K, T> retval =
         new GeneralReduceByKeyAndWindowStreamlet<>(this, keyExtractor, windowCfg,
             identity, reduceFn);
     addChild(retval);
