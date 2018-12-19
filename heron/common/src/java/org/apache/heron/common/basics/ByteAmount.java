@@ -24,7 +24,7 @@ package org.apache.heron.common.basics;
  */
 public final class ByteAmount implements Comparable<ByteAmount> {
   private static final long KB = 1024L;
-  private static final long MB = 1024L * 1024;
+  private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
   @SuppressWarnings("MathRoundIntLong")
   private static final long MAX_MB = Math.round(Long.MAX_VALUE / MB);
