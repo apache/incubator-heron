@@ -232,10 +232,10 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   @Override
   public String toString() {
     String value;
-    if (asGigabytes() > 0) {
-      value = String.format("%d GB (%d bytes)", asGigabytes(), asBytes());
-    } else if (asMegabytes() > 0) {
-      value = String.format("%d MB (%d bytes)", asMegabytes(), asBytes());
+    if ((double) asBytes() / GB > 0.0) {
+      value = String.format("%.1f GB (%d bytes)", (double) asBytes() / GB, asBytes());
+    } else if ((double) asBytes() / MB > 0.0) {
+      value = String.format("%.1f MB (%d bytes)", (double) asBytes() / MB, asBytes());
     } else {
       value = bytes + " bytes";
     }
