@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.metric.CountMetric;
+import org.apache.heron.api.metric.CumulativeCountMetric;
 import org.apache.heron.api.metric.MeanReducer;
 import org.apache.heron.api.metric.MeanReducerState;
 import org.apache.heron.api.metric.MultiCountMetric;
@@ -41,9 +42,12 @@ import org.apache.heron.common.utils.topology.TopologyContextImpl;
  * 2. New them in the constructor
  * 3. Register them in registerMetrics(...) by using MetricsCollector's registerMetric(...)
  * 4. Expose methods which could be called externally to change the value of metrics
+ *
+ * This is a spout metrics object with more information and it is used in heron core. To change to a faster
+ * metrics object, go to SpoutInstance.java and replace "new FullSpoutMetrcs" to "new SpoutMetrics"
  */
 
-public class FullSpoutMetrics extends SpoutMetrics {
+public class FullSpoutMetrics implements ISpoutMetrics {
   private final MultiCountMetric ackCount;
   private final ReducedMetric<MeanReducerState, Number, Double> tupleSize;
   private final MultiReducedMetric<MeanReducerState, Number, Double> completeLatency;
@@ -61,6 +65,18 @@ public class FullSpoutMetrics extends SpoutMetrics {
 
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
   private final ReducedMetric<MeanReducerState, Number, Double> pendingTuplesCount;
+  /*
+   * Metrics for how many times spout instance task is run.
+   */
+  private CumulativeCountMetric taskRunCount;
+  /*
+   * Metrics for how many times spout produceTuple is called.
+   */
+  private CumulativeCountMetric produceTupleCount;
+  /*
+   * Metrics for how many times spout continue work is true.
+   */
+  private CumulativeCountMetric continueWorkCount;
 
   public FullSpoutMetrics() {
     ackCount = new MultiCountMetric();
@@ -76,6 +92,9 @@ public class FullSpoutMetrics extends SpoutMetrics {
     serializationTimeNs = new MultiCountMetric();
     tupleAddedToQueue = new CountMetric();
     tupleSize = new ReducedMetric<>(new MeanReducer());
+    taskRunCount = new CumulativeCountMetric();
+    produceTupleCount = new CumulativeCountMetric();
+    continueWorkCount = new CumulativeCountMetric();
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -96,6 +115,9 @@ public class FullSpoutMetrics extends SpoutMetrics {
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
     topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs,
         interval);
+    topologyContext.registerMetric("__task-run-count", taskRunCount, interval);
+    topologyContext.registerMetric("__produce-tuple-count", produceTupleCount, interval);
+    topologyContext.registerMetric("__continue-work-count", continueWorkCount, interval);
 
     // The following metrics measure the rate at which tuples are added to the outgoing
     // queues at spouts and the sizes of these queues. This allows us to measure whether
@@ -163,6 +185,18 @@ public class FullSpoutMetrics extends SpoutMetrics {
 
   public void serializeDataTuple(String streamId, long latency) {
     serializationTimeNs.scope(streamId).incrBy(latency);
+  }
+
+  public void updateTaskRunCount() {
+    taskRunCount.incr();
+  }
+
+  public void updateProduceTupleCount() {
+    produceTupleCount.incr();
+  }
+
+  public void updateContinueWorkCount() {
+    continueWorkCount.incr();
   }
 }
 

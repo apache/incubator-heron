@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.metric.CumulativeCountMetric;
 import org.apache.heron.api.metric.IMetric;
 import org.apache.heron.api.metric.IMetricsRegister;
 import org.apache.heron.common.basics.Communicator;
@@ -41,10 +42,12 @@ import org.apache.heron.proto.system.Metrics;
  */
 public class MetricsCollector implements IMetricsRegister {
   private static final Logger LOG = Logger.getLogger(MetricsCollector.class.getName());
+  private static final String COLLECTION_COUNT_NAME = "__collector-collection-count";
 
   private Map<String, IMetric<?>> metrics;
   private Map<Integer, List<String>> timeBucketToMetricNames;
   private WakeableLooper runnableToGatherMetrics;
+  private CumulativeCountMetric metricCollectionCount;
 
   private Communicator<Metrics.MetricPublisherPublishMessage> queue;
 
@@ -54,6 +57,7 @@ public class MetricsCollector implements IMetricsRegister {
     timeBucketToMetricNames = new HashMap<>();
     this.queue = queue;
     this.runnableToGatherMetrics = runnableToGatherMetrics;
+    metricCollectionCount = new CumulativeCountMetric();
   }
 
   @Override
@@ -108,11 +112,14 @@ public class MetricsCollector implements IMetricsRegister {
       for (String metricName : metricNames) {
         gatherOneMetric(metricName, builder);
       }
-
-      Metrics.MetricPublisherPublishMessage msg = builder.build();
-
-      queue.offer(msg);
     }
+
+    metricCollectionCount.incr();
+    addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME, metricCollectionCount);
+
+    Metrics.MetricPublisherPublishMessage msg = builder.build();
+
+    queue.offer(msg);
   }
 
   private void addDataToMetricPublisher(Metrics.MetricPublisherPublishMessage.Builder builder,
@@ -144,6 +151,10 @@ public class MetricsCollector implements IMetricsRegister {
       for (String metricName : timeBucketToMetricNames.get(timeBucketSizeInSecs)) {
         gatherOneMetric(metricName, builder);
       }
+
+      metricCollectionCount.incr();
+      addDataToMetricPublisher(builder, COLLECTION_COUNT_NAME,
+                               metricCollectionCount.getValueAndReset());
 
       Metrics.MetricPublisherPublishMessage msg = builder.build();
 

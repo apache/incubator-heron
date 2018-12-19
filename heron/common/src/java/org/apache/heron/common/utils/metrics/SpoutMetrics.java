@@ -20,6 +20,7 @@
 package org.apache.heron.common.utils.metrics;
 
 import org.apache.heron.api.metric.CountMetric;
+import org.apache.heron.api.metric.CumulativeCountMetric;
 import org.apache.heron.api.metric.MeanReducer;
 import org.apache.heron.api.metric.MeanReducerState;
 import org.apache.heron.api.metric.ReducedMetric;
@@ -36,9 +37,12 @@ import org.apache.heron.common.utils.topology.TopologyContextImpl;
  * 2. New them in the constructor
  * 3. Register them in registerMetrics(...) by using MetricsCollector's registerMetric(...)
  * 4. Expose methods which could be called externally to change the value of metrics
+ *
+ * This is a fast spout metrics object and it is NOT used in heron core. To use this
+ * metrics object, go to SpoutInstance.java and replace "new FullSpoutMetrcs" to "new SpoutMetrics"
  */
 
-public class SpoutMetrics implements ComponentMetrics {
+public class SpoutMetrics implements ISpoutMetrics {
   private final CountMetric ackCount;
   private final ReducedMetric<MeanReducerState, Number, Double> completeLatency;
   private final ReducedMetric<MeanReducerState, Number, Double> failLatency;
@@ -55,6 +59,18 @@ public class SpoutMetrics implements ComponentMetrics {
 
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
   private final ReducedMetric<MeanReducerState, Number, Double> pendingTuplesCount;
+  /*
+   * Metrics for how many times spout instance task is run.
+   */
+  private CumulativeCountMetric taskRunCount;
+  /*
+   * Metrics for how many times spout produceTuple is called.
+   */
+  private CumulativeCountMetric produceTupleCount;
+  /*
+   * Metrics for how many times spout continue work is true.
+   */
+  private CumulativeCountMetric continueWorkCount;
 
   public SpoutMetrics() {
     ackCount = new CountMetric();
@@ -68,6 +84,9 @@ public class SpoutMetrics implements ComponentMetrics {
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
     tupleAddedToQueue = new CountMetric();
+    taskRunCount = new CumulativeCountMetric();
+    produceTupleCount = new CumulativeCountMetric();
+    continueWorkCount = new CumulativeCountMetric();
   }
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
@@ -88,6 +107,9 @@ public class SpoutMetrics implements ComponentMetrics {
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
     topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
         tupleAddedToQueue, interval);
+    topologyContext.registerMetric("__task-run-count", taskRunCount, interval);
+    topologyContext.registerMetric("__produce-tuple-count", produceTupleCount, interval);
+    topologyContext.registerMetric("__continue-work-count", continueWorkCount, interval);
   }
 
   // For MultiCountMetrics, we need to set the default value for all streams.
@@ -136,5 +158,17 @@ public class SpoutMetrics implements ComponentMetrics {
   }
 
   public void serializeDataTuple(String streamId, long latency) {
+  }
+
+  public void updateTaskRunCount() {
+    taskRunCount.incr();
+  }
+
+  public void updateProduceTupleCount() {
+    produceTupleCount.incr();
+  }
+
+  public void updateContinueWorkCount() {
+    continueWorkCount.incr();
   }
 }
