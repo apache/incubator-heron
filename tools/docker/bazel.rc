@@ -24,3 +24,11 @@ build --verbose_failures
 # fails to run tests.
 build --spawn_strategy=standalone --genrule_strategy=standalone
 test --test_strategy=standalone
+
+# Workaround https://github.com/bazelbuild/bazel/issues/3645
+# Bazel doesn't calculate the memory ceiling correctly when running under Docker.
+# Limit Bazel to consuming 4G ram and 2 cores.
+build --local_resources=4096,2.0,1.0
+
+# Echo all the configuration settings and their source
+ build --announce_rc

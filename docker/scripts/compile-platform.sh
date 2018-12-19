@@ -57,6 +57,7 @@ else
   exit 1
 fi
 
+bazel version
 ./bazel_configure.py
 bazel clean
 

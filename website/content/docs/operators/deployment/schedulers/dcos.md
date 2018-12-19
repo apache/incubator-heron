@@ -78,7 +78,7 @@ bucket).
 * `heron.executor.docker.image` --- Specified the Docker image to be used for running the executor.
 For the time being, a public image has been made available at `ndustrialio/heron-executor:jre8`. 
 However, you can create your own version of this Docker image by creating a Docker image with
-the Dockerfile provided at `heron/docker/Dockerfile.dist.ubuntu14.04` and pushing it to your own 
+the Dockerfile provided at `heron/docker/dist/Dockerfile.dist.ubuntu14.04` and pushing it to your own
 publicly-available Docker repository.
 
 ### Example Marathon Scheduler Configuration

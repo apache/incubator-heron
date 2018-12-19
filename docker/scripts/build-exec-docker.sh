@@ -49,7 +49,7 @@ build_exec_image() {
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
 
-  DOCKER_FILE="$SCRATCH_DIR/Dockerfile.dist.$TARGET_PLATFORM"
+  DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron:$HERON_VERSION-$TARGET_PLATFORM"
 
   setup_scratch_dir $SCRATCH_DIR
