@@ -26,7 +26,6 @@ import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.KeyByOperator;
 
 /**
@@ -52,9 +51,7 @@ public class KeyByStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
     setDefaultNameIfNone(StreamletNamePrefix.KEYBY, stageNames);
     KeyByOperator<R, K, V> bolt = new KeyByOperator<>(keyExtractor, valueExtractor);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), parent.getStreamId(),
-            // TODO: rename this grouping class to be more general
-            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
+        .shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

@@ -27,7 +27,7 @@ import org.apache.heron.streamlet.SerializableFunction;
 /**
  * KeyByOperator is the class that implements keyBy functionality.
  * It takes in a key extractor and a value extractor as input.
- * For every tuple, the bolt convert the steam to a key-value pair tuple
+ * For every tuple, the bolt convert the stream to a key-value pair tuple
  * by applying the extractors.
  */
 public class KeyByOperator<R, K, V> extends StreamletOperator<R, KeyValue<K, V>> {
