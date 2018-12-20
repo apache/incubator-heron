@@ -41,7 +41,7 @@ public class ReduceByKeyOperator<R, K, T> extends StreamletOperator<R, KeyValue<
   private SerializableFunction<R, T> valueExtractor;
   private SerializableBinaryOperator<T> reduceFn;
 
-  private Map<K, T> reduceMap;  // It is a hashmap of <K, T>
+  private Map<K, T> reduceMap;
 
   public ReduceByKeyOperator(SerializableFunction<R, K> keyExtractor,
                              SerializableFunction<R, T> valueExtractor,

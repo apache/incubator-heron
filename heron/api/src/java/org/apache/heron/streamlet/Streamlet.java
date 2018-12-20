@@ -264,8 +264,7 @@ public interface Streamlet<R> {
    */
   Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns);
 
-
-  /*
+  /**
    * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */

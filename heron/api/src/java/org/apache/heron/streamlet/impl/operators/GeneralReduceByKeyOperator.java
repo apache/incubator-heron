@@ -41,7 +41,7 @@ public class GeneralReduceByKeyOperator<R, K, T> extends StreamletOperator<R, Ke
   private T identity;
   private SerializableBiFunction<T, R, ? extends T> reduceFn;
 
-  private Map<K, T> reduceMap;  // It is a hashmap of <K, T>
+  private Map<K, T> reduceMap;
 
   public GeneralReduceByKeyOperator(SerializableFunction<R, K> keyExtractor,
                                     T identity,

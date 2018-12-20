@@ -459,8 +459,8 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    */
   @Override
   public <K, T> KVStreamlet<K, T> reduceByKey(SerializableFunction<R, K> keyExtractor,
-                                       SerializableFunction<R, T> valueExtractor,
-                                       SerializableBinaryOperator<T> reduceFn) {
+                                              SerializableFunction<R, T> valueExtractor,
+                                              SerializableBinaryOperator<T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
     checkNotNull(valueExtractor, "valueExtractor cannot be null");
     checkNotNull(reduceFn, "reduceFn cannot be null");
@@ -478,10 +478,9 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   @Override
-  public <K, T> KVStreamlet<K, T> reduceByKey(
-      SerializableFunction<R, K> keyExtractor,
-      T identity,
-      SerializableBiFunction<T, R, ? extends T> reduceFn) {
+  public <K, T> KVStreamlet<K, T> reduceByKey(SerializableFunction<R, K> keyExtractor,
+                                              T identity,
+                                              SerializableBiFunction<T, R, ? extends T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
     checkNotNull(identity, "identity cannot be null");
     checkNotNull(reduceFn, "reduceFn cannot be null");
@@ -666,7 +665,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     return splitStreamlet;
   }
 
-  /*
+  /**
    * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */

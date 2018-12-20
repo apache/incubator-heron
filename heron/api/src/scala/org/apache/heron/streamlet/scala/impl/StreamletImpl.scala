@@ -222,6 +222,7 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
                                                          javaJoinFunction)
     KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
+
   /**
     * Return a new KVStreamlet by joining 'this streamlet with ‘other’ streamlet. The type of joining
     * is declared by the joinType parameter.
@@ -287,8 +288,8 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
   override def reduceByKey[K, T](keyExtractor: R => K,
-                        identity: T,
-                        reduceFn: (T, R) => T): KVStreamlet[K, T] = {
+                           identity: T,
+                           reduceFn: (T, R) => T): KVStreamlet[K, T] = {
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
     val javaReduceFunction = toSerializableBiFunction[T, R, T](reduceFn)
 
