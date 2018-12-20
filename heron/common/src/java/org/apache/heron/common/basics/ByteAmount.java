@@ -23,12 +23,15 @@ package org.apache.heron.common.basics;
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
 public final class ByteAmount implements Comparable<ByteAmount> {
-  private static final long MB = 1024L * 1024;
+  private static final long KB = 1024L;
+  private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
   @SuppressWarnings("MathRoundIntLong")
   private static final long MAX_MB = Math.round(Long.MAX_VALUE / MB);
   @SuppressWarnings("MathRoundIntLong")
   private static final long MAX_GB = Math.round(Long.MAX_VALUE / GB);
+  @SuppressWarnings("MathRoundIntLong")
+  private static final long MAX_KB = Math.round(Long.MAX_VALUE / KB);
 
   public static final ByteAmount ZERO = ByteAmount.fromBytes(0);
   private final long bytes;
@@ -95,6 +98,18 @@ public final class ByteAmount implements Comparable<ByteAmount> {
    */
   public long asMegabytes() {
     return Math.round((double) bytes / MB);
+  }
+
+  /**
+   * Converts the number of bytes to kilobytes, rounding if there is a remainder. Because of loss
+   * of precision due to rounding, it's strongly advised to only use this method when it is certain
+   * that the only operations performed on the object were multiplication or addition and
+   * subtraction of other megabytes. If division or increaseBy were used this method could round up
+   * or down, potentially yielding unexpected results.
+   * @return returns the ByteValue in KBs or 0 if the value is &lt; (1024) / 2
+   */
+  public long asKilobytes() {
+    return Math.round((double) bytes / KB);
   }
 
   /**
@@ -233,9 +248,11 @@ public final class ByteAmount implements Comparable<ByteAmount> {
   public String toString() {
     String value;
     if (asGigabytes() > 0) {
-      value = String.format("%d GB (%d bytes)", asGigabytes(), asBytes());
+      value = String.format("%.1f GB (%d bytes)", (double) asBytes() / GB, asBytes());
     } else if (asMegabytes() > 0) {
-      value = String.format("%d MB (%d bytes)", asMegabytes(), asBytes());
+      value = String.format("%.1f MB (%d bytes)", (double) asBytes() / MB, asBytes());
+    } else if (asKilobytes() > 0) {
+      value = String.format("%.1f KB (%d bytes)", (double) asBytes() / KB, asBytes());
     } else {
       value = bytes + " bytes";
     }
