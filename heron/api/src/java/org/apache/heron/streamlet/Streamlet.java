@@ -145,7 +145,7 @@ public interface Streamlet<R> {
    * have. Typical windowing strategies are sliding windows and tumbling windows
    * @param joinFunction The join function that needs to be applied
    */
-  <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+  <K, S, T> KVStreamlet<KeyedWindow<K>, T>
         join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              SerializableBiFunction<R, S, ? extends T> joinFunction);
@@ -166,7 +166,7 @@ public interface Streamlet<R> {
    * @param joinType Type of Join. Options {@link JoinType}
    * @param joinFunction The join function that needs to be applied
    */
-  <K, S, T> Streamlet<KeyValue<KeyedWindow<K>, T>>
+  <K, S, T> KVStreamlet<KeyedWindow<K>, T>
         join(Streamlet<S> other, SerializableFunction<R, K> thisKeyExtractor,
              SerializableFunction<S, K> otherKeyExtractor, WindowConfig windowCfg,
              JoinType joinType, SerializableBiFunction<R, S, ? extends T> joinFunction);
@@ -181,7 +181,7 @@ public interface Streamlet<R> {
    * Typical windowing strategies are sliding windows and tumbling windows
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  <K, V> Streamlet<KeyValue<KeyedWindow<K>, V>> reduceByKeyAndWindow(
+  <K, V> KVStreamlet<KeyedWindow<K>, V> reduceByKeyAndWindow(
       SerializableFunction<R, K> keyExtractor, SerializableFunction<R, V> valueExtractor,
       WindowConfig windowCfg, SerializableBinaryOperator<V> reduceFn);
 
@@ -198,7 +198,7 @@ public interface Streamlet<R> {
    * @param reduceFn The reduce function takes two parameters: a partial result of the reduction
    * and the next element of the stream. It returns a new partial result.
    */
-  <K, T> Streamlet<KeyValue<KeyedWindow<K>, T>> reduceByKeyAndWindow(
+  <K, T> KVStreamlet<KeyedWindow<K>, T> reduceByKeyAndWindow(
       SerializableFunction<R, K> keyExtractor, WindowConfig windowCfg,
       T identity, SerializableBiFunction<T, R, ? extends T> reduceFn);
 
@@ -242,6 +242,21 @@ public interface Streamlet<R> {
    * Note that there could be 0 or multiple target stream ids
    */
   Streamlet<R> split(Map<String, SerializablePredicate<R>> splitFns);
+
+  /**
+   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   */
+  <K> KVStreamlet<K, R> keyBy(SerializableFunction<R, K> keyExtractor);
+
+  /**
+   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
+   * Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   */
+  <K, V> KVStreamlet<K, V> keyBy(SerializableFunction<R, K> keyExtractor,
+                                 SerializableFunction<R, V> valueExtractor);
 
   /**
    * Logs every element of the streamlet using String.valueOf function

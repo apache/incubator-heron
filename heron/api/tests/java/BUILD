@@ -29,6 +29,7 @@ java_tests(
     "org.apache.heron.api.bolt.BaseWindowedBoltTest",
     "org.apache.heron.streamlet.impl.StreamletImplTest",
     "org.apache.heron.streamlet.impl.operators.JoinOperatorTest",
+    "org.apache.heron.streamlet.impl.operators.KeyByOperatorTest",
     "org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperatorTest",
     "org.apache.heron.streamlet.impl.utils.StreamletUtilsTest",

@@ -27,18 +27,22 @@ import org.apache.heron.api.grouping.StreamGrouping
 import org.apache.heron.streamlet.{
   IStreamletOperator,
   JoinType,
-  KeyValue,
   KeyedWindow,
   SerializablePredicate,
+  KVStreamlet => JavaKVStreamlet,
   Streamlet => JavaStreamlet,
   WindowConfig
 }
-import org.apache.heron.streamlet.impl.{StreamletImpl => JavaStreamletImpl}
+import org.apache.heron.streamlet.impl.{
+  KVStreamletImpl => JavaKVStreamletImpl,
+  StreamletImpl => JavaStreamletImpl
+}
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet
 
 import org.apache.heron.streamlet.scala.{
   SerializableTransformer,
   Sink,
+  KVStreamlet,
   Streamlet
 }
 import org.apache.heron.streamlet.scala.converter.ScalaToJavaConverter._
@@ -204,18 +208,18 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       thisKeyExtractor: R => K,
       otherKeyExtractor: S => K,
       windowCfg: WindowConfig,
-      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+      joinFunction: (R, S) => T): KVStreamlet[KeyedWindow[K], T] = {
     val javaOtherStreamlet = toJavaStreamlet[S](other)
     val javaThisKeyExtractor = toSerializableFunction[R, K](thisKeyExtractor)
     val javaOtherKeyExtractor = toSerializableFunction[S, K](otherKeyExtractor)
     val javaJoinFunction = toSerializableBiFunction[R, S, T](joinFunction)
 
-    val newJavaStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
-                                                       javaThisKeyExtractor,
-                                                       javaOtherKeyExtractor,
-                                                       windowCfg,
-                                                       javaJoinFunction)
-    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
+                                                         javaThisKeyExtractor,
+                                                         javaOtherKeyExtractor,
+                                                         windowCfg,
+                                                         javaJoinFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
 
   /**
@@ -240,19 +244,19 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       otherKeyExtractor: S => K,
       windowCfg: WindowConfig,
       joinType: JoinType,
-      joinFunction: (R, S) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+      joinFunction: (R, S) => T): KVStreamlet[KeyedWindow[K], T] = {
     val javaOtherStreamlet = toJavaStreamlet[S](other)
     val javaThisKeyExtractor = toSerializableFunction[R, K](thisKeyExtractor)
     val javaOtherKeyExtractor = toSerializableFunction[S, K](otherKeyExtractor)
     val javaJoinFunction = toSerializableBiFunction[R, S, T](joinFunction)
 
-    val newJavaStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
-                                                       javaThisKeyExtractor,
-                                                       javaOtherKeyExtractor,
-                                                       windowCfg,
-                                                       joinType,
-                                                       javaJoinFunction)
-    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.join[K, S, T](javaOtherStreamlet,
+                                                         javaThisKeyExtractor,
+                                                         javaOtherKeyExtractor,
+                                                         windowCfg,
+                                                         joinType,
+                                                         javaJoinFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
 
   /**
@@ -266,21 +270,21 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     *                       Typical windowing strategies are sliding windows and tumbling windows
     * @param reduceFn       The reduce function that you want to apply to all the values of a key.
     */
-  override def reduceByKeyAndWindow[K, V](
+  override def reduceByKeyAndWindow[K, T](
       keyExtractor: R => K,
-      valueExtractor: R => V,
+      valueExtractor: R => T,
       windowCfg: WindowConfig,
-      reduceFn: (V, V) => V): Streamlet[KeyValue[KeyedWindow[K], V]] = {
+      reduceFn: (T, T) => T): KVStreamlet[KeyedWindow[K], T] = {
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
-    val javaValueExtractor = toSerializableFunction[R, V](valueExtractor)
-    val javaReduceFunction = toSerializableBinaryOperator[V](reduceFn)
+    val javaValueExtractor = toSerializableFunction[R, T](valueExtractor)
+    val javaReduceFunction = toSerializableBinaryOperator[T](reduceFn)
 
-    val newJavaStreamlet = javaStreamlet.reduceByKeyAndWindow[K, V](
-      javaKeyExtractor,
-      javaValueExtractor,
-      windowCfg,
-      javaReduceFunction)
-    fromJavaStreamlet[KeyValue[KeyedWindow[K], V]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.reduceByKeyAndWindow[K, T](
+        javaKeyExtractor,
+        javaValueExtractor,
+        windowCfg,
+        javaReduceFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
 
   /**
@@ -301,16 +305,16 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
       keyExtractor: R => K,
       windowCfg: WindowConfig,
       identity: T,
-      reduceFn: (T, R) => T): Streamlet[KeyValue[KeyedWindow[K], T]] = {
+      reduceFn: (T, R) => T): KVStreamlet[KeyedWindow[K], T] = {
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
     val javaReduceFunction = toSerializableBiFunction[T, R, T](reduceFn)
 
-    val newJavaStreamlet = javaStreamlet.reduceByKeyAndWindow[K, T](
-      javaKeyExtractor,
-      windowCfg,
-      identity,
-      javaReduceFunction)
-    fromJavaStreamlet[KeyValue[KeyedWindow[K], T]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.reduceByKeyAndWindow[K, T](
+        javaKeyExtractor,
+        windowCfg,
+        identity,
+        javaReduceFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
 
   /**
@@ -377,6 +381,32 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     }
     val newJavaStreamlet = javaStreamlet.split(javaSerializablePredicates)
     fromJavaStreamlet[R](newJavaStreamlet)
+  }
+
+
+  /**
+   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   */
+  override def keyBy[K](keyExtractor: R => K): KVStreamlet[K, R] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+
+    val newJavaKVStreamlet = javaStreamlet.keyBy[K](javaKeyExtractor)
+    KVStreamletImpl.fromJavaKVStreamlet[K, R](newJavaKVStreamlet)
+  }
+
+  /**
+   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
+   * Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   */
+  override def keyBy[K, T](keyExtractor: R => K, valueExtractor: R => T): KVStreamlet[K, T] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaValueExtractor = toSerializableFunction[R, T](valueExtractor)
+
+    val newJavaKVStreamlet = javaStreamlet.keyBy[K, T](javaKeyExtractor, javaValueExtractor)
+    KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
   }
 
   /**
