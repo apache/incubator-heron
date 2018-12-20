@@ -36,15 +36,18 @@ import org.apache.heron.streamlet.Window;
  * It takes in a reduceFunction Function as an input.
  * For every time window, the bolt goes over all the tuples in that window and applies the reduce
  * function grouped by keys. It emits a KeyedWindow, reduced Value KeyPairs as outputs
+ * R: Incoming data type, K: Key type, T: Result data type
  */
-public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWindowOperator<V, V> {
-  private static final long serialVersionUID = 2833576046687752396L;
-  private SerializableFunction<V, K> keyExtractor;
-  private VR identity;
-  private SerializableBiFunction<VR, V, ? extends VR> reduceFn;
+public class GeneralReduceByKeyAndWindowOperator<R, K, T>
+    extends StreamletWindowOperator<R, KeyValue<KeyedWindow<K>, T>> {
 
-  public GeneralReduceByKeyAndWindowOperator(SerializableFunction<V, K> keyExtractor, VR identity,
-                            SerializableBiFunction<VR, V, ? extends VR> reduceFn) {
+  private SerializableFunction<R, K> keyExtractor;
+  private T identity;
+  private SerializableBiFunction<T, R, ? extends T> reduceFn;
+
+  public GeneralReduceByKeyAndWindowOperator(SerializableFunction<R, K> keyExtractor,
+                                             T identity,
+                                             SerializableBiFunction<T, R, ? extends T> reduceFn) {
     this.keyExtractor = keyExtractor;
     this.identity = identity;
     this.reduceFn = reduceFn;
@@ -53,10 +56,10 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
   @SuppressWarnings("unchecked")
   @Override
   public void execute(TupleWindow inputWindow) {
-    Map<K, VR> reduceMap = new HashMap<>();
+    Map<K, T> reduceMap = new HashMap<>();
     Map<K, Integer> windowCountMap = new HashMap<>();
     for (Tuple tuple : inputWindow.get()) {
-      V tup = (V) tuple.getValue(0);
+      R tup = (R) tuple.getValue(0);
       addMap(reduceMap, windowCountMap, tup);
     }
     long startWindow;
@@ -78,7 +81,7 @@ public class GeneralReduceByKeyAndWindowOperator<K, V, VR> extends StreamletWind
     }
   }
 
-  private void addMap(Map<K, VR> reduceMap, Map<K, Integer> windowCountMap, V tup) {
+  private void addMap(Map<K, T> reduceMap, Map<K, Integer> windowCountMap, R tup) {
     K key = keyExtractor.apply(tup);
     if (!reduceMap.containsKey(key)) {
       reduceMap.put(key, identity);

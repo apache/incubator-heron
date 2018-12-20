@@ -297,6 +297,20 @@ trait Streamlet[R] {
       windowCfg: WindowConfig): Streamlet[KeyValue[KeyedWindow[K], java.lang.Long]]
 
   /**
+   * Return a new KVStreamlet<K, R> by applying key extractor to each element of this Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   */
+  def keyBy[K](keyExtractor: R => K): KVStreamlet[K, R]
+
+  /**
+   * Return a new KVStreamlet<K, V> by applying key and value extractor to each element of this
+   * Streamlet
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   */
+  def keyBy[K, T](keyExtractor: R => K, valueExtractor: R => T): KVStreamlet[K, T]
+
+  /**
     * Logs every element of the streamlet using String.valueOf function
     * This is one of the sink functions in the sense that this operation returns void
     */

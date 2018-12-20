@@ -42,6 +42,7 @@ import org.apache.heron.streamlet.impl.streamlets.{
   FlatMapStreamlet,
   LogStreamlet,
   JoinStreamlet,
+  KeyByStreamlet,
   MapStreamlet,
   ReduceByKeyStreamlet,
   ReduceByKeyAndWindowStreamlet,
@@ -720,6 +721,33 @@ class StreamletImplTest extends BaseFunSuite {
     assertEquals("Count_Streamlet_1", countStreamlet.getName)
     assertEquals(5, countStreamlet.getNumPartitions)
     assertEquals(0, countStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support keyBy operation") {
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .keyBy[Int, Int]((key: Int) => key % 3,  // Put into 3 groups
+                       (value: Int) => value)
+      .setName("KeyBy_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[KeyByStreamlet[_, _, _]])
+    val keyByStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[KeyByStreamlet[Int, Int, Int]]
+    assertEquals("KeyBy_Streamlet_1", keyByStreamlet.getName)
+    assertEquals(5, keyByStreamlet.getNumPartitions)
+    assertEquals(0, keyByStreamlet.getChildren.size())
   }
 
   private def verifyClonedStreamlets[R](supplierStreamlet: Streamlet[R],

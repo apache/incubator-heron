@@ -39,7 +39,7 @@ import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
  * KeyWindowInfo&lt;K&gt; type and the value is Long.
  */
 public class CountByKeyAndWindowStreamlet<R, K>
-    extends StreamletImpl<KeyValue<KeyedWindow<K>, Long>> {
+    extends KVStreamletImpl<KeyedWindow<K>, Long> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private WindowConfigImpl windowCfg;

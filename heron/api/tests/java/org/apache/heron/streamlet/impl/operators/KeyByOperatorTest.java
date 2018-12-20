@@ -38,18 +38,13 @@ import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
-import org.apache.heron.api.windowing.TupleWindow;
-import org.apache.heron.api.windowing.TupleWindowImpl;
 import org.apache.heron.common.utils.topology.TopologyContextImpl;
 import org.apache.heron.common.utils.tuple.TupleImpl;
 import org.apache.heron.streamlet.KeyValue;
-import org.apache.heron.streamlet.KeyedWindow;
 
-public class ReduceByKeyAndWindowOperatorTest {
+public class KeyByOperatorTest {
 
   private List<Object> emittedTuples;
-  private long startTime = 1508099660801L;
-  private long endTime = startTime + 1000L;
 
   @Before
   public void setUp() {
@@ -58,64 +53,42 @@ public class ReduceByKeyAndWindowOperatorTest {
 
   @Test
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public void testReduceByWindowOperator() {
-    ReduceByKeyAndWindowOperator<String, String, Integer> reduceOperator =
-        getReduceByWindowOperator();
-
-    TupleWindow tupleWindow = getTupleWindow(3, 5);
+  public void testKeyByOperator() {
+    KeyByOperator<String, String, Integer> keyByOperator = getKeyByOperator();
 
     HashMap<String, Integer> expectedResults = new HashMap<>();
-    expectedResults.put("0", 5);
-    expectedResults.put("1", 5);
-    expectedResults.put("2", 5);
+    expectedResults.put("even", 0);
+    expectedResults.put("odd", 1);
+    expectedResults.put("even", 2);
 
-    reduceOperator.execute(tupleWindow);
-
-    Assert.assertEquals(3, emittedTuples.size());
-    for (Object object : emittedTuples) {
-      KeyValue<KeyedWindow<String>, Integer> tuple =
-          (KeyValue<KeyedWindow<String>, Integer>) object;
-      KeyedWindow<String> window = tuple.getKey();
-      String key = window.getKey();
-      Assert.assertEquals(5, window.getWindow().getCount());
-      Assert.assertEquals(startTime, window.getWindow().getStartTime());
-      Assert.assertEquals(endTime, window.getWindow().getEndTime());
-      Assert.assertEquals(expectedResults.get(key), tuple.getValue());
-    }
-  }
-
-  private TupleWindow getTupleWindow(int nkeys, int count) {
     TopologyAPI.StreamId componentStreamId
         = TopologyAPI.StreamId.newBuilder()
         .setComponentName("sourceComponent").setId("default").build();
 
-    List<Tuple> tuples = new LinkedList<>();
-    for (int i = 0; i < nkeys; i++) {
-      for (int j = 0; j < count; ++j) {
-        Tuple tuple = getTuple(componentStreamId, new Fields("a"),
-            new Values(String.valueOf(i)));
-        tuples.add(tuple);
-      }
-    }
+    keyByOperator.execute(getTuple(componentStreamId, new Fields("a"), new Values("0")));
+    keyByOperator.execute(getTuple(componentStreamId, new Fields("a"), new Values("1")));
+    keyByOperator.execute(getTuple(componentStreamId, new Fields("a"), new Values("2")));
 
-    TupleWindow tupleWindow = new TupleWindowImpl(tuples, new LinkedList<>(), new LinkedList<>(),
-        startTime, endTime);
-    return tupleWindow;
+    Assert.assertEquals(3, emittedTuples.size());
+    String[] s = {"even", "odd"};
+    for (Object object : emittedTuples) {
+      KeyValue<String, Integer> tuple = (KeyValue<String, Integer>) object;
+      Assert.assertEquals(s[tuple.getValue() % 2], tuple.getKey());
+    }
   }
 
-
-
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private ReduceByKeyAndWindowOperator<String, String, Integer> getReduceByWindowOperator() {
-    ReduceByKeyAndWindowOperator<String, String, Integer> reduceByWindowOperator =
-        new ReduceByKeyAndWindowOperator<>(x -> x, x -> 1, (o, o2) -> o + o2);
+  private KeyByOperator<String, String, Integer> getKeyByOperator() {
+    KeyByOperator<String, String, Integer> keyByOperator =
+        new KeyByOperator<String, String, Integer>(
+            x -> (Integer.valueOf(x) % 2 == 0) ? "even" : "odd",
+            x -> Integer.valueOf(x));
 
-    reduceByWindowOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
+    keyByOperator.prepare(new Config(), PowerMockito.mock(TopologyContext.class),
         new OutputCollector(new IOutputCollector() {
 
           @Override
           public void reportError(Throwable error) {
-
           }
 
           @Override
@@ -128,20 +101,17 @@ public class ReduceByKeyAndWindowOperatorTest {
           @Override
           public void emitDirect(int taskId, String streamId,
                                  Collection<Tuple> anchors, List<Object> tuple) {
-
           }
 
           @Override
           public void ack(Tuple input) {
-
           }
 
           @Override
           public void fail(Tuple input) {
-
           }
         }));
-    return reduceByWindowOperator;
+    return keyByOperator;
   }
 
   private Tuple getTuple(TopologyAPI.StreamId streamId, final Fields fields, Values values) {

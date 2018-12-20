@@ -20,46 +20,38 @@
 
 package org.apache.heron.streamlet.impl.streamlets;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.SerializableFunction;
+import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
-import org.apache.heron.streamlet.impl.operators.ReduceByKeyOperator;
+import org.apache.heron.streamlet.impl.operators.KeyByOperator;
 
 /**
- * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
- * applying user supplied reduceFn on all elements within each window defined by a
- * user supplied Window Config.
- * Note that this is a stateful operation. And K and T types need to be serializable.
- * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo&lt;K&gt; type and the value is of type V.
+ * KeyByStreamlet represents a KVStreamlet that is the result of applying key and value extractors
+ * on all elements.
  */
-public class CountByKeyStreamlet<R, K extends Serializable>
-    extends KVStreamletImpl<K, Long> {
-
+public class KeyByStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
+  private SerializableFunction<R, V> valueExtractor;
 
-  public CountByKeyStreamlet(StreamletImpl<R> parent, SerializableFunction<R, K> keyExtractor) {
+  public KeyByStreamlet(StreamletImpl<R> parent,
+                        SerializableFunction<R, K> keyExtractor,
+                        SerializableFunction<R, V> valueExtractor) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
+    this.valueExtractor = valueExtractor;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.COUNT, stageNames);
-    // Count is a special case of reduce operation. Hence ReduceByKeyAndWindowOperator
-    // is used here. Every tuple has a value of 1 and the reduce operation is a simple sum.
-    ReduceByKeyOperator<R, K, Long> bolt =
-        new ReduceByKeyOperator<R, K, Long>(keyExtractor, x -> 1L, 0L, (c1, c2) -> c1 + c2);
+    setDefaultNameIfNone(StreamletNamePrefix.KEYBY, stageNames);
+    KeyByOperator<R, K, V> bolt = new KeyByOperator<>(keyExtractor, valueExtractor);
     bldr.setBolt(getName(), bolt, getNumPartitions())
-        .customGrouping(parent.getName(), parent.getStreamId(),
-            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
+        .shuffleGrouping(parent.getName(), parent.getStreamId());
     return true;
   }
 }

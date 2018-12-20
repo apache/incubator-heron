@@ -44,7 +44,7 @@ import org.apache.heron.streamlet.Context;
 import org.apache.heron.streamlet.IStreamletBasicOperator;
 import org.apache.heron.streamlet.IStreamletRichOperator;
 import org.apache.heron.streamlet.IStreamletWindowOperator;
-import org.apache.heron.streamlet.KeyValue;
+import org.apache.heron.streamlet.KVStreamlet;
 import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableConsumer;
 import org.apache.heron.streamlet.SerializablePredicate;
@@ -59,6 +59,7 @@ import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.ReduceByKeyStreamlet;
@@ -358,10 +359,24 @@ public class StreamletImplTest {
   }
 
   @Test
+  public void testKeyByStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    KVStreamlet<Long, Double> kvStream = baseStreamlet.keyBy(x -> Math.round(x));
+
+    assertTrue(kvStream instanceof KeyByStreamlet);
+    KeyByStreamlet<Double, Long, Double> mStreamlet =
+        (KeyByStreamlet<Double, Long, Double>) kvStream;
+    assertEquals(1, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), kvStream);
+  }
+
+  @Test
   @SuppressWarnings("unchecked")
   public void testReduceByKeyStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    Streamlet<KeyValue<String, Double>> streamlet = baseStreamlet.setNumPartitions(20)
+    KVStreamlet<String, Double> streamlet = baseStreamlet.setNumPartitions(20)
         .reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
             x -> x,
             0.0,
@@ -380,7 +395,7 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testCountByKeyStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    Streamlet<KeyValue<String, Long>> streamlet = baseStreamlet.setNumPartitions(20)
+    KVStreamlet<String, Long> streamlet = baseStreamlet.setNumPartitions(20)
         .countByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"));
 
     assertTrue(streamlet instanceof CountByKeyStreamlet);
@@ -396,7 +411,7 @@ public class StreamletImplTest {
   @SuppressWarnings("unchecked")
   public void testCountByKeyAndWindowStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
-    Streamlet<KeyValue<KeyedWindow<String>, Long>> streamlet = baseStreamlet.setNumPartitions(20)
+    KVStreamlet<KeyedWindow<String>, Long> streamlet = baseStreamlet.setNumPartitions(20)
         .countByKeyAndWindow(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
                              WindowConfig.TumblingCountWindow(10));
 

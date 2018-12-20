@@ -40,7 +40,7 @@ import org.apache.heron.streamlet.impl.operators.ReduceByKeyOperator;
  * KeyWindowInfo&lt;K&gt; type and the value is of type V.
  */
 public class ReduceByKeyStreamlet<R, K extends Serializable, T extends Serializable>
-    extends StreamletImpl<KeyValue<K, T>> {
+    extends KVStreamletImpl<K, T> {
 
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;

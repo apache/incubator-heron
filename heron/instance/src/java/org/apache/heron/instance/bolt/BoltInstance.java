@@ -45,8 +45,8 @@ import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SlaveLooper;
 import org.apache.heron.common.basics.TypeUtils;
 import org.apache.heron.common.config.SystemConfig;
-import org.apache.heron.common.utils.metrics.BoltMetrics;
 import org.apache.heron.common.utils.metrics.FullBoltMetrics;
+import org.apache.heron.common.utils.metrics.IBoltMetrics;
 import org.apache.heron.common.utils.misc.PhysicalPlanHelper;
 import org.apache.heron.common.utils.misc.SerializeDeSerializeHelper;
 import org.apache.heron.common.utils.topology.TopologyContextImpl;
@@ -64,7 +64,7 @@ public class BoltInstance implements IInstance {
   protected final IBolt bolt;
   protected final BoltOutputCollectorImpl collector;
   protected final IPluggableSerializer serializer;
-  protected final BoltMetrics boltMetrics;
+  protected final IBoltMetrics boltMetrics;
   // The bolt will read Data tuples from streamInQueue
   private final Communicator<Message> streamInQueue;
 
@@ -237,8 +237,10 @@ public class BoltInstance implements IInstance {
     Runnable boltTasks = new Runnable() {
       @Override
       public void run() {
+        boltMetrics.updateTaskRunCount();
         // Back-pressure -- only when we could send out tuples will we read & execute tuples
         if (collector.isOutQueuesAvailable()) {
+          boltMetrics.updateExecutionCount();
           readTuplesAndExecute(streamInQueue);
 
           // Though we may execute MAX_READ tuples, finally we will packet it as
@@ -251,6 +253,7 @@ public class BoltInstance implements IInstance {
 
         // If there are more to read, we will wake up itself next time when it doWait()
         if (collector.isOutQueuesAvailable() && !streamInQueue.isEmpty()) {
+          boltMetrics.updateContinueWorkCount();
           looper.wakeUp();
         }
       }

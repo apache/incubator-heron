@@ -24,13 +24,12 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.JoinType;
-import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 import org.apache.heron.streamlet.impl.groupings.JoinCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.JoinOperator;
 
@@ -41,13 +40,13 @@ import org.apache.heron.streamlet.impl.operators.JoinOperator;
  * JoinStreamlet's elements are of KeyValue type where the key is KeyWindowInfo&lt;K&gt; type
  * and the value is of type VR.
  */
-public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
+public final class JoinStreamlet<K, R, S, T> extends KVStreamletImpl<KeyedWindow<K>, T> {
   private JoinType joinType;
   private StreamletImpl<R> left;
   private StreamletImpl<S> right;
   private SerializableFunction<R, K> leftKeyExtractor;
   private SerializableFunction<S, K> rightKeyExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
   private SerializableBiFunction<R, S, ? extends T> joinFn;
 
   public static <A, B, C, D> JoinStreamlet<A, B, C, D>
@@ -73,7 +72,7 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     this.right = right;
     this.leftKeyExtractor = leftKeyExtractor;
     this.rightKeyExtractor = rightKeyExtractor;
-    this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.windowCfg = windowCfg;
     this.joinFn = joinFn;
     setNumPartitions(left.getNumPartitions());
   }
@@ -90,12 +89,12 @@ public final class JoinStreamlet<K, R, S, T> extends StreamletImpl<KeyValue<Keye
     setDefaultNameIfNone(StreamletNamePrefix.JOIN, stageNames);
     JoinOperator<K, R, S, T> bolt = new JoinOperator<>(joinType, left.getName(),
         right.getName(), leftKeyExtractor, rightKeyExtractor, joinFn);
-    windowCfg.attachWindowConfig(bolt);
+    windowCfg.applyTo(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(left.getName(), left.getStreamId(),
-            new JoinCustomGrouping<K, R>(leftKeyExtractor))
+            new JoinCustomGrouping<R, K>(leftKeyExtractor))
         .customGrouping(right.getName(), right.getStreamId(),
-            new JoinCustomGrouping<K, S>(rightKeyExtractor));
+            new JoinCustomGrouping<S, K>(rightKeyExtractor));
     return true;
   }
 }
