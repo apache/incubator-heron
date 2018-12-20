@@ -18,8 +18,6 @@
  */
 package org.apache.heron.streamlet.scala
 
-import java.io.{Serializable => JSerializable}
-
 import org.apache.heron.api.grouping.StreamGrouping
 import org.apache.heron.streamlet.{
   IStreamletOperator,
@@ -195,11 +193,19 @@ trait Streamlet[R] {
    * @param identity The identity element is the initial value for each key
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  def reduceByKey[K <: JSerializable, T <: JSerializable](
-      keyExtractor: R => K,
-      valueExtractor: R => T,
-      identity: T,
-      reduceFn: (T, T) => T): Streamlet[KeyValue[K, T]]
+  def reduceByKey[K, T](keyExtractor: R => K,
+                        valueExtractor: R => T,
+                        reduceFn: (T, T) => T): Streamlet[KeyValue[K, T]]
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param identity The identity element is the initial value for each key
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  def reduceByKey[K, T](keyExtractor: R => K,
+                        identity: T,
+                        reduceFn: (T, R) => T): Streamlet[KeyValue[K, T]]
 
   /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -284,7 +290,7 @@ trait Streamlet[R] {
    * Returns a new stream of <key, count> by counting tuples in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
-  def countByKey[K <: JSerializable](keyExtractor: R => K): Streamlet[KeyValue[K, java.lang.Long]]
+  def countByKey[K](keyExtractor: R => K): Streamlet[KeyValue[K, java.lang.Long]]
 
   /**
    * Returns a new stream of <key, count> by counting tuples over a window in this stream on each key.

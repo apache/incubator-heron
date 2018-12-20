@@ -23,37 +23,41 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
-import org.apache.heron.streamlet.impl.operators.ReduceByKeyOperator;
+import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyOperator;
 
 /**
- * ReduceByKeyAndWindowStreamlet represents a KVStreamlet that is the result of
- * applying user supplied reduceFn on all elements within each window defined by a
- * user supplied Window Config.
- * Note that this is a stateful operation. And K and T types need to be serializable.
- * ReduceByKeyAndWindowStreamlet's elements are of KeyValue type where the key is
- * KeyWindowInfo&lt;K&gt; type and the value is of type V.
+ * GeneralReduceByKeyStreamlet represents a KVStreamlet that is the result of
+ * applying user supplied reduceFn on all elements.
+ * GeneralReduceByKeyStreamlet's elements are of KeyValue type where the key is
+ * KeyWindowInfo&lt;K&gt; type and the value is of type T.
  */
-public class CountByKeyStreamlet<R, K> extends KVStreamletImpl<K, Long> {
+public class GeneralReduceByKeyStreamlet<R, K, T> extends KVStreamletImpl<K, T> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
+  private T identity;
+  private SerializableBiFunction<T, R, ? extends T> reduceFn;
 
-  public CountByKeyStreamlet(StreamletImpl<R> parent, SerializableFunction<R, K> keyExtractor) {
+  public GeneralReduceByKeyStreamlet(StreamletImpl<R> parent,
+                                     SerializableFunction<R, K> keyExtractor,
+                                     T identity,
+                                     SerializableBiFunction<T, R, ? extends T> reduceFn) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
+    this.identity = identity;
+    this.reduceFn = reduceFn;
     setNumPartitions(parent.getNumPartitions());
   }
 
   @Override
   public boolean doBuild(TopologyBuilder bldr, Set<String> stageNames) {
-    setDefaultNameIfNone(StreamletNamePrefix.COUNT, stageNames);
-    // Count is a special case of reduce operation. Hence ReduceByKeyAndWindowOperator
-    // is used here. Every tuple has a value of 1 and the reduce operation is a simple sum.
-    ReduceByKeyOperator<R, K, Long> bolt =
-        new ReduceByKeyOperator<R, K, Long>(keyExtractor, x -> 1L, (c1, c2) -> c1 + c2);
+    setDefaultNameIfNone(StreamletNamePrefix.REDUCE, stageNames);
+    GeneralReduceByKeyOperator<R, K, T> bolt =
+        new GeneralReduceByKeyOperator<R, K, T>(keyExtractor, identity, reduceFn);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));

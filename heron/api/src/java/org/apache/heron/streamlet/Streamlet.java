@@ -19,7 +19,6 @@
 
 package org.apache.heron.streamlet;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -177,14 +176,21 @@ public interface Streamlet<R> {
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
    * to be reduced on
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  <K, T> KVStreamlet<K, T> reduceByKey(SerializableFunction<R, K> keyExtractor,
+                                       SerializableFunction<R, T> valueExtractor,
+                                       SerializableBinaryOperator<T> reduceFn);
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param identity The identity element is the initial value for each key
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  <K extends Serializable, T extends Serializable> KVStreamlet<K, T> reduceByKey(
-      SerializableFunction<R, K> keyExtractor,
-      SerializableFunction<R, T> valueExtractor,
-      T identity,
-      SerializableBinaryOperator<T> reduceFn);
+  <K, T> KVStreamlet<K, T> reduceByKey(SerializableFunction<R, K> keyExtractor,
+                                       T identity,
+                                       SerializableBiFunction<T, R, ? extends T> reduceFn);
 
   /**
    * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
@@ -278,8 +284,7 @@ public interface Streamlet<R> {
    * Returns a new stream of <key, count> by counting tuples in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
-  <K extends Serializable> KVStreamlet<K, Long> countByKey(
-      SerializableFunction<R, K> keyExtractor);
+  <K> KVStreamlet<K, Long> countByKey(SerializableFunction<R, K> keyExtractor);
 
   /**
    * Returns a new stream of <key, count> by counting tuples over a window in this stream on each key.

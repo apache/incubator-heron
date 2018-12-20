@@ -40,6 +40,7 @@ import org.apache.heron.streamlet.impl.streamlets.{
   CustomStreamlet,
   FilterStreamlet,
   FlatMapStreamlet,
+  GeneralReduceByKeyStreamlet,
   LogStreamlet,
   JoinStreamlet,
   KeyByStreamlet,
@@ -620,8 +621,8 @@ class StreamletImplTest extends BaseFunSuite {
       .setNumPartitions(3)
 
     supplierStreamlet
-      .reduceByKey[Int, Int]((key: Int) => key * 100,
-                             (value: Int) => value,
+      .reduceByKey[Int, Int]((x: Int) => x * 100,
+                             (x: Int) => x,
                              (x: Int, y: Int) => x + y)  // sum operation
       .setName("Reduce_Streamlet_1")
       .setNumPartitions(5)
@@ -636,6 +637,34 @@ class StreamletImplTest extends BaseFunSuite {
     val reduceStreamlet = supplierStreamletImpl
       .getChildren(0)
       .asInstanceOf[ReduceByKeyStreamlet[Int, Int, Int]]
+    assertEquals("Reduce_Streamlet_1", reduceStreamlet.getName)
+    assertEquals(5, reduceStreamlet.getNumPartitions)
+    assertEquals(0, reduceStreamlet.getChildren.size())
+  }
+
+  test("StreamletImpl should support general reduce by key operation") {
+    val supplierStreamlet = builder
+      .newSource(() => Random.nextInt(10))
+      .setName("Supplier_Streamlet_1")
+      .setNumPartitions(3)
+
+    supplierStreamlet
+      .reduceByKey[Int, Int]((key: Int) => key * 100,
+                             0,
+                             (x: Int, y: Int) => x + y)  // sum operation
+      .setName("Reduce_Streamlet_1")
+      .setNumPartitions(5)
+
+    val supplierStreamletImpl =
+      supplierStreamlet.asInstanceOf[StreamletImpl[Int]]
+    assertEquals(1, supplierStreamletImpl.getChildren.size)
+    assertTrue(
+      supplierStreamletImpl
+        .getChildren(0)
+        .isInstanceOf[GeneralReduceByKeyStreamlet[_, _, _]])
+    val reduceStreamlet = supplierStreamletImpl
+      .getChildren(0)
+      .asInstanceOf[GeneralReduceByKeyStreamlet[Int, Int, Int]]
     assertEquals("Reduce_Streamlet_1", reduceStreamlet.getName)
     assertEquals(5, reduceStreamlet.getNumPartitions)
     assertEquals(0, reduceStreamlet.getChildren.size())

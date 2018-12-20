@@ -22,8 +22,6 @@ import java.util.{
   HashMap => JHashMap,
   Map => JMap
 }
-import java.io.{Serializable => JSerializable}
-
 import scala.collection.JavaConverters
 
 import org.apache.heron.api.grouping.StreamGrouping
@@ -261,30 +259,44 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
     KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], T](newJavaKVStreamlet)
   }
 
-
   /**
    * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
    * to be reduced on
-   * @param identity The identity element is the initial value for each key
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  def reduceByKey[K <: JSerializable, T <: JSerializable](
-      keyExtractor: R => K,
-      valueExtractor: R => T,
-      identity: T,
-      reduceFn: (T, T) => T): Streamlet[KeyValue[K, T]] = {
+  override def reduceByKey[K, T](keyExtractor: R => K,
+                                 valueExtractor: R => T,
+                                 reduceFn: (T, T) => T): KVStreamlet[K, T] = {
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
     val javaValueExtractor = toSerializableFunction[R, T](valueExtractor)
     val javaReduceFunction = toSerializableBinaryOperator[T](reduceFn)
 
-    val newJavaStreamlet = javaStreamlet.reduceByKey[K, T](
+    val newJavaKVStreamlet = javaStreamlet.reduceByKey[K, T](
       javaKeyExtractor,
       javaValueExtractor,
+      javaReduceFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
+  }
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param identity The identity element is the initial value for each key
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  override def reduceByKey[K, T](keyExtractor: R => K,
+                        identity: T,
+                        reduceFn: (T, R) => T): KVStreamlet[K, T] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaReduceFunction = toSerializableBiFunction[T, R, T](reduceFn)
+
+    val newJavaKVStreamlet = javaStreamlet.reduceByKey[K, T](
+      javaKeyExtractor,
       identity,
       javaReduceFunction)
-    fromJavaStreamlet[KeyValue[K, T]](newJavaStreamlet)
+    KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
   }
 
   /**
@@ -441,11 +453,11 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    * Returns a new stream of <key, count> by counting tuples in this stream on each key.
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
-  def countByKey[K <: JSerializable](keyExtractor: R => K): Streamlet[KeyValue[K, java.lang.Long]] = {
+  override def countByKey[K](keyExtractor: R => K): KVStreamlet[K, java.lang.Long] = {
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
 
-    val newJavaStreamlet = javaStreamlet.countByKey[K](javaKeyExtractor)
-    fromJavaStreamlet[KeyValue[K, java.lang.Long]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.countByKey[K](javaKeyExtractor)
+    KVStreamletImpl.fromJavaKVStreamlet[K, java.lang.Long](newJavaKVStreamlet)
   }
 
   /**
@@ -455,13 +467,13 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
    * Typical windowing strategies are sliding windows and tumbling windows
    * Note that there could be 0 or multiple target stream ids
    */
-  def countByKeyAndWindow[K](keyExtractor: R => K,
-      windowCfg: WindowConfig): Streamlet[KeyValue[KeyedWindow[K], java.lang.Long]] = {
+  override def countByKeyAndWindow[K](keyExtractor: R => K,
+      windowCfg: WindowConfig): KVStreamlet[KeyedWindow[K], java.lang.Long] = {
 
     val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
 
-    val newJavaStreamlet = javaStreamlet.countByKeyAndWindow[K](javaKeyExtractor, windowCfg)
-    fromJavaStreamlet[KeyValue[KeyedWindow[K], java.lang.Long]](newJavaStreamlet)
+    val newJavaKVStreamlet = javaStreamlet.countByKeyAndWindow[K](javaKeyExtractor, windowCfg)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], java.lang.Long](newJavaKVStreamlet)
   }
 
   /**

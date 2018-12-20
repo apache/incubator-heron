@@ -18,7 +18,6 @@
  */
 package org.apache.heron.streamlet.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -52,6 +51,7 @@ import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.LogStreamlet;
@@ -455,21 +455,39 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
    * to be reduced on
-   * @param identity The identity element is the initial value for each key
    * @param reduceFn The reduce function that you want to apply to all the values of a key.
    */
-  public <K extends Serializable, T extends Serializable> KVStreamlet<K, T> reduceByKey(
-      SerializableFunction<R, K> keyExtractor,
-      SerializableFunction<R, T> valueExtractor,
-      T identity,
-      SerializableBinaryOperator<T> reduceFn) {
+  @Override
+  public <K, T> KVStreamlet<K, T> reduceByKey(SerializableFunction<R, K> keyExtractor,
+                                       SerializableFunction<R, T> valueExtractor,
+                                       SerializableBinaryOperator<T> reduceFn) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
     checkNotNull(valueExtractor, "valueExtractor cannot be null");
-    checkNotNull(identity, "identity cannot be null");
     checkNotNull(reduceFn, "reduceFn cannot be null");
 
     ReduceByKeyStreamlet<R, K, T> retval =
-        new ReduceByKeyStreamlet<>(this, keyExtractor, valueExtractor, identity, reduceFn);
+        new ReduceByKeyStreamlet<>(this, keyExtractor, valueExtractor, reduceFn);
+    addChild(retval);
+    return retval;
+  }
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param identity The identity element is the initial value for each key
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  @Override
+  public <K, T> KVStreamlet<K, T> reduceByKey(
+      SerializableFunction<R, K> keyExtractor,
+      T identity,
+      SerializableBiFunction<T, R, ? extends T> reduceFn) {
+    checkNotNull(keyExtractor, "keyExtractor cannot be null");
+    checkNotNull(identity, "identity cannot be null");
+    checkNotNull(reduceFn, "reduceFn cannot be null");
+
+    GeneralReduceByKeyStreamlet<R, K, T> retval =
+        new GeneralReduceByKeyStreamlet<>(this, keyExtractor, identity, reduceFn);
     addChild(retval);
     return retval;
   }
@@ -679,7 +697,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
    * @param keyExtractor The function applied to a tuple of this streamlet to get the key
    */
   @Override
-  public <K extends Serializable> KVStreamlet<K, Long>
+  public <K> KVStreamlet<K, Long>
       countByKey(SerializableFunction<R, K> keyExtractor) {
     checkNotNull(keyExtractor, "keyExtractor cannot be null");
 

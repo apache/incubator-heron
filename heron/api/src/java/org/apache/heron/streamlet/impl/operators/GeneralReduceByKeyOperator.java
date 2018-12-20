@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.api.tuple.Values;
 import org.apache.heron.streamlet.KeyValue;
-import org.apache.heron.streamlet.SerializableBinaryOperator;
+import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 
 /**
@@ -36,18 +36,18 @@ import org.apache.heron.streamlet.SerializableFunction;
  * TODO: make it stateful or create a new stateful operator. The tricky part is how
  * to convert K and T to State<> which needs to be serializable.
  */
-public class ReduceByKeyOperator<R, K, T> extends StreamletOperator<R, KeyValue<K, T>> {
+public class GeneralReduceByKeyOperator<R, K, T> extends StreamletOperator<R, KeyValue<K, T>> {
   private SerializableFunction<R, K> keyExtractor;
-  private SerializableFunction<R, T> valueExtractor;
-  private SerializableBinaryOperator<T> reduceFn;
+  private T identity;
+  private SerializableBiFunction<T, R, ? extends T> reduceFn;
 
   private Map<K, T> reduceMap;  // It is a hashmap of <K, T>
 
-  public ReduceByKeyOperator(SerializableFunction<R, K> keyExtractor,
-                             SerializableFunction<R, T> valueExtractor,
-                             SerializableBinaryOperator<T> reduceFn) {
+  public GeneralReduceByKeyOperator(SerializableFunction<R, K> keyExtractor,
+                                    T identity,
+                                    SerializableBiFunction<T, R, ? extends T> reduceFn) {
     this.keyExtractor = keyExtractor;
-    this.valueExtractor = valueExtractor;
+    this.identity = identity;
     this.reduceFn = reduceFn;
     reduceMap = new HashMap<K, T>();
   }
@@ -57,14 +57,9 @@ public class ReduceByKeyOperator<R, K, T> extends StreamletOperator<R, KeyValue<
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
     K key = keyExtractor.apply(obj);
-    T value = valueExtractor.apply(obj);
 
-    T newValue;
-    if (reduceMap.containsKey(key)) {
-      newValue = reduceFn.apply(reduceMap.get(key), value);
-    } else {
-      newValue = value;
-    }
+    T oldValue = reduceMap.getOrDefault(key, identity);
+    T newValue = reduceFn.apply(oldValue, obj);
 
     reduceMap.put(key, newValue);
     collector.emit(new Values(new KeyValue<K, T>(key, newValue)));

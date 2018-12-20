@@ -23,12 +23,11 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
-import org.apache.heron.streamlet.impl.WindowConfigImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.ReduceByKeyAndWindowOperator;
 
@@ -42,14 +41,14 @@ public class CountByKeyAndWindowStreamlet<R, K>
     extends KVStreamletImpl<KeyedWindow<K>, Long> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
-  private WindowConfigImpl windowCfg;
+  private WindowConfig windowCfg;
 
   public CountByKeyAndWindowStreamlet(StreamletImpl<R> parent,
                                       SerializableFunction<R, K> keyExtractor,
                                       WindowConfig windowCfg) {
     this.parent = parent;
     this.keyExtractor = keyExtractor;
-    this.windowCfg = (WindowConfigImpl) windowCfg;
+    this.windowCfg = windowCfg;
     setNumPartitions(parent.getNumPartitions());
   }
 
@@ -58,13 +57,13 @@ public class CountByKeyAndWindowStreamlet<R, K>
     setDefaultNameIfNone(StreamletNamePrefix.COUNT, stageNames);
     // Count is a special case of reduce operation. Hence ReduceByKeyAndWindowOperator
     // is used here. Every tuple has a value of 1 and the reduce operation is a simple sum.
-    ReduceByKeyAndWindowOperator<K, Long, R> bolt =
-        new ReduceByKeyAndWindowOperator<K, Long, R>(keyExtractor, x -> 1L, (c1, c2) -> c1 + c2);
-    windowCfg.attachWindowConfig(bolt);
+    ReduceByKeyAndWindowOperator<R, K, Long> bolt =
+        new ReduceByKeyAndWindowOperator<R, K, Long>(keyExtractor, x -> 1L, (c1, c2) -> c1 + c2);
+    windowCfg.applyTo(bolt);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             // TODO: rename ReduceByKeyAndWindowCustomGrouping
-            new ReduceByKeyAndWindowCustomGrouping<K, R>(keyExtractor));
+            new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));
     return true;
   }
 }

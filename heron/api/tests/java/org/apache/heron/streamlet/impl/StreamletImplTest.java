@@ -58,6 +58,7 @@ import org.apache.heron.streamlet.impl.streamlets.CountByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CustomStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FilterStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
@@ -377,14 +378,31 @@ public class StreamletImplTest {
   public void testReduceByKeyStreamlet() {
     Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
     KVStreamlet<String, Double> streamlet = baseStreamlet.setNumPartitions(20)
-        .reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
+        .<String, Double>reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
             x -> x,
-            0.0,
             (x, y) -> x + y);  // A sum operation
 
     assertTrue(streamlet instanceof ReduceByKeyStreamlet);
     ReduceByKeyStreamlet<Double, String, Double> mStreamlet =
         (ReduceByKeyStreamlet<Double, String, Double>) streamlet;
+    assertEquals(20, mStreamlet.getNumPartitions());
+    SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
+    assertEquals(supplierStreamlet.getChildren().size(), 1);
+    assertEquals(supplierStreamlet.getChildren().get(0), streamlet);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testGeneralReduceByKeyStreamlet() {
+    Streamlet<Double> baseStreamlet = builder.newSource(() -> Math.random());
+    KVStreamlet<String, Double> streamlet = baseStreamlet.setNumPartitions(20)
+        .reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
+            0.0,
+            (x, y) -> x + y);  // A sum operation
+
+    assertTrue(streamlet instanceof GeneralReduceByKeyStreamlet);
+    GeneralReduceByKeyStreamlet<Double, String, Double> mStreamlet =
+        (GeneralReduceByKeyStreamlet<Double, String, Double>) streamlet;
     assertEquals(20, mStreamlet.getNumPartitions());
     SupplierStreamlet<Double> supplierStreamlet = (SupplierStreamlet<Double>) baseStreamlet;
     assertEquals(supplierStreamlet.getChildren().size(), 1);
