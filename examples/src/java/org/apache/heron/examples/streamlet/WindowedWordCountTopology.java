@@ -71,7 +71,7 @@ public final class WindowedWordCountTopology {
             // Value extractor (the value is always 1)
             word -> 1,
             WindowConfig.TumblingCountWindow(50),
-            (x, y) -> x + y
+            StreamletReducers::sum
         )
         .setName("reduce-operation")
         // The final output is logged using a user-supplied format
