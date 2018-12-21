@@ -18,9 +18,10 @@
  */
 package org.apache.heron.streamlet.scala.impl
 
-import java.util.{Map => JMap}
-import java.util.{HashMap => JHashMap}
-
+import java.util.{
+  HashMap => JHashMap,
+  Map => JMap
+}
 import scala.collection.JavaConverters
 
 import org.apache.heron.api.grouping.StreamGrouping
@@ -260,6 +261,46 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
   }
 
   /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param valueExtractor The function applied to a tuple of this streamlet to extract the value
+   * to be reduced on
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  override def reduceByKey[K, T](keyExtractor: R => K,
+                                 valueExtractor: R => T,
+                                 reduceFn: (T, T) => T): KVStreamlet[K, T] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaValueExtractor = toSerializableFunction[R, T](valueExtractor)
+    val javaReduceFunction = toSerializableBinaryOperator[T](reduceFn)
+
+    val newJavaKVStreamlet = javaStreamlet.reduceByKey[K, T](
+      javaKeyExtractor,
+      javaValueExtractor,
+      javaReduceFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
+  }
+
+  /**
+   * Return a new Streamlet accumulating tuples of this streamlet and applying reduceFn on those tuples.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param identity The identity element is the initial value for each key
+   * @param reduceFn The reduce function that you want to apply to all the values of a key.
+   */
+  override def reduceByKey[K, T](keyExtractor: R => K,
+                           identity: T,
+                           reduceFn: (T, R) => T): KVStreamlet[K, T] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+    val javaReduceFunction = toSerializableBiFunction[T, R, T](reduceFn)
+
+    val newJavaKVStreamlet = javaStreamlet.reduceByKey[K, T](
+      javaKeyExtractor,
+      identity,
+      javaReduceFunction)
+    KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
+  }
+
+  /**
     * Return a new Streamlet accumulating tuples of this streamlet over a Window defined by
     * windowCfg and applying reduceFn on those tuples.
     *
@@ -407,6 +448,33 @@ class StreamletImpl[R](val javaStreamlet: JavaStreamlet[R])
 
     val newJavaKVStreamlet = javaStreamlet.keyBy[K, T](javaKeyExtractor, javaValueExtractor)
     KVStreamletImpl.fromJavaKVStreamlet[K, T](newJavaKVStreamlet)
+  }
+
+  /**
+   * Returns a new stream of <key, count> by counting tuples in this stream on each key.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   */
+  override def countByKey[K](keyExtractor: R => K): KVStreamlet[K, java.lang.Long] = {
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+
+    val newJavaKVStreamlet = javaStreamlet.countByKey[K](javaKeyExtractor)
+    KVStreamletImpl.fromJavaKVStreamlet[K, java.lang.Long](newJavaKVStreamlet)
+  }
+
+  /**
+   * Returns a new stream of <key, count> by counting tuples over a window in this stream on each key.
+   * @param keyExtractor The function applied to a tuple of this streamlet to get the key
+   * @param windowCfg This is a specification of what kind of windowing strategy you like to have.
+   * Typical windowing strategies are sliding windows and tumbling windows
+   * Note that there could be 0 or multiple target stream ids
+   */
+  override def countByKeyAndWindow[K](keyExtractor: R => K,
+      windowCfg: WindowConfig): KVStreamlet[KeyedWindow[K], java.lang.Long] = {
+
+    val javaKeyExtractor = toSerializableFunction[R, K](keyExtractor)
+
+    val newJavaKVStreamlet = javaStreamlet.countByKeyAndWindow[K](javaKeyExtractor, windowCfg)
+    KVStreamletImpl.fromJavaKVStreamlet[KeyedWindow[K], java.lang.Long](newJavaKVStreamlet)
   }
 
   /**
