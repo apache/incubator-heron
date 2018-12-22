@@ -52,34 +52,34 @@ public final class StreamletReducers {
   }
 
   public static Integer max(Integer a, Integer b) {
-    return (a.compareTo(b) > 0) ? a : b;
+    return Math.max(a, b);
   }
 
   public static Long max(Long a, Long b) {
-    return (a.compareTo(b) > 0) ? a : b;
+    return Math.max(a, b);
   }
 
   public static Float max(Float a, Float b) {
-    return (a.compareTo(b) > 0) ? a : b;
+    return Math.max(a, b);
   }
 
   public static Double max(Double a, Double b) {
-    return (a.compareTo(b) > 0) ? a : b;
+    return Math.max(a, b);
   }
 
   public static Integer min(Integer a, Integer b) {
-    return (a.compareTo(b) < 0) ? a : b;
+    return Math.min(a, b);
   }
 
   public static Long min(Long a, Long b) {
-    return (a.compareTo(b) < 0) ? a : b;
+    return Math.min(a, b);
   }
 
   public static Float min(Float a, Float b) {
-    return (a.compareTo(b) < 0) ? a : b;
+    return Math.min(a, b);
   }
 
   public static Double min(Double a, Double b) {
-    return (a.compareTo(b) < 0) ? a : b;
+    return Math.min(a, b);
   }
 }
