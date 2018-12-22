@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.streamlet.SerializableFunction;
+import org.apache.heron.streamlet.StreamletReducers;
 import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
@@ -53,7 +54,7 @@ public class CountByKeyStreamlet<R, K> extends KVStreamletImpl<K, Long> {
     // Count is a special case of reduce operation. Hence ReduceByKeyAndWindowOperator
     // is used here. Every tuple has a value of 1 and the reduce operation is a simple sum.
     ReduceByKeyOperator<R, K, Long> bolt =
-        new ReduceByKeyOperator<R, K, Long>(keyExtractor, x -> 1L, (c1, c2) -> c1 + c2);
+        new ReduceByKeyOperator<R, K, Long>(keyExtractor, x -> 1L, StreamletReducers::sum);
     bldr.setBolt(getName(), bolt, getNumPartitions())
         .customGrouping(parent.getName(), parent.getStreamId(),
             new ReduceByKeyAndWindowCustomGrouping<R, K>(keyExtractor));

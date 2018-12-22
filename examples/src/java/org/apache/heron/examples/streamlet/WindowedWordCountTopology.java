@@ -28,6 +28,7 @@ import org.apache.heron.examples.streamlet.utils.StreamletUtils;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Runner;
+import org.apache.heron.streamlet.StreamletReducers;
 import org.apache.heron.streamlet.WindowConfig;
 
 /**
@@ -71,7 +72,7 @@ public final class WindowedWordCountTopology {
             // Value extractor (the value is always 1)
             word -> 1,
             WindowConfig.TumblingCountWindow(50),
-            (x, y) -> x + y
+            StreamletReducers::sum
         )
         .setName("reduce-operation")
         // The final output is logged using a user-supplied format
