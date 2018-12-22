@@ -28,6 +28,7 @@ import org.apache.heron.examples.streamlet.utils.StreamletUtils;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.Runner;
+import org.apache.heron.streamlet.StreamletReducers;
 import org.apache.heron.streamlet.WindowConfig;
 
 /**
