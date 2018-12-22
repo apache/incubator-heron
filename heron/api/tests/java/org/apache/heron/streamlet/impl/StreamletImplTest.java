@@ -51,6 +51,7 @@ import org.apache.heron.streamlet.SerializablePredicate;
 import org.apache.heron.streamlet.SerializableTransformer;
 import org.apache.heron.streamlet.Source;
 import org.apache.heron.streamlet.Streamlet;
+import org.apache.heron.streamlet.StreamletReducers;
 import org.apache.heron.streamlet.WindowConfig;
 import org.apache.heron.streamlet.impl.streamlets.ConsumerStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.CountByKeyAndWindowStreamlet;
@@ -380,7 +381,7 @@ public class StreamletImplTest {
     KVStreamlet<String, Double> streamlet = baseStreamlet.setNumPartitions(20)
         .<String, Double>reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
             x -> x,
-            (x, y) -> x + y);  // A sum operation
+            StreamletReducers::sum);
 
     assertTrue(streamlet instanceof ReduceByKeyStreamlet);
     ReduceByKeyStreamlet<Double, String, Double> mStreamlet =
@@ -398,7 +399,7 @@ public class StreamletImplTest {
     KVStreamlet<String, Double> streamlet = baseStreamlet.setNumPartitions(20)
         .reduceByKey(x -> (x > 0) ? "positive" : ((x < 0) ? "negative" : "zero"),
             0.0,
-            (x, y) -> x + y);  // A sum operation
+            StreamletReducers::sum);
 
     assertTrue(streamlet instanceof GeneralReduceByKeyStreamlet);
     GeneralReduceByKeyStreamlet<Double, String, Double> mStreamlet =
