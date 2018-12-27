@@ -53,6 +53,7 @@ import org.apache.heron.streamlet.impl.streamlets.FlatMapStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyAndWindowStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.GeneralReduceByKeyStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.JoinStreamlet;
+import org.apache.heron.streamlet.impl.streamlets.KVStreamletShadow;
 import org.apache.heron.streamlet.impl.streamlets.KeyByStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.LogStreamlet;
 import org.apache.heron.streamlet.impl.streamlets.MapStreamlet;
@@ -450,7 +451,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         this, joinee, thisKeyExtractor, otherKeyExtractor, windowCfg, joinType, joinFunction);
     addChild(retval);
     joinee.addChild(retval);
-    return retval;
+    return new KVStreamletShadow<KeyedWindow<K>, T>(retval);
   }
 
   /**
@@ -471,7 +472,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     ReduceByKeyStreamlet<R, K, T> retval =
         new ReduceByKeyStreamlet<>(this, keyExtractor, valueExtractor, reduceFn);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<K, T>(retval);
   }
 
   /**
@@ -491,7 +492,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     GeneralReduceByKeyStreamlet<R, K, T> retval =
         new GeneralReduceByKeyStreamlet<>(this, keyExtractor, identity, reduceFn);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<K, T>(retval);
   }
 
   /**
@@ -517,7 +518,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new ReduceByKeyAndWindowStreamlet<>(this, keyExtractor, valueExtractor,
             windowCfg, reduceFn);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<KeyedWindow<K>, T>(retval);
   }
 
   /**
@@ -546,7 +547,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
         new GeneralReduceByKeyAndWindowStreamlet<>(this, keyExtractor, windowCfg,
             identity, reduceFn);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<KeyedWindow<K>, T>(retval);
   }
 
   /**
@@ -691,7 +692,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     KeyByStreamlet<R, K, V> retval =
         new KeyByStreamlet<R, K, V>(this, keyExtractor, valueExtractor);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<K, V>(retval);
   }
 
   /**
@@ -705,7 +706,7 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
     CountByKeyStreamlet<R, K> retval = new CountByKeyStreamlet<>(this, keyExtractor);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<K, Long>(retval);
   }
 
 
@@ -725,6 +726,6 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
     CountByKeyAndWindowStreamlet<R, K> retval =
         new CountByKeyAndWindowStreamlet<>(this, keyExtractor, windowCfg);
     addChild(retval);
-    return retval;
+    return new KVStreamletShadow<KeyedWindow<K>, Long>(retval);
   }
 }
