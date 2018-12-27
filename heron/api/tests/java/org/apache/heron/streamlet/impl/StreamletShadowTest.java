@@ -56,13 +56,20 @@ public class StreamletShadowTest {
     assertEquals(shadow.getStreamId(), "real_stream");
 
     // set a different stream id
-    shadow.setStreamId("shadow_stream");
+    StreamletShadow<Double> shadow2 = new StreamletShadow(mockReal) {
+      @Override
+      public String getStreamId() {
+        return "shadow_stream";
+      }
+    };
+    assertEquals(shadow.getName(), "real_name");
+    assertEquals(shadow.getNumPartitions(), 1);
     assertEquals(shadow.getStreamId(), "shadow_stream");
 
     // addChild call should be forwarded to the real object
     verify(mockReal, never()).addChild(mockChild);
     shadow.addChild(mockChild);
-    verify(mockReal, times(1)).addChild(mockChild);
+    shadow2.addChild(mockChild);
+    verify(mockReal, times(2)).addChild(mockChild);
   }
-
 }
