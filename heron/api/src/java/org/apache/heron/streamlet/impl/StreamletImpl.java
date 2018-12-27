@@ -231,9 +231,12 @@ public abstract class StreamletImpl<R> implements Streamlet<R> {
 
     Set<String> availableIds = getAvailableStreamIds();
     if (availableIds.contains(streamId)) {
-      StreamletShadow<R> shadow = new StreamletShadow<R>(this);
-      shadow.setStreamId(streamId);
-      return shadow;
+      return new StreamletShadow<R>(this) {
+        @Override
+        public String getStreamId() {
+          return streamId;
+        }
+      };
     } else {
       throw new RuntimeException(
           String.format("Stream id %s is not available in %s. Available ids are: %s.",
