@@ -120,6 +120,9 @@ void StMgr::Init() {
   dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
   metrics_manager_client_->register_metric("__dropped_during_restore",
                                            dropped_during_restore_metrics_);
+  instance_bytes_received_metrics_ = new heron::common::MultiCountMetric();
+  metrics_manager_client_->register_metric("__instance_bytes_received",
+                                           instance_bytes_received_metrics_);
   back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
@@ -190,10 +193,12 @@ StMgr::~StMgr() {
   metrics_manager_client_->unregister_metric("__process");
   metrics_manager_client_->unregister_metric("__restore_initiated");
   metrics_manager_client_->unregister_metric("__dropped_during_restore");
+  metrics_manager_client_->unregister_metric("__instance_bytes_received");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
   delete stmgr_process_metrics_;
   delete restore_initiated_metrics_;
   delete dropped_during_restore_metrics_;
+  delete instance_bytes_received_metrics_;
   delete back_pressure_metric_initiated_;
   delete tuple_cache_;
   delete state_mgr_;
@@ -781,6 +786,9 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
                                proto::system::HeronTupleSet* _message) {
+  instance_bytes_received_metrics_->scope(std::to_string(_src_task_id))
+      ->incr_by(_message->ByteSize());
+
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id
               << " because we are in Restore";

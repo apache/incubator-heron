@@ -245,6 +245,9 @@ class StMgr {
   heron::common::CountMetric* restore_initiated_metrics_;
   heron::common::MultiCountMetric* dropped_during_restore_metrics_;
 
+  // Instance related metrics
+  heron::common::MultiCountMetric* instance_bytes_received_metrics_;
+
   // Backpressure relarted metrics
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
