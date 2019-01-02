@@ -22,7 +22,7 @@ package org.apache.heron.common.basics;
 /**
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
-public final class ByteAmount implements Comparable<ByteAmount> {
+public final class ByteAmount implements ResourceMeasure<ByteAmount> {
   private static final long KB = 1024L;
   private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
