@@ -89,8 +89,9 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   // TODO(mfu): Read these values from Config
   @VisibleForTesting
   static final ByteAmount DEFAULT_RAM_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(2);
+  @VisibleForTesting
+  static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1.0;
   private static final ByteAmount DEFAULT_DISK_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(12);
-  private static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1.0;
 
   @VisibleForTesting
   static final ByteAmount DEFAULT_DAEMON_PROCESS_RAM_PADDING = ByteAmount.fromGigabytes(1);
@@ -156,7 +157,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     Map<Integer, Map<InstanceId, CPUShare>> instancesCpuMap =
         calculateInstancesResourceMapInContainer(
         roundRobinAllocation,
-        CPUShare.fromDoubleMap(TopologyUtils.getComponentCpuMapConfig(topology)),
+        CPUShare.convertDoubleMapToCpuShareMap(TopologyUtils.getComponentCpuMapConfig(topology)),
         CPUShare.fromDouble(getContainerCpuHint(roundRobinAllocation)),
         CPUShare.fromDouble(instanceCpuDefault),
         CPUShare.fromDouble(containerCpuPadding),
@@ -213,8 +214,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlans);
 
-    // Check whether it is a valid PackingPlan
-    validatePackingPlan(plan);
+    validateMinRam(plan);
     return plan;
   }
 
@@ -414,12 +414,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Check whether the PackingPlan generated is valid
+   * Check whether the PackingPlan configured each instance to have at least minimum required RAM
    *
    * @param plan The PackingPlan to check
    * @throws PackingException if it's not a valid plan
    */
-  private void validatePackingPlan(PackingPlan plan) throws PackingException {
+  private void validateMinRam(PackingPlan plan) throws PackingException {
     for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check

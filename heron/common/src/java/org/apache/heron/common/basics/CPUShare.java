@@ -87,7 +87,7 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
     return cpuShare <= other.cpuShare;
   }
 
-  public static Map<String, CPUShare> fromDoubleMap(Map<String, Double> doubleMap) {
+  public static Map<String, CPUShare> convertDoubleMapToCpuShareMap(Map<String, Double> doubleMap) {
     Map<String, CPUShare> retval = new HashMap<>();
     for (Map.Entry<String, Double> entry : doubleMap.entrySet()) {
       retval.put(entry.getKey(), new CPUShare(entry.getValue()));
@@ -120,6 +120,6 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
 
   @Override
   public String toString() {
-    return super.toString();
+    return String.format("CPUShare{%.3f}", cpuShare);
   }
 }
