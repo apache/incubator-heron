@@ -141,7 +141,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         getRoundRobinAllocation(numContainer, parallelismMap);
 
     // Get the RAM map for every instance
-    Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap = getInstancesResourceMapInContainer(
+    Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
+        calculateInstancesResourceMapInContainer(
         roundRobinAllocation,
         TopologyUtils.getComponentRamMapConfig(topology),
         getContainerRamHint(roundRobinAllocation),
@@ -152,14 +153,15 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         RAM);
 
     // Get the CPU map for every instance
-    Map<Integer, Map<InstanceId, CPUShare>> instancesCpuMap = getInstancesResourceMapInContainer(
+    Map<Integer, Map<InstanceId, CPUShare>> instancesCpuMap =
+        calculateInstancesResourceMapInContainer(
         roundRobinAllocation,
         CPUShare.fromDoubleMap(TopologyUtils.getComponentCpuMapConfig(topology)),
-        new CPUShare(getContainerCpuHint(roundRobinAllocation)),
-        new CPUShare(instanceCpuDefault),
-        new CPUShare(containerCpuPadding),
-        new CPUShare(0.0),
-        new CPUShare(NOT_SPECIFIED_CPU_SHARE),
+        CPUShare.fromDouble(getContainerCpuHint(roundRobinAllocation)),
+        CPUShare.fromDouble(instanceCpuDefault),
+        CPUShare.fromDouble(containerCpuPadding),
+        CPUShare.fromDouble(0.0),
+        CPUShare.fromDouble(NOT_SPECIFIED_CPU_SHARE),
         CPU);
 
     ByteAmount containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
@@ -248,15 +250,15 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
   @SuppressWarnings("unchecked")
   private <T extends ResourceMeasure> Map<Integer, Map<InstanceId, T>>
-  getInstancesResourceMapInContainer(
-      Map<Integer, List<InstanceId>> allocation,
-      Map<String, T> resMap,
-      T containerResHint,
-      T instanceResDefault,
-      T containerResPadding,
-      T zero,
-      T notSpecified,
-      String resourceType) {
+            calculateInstancesResourceMapInContainer(
+                Map<Integer, List<InstanceId>> allocation,
+                Map<String, T> resMap,
+                T containerResHint,
+                T instanceResDefault,
+                T containerResPadding,
+                T zero,
+                T notSpecified,
+                String resourceType) {
     Map<Integer, Map<InstanceId, T>> instancesResMapInContainer = new HashMap<>();
 
     for (int containerId : allocation.keySet()) {
@@ -265,7 +267,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       instancesResMapInContainer.put(containerId, resInsideContainer);
       List<InstanceId> unspecifiedInstances = new ArrayList<>();
 
-      // Calculate the actual value
+      // Register the instance resource allocation and calculate the used resource so far
       T usedRes = zero;
       for (InstanceId instanceId : instanceIds) {
         String componentName = instanceId.getComponentName();
@@ -278,15 +280,28 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         }
       }
 
-      // Now we have calculated RAM for instances specified in ComponentRamMap
-      // Then to calculate RAM for the rest instances
+      // Validate instance resources specified so far don't violate container-level constraint
+      if (!containerResHint.equals(notSpecified)
+          && usedRes.greaterThan(containerResHint.minus(containerResPadding))) {
+        throw new PackingException(String.format("Invalid packing plan generated. "
+                + "Total instance %s in a container (%s) have exceeded "
+                + "the container-level constraint of %s.",
+            resourceType, usedRes.toString(), containerResHint));
+      }
+
+      // calculate resource for the remaining unspecified instances if any
       if (!unspecifiedInstances.isEmpty()) {
         T individualInstanceRes = instanceResDefault;
-        // We have different strategy depending on whether container RAM is specified
-        // If container RAM is specified
+
+        // If container resource is specified
         if (!containerResHint.equals(notSpecified)) {
-          // remove RAM for heron internal process
+          // discount resource for heron internal process (padding) and used (usedRes)
           T remainingRes = (T) ((T) containerResHint.minus(containerResPadding)).minus(usedRes);
+
+          if (remainingRes.lessOrEqual(zero)) {
+            throw new PackingException(String.format("Invalid packing plan generated. "
+                + "No enough %s to allocate for unspecified instances", resourceType));
+          }
 
           // Split remaining RAM evenly
           individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
@@ -296,18 +311,6 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         for (InstanceId instanceId : unspecifiedInstances) {
           resInsideContainer.put(instanceId, individualInstanceRes);
         }
-      }
-
-      // Validate if instance RAMs don't violate container-level RAM constraint
-      T totalResInContainer = resInsideContainer.values().stream()
-          .reduce((t1, t2) -> (T) t1.plus(t2))
-          .orElse(zero);
-
-      if (!containerResHint.equals(notSpecified)
-          && totalResInContainer.greaterThan(containerResHint.minus(containerResPadding))) {
-        throw new PackingException(String.format("Invalid packing plan generated. "
-            + "Total instance %s in a container have exceeded "
-            + "the container-level constraint of %s.", resourceType, containerResHint));
       }
     }
 
