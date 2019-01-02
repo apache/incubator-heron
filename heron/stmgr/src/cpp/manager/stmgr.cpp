@@ -57,8 +57,12 @@ const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
 const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
+const sp_string METRIC_PROCESS = "__process";
+const sp_string METRIC_RESTORE_INITIALIZED = "__restore_initiated";
 const sp_string RESTORE_DROPPED_STMGR_BYTES = "__stmgr_dropped_bytes";
 const sp_string RESTORE_DROPPED_INSTANCE_TUPLES = "__instance_dropped_tuples";
+const sp_string METRIC_INSTANCE_BYTES_RECEIVED = "__instance_bytes_received";
+const sp_string METRIC_DROPPED_DURING_RESTORE = "__dropped_during_restore";
 // Time spent in back pressure because of local instances connection;
 // we initiated this backpressure
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
@@ -114,12 +118,15 @@ void StMgr::Init() {
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       metricsmgr_port_, metrics_export_interval_sec, eventLoop_);
   stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
-  metrics_manager_client_->register_metric("__process", stmgr_process_metrics_);
+  metrics_manager_client_->register_metric(METRIC_PROCESS, stmgr_process_metrics_);
   restore_initiated_metrics_ = new heron::common::CountMetric();
-  metrics_manager_client_->register_metric("__restore_initiated", restore_initiated_metrics_);
+  metrics_manager_client_->register_metric(METRIC_RESTORE_INITIALIZED, restore_initiated_metrics_);
   dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
-  metrics_manager_client_->register_metric("__dropped_during_restore",
+  metrics_manager_client_->register_metric(METRIC_DROPPED_DURING_RESTORE,
                                            dropped_during_restore_metrics_);
+  instance_bytes_received_metrics_ = new heron::common::MultiCountMetric();
+  metrics_manager_client_->register_metric(METRIC_INSTANCE_BYTES_RECEIVED,
+                                           instance_bytes_received_metrics_);
   back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
@@ -187,13 +194,15 @@ void StMgr::Init() {
 }
 
 StMgr::~StMgr() {
-  metrics_manager_client_->unregister_metric("__process");
-  metrics_manager_client_->unregister_metric("__restore_initiated");
-  metrics_manager_client_->unregister_metric("__dropped_during_restore");
+  metrics_manager_client_->unregister_metric(METRIC_PROCESS);
+  metrics_manager_client_->unregister_metric(METRIC_RESTORE_INITIALIZED);
+  metrics_manager_client_->unregister_metric(METRIC_DROPPED_DURING_RESTORE);
+  metrics_manager_client_->unregister_metric(METRIC_INSTANCE_BYTES_RECEIVED);
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
   delete stmgr_process_metrics_;
   delete restore_initiated_metrics_;
   delete dropped_during_restore_metrics_;
+  delete instance_bytes_received_metrics_;
   delete back_pressure_metric_initiated_;
   delete tuple_cache_;
   delete state_mgr_;
@@ -781,6 +790,9 @@ void StMgr::ProcessAcksAndFails(sp_int32 _src_task_id, sp_int32 _task_id,
 // Called when local tasks generate data
 void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
                                proto::system::HeronTupleSet* _message) {
+  instance_bytes_received_metrics_->scope(std::to_string(_src_task_id))
+      ->incr_by(_message->ByteSize());
+
   if (stateful_restorer_ && stateful_restorer_->InProgress()) {
     LOG(INFO) << "Dropping data received from instance " << _src_task_id
               << " because we are in Restore";
