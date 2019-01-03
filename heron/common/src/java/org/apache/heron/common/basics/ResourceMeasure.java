@@ -19,25 +19,59 @@
 
 package org.apache.heron.common.basics;
 
-public interface ResourceMeasure<T> extends Comparable<T> {
+public abstract class ResourceMeasure<T extends ResourceMeasure, V extends Number & Comparable>
+    implements Comparable<T> {
 
-  boolean isZero();
+  protected final V value;
 
-  T minus(T other);
+  protected ResourceMeasure(V value) {
+    if (value == null) {
+      throw new IllegalArgumentException();
+    }
+    this.value = value;
+  }
 
-  T plus(T other);
+  public V getValue() {
+    return value;
+  }
 
-  T multiply(int factor);
+  public boolean isZero() {
+    return value.doubleValue() == 0.0;
+  }
 
-  T divide(int factor);
+  public abstract T minus(T other);
 
-  T increaseBy(int percentage);
+  public abstract T plus(T other);
 
-  boolean greaterThan(T other);
+  public abstract T multiply(int factor);
 
-  boolean greaterOrEqual(T other);
+  public abstract T divide(int factor);
 
-  boolean lessThan(T other);
+  public abstract T increaseBy(int percentage);
 
-  boolean lessOrEqual(T other);
+  @SuppressWarnings("unchecked")
+  public boolean greaterThan(T other) {
+    return value.compareTo(other.value) > 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public boolean greaterOrEqual(T other) {
+    return value.compareTo(other.value) >= 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public boolean lessThan(T other) {
+    return value.compareTo(other.value) < 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public boolean lessOrEqual(T other) {
+    return value.compareTo(other.value) <= 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public int compareTo(T o) {
+    return value.compareTo(o.value);
+  }
 }

@@ -22,7 +22,7 @@ package org.apache.heron.common.basics;
 /**
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
-public final class ByteAmount implements ResourceMeasure<ByteAmount> {
+public final class ByteAmount extends ResourceMeasure<ByteAmount, Long> {
   private static final long KB = 1024L;
   private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
@@ -34,10 +34,9 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
   private static final long MAX_KB = Math.round(Long.MAX_VALUE / KB);
 
   public static final ByteAmount ZERO = ByteAmount.fromBytes(0);
-  private final long bytes;
 
-  private ByteAmount(long bytes) {
-    this.bytes = bytes;
+  private ByteAmount(Long value) {
+    super(value);
   }
 
   /**
@@ -67,7 +66,8 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
 
   /**
    * Creates a ByteAmount value in gigabytes. If the gigabytes value
-   * is &gt;= Long.MAX_VALUE / 1024 / 1024 / 1024, the byte representation is capped at Long.MAX_VALUE.
+   * is &gt;= Long.MAX_VALUE / 1024 / 1024 / 1024,
+   * the byte representation is capped at Long.MAX_VALUE.
    *
    * @param gigabytes value in gigabytes to represent
    * @return a ByteAmount object repressing the number of GBs passed
@@ -85,7 +85,7 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return number of bytes
    */
   public long asBytes() {
-    return bytes;
+    return super.getValue();
   }
 
   /**
@@ -97,7 +97,7 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return returns the ByteValue in MBs or 0 if the value is &lt; (1024 * 1024) / 2
    */
   public long asMegabytes() {
-    return Math.round((double) bytes / MB);
+    return Math.round(value.doubleValue() / MB);
   }
 
   /**
@@ -109,7 +109,7 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return returns the ByteValue in KBs or 0 if the value is &lt; (1024) / 2
    */
   public long asKilobytes() {
-    return Math.round((double) bytes / KB);
+    return Math.round(value.doubleValue() / KB);
   }
 
   /**
@@ -121,15 +121,7 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return returns the ByteValue in GBs or 0 if the value is &lt; (1024 * 1024 * 1024) / 2
    */
   public long asGigabytes() {
-    return Math.round((double) bytes / GB);
-  }
-
-  /**
-   * Convenience methdod to determine if byte value is zero
-   * @return true if the byte value is 0
-   */
-  public boolean isZero() {
-    return ZERO.equals(this);
+    return Math.round(value.doubleValue() / GB);
   }
 
   /**
@@ -138,10 +130,11 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return a new ByteValue of this minus other ByteValue
    * @throws IllegalArgumentException if subtraction would overshoot Long.MIN_VALUE
    */
+  @Override
   public ByteAmount minus(ByteAmount other) {
-    checkArgument(Long.MIN_VALUE + other.asBytes() <= asBytes(), String.format(
-        "Subtracting %s from %s would overshoot Long.MIN_LONG", other, this));
-    return ByteAmount.fromBytes(asBytes() - other.asBytes());
+    checkArgument(Long.MIN_VALUE + other.value <= value,
+        String.format("Subtracting %s from %s would overshoot Long.MIN_LONG", other, this));
+    return ByteAmount.fromBytes(value - other.value);
   }
 
   /**
@@ -150,10 +143,11 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return a new ByteValue of this plus other ByteValue
    * @throws IllegalArgumentException if addition would exceed Long.MAX_VALUE
    */
+  @Override
   public ByteAmount plus(ByteAmount other) {
-    checkArgument(Long.MAX_VALUE - asBytes() >= other.asBytes(), String.format(
-        "Adding %s to %s would exceed Long.MAX_LONG", other, this));
-    return ByteAmount.fromBytes(asBytes() + other.asBytes());
+    checkArgument(Long.MAX_VALUE - value >= other.value,
+        String.format("Adding %s to %s would exceed Long.MAX_LONG", other, this));
+    return ByteAmount.fromBytes(value + other.value);
   }
 
   /**
@@ -162,10 +156,11 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return a new ByteValue of this ByteValue multiplied by factor
    * @throws IllegalArgumentException if multiplication would exceed Long.MAX_VALUE
    */
+  @Override
   public ByteAmount multiply(int factor) {
-    checkArgument(asBytes() <= Long.MAX_VALUE / factor, String.format(
-        "Multiplying %s by %d would exceed Long.MAX_LONG", this, factor));
-    return ByteAmount.fromBytes(asBytes() * factor);
+    checkArgument(value <= Long.MAX_VALUE / factor,
+        String.format("Multiplying %s by %d would exceed Long.MAX_LONG", this, factor));
+    return ByteAmount.fromBytes(value * factor);
   }
 
   /**
@@ -175,9 +170,10 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @param factor value to divide by
    * @return a new ByteValue of this ByteValue divided by factor
    */
+  @Override
   public ByteAmount divide(int factor) {
     checkArgument(factor != 0, String.format("Can not divide %s by 0", this));
-    return ByteAmount.fromBytes(Math.round((double) this.asBytes() / (double) factor));
+    return ByteAmount.fromBytes(Math.round(value.doubleValue() / factor));
   }
 
   /**
@@ -187,30 +183,15 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
    * @return a new ByteValue of this ByteValue increased by percentage
    * @throws IllegalArgumentException if increase would exceed Long.MAX_VALUE
    */
+  @Override
   public ByteAmount increaseBy(int percentage) {
-    checkArgument(percentage >= 0, String.format(
-        "Increasing by negative percent (%d) not supported", percentage));
+    checkArgument(percentage >= 0,
+        String.format("Increasing by negative percent (%d) not supported", percentage));
     double factor = 1.0 + ((double) percentage / 100);
     long max = Math.round(Long.MAX_VALUE / factor);
-    checkArgument(asBytes() <= max, String.format(
-        "Increasing %s by %d percent would exceed Long.MAX_LONG", this, percentage));
-    return ByteAmount.fromBytes(Math.round((double) asBytes() * factor));
-  }
-
-  public boolean greaterThan(ByteAmount other) {
-    return this.asBytes() > other.asBytes();
-  }
-
-  public boolean greaterOrEqual(ByteAmount other) {
-    return this.asBytes() >= other.asBytes();
-  }
-
-  public boolean lessThan(ByteAmount other) {
-    return this.asBytes() < other.asBytes();
-  }
-
-  public boolean lessOrEqual(ByteAmount other) {
-    return this.asBytes() <= other.asBytes();
+    checkArgument(value <= max,
+        String.format("Increasing %s by %d percent would exceed Long.MAX_LONG", this, percentage));
+    return ByteAmount.fromBytes(Math.round(value.doubleValue() * factor));
   }
 
   public ByteAmount max(ByteAmount other) {
@@ -222,41 +203,36 @@ public final class ByteAmount implements ResourceMeasure<ByteAmount> {
   }
 
   @Override
-  public int compareTo(ByteAmount other) {
-    return Long.compare(asBytes(), other.asBytes());
-  }
-
-  @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
     }
-    if (other == null || getClass() != other.getClass()) {
+    if (!(other instanceof ByteAmount)) {
       return false;
     }
 
     ByteAmount that = (ByteAmount) other;
-    return bytes == that.bytes;
+    return value.equals(that.value);
   }
 
   @Override
   public int hashCode() {
-    return (int) (bytes ^ (bytes >>> 32));
+    return (int) (value ^ (value >>> 32));
   }
 
   @Override
   public String toString() {
-    String value;
+    String str;
     if (asGigabytes() > 0) {
-      value = String.format("%.1f GB (%d bytes)", (double) asBytes() / GB, asBytes());
+      str = String.format("%.1f GB (%d bytes)", value.doubleValue() / GB, value);
     } else if (asMegabytes() > 0) {
-      value = String.format("%.1f MB (%d bytes)", (double) asBytes() / MB, asBytes());
+      str = String.format("%.1f MB (%d bytes)", value.doubleValue() / MB, value);
     } else if (asKilobytes() > 0) {
-      value = String.format("%.1f KB (%d bytes)", (double) asBytes() / KB, asBytes());
+      str = String.format("%.1f KB (%d bytes)", value.doubleValue() / KB, value);
     } else {
-      value = bytes + " bytes";
+      str = value + " bytes";
     }
-    return String.format("ByteAmount{%s}", value);
+    return String.format("ByteAmount{%s}", str);
   }
 
   private void checkArgument(boolean condition, String errorMessage) {

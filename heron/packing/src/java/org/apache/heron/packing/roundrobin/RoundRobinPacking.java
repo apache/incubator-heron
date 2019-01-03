@@ -185,7 +185,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
       for (InstanceId instanceId : instanceList) {
         ByteAmount instanceRam = instancesRamMap.get(containerId).get(instanceId);
-        Double instanceCpu = instancesCpuMap.get(containerId).get(instanceId).getShare();
+        Double instanceCpu = instancesCpuMap.get(containerId).get(instanceId).getValue();
 
         // Currently not yet support disk config for different components, just use the default.
         ByteAmount instanceDisk = instanceDiskDefault;
@@ -295,7 +295,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         // If container resource is specified
         if (!containerResHint.equals(notSpecified)) {
           // discount resource for heron internal process (padding) and used (usedRes)
-          T remainingRes = (T) ((T) containerResHint.minus(containerResPadding)).minus(usedRes);
+          T remainingRes = (T) containerResHint.minus(containerResPadding).minus(usedRes);
 
           if (remainingRes.lessOrEqual(zero)) {
             throw new PackingException(String.format("Invalid packing plan generated. "
@@ -330,7 +330,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     }
 
     for (int i = 1; i <= numContainer; ++i) {
-      allocation.put(i, new ArrayList<InstanceId>());
+      allocation.put(i, new ArrayList<>());
     }
 
     int index = 1;

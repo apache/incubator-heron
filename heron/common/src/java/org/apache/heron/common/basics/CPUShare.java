@@ -22,69 +22,39 @@ package org.apache.heron.common.basics;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class CPUShare implements ResourceMeasure<CPUShare> {
-  private final Double share;
+public final class CPUShare extends ResourceMeasure<CPUShare, Double> {
 
-  private CPUShare(Double share) {
-    this.share = share;
+  private CPUShare(Double value) {
+    super(value);
   }
 
-  public static CPUShare fromDouble(double share) {
-    return new CPUShare(share);
-  }
-
-  public Double getShare() {
-    return share;
-  }
-
-  @Override
-  public boolean isZero() {
-    return share == 0.0;
+  public static CPUShare fromDouble(double value) {
+    return new CPUShare(value);
   }
 
   @Override
   public CPUShare minus(CPUShare other) {
-    return new CPUShare(share - other.share);
+    return new CPUShare(value - other.value);
   }
 
   @Override
   public CPUShare plus(CPUShare other) {
-    return new CPUShare(share + other.share);
+    return new CPUShare(value + other.value);
   }
 
   @Override
   public CPUShare multiply(int factor) {
-    return new CPUShare(share * factor);
+    return new CPUShare(value * factor);
   }
 
   @Override
   public CPUShare divide(int factor) {
-    return new CPUShare(share / factor);
+    return new CPUShare(value / factor);
   }
 
   @Override
   public CPUShare increaseBy(int percentage) {
-    return new CPUShare(share * (1.0 + percentage / 100.0));
-  }
-
-  @Override
-  public boolean greaterThan(CPUShare other) {
-    return share > other.share;
-  }
-
-  @Override
-  public boolean greaterOrEqual(CPUShare other) {
-    return share >= other.share;
-  }
-
-  @Override
-  public boolean lessThan(CPUShare other) {
-    return share < other.share;
-  }
-
-  @Override
-  public boolean lessOrEqual(CPUShare other) {
-    return share <= other.share;
+    return new CPUShare(value * (1.0 + percentage / 100.0));
   }
 
   public static Map<String, CPUShare> convertDoubleMapToCpuShareMap(Map<String, Double> doubleMap) {
@@ -96,13 +66,8 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
   }
 
   @Override
-  public int compareTo(CPUShare o) {
-    return Double.compare(share, o.share);
-  }
-
-  @Override
   public int hashCode() {
-    return share.hashCode();
+    return value.hashCode();
   }
 
   @Override
@@ -115,11 +80,11 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
     }
 
     CPUShare that = (CPUShare) other;
-    return share.equals(that.share);
+    return value.equals(that.value);
   }
 
   @Override
   public String toString() {
-    return String.format("CPUShare{%.3f}", share);
+    return String.format("CPUShare{%.3f}", value);
   }
 }
