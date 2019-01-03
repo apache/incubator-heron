@@ -38,7 +38,7 @@ SCALA_TESTS_DIR="integration_test/src/scala/org/apache/heron/integration_test/to
 
 # Parse arguments
 LANGUAGE="all"
-TESTS_PATTERN=".*"
+TESTS_PATTERN="[^\n]+"
 if [ "$1" != "" ]; then
   if [ "$1" == "--help" ] || [ "$1" == "-h" ];then
     echo "Usage:"
@@ -97,7 +97,7 @@ fi
 
 # run the java integration tests
 if [ "$LANGUAGE" = "all" ] || [ "$LANGUAGE" = "java" ]; then
-echo "Run the Java integration tests"
+  echo "Run the Java integration tests"
   ${TEST_RUNNER} \
     -hc ~/.heron/bin/heron -tb ${JAVA_INTEGRATION_TESTS_BIN} \
     -rh localhost -rp 8080 \
@@ -108,7 +108,7 @@ fi
 
 # run the python integration tests
 if [ "$LANGUAGE" = "all" ] || [ "$LANGUAGE" = "python" ]; then
-echo "Run the Python integration tests"
+  echo "Run the Python integration tests"
   ${TEST_RUNNER} \
     -hc ~/.heron/bin/heron -tb ${PYTHON_INTEGRATION_TESTS_BIN} \
     -rh localhost -rp 8080 \
