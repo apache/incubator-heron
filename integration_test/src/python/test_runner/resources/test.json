@@ -27,6 +27,11 @@
       "topologyName" : "IntegrationTest_ScalaStreamletWithMapAndFilterAndUnion",
       "classPath"    : "scala_streamlet_with_map_and_filter_and_union.ScalaStreamletWithMapAndFilterAndUnion",
       "expectedResultRelativePath" : "scala_streamlet_with_map_and_filter_and_union/ScalaStreamletWithMapAndFilterAndUnionResults.json"
+    },
+    {
+      "topologyName": "IntegrationTest_ScalaStreamletWithKeybyCountAndReduce",
+      "classPath": "scala_streamlet_with_keyby_count_and_reduce.ScalaStreamletWithKeybyCountAndReduce",
+      "expectedResultRelativePath": "scala_streamlet_with_keyby_count_and_reduce/ScalaStreamletWithKeybyCountAndReduceResults.json"
     }
   ],
   "javaTopologies": [
