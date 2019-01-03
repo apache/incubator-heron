@@ -86,7 +86,6 @@ import org.apache.heron.spi.packing.Resource;
 public class RoundRobinPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
 
-  // TODO(mfu): Read these values from Config
   @VisibleForTesting
   static final ByteAmount DEFAULT_RAM_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(2);
   @VisibleForTesting
@@ -303,11 +302,11 @@ public class RoundRobinPacking implements IPacking, IRepacking {
                 + "No enough %s to allocate for unspecified instances", resourceType));
           }
 
-          // Split remaining RAM evenly
+          // Split remaining resource evenly
           individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
         }
 
-        // Put the results in instancesRam
+        // Put the results in resInsideContainer
         for (InstanceId instanceId : unspecifiedInstances) {
           resInsideContainer.put(instanceId, individualInstanceRes);
         }
