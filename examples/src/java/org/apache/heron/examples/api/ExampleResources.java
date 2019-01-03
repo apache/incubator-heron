@@ -35,7 +35,12 @@ public final class ExampleResources {
 
   static ByteAmount getContainerRam(int components, int containers) {
     final int componentsPerContainer = Math.max(components / containers, 1);
-    return ByteAmount.fromMegabytes(COMPONENT_RAM_MB * componentsPerContainer);
+    return ByteAmount.fromMegabytes(COMPONENT_RAM_MB * (componentsPerContainer + 2));
+  }
+
+  static double getContainerCpu(int components, int containers) {
+    final int componentsPerContainer = Math.max(components / containers, 1);
+    return componentsPerContainer + 1.0;
   }
 
   private ExampleResources() {

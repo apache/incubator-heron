@@ -188,12 +188,16 @@ public final class WordCountTopology {
     conf.setComponentRam("consumer",
         ByteAmount.fromMegabytes(ExampleResources.COMPONENT_RAM_MB));
 
+    conf.setComponentCpu("word", 1.0);
+    conf.setComponentCpu("consumer", 1.0);
+
     // configure container resources
     conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(2 * parallelism, parallelism));
     conf.setContainerRamRequested(
         ExampleResources.getContainerRam(2 * parallelism, parallelism));
-    conf.setContainerCpuRequested(2);
+    conf.setContainerCpuRequested(
+        ExampleResources.getContainerCpu(2 * parallelism, parallelism));
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
