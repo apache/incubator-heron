@@ -418,6 +418,8 @@ pkg_tar(
     package_dir = "lib/api",
     srcs = [
         "//heron/api/src/cpp:cxx-api",
+        "//heron/api/src/java:api-java",
+        "//heron/api/src/scala:api-scala",
         "//heron/tools/apiserver/src/java:heron-apiserver",
     ],
 )
@@ -461,6 +463,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-simulator",
+    package_dir = "lib/simulator",
+    srcs = [
+        "//heron/simulator/src/java:simulator-java",
+    ],
+)
+
+pkg_tar(
     name = "heron",
     extension = "tar.gz",
     srcs = generated_release_files,
@@ -480,13 +490,14 @@ pkg_tar(
         ":heron-include-tuple",
         ":heron-include-utils",
         ":heron-lib-api",
-        ":heron-lib-third_party",
-        ":heron-lib-scheduler",
-        ":heron-lib-packing",
-        ":heron-lib-statemgr",
-        ":heron-lib-metricscachemgr",
-        ":heron-lib-uploader",
         ":heron-lib-downloader",
+        ":heron-lib-metricscachemgr",
+        ":heron-lib-packing",
+        ":heron-lib-scheduler",
+        ":heron-lib-statemgr",
+        ":heron-lib-third_party",
+        ":heron-lib-uploader",
+        ":heron-simulator",
     ],
 )
 
