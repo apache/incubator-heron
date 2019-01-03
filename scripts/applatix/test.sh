@@ -36,8 +36,8 @@ JAVA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/integration-tests.jar"
 PYTHON_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/heron_integ_topology.pex"
 SCALA_INTEGRATION_TESTS_BIN="${HOME}/.herontests/lib/scala-integration-tests.jar"
 
-# install tools
-T="heron tools install"
+# install clients and tools
+T="heron clients/tools install"
 start_timer "$T"
 python ${UTILS}/save-logs.py "heron_install.txt" ./heron-install.sh --user
 end_timer "$T"

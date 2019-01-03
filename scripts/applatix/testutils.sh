@@ -31,8 +31,8 @@ echo "Using $PLATFORM platform"
 # include HOME directory bin in PATH for heron cli, tools and tests
 export PATH=${HOME}/bin:$PATH
 
-# install tools
-T="heron tools install"
+# install clients and tools
+T="heron clients/tools install"
 start_timer "$T"
 python ${UTILS}/save-logs.py "heron_install.txt" ./heron-install.sh --user
 end_timer "$T"
