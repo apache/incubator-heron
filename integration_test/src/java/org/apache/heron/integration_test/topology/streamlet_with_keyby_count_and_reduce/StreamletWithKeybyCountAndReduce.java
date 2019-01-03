@@ -107,20 +107,20 @@ class StreamletWithKeybyCountAndReduce extends AbstractTestTopology {
       }
     };
 
-    // Count
+    // Count months per season
     monthStreamlet
         .keyBy(getSeason, getNumberOfDays)
         .setName("key-by-season")
         .countByKey(x -> x.getKey())
         .setName("key-by-and-count")
-        .map(x -> String.format("%s: %d", x.getKey(), x.getValue()))
+        .map(x -> String.format("%s: %d months", x.getKey(), x.getValue()))
         .setName("to-string");
 
-    // Sum
+    // Sum days per season
     monthStreamlet
         .<String, Integer>reduceByKey(getSeason, getNumberOfDays, StreamletReducers::sum)
         .setName("sum-by-season")
-        .map(x -> String.format("%s: %d", x.getKey(), x.getValue()))
+        .map(x -> String.format("%s: %d days", x.getKey(), x.getValue()))
         .setName("to-string-2");
 
     BuilderImpl streamletBuilderImpl = (BuilderImpl) streamletBuilder;
