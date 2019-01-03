@@ -22,7 +22,7 @@ package org.apache.heron.common.basics;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class CPUShare extends ResourceMeasure<CPUShare, Double> {
+public final class CPUShare extends ResourceMeasure<Double> {
 
   private CPUShare(Double value) {
     super(value);
@@ -33,12 +33,12 @@ public final class CPUShare extends ResourceMeasure<CPUShare, Double> {
   }
 
   @Override
-  public CPUShare minus(CPUShare other) {
+  public CPUShare minus(ResourceMeasure<Double> other) {
     return new CPUShare(value - other.value);
   }
 
   @Override
-  public CPUShare plus(CPUShare other) {
+  public CPUShare plus(ResourceMeasure<Double> other) {
     return new CPUShare(value + other.value);
   }
 

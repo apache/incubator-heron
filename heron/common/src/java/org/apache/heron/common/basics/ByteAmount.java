@@ -22,7 +22,7 @@ package org.apache.heron.common.basics;
 /**
  * Class that encapsulates number of bytes, with helpers to handle units properly.
  */
-public final class ByteAmount extends ResourceMeasure<ByteAmount, Long> {
+public final class ByteAmount extends ResourceMeasure<Long> {
   private static final long KB = 1024L;
   private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
@@ -131,7 +131,7 @@ public final class ByteAmount extends ResourceMeasure<ByteAmount, Long> {
    * @throws IllegalArgumentException if subtraction would overshoot Long.MIN_VALUE
    */
   @Override
-  public ByteAmount minus(ByteAmount other) {
+  public ByteAmount minus(ResourceMeasure<Long> other) {
     checkArgument(Long.MIN_VALUE + other.value <= value,
         String.format("Subtracting %s from %s would overshoot Long.MIN_LONG", other, this));
     return ByteAmount.fromBytes(value - other.value);
@@ -144,7 +144,7 @@ public final class ByteAmount extends ResourceMeasure<ByteAmount, Long> {
    * @throws IllegalArgumentException if addition would exceed Long.MAX_VALUE
    */
   @Override
-  public ByteAmount plus(ByteAmount other) {
+  public ByteAmount plus(ResourceMeasure<Long> other) {
     checkArgument(Long.MAX_VALUE - value >= other.value,
         String.format("Adding %s to %s would exceed Long.MAX_LONG", other, this));
     return ByteAmount.fromBytes(value + other.value);
