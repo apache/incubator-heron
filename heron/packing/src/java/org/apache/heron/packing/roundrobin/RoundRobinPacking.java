@@ -169,7 +169,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     double containerCpuHint = getContainerCpuHint(roundRobinAllocation);
     ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
 
-    LOG.info(String.format("Pack internal: container CPU hint: %.1f, RAM hint: %s, disk hint: %s.",
+    LOG.info(String.format("Pack internal: container CPU hint: %.3f, RAM hint: %s, disk hint: %s.",
         containerCpuHint,
         containerRamHint.toString(),
         containerDiskInBytes.toString()));
@@ -186,7 +186,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
       for (InstanceId instanceId : instanceList) {
         ByteAmount instanceRam = instancesRamMap.get(containerId).get(instanceId);
-        Double instanceCpu = instancesCpuMap.get(containerId).get(instanceId).getCpuShare();
+        Double instanceCpu = instancesCpuMap.get(containerId).get(instanceId).getShare();
 
         // Currently not yet support disk config for different components, just use the default.
         ByteAmount instanceDisk = instanceDiskDefault;
@@ -214,7 +214,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlans);
 
-    validateMinRam(plan);
+    validatePackingPlan(plan);
     return plan;
   }
 
@@ -414,12 +414,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   }
 
   /**
-   * Check whether the PackingPlan configured each instance to have at least minimum required RAM
+   * Check whether the PackingPlan generated is valid
    *
    * @param plan The PackingPlan to check
    * @throws PackingException if it's not a valid plan
    */
-  private void validateMinRam(PackingPlan plan) throws PackingException {
+  private void validatePackingPlan(PackingPlan plan) throws PackingException {
     for (PackingPlan.ContainerPlan containerPlan : plan.getContainers()) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         // Safe check

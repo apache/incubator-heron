@@ -23,68 +23,68 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class CPUShare implements ResourceMeasure<CPUShare> {
-  private final Double cpuShare;
+  private final Double share;
 
-  private CPUShare(Double cpuShare) {
-    this.cpuShare = cpuShare;
+  private CPUShare(Double share) {
+    this.share = share;
   }
 
   public static CPUShare fromDouble(double share) {
     return new CPUShare(share);
   }
 
-  public Double getCpuShare() {
-    return cpuShare;
+  public Double getShare() {
+    return share;
   }
 
   @Override
   public boolean isZero() {
-    return cpuShare == 0.0;
+    return share == 0.0;
   }
 
   @Override
   public CPUShare minus(CPUShare other) {
-    return new CPUShare(cpuShare - other.cpuShare);
+    return new CPUShare(share - other.share);
   }
 
   @Override
   public CPUShare plus(CPUShare other) {
-    return new CPUShare(cpuShare + other.cpuShare);
+    return new CPUShare(share + other.share);
   }
 
   @Override
   public CPUShare multiply(int factor) {
-    return new CPUShare(cpuShare * factor);
+    return new CPUShare(share * factor);
   }
 
   @Override
   public CPUShare divide(int factor) {
-    return new CPUShare(cpuShare / factor);
+    return new CPUShare(share / factor);
   }
 
   @Override
   public CPUShare increaseBy(int percentage) {
-    return new CPUShare(cpuShare * (1.0 + percentage / 100.0));
+    return new CPUShare(share * (1.0 + percentage / 100.0));
   }
 
   @Override
   public boolean greaterThan(CPUShare other) {
-    return cpuShare > other.cpuShare;
+    return share > other.share;
   }
 
   @Override
   public boolean greaterOrEqual(CPUShare other) {
-    return cpuShare >= other.cpuShare;
+    return share >= other.share;
   }
 
   @Override
   public boolean lessThan(CPUShare other) {
-    return cpuShare < other.cpuShare;
+    return share < other.share;
   }
 
   @Override
   public boolean lessOrEqual(CPUShare other) {
-    return cpuShare <= other.cpuShare;
+    return share <= other.share;
   }
 
   public static Map<String, CPUShare> convertDoubleMapToCpuShareMap(Map<String, Double> doubleMap) {
@@ -97,12 +97,12 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
 
   @Override
   public int compareTo(CPUShare o) {
-    return Double.compare(cpuShare, o.cpuShare);
+    return Double.compare(share, o.share);
   }
 
   @Override
   public int hashCode() {
-    return cpuShare.hashCode();
+    return share.hashCode();
   }
 
   @Override
@@ -110,16 +110,16 @@ public final class CPUShare implements ResourceMeasure<CPUShare> {
     if (this == other) {
       return true;
     }
-    if (other == null || getClass() != other.getClass()) {
+    if (!(other instanceof CPUShare)) {
       return false;
     }
 
     CPUShare that = (CPUShare) other;
-    return cpuShare.equals(that.cpuShare);
+    return share.equals(that.share);
   }
 
   @Override
   public String toString() {
-    return String.format("CPUShare{%.3f}", cpuShare);
+    return String.format("CPUShare{%.3f}", share);
   }
 }
