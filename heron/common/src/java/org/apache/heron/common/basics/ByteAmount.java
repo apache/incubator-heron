@@ -203,24 +203,6 @@ public final class ByteAmount extends ResourceMeasure<Long> {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (!(other instanceof ByteAmount)) {
-      return false;
-    }
-
-    ByteAmount that = (ByteAmount) other;
-    return value.equals(that.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return (int) (value ^ (value >>> 32));
-  }
-
-  @Override
   public String toString() {
     String str;
     if (asGigabytes() > 0) {

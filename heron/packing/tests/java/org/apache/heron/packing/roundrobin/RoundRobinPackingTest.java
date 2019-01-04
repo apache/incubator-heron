@@ -177,7 +177,7 @@ public class RoundRobinPackingTest {
       Assert.assertEquals(1, resources.size());
       int instancesCount = containerPlan.getInstances().size();
       Assert.assertEquals(containerRam
-              .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
+          .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
           resources.iterator().next().getRam());
 
       Assert.assertEquals(

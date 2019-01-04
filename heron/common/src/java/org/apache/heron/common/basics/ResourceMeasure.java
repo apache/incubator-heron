@@ -74,4 +74,24 @@ public abstract class ResourceMeasure<V extends Number & Comparable>
   public int compareTo(ResourceMeasure<V> o) {
     return value.compareTo(o.value);
   }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+
+    if (other == null || getClass() != other.getClass()) {
+      return false;
+    }
+
+    ResourceMeasure<V> that = (ResourceMeasure<V>) other;
+    return value.equals(that.value);
+  }
 }

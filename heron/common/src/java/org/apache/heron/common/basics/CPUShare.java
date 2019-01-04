@@ -66,24 +66,6 @@ public final class CPUShare extends ResourceMeasure<Double> {
   }
 
   @Override
-  public int hashCode() {
-    return value.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    }
-    if (!(other instanceof CPUShare)) {
-      return false;
-    }
-
-    CPUShare that = (CPUShare) other;
-    return value.equals(that.value);
-  }
-
-  @Override
   public String toString() {
     return String.format("CPUShare{%.3f}", value);
   }
