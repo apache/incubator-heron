@@ -283,10 +283,45 @@ public class RoundRobinPackingTest {
   }
 
   /**
-   * Test the scenario CPU map config is completely set
+   * Test the scenario CPU map config is completely set and there are exactly enough resource
    */
   @Test
-  public void testCompleteCpuMapRequested() throws Exception {
+  public void testCompleteCpuMapRequestedWithExactlyEnoughResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    double containerCpu = 17;
+
+    // Explicit set component CPU map
+    double boltCpu = 4;
+    double spoutCpu = 4;
+
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentCpu(BOLT_NAME, boltCpu);
+    topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
+
+    TopologyAPI.Topology topologyExplicitCpuMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitCpuMap =
+        getRoundRobinPackingPlan(topologyExplicitCpuMap);
+
+    AssertPacking.assertContainers(packingPlanExplicitCpuMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltCpu, spoutCpu, null);
+    Assert.assertEquals(totalInstances, packingPlanExplicitCpuMap.getInstanceCount());
+  }
+
+  /**
+   * Test the scenario CPU map config is completely set and there are more than enough resource
+   */
+  @Test
+  public void testCompleteCpuMapRequestedWithMoreThanEnoughResource() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
@@ -299,7 +334,7 @@ public class RoundRobinPackingTest {
     // Explicit set resources for container
     double containerCpu = 30;
 
-    // Explicit set component RAM map
+    // Explicit set component CPU map
     double boltCpu = 4;
     double spoutCpu = 4;
 
@@ -315,6 +350,65 @@ public class RoundRobinPackingTest {
     AssertPacking.assertContainers(packingPlanExplicitCpuMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltCpu, spoutCpu, containerCpu);
     Assert.assertEquals(totalInstances, packingPlanExplicitCpuMap.getInstanceCount());
+  }
+
+  /**
+   * Test the scenario CPU map config is completely set and there are less than enough resource
+   */
+  @Test(expected = PackingException.class)
+  public void testCompleteCpuMapRequestedWithLessThanEnoughResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    double containerCpu = 10;
+
+    // Explicit set component CPU map
+    double boltCpu = 4;
+    double spoutCpu = 4;
+
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentCpu(BOLT_NAME, boltCpu);
+    topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
+
+    TopologyAPI.Topology topologyExplicitCpuMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    getRoundRobinPackingPlan(topologyExplicitCpuMap);
+  }
+
+  /**
+   * Test the scenario CPU map config is completely set
+   * and there are exactly enough resource for instances, but not enough for padding
+   */
+  @Test(expected = PackingException.class)
+  public void testCompleteCpuMapRequestedWithoutPaddingResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    double containerCpu = 16;
+
+    // Explicit set component CPU map
+    double boltCpu = 4;
+    double spoutCpu = 4;
+
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentCpu(BOLT_NAME, boltCpu);
+    topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
+
+    TopologyAPI.Topology topologyExplicitCpuMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    getRoundRobinPackingPlan(topologyExplicitCpuMap);
   }
 
   /**
@@ -389,7 +483,7 @@ public class RoundRobinPackingTest {
     topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
-    double containerCpu = 30;
+    double containerCpu = 17;
 
     // Explicit set component CPU map
     double boltCpu = 4;
