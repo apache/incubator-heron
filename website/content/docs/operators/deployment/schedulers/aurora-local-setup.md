@@ -79,8 +79,7 @@ https://github.com/apache/incubator-heron/releases/tag/{{% heronVersion %}}
 
 For example for the {{% heronVersion %}} release the files you need to download For Ubuntu will be the following.
 
-* `heron-client-install-{{% heronVersion %}}-ubuntu.sh`
-* `heron-tools-install-{{% heronVersion %}}-ubuntu.sh`
+* `heron-install-{{% heronVersion %}}-ubuntu.sh`
 
 Optionally - You want need the following for the steps in the blog post
 
@@ -91,8 +90,8 @@ Optionally - You want need the following for the steps in the blog post
 
 
 ```bash
-$ chmod +x heron-client-install-VERSION-PLATFORM.sh
-$ ./heron-client-install-VERSION-PLATFORM.sh --user
+$ chmod +x heron-install-VERSION-PLATFORM.sh
+$ ./heron-install-VERSION-PLATFORM.sh --user
 Heron client installer
 ----------------------
 
