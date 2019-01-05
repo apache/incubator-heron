@@ -348,7 +348,7 @@ public class RoundRobinPackingTest {
         getRoundRobinPackingPlan(topologyExplicitCpuMap);
 
     AssertPacking.assertContainers(packingPlanExplicitCpuMap.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltCpu, spoutCpu, containerCpu);
+        BOLT_NAME, SPOUT_NAME, boltCpu, spoutCpu, null);
     Assert.assertEquals(totalInstances, packingPlanExplicitCpuMap.getInstanceCount());
   }
 

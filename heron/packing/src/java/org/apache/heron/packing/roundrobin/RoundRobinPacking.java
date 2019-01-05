@@ -198,7 +198,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         containerCpu += instanceCpu;
       }
 
-      Resource resource = new Resource(containerCpu, containerRam, containerDiskInBytes);
+      Resource resource = new Resource(Math.max(containerCpu, containerCpuHint),
+          containerRam, containerDiskInBytes);
       PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
           containerId, new HashSet<>(instancePlanMap.values()), resource);
 
