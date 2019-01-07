@@ -58,6 +58,10 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
     this.real = real;
   }
 
+  public StreamletImpl<R> getReal() {
+    return real;
+  }
+
   /**
    * Gets the stream id of this Streamlet.
    * @return the stream id of this Streamlet
@@ -72,8 +76,20 @@ public class StreamletShadow<R> extends StreamletImpl<R> {
    * the real object since shadow object shouldn't have them)
    */
   @Override
+  public StreamletShadow<R> setName(String sName) {
+    real.setName(sName);
+    return this;
+  }
+
+  @Override
   public String getName() {
     return real.getName();
+  }
+
+  @Override
+  public StreamletShadow<R> setNumPartitions(int numPartitions) {
+    real.setNumPartitions(numPartitions);
+    return this;
   }
 
   @Override

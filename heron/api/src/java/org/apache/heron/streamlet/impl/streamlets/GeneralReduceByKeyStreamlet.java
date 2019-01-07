@@ -23,9 +23,9 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
-import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyOperator;
@@ -36,7 +36,7 @@ import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyOperator;
  * GeneralReduceByKeyStreamlet's elements are of KeyValue type where the key is
  * KeyWindowInfo&lt;K&gt; type and the value is of type T.
  */
-public class GeneralReduceByKeyStreamlet<R, K, T> extends KVStreamletImpl<K, T> {
+public class GeneralReduceByKeyStreamlet<R, K, T> extends StreamletImpl<KeyValue<K, T>> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private T identity;

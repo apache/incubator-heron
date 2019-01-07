@@ -23,11 +23,11 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.KeyedWindow;
 import org.apache.heron.streamlet.SerializableBiFunction;
 import org.apache.heron.streamlet.SerializableFunction;
 import org.apache.heron.streamlet.WindowConfig;
-import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.groupings.ReduceByKeyAndWindowCustomGrouping;
 import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOperator;
@@ -40,7 +40,7 @@ import org.apache.heron.streamlet.impl.operators.GeneralReduceByKeyAndWindowOper
  * KeyWindowInfo&lt;K&gt; type and the value is of type T.
  */
 public class GeneralReduceByKeyAndWindowStreamlet<R, K, T>
-    extends KVStreamletImpl<KeyedWindow<K>, T> {
+    extends StreamletImpl<KeyValue<KeyedWindow<K>, T>> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private WindowConfig windowCfg;

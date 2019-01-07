@@ -35,7 +35,6 @@ import org.apache.heron.streamlet.{
   WindowConfig
 }
 import org.apache.heron.streamlet.impl.{
-  KVStreamletImpl => JavaKVStreamletImpl,
   StreamletImpl => JavaStreamletImpl
 }
 import org.apache.heron.streamlet.impl.streamlets.SupplierStreamlet

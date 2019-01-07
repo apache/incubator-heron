@@ -23,8 +23,8 @@ package org.apache.heron.streamlet.impl.streamlets;
 import java.util.Set;
 
 import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.SerializableFunction;
-import org.apache.heron.streamlet.impl.KVStreamletImpl;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 import org.apache.heron.streamlet.impl.operators.KeyByOperator;
 
@@ -32,7 +32,7 @@ import org.apache.heron.streamlet.impl.operators.KeyByOperator;
  * KeyByStreamlet represents a KVStreamlet that is the result of applying key and value extractors
  * on all elements.
  */
-public class KeyByStreamlet<R, K, V> extends KVStreamletImpl<K, V> {
+public class KeyByStreamlet<R, K, V> extends StreamletImpl<KeyValue<K, V>> {
   private StreamletImpl<R> parent;
   private SerializableFunction<R, K> keyExtractor;
   private SerializableFunction<R, V> valueExtractor;
