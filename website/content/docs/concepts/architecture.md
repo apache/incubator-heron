@@ -148,10 +148,9 @@ SMs in containers **C** and **D**, which will lead to the socket buffers in
 those containers filling up, which could lead to throughput collapse.
 
 In a situation like this, Heron's back pressure mechanism will kick in. The **SM**
-in container **A** will send a message to all the other **SMs**. In response, the
-other **SMs** will examine the container's [physical
-plan](../topologies#physical-plan) and cut off inputs from spouts that feed
-bolt **B3** (in this case spout **S1**).
+in container **A** will send a message to all the other **SMs**, then all
+**SMs** will cut off inputs from local spouts and no new data will be accepted
+into the topology.
 
 ![Back Pressure 2](/img/backpressure2.png)
 
