@@ -21,6 +21,7 @@ package org.apache.heron.streamlet.impl.streamlets;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import org.apache.heron.streamlet.KeyValue;
 import org.apache.heron.streamlet.impl.StreamletImpl;
 
 import static org.junit.Assert.assertEquals;
@@ -34,9 +35,9 @@ import static org.mockito.Mockito.verify;
 /**
  * Unit tests for {@link StreamletShadow}
  */
-public class StreamletShadowTest {
+public class KVStreamletShadowTest {
   @Mock
-  private StreamletImpl<Double> mockReal = mock(StreamletImpl.class);
+  private StreamletImpl<KeyValue<String, Double>> mockReal = mock(StreamletImpl.class);
 
   @Mock
   private StreamletImpl<Double> mockChild = mock(StreamletImpl.class);
@@ -50,24 +51,15 @@ public class StreamletShadowTest {
     doReturn(mockReal).when(mockReal).setNumPartitions(2);
     doReturn("real_stream").when(mockReal).getStreamId();
 
-    StreamletShadow<Double> shadow = new StreamletShadow(mockReal);
+    KVStreamletShadow<String, Double> shadow = new KVStreamletShadow(mockReal);
     assertEquals(shadow.getName(), "real_name");
     assertEquals(shadow.getNumPartitions(), 1);
-    assertEquals(shadow.getStreamId(), "real_stream");
-
-    // set a different stream id
-    StreamletShadow<Double> shadow2 = new StreamletShadow(mockReal) {
-      @Override
-      public String getStreamId() {
-        return "shadow_stream";
-      }
-    };
-    assertEquals(shadow2.getName(), "real_name");
-    assertEquals(shadow2.getNumPartitions(), 1);
-    assertEquals(shadow2.getStreamId(), "shadow_stream");
 
     // Set name/partition should be applied to the real object
-    shadow.setName("shadow_name").setNumPartitions(2);
+    KVStreamletShadow<String, Double> shadow2 = new KVStreamletShadow(mockReal)
+        .setName("shadow_name")
+        .setNumPartitions(2);
+
     verify(mockReal, times(1)).setName("shadow_name");
     verify(mockReal, times(1)).setNumPartitions(2);
 
