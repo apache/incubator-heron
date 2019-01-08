@@ -48,6 +48,7 @@ RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
     && tar -xzf /heron/$ZK_DIST.tar.gz -C /opt \
     && rm -r /heron/$ZK_DIST.tar.gz \
     && mv /opt/$ZK_DIST /opt/zookeeper \
+    && rm -rf /heron/heron-install.sh \
     && rm -rf /opt/zookeeper/CHANGES.txt \
     /opt/zookeeper/README.txt \
     /opt/zookeeper/NOTICE.txt \
