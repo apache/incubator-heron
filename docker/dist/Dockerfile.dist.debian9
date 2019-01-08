@@ -36,7 +36,7 @@ WORKDIR /heron
 RUN /heron/heron-install.sh && \
     tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron && \
     rm -rf /heron/heron-core.tar.gz && \
-    rm -rf /heron/heron-tools-install.sh && \
+    rm -rf /heron/heron-install.sh && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-local-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-slurm-scheduler.jar
