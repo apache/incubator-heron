@@ -393,6 +393,7 @@
           return d.color;
         })
         .on("click", planController.logicalComponentClicked)
+        .on("dblclick", planController.logicalComponentClicked)
         .on("mouseover", planController.logicalComponentHoverOver)
         .on("mouseout", planController.logicalComponentHoverOut);
 
@@ -402,6 +403,7 @@
         .attr("y", function (d) { return d.cy - d.r - 10; })
         .attr("class", "fade")
         .style("text-anchor", "middle")
+        .style("user-select", "all")
         .text(function (d) {
           if (d.isReal) {
             return d.name;

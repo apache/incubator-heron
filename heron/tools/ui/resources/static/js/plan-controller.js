@@ -184,8 +184,8 @@ function PlanController(baseUrl, cluster, environ, toponame, physicalPlan, logic
     highlightFocusedElements();
   };
 
-  // treat any click that bubbles up unhandled as intent to clear the focus
-  $(document).on('click', ".plans .graphics", function () {
+  // treat double click as intent to clear the focus
+  $(document).on('dblclick', ".plans .graphics", function () {
     window.location.hash = "/";
   });
   $(document).on('click', ".reset", function () {

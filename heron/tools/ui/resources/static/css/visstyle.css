@@ -29,7 +29,7 @@
 .reset {
   position: absolute;
   top: 1em;
-  right: 1em;
+  left: 1em;
   z-index: 100;
 }
 
