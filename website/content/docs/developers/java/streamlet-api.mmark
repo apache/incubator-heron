@@ -166,7 +166,14 @@ Operation | Description | Example
 [`clone`](#clone-operations) | Creates any number of identical copies of a streamlet | Create three separate streamlets from the same source
 [`transform`](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations) |
 [`join`](#join-operations) | Create a new streamlet by combining two separate key-value streamlets into one on the basis of each element's key. Supported Join Types: Inner (as default), Outer-Left, Outer-Right and Outer. | Combine key-value pairs listing current scores (e.g. `("h4x0r", 127)`) for each user into a single per-user stream
-[`reduceByKeyAndWindow`](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a time window, and in accordance with a reduce function that you apply to all the accumulated values | Count the number of times a value has been encountered within a specified time window
+[`keyBy`](#key-by-operations) | Returns a new key-value streamlet by applying the supplied extractors to each element in the original streamlet |
+[`reduceByKey`](#reduce-by-key-operations) |  Produces a streamlet of key-value on each key, and in accordance with a reduce function that you apply to all the accumulated values | Count the number of times a value has been encountered
+[`reduceByKeyAndWindow`](#reduce-by-key-and-window-operations) |  Produces a streamlet of key-value on each key, within a time window, and in accordance with a reduce function that you apply to all the accumulated values | Count the number of times a value has been encountered within a specified time window
+[`countByKey`](#count-by-key-operations) | A special reduce operation of counting number of tuples on each key | Count the number of times a value has been encountered
+[`countByKeyAndWindow`](#count-by-key-and-window-operations) | A special reduce operation of counting number of tuples on each key, within a time window | Count the number of times a value has been encountered within a specified time window
+[`split`](#split-operations) | Split a streamlet into multiple streamlets with different id |
+[`withStream`](#with-stream-operations) | Select a stream with id from a streamlet that contains multiple streams |
+[`applyOperator`](#apply-operator-operations) | Returns a new streamlet by applying an user defined operator to the original streamlet | Apply an existing bolt as an operator
 [`repartition`](#repartition-operations) | Create a new streamlet by applying a new parallelism level to the original streamlet | Increase the parallelism of a streamlet from 5 to 10
 [`toSink`](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc. | Store processing graph results in an AWS Redshift table
 [`log`](#log-operations) | Logs the final results of a processing graph to stdout. This *must* be the last step in the graph. |
@@ -325,6 +332,56 @@ In this case, the resulting streamlet would consist of an indefinite stream with
 
 > The effect of a join operation is to create a new streamlet *for each key*.
 
+### Key by operations
+
+Key by operations convert each item in the original streamlet into a key-value pair and return a new streamlet. Here is an example:
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .keyBy(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (get the length of each word)
+        word -> workd.length()
+    )
+    // The result is logged
+    .log();
+```
+
+### Reduce by key operations
+
+You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/streams/reduction.html) operations to streamlets by specifying:
+
+* a key extractor that determines what counts as the key for the streamlet
+* a value extractor that determines which final value is chosen for each element of the streamlet
+* a reduce function that produces a single value for each key in the streamlet
+
+Reduce by key operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value). Here's an example:
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .reduceByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (each word appears only once, hence the value is always 1)
+        word -> 1,
+        // Reduce operation (a running sum)
+        (x, y) -> x + y
+    )
+    // The result is logged
+    .log();
+```
+
 ### Reduce by key and window operations
 
 You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/streams/reduction.html) operations to streamlets by specifying:
@@ -355,6 +412,92 @@ Builder builder = Builder.newBuilder()
         // Reduce operation (a running sum)
         (x, y) -> x + y
     )
+    // The result is logged
+    .log();
+```
+
+### Count by key operations
+
+Count by key operations extract keys from data in the original streamlet and count the number of times a key has been encountered. Here's an example:
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .countByKeyAndWindow(word -> word)
+    // The result is logged
+    .log();
+```
+
+### Count by key and window operations
+
+Count by key and window operations extract keys from data in the original streamlet and count the number of times a key has been encountered within each [time window](../../../concepts/topologies#window-operations). Here's an example:
+
+```java
+import java.util.Arrays;
+
+import org.apache.heron.streamlet.WindowConfig;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .countByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+    )
+    // The result is logged
+    .log();
+```
+
+### Split operations
+
+Split operations split a streamlet into multiple streamlets with different id by getting the corresponding stream ids from each item in the origina streamlet. Here is an example:
+
+```java
+import java.util.Arrays;
+
+Map<String, SerializablePredicate<String>> splitter = new HashMap();
+    splitter.put("long_word", s -> s.length() >= 4);
+    splitter.put("short_word", s -> s.length() < 4);
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    // Splits the stream into streams of long and short words
+    .split(splitter)
+    // Choose the stream of the short words
+    .withStream("short_word")
+    // The result is logged
+    .log();
+```
+
+### With stream operations
+
+With stream operations select a stream with id from a streamlet that contains multiple streams. They are often used with [split](#split-operations).
+
+### Apply operator operations
+
+Apply operator operations apply a user defined operator (like a bolt) to each element of the original streamlet and return a new streamlet. Here is an example:
+
+```java
+import java.util.Arrays;
+
+private class MyBoltOperator extends MyBolt implements IStreamletRichOperator<Double, Double> {
+}
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    // Apply user defined operation
+    .applyOperator(new MyBoltOperator())
     // The result is logged
     .log();
 ```
