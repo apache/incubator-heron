@@ -32,6 +32,8 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.CPUShare;
+import org.apache.heron.common.basics.ResourceMeasure;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -84,17 +86,23 @@ import org.apache.heron.spi.packing.Resource;
 public class RoundRobinPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
 
-  // TODO(mfu): Read these values from Config
-  private static final ByteAmount DEFAULT_DISK_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(12);
-  private static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1;
-  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
   @VisibleForTesting
   static final ByteAmount DEFAULT_RAM_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(2);
   @VisibleForTesting
+  static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1.0;
+  private static final ByteAmount DEFAULT_DISK_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(12);
+
+  @VisibleForTesting
   static final ByteAmount DEFAULT_DAEMON_PROCESS_RAM_PADDING = ByteAmount.fromGigabytes(1);
+  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
 
   // Use as a stub as default number value when getting config value
-  private static final ByteAmount NOT_SPECIFIED_NUMBER_VALUE = ByteAmount.fromBytes(-1);
+  private static final ByteAmount NOT_SPECIFIED_BYTE_AMOUNT = ByteAmount.fromBytes(-1);
+  private static final double NOT_SPECIFIED_CPU_SHARE = -1.0;
+
+  private static final String RAM = "RAM";
+  private static final String CPU = "CPU";
+  private static final String DISK = "DISK";
 
   private TopologyAPI.Topology topology;
 
@@ -102,6 +110,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
   private double instanceCpuDefault;
   private ByteAmount instanceDiskDefault;
   private ByteAmount containerRamPadding = DEFAULT_RAM_PADDING_PER_CONTAINER;
+  private double containerCpuPadding = DEFAULT_CPU_PADDING_PER_CONTAINER;
 
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
@@ -133,16 +142,36 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     // Get the RAM map for every instance
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
-        getInstancesRamMapInContainer(roundRobinAllocation);
+        calculateInstancesResourceMapInContainer(
+        roundRobinAllocation,
+        TopologyUtils.getComponentRamMapConfig(topology),
+        getContainerRamHint(roundRobinAllocation),
+        instanceRamDefault,
+        containerRamPadding,
+        ByteAmount.ZERO,
+        NOT_SPECIFIED_BYTE_AMOUNT,
+        RAM);
+
+    // Get the CPU map for every instance
+    Map<Integer, Map<InstanceId, CPUShare>> instancesCpuMap =
+        calculateInstancesResourceMapInContainer(
+        roundRobinAllocation,
+        CPUShare.convertDoubleMapToCpuShareMap(TopologyUtils.getComponentCpuMapConfig(topology)),
+        CPUShare.fromDouble(getContainerCpuHint(roundRobinAllocation)),
+        CPUShare.fromDouble(instanceCpuDefault),
+        CPUShare.fromDouble(containerCpuPadding),
+        CPUShare.fromDouble(0.0),
+        CPUShare.fromDouble(NOT_SPECIFIED_CPU_SHARE),
+        CPU);
 
     ByteAmount containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
-    double containerCpu = getContainerCpuHint(roundRobinAllocation);
+    double containerCpuHint = getContainerCpuHint(roundRobinAllocation);
     ByteAmount containerRamHint = getContainerRamHint(roundRobinAllocation);
 
-    LOG.info(String.format("Pack internal: container CPU hint: %f, RAM hint: %s, disk hint: %s.",
-        containerCpu,
-        containerDiskInBytes.toString(),
-        containerRamHint.toString()));
+    LOG.info(String.format("Pack internal: container CPU hint: %.3f, RAM hint: %s, disk hint: %s.",
+        containerCpuHint,
+        containerRamHint.toString(),
+        containerDiskInBytes.toString()));
 
     // Construct the PackingPlan
     Set<PackingPlan.ContainerPlan> containerPlans = new HashSet<>();
@@ -152,31 +181,39 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       // Calculate the resource required for single instance
       Map<InstanceId, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
       ByteAmount containerRam = containerRamPadding;
+      double containerCpu = containerCpuPadding;
+
       for (InstanceId instanceId : instanceList) {
         ByteAmount instanceRam = instancesRamMap.get(containerId).get(instanceId);
+        Double instanceCpu = instancesCpuMap.get(containerId).get(instanceId).getValue();
 
-        // Currently not yet support disk or CPU config for different components,
-        // so just use the default value.
+        // Currently not yet support disk config for different components, just use the default.
         ByteAmount instanceDisk = instanceDiskDefault;
-        double instanceCpu = instanceCpuDefault;
 
         Resource resource = new Resource(instanceCpu, instanceRam, instanceDisk);
 
         // Insert it into the map
         instancePlanMap.put(instanceId, new PackingPlan.InstancePlan(instanceId, resource));
         containerRam = containerRam.plus(instanceRam);
+        containerCpu += instanceCpu;
       }
 
-      Resource resource = new Resource(containerCpu, containerRam, containerDiskInBytes);
+      Resource resource = new Resource(Math.max(containerCpu, containerCpuHint),
+          containerRam, containerDiskInBytes);
       PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
           containerId, new HashSet<>(instancePlanMap.values()), resource);
 
       containerPlans.add(containerPlan);
+
+      LOG.info(String.format("Pack internal finalized: container#%d CPU: %f, RAM: %s, disk: %s.",
+          containerId,
+          resource.getCpu(),
+          resource.getRam().toString(),
+          resource.getDisk().toString()));
     }
 
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlans);
 
-    // Check whether it is a valid PackingPlan
     validatePackingPlan(plan);
     return plan;
   }
@@ -211,68 +248,74 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         daemonProcessPadding);
   }
 
-  /**
-   * Calculate the RAM required by any instance in the container
-   *
-   * @param allocation the allocation of instances in different container
-   * @return A map: (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
-   */
-  private Map<Integer, Map<InstanceId, ByteAmount>> getInstancesRamMapInContainer(
-      Map<Integer, List<InstanceId>> allocation) {
-    Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
-    Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMapInContainer = new HashMap<>();
-    ByteAmount containerRamHint = getContainerRamHint(allocation);
+  @SuppressWarnings("unchecked")
+  private <T extends ResourceMeasure> Map<Integer, Map<InstanceId, T>>
+            calculateInstancesResourceMapInContainer(
+                Map<Integer, List<InstanceId>> allocation,
+                Map<String, T> resMap,
+                T containerResHint,
+                T instanceResDefault,
+                T containerResPadding,
+                T zero,
+                T notSpecified,
+                String resourceType) {
+    Map<Integer, Map<InstanceId, T>> instancesResMapInContainer = new HashMap<>();
 
     for (int containerId : allocation.keySet()) {
       List<InstanceId> instanceIds = allocation.get(containerId);
-      Map<InstanceId, ByteAmount> ramInsideContainer = new HashMap<>();
-      instancesRamMapInContainer.put(containerId, ramInsideContainer);
-      List<InstanceId> instancesToBeAccounted = new ArrayList<>();
+      Map<InstanceId, T> resInsideContainer = new HashMap<>();
+      instancesResMapInContainer.put(containerId, resInsideContainer);
+      List<InstanceId> unspecifiedInstances = new ArrayList<>();
 
-      // Calculate the actual value
-      ByteAmount usedRam = ByteAmount.ZERO;
+      // Register the instance resource allocation and calculate the used resource so far
+      T usedRes = zero;
       for (InstanceId instanceId : instanceIds) {
         String componentName = instanceId.getComponentName();
-        if (ramMap.containsKey(componentName)) {
-          ByteAmount ram = ramMap.get(componentName);
-          ramInsideContainer.put(instanceId, ram);
-          usedRam = usedRam.plus(ram);
+        if (resMap.containsKey(componentName)) {
+          T res = resMap.get(componentName);
+          resInsideContainer.put(instanceId, res);
+          usedRes = (T) usedRes.plus(res);
         } else {
-          instancesToBeAccounted.add(instanceId);
+          unspecifiedInstances.add(instanceId);
         }
       }
 
-      // Now we have calculated RAM for instances specified in ComponentRamMap
-      // Then to calculate RAM for the rest instances
-      int instancesToAllocate = instancesToBeAccounted.size();
+      // Validate instance resources specified so far don't violate container-level constraint
+      if (!containerResHint.equals(notSpecified)
+          && usedRes.greaterThan(containerResHint.minus(containerResPadding))) {
+        throw new PackingException(String.format("Invalid packing plan generated. "
+                + "Total instance %s in a container (%s) have exceeded "
+                + "the container-level constraint of %s.",
+            resourceType, usedRes.toString(), containerResHint));
+      }
 
-      if (instancesToAllocate != 0) {
-        ByteAmount individualInstanceRam = instanceRamDefault;
+      // calculate resource for the remaining unspecified instances if any
+      if (!unspecifiedInstances.isEmpty()) {
+        T individualInstanceRes = instanceResDefault;
 
-        // The RAM map is partially set. We need to calculate RAM for the rest
+        // If container resource is specified
+        if (!containerResHint.equals(notSpecified)) {
+          // discount resource for heron internal process (padding) and used (usedRes)
+          T remainingRes = (T) containerResHint.minus(containerResPadding).minus(usedRes);
 
-        // We have different strategy depending on whether container RAM is specified
-        // If container RAM is specified
-        if (!containerRamHint.equals(NOT_SPECIFIED_NUMBER_VALUE)) {
-          // remove RAM for heron internal process
-          ByteAmount remainingRam =
-              containerRamHint.minus(containerRamPadding).minus(usedRam);
+          if (remainingRes.lessOrEqual(zero)) {
+            throw new PackingException(String.format("Invalid packing plan generated. "
+                + "No enough %s to allocate for unspecified instances", resourceType));
+          }
 
-          // Split remaining RAM evenly
-          individualInstanceRam = remainingRam.divide(instancesToAllocate);
+          // Split remaining resource evenly
+          individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
         }
 
-        // Put the results in instancesRam
-        for (InstanceId instanceId : instancesToBeAccounted) {
-          ramInsideContainer.put(instanceId, individualInstanceRam);
+        // Put the results in resInsideContainer
+        for (InstanceId instanceId : unspecifiedInstances) {
+          resInsideContainer.put(instanceId, individualInstanceRes);
         }
       }
     }
 
-    return instancesRamMapInContainer;
+    return instancesResMapInContainer;
   }
-
 
   /**
    * Get the instances' allocation basing on round robin algorithm
@@ -288,7 +331,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     }
 
     for (int i = 1; i <= numContainer; ++i) {
-      allocation.put(i, new ArrayList<InstanceId>());
+      allocation.put(i, new ArrayList<>());
     }
 
     int index = 1;
@@ -367,7 +410,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     return TopologyUtils.getConfigWithDefault(
         topologyConfig, org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
-        NOT_SPECIFIED_NUMBER_VALUE);
+        NOT_SPECIFIED_BYTE_AMOUNT);
   }
 
   /**

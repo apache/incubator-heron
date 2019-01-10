@@ -23,7 +23,9 @@ import org.apache.heron.common.basics.ByteAmount;
 
 public final class ExampleResources {
 
+  static final long DEFAULT_RAM_PADDING_PER_CONTAINER = 2 * 1024;
   static final long COMPONENT_RAM_MB = 1024;
+  static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1.0;
 
   static ByteAmount getComponentRam() {
     return ByteAmount.fromMegabytes(COMPONENT_RAM_MB);
@@ -35,7 +37,13 @@ public final class ExampleResources {
 
   static ByteAmount getContainerRam(int components, int containers) {
     final int componentsPerContainer = Math.max(components / containers, 1);
-    return ByteAmount.fromMegabytes(COMPONENT_RAM_MB * componentsPerContainer);
+    return ByteAmount.fromMegabytes(COMPONENT_RAM_MB * componentsPerContainer
+        + DEFAULT_RAM_PADDING_PER_CONTAINER);
+  }
+
+  static double getContainerCpu(int components, int containers) {
+    final int componentsPerContainer = Math.max(components / containers, 1);
+    return componentsPerContainer + DEFAULT_CPU_PADDING_PER_CONTAINER;
   }
 
   private ExampleResources() {
