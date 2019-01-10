@@ -54,8 +54,8 @@ var TopologyItem = React.createClass({
          <td className="col-md-3 break-all"><a className="toponame" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
          <td className="col-md-1 topostatus">{topology.status}</td>
          <td className="col-md-1 topocluster">{displaycluster}</td>
-         <td className="col-md-1 topoenviron">{displayenv}</td>
          <td className="col-md-1 toporunrole break-all">{topology.role}</td>
+         <td className="col-md-1 topoenviron">{displayenv}</td>
          <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
@@ -182,11 +182,11 @@ var TopologyTable = React.createClass({
               <th onClick={sortBy("cluster")} className={sortClass("cluster")}>
                 Cluster
               </th>
-              <th onClick={sortBy("environ")} className={sortClass("environ")}>
-                Environ
-              </th>
               <th onClick={sortBy("role")} className={sortClass("role")}>
                 Role
+              </th>
+              <th onClick={sortBy("environ")} className={sortClass("environ")}>
+                Environ
               </th>
               <th onClick={sortBy("release_version")} className={sortClass("release_version")}>
                 Version
