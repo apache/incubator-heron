@@ -165,6 +165,18 @@ def add_extra_launch_classpath(parser):
       help='Additional JVM class path for launching topology')
   return parser
 
+def add_release_yaml_file(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--release-yaml-file',
+      default="",
+      help='YAML file that contains release info. Default value is the '
+           'path of the release file in this CLI')
+  return parser
+
 def add_dry_run(parser):
   '''
   :param parser:
