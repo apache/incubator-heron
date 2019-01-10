@@ -346,10 +346,10 @@ public class RoundRobinPackingTest {
 
 
   /**
-   * test re-packing of instances
+   * test re-packing with same total instances
    */
   @Test
-  public void testRePacking() throws Exception {
+  public void testRepackingWithSameTotalInstances() throws Exception {
     int numContainers = 2;
     int componentParallelism = 4;
 
@@ -386,6 +386,94 @@ public class RoundRobinPackingTest {
     }
     Assert.assertEquals(componentParallelism - 1, spoutCount);
     Assert.assertEquals(componentParallelism + 1, boltCount);
+  }
+
+  /**
+   * test re-packing with more total instances
+   */
+  @Test
+  public void testRepackingWithMoreTotalInstances() throws Exception {
+    int numContainers = 2;
+    int componentParallelism = 4;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    TopologyAPI.Topology topology =
+        getTopology(componentParallelism, componentParallelism, topologyConfig);
+
+    int numInstance = TopologyUtils.getTotalInstance(topology);
+    // Two components
+    Assert.assertEquals(2 * componentParallelism, numInstance);
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, +1);
+    componentChanges.put(BOLT_NAME,  +1);
+    PackingPlan output = getRoundRobinRePackingPlan(topology, componentChanges);
+    Assert.assertEquals(numContainers + 1, output.getContainers().size());
+    Assert.assertEquals((Integer) (numInstance + 2), output.getInstanceCount());
+
+    int spoutCount = 0;
+    int boltCount = 0;
+    for (PackingPlan.ContainerPlan container : output.getContainers()) {
+      Assert.assertTrue((double) container.getInstances().size()
+          <= (double) numInstance / numContainers);
+
+      for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
+        if (SPOUT_NAME.equals(instancePlan.getComponentName())) {
+          spoutCount++;
+        } else if (BOLT_NAME.equals(instancePlan.getComponentName())) {
+          boltCount++;
+        }
+      }
+    }
+    Assert.assertEquals(componentParallelism + 1, spoutCount);
+    Assert.assertEquals(componentParallelism + 1, boltCount);
+  }
+
+  /**
+   * test re-packing with fewer total instances
+   */
+  @Test
+  public void testRepackingWithFewerTotalInstances() throws Exception {
+    int numContainers = 2;
+    int componentParallelism = 4;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    TopologyAPI.Topology topology =
+        getTopology(componentParallelism, componentParallelism, topologyConfig);
+
+    int numInstance = TopologyUtils.getTotalInstance(topology);
+    // Two components
+    Assert.assertEquals(2 * componentParallelism, numInstance);
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, -2);
+    componentChanges.put(BOLT_NAME,  -2);
+    PackingPlan output = getRoundRobinRePackingPlan(topology, componentChanges);
+    Assert.assertEquals(numContainers - 1, output.getContainers().size());
+    Assert.assertEquals((Integer) (numInstance - 4), output.getInstanceCount());
+
+    int spoutCount = 0;
+    int boltCount = 0;
+    for (PackingPlan.ContainerPlan container : output.getContainers()) {
+      Assert.assertTrue((double) container.getInstances().size()
+          <= (double) numInstance / numContainers);
+
+      for (PackingPlan.InstancePlan instancePlan : container.getInstances()) {
+        if (SPOUT_NAME.equals(instancePlan.getComponentName())) {
+          spoutCount++;
+        } else if (BOLT_NAME.equals(instancePlan.getComponentName())) {
+          boltCount++;
+        }
+      }
+    }
+    Assert.assertEquals(componentParallelism - 2, spoutCount);
+    Assert.assertEquals(componentParallelism - 2, boltCount);
   }
 
   private static void assertComponentCount(
