@@ -31,6 +31,7 @@ from query import QueryHandler
 # pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
 TOPOLOGIES_URL_FMT          = "%s/topologies"
+TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
 EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
 LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
@@ -138,7 +139,7 @@ def get_topologies_states():
   Get the list of topologies and their states
   :return:
   '''
-  request_url = create_url(TOPOLOGIES_URL_FMT) + "/states"
+  request_url = create_url(TOPOLOGIES_STATS_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
