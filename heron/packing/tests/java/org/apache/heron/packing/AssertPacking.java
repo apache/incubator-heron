@@ -42,6 +42,8 @@ import static org.junit.Assert.assertTrue;
  */
 public final class AssertPacking {
 
+  private static final double DELTA = 0.1;
+
   private AssertPacking() { }
 
   /**
@@ -55,18 +57,17 @@ public final class AssertPacking {
                                       ByteAmount notExpectedContainerRam) {
     boolean boltFound = false;
     boolean spoutFound = false;
-    List<Integer> expectedInstanceIndecies = new ArrayList<>();
-    List<Integer> foundInstanceIndecies = new ArrayList<>();
+    List<Integer> expectedInstanceIndices = new ArrayList<>();
+    List<Integer> foundInstanceIndices = new ArrayList<>();
     int expectedInstanceIndex = 1;
     // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       if (notExpectedContainerRam != null) {
-        assertNotEquals(
-            notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
+        assertNotEquals(notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
       }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        expectedInstanceIndecies.add(expectedInstanceIndex++);
-        foundInstanceIndecies.add(instancePlan.getTaskId());
+        expectedInstanceIndices.add(expectedInstanceIndex++);
+        foundInstanceIndices.add(instancePlan.getTaskId());
         if (instancePlan.getComponentName().equals(boltName)) {
           assertEquals("Unexpected bolt RAM", expectedBoltRam, instancePlan.getResource().getRam());
           boltFound = true;
@@ -81,9 +82,52 @@ public final class AssertPacking {
     assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
     assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
 
-    Collections.sort(foundInstanceIndecies);
+    Collections.sort(foundInstanceIndices);
     assertEquals("Unexpected instance global id set found.",
-        expectedInstanceIndecies, foundInstanceIndecies);
+        expectedInstanceIndices, foundInstanceIndices);
+  }
+
+  /**
+   * Verifies that the containerPlan has at least one bolt named boltName with CPU equal to
+   * expectedBoltCpu and likewise for spouts. If notExpectedContainerCpu is not null, verifies that
+   * the container CPU is not that.
+   */
+  public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
+                                      String boltName, String spoutName,
+                                      Double expectedBoltCpu, Double expectedSpoutCpu,
+                                      Double notExpectedContainerCpu) {
+    boolean boltFound = false;
+    boolean spoutFound = false;
+    List<Integer> expectedInstanceIndices = new ArrayList<>();
+    List<Integer> foundInstanceIndices = new ArrayList<>();
+    int expectedInstanceIndex = 1;
+    // CPU for bolt should be the value in component CPU map
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      if (notExpectedContainerCpu != null) {
+        assertNotEquals(notExpectedContainerCpu, containerPlan.getRequiredResource().getCpu());
+      }
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        expectedInstanceIndices.add(expectedInstanceIndex++);
+        foundInstanceIndices.add(instancePlan.getTaskId());
+        if (instancePlan.getComponentName().equals(boltName)) {
+          assertEquals("Unexpected bolt CPU",
+              expectedBoltCpu.doubleValue(), instancePlan.getResource().getCpu(), DELTA);
+          boltFound = true;
+        }
+        if (instancePlan.getComponentName().equals(spoutName)) {
+          assertEquals(
+              "Unexpected spout CPU",
+              expectedSpoutCpu.doubleValue(), instancePlan.getResource().getCpu(), DELTA);
+          spoutFound = true;
+        }
+      }
+    }
+    assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
+    assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
+
+    Collections.sort(foundInstanceIndices);
+    assertEquals("Unexpected instance global id set found.",
+        expectedInstanceIndices, foundInstanceIndices);
   }
 
   /**
