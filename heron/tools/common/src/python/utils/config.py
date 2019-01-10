@@ -211,7 +211,7 @@ def get_heron_lib_dir():
 def get_heron_release_file():
   """
   This will provide the path to heron release.yaml file
-  :return: absolute path of heron release.yaml file
+  :return: absolute path of heron release.yaml file in CLI
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
 

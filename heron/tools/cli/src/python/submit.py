@@ -75,6 +75,7 @@ def create_parser(subparsers):
   cli_args.add_deactive_deploy(parser)
   cli_args.add_dry_run(parser)
   cli_args.add_extra_launch_classpath(parser)
+  cli_args.add_release_yaml_file(parser)
   cli_args.add_service_url(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
@@ -98,7 +99,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   topology_pkg_path = config.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
   # get the release yaml file
-  release_yaml_file = config.get_heron_release_file()
+  release_yaml_file = cl_args['release_yaml_file']
 
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
@@ -455,6 +456,9 @@ def run(command, parser, cl_args, unknown_args):
   opts.set_config('cmdline.topology.role', cl_args['role'])
   opts.set_config('cmdline.topology.environment', cl_args['environ'])
 
+  # Use CLI release yaml file if the release_yaml_file config is empty
+  if not cl_args['release_yaml_file']:
+    cl_args['release_yaml_file'] = config.get_heron_release_file()
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:
