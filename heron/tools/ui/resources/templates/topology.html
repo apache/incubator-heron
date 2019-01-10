@@ -127,11 +127,12 @@ under the License.
       <thead>
         <th>Topology name</th>
         <th>Status</th>
-        <th>DC</th>
+        <th>Cluster</th>
         <th>Role</th>
         <th>Environment</th>
+        <th>Version</th>
         <th>Launched at</th>
-        <th>Launched by</th>
+        <th>Submitted by</th>
         <th>Links</th>
       </thead>
 
@@ -142,6 +143,7 @@ under the License.
           <td>{{cluster}}</td>
           <td>{{execution_state['role']}}</td>
           <td>{{environ}}</td>
+          <td>{{execution_state['release_version']}}</td>
           <td>{{launched}}</td>
           <td>{{execution_state['submission_user']}}</td>
           <td>
