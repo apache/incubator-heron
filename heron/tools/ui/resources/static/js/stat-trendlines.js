@@ -207,10 +207,8 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
     } else if (instance === '*') {
       d3.select('#trendline-title').text(name + ' Metrics');
     } else {
-      d3.select('#trendline-title').text('Instance Metrics');
-    }
+      d3.select('#trendline-title').text(instance + ' Metrics');
 
-    if (instance !== '*') {
       container = instance.split("_")[1];
       target
         .append('div')
@@ -220,7 +218,6 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
           '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/filestats/' + cluster + '/' + environ + '/' + toponame + '/' + container + '">job</a>',
           '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
           '<br>',
-          instance
         ].join(' '));
     }
   };
