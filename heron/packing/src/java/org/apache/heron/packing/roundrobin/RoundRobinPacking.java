@@ -433,10 +433,18 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     }
   }
 
-  /*
-   * read the current packing plan with update parallelism to calculate a new packing plan
-   * the packing algorithm packInternal() is shared with pack()
+  /**
+   * Read the current packing plan with update parallelism to calculate a new packing plan.
+   * This method should determine a new number of containers based on the updated parallism
+   * while remaining the number of instances per container <= that of the old packing plan.
+   * The packing algorithm packInternal() is shared with pack()
    * delegate to packInternal() with the new container count and component parallelism
+   *
+   * @param currentPackingPlan Existing packing plan
+   * @param componentChanges Map &lt; componentName, new component parallelism &gt;
+   * that contains the parallelism for each component whose parallelism has changed.
+   * @return new packing plan
+   * @throws PackingException
    */
   @Override
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges)
@@ -445,11 +453,10 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     int initialNumInstance = TopologyUtils.getTotalInstance(topology);
     double initialNumInstancePerContainer = (double) initialNumInstance / initialNumContainer;
 
-    Map<String, Integer> currentComponentParallelism = currentPackingPlan.getComponentCounts();
     Map<String, Integer> newComponentParallelism =
         getNewComponentParallelism(currentPackingPlan, componentChanges);
 
-    int newNumInstance = TopologyUtils.getTotalInstance(currentComponentParallelism);
+    int newNumInstance = TopologyUtils.getTotalInstance(newComponentParallelism);
     int newNumContainer = (int) Math.ceil(newNumInstance / initialNumInstancePerContainer);
     return packInternal(newNumContainer, newComponentParallelism);
   }
@@ -464,6 +471,20 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     return currentComponentParallelism;
   }
 
+  /**
+   * Read the current packing plan with update parallelism and number of containers
+   * to calculate a new packing plan.
+   * The packing algorithm packInternal() is shared with pack()
+   * delegate to packInternal() with the new container count and component parallelism
+   *
+   * @param currentPackingPlan Existing packing plan
+   * @param containers &lt; the new number of containers for the topology
+   * specified by the user
+   * @param componentChanges Map &lt; componentName, new component parallelism &gt;
+   * that contains the parallelism for each component whose parallelism has changed.
+   * @return new packing plan
+   * @throws PackingException
+   */
   @Override
   public PackingPlan repack(PackingPlan currentPackingPlan, int containers, Map<String, Integer>
       componentChanges) throws PackingException {
