@@ -184,10 +184,6 @@
           planController.physicalComponentClicked(d);
         });
 
-
-
-    // put tooltip on top of everything
-    d3.selectAll('.d3-tip.main').remove();
     svg.call(tip);
   }
 
