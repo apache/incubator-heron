@@ -51,7 +51,7 @@ echo "Running build in container"
 docker run \
     --rm \
     -e TARGET_PLATFORM=$TARGET_PLATFORM \
-    -e SCRATCH_DIR="/scratch" \
+    -e SCRATCH_DIR="/$HERON_VERSION" \
     -e SOURCE_TARBALL="/src.tar.gz" \
     -e OUTPUT_DIRECTORY="/dist" \
     -e HERON_VERSION=$HERON_VERSION \
