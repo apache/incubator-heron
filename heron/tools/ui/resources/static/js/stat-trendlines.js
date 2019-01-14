@@ -47,7 +47,6 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
 
     var svg = outerSvg.append('g');
     var svgTop = outerSvg.append('g');
-    d3.selectAll('.d3-tip.instance').remove();
     var tip = d3.tip()
         .attr('class', 'd3-tip instance text-center')
         .offset([-8, 0])
