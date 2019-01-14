@@ -86,8 +86,8 @@ jobs = [
       ),
       initial_interval_secs=30,
       interval_secs=10,
-      max_consecutive_failures=1,
-      timeout_secs=1
+      max_consecutive_failures=2,
+      timeout_secs=5
     )
   )
 ]
