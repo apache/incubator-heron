@@ -740,6 +740,9 @@ class HeronExecutor(object):
     '''
     retval = {}
     instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
+    if instance_plans is None:
+      return retval
+
     instance_info = []
     for instance_plan in instance_plans:
       global_task_id = instance_plan.task_id
@@ -844,8 +847,10 @@ class HeronExecutor(object):
       if container_plan.id == container_id:
         this_container_plan = container_plan
 
-    # make sure that our shard id is a valid one
-    assert this_container_plan is not None
+    # when the executor starts by `heron update` in newly added container,
+    # there is no plan for this container. return None to bypass instance processes
+    if this_container_plan is None:
+      return None
     return this_container_plan.instance_plans
 
   # Returns the common heron support processes that all containers get, like the heron shell
