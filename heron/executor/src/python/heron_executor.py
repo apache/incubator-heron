@@ -740,9 +740,6 @@ class HeronExecutor(object):
     '''
     retval = {}
     instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
-    if instance_plans is None:
-      return retval
-
     instance_info = []
     for instance_plan in instance_plans:
       global_task_id = instance_plan.task_id
@@ -857,13 +854,6 @@ class HeronExecutor(object):
   def _get_heron_support_processes(self):
     """ Get a map from all daemon services' name to the command to start them """
     retval = {}
-
-    Log.info("huijun debug %s", self.shard)
-    Log.info("huijun debug %s", self.heron_shell_ids[self.shard])
-    Log.info("huijun debug %s", self.heron_shell_binary)
-    Log.info("huijun debug %s", self.shell_port)
-    Log.info("huijun debug %s", self.log_dir)
-    Log.info("huijun debug %s", self.topology_id)
 
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
@@ -986,7 +976,8 @@ class HeronExecutor(object):
 
   def get_commands_to_run(self):
     # During shutdown the watch might get triggered with the empty packing plan
-    if len(self.packing_plan.container_plans) == 0:
+    if (len(self.packing_plan.container_plans) == 0 or
+        self._get_instance_plans(self.packing_plan, self.shard) is None):
       return {}
 
     if self.shard == 0:
