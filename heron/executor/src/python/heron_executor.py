@@ -858,6 +858,13 @@ class HeronExecutor(object):
     """ Get a map from all daemon services' name to the command to start them """
     retval = {}
 
+    Log.info("huijun debug %s", self.shard)
+    Log.info("huijun debug %s", self.heron_shell_ids[self.shard])
+    Log.info("huijun debug %s", self.heron_shell_binary)
+    Log.info("huijun debug %s", self.shell_port)
+    Log.info("huijun debug %s", self.log_dir)
+    Log.info("huijun debug %s", self.topology_id)
+
     retval[self.heron_shell_ids[self.shard]] = [
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
