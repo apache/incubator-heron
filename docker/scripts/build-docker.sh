@@ -54,14 +54,9 @@ run_build() {
 
   setup_scratch_dir $SCRATCH_DIR
 
-  # need to copy artifacts locally
-  CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
-  CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
-
   ALL_FILE="$OUTPUT_DIRECTORY/heron-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
   ALL_OUT_FILE="$SCRATCH_DIR/artifacts/heron-install.sh"
 
-  cp $CORE_FILE $CORE_OUT_FILE
   cp $ALL_FILE $ALL_OUT_FILE
   export HERON_VERSION
 
