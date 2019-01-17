@@ -31,8 +31,6 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-RUN chmod 755 heron-install.sh
-
 # run heron installer
 RUN /heron/heron-install.sh && \
     rm -rf /heron/heron-install.sh && \
