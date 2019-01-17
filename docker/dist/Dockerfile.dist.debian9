@@ -38,18 +38,15 @@ RUN /heron/heron-install.sh && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-slurm-scheduler.jar
 
-RUN ln -s /usr/local/heron/dist/heron-core /heron
-
-RUN mkdir -p /heron/heron-tools
-RUN ln -s /usr/local/heron/bin /heron/heron-tools
-RUN ln -s /usr/local/heron/conf /heron/heron-tools
-RUN ln -s /usr/local/heron/dist /heron/heron-tools
-RUN ln -s /usr/local/heron/lib /heron/heron-tools
-RUN ln -s /usr/local/heron/release.yaml /heron/heron-tools
-
-RUN ln -s /usr/local/heron/examples /heron
-
-RUN ln -s /usr/local/heron/release.yaml /heron
+RUN ln -s /usr/local/heron/dist/heron-core /heron \
+    && mkdir -p /heron/heron-tools \
+    && ln -s /usr/local/heron/bin /heron/heron-tools \
+    && ln -s /usr/local/heron/conf /heron/heron-tools \
+    && ln -s /usr/local/heron/dist /heron/heron-tools \
+    && ln -s /usr/local/heron/lib /heron/heron-tools \
+    && ln -s /usr/local/heron/release.yaml /heron/heron-tools \
+    && ln -s /usr/local/heron/examples /heron \
+    && ln -s /usr/local/heron/release.yaml /heron
 
 ENV HERON_HOME /heron/heron-core/
 
