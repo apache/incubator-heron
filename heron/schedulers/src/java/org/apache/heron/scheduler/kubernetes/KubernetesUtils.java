@@ -38,6 +38,10 @@ final class KubernetesUtils {
   private KubernetesUtils() {
   }
 
+  static String getConfCommand(Config config) {
+    return String.format("%s", Context.downloaderConfKubernetes(config));
+  }
+
   static String getFetchCommand(Config config, Config runtime) {
     return String.format("%s %s .", Context.downloaderBinary(config),
         Runtime.topologyPackageUri(runtime).toString());
