@@ -54,6 +54,9 @@ We also added beta testing for [Apache YARN](https://hadoop.apache.org/docs/r2.7
 We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We will continue to post updates as we progress.
 
 
+## Building in ubuntu 18.04 with bazel version 0.21.x
+Move the bazel.rc file living under tools to the root directory and rename it to .bazelrc
+
 ## License
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
