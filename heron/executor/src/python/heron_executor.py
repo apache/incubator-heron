@@ -844,8 +844,9 @@ class HeronExecutor(object):
       if container_plan.id == container_id:
         this_container_plan = container_plan
 
-    # when the executor starts by `heron update` in newly added container,
-    # there is no plan for this container. return None to bypass instance processes
+    # When the executor runs in newly added container by `heron update`,
+    # there is no plan for this container. In this situation,
+    # return None to bypass instance processes.
     if this_container_plan is None:
       return None
     return this_container_plan.instance_plans
@@ -976,8 +977,9 @@ class HeronExecutor(object):
 
   def get_commands_to_run(self):
     # During shutdown the watch might get triggered with the empty packing plan
-    if (len(self.packing_plan.container_plans) == 0 or
-        self._get_instance_plans(self.packing_plan, self.shard) is None):
+    if len(self.packing_plan.container_plans) == 0:
+      return {}
+    if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
       return {}
 
     if self.shard == 0:
