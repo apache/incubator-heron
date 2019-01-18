@@ -980,7 +980,13 @@ class HeronExecutor(object):
     if len(self.packing_plan.container_plans) == 0:
       return {}
     if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
-      return {}
+      retval = {}
+      retval['heron-shell'] = [
+        '%s' % self.heron_shell_binary,
+        '--port=%s' % self.shell_port,
+        '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+        '--secret=%s' % self.topology_id]
+      return retval
 
     if self.shard == 0:
       commands = self._get_tmaster_processes()
