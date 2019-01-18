@@ -16,5 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-ln -s /usr/local/heron/conf/kubernetes /heron
-mv /heron/kubernetes /heron/heron-conf
+if [ $1 = "kubernetes" ]; then
+   ln -s /usr/local/heron/conf/kubernetes /heron
+   mv /heron/kubernetes /heron/heron-conf
+fi

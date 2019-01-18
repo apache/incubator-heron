@@ -347,7 +347,7 @@ public class Context {
   }
 
   public static String downloaderConfKubernetes(Config cfg) {
-    return cfg.getStringValue(Key.DOWNLOADER_CONF_KUBERNETES);
+    return cfg.getStringValue(Key.DOWNLOADER_CONF);
   }
 
   public static String updatePrompt(Config cfg) {

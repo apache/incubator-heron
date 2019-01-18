@@ -35,11 +35,13 @@ import io.kubernetes.client.ApiException;
 
 final class KubernetesUtils {
 
+  private static final String CONTAINER = "kubernetes";
+
   private KubernetesUtils() {
   }
 
   static String getConfCommand(Config config) {
-    return String.format("%s", Context.downloaderConfKubernetes(config));
+    return String.format("%s %s", Context.downloaderConfKubernetes(config), CONTAINER);
   }
 
   static String getFetchCommand(Config config, Config runtime) {

@@ -6,6 +6,6 @@ sh_binary(
 )
 
 sh_binary(
-  name = "heron-downloader-config-kubernetes",
-  srcs = ["heron-downloader-config-kubernetes.sh"],
+  name = "heron-downloader-config",
+  srcs = ["heron-downloader-config.sh"],
 )
