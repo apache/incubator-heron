@@ -976,6 +976,11 @@ class HeronExecutor(object):
             log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
+    """
+    Prepare either TMaster or Streaming commands according to shard.
+    The Shell command is attached to all containers. The empty container plan and non-exist
+    container plan are bypassed.
+    """
     # During shutdown the watch might get triggered with the empty packing plan
     if len(self.packing_plan.container_plans) == 0:
       return {}
