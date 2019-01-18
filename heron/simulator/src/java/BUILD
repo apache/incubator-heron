@@ -17,3 +17,28 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps = simulator_deps_files,
 )
+
+java_binary(
+    name = "simulator-unshaded",
+    srcs = glob(["org/apache/heron/simulator/**/*.java"]),
+    deps = simulator_deps_files + [
+        "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
+    ]
+)
+
+jarjar_binary(
+    name = "simulator-shaded",
+    src = ":simulator-unshaded_deploy.jar",
+    shade = "shade.conf",
+    deps = [
+        "@org_sonatype_plugins_jarjar_maven_plugin//jar"
+    ]
+)
+
+genrule(
+    name = "heron-simulator",
+    srcs = [":simulator-shaded"],
+    outs = ["heron-simulator.jar"],
+    cmd = "cp $< $@",
+)
