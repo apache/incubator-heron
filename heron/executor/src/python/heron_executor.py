@@ -844,8 +844,11 @@ class HeronExecutor(object):
       if container_plan.id == container_id:
         this_container_plan = container_plan
 
-    # make sure that our shard id is a valid one
-    assert this_container_plan is not None
+    # When the executor runs in newly added container by `heron update`,
+    # there is no plan for this container. In this situation,
+    # return None to bypass instance processes.
+    if this_container_plan is None:
+      return None
     return this_container_plan.instance_plans
 
   # Returns the common heron support processes that all containers get, like the heron shell
@@ -973,9 +976,22 @@ class HeronExecutor(object):
             log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
+    """
+    Prepare either TMaster or Streaming commands according to shard.
+    The Shell command is attached to all containers. The empty container plan and non-exist
+    container plan are bypassed.
+    """
     # During shutdown the watch might get triggered with the empty packing plan
     if len(self.packing_plan.container_plans) == 0:
       return {}
+    if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
+      retval = {}
+      retval['heron-shell'] = [
+          '%s' % self.heron_shell_binary,
+          '--port=%s' % self.shell_port,
+          '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+          '--secret=%s' % self.topology_id]
+      return retval
 
     if self.shard == 0:
       commands = self._get_tmaster_processes()
