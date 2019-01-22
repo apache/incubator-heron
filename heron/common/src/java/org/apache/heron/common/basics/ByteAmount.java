@@ -27,12 +27,11 @@ public final class ByteAmount extends ResourceMeasure<Long> {
   private static final long MB = KB * 1024;
   private static final long GB = MB * 1024;
   @SuppressWarnings("MathRoundIntLong")
-  private static final long MAX_MB = Math.round(Long.MAX_VALUE / MB);
+  private static final long MAX_MB = Math.round((double)Long.MAX_VALUE / MB);
   @SuppressWarnings("MathRoundIntLong")
-  private static final long MAX_GB = Math.round(Long.MAX_VALUE / GB);
+  private static final long MAX_GB = Math.round((double)Long.MAX_VALUE / GB);
   @SuppressWarnings("MathRoundIntLong")
-  private static final long MAX_KB = Math.round(Long.MAX_VALUE / KB);
-
+  private static final long MAX_KB = Math.round((double)Long.MAX_VALUE / KB);
   public static final ByteAmount ZERO = ByteAmount.fromBytes(0);
 
   private ByteAmount(Long value) {

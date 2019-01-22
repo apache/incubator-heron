@@ -17,6 +17,9 @@
 
 workspace(name = "org_apache_heron")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 curator_version = "2.9.0"
@@ -785,35 +788,35 @@ WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e
 
 http_file(
     name = 'pytest_whl',
-    url = PYTEST_WHEEL,
+    urls = [PYTEST_WHEEL],
 )
 
 http_file(
     name = 'py_whl',
-    url = PY_WHEEL,
+    urls = [PY_WHEEL],
 )
 
 http_file(
     name = "wheel_src",
-    url = WHEEL_SRC,
+    urls = [WHEEL_SRC],
 )
 
 http_file(
     name = "pex_src",
-    url = PEX_SRC,
+    urls = [PEX_SRC],
 )
 
 http_file(
     name = "requests_src",
-    url = REQUESTS_SRC,
+    urls = [REQUESTS_SRC],
 )
 
 http_file(
     name = "setuptools_src",
-    url = SETUPTOOLS_SRC,
+    urls = [SETUPTOOLS_SRC],
 )
 
-new_http_archive(
+http_archive(
     name = "virtualenv",
     url = VIRTUALENV_SRC,
     strip_prefix = VIRTUALENV_PREFIX,
@@ -832,9 +835,8 @@ new_http_archive(
 # protobuf dependencies for C++ and Java
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
-    sha256 = "8e0236242106e680b4f9f576cc44b8cd711e948b20a9fc07769b0a20ceab9cc4",
+    urls = ["https://github.com/google/protobuf/archive/v3.6.1.3.tar.gz"],
+    strip_prefix = "protobuf-3.6.1.3",
 )
 # end protobuf dependencies for C++ and Java
 
@@ -846,23 +848,23 @@ http_archive(
     sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
 )
 
-new_http_archive(
+http_archive(
     name = "org_libevent_libevent",
     urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz"],
     strip_prefix = "libevent-2.1.8-stable",
-    build_file = "third_party/libevent/libevent.BUILD",
+    build_file = "//third_party/libevent:libevent.BUILD",
     sha256 = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2",
 )
 
-new_http_archive(
+http_archive(
     name = "org_nongnu_libunwind",
     urls = ["http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
     strip_prefix = "libunwind-1.1",
-    build_file = "third_party/libunwind/libunwind.BUILD",
+    build_file = "//third_party/libunwind:libunwind.BUILD",
     sha256 = "9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a",
 )
 
-new_http_archive(
+http_archive(
     name = "org_apache_zookeeper",
     urls = [
       "http://apache.cs.utah.edu/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz",
@@ -870,64 +872,81 @@ new_http_archive(
       "http://apache.mesi.com.ar/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz",
     ],
     strip_prefix = "zookeeper-3.4.10",
-    build_file = "third_party/zookeeper/zookeeper.BUILD",
+    build_file = "//third_party/zookeeper:zookeeper.BUILD",
     sha256 = "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_gperftools_gperftools",
     urls = ["https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz"],
     strip_prefix = "gperftools-2.4",
-    build_file = "third_party/gperftools/gperftools.BUILD",
+    build_file = "//third_party/gperftools:gperftools.BUILD",
     sha256 = "982a37226eb42f40714e26b8076815d5ea677a422fb52ff8bfca3704d9c30a2d",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_google_glog",
     urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
     strip_prefix = "glog-0.3.5",
-    build_file = "third_party/glog/glog.BUILD",
+    build_file = "//third_party/glog:glog.BUILD",
     sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
 )
 
-new_http_archive(
+http_archive(
     name = "com_google_googletest",
     urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
     strip_prefix = "googletest-release-1.8.0",
-    build_file = "third_party/gtest/gtest.BUILD",
+    build_file = "//third_party/gtest:gtest.BUILD",
     sha256 = "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_cereal",
     urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
     strip_prefix = "cereal-1.2.2",
-    build_file = "third_party/cereal/cereal.BUILD",
+    build_file_content = "\n".join([
+        "cc_library(",
+        "    name = 'cereal-cxx',",
+        "    hdrs = glob(['include/cereal/**/*.hpp']) + glob(['include/cereal/**/*.h']),",
+        "    includes = ['include'],",
+        "    linkstatic = 1,",
+        "    visibility = ['//visibility:public'],",
+        ")",
+    ]),
     sha256 = "1921f26d2e1daf9132da3c432e2fd02093ecaedf846e65d7679ddf868c7289c4",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_jbeder_yaml_cpp",
     urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
     strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
-    build_file = "third_party/yaml-cpp/yaml.BUILD",
+    build_file_content = "\n".join([
+        "cc_library(",
+        "    name = 'yaml-cxx',",
+        "    srcs = glob(['src/**/*.cpp', 'src/**/*.h']),",
+        "    hdrs = glob(['include/**/*.h']),",
+        "    includes = ['include'],",
+        "    linkstatic = 1,",
+        "    visibility = ['//visibility:public'],",
+        ")",
+    ]),
 )
 # end 3rdparty C++ dependencies
 
 # for helm
-new_http_archive(
+http_archive(
     name = "helm_mac",
     url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
     strip_prefix = "darwin-amd64",
-    build_file = "third_party/helm/helm.BUILD",
+    build_file = "//third_party/helm:helm.BUILD",
     sha256 = "5058142bcd6e16b7e01695a8f258d27ae0b6469caf227ddf6aa2181405e6aa8e",
 )
 
-new_http_archive(
+http_archive(
     name = "helm_linux",
     url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz",
     strip_prefix = "linux-amd64",
-    build_file = "third_party/helm/helm.BUILD",
+    build_file = "//third_party/helm:helm.BUILD",
     sha256 = "9f04c4824fc751d6c932ae5b93f7336eae06e78315352aa80241066aa1d66c49",
 )
 # end helm
@@ -935,9 +954,8 @@ new_http_archive(
 # for docker image building
 http_archive(
     name = "io_bazel_rules_docker",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.4.0.tar.gz"],
-    strip_prefix = "rules_docker-0.4.0",
-    sha256 = "6dede2c65ce86289969b907f343a1382d33c14fbce5e30dd17bb59bb55bb6593",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.6.0.tar.gz"],
+    strip_prefix = "rules_docker-0.6.0",
 )
 
 load(
@@ -945,10 +963,12 @@ load(
     "container_pull",
     container_repositories = "repositories",
 )
-
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
 container_repositories()
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_pull",
+)
 
 container_pull(
     name = "heron-base",
@@ -959,30 +979,32 @@ container_pull(
 # end docker image building
 
 # for nomad repear
-new_http_archive(
+http_archive(
     name = "nomad_mac",
     urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_darwin_amd64.zip"],
-    build_file = "third_party/nomad/nomad.BUILD",
+    build_file = "//third_party/nomad:nomad.BUILD",
     sha256 = "53452f5bb27131f1fe5a5f9178324511bcbc54e4fef5bec4e25b049ac38e0632",
 )
 
-new_http_archive(
+http_archive(
     name = "nomad_linux",
     urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
-    build_file = "third_party/nomad/nomad.BUILD",
+    build_file = "//third_party/nomad:nomad.BUILD",
     sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
 )
 
 # scala integration
-rules_scala_version="5cdae2f034581a05e23c3473613b409de5978833" # update this as needed
+rules_scala_version="1354d935a74395b3f0870dd90a04e0376fe22587" # update this as needed
 
 http_archive(
     name = "io_bazel_rules_scala",
     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
     type = "zip",
     strip_prefix= "rules_scala-%s" % rules_scala_version,
-    sha256 = "bd66b178da5b9b6845f677bdfb2594de8f1050f831a8d69527c6737969376065",
 )
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
 scala_repositories()
+
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+scala_register_toolchains()
