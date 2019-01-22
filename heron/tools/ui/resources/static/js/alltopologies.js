@@ -1,5 +1,24 @@
 /** @jsx React.DOM */
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 var TopologyItem = React.createClass({
   render: function() {
     var topology = this.props.topology;
@@ -35,8 +54,8 @@ var TopologyItem = React.createClass({
          <td className="col-md-3 break-all"><a className="toponame" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
          <td className="col-md-1 topostatus">{topology.status}</td>
          <td className="col-md-1 topocluster">{displaycluster}</td>
-         <td className="col-md-1 topoenviron">{displayenv}</td>
          <td className="col-md-1 toporunrole break-all">{topology.role}</td>
+         <td className="col-md-1 topoenviron">{displayenv}</td>
          <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
@@ -163,11 +182,11 @@ var TopologyTable = React.createClass({
               <th onClick={sortBy("cluster")} className={sortClass("cluster")}>
                 Cluster
               </th>
-              <th onClick={sortBy("environ")} className={sortClass("environ")}>
-                Environ
-              </th>
               <th onClick={sortBy("role")} className={sortClass("role")}>
                 Role
+              </th>
+              <th onClick={sortBy("environ")} className={sortClass("environ")}>
+                Environ
               </th>
               <th onClick={sortBy("release_version")} className={sortClass("release_version")}>
                 Version

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef __TMASTER_H
@@ -46,9 +49,6 @@ typedef StMgrMap::iterator StMgrMapIter;
 typedef std::map<std::string, std::string> ConfigValueMap;
 // From component name to config/value pairs
 typedef std::map<std::string, std::map<std::string, std::string>> ComponentConfigMap;
-
-const sp_string TOPOLOGY_CONFIG_KEY = "_topology_";
-const sp_string RUNTIME_CONFIG_POSTFIX = ":runtime";
 
 class TMaster {
  public:
@@ -124,6 +124,9 @@ class TMaster {
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
   void DoPhysicalPlan(EventLoop::Status _code);
 
+  // Log config object
+  void LogConfig(const ComponentConfigMap& _config);
+
   // Big brother function that does the assignment to the workers
   // If _new_stmgr is null, this means that there was a plan
   // existing, but a _new_stmgr joined us. So redo his part
@@ -191,10 +194,6 @@ class TMaster {
   void KillContainer(const std::string& host_name,
                      sp_int32 port,
                      const std::string& stmgr_id);
-
-  void AppendPostfix(const ConfigValueMap& _origin,
-                     const std::string& post_fix,
-                     ConfigValueMap& _update);
 
   // map of active stmgr id to stmgr state
   StMgrMap stmgrs_;

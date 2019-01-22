@@ -1,16 +1,20 @@
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' standalone.py '''
 from collections import OrderedDict
 from subprocess import call
@@ -497,7 +501,7 @@ def start_api_server(masters, cl_args):
   output = pid.communicate()
   Log.debug("return code: %s output: %s" % (return_code, output))
   if return_code != 0:
-    Log.error("Failed to start apiserver on %s with error:\n%s" % (single_master, output[1]))
+    Log.error("Failed to start API server on %s with error:\n%s" % (single_master, output[1]))
     sys.exit(-1)
 
   wait_for_job_to_start(single_master, "apiserver")
@@ -792,13 +796,13 @@ def get_nomad_slave_config_file(cl_args):
 
 def get_apiserver_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/apiserver.hcl" % config.get_heron_conf_dir()
 
 def get_heron_tools_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/heron_tools.hcl" % config.get_heron_conf_dir()
 

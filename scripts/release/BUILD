@@ -18,6 +18,6 @@ sh_library(
 filegroup(
     name = "workspace-status",
     srcs = [ 
-        "status",
+        "status.sh",
     ],
 )

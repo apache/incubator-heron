@@ -1,0 +1,38 @@
+# Files start with .
+\..*
+
+# Data/doc files
+.*\.conf
+.*\.json
+.*\.md
+.*\.txt
+.*\.BUILD
+.*\.patch
+
+_helpers\.tpl
+autogen\.sh
+description
+heron\.iml
+
+# UI resources
+jquery.*\.js
+bootstrap\.min\.css
+glyphicons-halflings-regular\.svg
+bootstrap\.min\.js
+d3.*\.js
+html5-trunk\.js
+list\.min.*.js
+moment\.min.*\.js
+underscore-min.*\.js
+underscore-min.*\.map
+
+# Directories
+bazel-.*
+m4
+website
+META-INF
+
+# Thirdparty
+cpplint\.py
+kashmir
+semver

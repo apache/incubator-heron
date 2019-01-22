@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef HERON_API_CONFIG_CONFIG_H_
@@ -128,12 +131,12 @@ class Config {
   static const std::string TOPOLOGY_RELIABILITY_MODE;
 
   /**
-   * Number of cpu cores per container to be reserved for this topology
+   * Number of CPU cores per container to be reserved for this topology
    */
   static const std::string TOPOLOGY_CONTAINER_CPU_REQUESTED;
 
   /**
-   * Amount of ram per container to be reserved for this topology.
+   * Amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_RAM_REQUESTED;
@@ -145,12 +148,12 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_DISK_REQUESTED;
 
   /**
-   * Hint for max number of cpu cores per container to be reserved for this topology
+   * Hint for max number of CPU cores per container to be reserved for this topology
    */
   static const std::string TOPOLOGY_CONTAINER_MAX_CPU_HINT;
 
   /**
-   * Hint for max amount of ram per container to be reserved for this topology.
+   * Hint for max amount of RAM per container to be reserved for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_MAX_RAM_HINT;
@@ -168,19 +171,19 @@ class Config {
   static const std::string TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
 
   /**
-   * Amount of ram to pad each container for this topology.
+   * Amount of RAM to pad each container for this topology.
    * In bytes.
    */
   static const std::string TOPOLOGY_CONTAINER_RAM_PADDING;
 
   /**
-   * Per component cpu requirement.  The format of this flag is something like
+   * Per component CPU requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
    */
   static const std::string TOPOLOGY_COMPONENT_CPUMAP;
 
   /**
-   * Per component ram requirement.  The format of this flag is something like
+   * Per component RAM requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   static const std::string TOPOLOGY_COMPONENT_RAMMAP;
@@ -302,14 +305,14 @@ class Config {
 
   void setComponentCpu(const std::string& componentName, double cpu) {
     if (cpu < 0) {
-      throw std::runtime_error("Invalid Cpu specified for component");
+      throw std::runtime_error("Invalid CPU specified for component");
     }
     appendComponentConfig<double>(Config::TOPOLOGY_COMPONENT_CPUMAP, componentName, cpu);
   }
 
   void setComponentRam(const std::string& componentName, int64_t bytes) {
     if (bytes < 0) {
-      throw std::runtime_error("Invalid Ram specified for component");
+      throw std::runtime_error("Invalid RAM specified for component");
     }
     appendComponentConfig<int64_t>(Config::TOPOLOGY_COMPONENT_RAMMAP, componentName, bytes);
   }

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_CKPTMGR_SRC_CKPTCLIENT_CLIENT_H_
@@ -34,16 +37,17 @@ class CkptMgrClient : public Client {
                 std::function<void(const proto::system::Instance&,
                                    const std::string&)> _ckpt_saved_watcher,
                 std::function<void(proto::system::StatusCode, sp_int32, sp_string,
-                              const proto::ckptmgr::InstanceStateCheckpoint&)> _ckpt_get_watcher,
+                              const proto::ckptmgr::InstanceStateCheckpoint&)>
+                              _ckpt_get_watcher,
                 std::function<void()> _register_watcher);
   virtual ~CkptMgrClient();
 
   void Quit();
 
-  // TODO(nlu): add requests methods
   virtual void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
   virtual void GetInstanceState(const proto::system::Instance& _instance,
                                 const std::string& _checkpoint_id);
+  virtual void SetPhysicalPlan(proto::system::PhysicalPlan& _pplan);
 
  protected:
   void GetInstanceState(const proto::system::Instance& _instance,
@@ -64,8 +68,6 @@ class CkptMgrClient : public Client {
 
   void OnReconnectTimer();
 
-  // TODO(nlu): add response handler methods
-
   sp_string topology_name_;
   sp_string topology_id_;
   sp_string ckptmgr_id_;
@@ -79,6 +81,8 @@ class CkptMgrClient : public Client {
 
   // Config
   sp_int32 reconnect_cpktmgr_interval_sec_;
+
+  proto::system::PhysicalPlan* pplan_;
 };
 
 }  // namespace stmgr

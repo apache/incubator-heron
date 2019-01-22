@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 ''' main '''
 import argparse
 import json
@@ -9,6 +25,7 @@ import sys
 import time
 import uuid
 from httplib import HTTPConnection
+from threading import Lock, Thread
 
 from ..common import status
 from heron.common.src.python.utils import log
@@ -19,6 +36,9 @@ DEFAULT_TEST_CONF_FILE = "integration_test/src/python/test_runner/resources/test
 RETRY_ATTEMPTS = 15
 #seconds
 RETRY_INTERVAL = 10
+
+successes = []
+failures = []
 
 class FileBasedExpectedResultsHandler(object):
   def __init__(self, file_path):
@@ -238,7 +258,7 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit --config-path=%s %s %s %s %s" %\
+  cmd = "%s submit --verbose --config-path=%s %s %s %s %s" %\
         (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
          jar_path, classpath, args)
 
@@ -285,26 +305,58 @@ def filter_test_topologies(test_topologies, test_pattern):
     sys.exit(1)
   return test_topologies
 
-def run_tests(conf, args):
+def run_tests(conf, test_args):
   ''' Run the test for each topology specified in the conf file '''
-  successes = []
-  failures = []
+  lock = Lock()
   timestamp = time.strftime('%Y%m%d%H%M%S')
 
-  http_server_host_port = "%s:%d" % (args.http_server_hostname, args.http_server_port)
+  http_server_host_port = "%s:%d" % (test_args.http_server_hostname, test_args.http_server_port)
 
-  if args.tests_bin_path.endswith(".jar"):
-    test_topologies = filter_test_topologies(conf["javaTopologies"], args.test_topology_pattern)
+  if test_args.tests_bin_path.endswith("scala-integration-tests.jar"):
+    test_topologies = filter_test_topologies(conf["scalaTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = conf["topologyClasspathPrefix"]
     extra_topology_args = "-s http://%s/state" % http_server_host_port
-  elif args.tests_bin_path.endswith(".pex"):
-    test_topologies = filter_test_topologies(conf["pythonTopologies"], args.test_topology_pattern)
+  elif test_args.tests_bin_path.endswith("integration-tests.jar"):
+    test_topologies = filter_test_topologies(conf["javaTopologies"], test_args.test_topology_pattern)
+    topology_classpath_prefix = conf["topologyClasspathPrefix"]
+    extra_topology_args = "-s http://%s/state" % http_server_host_port
+  elif test_args.tests_bin_path.endswith("heron_integ_topology.pex"):
+    test_topologies = filter_test_topologies(conf["pythonTopologies"], test_args.test_topology_pattern)
     topology_classpath_prefix = ""
     extra_topology_args = ""
   else:
-    raise ValueError("Unrecognized binary file type: %s" % args.tests_bin_path)
+    raise ValueError("Unrecognized binary file type: %s" % test_args.tests_bin_path)
 
-  current = 1
+  def _run_single_test(topology_name, topology_conf, test_args, http_server_host_port, classpath,
+    update_args, topology_args):
+    global successes, failures
+    results_checker = load_result_checker(
+      topology_name, topology_conf,
+      load_expected_result_handler(topology_name, topology_conf, test_args, http_server_host_port),
+      HttpBasedActualResultsHandler(http_server_host_port, topology_name))
+
+    start_secs = int(time.time())
+    try:
+      result = run_test(topology_name, classpath, results_checker,
+        test_args, http_server_host_port, update_args, topology_args)
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      if isinstance(result, status.TestSuccess):
+        successes += [test_tuple]
+      elif isinstance(result, status.TestFailure):
+        failures += [test_tuple]
+      else:
+        logging.error("Unrecognized test response returned for test %s: %s",
+          topology_name, str(result))
+        failures += [test_tuple]
+      lock.release()
+    except status.TestFailure:
+      test_tuple = (topology_name, int(time.time()) - start_secs)
+      lock.acquire()
+      failures += [test_tuple]
+      lock.release()
+
+  test_threads = []
   for topology_conf in test_topologies:
     topology_name = ("%s_%s_%s") % (timestamp, topology_conf["topologyName"], str(uuid.uuid4()))
     classpath = topology_classpath_prefix + topology_conf["classPath"]
@@ -324,32 +376,21 @@ def run_tests(conf, args):
                          + topology_name)
       topology_args = "%s %s" % (topology_args, topology_conf["topologyArgs"])
 
-    results_checker = load_result_checker(
-        topology_name, topology_conf,
-        load_expected_result_handler(topology_name, topology_conf, args, http_server_host_port),
-        HttpBasedActualResultsHandler(http_server_host_port, topology_name))
+    test_threads.append(Thread(target=_run_single_test, args=(topology_name, topology_conf,
+      test_args, http_server_host_port, classpath, update_args, topology_args)))
 
-    logging.info("==== Starting test %s of %s: %s ====",
-                 current, len(test_topologies), topology_name)
-    start_secs = int(time.time())
-    try:
-      result = run_test(topology_name, classpath, results_checker,
-                        args, http_server_host_port, update_args, topology_args)
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      if isinstance(result, status.TestSuccess):
-        successes += [test_tuple]
-      elif isinstance(result, status.TestFailure):
-        failures += [test_tuple]
-      else:
-        logging.error("Unrecognized test response returned for test %s: %s",
-                      topology_name, str(result))
-        failures += [test_tuple]
-    except status.TestFailure:
-      test_tuple = (topology_name, int(time.time()) - start_secs)
-      failures += [test_tuple]
+  # Run test in batches
+  start = 0
+  while start < len(test_threads):
+    end = min(start + int(test_args.max_thread_number), len(test_threads))
+    for i in range(start, end):
+      logging.info("==== Starting test %s of %s ====", i + 1, len(test_threads))
+      test_threads[i].start()
+    for i in range(start, end):
+      test_threads[i].join()
+    start = end
 
-    current += 1
-  return successes, failures
+  return
 
 def load_result_checker(topology_name, topology_conf,
                         expected_result_handler, actual_result_handler):
@@ -402,6 +443,7 @@ def main():
   parser.add_argument('-pi', '--release-package-uri', dest='release_package_uri', default=None)
   parser.add_argument('-cd', '--cli-config-path', dest='cli_config_path',
                       default=conf['cliConfigPath'])
+  parser.add_argument('-ms', '--max-thread-number', dest='max_thread_number', default=1)
 
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
   #                    help='comma separated test case(classpath) name that will not be run')
@@ -413,8 +455,10 @@ def main():
     logging.error('Unknown argument passed to %s: %s', sys.argv[0], unknown_args[0])
     sys.exit(1)
 
-  (successes, failures) = run_tests(conf, args)
+  tests_start_time = int(time.time())
+  run_tests(conf, args)
   total = len(failures) + len(successes)
+  logging.info("Total integration test time = %ss" % (int(time.time()) - tests_start_time))
 
   if not failures:
     logging.info("SUCCESS: %s (all) tests passed:", len(successes))

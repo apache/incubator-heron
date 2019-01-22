@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 """
 topology.py: module for defining Heron topologies in Python
 """
@@ -22,10 +26,11 @@ import os
 import uuid
 
 import heronpy.api.api_constants as api_constants
+import six
+from heronpy.api.component.component_spec import HeronComponentSpec
 from heronpy.api.serializer import default_serializer
 from heronpy.proto import topology_pb2
 
-from heronpy.api.component.component_spec import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""
@@ -149,7 +154,7 @@ class TopologyType(type):
       return
     heron_options = TopologyType.get_heron_options_from_env()
     initial_state = heron_options.get("cmdline.topology.initial.state", "RUNNING")
-    tmp_directory = heron_options.get("cmdline.topologydefn.tmpdirectory", None)
+    tmp_directory = heron_options.get("cmdline.topologydefn.tmpdirectory")
     if tmp_directory is None:
       raise RuntimeError("Topology definition temp directory not specified")
 
@@ -190,24 +195,25 @@ class TopologyType(type):
 
     Currently supports the following options natively:
 
-    - `cmdline.topologydefn.tmpdirectory`: the directory to which this
+    - `cmdline.topologydefn.tmpdirectory`: (required) the directory to which this
     topology's defn file is written
-    - `cmdline.topology.initial.state`: the initial state of the topology
-    - `cmdline.topology.name`: topology name on deployment
+    - `cmdline.topology.initial.state`: (default: "RUNNING") the initial state of the topology
+    - `cmdline.topology.name`: (default: class name) topology name on deployment
 
     Returns: map mapping from key to value
     """
-    heron_options_raw = os.environ.get("HERON_OPTIONS", None)
+    heron_options_raw = os.environ.get("HERON_OPTIONS")
     if heron_options_raw is None:
       raise RuntimeError("HERON_OPTIONS environment variable not found")
 
-    ret = {}
-    heron_opt_list = heron_options_raw.replace("%%%%", " ").split(',')
-    for opt_raw in heron_opt_list:
-      opt = opt_raw.split("=")
-      if len(opt) == 2:
-        ret[opt[0]] = opt[1]
-    return ret
+    options = {}
+    for option_line in heron_options_raw.replace("%%%%", " ").split(','):
+      key, sep, value = option_line.partition("=")
+      if sep:
+        options[key] = value
+      else:
+        raise ValueError("Invalid HERON_OPTIONS part %r" % option_line)
+    return options
 
   @classmethod
   def add_bolts_and_spouts(mcs, topology, class_dict):
@@ -251,6 +257,7 @@ class TopologyType(type):
 
     return sanitized
 
+@six.add_metaclass(TopologyType)
 class Topology(object):
   """Topology is an abstract class for defining a topology
 
@@ -281,7 +288,6 @@ class Topology(object):
                                     inputs={word_spout: Grouping.fields('word')},
                                     config={"count_bolt.specific.config": "another value"})
   """
-  __metaclass__ = TopologyType
 
   # pylint: disable=no-member
   @classmethod
@@ -332,7 +338,7 @@ class TopologyBuilder(object):
 
     self.topology_name = name
 
-    self._specs = []
+    self._specs = {}
     self._topology_config = {}
 
   def add_spec(self, *specs):
@@ -347,7 +353,12 @@ class TopologyBuilder(object):
                         % str(spec))
       if spec.name is None:
         raise ValueError("TopologyBuilder cannot take a spec without name")
-      self._specs.append(spec)
+      if spec.name == "config":
+        raise ValueError("config is a reserved name")
+      if spec.name in self._specs:
+        raise ValueError("Attempting to add duplicate spec name: %r %r" % (spec.name, spec))
+
+      self._specs[spec.name] = spec
 
   def add_spout(self, name, spout_cls, par, config=None, optional_outputs=None):
     """Add a spout to the topology"""
@@ -374,16 +385,7 @@ class TopologyBuilder(object):
     self._topology_config = config
 
   def _construct_topo_class_dict(self):
-    class_dict = {}
-
-    # specs
-    for spec in self._specs:
-      name = spec.name
-      if name in class_dict:
-        raise ValueError("Duplicate spec names: %s" % name)
-      class_dict[name] = spec
-
-    # config
+    class_dict = self._specs.copy()
     class_dict["config"] = self._topology_config
     return class_dict
 

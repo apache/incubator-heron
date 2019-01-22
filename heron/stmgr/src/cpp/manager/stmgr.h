@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_H_
@@ -64,7 +67,8 @@ class StMgr {
         const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
         const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port,
         sp_int32 _ckptmgr_port, const sp_string& _ckptmgr_id,
-        sp_int64 _high_watermark, sp_int64 _low_watermark);
+        sp_int64 _high_watermark, sp_int64 _low_watermark,
+        const sp_string& _metricscachemgr_mode);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -78,8 +82,9 @@ class StMgr {
                           proto::system::HeronTupleSet* _message);
   // Called when an instance does checkpoint and sends its checkpoint
   // to the stmgr to save it
-  void HandleStoreInstanceStateCheckpoint(const proto::ckptmgr::InstanceStateCheckpoint& _message,
-                                          const proto::system::Instance& _instance);
+  void HandleStoreInstanceStateCheckpoint(
+      const proto::ckptmgr::InstanceStateCheckpoint& _message,
+      const proto::system::Instance& _instance);
   void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   // Send checkpoint message to this task_id
   void DrainDownstreamCheckpoint(sp_int32 _task_id,
@@ -186,6 +191,12 @@ class StMgr {
   void HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                  std::string _checkpoint_id, sp_int64 _restore_txid);
 
+  // Patch new physical plan with internal hydrated topology but keep new topology data:
+  // - new topology state
+  // - new topology/component config
+  static void PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _pplan,
+                                                    proto::api::Topology* _topology);
+
   heron::common::HeronStateMgr* state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
@@ -234,6 +245,9 @@ class StMgr {
   heron::common::CountMetric* restore_initiated_metrics_;
   heron::common::MultiCountMetric* dropped_during_restore_metrics_;
 
+  // Instance related metrics
+  heron::common::MultiCountMetric* instance_bytes_received_metrics_;
+
   // Backpressure relarted metrics
   heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
 
@@ -253,6 +267,9 @@ class StMgr {
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;
+
+  // whether MetricsCacheMgr is running
+  sp_string metricscachemgr_mode_;
 };
 
 }  // namespace stmgr

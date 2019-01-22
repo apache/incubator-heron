@@ -1,0 +1,71 @@
+{
+  "topology": {
+    "id": "IntegrationTopologyTest_BasicTopologyOneTaskScaleUp",
+    "name": "IntegrationTopologyTest_BasicTopologyOneTaskScaleUp",
+    "spouts": {
+      "comp": {
+        "name": "ab-spout",
+        "config": {
+          "kvs": {
+            "key": "topology.component.parallelism",
+            "value": "2"
+          }
+        }
+      }
+    },
+    "bolts": [
+      {
+        "comp": {
+          "name": "identity-bolt",
+          "config": {
+            "kvs": {
+              "key": "topology.component.parallelism",
+              "value": "3"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "stream": {
+              "id": "default",
+              "component_name": "ab-spout"
+            }
+          }
+        ]
+      }
+    ],
+    "state": "RUNNING"
+  },
+  "instances": [
+    {
+      "instance_id": "container_1_ab-spout_1",
+      "info": {
+        "component_name": "ab-spout"
+      }
+    },
+    {
+      "instance_id": "container_1_identity-bolt_3",
+      "info": {
+        "component_name": "identity-bolt"
+      }
+    },
+    {
+      "instance_id": "container_1_identity-bolt_5",
+      "info": {
+        "component_name": "identity-bolt"
+      }
+    },
+    {
+      "instance_id": "container_2_ab-spout_2",
+      "info": {
+        "component_name": "ab-spout"
+      }
+    },
+    {
+      "instance_id": "container_2_identity-bolt_4",
+      "info": {
+        "component_name": "identity-bolt"
+      }
+    }
+  ]
+}

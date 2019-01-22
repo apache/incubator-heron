@@ -3,7 +3,7 @@ title: Tuple Serialization
 ---
 
 The tuple is Heron's core data type. Heron's native
-[`Tuple`](/api/com/twitter/heron/api/tuple/Tuple.html) interface supports
+[`Tuple`](/api/org/apache/heron/api/tuple/Tuple.html) interface supports
 a broad range of [basic data types](../data-model/#using-tuples), such as
 strings, integers, and booleans, out of the box, but tuples can contain values
 of any type. You can use data types beyond the core types by providing a custom

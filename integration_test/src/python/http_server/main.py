@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 ''' main.py '''
 import logging
 import os
@@ -71,6 +87,37 @@ class MemoryMapHandler(tornado.web.RequestHandler):
     self.state_map[key] = tornado.escape.json_encode(data)
     self.write("Results written to " + tornado.escape.json_encode(self.state_map) + " successfully")
 
+# for instance states in stateful processing
+class StateResultHandler(tornado.web.RequestHandler):
+  def initialize(self, result_map):
+    self.result_map = result_map
+
+  def get(self, key):
+    if key:
+      self.set_header("Content-Type", 'application/json; charset="utf-8"')
+      if key in self.result_map:
+        self.write(tornado.escape.json_encode(self.result_map[key]))
+      else:
+        raise tornado.web.HTTPError(status_code=404, log_message="Key %s not found" % key)
+    else:
+      self.write(tornado.escape.json_encode(self.result_map))
+
+  def post(self, key):
+    data = tornado.escape.json_decode(self.request.body)
+    if key:
+      if key in self.result_map:
+        # fix the duplicate record issue
+        for comp in self.result_map[key]:
+          if comp.keys()[0] == data.keys()[0]:
+            break
+        else:
+          self.result_map[key].append(data)
+      else:
+        self.result_map[key] = [data]
+      self.write("Results written successfully: topology " + key + ' instance ' + data.keys()[0])
+    else:
+      raise tornado.web.HTTPError(status_code=404, log_message="Invalid key %s" % key)
+
 def main():
   '''
   Runs a tornado http server that listens for any
@@ -83,11 +130,14 @@ def main():
     os.makedirs(RESULTS_DIRECTORY)
 
   state_map = {}
+  # for instance states in stateful processing
+  state_result_map = {}
   application = tornado.web.Application([
-      (r"/", MainHandler),
-      (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler),
-      (r"^/state", MemoryMapGetAllHandler, dict(state_map=state_map)),
-      (r"^/state/([a-zA-Z0-9_-]+$)", MemoryMapHandler, dict(state_map=state_map)),
+    (r"/", MainHandler),
+    (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler),
+    (r"^/state", MemoryMapGetAllHandler, dict(state_map=state_map)),
+    (r"^/state/([a-zA-Z0-9_-]+$)", MemoryMapHandler, dict(state_map=state_map)),
+    (r"^/stateResults/([a-zA-Z0-9_-]+$)", StateResultHandler, dict(result_map=state_result_map)),
   ])
 
   if len(sys.argv) == 1:

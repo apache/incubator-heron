@@ -7,20 +7,20 @@ data that is fed into a Heron topology via
 [spouts](../../concepts/topologies#spouts) and then processed by
 [bolts](../../concepts/topologies#bolts) consists of tuples.
 
-Heron has a [`Tuple`](/api/com/twitter/heron/api/tuple/Tuple.html)
+Heron has a [`Tuple`](/api/org/apache/heron/api/tuple/Tuple.html)
 interface for working with tuples. Heron `Tuple`s can hold values of any type;
 values are accessible either by providing an index or a field name.
 
 ## Using Tuples
 
 Heron's `Tuple` interface contains the methods listed in the [Javadoc
-definition](/api/com/twitter/heron/api/tuple/Tuple.html).
+definition](/api/org/apache/heron/api/tuple/Tuple.html).
 
 ### Accessing Primitive Types By Index
 
 Heron `Tuple`s support a wide variety of primitive Java types, including
 strings, Booleans, byte arrays, and more.
-[`getString`](/api/com/twitter/heron/api/tuple/Tuple.html#getString-int-)
+[`getString`](/api/org/apache/heron/api/tuple/Tuple.html#getString-int-)
 method, for example, takes an integer index and returns either a string or
 `null` if no string value is present at that index. Analogous methods can be
 found in the Javadoc.
@@ -29,7 +29,7 @@ found in the Javadoc.
 
 In addition to being accessible via index, values stored in Heron tuples are
 accessible via field name as well. The
-[`getStringByField`](/api/com/twitter/heron/api/tuple/Tuple.html#getStringByField-java.lang.String-)
+[`getStringByField`](/api/org/apache/heron/api/tuple/Tuple.html#getStringByField-java.lang.String-)
 method, for example, takes a field name string and returns either a string or
 `null` if no string value is present for that field name. Analogous methods can
 be found in the Javadoc.
@@ -41,12 +41,12 @@ Java `Object`. As for primitive types, you can access `Object`s on the basis of
 an index or a field name. The following methods return either an `Object` or
 `null` if no object is present:
 
-* [`getValue`](/api/com/twitter/heron/api/tuple/Tuple.html#getValue-int-)
-* [`getValueByField`](/api/com/twitter/heron/api/tuple/Tuple.html#getValueByField-java.lang.String-)
+* [`getValue`](/api/org/apache/heron/api/tuple/Tuple.html#getValue-int-)
+* [`getValueByField`](/api/org/apache/heron/api/tuple/Tuple.html#getValueByField-java.lang.String-)
 
 You can also retrieve all objects contained in a Heron `Tuple` as a Java
 [List](https://docs.oracle.com/javase/8/docs/api/java/util/List.html) using the
-[`getValues`](/api/com/twitter/heron/api/tuple/Tuple.html#getValues--)
+[`getValues`](/api/org/apache/heron/api/tuple/Tuple.html#getValues--)
 method.
 
 ### User-defined Types
@@ -72,7 +72,7 @@ Serializers](../serialization).
 ### Fields
 
 The `getFields` method returns a
-[`Fields`](http://heronproject.github.io/topology-api/com/twitter/heron/api/tuple/Fields)
+[`Fields`](http://heronproject.github.io/topology-api/org/apache/heron/api/tuple/Fields)
 object that contains all of the fields in the tuple. More on fields can be found
 [below]({{< ref "#Fields" >}}).
 
@@ -81,14 +81,14 @@ object that contains all of the fields in the tuple. More on fields can be found
 There are additional methods available for determining the size of Heron
 `Tuple`s, extracting contextual information, and more. For a full listing of
 methods, see the
-[Javadoc](/api/com/twitter/heron/api/tuple/Tuple.html).
+[Javadoc](/api/org/apache/heron/api/tuple/Tuple.html).
 
 ## Fields
 
 From the methods in the list above you can see that you can retrieve single
 values from a Heron tuple on the basis of their index. You can also retrieve
 multiple values using a
-[`Fields`](/api/com/twitter/heron/api/tuple/Fields.html) object,
+[`Fields`](/api/org/apache/heron/api/tuple/Fields.html) object,
 which can be initialized either using varargs or a list of strings:
 
 ```java

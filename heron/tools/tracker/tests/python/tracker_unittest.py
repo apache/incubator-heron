@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 ''' tracker_unittest.py '''
 
 # pylint: disable=missing-docstring, attribute-defined-outside-init
@@ -8,6 +24,7 @@ import heron.proto.execution_state_pb2 as protoEState
 from heron.statemgrs.src.python import statemanagerfactory
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python.tracker import Tracker
+from mock_proto import MockProto
 
 class TrackerTest(unittest.TestCase):
   def setUp(self):
@@ -215,3 +232,21 @@ class TrackerTest(unittest.TestCase):
     self.tracker.removeTopology('top_name4', 'mock_name2')
     self.assertItemsEqual([self.topology3, self.topology5],
                           self.tracker.topologies)
+
+  def test_extract_physical_plan(self):
+    # Create topology
+    pb_pplan = MockProto().create_mock_simple_physical_plan()
+    topology = Topology('topology_name', 'state_manager')
+    topology.set_physical_plan(pb_pplan)
+    # Extract physical plan
+    pplan = self.tracker.extract_physical_plan(topology)
+    # Mock topology doesn't have topology config and instances
+    self.assertEqual(pplan['config'], {})
+    self.assertEqual(pplan['bolts'], {'mock_bolt': []})
+    self.assertEqual(pplan['spouts'], {'mock_spout': []})
+    self.assertEqual(pplan['components']['mock_bolt']['config'],
+                     {'topology.component.parallelism': '1'})
+    self.assertEqual(pplan['components']['mock_spout']['config'],
+                     {'topology.component.parallelism': '1'})
+    self.assertEqual(pplan['instances'], {})
+    self.assertEqual(pplan['stmgrs'], {})

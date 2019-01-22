@@ -2,32 +2,24 @@
 
 ![logo](website/static/img/HeronTextLogo.png)
 
-Heron is realtime analytics platform developed by Twitter. It is the direct
-successor of [Apache Storm](http://storm.apache.org), built to be backwards
-compatible with Storm's [topology API](http://storm.apache.org/releases/current/Tutorial.html#topologies)
-but with a wide array of architectural improvements.
+Heron is realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
 
-http://incubator.apache.org/projects/heron.html
+[Heron in Apache Incubation](http://incubator.apache.org/projects/heron.html)
 
-https://heron.incubator.apache.org (coming soon...)
+[Heron Website](https://apache.github.io/incubator-heron)
 
 ### Documentation
-http://heronstreaming.io (official until)
+
+[https://apache.github.io/incubator-heron](https://apache.github.io/incubator-heron)
 
 #### Heron Requirements:
  * Java JDK 1.8
  * Python 2.7
- * Bazel
-
+ * Bazel latest
 
 ## Contact
 
 #### Mailing lists
-
-Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
-
-Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
-
 
 | Name                                                                      | Scope                           |                                                                |                                                                    |                                                                           |
 |:--------------------------------------------------------------------------|:--------------------------------|:---------------------------------------------------------------|:-------------------------------------------------------------------|:--------------------------------------------------------------------------|
@@ -36,25 +28,22 @@ Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
 #### Slack
 
-heron slack channel at https://heronstreaming.slack.com/
-
-You can self-register at http://heronstreaming.herokuapp.com/
+[Self-Register](http://heronstreaming.herokuapp.com/) to our [Heron Slack Workspace](https://heronstreaming.slack.com/)
 
 #### Meetup Group
-https://www.meetup.com/Apache-Heron-Bay-Area
 
+[Bay Area Heron Meetup](https://www.meetup.com/Apache-Heron-Bay-Area), *We meet on Third Monday of Every Month in Palo Alto.*
+
+#### Twitter
+Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
 ## For more information:
 
-* Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
-* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](http://twitter.github.io/heron/docs/resources/)
-* [Twitter Heron: Stream Processing at
-  Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
-* [Twitter Heron: Stream Processing at
-  Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
-* [Flying Faster with Twitter
-  Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog
-  post)
+* Official Heron documentation located at [https://apache.github.io/incubator-heron](https://apache.github.io/incubator-heron)
+* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](https://apache.github.io/incubator-heron/docs/resources/)
+* [Twitter Heron: Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
+* [Twitter Heron: Stream Processing at Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
+* [Flying Faster with Twitter Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog post)
 
 ## Update
 

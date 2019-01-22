@@ -25,7 +25,7 @@ set +e
 # Build everything
 DIR=`dirname $0`
 source ${DIR}/detect_os_type.sh
-bazel build --config=`platform` {heron,integration_test,tools/java,examples,heronpy,storm-compatibility,storm-compatibility-examples,eco,eco-examples}/...
+bazel build --config=`platform` {heron,integration_test,tools/java,examples,heronpy,storm-compatibility,storm-compatibility-examples,eco,eco-storm-examples,eco-heron-examples}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
@@ -67,7 +67,7 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-  local java_paths=$(find {heron,heron/tools,tools,integration_test,storm-compatibility,contrib,eco,eco-examples} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  local java_paths=$(find {heron,heron/tools,tools,integration_test,storm-compatibility,eco,eco-storm-examples,eco-heron-examples} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
   if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
     java_paths=$(echo "${java_paths}" | fgrep -v "/objc_tools/")
   fi
@@ -105,8 +105,7 @@ function get_containing_library() {
 
 function collect_generated_binary_deps() {
   local proto_deps=$(find bazel-bin/heron/proto -type f | grep "jar$");
-  local thrift_deps=$(find bazel-bin/heron/metricsmgr/src/thrift -type f | grep "jar$");
-  echo "${proto_deps} ${thrift_deps}" | sort | uniq
+  echo "${proto_deps}" | sort | uniq
 }
 
 function collect_generated_paths() {

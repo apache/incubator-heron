@@ -77,6 +77,7 @@ In this diagram, the **source streamlet** is produced by a random generator that
 The Heron Streamlet API is currently available for:
 
 * [Java](/docs/developers/java/streamlet-api)
+* [Scala](/docs/developers/scala/streamlet-api)
 
 ### The Heron Streamlet API and topologies
 
@@ -105,9 +106,9 @@ The code below shows how you could implement the processing graph shown [above](
 ```java
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.twitter.heron.streamlet.Builder;
-import com.twitter.heron.streamlet.Config;
-import com.twitter.heron.streamlet.Runner;
+import org.apache.heron.streamlet.Builder;
+import org.apache.heron.streamlet.Config;
+import org.apache.heron.streamlet.Runner;
 
 Builder builder = Builder.newBuilder();
 
@@ -147,7 +148,14 @@ Operation | Description
 [union](#filter-operations) | Unifies two streamlets into one, without [windowing](#windowing) or modifying the elements of the two streamlets
 [clone](#clone-operations) | Creates any number of identical copies of a streamlet
 [transform](#transform-operations) | Transform a streamlet using whichever logic you'd like (useful for transformations that don't neatly map onto the available operations) | Modify the elements from an incoming streamlet and update the topology's state
-[reduceByKeyAndWindow](#reduce-by-key-and-window-operations) | Produces a streamlet out of two separate key-value streamlets on a key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
+[keyBy](#key-by-operations) | Returns a new key-value streamlet by applying the supplied extractors to each element in the original streamlet
+[reduceByKey](#reduce-by-key-operations) | Produces a streamlet of key-value on each key and in accordance with a reduce function that you apply to all the accumulated values
+[reduceByKeyAndWindow](#reduce-by-key-and-window-operations) |  Produces a streamlet of key-value on each key, within a [time window](#windowing), and in accordance with a reduce function that you apply to all the accumulated values
+[countByKey](#count-by-key-operations) | A special reduce operation of counting number of tuples on each key
+[countByKeyAndWindow](#count-by-key-and-window-operations) | A special reduce operation of counting number of tuples on each key, within a [time window](#windowing)
+[split](#split-operations) | Split a streamlet into multiple streamlets with different id.
+[withStream](#with-stream-operations) | Select a stream with id from a streamlet that contains multiple streams
+[applyOperator](#apply-operator-operations) | Returns a new streamlet by applying an user defined operator to the original streamlet
 [join](#join-operations) | Joins two separate key-value streamlets into a single streamlet on a key, within a [time window](#windowing), and in accordance with a join function
 [log](#log-operations) | Logs the final streamlet output of the processing graph to stdout
 [toSink](#sink-operations) | Sink operations terminate the processing graph by storing elements in a database, logging elements to stdout, etc.
@@ -160,7 +168,7 @@ Map operations create a new streamlet by applying the supplied mapping function 
 #### Java example
 
 ```java
-import com.twitter.heron.streamlet.Builder;
+import org.apache.heron.streamlet.Builder;
 
 Builder processingGraphBuilder = Builder.newBuilder();
 
@@ -260,8 +268,8 @@ The context object available to a transform operation provides access to:
 Here's a Java example of a transform operation in a topology where a stateful record is kept of the number of items processed:
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.SerializableTransformer;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.SerializableTransformer;
 
 import java.util.function.Consumer;
 
@@ -287,7 +295,7 @@ public class CountNumberOfItems implements SerializableTransformer<String, Strin
 
 This operation does a few things:
 
-* In the `setup` method, the [`Context`](/api/java/com/twitter/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
+* In the `setup` method, the [`Context`](/api/java/org/apache/heron/streamlet/Context.html) object is used to access the current state (which has the semantics of a Java `Map`). The current number of items processed is incremented by one and then saved as the new state.
 * In the `transform` method, the incoming string is transformed in some way and then "accepted" as the new value.
 * In the `cleanup` step, the current count of items processed is logged.
 
@@ -297,6 +305,60 @@ Here's that operation within the context of a streamlet processing graph:
 builder.newSource(() -> "Some string over and over");
         .transform(new CountNumberOfItems())
         .log();
+```
+
+### Key by operations
+
+Key by operations convert each item in the original streamlet into a key-value pair and return a new streamlet.
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .keyBy(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (get the length of each word)
+        word -> workd.length()
+    )
+    // The result is logged
+    .log();
+```
+
+### Reduce by key operations
+
+You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/streams/reduction.html) operations to streamlets by specifying:
+
+* a key extractor that determines what counts as the key for the streamlet
+* a value extractor that determines which final value is chosen for each element of the streamlet
+* a reduce function that produces a single value for each key in the streamlet
+
+Reduce by key operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value).
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .reduceByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Value extractor (each word appears only once, hence the value is always 1)
+        word -> 1,
+        // Reduce operation (a running sum)
+        (x, y) -> x + y
+    )
+    // The result is logged
+    .log();
 ```
 
 ### Reduce by key and window operations
@@ -315,7 +377,7 @@ Reduce by key and window operations produce a new streamlet of key-value window 
 ```java
 import java.util.Arrays;
 
-import com.twitter.heron.streamlet.WindowConfig;
+import org.apache.heron.streamlet.WindowConfig;
 
 Builder builder = Builder.newBuilder();
 
@@ -331,6 +393,100 @@ builder.newSource(() -> "Mary had a little lamb")
         // Reduce operation (a running sum)
         (x, y) -> x + y
     )
+    // The result is logged
+    .log();
+```
+
+### Count by key operations
+
+Count by key operations extract keys from data in the original streamlet and count the number of times a key has been encountered.
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .countByKeyAndWindow(word -> word)
+    // The result is logged
+    .log();
+```
+
+### Count by key and window operations
+
+Count by key and window operations extract keys from data in the original streamlet and count the number of times a key has been encountered within each [time window](#windowing).
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+import org.apache.heron.streamlet.WindowConfig;
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    .countByKeyAndWindow(
+        // Key extractor (in this case, each word acts as the key)
+        word -> word,
+        // Window configuration
+        WindowConfig.TumblingCountWindow(50),
+    )
+    // The result is logged
+    .log();
+```
+
+### Split operations
+
+Split operations split a streamlet into multiple streamlets with different id by getting the corresponding stream ids from each item in the origina streamlet.
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+Map<String, SerializablePredicate<String>> splitter = new HashMap();
+    splitter.put("long_word", s -> s.length() >= 4);
+    splitter.put("short_word", s -> s.length() < 4);
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    // Splits the stream into streams of long and short words
+    .split(splitter)
+    // Choose the stream of the short words
+    .withStream("short_word")
+    // The result is logged
+    .log();
+```
+
+### With stream operations
+
+With stream operations select a stream with id from a streamlet that contains multiple streams. They are often used with [split](#split-operations).
+
+### Apply operator operations
+
+Apply operator operations apply a user defined operator (like a bolt) to each element of the original streamlet and return a new streamlet.
+
+#### Java example
+
+```java
+import java.util.Arrays;
+
+private class MyBoltOperator extends MyBolt implements IStreamletRichOperator<Double, Double> {
+}
+
+Builder builder = Builder.newBuilder()
+    .newSource(() -> "Mary had a little lamb")
+    // Convert each sentence into individual words
+    .flatMap(sentence -> Arrays.asList(sentence.toLowerCase().split("\\s+")))
+    // Apply user defined operation
+    .applyOperator(new MyBoltOperator())
     // The result is logged
     .log();
 ```
@@ -443,7 +599,7 @@ In this example, two streamlets consisting of `Score` objects are joined. In the
 By default, an [inner join](#inner-joins) is applied in join operations but you can also specify a different join type. Here's a Java example for an [outer right](#outer-right-joins) join:
 
 ```java
-import com.twitter.heron.streamlet.JoinType;
+import org.apache.heron.streamlet.JoinType;
 
 scores1
     .join(
@@ -537,8 +693,8 @@ In processing graphs like the ones you build using the Heron Streamlet API, **si
 #### Java example
 
 ```java
-import com.twitter.heron.streamlet.Context;
-import com.twitter.heron.streamlet.Sink;
+import org.apache.heron.streamlet.Context;
+import org.apache.heron.streamlet.Sink;
 
 public class FormattedLogSink implements Sink<T> {
     private String streamletName;

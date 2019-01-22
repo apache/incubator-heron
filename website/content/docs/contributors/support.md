@@ -13,10 +13,10 @@ All undocumented features are subject to change at any time without prior notice
 
 Heron relies on the Google [Bazel](http://bazel.io) build tool which is also in Beta.  Therefore, the Bazel Skylark macro and rules language (anything written in a .bzl file) is still subject to change. The Bazel Google group is in the process of migrating Google to Skylark, and expect the macro language to stabilize as part of that process.
 
-Please help keep discover issues: report bugs and regressions in the [GitHub bugtracker](https://github.com/twitter/heron/issues). Heron core contributors will make an effort to triage all reported issues within 2 business days.
+Please help keep discover issues: report bugs and regressions in the [GitHub bugtracker](https://github.com/apache/incubator-heron/issues). Heron core contributors will make an effort to triage all reported issues within 2 business days.
 
 ### Releases
-We regularly publish [binary releases of Heron](https://github.com/twitter/heron/releases). To that end, release candidates are announced on heron-users; these are binaries that have passed all unit and integration tests. Over the next few days, regression tests are run, such as on applicable build targets at Twitter. If you have a critical project using Heron, it is recommended that you establish an automated testing process that tracks the current release candidate, and report any regressions.
+We regularly publish [binary releases of Heron](https://github.com/apache/incubator-heron/releases). To that end, release candidates are announced on heron-users; these are binaries that have passed all unit and integration tests. Over the next few days, regression tests are run, such as on applicable build targets at Twitter. If you have a critical project using Heron, it is recommended that you establish an automated testing process that tracks the current release candidate, and report any regressions.
 
 If no regressions are discovered, official binaries are released after a week. However, regressions can delay the release of a release candidate. If regressions are found, corresponding cherry-picks are applied to the release candidate to fix those regressions. If no further regressions are found for two business days, but not before a week has elapsed since the first release candidate, the full binaries are released.
 

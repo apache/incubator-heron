@@ -14,7 +14,7 @@ installed:
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
-* [pip](https://pypi.python.org/pypi/pip)
+* [pip](https://pypi.python.org/pypi/pip) - install `PyYAML>=3.12`
 * [Go](https://golang.org) (make sure that your `GOPATH` and `GOROOT` are set)
 
 ### macOS setup
@@ -39,8 +39,7 @@ are installed:
 
 1. Navigate to the `website` folder
 2. Run `npm install`
-3. Run `make build-static-assets` (this will build all of the necessary static
-   assets, i.e. CSS, Javascript, etc.)
+3. Run `make site`
 
 ## Building the Docs Locally
 
@@ -68,8 +67,10 @@ This will run the docs locally on `localhost:1313`. Navigate to
 open the browser from the command line:
 
 ```bash
-$ open http://localhost:1313/heron
+$ open http://localhost:1313/incubator-heron/
 ```
+
+You can edit `.md` files and they will be automatically updated in your browser.
 
 ## Working on Static Assets
 
@@ -90,7 +91,7 @@ one can use `grep` command to find those parent webpages.
 
 The content on the [twitter.github.io/heron](http://twitter.github.io/heron)
 website is what is committed on the [gh-pages
-branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
+branch](https://github.com/apache/incubator-heron/tree/gh-pages) of the Heron repo. To
 simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
 submodule that points to the `gh-pages` branch of the heron repo.

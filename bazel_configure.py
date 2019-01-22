@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 # -*- encoding: utf-8 -*-
 #
 # Verifies required libraries and tools exist and are valid versions.
@@ -263,6 +279,19 @@ variable to specify the full path to yours.'""" % (program, program, program, en
   print('Using %s:\t%s' % (msg.ljust(20), print_value))
   return VALUE
 
+def discover_jdk():
+  try:
+    jdk_path = os.environ['JAVA_HOME']
+  except KeyError:
+    javac_path = real_program_path('javac')
+    if javac_path is None:
+        fail("You need to have JDK installed to build Heron.\n"
+             "You can set the JAVA_HOME environment variavle to specify the full path to yours.")
+    jdk_bin_path = os.path.dirname(javac_path)
+    jdk_path = os.path.dirname(jdk_bin_path)
+  print('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path))
+  return jdk_path
+
 ######################################################################
 # Discover the linker directory
 ######################################################################
@@ -377,6 +406,7 @@ def main():
   env_map['CXXCPP'] = discover_tool('cpp','C++ preprocessor', 'CXXCPP', cpp_min)
   env_map['LD'] =  discover_tool('ld','linker', 'LD')
   env_map['BLDFLAG'] = discover_linker(env_map)
+  env_map['JAVA_HOME'] = discover_jdk()
 
   # Discover the utilities
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')

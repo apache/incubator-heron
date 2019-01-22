@@ -148,10 +148,9 @@ SMs in containers **C** and **D**, which will lead to the socket buffers in
 those containers filling up, which could lead to throughput collapse.
 
 In a situation like this, Heron's back pressure mechanism will kick in. The **SM**
-in container **A** will send a message to all the other **SMs**. In response, the
-other **SMs** will examine the container's [physical
-plan](../topologies#physical-plan) and cut off inputs from spouts that feed
-bolt **B3** (in this case spout **S1**).
+in container **A** will send a message to all the other **SMs**, then all
+**SMs** will cut off inputs from local spouts and no new data will be accepted
+into the topology.
 
 ![Back Pressure 2](/img/backpressure2.png)
 
@@ -259,18 +258,18 @@ The diagram below illustrates what happens when you submit a Heron topology:
 
 Component | Description
 :---------|:-----------
-Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`com.twitter.heron.scheduler.SubmitterMain`](/api/java/com/twitter/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
+Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`org.apache.heron.scheduler.SubmitterMain`](/api/java/org/apache/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
 Heron API server | When the [Heron API server](../../operators/heron-api-server) has been notified that a topology is being submitted, it does two things. First, it uploads the topology artifacts (a JAR for Java or a PEX for Python, plus a few other files) to a storage service; Heron supports multiple [uploaders](../../operators/deployment/uploaders) for a variety of storage systems, such as [Amazon S3](../../operators/deployment/uploaders/s3), [HDFS](../../operators/deployment/uploaders/hdfs), and the [local filesystem](../../operators/deployment/uploaders/localfs).
 Heron scheduler | When the Heron CLI (client) submits a topology to the Heron API server, the API server notifies the Heron scheduler and also provides the scheduler with the topology's [logical plan](../../concepts/topologies#logical-plan), [physical plan](../../concepts/topologies#physical-plan), and some other artifacts. The scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Aurora](../../operators/deployment/schedulers/aurora), the [local filesystem](../../operators/deployment/schedulers/localfs), or something else, then deploys the topology using containers.
 Storage | When the topology is deployed to containers by the scheduler, the code running in those containers then downloads the remaining necessary topology artifacts (essentially the code that will run in those containers) from the storage system.
 
 * Shared Services
 
-    When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked
+    When the main scheduler (`org.apache.heron.scheduler.SchedulerMain`) is invoked
     by the launcher, it fetches the submitted topology artifact from the
     topology storage, initializes the **State Manager**, and prepares a physical plan that
     specifies how multiple instances should be packed into containers. Then, it starts
-    the specified scheduler, such as `com.twitter.heron.scheduler.local.LocalScheduler`,
+    the specified scheduler, such as `org.apache.heron.scheduler.local.LocalScheduler`,
     which invokes the `heron-executor` for each container.
 
 * Topologies
@@ -281,7 +280,7 @@ Storage | When the topology is deployed to containers by the scheduler, the code
     on container 0. When `heron-executor` executes normal **Heron Instances**
     (i.e. except for container 0), it first prepares
     the **Stream Manager** and the **Metrics Manager** before starting
-    `com.twitter.heron.instance.HeronInstance` for each instance that is
+    `org.apache.heron.instance.HeronInstance` for each instance that is
     assigned to the container.
     
     **Heron Instance** has two threads: the gateway thread and the slave thread.

@@ -3,20 +3,20 @@ You can check the status of Heron by doing the following:
 1. Start kubectl proxy
    kubectl proxy -p 8001
 
-2. Verify you can access the api server
-   curl http://localhost:8001/api/v1/proxy/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-apiserver:9000/api/v1/version
+2. Verify you can access the API server
+   curl http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-apiserver:9000/proxy/api/v1/version
 
 3. Verify you can access the heron ui
-   open http://localhost:8001/api/v1/proxy/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889
+   open http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
 
 4. Set your service url
-   heron config {{ .Release.Name }} set service_url http://localhost:8001/api/v1/proxy/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-apiserver:9000
+   heron config {{ .Release.Name }} set service_url http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-apiserver:9000/proxy
 
 5. Submit an example topology
-   heron submit {{ .Release.Name }} ~/.heron/examples/heron-api-examples.jar com.twitter.heron.examples.api.AckingTopology acking
+   heron submit {{ .Release.Name }} ~/.heron/examples/heron-api-examples.jar org.apache.heron.examples.api.AckingTopology acking
 
 6. Visit the heron ui and see if your example topology is running
-   open http://localhost:8001/api/v1/proxy/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889
+   open http://localhost:8001/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
 
 7. You can kill the example topology by 
    heron kill {{ .Release.Name }} acking

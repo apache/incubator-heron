@@ -1,6 +1,23 @@
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
+
 syntax = "proto2";
 package heron.proto.ckptmgr;
-option java_package = "com.twitter.heron.proto.ckptmgr";
+option java_package = "org.apache.heron.proto.ckptmgr";
 option java_outer_classname = "CheckpointManager";
 
 import "common.proto";
@@ -82,7 +99,9 @@ message StatefulConsistentCheckpoints {
   repeated StatefulConsistentCheckpoint consistent_checkpoints = 1;
 }
 
-// tmaster -> stmgr messages
+/*
+ * tmaster <-> stmgr messages
+ */
 
 // Message sent to stmgrs by the tmaster to initiate checkpointing
 message StartStatefulCheckpoint {
@@ -140,7 +159,9 @@ message StartStmgrStatefulProcessing {
   required string checkpoint_id = 1;
 }
 
-// tmaster -> ckptmgr messages
+/*
+ * tmaster -> ckptmgr messages
+ */
 
 // This is the message that a tmaster sends
 // when it wants to register itself
@@ -171,7 +192,25 @@ message CleanStatefulCheckpointResponse {
   repeated string cleaned_checkpoint_ids = 2;
 }
 
-// stmgr -> ckptmgr messages
+/*
+ * stmgr -> ckptmgr messages
+ */
+
+// This message encapsulates the info associated with
+// state of an instance/partition. only one of the state_location
+// and state should be set
+message InstanceStateCheckpoint {
+  required string checkpoint_id = 1;
+  optional bytes state = 2;
+  optional string state_location = 3;
+}
+
+// This message encapsulates the info associated with
+// checkpoint metadata of a component
+message CheckpointComponentMetadata {
+  required string component_name = 1;
+  required int32 parallelism = 2;
+}
 
 // This is the message that a stmgr sends
 // when it wants to register itself with
@@ -180,6 +219,7 @@ message RegisterStMgrRequest {
   required string topology_name = 1;
   required string topology_id = 2;
   required string stmgr_id = 3;
+  required heron.proto.system.PhysicalPlan physical_plan = 4;
 }
 
 // This is the message that checkpoint manager
@@ -194,6 +234,8 @@ message RegisterStMgrResponse {
 message SaveInstanceStateRequest {
   // Information about the instance whose state this is
   required heron.proto.system.Instance instance = 1;
+  // TODO(nwang): currently repartition is not supported and each request
+  //     contains a single partition.
   required InstanceStateCheckpoint checkpoint = 2;
 }
 
@@ -221,19 +263,14 @@ message GetInstanceStateResponse {
   optional InstanceStateCheckpoint checkpoint = 4;
 }
 
-// stmgr -> Instance messages
+/*
+ * stmgr -> Instance messages
+ */
 
 // This is the message that the stmgr sends to its
 // local tasks to begin initiating checkpoint
 message InitiateStatefulCheckpoint {
   required string checkpoint_id = 1;
-}
-
-// This proto encapsulates the info associated with
-// state of an instance
-message InstanceStateCheckpoint {
-  required string checkpoint_id = 1;
-  required bytes state = 2;
 }
 
 // This is the message that the instance sends
@@ -262,7 +299,9 @@ message StartInstanceStatefulProcessing {
   required string checkpoint_id = 1;
 }
 
-// stmgr -> stmgr messages
+/*
+ * stmgr -> stmgr messages
+ */
 
 // Once stmgr receives StoreInstanceStateCheckpoint from an instance,
 // it sends this message to all of that instance's 

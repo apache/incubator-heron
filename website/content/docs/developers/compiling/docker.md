@@ -64,7 +64,7 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
 ```
 
 This will build a Docker container specific to Ubuntu 14.04, create a source
@@ -87,13 +87,12 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz
+heron-0.12.0-ubuntu14.04.tar
+heron-0.12.0-ubuntu14.04.tar.gz
+heron-core-0.12.0-ubuntu14.04.tar.gz
+heron-install-0.12.0-ubuntu14.04.sh
+heron-layer-0.12.0-ubuntu14.04.tar
 heron-tools-0.12.0-ubuntu14.04.tar.gz
-heron-client-install-0.12.0-ubuntu.sh  
-heron-tools-install-0.12.0-ubuntu.sh
-heron-api-install-0.12.0-ubuntu.sh     
-heron-core-0.12.0-ubuntu.tar.gz
 ```
 
 ## Contributing New Environments
@@ -172,7 +171,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 Here's an example:
 
 ```dockerfile
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel-0.14.1-installer-linux-x86_64.sh \
          && chmod +x /tmp/bazel.sh \
          && /tmp/bazel.sh
 ```

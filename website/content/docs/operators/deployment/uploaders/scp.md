@@ -18,7 +18,7 @@ You can make Heron use SCP uploader by modifying the `uploader.yaml` config file
 for the Heron cluster. You'll need to specify the following for each cluster:
 
 * `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this to
-com.twitter.heron.uploader.scp.ScpUploader
+org.apache.heron.uploader.scp.ScpUploader
 * `heron.uploader.scp.command.options` --- Part of the SCP command where you specify custom options.
 i.e "-i ~/.ssh/id_rsa"
 * `heron.uploader.scp.command.connection` --- The user name and host pair to be used by the SCP command.
@@ -35,7 +35,7 @@ Below is an example configuration (in `uploader.yaml`) for a SCP uploader:
 
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader:         com.twitter.heron.uploader.scp.ScpUploader
+heron.class.uploader:         org.apache.heron.uploader.scp.ScpUploader
 # This is the scp command options that will be used by the uploader, this can be used to
 # specify custom options such as the location of ssh keys.
 heron.uploader.scp.command.options:   "-i ~/.ssh/id_rsa"

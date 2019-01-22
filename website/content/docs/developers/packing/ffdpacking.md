@@ -28,19 +28,19 @@ algorithm, update the `packing.yaml` file as follows:
 
 ```yaml
 # packing algorithm for packing instances into containers
-heron.class.packing.algorithm:    com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking
+heron.class.packing.algorithm:    org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
 ```
 
 The algorithm accepts as input the values of the following parameters:
 
 1. Component RAM
 2. Hint for the maximum container RAM
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT`)
 3. Hint for the maximum container CPU
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT`)
 4. Hint for the maximum container Disk
-   (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT`)
-5. Padding percentage (`com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE`)
+   (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT`)
+5. Padding percentage (`org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE`)
 6. Component Parallelisms
 
 Parameter 1 determines the RAM requirement of each component in the topology.
@@ -48,7 +48,7 @@ If the requirement is not specified then a default value of 1GB is used. The Fir
 algorithm guarantees that the amount of memory allocated to a component is either the one specified
 by the user or the default one.
 
-The parameters 2-4 determine the maximum container size with respect to RAM, cpu cores and disk.
+The parameters 2-4 determine the maximum container size with respect to RAM, CPU cores and disk.
 If one of these parameters is not specified by the user then
 the hint for the corresponding maximum container resource is set to the default resource requirement
 of 4 Heron instances.
@@ -66,7 +66,7 @@ will be allocated to it.
 Based on these parameters, the algorithm decides how to place the instances in the containers
 and how many containers to use. More specifically, the algorithm first sorts the instances in
 decreasing order of their RAM requirements. It then picks the instance on the head of the sorted
-list and places it in the first container that has enough resources (RAM, cpu cores, disk) to
+list and places it in the first container that has enough resources (RAM, CPU cores, disk) to
 accommodate it. If none of the existing containers have the requires resources, then a new container
 is allocated. Note that if an the RAM requirements of an instance exceed the value of
 parameter 2, then the algorithm returns an empty packing plan. After all the instances have
@@ -77,12 +77,12 @@ containers as input.
 
 ### Configuring the First Fit Decreasing Packing Algorithm
 
-1. The methods `com.twitter.heron.api.Config.setContainerMaxRamHint(long bytes)`,
-   `com.twitter.heron.api.Config.setContainerMaxCpuHint(float ncpus)`,
-   `com.twitter.heron.api.Config.setContainerMaxDiskHint(long bytes)`
+1. The methods `org.apache.heron.api.Config.setContainerMaxRamHint(long bytes)`,
+   `org.apache.heron.api.Config.setContainerMaxCpuHint(float ncpus)`,
+   `org.apache.heron.api.Config.setContainerMaxDiskHint(long bytes)`
    can be used to set parameters 2-4 when defining a topology.
 
-2. The `com.twitter.heron.api.Config.setContainerPaddingPercentage(int percentage)`
+2. The `org.apache.heron.api.Config.setContainerPaddingPercentage(int percentage)`
    method can be used to set the padding percentage
    defined in parameter 5 when defining a topology.
 
@@ -91,7 +91,7 @@ containers as input.
    ```java
 
      // Set up the topology and its config
-     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+     org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
 
      long maxContainerRam = 10L * Constants.GB;
 

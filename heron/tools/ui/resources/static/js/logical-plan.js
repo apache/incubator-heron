@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * Code for drawing the connected circles that make up the logical plan for this topology.
  * Exports a single global function drawLogicalPlan.
@@ -245,7 +264,8 @@
     for (var i in topology.bolts) {
       boltsArr.push({
           "name": i,
-          "inputComponents": topology.bolts[i]["inputComponents"]
+          "inputComponents": topology.bolts[i]["inputComponents"],
+          "inputStreams": topology.bolts[i]["inputs"]
       });
     }
 
@@ -255,9 +275,18 @@
     for (var b in boltsArr) {
       for (w in nodes) {
         if (boltsArr[b].inputComponents.indexOf(nodes[w].name) >= 0) {
+          // Found that node[w] is upstream of boltsArr[b], build a link
+          var streams = []
+          for (i in boltsArr[b].inputComponents) {
+            if (boltsArr[b].inputComponents[i] == nodes[w].name) {
+              streams.push(boltsArr[b].inputStreams[i].stream_name
+                  + ":" + boltsArr[b].inputStreams[i].grouping);
+            }
+          }
           links.push({
             "source": nodes[w],
-            "target": boltsArr[b]
+            "target": boltsArr[b],
+            "streams": streams.sort().join("<br>")
           });
         }
       }
@@ -315,6 +344,14 @@
     outerSvg.attr('height', (yRange[1] - yRange[0]) + padding.top + padding.bottom);
     svg.attr('transform', 'translate(' + padding.left + ',' + (padding.top - yRange[0]) + ')')
 
+    var connection_tip = d3.tip()
+        .attr('class', 'd3-tip main text-center connection')
+        .offset([10, 0])
+        .direction('s')
+        .html(function (d) {
+          return d.streams;
+        });
+
     var node = svg.selectAll(".topnode")
                   .data(nodes)
                   .enter()
@@ -322,6 +359,7 @@
                   .attr("class", "topnode")
                   .style("fill", "black");
 
+    // Links
     node.each(function (n) {
       d3.select(this)
         .selectAll(".link")
@@ -329,7 +367,7 @@
         .enter()
         .append("path")
         .attr('class', 'link')
-        .attr("stroke-width", linestyle.width)
+        .attr("stroke-width", linestyle.boldwidth)
         .attr("stroke", linestyle.color)
         .attr("fill", "none")
         .attr("d", function (edge) {
@@ -341,9 +379,12 @@
                  "C" + p[1].x + " " + p[1].y +
                  " " + p[2].x + " " + p[2].y +
                  " " + p[3].x + " " + p[3].y;
-        });
+        })
+        .on('mouseover', connection_tip.show)
+        .on('mouseout', connection_tip.hide);
     });
 
+    // Component
     node.append("circle")
         .attr('class', 'background')
         .attr("cx", function (d) { return d.x; })
@@ -374,21 +415,27 @@
           return d.color;
         })
         .on("click", planController.logicalComponentClicked)
+        .on("dblclick", planController.logicalComponentClicked)
         .on("mouseover", planController.logicalComponentHoverOver)
         .on("mouseout", planController.logicalComponentHoverOut);
 
+    // Component name
     node.append("text")
         .attr("id", function(d) { return "text+" + d.name; })
         .attr("x", function (d) { return d.cx; })
         .attr("y", function (d) { return d.cy - d.r - 10; })
         .attr("class", "fade")
         .style("text-anchor", "middle")
+        .style("user-select", "all")
         .text(function (d) {
           if (d.isReal) {
             return d.name;
           }
           return "";
         });
+
+
+    svg.call(connection_tip);
   }
 
   global.drawLogicalPlan = drawLogicalPlan;

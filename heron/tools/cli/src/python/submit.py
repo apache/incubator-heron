@@ -1,25 +1,31 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' submit.py '''
 import glob
 import logging
 import os
 import tempfile
 import requests
+import subprocess
+import urlparse
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -69,6 +75,7 @@ def create_parser(subparsers):
   cli_args.add_deactive_deploy(parser)
   cli_args.add_dry_run(parser)
   cli_args.add_extra_launch_classpath(parser)
+  cli_args.add_release_yaml_file(parser)
   cli_args.add_service_url(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
@@ -92,7 +99,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   topology_pkg_path = config.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
   # get the release yaml file
-  release_yaml_file = config.get_heron_release_file()
+  release_yaml_file = cl_args['release_yaml_file']
 
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
@@ -130,7 +137,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file, topol
   extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
-  main_class = 'com.twitter.heron.scheduler.SubmitterMain'
+  main_class = 'org.apache.heron.scheduler.SubmitterMain'
   res = execute.heron_class(
       class_name=main_class,
       lib_jars=lib_jars,
@@ -190,7 +197,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
     created = r.status_code is requests.codes.created
     s = Status.Ok if created or ok else Status.HeronError
     if s is Status.HeronError:
-      Log.error(r.json().get('message', "Unknown error from api server %d" % r.status_code))
+      Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
     elif ok:
       # this case happens when we request a dry_run
       print(r.json().get("response"))
@@ -366,6 +373,22 @@ def submit_cpp(cl_args, unknown_args, tmp_dir):
 
   return launch_topologies(cl_args, topology_file, tmp_dir)
 
+def download(uri, cluster):
+  tmp_dir = tempfile.mkdtemp()
+  cmd_downloader = config.get_heron_bin_dir() + "/heron-downloader.sh"
+  cmd_uri = "-u " + uri
+  cmd_destination = "-f " + tmp_dir
+  cmd_heron_root = "-d " + config.get_heron_dir()
+  cmd_heron_config = "-p " + config.get_heron_cluster_conf_dir(cluster, config.get_heron_conf_dir())
+  cmd_mode = "-m local"
+  cmd = [cmd_downloader, cmd_uri, cmd_destination, cmd_heron_root, cmd_heron_config, cmd_mode]
+  Log.debug("download uri command: %s", cmd)
+  subprocess.call(cmd)
+  suffix = (".jar", ".tar", ".tar.gz", ".pex", ".dylib", ".so")
+  for f in os.listdir(tmp_dir):
+    if f.endswith(suffix):
+      return os.path.join(tmp_dir, f)
+
 ################################################################################
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
@@ -387,6 +410,11 @@ def run(command, parser, cl_args, unknown_args):
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 
+  if urlparse.urlparse(topology_file).scheme:
+    cl_args['topology-file-name'] = download(topology_file, cl_args['cluster'])
+    topology_file = cl_args['topology-file-name']
+    Log.debug("download uri to local file: %s", topology_file)
+
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
     err_context = "Topology file '%s' does not exist" % topology_file
@@ -397,8 +425,8 @@ def run(command, parser, cl_args, unknown_args):
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
   pex_type = topology_file.endswith(".pex")
   cpp_type = topology_file.endswith(".dylib") or topology_file.endswith(".so")
-  if not jar_type and not tar_type and not pex_type and not cpp_type:
-    ext_name = os.path.splitext(topology_file)
+  if not (jar_type or tar_type or pex_type or cpp_type):
+    _, ext_name = os.path.splitext(topology_file)
     err_context = "Unknown file type '%s'. Please use .tar "\
                   "or .tar.gz or .jar or .pex or .dylib or .so file"\
                   % ext_name
@@ -428,6 +456,9 @@ def run(command, parser, cl_args, unknown_args):
   opts.set_config('cmdline.topology.role', cl_args['role'])
   opts.set_config('cmdline.topology.environment', cl_args['environ'])
 
+  # Use CLI release yaml file if the release_yaml_file config is empty
+  if not cl_args['release_yaml_file']:
+    cl_args['release_yaml_file'] = config.get_heron_release_file()
 
   # check the extension of the file name to see if it is tar/jar file.
   if jar_type:

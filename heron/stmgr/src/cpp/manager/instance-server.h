@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_INSTANCE_SERVER_H_
@@ -79,7 +82,7 @@ class InstanceServer : public Server {
   void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
   // Send a RestoreInstanceStateRequest to _task_id asking it to restore itself from _state
   virtual bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
-                                           const proto::ckptmgr::InstanceStateCheckpoint& _state);
+      const proto::ckptmgr::InstanceStateCheckpoint& _state);
   // Send StartInstanceStatefulProcessing message to all instances so that they can start
   // processing
   void SendStartInstanceStatefulProcessing(const std::string& _ckpt_id);
@@ -101,6 +104,7 @@ class InstanceServer : public Server {
   void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
+  sp_string MakeQueueLengthCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
   void UpdateQueueMetrics(EventLoop::Status);
 
@@ -159,6 +163,14 @@ class InstanceServer : public Server {
   // map of Instance_id to queue metric
   typedef std::unordered_map<sp_string, heron::common::MultiMeanMetric*> ConnectionBufferMetricMap;
   ConnectionBufferMetricMap connection_buffer_metric_map_;
+
+  // map of Instance_id to queue length metric
+  typedef std::unordered_map<sp_string, heron::common::MultiCountMetric*>
+    ConnectionBufferLengthMetricMap;
+  ConnectionBufferLengthMetricMap connection_buffer_length_metric_map_;
+
+  // map of task id to task name
+  std::unordered_map<sp_int32, sp_string> task_id_to_name;
 
   // instances/ causing back pressure
   std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;

@@ -50,7 +50,7 @@ import org.apache.storm.tuple.Fields;
  * synchronize state with StateSpouts this object is subscribed to.
  */
 public class TopologyContext extends WorkerTopologyContext implements IMetricsContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate;
+  private org.apache.heron.api.topology.TopologyContext delegate;
 
   // Constructor to match the signature of the storm's TopologyContext
   // Note that here, we fake the clojure.lang.Atom by creating our own class
@@ -66,10 +66,10 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
                          Map<String, Object> userResources,
                          Map<String, Object> executorData, Map<String, Object> registeredMetrics,
                          org.apache.storm.clojure.lang.Atom openOrPrepareWasCalled) {
-    super((com.twitter.heron.api.topology.TopologyContext) null);
+    super((org.apache.heron.api.topology.TopologyContext) null);
   }
 
-  public TopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
+  public TopologyContext(org.apache.heron.api.topology.TopologyContext delegate) {
     super(delegate);
     this.delegate = delegate;
   }
@@ -217,14 +217,14 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   */
 
   public void addTaskHook(ITaskHook newHook) {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+    Collection<org.apache.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
     if (hooks == null) {
       ITaskHookDelegate delegateHook = new ITaskHookDelegate();
       delegateHook.addHook(newHook);
 
       delegate.addTaskHook(delegateHook);
     } else {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+      for (org.apache.heron.api.hooks.ITaskHook hook : hooks) {
         if (hook instanceof ITaskHookDelegate) {
           ITaskHookDelegate delegateHook = (ITaskHookDelegate) hook;
           delegateHook.addHook(newHook);
@@ -236,9 +236,9 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   }
 
   public Collection<ITaskHook> getHooks() {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+    Collection<org.apache.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
     if (hooks != null) {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+      for (org.apache.heron.api.hooks.ITaskHook hook : hooks) {
         if (hook instanceof ITaskHookDelegate) {
           return ((ITaskHookDelegate) hook).getHooks();
         }

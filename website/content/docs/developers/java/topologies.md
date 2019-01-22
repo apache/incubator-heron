@@ -6,7 +6,7 @@ title: Writing and Launching Topologies in Java
 
 A topology specifies components like [spouts](../spouts) and [bolts](../bolts), as well as the relation
 between components and proper configurations. The
-[`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.twitter.heron%22%20AND%20a%3A%22heron-api%22)
+[`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.apache.heron%22%20AND%20a%3A%22heron-api%22)
 enables you to create topology logic in Java.
 
 > If you're interested in creating stateful topologies with [effectively-once
@@ -25,7 +25,7 @@ configuration file:
 
 ```xml
 <dependency>
-    <groupId>com.twitter.heron</groupId>
+    <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
     <version>{{< heronVersion >}}</version>
 </dependency>
@@ -84,7 +84,7 @@ of [spouts](../spouts) that ingest data and [bolts](../bolts) that process that 
 {{< alert "spouts-and-bolts" >}}
 
 Once you've defined the spouts and bolts, a topology can be composed using a
-[`TopologyBuilder`](/api/com/twitter/heron/api/topology/TopologyBuilder.html). The
+[`TopologyBuilder`](/api/org/apache/heron/api/topology/TopologyBuilder.html). The
 `TopologyBuilder` has two major methods used to specify topology components:
 
 Method | Description
@@ -129,12 +129,12 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/twitter/heron/tree/master/examples/src/java/com/twitter/heron/examples).
+See the [`ExclamationTopology`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
 
 ## Applying delivery semantics to topologies
 
 ```java
-import com.twitter.heron.api.Config;
+import org.apache.heron.api.Config;
 
 Config topologyConfig = new Config();
 
@@ -151,7 +151,7 @@ There are three delivery semantics available corresponding to the three delivery
 
 In distributed systems, an **ack** (short for "acknowledgment") is a message that confirms that some action has been taken. In Heron, you can create [bolts](#acking-bolts) that emit acks when some desired operation has occurred (for example data has been successfully stored in a database or a message has been successfully produced on a topic in a pub-sub messaging system). Those acks can then be received and acted upon by upstream [spouts](#ack-receiving-spouts).
 
-> You can see acking at work in a complete Heron topology in [this topology](https://github.com/twitter/heron/blob/master/examples/src/java/com/twitter/heron/examples/api/AckingTopology.java).
+> You can see acking at work in a complete Heron topology in [this topology](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/AckingTopology.java).
 
 Whereas acking a tuple indicates that some operation has succeeded, the opposite can be indicated when a bolt [fails](#failing) a tuple.
 
@@ -162,9 +162,9 @@ Each Heron bolt has an `OutputCollector` that can ack tuples using the `ack` met
 Here's an example of a bolt that acks tuples when they're successfully processed:
 
 ```java
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.TopologyContext;
+import org.apache.heron.api.bolt.BaseRichBolt;
+import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.topology.TopologyContext;
 
 public class AckingBolt extends BaseRichBolt {
     private OutputCollector outputCollector;
@@ -205,7 +205,7 @@ Heron spouts don't emit acks, but they can receive acks when downstream bolts ha
 If you want a spout to receive acks from downstream bolts, the spout needs to specify a message ID every time the spout's `SpoutOutputCollector` emits a tuple to downstream bolts. Here's an example:
 
 ```java
-import com.twitter.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.BaseRichSpout;
 
 public class AckReceivingSpout extends BaseRichSpout {
     private Object generateMessageId() {
@@ -314,7 +314,7 @@ As with acking, spouts must include a message ID when emitting tuples or else th
 If you're setting up your spouts and bolts to include an ack/fail logic, you can specify that a tuple will automatically be failed if a timeout threshold is reached before the tuple is acked. In this example, all tuples passing through all bolts will be failed if not acked within 10 seconds:
 
 ```java
-import com.twitter.heron.api.Config;
+import org.apache.heron.api.Config;
 
 Config config = new Config();
 config.setMessageTimeoutSecs(10);

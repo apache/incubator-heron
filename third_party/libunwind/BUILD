@@ -1,11 +1,6 @@
-package(default_visibility = ["//visibility:public"])
+licenses(["permissive"])
 
-exports_files([
-    "libunwind-1.1-cache.patch",
-    "libunwind-1.1-config.patch",
-    "libunwind-1.1-lzma-link.patch",
-    "libunwind.BUILD",
-])
+package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "libunwind-files",
