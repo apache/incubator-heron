@@ -73,6 +73,7 @@ pkg_tar(
     srcs = [
         "//heron/executor/src/python:heron-executor",
         "//heron/downloaders/src/shell:heron-downloader",
+        "//heron/downloaders/src/shell:heron-downloader-config",
         "//heron/instance/src/python:heron-python-instance",
         "//heron/instance/src/cpp:heron-cpp-instance",
         "//heron/shell/src/python:heron-shell",
@@ -264,6 +265,7 @@ pkg_tar(
     package_dir = "bin",
     srcs = [
         "//heron/downloaders/src/shell:heron-downloader",
+        "//heron/downloaders/src/shell:heron-downloader-config",
         "//heron/tools/cli/src/python:heron",
         "//heron/tools/explorer/src/python:heron-explorer",
         "//heron/tools/admin/src/python:heron-admin",
