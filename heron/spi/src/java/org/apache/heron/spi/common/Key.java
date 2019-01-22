@@ -187,6 +187,7 @@ public enum Key {
   PYTHON_INSTANCE_BINARY("heron.binaries.python.instance", "${HERON_BIN}/heron-python-instance"),
   CPP_INSTANCE_BINARY   ("heron.binaries.cpp.instance",    "${HERON_BIN}/heron-cpp-instance"),
   DOWNLOADER_BINARY     ("heron.binaries.downloader",      "${HERON_BIN}/heron-downloader"),
+  DOWNLOADER_CONF       ("heron.binaries.downloader-conf", "${HERON_BIN}/heron-downloader-config"),
 
   // keys for `heron` command line.
   // Prompt user when more containers are required so that
