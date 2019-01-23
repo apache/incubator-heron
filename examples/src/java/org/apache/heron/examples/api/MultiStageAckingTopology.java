@@ -84,7 +84,8 @@ public final class MultiStageAckingTopology {
         ExampleResources.getContainerDisk(3 * parallelism, parallelism));
     conf.setContainerRamRequested(
         ExampleResources.getContainerRam(3 * parallelism, parallelism));
-    conf.setContainerCpuRequested(1);
+    conf.setContainerCpuRequested(
+        ExampleResources.getContainerCpu(3 * parallelism, parallelism));
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(parallelism);

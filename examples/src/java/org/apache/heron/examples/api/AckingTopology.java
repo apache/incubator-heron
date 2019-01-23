@@ -81,7 +81,8 @@ public final class AckingTopology {
         ExampleResources.getContainerDisk(spouts + bolts, 2));
     conf.setContainerRamRequested(
         ExampleResources.getContainerRam(spouts + bolts, 2));
-    conf.setContainerCpuRequested(1);
+    conf.setContainerCpuRequested(
+        ExampleResources.getContainerCpu(spouts + bolts, 2));
 
     // Set the number of workers or stream managers
     conf.setNumStmgrs(2);

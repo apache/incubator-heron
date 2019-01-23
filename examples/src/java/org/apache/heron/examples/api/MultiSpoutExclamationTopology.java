@@ -69,8 +69,8 @@ public final class MultiSpoutExclamationTopology {
 
     // container resource configuration
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(3));
-    conf.setContainerRamRequested(ByteAmount.fromGigabytes(2));
-    conf.setContainerCpuRequested(1);
+    conf.setContainerRamRequested(ByteAmount.fromGigabytes(5));
+    conf.setContainerCpuRequested(4);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(3);
