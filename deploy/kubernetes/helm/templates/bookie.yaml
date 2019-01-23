@@ -27,7 +27,6 @@
 {{- $bookieDirectMemory := .Values.bookieDirectMemory }}
 {{- $bookieJournalCapacity := .Values.bookieJournalCapacity }}
 {{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
-{{- $bookieJournalHostPath := .Values.bookieJournalHostPath }}
 {{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
 
 apiVersion: v1
