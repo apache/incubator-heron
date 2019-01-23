@@ -1,10 +1,12 @@
-licenses(["notice"]) # apache 2.0
+licenses(["notice"])  # apache 2.0
+
+load("//pex:pex_rules.bzl", "pex_binary")
 
 package(default_visibility = ["//visibility:public"])
 
 pex_binary(
     name = "pylint",
-    main = "main.py",
     srcs = ["main.py"],
+    main = "main.py",
     reqs = ["pylint==1.5.5"],
 )

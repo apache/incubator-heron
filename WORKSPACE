@@ -4,6 +4,15 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
 
+http_archive(
+    name = "io_bazel_rules_pex",
+    sha256 = "4e068ab38589b2baf22d2c6c58b7cb3004d14191bc4f9fdb0baed4275520943f",
+    strip_prefix = "bazel_rules_pex-e2746c5c4ed70f7a56b724eec733a3fb32239b77",
+    url = "https://github.com/benley/bazel_rules_pex/archive/e2746c5c4ed70f7a56b724eec733a3fb32239b77.zip",
+)
+
+load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 
