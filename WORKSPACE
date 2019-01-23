@@ -2,6 +2,7 @@ workspace(name = "org_apache_heron")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
 
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
