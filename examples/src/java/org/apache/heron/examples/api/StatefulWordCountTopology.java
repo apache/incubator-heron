@@ -213,8 +213,9 @@ public final class StatefulWordCountTopology {
     conf.setContainerDiskRequested(
         ExampleResources.getContainerDisk(2 * parallelism, parallelism));
     conf.setContainerRamRequested(
-        ExampleResources.getContainerRam(2 * parallelism, parallelism));
-    conf.setContainerCpuRequested(2);
+        ExampleResources.getContainerRam(4 * parallelism, parallelism));
+    conf.setContainerCpuRequested(
+        ExampleResources.getContainerCpu(2 * parallelism, parallelism));
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }

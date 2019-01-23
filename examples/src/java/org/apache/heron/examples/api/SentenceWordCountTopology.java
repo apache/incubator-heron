@@ -186,8 +186,8 @@ public final class SentenceWordCountTopology {
 
     // container resource configuration
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(3));
-    conf.setContainerRamRequested(ByteAmount.fromGigabytes(3));
-    conf.setContainerCpuRequested(2);
+    conf.setContainerRamRequested(ByteAmount.fromGigabytes(4));
+    conf.setContainerCpuRequested(4);
 
     conf.setNumStmgrs(2);
 
