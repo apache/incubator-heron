@@ -2,6 +2,16 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+load("//tools/rules:build_defs.bzl", "DOCLINT_HTML_AND_SYNTAX")
+load("//tools/rules:javadoc.bzl", "java_doc")
+
+java_doc(
+    name = "heron-simulator-javadoc",
+    libs = [":simulator-java"],
+    pkgs = ["org/apache/heron"],
+    title = "Heron Simulator Documentation",
+)
+
 simulator_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java-low-level",
@@ -14,6 +24,7 @@ simulator_deps_files = \
 
 java_library(
     name = "simulator-java",
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
     srcs = glob(["**/*.java"]),
     deps = simulator_deps_files,
 )
