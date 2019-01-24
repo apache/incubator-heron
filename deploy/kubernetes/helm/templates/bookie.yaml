@@ -27,7 +27,6 @@
 {{- $bookieDirectMemory := .Values.bookieDirectMemory }}
 {{- $bookieJournalCapacity := .Values.bookieJournalCapacity }}
 {{- $bookieStorageCapacity := .Values.bookieStorageCapacity }}
-{{- $bookieJournalHostPath := .Values.bookieJournalHostPath }}
 {{- $bookieStorageHostPath := .Values.bookieStorageHostPath }}
 
 apiVersion: v1
@@ -144,15 +143,15 @@ spec:
             - name: data-disk
               mountPath: /bookkeeper/data/ledgers
 
-{{- if eq .Values.platform "baremetal" }}
+{{- if or (eq .Values.platform "aws") (eq .Values.platform "baremetal") }}
       volumes:
           # Mount local disks
         - name: journal-disk
           hostPath:
-            path: {{ $bookieJournalHostPath | quote }}
+            path: /bookkeeper/data/journal
         - name: ledgers-disk
           hostPath:
-            path: {{ $bookieStorageHostPath | quote }}
+            path: /bookkeeper/data/ledgers
 {{- end }}
 
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
