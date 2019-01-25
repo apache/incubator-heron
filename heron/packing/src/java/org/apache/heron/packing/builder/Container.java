@@ -23,9 +23,6 @@ import java.util.HashSet;
 
 import com.google.common.base.Optional;
 
-import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.exceptions.ResourceExceededException;
-import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
@@ -39,20 +36,20 @@ public class Container {
   private int containerId;
   private HashSet<PackingPlan.InstancePlan> instances;
   private Resource capacity;
-  private int paddingPercentage;
+  private Resource padding;
 
   /**
    * Creates a container with a specific capacity which will maintain a specific percentage
    * of its resources for padding.
    *
    * @param capacity the capacity of the container in terms of CPU, RAM and disk
-   * @param paddingPercentage the padding percentage
+   * @param padding the padding
    */
-  Container(int containerId, Resource capacity, int paddingPercentage) {
+  Container(int containerId, Resource capacity, Resource padding) {
     this.containerId = containerId;
     this.capacity = capacity;
     this.instances = new HashSet<PackingPlan.InstancePlan>();
-    this.paddingPercentage = paddingPercentage;
+    this.padding = padding;
   }
 
   public int getContainerId() {
@@ -67,20 +64,19 @@ public class Container {
     return capacity;
   }
 
-  int getPaddingPercentage() {
-    return paddingPercentage;
+  public Resource getPadding() {
+    return padding;
   }
 
   /**
    * Update the resources currently used by the container, when a new instance with specific
    * resource requirements has been assigned to the container.
    */
-  void add(PackingPlan.InstancePlan instancePlan) throws ResourceExceededException {
+  void add(PackingPlan.InstancePlan instancePlan) {
     if (this.instances.contains(instancePlan)) {
       throw new PackingException(String.format(
           "Instance %s already exists in container %s", instancePlan, toString()));
     }
-    assertHasSpace(instancePlan.getResource());
     this.instances.add(instancePlan);
   }
 
@@ -103,8 +99,8 @@ public class Container {
 
   @Override
   public String toString() {
-    return String.format("{containerId=%s, instances=%s, capacity=%s, paddingPercentage=%s}",
-        containerId, instances, capacity, paddingPercentage);
+    return String.format("{containerId=%s, instances=%s, capacity=%s, padding=%s}",
+        containerId, instances, capacity, padding);
   }
 
   /**
@@ -151,50 +147,16 @@ public class Container {
   }
 
   /**
-   * Check whether the container can accommodate a new instance with specific resource requirements
-   */
-  private void assertHasSpace(Resource resource) throws ResourceExceededException {
-    Resource usedResources = this.getTotalUsedResources();
-    ByteAmount newRam =
-        usedResources.getRam().plus(resource.getRam()).increaseBy(paddingPercentage);
-    double newCpu = Math.round(
-        PackingUtils.increaseBy(usedResources.getCpu() + resource.getCpu(), paddingPercentage));
-    ByteAmount newDisk =
-        usedResources.getDisk().plus(resource.getDisk()).increaseBy(paddingPercentage);
-
-    if (newRam.greaterThan(this.capacity.getRam())) {
-      throw new ResourceExceededException(String.format("Adding %s bytes of RAM to existing %s "
-          + "bytes with %d percent padding would exceed capacity %s",
-          resource.getRam(), usedResources.getRam(), paddingPercentage, this.capacity.getRam()));
-    }
-    if (newCpu > this.capacity.getCpu()) {
-      throw new ResourceExceededException(String.format("Adding %s cores to existing %s "
-          + "cores with %d percent padding would exceed capacity %s",
-          resource.getCpu(), usedResources.getCpu(), paddingPercentage, this.capacity.getCpu()));
-    }
-    if (newDisk.greaterThan(this.capacity.getDisk())) {
-      throw new ResourceExceededException(String.format("Adding %s bytes of disk to existing %s "
-          + "bytes with %s percent padding would exceed capacity %s",
-          resource.getDisk(), usedResources.getDisk(), paddingPercentage, this.capacity.getDisk()));
-    }
-  }
-
-  /**
    * Computes the used resources of the container by taking into account the resources
    * allocated for each instance.
    *
    * @return a Resource object that describes the used CPU, RAM and disk in the container.
    */
   public Resource getTotalUsedResources() {
-    ByteAmount usedRam = ByteAmount.ZERO;
-    double usedCpuCores = 0;
-    ByteAmount usedDisk = ByteAmount.ZERO;
-    for (PackingPlan.InstancePlan instancePlan : this.instances) {
-      Resource resource = instancePlan.getResource();
-      usedRam = usedRam.plus(resource.getRam());
-      usedCpuCores += resource.getCpu();
-      usedDisk = usedDisk.plus(resource.getDisk());
-    }
-    return new Resource(usedCpuCores, usedRam, usedDisk);
+    return getInstances().stream()
+        .map(PackingPlan.InstancePlan::getResource)
+        .reduce(Resource::plus)
+        .orElse(Resource.EMPTY_RESOURCE)
+        .plus(getPadding());
   }
 }

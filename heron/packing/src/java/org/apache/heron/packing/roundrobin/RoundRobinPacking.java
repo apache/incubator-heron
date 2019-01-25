@@ -36,7 +36,7 @@ import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.CPUShare;
 import org.apache.heron.common.basics.ResourceMeasure;
-import org.apache.heron.packing.RamRequirement;
+import org.apache.heron.packing.builder.RamRequirement;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;

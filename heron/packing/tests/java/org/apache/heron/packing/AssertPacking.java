@@ -33,7 +33,6 @@ import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingPlan;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -51,50 +50,9 @@ public final class AssertPacking {
    * expectedBoltRam and likewise for spouts. If notExpectedContainerRam is not null, verifies that
    * the container RAM is not that.
    */
-  public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
-                                      String boltName, String spoutName,
-                                      ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam,
-                                      ByteAmount notExpectedContainerRam) {
-    boolean boltFound = false;
-    boolean spoutFound = false;
-    List<Integer> expectedInstanceIndices = new ArrayList<>();
-    List<Integer> foundInstanceIndices = new ArrayList<>();
-    int expectedInstanceIndex = 1;
-    // RAM for bolt should be the value in component RAM map
-    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      if (notExpectedContainerRam != null) {
-        assertNotEquals(notExpectedContainerRam, containerPlan.getRequiredResource().getRam());
-      }
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        expectedInstanceIndices.add(expectedInstanceIndex++);
-        foundInstanceIndices.add(instancePlan.getTaskId());
-        if (instancePlan.getComponentName().equals(boltName)) {
-          assertEquals("Unexpected bolt RAM", expectedBoltRam, instancePlan.getResource().getRam());
-          boltFound = true;
-        }
-        if (instancePlan.getComponentName().equals(spoutName)) {
-          assertEquals(
-              "Unexpected spout RAM", expectedSpoutRam, instancePlan.getResource().getRam());
-          spoutFound = true;
-        }
-      }
-    }
-    assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
-    assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
-
-    Collections.sort(foundInstanceIndices);
-    assertEquals("Unexpected instance global id set found.",
-        expectedInstanceIndices, foundInstanceIndices);
-  }
-
-  /**
-   * Verifies that the containerPlan has at least one bolt named boltName with RAM equal to
-   * expectedBoltRam and likewise for spouts. If notExpectedContainerRam is not null, verifies that
-   * the container RAM is not that.
-   */
   public static void assertInstanceRam(Set<PackingPlan.ContainerPlan> containerPlans,
-                                       String boltName, String spoutName,
-                                       ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam) {
+                                      String boltName, String spoutName,
+                                      ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam) {
     // RAM for bolt should be the value in component RAM map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
@@ -246,10 +204,7 @@ public final class AssertPacking {
                 instance.getComponentIndex() != instancePlan.getComponentIndex());
           }
         }
-        if (componentInstances.get(instancePlan.getComponentName()) == null) {
-          componentInstances.put(instancePlan.getComponentName(),
-              new HashSet<PackingPlan.InstancePlan>());
-        }
+        componentInstances.computeIfAbsent(instancePlan.getComponentName(), k -> new HashSet<>());
         componentInstances.get(instancePlan.getComponentName()).add(instancePlan);
       }
     }

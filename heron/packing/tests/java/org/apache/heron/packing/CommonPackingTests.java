@@ -30,6 +30,7 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.common.utils.topology.TopologyTests;
 import org.apache.heron.packing.exceptions.ConstraintViolationException;
+import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -45,12 +46,9 @@ import static org.apache.heron.packing.AssertPacking.DELTA;
  * There is some common functionality in multiple packing plans. This class contains common tests.
  */
 public abstract class CommonPackingTests {
-  protected static final String A  = "A";
-  protected static final String B = "B";
-
-  protected static final String BOLT_NAME = "bolt";
-  protected static final String SPOUT_NAME = "spout";
-  protected static final int DEFAULT_CONTAINER_PADDING = 10;
+  protected static final String BOLT_NAME = "B";
+  protected static final String SPOUT_NAME = "A";
+  protected static final int DEFAULT_CONTAINER_PADDING_PERCENT = 10;
   protected int spoutParallelism;
   protected int boltParallelism;
   protected Integer totalInstances;
@@ -80,9 +78,8 @@ public abstract class CommonPackingTests {
         Context.instanceCpu(config), Context.instanceRam(config), Context.instanceDisk(config));
   }
 
-  protected static TopologyAPI.Topology getTopology(
-      int spoutParallelism, int boltParallelism,
-      org.apache.heron.api.Config topologyConfig) {
+  protected static TopologyAPI.Topology getTopology(int spoutParallelism, int boltParallelism,
+                                                    org.apache.heron.api.Config topologyConfig) {
     return TopologyTests.createTopology("testTopology", topologyConfig, SPOUT_NAME, BOLT_NAME,
         spoutParallelism, boltParallelism);
   }
@@ -93,12 +90,23 @@ public abstract class CommonPackingTests {
     return packing.pack();
   }
 
-  protected PackingPlan repack(TopologyAPI.Topology testTopology,
+  private PackingPlan repack(TopologyAPI.Topology testTopology,
                                PackingPlan initialPackingPlan,
                                Map<String, Integer> componentChanges) {
     IRepacking repacking = getRepackingImpl();
     repacking.initialize(PackingTestUtils.newTestConfig(testTopology), testTopology);
     return repacking.repack(initialPackingPlan, componentChanges);
+  }
+
+  protected Resource getDefaultMaxContainerResource() {
+    return getDefaultMaxContainerResource(
+        PackingUtils.DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER);
+  }
+
+  protected Resource getDefaultMaxContainerResource(int maxNumInstancesPerContainer) {
+    return new Resource(this.instanceDefaultResources.getCpu() * maxNumInstancesPerContainer,
+        this.instanceDefaultResources.getRam().multiply(maxNumInstancesPerContainer),
+        this.instanceDefaultResources.getDisk().multiply(maxNumInstancesPerContainer));
   }
 
   protected Resource getDefaultUnspecifiedContainerResource(int testNumInstances,
@@ -111,11 +119,43 @@ public abstract class CommonPackingTests {
   }
 
   protected PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
-                                             int numContainersBeforeRepack) {
-    return doScalingTest(topology, componentChanges,
-        instanceDefaultResources.getRam(), boltParallelism,
-        instanceDefaultResources.getRam(), spoutParallelism,
-        numContainersBeforeRepack, totalInstances);
+                                             int numContainersBeforeRepack,
+                                             int numContainersAfterRepack,
+                                             Resource maxContainerResource) {
+    return doPackingAndScalingTest(topology, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainersBeforeRepack, numContainersAfterRepack, maxContainerResource);
+  }
+
+  /**
+   * Performs a scaling test for a specific topology. It first
+   * computes an initial packing plan as a basis for scaling.
+   * Given specific component parallelism changes, a new packing plan is produced.
+   *
+   * @param testTopology Input topology
+   * @param componentChanges parallelism changes for scale up/down
+   * @param boltRes RAM allocated to bolts
+   * @param testBoltParallelism bolt parallelism
+   * @param spoutRes RAM allocated to spouts
+   * @param testSpoutParallelism spout parallelism
+   * @param numContainersBeforeRepack number of containers that the initial packing plan should use
+   * @param numContainersAfterRepack number of instances expected before scaling
+   * @return the new packing plan
+   */
+  protected PackingPlan doPackingAndScalingTest(TopologyAPI.Topology testTopology,
+                                                Map<String, Integer> componentChanges,
+                                                Resource boltRes, int testBoltParallelism,
+                                                Resource spoutRes, int testSpoutParallelism,
+                                                int numContainersBeforeRepack,
+                                                int numContainersAfterRepack,
+                                                Resource maxContainerResource) {
+    PackingPlan packingPlan = doPackingTest(testTopology, boltRes, testBoltParallelism,
+        spoutRes, testSpoutParallelism, numContainersBeforeRepack, maxContainerResource);
+    PackingPlan newPackingPlan = doScalingTest(testTopology, packingPlan, componentChanges,
+        boltRes, testBoltParallelism, spoutRes, testSpoutParallelism,
+        numContainersAfterRepack, maxContainerResource);
+    return newPackingPlan;
   }
 
   protected PackingPlan doPackingTest(TopologyAPI.Topology testTopology,
@@ -229,41 +269,27 @@ public abstract class CommonPackingTests {
     return packingPlan;
   }
 
-  /**
-   * Performs a scaling test for a specific topology. It first
-   * computes an initial packing plan as a basis for scaling.
-   * Given specific component parallelism changes, a new packing plan is produced.
-   *
-   * @param testTopology Input topology
-   * @param componentChanges parallelism changes for scale up/down
-   * @param boltRam RAM allocated to bolts
-   * @param testBoltParallelism bolt parallelism
-   * @param spoutRam RAM allocated to spouts
-   * @param testSpoutParallelism spout parallelism
-   * @param numContainersBeforeRepack number of containers that the initial packing plan should use
-   * @param totalInstancesExpected number of instances expected before scaling
-   * @return the new packing plan
-   */
   protected PackingPlan doScalingTest(TopologyAPI.Topology testTopology,
+                                      PackingPlan packingPlan,
                                       Map<String, Integer> componentChanges,
-                                      ByteAmount boltRam,
-                                      int testBoltParallelism, ByteAmount spoutRam,
-                                      int testSpoutParallelism,
-                                      int numContainersBeforeRepack,
-                                      int totalInstancesExpected) {
-    PackingPlan packingPlan = pack(testTopology);
+                                      Resource boltRes, int testBoltParallelism,
+                                      Resource spoutRes, int testSpoutParallelism,
+                                      int testNumContainers,
+                                      Resource maxContainerResource) {
+    PackingPlan newPackingPlan = repack(testTopology, packingPlan, componentChanges);
+    Assert.assertEquals(testNumContainers, newPackingPlan.getContainers().size());
+    AssertPacking.assertInstanceRam(newPackingPlan.getContainers(), BOLT_NAME, SPOUT_NAME,
+        boltRes.getRam(), spoutRes.getRam());
+    AssertPacking.assertInstanceCpu(newPackingPlan.getContainers(), BOLT_NAME, SPOUT_NAME,
+        boltRes.getCpu(), spoutRes.getCpu());
+//    AssertPacking.assertInstanceIndices(newPackingPlan.getContainers(), BOLT_NAME, SPOUT_NAME);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(), BOLT_NAME,
+        testBoltParallelism + componentChanges.getOrDefault(BOLT_NAME, 0));
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(), SPOUT_NAME,
+        testSpoutParallelism + componentChanges.getOrDefault(SPOUT_NAME, 0));
 
-    Assert.assertEquals(numContainersBeforeRepack, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstancesExpected, (int) packingPlan.getInstanceCount());
-    AssertPacking.assertContainers(packingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, testBoltParallelism);
-    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, testSpoutParallelism);
-
-    PackingPlan newPackingPlan =
-        repack(testTopology, packingPlan, componentChanges);
-    AssertPacking.assertContainerRam(newPackingPlan.getContainers(),
-        packingPlan.getMaxContainerResources().getRam());
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(), maxContainerResource.getRam());
+    AssertPacking.assertContainerCpu(newPackingPlan.getContainers(), maxContainerResource.getCpu());
 
     return newPackingPlan;
   }
@@ -372,7 +398,7 @@ public abstract class CommonPackingTests {
     // reconstruct the PackingPlan, see https://github.com/apache/incubator-heron/issues/1577
     PackingPlan initialPackingPlan = PackingTestHelper.addToTestPackingPlan(
         topologyId, null, PackingTestHelper.toContainerIdComponentNames(initialComponentInstances),
-        DEFAULT_CONTAINER_PADDING);
+        DEFAULT_CONTAINER_PADDING_PERCENT);
     AssertPacking.assertPackingPlan(topologyId, initialComponentInstances, initialPackingPlan);
 
     PackingPlan newPackingPlan = repack(this.topology, initialPackingPlan, componentChanges);
