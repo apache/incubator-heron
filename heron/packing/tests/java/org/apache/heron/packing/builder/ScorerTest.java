@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.Resource;
 import org.apache.heron.spi.utils.PackingTestUtils;
 
@@ -41,9 +41,9 @@ public class ScorerTest {
     Resource containerCapacity
         = new Resource(1000, ByteAmount.fromGigabytes(100), ByteAmount.fromGigabytes(100));
     testContainers = new Container[] {
-        new Container(1, containerCapacity, 0),
-        new Container(3, containerCapacity, 0),
-        new Container(4, containerCapacity, 0),
+        new Container(1, containerCapacity, Resource.EMPTY_RESOURCE),
+        new Container(3, containerCapacity, Resource.EMPTY_RESOURCE),
+        new Container(4, containerCapacity, Resource.EMPTY_RESOURCE),
     };
 
     addInstance(testContainers[0], "A", 0);

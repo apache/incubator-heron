@@ -17,19 +17,19 @@
  * under the License.
  */
 
-package org.apache.heron.packing;
+package org.apache.heron.packing.builder;
 
 /**
- * Thrown to indicate that the resources required are not available
+ * Scores based on container instance count, from highest to lowest
  */
-public class ResourceExceededException extends Exception {
-  private static final long serialVersionUID = -3662229190395580148L;
-
-  public ResourceExceededException(String message) {
-    super(message);
+public class NonEmptyContainerScorer implements Scorer<Container> {
+  @Override
+  public boolean sortAscending() {
+    return false;
   }
 
-  public ResourceExceededException(String message, Throwable cause) {
-    super(message, cause);
+  @Override
+  public double getScore(Container container) {
+    return container.getInstances().isEmpty() ? 0 : 1;
   }
 }

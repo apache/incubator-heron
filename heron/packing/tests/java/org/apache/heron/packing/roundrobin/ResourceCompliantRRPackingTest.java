@@ -28,9 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
-import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.AssertPacking;
 import org.apache.heron.packing.CommonPackingTests;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.IPacking;
@@ -51,19 +49,15 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     return new ResourceCompliantRRPacking();
   }
 
-  private int countComponent(String component, Set<PackingPlan.InstancePlan> instances) {
-    int count = 0;
-    for (PackingPlan.InstancePlan instancePlan : instances) {
-      if (component.equals(instancePlan.getComponentName())) {
-        count++;
-      }
-    }
-    return count;
+  @Test (expected = PackingException.class)
+  public void testFailureInsufficientContainerRam() throws Exception {
+    topologyConfig.setContainerRamRequested(ByteAmount.ZERO);
+    pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
-  @Test(expected = PackingException.class)
-  public void testFailureInsufficientContainerRamRequested() throws Exception {
-    topologyConfig.setContainerRamRequested(ByteAmount.ZERO);
+  @Test (expected = PackingException.class)
+  public void testFailureInsufficientContainerCpu() throws Exception {
+    topologyConfig.setContainerCpuRequested(1.0);
     pack(getTopology(spoutParallelism, boltParallelism, topologyConfig));
   }
 
@@ -72,11 +66,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testDefaultResources() throws Exception {
-    int numContainers = 2;
-    PackingPlan packingPlanNoExplicitResourcesConfig = pack(topology);
-
-    Assert.assertEquals(numContainers, packingPlanNoExplicitResourcesConfig.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlanNoExplicitResourcesConfig.getInstanceCount());
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        3, getDefaultMaxContainerResource());
   }
 
   /**
@@ -84,16 +77,14 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testDefaultContainerSizeWithPadding() throws Exception {
-    int numContainers = 2;
     int padding = 50;
     topologyConfig.setContainerPaddingPercentage(padding);
-    TopologyAPI.Topology newTopology = getTopology(spoutParallelism, boltParallelism,
-        topologyConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    PackingPlan packingPlan = pack(newTopology);
-
-    Assert.assertEquals(numContainers, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        4, getDefaultMaxContainerResource());
   }
 
   /**
@@ -104,36 +95,43 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     int numContainers = 1;
 
     // Set up the topology and its config
-    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    topologyConfig.setNumStmgrs(numContainers);
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
     ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
     double containerCpu = 30;
+    Resource containerResource = new Resource(containerCpu, containerRam, containerDisk);
+
+    Resource padding = PackingUtils.finalizePadding(
+        new Resource(containerCpu, containerRam, containerDisk),
+        new Resource(PackingUtils.DEFAULT_CONTAINER_CPU_PADDING,
+            PackingUtils.DEFAULT_CONTAINER_RAM_PADDING,
+            PackingUtils.DEFAULT_CONTAINER_RAM_PADDING),
+        PackingUtils.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
 
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setContainerDiskRequested(containerDisk);
     topologyConfig.setContainerCpuRequested(containerCpu);
-    TopologyAPI.Topology topologyExplicitResourcesConfig =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    Assert.assertEquals(numContainers, packingPlanExplicitResourcesConfig.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+    PackingPlan packingPlan = doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, containerResource);
 
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.getContainers()) {
-      Assert.assertEquals(Math.round(PackingUtils.increaseBy(totalInstances
-              * instanceDefaultResources.getCpu(), DEFAULT_CONTAINER_PADDING)),
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      Assert.assertEquals(Math.round(totalInstances * instanceDefaultResources.getCpu()
+              + padding.getCpu()),
           (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(instanceDefaultResources.getRam()
               .multiply(totalInstances)
-              .increaseBy(DEFAULT_CONTAINER_PADDING),
+              .plus(padding.getRam()),
           containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(instanceDefaultResources.getDisk()
-                    .multiply(totalInstances)
-                    .increaseBy(DEFAULT_CONTAINER_PADDING),
+              .multiply(totalInstances)
+              .plus(padding.getDisk()),
           containerPlan.getRequiredResource().getDisk());
 
       // All instances' resource requirement should be equal
@@ -149,7 +147,8 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
 
   @Test
   public void testContainersRequestedExceedsInstanceCount() throws Exception {
-    doTestContainerCountRequested(8, 7); // each of the 7 instances will get their own container
+    // each of the 7 instances will get their own container
+    doTestContainerCountRequested(8, 7);
   }
 
   /**
@@ -157,7 +156,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testCompleteRamMapRequested() throws Exception {
-    int numContainers = 2;
+    int numContainers = 3;
 
     // Explicit set resources for container
     // the value should be ignored, since we set the complete component RAM map
@@ -169,14 +168,12 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setContainerRamRequested(containerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
-    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
-    Assert.assertEquals(numContainers, packingPlanExplicitRamMap.getContainers().size());
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), containerRam);
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultMaxContainerResource().cloneWithRam(containerRam));
   }
 
   /**
@@ -184,7 +181,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testPartialRamMap() throws Exception {
-    int numContainers = 2;
+    int numContainers = 3;
 
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(10);
@@ -197,14 +194,12 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
-    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
-    Assert.assertEquals(numContainers, packingPlanExplicitRamMap.getContainers().size());
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, containerRam);
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainers, getDefaultMaxContainerResource().cloneWithRam(containerRam));
   }
 
   /**
@@ -215,18 +210,17 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     int numContainers = 1;
 
     // Set up the topology and its config
-    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    topologyConfig.setNumStmgrs(numContainers);
 
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(2);
-
     topologyConfig.setContainerRamRequested(containerRam);
 
-    TopologyAPI.Topology newTopology =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan = pack(newTopology);
-    Assert.assertEquals(7, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        7, getDefaultMaxContainerResource().cloneWithRam(containerRam));
   }
 
   /**
@@ -237,7 +231,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     int numContainers = 1;
 
     // Set up the topology and its config
-    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    topologyConfig.setNumStmgrs(numContainers);
 
     // Explicit set resources for container
     ByteAmount containerRam = ByteAmount.fromGigabytes(3);
@@ -250,11 +244,11 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan = pack(topologyExplicitRamMap);
-    Assert.assertEquals(7, packingPlan.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlan.getInstanceCount());
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        7, getDefaultMaxContainerResource().cloneWithRam(containerRam));
   }
 
   /**
@@ -262,27 +256,18 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testEvenPacking() throws Exception {
-    int numContainers = 2;
+    int numContainers = 3;
     int componentParallelism = 4;
-
+    boltParallelism = componentParallelism;
+    spoutParallelism = componentParallelism;
     // Set up the topology and its config
-    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    topologyConfig.setNumStmgrs(numContainers);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    TopologyAPI.Topology newTopology =
-        getTopology(componentParallelism, componentParallelism, topologyConfig);
-
-    int numInstance = TopologyUtils.getTotalInstance(newTopology);
-    // Two components
-    Assert.assertEquals(2 * componentParallelism, numInstance);
-    PackingPlan output = pack(newTopology);
-    Assert.assertEquals(numContainers, output.getContainers().size());
-    Assert.assertEquals((Integer) numInstance, output.getInstanceCount());
-
-    for (PackingPlan.ContainerPlan container : output.getContainers()) {
-      Assert.assertEquals(numInstance / numContainers, container.getInstances().size());
-      Assert.assertEquals(2, countComponent("spout", container.getInstances()));
-      Assert.assertEquals(2, countComponent("bolt", container.getInstances()));
-    }
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultMaxContainerResource());
   }
 
   /**
@@ -294,30 +279,11 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     int numScalingInstances = 5;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(4, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertContainers(newPackingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, instanceDefaultResources.getRam(),
-        instanceDefaultResources.getRam(), null);
-    for (PackingPlan.ContainerPlan containerPlan
-        : newPackingPlan.getContainers()) {
-      Assert.assertEquals(Math.round(PackingUtils.increaseBy(
-          containerPlan.getInstances().size() * instanceDefaultResources.getCpu(),
-          DEFAULT_CONTAINER_PADDING)), (long) containerPlan.getRequiredResource().getCpu());
+    int numContainersBeforeRepack = 3;
+    int numContainersAfterRepack = 5;
 
-      Assert.assertEquals(instanceDefaultResources.getRam()
-              .multiply(containerPlan.getInstances().size())
-              .increaseBy(DEFAULT_CONTAINER_PADDING),
-          containerPlan.getRequiredResource().getRam());
-
-      Assert.assertEquals(instanceDefaultResources.getDisk()
-              .multiply(containerPlan.getInstances().size())
-              .increaseBy(DEFAULT_CONTAINER_PADDING),
-          containerPlan.getRequiredResource().getDisk());
-    }
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource());
   }
 
   /**
@@ -332,42 +298,20 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topologyConfig.setContainerRamRequested(maxContainerRam);
-
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     int numScalingInstances = 3;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
 
-    int numContainersBeforeRepack = 3;
-    PackingPlan newPackingPlan =
-        doScalingTest(topologyExplicitRamMap, componentChanges, boltRam,
-            boltParallelism, instanceDefaultResources.getRam(), spoutParallelism,
-            numContainersBeforeRepack, totalInstances);
-    Assert.assertEquals(6, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertContainers(newPackingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
+    int numContainersBeforeRepack = 4;
+    int numContainersAfterRepack = 6;
 
-    for (PackingPlan.ContainerPlan containerPlan : newPackingPlan.getContainers()) {
-      //Each container either contains a single bolt or 1 bolt and 2 spouts or 1 bolt and 1 spout
-      if (containerPlan.getInstances().size() == 1) {
-        Assert.assertEquals(boltRam.increaseBy(paddingPercentage),
-            containerPlan.getRequiredResource().getRam());
-      }
-      if (containerPlan.getInstances().size() == 2) {
-        Assert.assertEquals(boltRam.plus(instanceDefaultResources.getRam())
-                .increaseBy(paddingPercentage),
-            containerPlan.getRequiredResource().getRam());
-      }
-      if (containerPlan.getInstances().size() == 3) {
-        Assert.assertEquals(boltRam.plus(instanceDefaultResources.getRam().multiply(2))
-                .increaseBy(paddingPercentage),
-            containerPlan.getRequiredResource().getRam());
-      }
-    }
+    doPackingAndScalingTest(topology, componentChanges,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource().cloneWithRam(maxContainerRam));
   }
 
   /**
@@ -375,7 +319,6 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
    */
   @Test
   public void testPartialRamMapScaling() throws Exception {
-
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
     // Explicit set component RAM map
@@ -383,23 +326,19 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setContainerRamRequested(maxContainerRam);
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     int numScalingInstances = 3;
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(BOLT_NAME, numScalingInstances);
 
     int numContainersBeforeRepack = 3;
-    PackingPlan newPackingPlan = doScalingTest(topologyExplicitRamMap, componentChanges, boltRam,
-        boltParallelism, instanceDefaultResources.getRam(), spoutParallelism,
-        numContainersBeforeRepack, totalInstances);
-
-    Assert.assertEquals(6, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + numScalingInstances),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertContainers(newPackingPlan.getContainers(),
-        BOLT_NAME, SPOUT_NAME, boltRam, instanceDefaultResources.getRam(), null);
+    int numContainersAfterRepack = 4;
+    doPackingAndScalingTest(topology, componentChanges,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource().cloneWithRam(maxContainerRam));
   }
 
   /**
@@ -413,15 +352,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingDown); //leave 2 spouts
     componentChanges.put(BOLT_NAME, boltScalingDown); //leave 2 bolts
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(1, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 2);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 2);
+    int numContainersBeforeRepack = 3;
+    int numContainersAfterRepack = 2;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource());
   }
 
   /**
@@ -439,15 +373,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingDown); //leave 1 spout
     componentChanges.put(BOLT_NAME, boltScalingDown); //leave 1 bolt
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(1, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingDown),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 0);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 1);
+    int numContainersBeforeRepack = 3;
+    int numContainersAfterRepack = 1;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource());
   }
 
   /**
@@ -457,7 +386,7 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
   @Test
   public void scaleDownAndUpWithExtraPadding() throws Exception {
     int paddingPercentage = 50;
-    int numContainers = 1;
+    int numContainers = 2;
     topologyConfig.setContainerPaddingPercentage(paddingPercentage);
     // Explicit set resources for container
     ByteAmount maxContainerRam = ByteAmount.fromGigabytes(12);
@@ -467,11 +396,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topologyConfig.setNumStmgrs(numContainers);
 
-    int noBolts = 2;
-    int noSpouts = 1;
+    boltParallelism = 2;
+    spoutParallelism = 1;
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(noSpouts, noBolts, topologyConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     int spoutScalingUp = 1;
     int boltScalingDown = -2;
@@ -479,18 +407,14 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingUp); // 2 spouts
     componentChanges.put(BOLT_NAME, boltScalingDown); // 0 bolts
-    int numContainersBeforeRepack = 1;
-    PackingPlan newPackingPlan = doScalingTest(topologyExplicitRamMap, componentChanges,
-        instanceDefaultResources.getRam(), noBolts, spoutRam, noSpouts,
-        numContainersBeforeRepack, noSpouts + noBolts);
+    int numContainersBeforeRepack = 2;
+    int numContainersAfterRepack = 1;
 
-    Assert.assertEquals(1, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (noSpouts + noBolts + spoutScalingUp + boltScalingDown),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, noBolts + boltScalingDown);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, noSpouts + spoutScalingUp);
+    doPackingAndScalingTest(topology, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource().cloneWithRam(maxContainerRam));
   }
 
   /**
@@ -511,11 +435,10 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topologyConfig.setNumStmgrs(numContainers);
 
-    int noBolts = 3;
-    int noSpouts = 1;
+    boltParallelism = 3;
+    spoutParallelism = 1;
 
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(noSpouts, noBolts, topologyConfig);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     int spoutScalingUp = 1;
     int boltScalingDown = -1;
@@ -523,18 +446,14 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingUp); // 2 spouts
     componentChanges.put(BOLT_NAME, boltScalingDown); // 2 bolts
-    int numContainersBeforeRepack = 1;
-    PackingPlan newPackingPlan = doScalingTest(topologyExplicitRamMap, componentChanges,
-        instanceDefaultResources.getRam(), noBolts, spoutRam, noSpouts,
-        numContainersBeforeRepack, noSpouts + noBolts);
+    int numContainersBeforeRepack = 2;
+    int numContainersAfterRepack = 2;
 
-    Assert.assertEquals(2, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (noSpouts + noBolts + spoutScalingUp + boltScalingDown),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, noBolts + boltScalingDown);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, noSpouts + spoutScalingUp);
+    doPackingAndScalingTest(topology, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource().cloneWithRam(maxContainerRam));
   }
 
   @Test
@@ -545,14 +464,99 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
     Map<String, Integer> componentChanges = new HashMap<>();
     componentChanges.put(SPOUT_NAME, spoutScalingUp); // 8 spouts
     componentChanges.put(BOLT_NAME, boltScalingUp); // 8 bolts
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-    Assert.assertEquals(4, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingUp + boltScalingUp),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, boltParallelism + boltScalingUp);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, spoutParallelism + spoutScalingUp);
+    int numContainersBeforeRepack = 3;
+    int numContainersAfterRepack = 5;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource());
+  }
+
+  /**
+   * Test the scenario where scaling down and up is simultaneously requested
+   */
+  @Test
+  public void scaleDownAndUp() throws Exception {
+    int spoutScalingDown = -4;
+    int boltScalingUp = 6;
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
+    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
+    int numContainersBeforeRepack = 3;
+    int numContainersAfterRepack = 4;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersAfterRepack,
+        getDefaultMaxContainerResource());
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidScaleFactor() throws Exception {
+    //try to remove more spout instances than possible
+    int spoutScalingDown = -5;
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown);
+
+    int numContainersBeforeRepack = 3;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersBeforeRepack,
+        getDefaultMaxContainerResource());
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidComponent() throws Exception {
+    //try to remove a component that does not exist
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("SPOUT_FAKE", -10);
+    int numContainersBeforeRepack = 3;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack, numContainersBeforeRepack,
+        getDefaultMaxContainerResource());
+  }
+
+  /**
+   * Test invalid RAM for instance
+   */
+  @Test(expected = PackingException.class)
+  public void testInvalidRamInstance() throws Exception {
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount boltRam = ByteAmount.ZERO;
+    topologyConfig.setContainerRamRequested(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        0, getDefaultMaxContainerResource().cloneWithRam(maxContainerRam));
+  }
+
+  @Test
+  public void testTwoContainersRequested() throws Exception {
+    doTestContainerCountRequested(2, 2);
+  }
+
+  /**
+   * Test the scenario where container level resource config are set
+   */
+  protected void doTestContainerCountRequested(int requestedContainers,
+                                               int expectedContainer) throws Exception {
+
+    // Explicit set resources for container
+    topologyConfig.setContainerRamRequested(ByteAmount.fromGigabytes(10));
+    topologyConfig.setContainerDiskRequested(ByteAmount.fromGigabytes(20));
+    topologyConfig.setContainerCpuRequested(30);
+    topologyConfig.setNumStmgrs(requestedContainers);
+
+    TopologyAPI.Topology topologyExplicitResourcesConfig =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
+
+    Assert.assertEquals(expectedContainer,
+        packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+
+    // RAM for bolt/spout should be the value in component RAM map
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
+      }
+    }
   }
 }

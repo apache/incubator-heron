@@ -35,7 +35,8 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.AssertPacking;
 import org.apache.heron.packing.PackingTestHelper;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
@@ -52,9 +53,12 @@ public class PackingPlanBuilderTest {
   @Before
   public void init() {
     testContainers = new ArrayList<>();
-    testContainers.add(new Container(3, null, 5));
-    testContainers.add(new Container(6, null, 20));
-    testContainers.add(new Container(4, null, 20));
+    testContainers.add(new Container(3, null,
+        new Resource(5, ByteAmount.fromGigabytes(5), ByteAmount.fromGigabytes(5))));
+    testContainers.add(new Container(6, null,
+        new Resource(20, ByteAmount.fromGigabytes(20), ByteAmount.fromGigabytes(20))));
+    testContainers.add(new Container(4, null,
+        new Resource(20, ByteAmount.fromGigabytes(20), ByteAmount.fromGigabytes(20))));
   }
 
   @Test
@@ -117,9 +121,8 @@ public class PackingPlanBuilderTest {
    * Tests the getContainers method.
    */
   @Test
-  public void testGetContainers() throws ResourceExceededException {
-
-    int paddingPercentage = 10;
+  public void testGetContainers() {
+    Resource padding = new Resource(1.0, ByteAmount.fromGigabytes(1), ByteAmount.fromGigabytes(1));
     Map<Integer, List<InstanceId>> packing = new HashMap<>();
     packing.put(7, Arrays.asList(
         new InstanceId("spout", 1, 0),
@@ -130,12 +133,12 @@ public class PackingPlanBuilderTest {
 
     PackingPlan packingPlan = generatePacking(packing);
     Map<Integer, Container> containers = PackingPlanBuilder.getContainers(
-        packingPlan, paddingPercentage,
+        packingPlan, packingPlan.getMaxContainerResources(), padding,
         new HashMap<String, TreeSet<Integer>>(), new TreeSet<Integer>());
     assertEquals(packing.size(), containers.size());
     for (Integer containerId : packing.keySet()) {
       Container foundContainer = containers.get(containerId);
-      assertEquals(paddingPercentage, foundContainer.getPaddingPercentage());
+      assertEquals(padding, foundContainer.getPadding());
       assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
       assertEquals(2, foundContainer.getInstances().size());
     }
@@ -190,12 +193,12 @@ public class PackingPlanBuilderTest {
       PackingTestHelper.toContainerIdComponentNames(testContainerInstances);
 
   @Test
-  public void testBuildPackingPlan() throws ResourceExceededException {
+  public void testBuildPackingPlan() throws ConstraintViolationException {
     doCreatePackingPlanTest(testContainerInstances);
   }
 
   @Test
-  public void testAddToPackingPlan() throws ResourceExceededException {
+  public void testAddToPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -211,19 +214,20 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = ResourceExceededException.class)
-  public void testExceededCapacityAddingToPackingPlan() throws ResourceExceededException {
+  public void testExceededCapacityAddingToPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(3, new InstanceId("componentB", 4, 1))
+        new Pair<>(3, new InstanceId("componentB", 4, 1)),
+        new Pair<>(3, new InstanceId("componentB", 5, 2))
     };
     PackingTestHelper.addToTestPackingPlan(
         TOPOLOGY_ID, plan, PackingTestHelper.toContainerIdComponentNames(added), 0);
   }
 
   @Test
-  public void testRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -242,7 +246,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = PackingException.class)
-  public void testInvalidContainerRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testInvalidContainerRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -253,7 +257,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = PackingException.class)
-  public void testInvalidComponentRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testInvalidComponentRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -264,7 +268,7 @@ public class PackingPlanBuilderTest {
   }
 
   private static PackingPlan doCreatePackingPlanTest(
-      Pair<Integer, InstanceId>[] instances) throws ResourceExceededException {
+      Pair<Integer, InstanceId>[] instances) throws ConstraintViolationException {
     PackingPlan plan = PackingTestHelper.createTestPackingPlan(
         TOPOLOGY_ID, PackingTestHelper.toContainerIdComponentNames(instances), 0);
     AssertPacking.assertPackingPlan(TOPOLOGY_ID, instances, plan);
@@ -291,7 +295,7 @@ public class PackingPlanBuilderTest {
 
     @Override
     public double getScore(Container container) {
-      return container.getPaddingPercentage();
+      return container.getPadding().getCpu();
     }
   }
 }

@@ -36,7 +36,7 @@ import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.CPUShare;
 import org.apache.heron.common.basics.ResourceMeasure;
-import org.apache.heron.packing.RamRequirement;
+import org.apache.heron.packing.builder.ResourceRequirement;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -374,7 +374,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     // To ensure we spread out the big instances first
     // Only sorting by RAM here because only RAM can be explicitly capped by JVM processes
     List<String> sortedInstances = getSortedRAMComponents(parallelismMap.keySet()).stream()
-        .map(RamRequirement::getComponentName).collect(Collectors.toList());
+        .map(ResourceRequirement::getComponentName).collect(Collectors.toList());
     for (String component : sortedInstances) {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
@@ -392,12 +392,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<RamRequirement> getSortedRAMComponents(Set<String> componentNames) {
-    ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
+  private ArrayList<ResourceRequirement> getSortedRAMComponents(Set<String> componentNames) {
+    ArrayList<ResourceRequirement> ramRequirements = new ArrayList<>();
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     for (String componentName : componentNames) {
-      ramRequirements.add(new RamRequirement(componentName,
+      ramRequirements.add(new ResourceRequirement(componentName,
           ramMap.getOrDefault(componentName, ByteAmount.ZERO)));
     }
     Collections.sort(ramRequirements, Collections.reverseOrder());
@@ -463,11 +463,15 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    * @return Container RAM requirement
    */
   private ByteAmount getContainerRamHint(Map<Integer, List<InstanceId>> allocation) {
+    ByteAmount defaultContainerRam = instanceRamDefault
+        .multiply(getLargestContainerSize(allocation))
+        .plus(DEFAULT_RAM_PADDING_PER_CONTAINER);
+
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     return TopologyUtils.getConfigWithDefault(
         topologyConfig, org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
-        NOT_SPECIFIED_BYTE_AMOUNT);
+        defaultContainerRam);
   }
 
   /**

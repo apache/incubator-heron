@@ -20,6 +20,7 @@
 package org.apache.heron.packing.roundrobin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -27,13 +28,16 @@ import java.util.logging.Logger;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.ResourceExceededException;
 import org.apache.heron.packing.builder.Container;
 import org.apache.heron.packing.builder.ContainerIdScorer;
 import org.apache.heron.packing.builder.HomogeneityScorer;
 import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
 import org.apache.heron.packing.builder.Scorer;
+import org.apache.heron.packing.constraints.MinRamConstraint;
+import org.apache.heron.packing.constraints.ResourceConstraint;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
@@ -43,9 +47,12 @@ import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
+import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_PADDING;
 import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED;
 import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED;
+import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES;
 import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
+import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_PADDING;
 import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
 
 /**
@@ -92,14 +99,18 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * the size of RAM for an instance is less than the minimal required value.
  */
 public class ResourceCompliantRRPacking implements IPacking, IRepacking {
-
-  static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
-  private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
-
   private static final Logger LOG = Logger.getLogger(ResourceCompliantRRPacking.class.getName());
 
   private TopologyAPI.Topology topology;
+
+  // instance & container
   private Resource defaultInstanceResources;
+  private Resource maxContainerResources;
+  private int maxNumInstancesPerContainer;
+  private Map<String, Resource> componentResourceMap;
+
+  // padding
+  private Resource padding;
 
   private int numContainers;
   //ContainerId to examine next. It is set to 1 when the
@@ -121,11 +132,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
-    this.numContainers = TopologyUtils.getNumContainers(topology);
-    this.defaultInstanceResources = new Resource(
-        Context.instanceCpu(config),
-        Context.instanceRam(config),
-        Context.instanceDisk(config));
+    setPackingConfigs(config);
     resetToFirstContainer();
 
     LOG.info(String.format("Initializing ResourceCompliantRRPacking. "
@@ -135,37 +142,74 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         this.defaultInstanceResources.getDisk().toString()));
   }
 
-  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
+  /**
+   * Instatiate the packing algorithm parameters related to this topology.
+   */
+  private void setPackingConfigs(Config config) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    double defaultCpu = this.defaultInstanceResources.getCpu()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
-        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
-    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
-        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
+    this.numContainers = TopologyUtils.getNumContainers(topology);
+
+    // instance default resources are acquired from heron system level config
+    this.defaultInstanceResources = new Resource(
+        Context.instanceCpu(config),
+        Context.instanceRam(config),
+        Context.instanceDisk(config));
+
     int paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
-        TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
+        TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, PackingUtils.DEFAULT_CONTAINER_PADDING_PERCENTAGE);
+    ByteAmount ramPadding = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_RAM_PADDING, PackingUtils.DEFAULT_CONTAINER_RAM_PADDING);
+    double cpuPadding = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_CPU_PADDING, PackingUtils.DEFAULT_CONTAINER_CPU_PADDING);
+    Resource preliminaryPadding = new Resource(cpuPadding, ramPadding,
+        PackingUtils.DEFAULT_CONTAINER_DISK_PADDING);
 
-    Resource maxContainerResources = new Resource(
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
-            (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            defaultRam.increaseBy(paddingPercentage)),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            defaultDisk.increaseBy(paddingPercentage)));
+    this.maxNumInstancesPerContainer = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES, PackingUtils.DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER);
 
-    LOG.info(String.format("ResourceCompliantRRPacking newPackingPlanBuilder. "
-        + "CPU max: %f, RAMmaxMax: %s, DISK max: %s, Padding percentage: %d.",
-        maxContainerResources.getCpu(),
-        maxContainerResources.getRam().toString(),
-        maxContainerResources.getDisk().toString(),
-        paddingPercentage));
+    // container default resources are computed as:
+    // max number of instances per container * default instance resources
+    double containerDefaultCpu = this.defaultInstanceResources.getCpu()
+        * maxNumInstancesPerContainer;
+    ByteAmount containerDefaultRam = this.defaultInstanceResources.getRam()
+        .multiply(maxNumInstancesPerContainer);
+    ByteAmount containerDefaultDisk = this.defaultInstanceResources.getDisk()
+        .multiply(maxNumInstancesPerContainer);
+
+    double containerCpu = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_CPU_REQUESTED, containerDefaultCpu);
+    ByteAmount containerRam = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_RAM_REQUESTED, containerDefaultRam);
+    ByteAmount containerDisk = TopologyUtils.getConfigWithDefault(topologyConfig,
+        TOPOLOGY_CONTAINER_DISK_REQUESTED, containerDefaultDisk);
+    Resource containerResource = new Resource(containerCpu,
+        containerRam, containerDisk);
+
+    // finalize padding
+    this.padding = PackingUtils.finalizePadding(containerResource,
+        preliminaryPadding, paddingPercentage);
+
+    // finalize container resources
+    this.maxContainerResources = containerResource;
+
+    this.componentResourceMap = PackingUtils.getComponentResourceMap(
+        TopologyUtils.getComponentParallelism(topology),
+        TopologyUtils.getComponentRamMapConfig(topology),
+        TopologyUtils.getComponentCpuMapConfig(topology),
+        TopologyUtils.getComponentDiskMapConfig(topology),
+        defaultInstanceResources
+    );
+  }
+
+  private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
-        .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
-        .setRequestedContainerPadding(paddingPercentage)
-        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+        .setMaxContainerResource(maxContainerResources)
+        .setRequestedContainerPadding(padding)
+        .setRequestedComponentResource(componentResourceMap)
+        .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
+        .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
   }
 
   @Override
@@ -179,13 +223,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
         return planBuilder.build();
 
-      } catch (ResourceExceededException e) {
+      } catch (ConstraintViolationException e) {
         //Not enough containers. Adjust the number of containers.
-        LOG.finest(String.format(
-            "%s Increasing the number of containers to %s and attempting to place again.",
+        LOG.info(String.format(
+            "%s. Increasing the number of containers to %s and attempting to place again.",
             e.getMessage(), this.numContainers + 1));
         increaseNumContainers(1);
         resetToFirstContainer();
+
+        int totalInstances = TopologyUtils.getTotalInstance(topology);
+        if (numContainers > totalInstances) {
+          throw new PackingException("Cannot add to that container");
+        }
       }
     }
   }
@@ -216,13 +265,18 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
         return planBuilder.build();
 
-      } catch (ResourceExceededException e) {
-        //Not enough containers. Adjust the number of containers.
-        increaseNumContainers(1);
-        resetToFirstContainer();
+      } catch (ConstraintViolationException e) {
         LOG.info(String.format(
             "%s Increasing the number of containers to %s and attempting packing again.",
             e.getMessage(), this.numContainers));
+        //Not enough containers. Adjust the number of containers.
+        increaseNumContainers(1);
+        resetToFirstContainer();
+
+        int totalInstances = TopologyUtils.getTotalInstance(topology);
+        if (numContainers > totalInstances) {
+          throw new PackingException("Cannot add to that container");
+        }
       }
     }
   }
@@ -258,7 +312,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   }
 
   private PackingPlanBuilder getResourceCompliantRRAllocation(
-      PackingPlanBuilder planBuilder) throws ResourceExceededException {
+      PackingPlanBuilder planBuilder) throws ConstraintViolationException {
 
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     int totalInstances = TopologyUtils.getTotalInstance(topology);
@@ -282,7 +336,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private PackingPlanBuilder getResourceCompliantRRAllocation(
       PackingPlanBuilder planBuilder, Map<String, Integer> componentChanges)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
 
     Map<String, Integer> componentsToScaleDown =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
@@ -309,7 +363,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
                                            Map<String, Integer> parallelismMap,
-                                           PolicyType policyType) throws ResourceExceededException {
+                                           PolicyType policyType)
+      throws ConstraintViolationException {
     for (String componentName : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(componentName);
       for (int i = 0; i < numInstance; ++i) {
@@ -326,7 +381,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * @throws ResourceExceededException if there is no room on the current container for the instance
    */
   private void strictRRpolicy(PackingPlanBuilder planBuilder,
-                              String componentName) throws ResourceExceededException {
+                              String componentName) throws ConstraintViolationException {
     planBuilder.addInstance(this.containerId, componentName);
     this.containerId = nextContainerId(this.containerId);
   }
@@ -383,7 +438,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     private void assignInstance(PackingPlanBuilder planBuilder,
                                 String componentName,
                                 ResourceCompliantRRPacking packing)
-        throws ResourceExceededException, RuntimeException {
+        throws ConstraintViolationException, RuntimeException {
       switch (this) {
         case STRICT:
           packing.strictRRpolicy(planBuilder, componentName);

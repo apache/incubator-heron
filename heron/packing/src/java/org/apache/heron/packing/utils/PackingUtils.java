@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.Resource;
 
 /**
@@ -34,66 +33,35 @@ import org.apache.heron.spi.packing.Resource;
  */
 public final class PackingUtils {
   private static final Logger LOG = Logger.getLogger(PackingUtils.class.getName());
-  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
+
+  // default
+  public static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
+  public static final ByteAmount DEFAULT_CONTAINER_RAM_PADDING = ByteAmount.fromGigabytes(1);
+  public static final ByteAmount DEFAULT_CONTAINER_DISK_PADDING = ByteAmount.fromGigabytes(1);
+  public static final double DEFAULT_CONTAINER_CPU_PADDING = 1.0;
+  public static final int DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER = 4;
 
   private PackingUtils() {
   }
 
-  /**
-   * Verifies the Instance has enough RAM and that it can fit within the container limits.
-   *
-   * @param instanceResources The resources allocated to the instance
-   * @throws PackingException if the instance is invalid
-   */
-  private static void assertIsValidInstance(Resource instanceResources,
-                                            ByteAmount minInstanceRam,
-                                            Resource maxContainerResources,
-                                            int paddingPercentage) throws PackingException {
-
-    if (instanceResources.getRam().lessThan(minInstanceRam)) {
-      throw new PackingException(String.format(
-          "Instance requires RAM %s which is less than the minimum RAM per instance of %s",
-          instanceResources.getRam(), minInstanceRam));
+  public static Map<String, Resource> getComponentResourceMap(
+      Map<String, Integer> parallelismMap,
+      Map<String, ByteAmount> componentRamMap,
+      Map<String, Double> componentCpuMap,
+      Map<String, ByteAmount> componentDiskMap,
+      Resource defaultInstanceResource) {
+    Map<String, Resource> componentResourceMap = new HashMap<>();
+    for (String component : parallelismMap.keySet()) {
+      ByteAmount instanceRam = componentRamMap.getOrDefault(component,
+          defaultInstanceResource.getRam());
+      double instanceCpu = componentCpuMap.getOrDefault(component,
+          defaultInstanceResource.getCpu());
+      ByteAmount instanceDisk = componentDiskMap.getOrDefault(component,
+          defaultInstanceResource.getDisk());
+      componentResourceMap.put(component, new Resource(instanceCpu, instanceRam, instanceDisk));
     }
 
-    ByteAmount instanceRam = instanceResources.getRam().increaseBy(paddingPercentage);
-    if (instanceRam.greaterThan(maxContainerResources.getRam())) {
-      throw new PackingException(String.format(
-          "This instance requires containers of at least %s RAM. The current max container "
-              + "size is %s",
-          instanceRam, maxContainerResources.getRam()));
-    }
-
-    double instanceCpu = Math.round(PackingUtils.increaseBy(
-        instanceResources.getCpu(), paddingPercentage));
-    if (instanceCpu > maxContainerResources.getCpu()) {
-      throw new PackingException(String.format(
-          "This instance requires containers with at least %s CPU cores. The current max container"
-              + "size is %s cores",
-          instanceCpu, maxContainerResources.getCpu()));
-    }
-
-    ByteAmount instanceDisk = instanceResources.getDisk().increaseBy(paddingPercentage);
-    if (instanceDisk.greaterThan(maxContainerResources.getDisk())) {
-      throw new PackingException(String.format(
-          "This instance requires containers of at least %s disk. The current max container"
-              + "size is %s",
-          instanceDisk, maxContainerResources.getDisk()));
-    }
-  }
-
-  public static Resource getResourceRequirement(String component,
-                                                Map<String, ByteAmount> componentRamMap,
-                                                Resource defaultInstanceResource,
-                                                Resource maxContainerResource,
-                                                int paddingPercentage) {
-    ByteAmount instanceRam = defaultInstanceResource.getRam();
-    if (componentRamMap.containsKey(component)) {
-      instanceRam = componentRamMap.get(component);
-    }
-    assertIsValidInstance(defaultInstanceResource.cloneWithRam(instanceRam),
-        MIN_RAM_PER_INSTANCE, maxContainerResource, paddingPercentage);
-    return defaultInstanceResource.cloneWithRam(instanceRam);
+    return componentResourceMap;
   }
 
   public static long increaseBy(long value, int paddingPercentage) {
@@ -102,6 +70,28 @@ public final class PackingUtils {
 
   public static double increaseBy(double value, int paddingPercentage) {
     return value + (paddingPercentage * value) / 100;
+  }
+
+  public static Resource finalizePadding(
+      Resource containerResource, Resource padding, int paddingPercentage) {
+    double cpuPadding = finalizePadding(containerResource.getCpu(),
+        padding.getCpu(), paddingPercentage);
+    ByteAmount ramPadding = finalizePadding(containerResource.getRam(),
+        padding.getRam(), paddingPercentage);
+    ByteAmount diskPadding = finalizePadding(containerResource.getDisk(),
+        padding.getDisk(), paddingPercentage);
+    return new Resource(cpuPadding, ramPadding, diskPadding);
+  }
+
+  public static ByteAmount finalizePadding(
+      ByteAmount containerRes, ByteAmount padding, int paddingPercentage) {
+    return ByteAmount.fromBytes(Math.max(padding.asBytes(),
+        containerRes.asBytes() * paddingPercentage / 100));
+  }
+
+  public static double finalizePadding(
+      double containerRes, double padding, int paddingPercentage) {
+    return Math.max(padding, containerRes * paddingPercentage / 100);
   }
 
   /**
