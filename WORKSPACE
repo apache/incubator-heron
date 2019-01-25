@@ -11,10 +11,14 @@ http_archive(
     url = "https://github.com/benley/bazel_rules_pex/archive/e2746c5c4ed70f7a56b724eec733a3fb32239b77.zip",
 )
 
+rules_scala_version = "a89d44f7ef67d93dedfc9888630f48d7723516f7"  # update this as needed
+
 load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
 
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
+
+rules_scala_version = "a89d44f7ef67d93dedfc9888630f48d7723516f7"  # update this as needed
 
 curator_version = "2.9.0"
 
@@ -1016,18 +1020,37 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.6.0.tar.gz"],
 )
 
+# Download the rules_docker repository at release v0.7.0
+http_archive(
+    name = "io_bazel_rules_docker",
+    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
+    strip_prefix = "rules_docker-0.7.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+)
+
+http_archive(
+    name = "io_bazel_rules_scala",
+    strip_prefix = "rules_scala-%s" % rules_scala_version,
+    type = "zip",
+    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
+)
+
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
+
+# register default scala toolchain
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+
+scala_register_toolchains()
+
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_pull",
     container_repositories = "repositories",
 )
 
+# This is NOT needed when going through the language lang_image
+# "repositories" function(s).
 container_repositories()
-
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-)
 
 container_pull(
     name = "heron-base",
@@ -1035,6 +1058,7 @@ container_pull(
     repository = "heron/base",
     tag = "0.4.0",
 )
+
 # end docker image building
 
 # for nomad repear
