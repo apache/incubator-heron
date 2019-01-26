@@ -175,6 +175,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
       ack_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().acks_size());
       fail_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().fails_size());
     }
+    __global_protobuf_pool_release__(tuple_set);
 
     stmgr_->HandleStreamManagerData(iter->second, _message);
   }
