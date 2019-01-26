@@ -188,6 +188,7 @@ void StMgrClient::SendHelloRequest() {
 }
 
 bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg) {
+  bool retval;
   proto::system::HeronTupleSet2* tuple_set = nullptr;
   tuple_set = __global_protobuf_pool_acquire__(tuple_set);
   tuple_set->ParsePartialFromString(_msg.set());
@@ -214,7 +215,7 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
                         << "droptuples_upon_backpressure is set";
       }
     }
-    return false;
+    retval = false;
   } else {
     stmgr_client_metrics_->scope(METRIC_BYTES_TO_STMGRS)->incr_by(_msg.ByteSize());
     if (tuple_set->has_data()) {
@@ -228,8 +229,11 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
     }
 
     SendMessage(_msg);
-    return true;
+    retval = true;
   }
+
+  __global_protobuf_pool_release__(tuple_set);
+  return retval;
 }
 
 void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
