@@ -250,7 +250,73 @@ public class RoundRobinPackingTest {
    * Test the scenario RAM map config is completely set
    */
   @Test
-  public void testCompleteRamMapRequested() throws Exception {
+  public void testCompleteRamMapRequestedWithExactlyEnoughResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    // the value should be ignored, since we set the complete component RAM map
+    ByteAmount containerRam = ByteAmount.fromGigabytes(8);
+
+    // Explicit set component RAM map
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
+
+    topologyConfig.setContainerRamRequested(containerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap =
+        getRoundRobinPackingPlan(topologyExplicitRamMap);
+
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+  }
+
+  /**
+   * Test the scenario RAM map config is completely set
+   */
+  @Test(expected = PackingException.class)
+  public void testCompleteRamMapRequestedWithLessThanEnoughResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    // the value should be ignored, since we set the complete component RAM map
+    ByteAmount containerRam = ByteAmount.fromGigabytes(2);
+
+    // Explicit set component RAM map
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
+
+    topologyConfig.setContainerRamRequested(containerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    getRoundRobinPackingPlan(topologyExplicitRamMap);
+  }
+
+  /**
+   * Test the scenario RAM map config is completely set
+   */
+  @Test
+  public void testCompleteRamMapRequestedWithMoreThanEnoughResource() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
@@ -279,6 +345,42 @@ public class RoundRobinPackingTest {
 
     AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
         BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, containerRam);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+  }
+
+  /**
+   * Test the scenario RAM map config is completely set
+   */
+  @Test
+  public void testCompleteRamMapRequestedWithoutPaddingResource() throws Exception {
+    int numContainers = 2;
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
+
+    // Set up the topology and its config
+    org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+
+    // Explicit set resources for container
+    // the value should be ignored, since we set the complete component RAM map
+    ByteAmount containerRam = ByteAmount.fromGigabytes(6);
+
+    // Explicit set component RAM map
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    ByteAmount spoutRam = ByteAmount.fromGigabytes(2);
+
+    topologyConfig.setContainerRamRequested(containerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap =
+        getRoundRobinPackingPlan(topologyExplicitRamMap);
+
+    AssertPacking.assertContainers(packingPlanExplicitRamMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltRam, spoutRam, null);
     Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
   }
 
@@ -360,6 +462,7 @@ public class RoundRobinPackingTest {
     int numContainers = 2;
     int spoutParallelism = 4;
     int boltParallelism = 3;
+    Integer totalInstances = spoutParallelism + boltParallelism;
 
     // Set up the topology and its config
     org.apache.heron.api.Config topologyConfig = new org.apache.heron.api.Config();
@@ -378,14 +481,18 @@ public class RoundRobinPackingTest {
 
     TopologyAPI.Topology topologyExplicitCpuMap =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    getRoundRobinPackingPlan(topologyExplicitCpuMap);
+    PackingPlan packingPlanExplicitCpuMap = getRoundRobinPackingPlan(topologyExplicitCpuMap);
+
+    AssertPacking.assertContainers(packingPlanExplicitCpuMap.getContainers(),
+        BOLT_NAME, SPOUT_NAME, boltCpu, spoutCpu, null);
+    Assert.assertEquals(totalInstances, packingPlanExplicitCpuMap.getInstanceCount());
   }
 
   /**
    * Test the scenario CPU map config is completely set
    * and there are exactly enough resource for instances, but not enough for padding
    */
-  @Test(expected = PackingException.class)
+  @Test
   public void testCompleteCpuMapRequestedWithoutPaddingResource() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
