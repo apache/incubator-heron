@@ -284,9 +284,9 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       if (!containerResHint.equals(notSpecified)
           && usedRes.greaterThan(containerResHint.minus(containerResPadding))) {
         throw new PackingException(String.format("Invalid packing plan generated. "
-                + "Total instance %s in a container (%s) have exceeded "
+                + "Total instance %s in a container (%s) + padding(%s) have exceeded "
                 + "the container-level constraint of %s.",
-            resourceType, usedRes.toString(), containerResHint));
+            resourceType, usedRes.toString(), containerResPadding.toString(), containerResHint));
       }
 
       // calculate resource for the remaining unspecified instances if any
