@@ -205,10 +205,14 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       if (!containerRamHint.equals(NOT_SPECIFIED_BYTE_AMOUNT)) {
         containerRam = ByteAmount.fromBytes(
             Math.min(containerRam.plus(containerRamPadding).asBytes(), containerRamHint.asBytes()));
+      } else {
+        containerRam = containerRam.plus(containerRamPadding);
       }
 
       if (containerCpuHint != NOT_SPECIFIED_CPU_SHARE) {
         containerCpu = Math.min(containerCpu + containerCpuPadding, containerCpuHint);
+      } else {
+        containerCpu += containerCpuPadding;
       }
 
       Resource resource = new Resource(Math.max(containerCpu, containerCpuHint),
@@ -293,18 +297,18 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         }
       }
 
-      // Validate instance resources specified so far don't violate container-level constraint
-      if (!containerResHint.equals(notSpecified) && usedRes.greaterThan(containerResHint)) {
-        throw new PackingException(String.format("Invalid packing plan generated. "
-                + "Total instance %s (%s) in container#%d have exceeded "
-                + "the container-level constraint of %s.",
-            resourceType, usedRes.toString(), containerId, containerResHint.toString()));
-      }
-
       // Soft padding constraint validation: warn if padding amount cannot be accommodated
       boolean paddingThrottling = false;
       if (!containerResHint.equals(notSpecified)
           && usedRes.greaterThan(containerResHint.minus(containerResPadding))) {
+        // Validate instance resources specified so far don't violate container-level constraint
+        if (usedRes.greaterThan(containerResHint)) {
+          throw new PackingException(String.format("Invalid packing plan generated. "
+                  + "Total instance %s (%s) in container#%d have exceeded "
+                  + "the container-level constraint of %s.",
+              resourceType, usedRes.toString(), containerId, containerResHint.toString()));
+        }
+
         paddingThrottling = true;
         LOG.warning(String.format("Container#%d (max %s: %s) is now hosting instances that "
                 + "take up to %s %s. The container may not have enough resource to accommodate "
@@ -368,7 +372,8 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     int globalTaskIndex = 1;
 
     // To ensure we spread out the big instances first
-    List<String> sortedInstances = getSortedRAMInstances(parallelismMap.keySet()).stream()
+    // Only sorting by RAM here because only RAM can be explicitly capped by JVM processes
+    List<String> sortedInstances = getSortedRAMComponents(parallelismMap.keySet()).stream()
         .map(RamRequirement::getComponentName).collect(Collectors.toList());
     for (String component : sortedInstances) {
       int numInstance = parallelismMap.get(component);
@@ -387,7 +392,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
+  private ArrayList<RamRequirement> getSortedRAMComponents(Set<String> componentNames) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
