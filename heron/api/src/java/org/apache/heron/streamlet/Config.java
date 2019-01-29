@@ -22,6 +22,7 @@ package org.apache.heron.streamlet;
 
 import java.io.Serializable;
 
+import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.streamlet.impl.KryoSerializer;
 
 /**
@@ -33,7 +34,7 @@ import org.apache.heron.streamlet.impl.KryoSerializer;
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
   private final double cpu;
-  private final long ram;
+  private final ByteAmount ram;
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
   private org.apache.heron.api.Config heronConfig;
@@ -63,7 +64,7 @@ public final class Config implements Serializable {
     static final boolean USE_KRYO = true;
     static final org.apache.heron.api.Config CONFIG = new org.apache.heron.api.Config();
     static final double CPU = 1.0;
-    static final long RAM = 100 * MB;
+    static final ByteAmount RAM = ByteAmount.fromMegabytes(100);
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
     static final Serializer SERIALIZER = Serializer.KRYO;
   }
@@ -110,23 +111,7 @@ public final class Config implements Serializable {
    * @return the per-container RAM in bytes
    */
   public long getPerContainerRam() {
-    return ram;
-  }
-
-  /**
-   * Gets the RAM used per topology container as a number of gigabytes
-   * @return the per-container RAM in gigabytes
-   */
-  public long getPerContainerRamAsGigabytes() {
-    return Math.round((double) ram / GB);
-  }
-
-  /**
-   * Gets the RAM used per topology container as a number of megabytes
-   * @return the per-container RAM in megabytes
-   */
-  public long getPerContainerRamAsMegabytes() {
-    return Math.round((double) ram / MB);
+    return getPerContainerRamAsBytes();
   }
 
   /**
@@ -134,7 +119,23 @@ public final class Config implements Serializable {
    * @return the per-container RAM in bytes
    */
   public long getPerContainerRamAsBytes() {
-    return getPerContainerRam();
+    return ram.asBytes();
+  }
+
+  /**
+   * Gets the RAM used per topology container as a number of megabytes
+   * @return the per-container RAM in megabytes
+   */
+  public long getPerContainerRamAsMegabytes() {
+    return ram.asMegabytes();
+  }
+
+  /**
+   * Gets the RAM used per topology container as a number of gigabytes
+   * @return the per-container RAM in gigabytes
+   */
+  public long getPerContainerRamAsGigabytes() {
+    return ram.asGigabytes();
   }
 
   /**
@@ -170,7 +171,7 @@ public final class Config implements Serializable {
   public static final class Builder {
     private org.apache.heron.api.Config config;
     private double cpu;
-    private long ram;
+    private ByteAmount ram;
     private DeliverySemantics deliverySemantics;
     private Serializer serializer;
 
@@ -188,6 +189,9 @@ public final class Config implements Serializable {
      */
     public Builder setPerContainerCpu(double perContainerCpu) {
       this.cpu = perContainerCpu;
+      // Different packing algorithm might use different configs. Set all of them here.
+      config.setContainerCpuRequested(perContainerCpu);
+      config.setContainerMaxCpuHint(perContainerCpu);
       return this;
     }
 
@@ -196,8 +200,7 @@ public final class Config implements Serializable {
      * @param perContainerRam Per-container (per-instance) RAM expressed as a Long.
      */
     public Builder setPerContainerRam(long perContainerRam) {
-      this.ram = perContainerRam;
-      return this;
+      return setPerContainerRamInBytes(perContainerRam);
     }
 
     /**
@@ -205,7 +208,10 @@ public final class Config implements Serializable {
      * @param perContainerRam Per-container (per-instance) RAM expressed as a Long.
      */
     public Builder setPerContainerRamInBytes(long perContainerRam) {
-      this.ram = perContainerRam;
+      this.ram = ByteAmount.fromBytes(perContainerRam);
+      // Different packing algorithm might use different configs. Set all of them here.
+      config.setContainerRamRequested(ram);
+      config.setContainerMaxRamHint(ram);
       return this;
     }
 
@@ -214,8 +220,7 @@ public final class Config implements Serializable {
      * @param perContainerRamMB Per-container (per-instance) RAM expressed as a Long.
      */
     public Builder setPerContainerRamInMegabytes(long perContainerRamMB) {
-      this.ram = perContainerRamMB * MB;
-      return this;
+      return setPerContainerRam(perContainerRamMB * MB);
     }
 
     /**
@@ -223,8 +228,7 @@ public final class Config implements Serializable {
      * @param perContainerRamGB Per-container (per-instance) RAM expressed as a Long.
      */
     public Builder setPerContainerRamInGigabytes(long perContainerRamGB) {
-      this.ram = perContainerRamGB * GB;
-      return this;
+      return setPerContainerRam(perContainerRamGB * GB);
     }
 
     /**
