@@ -563,12 +563,22 @@ public class StreamletImplTest {
   }
 
   @Test
-  public void testConfigBuilder() {
+  public void testConfigBuilderDefaultConfig() {
     Config defaultConfig = Config.defaultConfig();
     assertEquals(defaultConfig.getSerializer(), Config.Serializer.KRYO);
-    assertEquals(0, Double.compare(defaultConfig.getPerContainerCpu(), 1.0));
-    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromMegabytes(100).asBytes());
+    assertEquals(0, Double.compare(defaultConfig.getPerContainerCpu(), -1.0));
+    assertEquals(defaultConfig.getPerContainerRam(), ByteAmount.fromBytes(-1).asBytes());
     assertEquals(defaultConfig.getDeliverySemantics(), Config.DeliverySemantics.ATMOST_ONCE);
+
+    org.apache.heron.api.Config conf = defaultConfig.getHeronConfig();
+    assertFalse(conf.containsKey(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED));
+    assertFalse(conf.containsKey(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT));
+    assertFalse(conf.containsKey(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED));
+    assertFalse(conf.containsKey(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT));
+  }
+
+  @Test
+  public void testConfigBuilderNonDefaultConfig() {
     Config nonDefaultConfig = Config.newBuilder()
         .setDeliverySemantics(Config.DeliverySemantics.EFFECTIVELY_ONCE)
         .setSerializer(Config.Serializer.JAVA)
@@ -581,6 +591,16 @@ public class StreamletImplTest {
     assertEquals(nonDefaultConfig.getPerContainerRamAsGigabytes(), 10);
     assertEquals(nonDefaultConfig.getPerContainerRamAsMegabytes(), 1024 * 10);
     assertEquals(0, Double.compare(nonDefaultConfig.getPerContainerCpu(), 3.5));
+
+    org.apache.heron.api.Config conf = nonDefaultConfig.getHeronConfig();
+    assertEquals(conf.get(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED),
+                 "3.5");
+    assertEquals(conf.get(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT),
+                 "3.5");
+    assertEquals(conf.get(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED),
+                 "10737418240");
+    assertEquals(conf.get(org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT),
+                 "10737418240");
   }
 
   @Test

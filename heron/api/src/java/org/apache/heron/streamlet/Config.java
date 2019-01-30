@@ -62,7 +62,6 @@ public final class Config implements Serializable {
 
   private static class Defaults {
     static final boolean USE_KRYO = true;
-    static final org.apache.heron.api.Config CONFIG = new org.apache.heron.api.Config();
     static final double CPU = -1.0;                             // -1 means undefined
     static final ByteAmount RAM = ByteAmount.fromBytes(-1);     // -1 means undefined
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
@@ -176,7 +175,7 @@ public final class Config implements Serializable {
     private Serializer serializer;
 
     private Builder() {
-      config = Defaults.CONFIG;
+      config = new org.apache.heron.api.Config();
       cpu = Defaults.CPU;
       ram = Defaults.RAM;
       deliverySemantics = Defaults.SEMANTICS;
