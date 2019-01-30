@@ -50,12 +50,15 @@ chmod +x heron/tools/apiserver/src/shell/heron-apiserver.sh
 
 bash scripts/release/status.sh
 
-# Create a temporary director for generated files
+# Create a temporary directory for generated files
 mkdir -p $TEMP_RELEASE_DIR
 rm -f $TEMP_RELEASE_DIR/*.*
-./docker/scripts/build-artifacts.sh $BUILD_OS $VERSION_TAG rm -f $TEMP_RELEASE_DIR
+./docker/scripts/build-artifacts.sh $BUILD_OS $VERSION_TAG $TEMP_RELEASE_DIR
 
 # Cherry-pick files to output dir
 mkdir -p $OUTPUT_DIR
 cp $TEMP_RELEASE_DIR/heron-${VERSION_TAG}-${BUILD_OS}.tar.gz $OUTPUT_DIR
 cp $TEMP_RELEASE_DIR/heron-install-${VERSION_TAG}-${BUILD_OS}.sh $OUTPUT_DIR
+
+# Remove temporary directory
+rm -rf $TEMP_RELEASE_DIR
