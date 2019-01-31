@@ -16,10 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Build packages to be released
+# Build docker image to be released
 # parameters:
 # 1. version tag, e.g. v0.20.1-incubating
-# 2. build os, e.g. darwin, centos7
+# 2. build os, e.g. debian9, centos7
 # 3. output dir
 
 # Related environment variables
@@ -53,12 +53,14 @@ bash scripts/release/status.sh
 # Create a temporary directory for generated files
 mkdir -p $TEMP_RELEASE_DIR
 rm -f $TEMP_RELEASE_DIR/*.*
+
+# Build artifacts and the docker image
 ./docker/scripts/build-artifacts.sh $BUILD_OS $VERSION_TAG $TEMP_RELEASE_DIR
+./docker/scripts/build-docker.sh $BUILD_OS $VERSION_TAG $TEMP_RELEASE_DIR
 
 # Cherry-pick files to output dir
 mkdir -p $OUTPUT_DIR
-cp $TEMP_RELEASE_DIR/heron-${VERSION_TAG}-${BUILD_OS}.tar.gz $OUTPUT_DIR
-cp $TEMP_RELEASE_DIR/heron-install-${VERSION_TAG}-${BUILD_OS}.sh $OUTPUT_DIR
+cp ${TEMP_RELEASE_DIR}/heron-docker-${VERSION_TAG}-${BUILD_OS}.tar.gz $OUTPUT_DIR
 
 # Remove temporary directory
 rm -rf $TEMP_RELEASE_DIR
