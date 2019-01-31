@@ -58,10 +58,10 @@ sh ./maven/maven-pom-version.sh $VERSION_TAG
 cd $BASE_DIR
 
 echo "Build directories for jars ... "
-mkdir $OUTPUT_DIR/$VERSION_TAG/heron-api
-mkdir $OUTPUT_DIR/$VERSION_TAG/heron-spi
-mkdir $OUTPUT_DIR/$VERSION_TAG/heron-simulator
-mkdir $OUTPUT_DIR/$VERSION_TAG/heron-storm
+mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-api
+mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-spi
+mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-simulator
+mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-storm
 
 echo "Copy heron-api artifacts ... "
 cp ./release/heron-api-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-api/
@@ -89,5 +89,5 @@ cp ./bazel-bin/storm-compatibility/src/java/libstorm-compatibility-java-src.jar 
 
 
 echo "Compress all artifacts into a bundle file ..."
-tar -czf "${VERSION_TAG}_artifacts.tar.gz" $OUTPUT_DIR
-mv "${VERSION_TAG}_artifacts.tar.gz" $OUTPUT_DIR
+tar -czf "heron-artifacts-${VERSION_TAG}.tar.gz" $OUTPUT_DIR
+mv "heron-artifacts-${VERSION_TAG}.tar.gz" $OUTPUT_DIR
