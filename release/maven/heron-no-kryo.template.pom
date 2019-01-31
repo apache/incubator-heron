@@ -31,6 +31,24 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+
+  <mailingLists>
+    <mailingList>
+        <name>Heron user mailing list</name>
+        <subscribe>user-subscribe@heron.incubator.apache.org</subscribe>
+        <unsubscribe>user-unsubscribe@heron.incubator.apache.org</unsubscribe>
+        <post>user@heron.incubator.apache.org</post>
+        <archive>http://mail-archives.apache.org/mod_mbox/heron-user/</archive>
+    </mailingList>
+    <mailingList>
+        <name>Heron developer mailing list</name>
+        <subscribe>dev-subscribe@heron.incubator.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@heron.incubator.apache.org</unsubscribe>
+        <post>dev@heron.incubator.apache.org</post>
+        <archive>http://mail-archives.apache.org/mod_mbox/heron-dev/</archive>
+    </mailingList>
+  </mailingLists>
+
   <developers>
     <developer>
       <name>Heron Project</name>
@@ -39,6 +57,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <organizationUrl>http://http://apache.org/</organizationUrl>
     </developer>
   </developers>
+
   <scm>
     <connection>scm:git:git@github.com:apache/incubator-heron.git</connection>
     <developerConnection>scm:git:git@github.com:apache/incubator-heron.git</developerConnection>
