@@ -18,15 +18,15 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   </licenses>
   <developers>
     <developer>
-      <name>Heron Users</name>
-      <email>heron-users@googlegroups.com</email>
-      <organization>Twitter</organization>
-      <organizationUrl>http://www.twitter.com</organizationUrl>
+      <name>Heron Project</name>
+      <email>dev@heron.incubator.apache.org</email>
+      <organization>Apache Software Foundation</organization>
+      <organizationUrl>http://http://apache.org/</organizationUrl>
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git@github.com:twitter/heron.git</connection>
-    <developerConnection>scm:git:git@github.com:twitter/heron.git</developerConnection>
-    <url>git@github.com:twitter/heron.git</url>
+    <connection>scm:git:git@github.com:apache/incubator-heron.git</connection>
+    <developerConnection>scm:git:git@github.com:apache/incubator-heron.git</developerConnection>
+    <url>git@github.com:apache/incubator-heron.git</url>
   </scm>
 </project>
