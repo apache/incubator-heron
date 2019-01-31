@@ -1,7 +1,25 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 workspace(name = "org_apache_heron")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
 
 http_archive(
@@ -14,6 +32,7 @@ http_archive(
 rules_scala_version = "a89d44f7ef67d93dedfc9888630f48d7723516f7"  # update this as needed
 
 load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
+
 
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
@@ -510,6 +529,21 @@ maven_jar(
     artifact = "org.roaringbitmap:RoaringBitmap:0.6.51",
 )
 
+maven_jar(
+  name = "tech_tablesaw",
+  artifact = "tech.tablesaw:tablesaw-core:0.11.4"
+)
+
+maven_jar(
+  name = "it_unimi_dsi_fastutil",
+  artifact = "it.unimi.dsi:fastutil:8.1.1"
+)
+
+maven_jar(
+  name = "org_roaringbitmap",
+  artifact = "org.roaringbitmap:RoaringBitmap:0.6.51"
+)
+
 # Google Cloud
 maven_jar(
     name = "google_api_services_storage",
@@ -804,12 +838,12 @@ VIRTUALENV_PREFIX = "virtualenv-15.1.0"
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
 http_file(
-    name = "pytest_whl",
+    name = 'pytest_whl',
     urls = [PYTEST_WHEEL],
 )
 
 http_file(
-    name = "py_whl",
+    name = 'py_whl',
     urls = [PY_WHEEL],
 )
 
@@ -980,6 +1014,8 @@ http_archive(
 
 http_archive(
     name = "com_github_jbeder_yaml_cpp",
+    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
+    strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     build_file_content = "\n".join([
         "cc_library(",
         "    name = 'yaml-cxx',",
@@ -990,8 +1026,6 @@ http_archive(
         "    visibility = ['//visibility:public'],",
         ")",
     ]),
-    strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
-    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
 )
 # end 3rdparty C++ dependencies
 
@@ -1047,10 +1081,12 @@ load(
     "container_pull",
     container_repositories = "repositories",
 )
-
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
 container_repositories()
+
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_pull",
+)
 
 container_pull(
     name = "heron-base",
@@ -1073,7 +1109,7 @@ http_archive(
     name = "nomad_linux",
     build_file = "//third_party/nomad:nomad.BUILD",
     sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
-    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
+    urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"]
 )
 
 # scala integration
@@ -1084,6 +1120,18 @@ http_archive(
     strip_prefix = "rules_scala-%s" % rules_scala_version,
     type = "zip",
     url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
+    build_file = "//third_party/nomad:nomad.BUILD",
+    sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
+)
+
+# scala integration
+rules_scala_version="1354d935a74395b3f0870dd90a04e0376fe22587" # update this as needed
+
+http_archive(
+    name = "io_bazel_rules_scala",
+    url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
+    type = "zip",
+    strip_prefix= "rules_scala-%s" % rules_scala_version,
 )
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")

@@ -34,7 +34,7 @@ $ echo $CC $CXX
 ### Step 4 --- Fetch the latest version of Heron's source code
 
 ```bash
-$ git clone https://github.com/twitter/heron.git && cd heron
+$ git clone https://github.com/apache/incubator-heron.git && cd heron
 ```
 
 ### Step 5 --- Configure Heron for building with Bazel

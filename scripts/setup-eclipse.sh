@@ -70,10 +70,10 @@ EOH
 done
 }
 
-py_dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 3-`
+py_dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 4-`
 generate_py_source_dirs
 
-py_dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
+py_dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 4-`
 generate_py_source_dirs
 
 cat >> $pydevproject_file << 'EOF'
@@ -93,33 +93,33 @@ EOH
 function generate_source_dirs() {
 for srcdir in $dir_list; do
     cat >> $classpath_file << EOH
-  <classpathentry kind="src" output="bin/$srcdir" path="$srcdir">$
-    <attributes>$
-      <attribute name="optional" value="true"/>$
-      <attribute name="maven.pomderived" value="true"/>$
-    </attributes>$
-  </classpathentry>$
+  <classpathentry kind="src" output="bin/$srcdir" path="$srcdir">
+    <attributes>
+      <attribute name="optional" value="true"/>
+      <attribute name="maven.pomderived" value="true"/>
+    </attributes>
+  </classpathentry>
 EOH
 done
 }
 
-dir_list=`find $DIR/../heron -path "*/src/java" | cut -d '/' -f 3-`
+dir_list=`find $DIR/../heron -path "*/src/java" | cut -d '/' -f 4-`
 generate_source_dirs
 
-dir_list=`find $DIR/../integration_test -path "*/src/java" | cut -d '/' -f 3-`
+dir_list=`find $DIR/../integration_test -path "*/src/java" | cut -d '/' -f 4-`
 generate_source_dirs
 
-dir_list=`find $DIR/../heron -path "*/tests/java" | cut -d '/' -f 3-`
+dir_list=`find $DIR/../heron -path "*/tests/java" | cut -d '/' -f 4-`
 generate_source_dirs
 
-#dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 3-`
+#dir_list=`find $DIR/../heron -path "*/src/python" | cut -d '/' -f 4-`
 #generate_source_dirs
 
-#dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
+#dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 4-`
 #generate_source_dirs
 
 
-for jarfile in `find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 3-`; do 
+for jarfile in `find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 4-`; do 
   cat >> $classpath_file << EOH
   <classpathentry kind="lib" path="$jarfile"/>
 EOH

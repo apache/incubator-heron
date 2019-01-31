@@ -8,14 +8,14 @@ title: Implementing Python Spouts
 To create a spout for a Heron topology, you need to subclass the [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) class, which has the following methods.
 
 ```python
-class Spout(BaseSpout):
-    def initialize(self, config, context)
-    def next_tuple(self)
-    def ack(self, tup_id)
-    def fail(self, tup_id)
-    def activate(self)
-    def deactivate(self)
-    def close(self)
+class MySpout(Spout):
+    def initialize(self, config, context): pass
+    def next_tuple(self): pass
+    def ack(self, tup_id): pass
+    def fail(self, tup_id): pass
+    def activate(self): pass
+    def deactivate(self): pass
+    def close(self): pass
 ```
 
 ## `Spout` class methods
@@ -24,7 +24,7 @@ The [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) class pr
 
 * The `initialize()` method is called when the spout is first initialized
 and provides the spout with the executing environment. It is equivalent to
-`open()` method of [`ISpout`](/api/com/twitter/heron/api/spout/ISpout.html).
+`open()` method of [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html).
 Note that you should not override `__init__()` constructor of `Spout` class
 for initialization of custom variables, since it is used internally by HeronInstance; instead,
 `initialize()` should be used to initialize any custom variables or connections to databases.
@@ -52,13 +52,11 @@ guarantee that this method is called due to how the instance is killed.
 The `Spout` class inherits from the [`BaseSpout`](/api/python/spout/base_spout.m.html#heronpy.spout.base_spout.BaseSpout) class, which also provides you methods you can use in your spouts.
 
 ```python
-class BaseSpout:
-    def emit(self, tup, tup_id=None, stream="default", direct_task=None, need_task_ids=False)
-
-    def log(self, message, level=None)
-
+class BaseSpout(BaseComponent):
+    def log(self, message, level=None): ...
+    def emit(self, tup, tup_id=None, stream="default", direct_task=None, need_task_ids=False): ...
     @classmethod
-    def spec(cls, name=None, par=1, config=None)
+    def spec(cls, name=None, par=1, config=None): ...
 ```
 
 * The `emit()` method is used to emit a given tuple, which can be a `list` or `tuple` of any Python objects. Unlike in the Java implementation, there is no `OutputCollector` in the Python implementation.
@@ -84,7 +82,8 @@ The following is an example implementation of a spout in Python.
 
 ```python
 from itertools import cycle
-from heronpy import Spout
+from heronpy.api.spout.spout import Spout
+
 
 class WordSpout(Spout):
     outputs = ['word']

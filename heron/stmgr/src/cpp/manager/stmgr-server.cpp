@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "manager/stmgr-server.h"
@@ -27,10 +30,13 @@
 #include "network/network.h"
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
+#include "metrics/metrics.h"
 
 namespace heron {
 namespace stmgr {
 
+// The scope the metrics in this file are under
+const sp_string SERVER_SCOPE = "__server/";
 // Num data tuples received from other stream managers
 const sp_string METRIC_DATA_TUPLES_FROM_STMGRS = "__tuples_from_stmgrs";
 // Num ack tuples received from other stream managers
@@ -42,22 +48,48 @@ const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
 
 StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
-                         const sp_string& _stmgr_id, StMgr* _stmgr)
+                         const sp_string& _stmgr_id, StMgr* _stmgr,
+                         heron::common::MetricsMgrSt* _metrics_manager_client)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
       stmgr_id_(_stmgr_id),
-      stmgr_(_stmgr) {
+      stmgr_(_stmgr),
+      metrics_manager_client_(_metrics_manager_client) {
   // stmgr related handlers
   InstallRequestHandler(&StMgrServer::HandleStMgrHelloRequest);
   InstallMessageHandler(&StMgrServer::HandleTupleStreamMessage);
   InstallMessageHandler(&StMgrServer::HandleStartBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleStopBackPressureMessage);
   InstallMessageHandler(&StMgrServer::HandleDownstreamStatefulCheckpointMessage);
+
+  // The metrics need to be registered one by one here because the "__server" scope
+  // is already registered in heron::stmgr::InstanceServer. Duplicated registrations
+  // will only have one successfully registered.
+  tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS,
+                                           tuples_from_stmgrs_metrics_);
+  ack_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS,
+                                           ack_tuples_from_stmgrs_metrics_);
+  fail_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS,
+                                           fail_tuples_from_stmgrs_metrics_);
+  bytes_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS,
+                                           bytes_from_stmgrs_metrics_);
 }
 
 StMgrServer::~StMgrServer() {
   Stop();
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS);
+  delete tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS);
+  delete ack_tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS);
+  delete fail_tuples_from_stmgrs_metrics_;
+  metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS);
+  delete bytes_from_stmgrs_metrics_;
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {
@@ -132,6 +164,18 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
     __global_protobuf_pool_release__(_message);
   } else {
+    proto::system::HeronTupleSet2* tuple_set = nullptr;
+    tuple_set = __global_protobuf_pool_acquire__(tuple_set);
+    tuple_set->ParsePartialFromString(_message->set());
+
+    bytes_from_stmgrs_metrics_->incr_by(_message->ByteSize());
+    if (tuple_set->has_data()) {
+      tuples_from_stmgrs_metrics_->incr_by(tuple_set->data().tuples_size());
+    } else if (tuple_set->has_control()) {
+      ack_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().acks_size());
+      fail_tuples_from_stmgrs_metrics_->incr_by(tuple_set->control().fails_size());
+    }
+
     stmgr_->HandleStreamManagerData(iter->second, _message);
   }
 }

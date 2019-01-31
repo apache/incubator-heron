@@ -31,7 +31,7 @@ public class BoltFailInfo {
     this.failLatencyMs = failLatencyMs;
   }
 
-  public BoltFailInfo(com.twitter.heron.api.hooks.info.BoltFailInfo info) {
+  public BoltFailInfo(org.apache.heron.api.hooks.info.BoltFailInfo info) {
     this.tuple = new org.apache.storm.tuple.TupleImpl(info.getTuple());
     this.failingTaskId = info.getFailingTaskId();
     this.failLatencyMs = info.getFailLatency().toMillis();

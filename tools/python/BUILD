@@ -18,6 +18,6 @@ extra_action(
     requires_action_output = True,
     tools = [
         "//third_party/python/pylint",
-        "//tools/java/src/com/twitter/bazel/checkstyle:checkstyle_python",
+        "//tools/java/src/org/apache/bazel/checkstyle:checkstyle_python",
     ],
 )

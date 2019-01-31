@@ -1,5 +1,5 @@
 Total number of containers: 2
-Using packing class: com.twitter.heron.packing.roundrobin.RoundRobinPacking
+Using packing class: org.apache.heron.packing.roundrobin.RoundRobinPacking
 [1mContainer 1[0m
 CPU: 6.0, RAM: 7168 MB, Disk: 7168 MB
 ====================================================

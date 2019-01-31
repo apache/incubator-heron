@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 configfiles:
 - file: client
   configs:
@@ -211,7 +228,7 @@ configfiles:
     description: Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting
     default: 60
   - name: heron.instance.metrics.system.sample.interval.sec
-    description: The interval in second for an instance to sample its system metrics, for instance, cpu load.
+    description: The interval in second for an instance to sample its system metrics, for instance, CPU load.
     default: 10
   - name: heron.instance.slave.fetch.pplan.interval.sec
     description: The time interval (in seconds) at which Heron instances fetch the physical plan from slaves
@@ -244,15 +261,15 @@ configfiles:
   configs:
   - name: heron.class.packing.algorithm
     description: Packing algorithm for packing instances into containers
-    default: com.twitter.heron.packing.roundrobin.RoundRobinPacking
+    default: org.apache.heron.packing.roundrobin.RoundRobinPacking
 - file: scheduler
   configs:
   - name: heron.class.scheduler
     description: scheduler class for distributing the topology for execution
-    default: com.twitter.heron.scheduler.kubernetes.KubernetesScheduler
+    default: org.apache.heron.scheduler.kubernetes.KubernetesScheduler
   - name: heron.class.launcher
     description: launcher class for submitting and launching the topology
-    default: com.twitter.heron.scheduler.kubernetes.KubernetesLauncher
+    default: org.apache.heron.scheduler.kubernetes.KubernetesLauncher
   - name: heron.directory.sandbox.java.home
     description: location of java - pick it up from shell environment
     default: $JAVA_HOME
@@ -268,12 +285,12 @@ configfiles:
   configs:
   - name: heron.statefulstorage.classname
     description: The type of storage to be used for state checkpointing
-    default: com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorage
+    default: org.apache.heron.statefulstorage.localfs.LocalFileSystemStorage
 - file: statemgr
   configs:
   - name: heron.class.state.manager
     description: local state manager class for managing state in a persistent fashion
-    default: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+    default: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
   - name: heron.statemgr.connection.string
     description: local state manager connection string
   - name: heron.statemgr.root.path
@@ -298,7 +315,7 @@ configfiles:
   configs:
   - name: heron.class.uploader
     description: uploader class for transferring the topology files (jars, tars, PEXes, etc.) to storage
-    default: com.twitter.heron.uploader.s3.S3Uploader
+    default: org.apache.heron.uploader.s3.S3Uploader
   - name: heron.uploader.s3.bucket
     description: S3 bucket in which topology assets will be stored (if AWS S3 is being used)
   - name: heron.uploader.s3.access_key

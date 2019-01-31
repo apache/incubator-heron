@@ -7,8 +7,8 @@ title: Community
 
 Discussion about Heron happens on GitHub and over mailing list.
 
-* GitHub: [twitter/heron](https://github.com/twitter/heron)
-* Heron User Google Group: [heron-users@googlegroups.com](https://groups.google.com/forum/#!forum/heron-users)
+* GitHub: [apache/incubator-heron](https://github.com/apache/incubator-heron)
+* Heron User Group: [user@heron.incubator.apache.org](https://mail-archives.apache.org/mod_mbox/heron-user/)
 * Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 
 Community is critical to Heron. Contributions are welcomed!
@@ -32,20 +32,19 @@ $ ./scripts/setup-intellij.sh
 
 In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
 "cleanup" changes) are preferred. If you're looking for places to contribute, issues with label
-[help-wanted](https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
-are good candidates. Please check with [mailing list](https://groups.google.com/forum/#!forum/heron-users)
+[help-wanted](https://github.com/apache/incubator-heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
+are good candidates. Please check with [mailing list](https://mail-archives.apache.org/mod_mbox/heron-dev/)
 if your patch involves lots of changes.
 
 **If you have any question or issues about troubleshooting,
-you should post on [mailing list](https://groups.google.com/forum/#!forum/heron-users) instead
+you should post on [mailing list](https://mail-archives.apache.org/mod_mbox/heron-user/) instead
 of opening GitHub issues.**
 
 ### Submitting a Patch
-1. Read the Heron [governance plan](../governance) and accept the
-[Twitter Contributor License Agreement](https://engineering.twitter.com/opensource/cla) (CLA).
+1. Read the Heron [governance plan](../governance).
 
 2. Discuss your plan and design, and get agreement on
-[mailing list](https://groups.google.com/forum/#!forum/heron-users).
+[mailing list](https://mail-archives.apache.org/mod_mbox/heron-dev/).
 
 3. Implement proper unit tests along with your change. Verify that all tests can pass.
 

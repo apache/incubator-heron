@@ -1,19 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' configloader.py '''
 
 import os
@@ -27,7 +31,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
                                  overrides={}):
   """ Reads configs to determine which state manager to use and converts them to state manager
   locations. Handles a subset of config wildcard substitution supported in the substitute method in
-  com.twitter.heron.spi.common.Misc.java"""
+  org.apache.heron.spi.common.Misc.java"""
   with open(state_manager_config_file, 'r') as stream:
     config = yaml.load(stream)
 
@@ -66,7 +70,7 @@ def load_state_manager_locations(cluster, state_manager_config_file='heron-conf/
       state_manager_location[key_mappings[config_key]] = config[config_key]
 
   state_manager_class = config['heron.class.state.manager']
-  if state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
+  if state_manager_class == 'org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager':
     state_manager_location['type'] = 'zookeeper'
     state_manager_location['name'] = 'zk'
 

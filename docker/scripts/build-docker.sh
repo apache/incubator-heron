@@ -1,4 +1,20 @@
 #!/bin/bash
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 set -o errexit
 
 realpath() {
@@ -20,6 +36,7 @@ trap cleanup EXIT
 
 setup_scratch_dir() {
   if [ ! -f "$1" ]; then
+
     mkdir $1
     mkdir $1/artifacts
   fi
@@ -37,31 +54,21 @@ run_build() {
 
   setup_scratch_dir $SCRATCH_DIR
 
-  # need to copy artifacts locally
-  TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
-  TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
+  ALL_FILE="$OUTPUT_DIRECTORY/heron-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
+  ALL_OUT_FILE="$SCRATCH_DIR/artifacts/heron-install.sh"
 
-  CLIENT_FILE="$OUTPUT_DIRECTORY/heron-client-install-$HERON_VERSION-$TARGET_PLATFORM.sh"
-  CLIENT_OUT_FILE="$SCRATCH_DIR/artifacts/heron-client-install.sh"
-
-  CORE_FILE="$OUTPUT_DIRECTORY/heron-core-$HERON_VERSION-$TARGET_PLATFORM.tar.gz"
-  CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
-
-  cp $TOOLS_FILE $TOOLS_OUT_FILE
-  cp $CORE_FILE $CORE_OUT_FILE
-
+  cp $ALL_FILE $ALL_OUT_FILE
   export HERON_VERSION
 
   echo "Building docker image with tag:$DOCKER_TAG"
   docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
-
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
 
   echo "Saving docker image to $DOCKER_IMAGE_FILE"
   docker save -o $DOCKER_IMAGE_FILE $DOCKER_TAG
   gzip $DOCKER_IMAGE_FILE
-}
+} 
 
 case $# in
   3)
@@ -76,7 +83,7 @@ case $# in
     echo "  "
     echo "Usage: $0 <platform> <version_string> <artifact-directory> "
     echo "  "
-    echo "Platforms Supported: ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7 debian8"
+    echo "Platforms Supported: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-docker.sh ubuntu14.04 0.12.0 ~/ubuntu"

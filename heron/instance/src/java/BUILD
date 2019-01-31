@@ -25,7 +25,7 @@ java_library(
 java_binary(
     name = "instance-unshaded",
     srcs = glob(["**/*/*.java"]),
-    main_class = "com.twitter.heron.instance.HeronInstance",
+    main_class = "org.apache.heron.instance.HeronInstance",
     deps = instance_deps_files,
 )
 

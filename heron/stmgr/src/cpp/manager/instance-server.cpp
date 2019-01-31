@@ -1,23 +1,28 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "manager/instance-server.h"
+
 #include <iostream>
-#include <unordered_set>
+#include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include "manager/checkpoint-gateway.h"
 #include "util/neighbour-calculator.h"
@@ -69,6 +74,12 @@ const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_AGGR = "__server/__time_spent_ba
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
 // Prefix for connection buffer's metrics
 const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
+// Prefix for connection buffer's length metrics. This is different
+// from METRIC_DATA_TUPLES_TO_INSTANCES as that counts
+// the tuples when they are sent to the instance -- this metric
+// will be used to count the tuples as they are received
+const sp_string CONNECTION_BUFFER_LENGTH_BY_INSTANCEID =
+  "__connection_buffer_length_by_instanceid/";
 
 // TODO(mfu): Read this value from config
 const sp_int64 SYSTEM_METRICS_SAMPLE_INTERVAL_MICROSECOND = 10_s;
@@ -135,6 +146,7 @@ InstanceServer::~InstanceServer() {
     }
   }
 
+  // Clean the connection_buffer_metric_map
   for (auto qmmIter = connection_buffer_metric_map_.begin();
       qmmIter != connection_buffer_metric_map_.end(); ++qmmIter) {
     const sp_string& instance_id = qmmIter->first;
@@ -149,8 +161,18 @@ InstanceServer::~InstanceServer() {
     }
   }
 
+  // Clean the connection_buffer_length_metric_map
+  for (auto qlmIter = connection_buffer_length_metric_map_.begin();
+    qlmIter != connection_buffer_length_metric_map_.end(); ++qlmIter) {
+    const sp_string& instance_id = qlmIter->first;
+    sp_string metric_name = MakeQueueLengthCompIdMetricName(instance_id);
+    metrics_manager_client_->unregister_metric(metric_name);
+    delete qlmIter->second;
+  }
+
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
+
   delete instance_server_metrics_;
   delete back_pressure_metric_aggr_;
 
@@ -183,6 +205,10 @@ sp_string InstanceServer::MakeBackPressureCompIdMetricName(const sp_string& inst
 
 sp_string InstanceServer::MakeQueueSizeCompIdMetricName(const sp_string& instanceid) {
   return CONNECTION_BUFFER_BY_INSTANCEID + instanceid;
+}
+
+sp_string InstanceServer::MakeQueueLengthCompIdMetricName(const sp_string& instanceid) {
+  return CONNECTION_BUFFER_LENGTH_BY_INSTANCEID + instanceid;
 }
 
 void InstanceServer::UpdateQueueMetrics(EventLoop::Status) {
@@ -248,6 +274,14 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
       connection_buffer_metric_map_.erase(instance_id);
     }
 
+    // Clean the connection_buffer_length_metric_map_
+    auto qlmiter = connection_buffer_length_metric_map_.find(instance_id);
+    if (qlmiter != connection_buffer_length_metric_map_.end()) {
+      metrics_manager_client_->unregister_metric(MakeQueueLengthCompIdMetricName(instance_id));
+      delete connection_buffer_length_metric_map_[instance_id];
+      connection_buffer_length_metric_map_.erase(instance_id);
+    }
+
     stmgr_->HandleDeadInstance(task_id);
   }
 }
@@ -310,6 +344,15 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
                                                queue_metric);
       connection_buffer_metric_map_[instance_id] = queue_metric;
     }
+
+    if (connection_buffer_length_metric_map_.find(instance_id) ==
+      connection_buffer_length_metric_map_.end()) {
+      task_id_to_name[task_id] = instance_id;
+      auto queue_metric = new heron::common::MultiCountMetric();
+      metrics_manager_client_->register_metric(MakeQueueLengthCompIdMetricName(instance_id),
+                                               queue_metric);
+      connection_buffer_length_metric_map_[instance_id] = queue_metric;
+    }
     instance_info_[task_id]->set_connection(_conn);
 
     proto::stmgr::RegisterInstanceResponse response;
@@ -356,6 +399,13 @@ void InstanceServer::HandleTupleSetMessage(Connection* _conn,
 }
 
 void InstanceServer::SendToInstance2(proto::stmgr::TupleStreamMessage* _message) {
+  sp_string instance_id = task_id_to_name[_message->task_id()];
+  ConnectionBufferLengthMetricMap::const_iterator it =
+    connection_buffer_length_metric_map_.find(instance_id);
+  if ( it != connection_buffer_length_metric_map_.end() )
+    connection_buffer_length_metric_map_
+      [instance_id]->scope("packets")->incr_by(_message->num_tuples());
+
   stateful_gateway_->SendToInstance(_message);
 }
 
@@ -373,6 +423,16 @@ void InstanceServer::DrainTupleStream(proto::stmgr::TupleStreamMessage* _message
 
 void InstanceServer::SendToInstance2(sp_int32 _task_id,
                                   proto::system::HeronTupleSet2* _message) {
+  if (_message->has_data()) {
+    sp_string instance_id = task_id_to_name[_task_id];
+
+    ConnectionBufferLengthMetricMap::const_iterator it =
+      connection_buffer_length_metric_map_.find(instance_id);
+
+    if ( it != connection_buffer_length_metric_map_.end() )
+      connection_buffer_length_metric_map_
+        [instance_id]->scope("packets")->incr_by(_message->data().tuples_size());
+  }
   stateful_gateway_->SendToInstance(_task_id, _message);
 }
 
@@ -422,6 +482,9 @@ void InstanceServer::DrainCheckpoint(sp_int32 _task_id,
 
 void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   // TODO(vikasr) We do not handle any changes to our local assignment
+  LOG(INFO) << "Broadcasting new PhysicalPlan:";
+  config::TopologyConfigHelper::LogTopology(_pplan.topology());
+
   ComputeLocalSpouts(_pplan);
   proto::stmgr::NewInstanceAssignmentMessage new_assignment;
   new_assignment.mutable_pplan()->CopyFrom(_pplan);
@@ -439,17 +502,18 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
 void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
                                   const std::string& _component,
                                   Connection* _conn) const {
-  sp_int64 read_bsp =
+  sp_int64 read_bps =
       config::TopologyConfigHelper::GetComponentOutputBPS(_pplan.topology(), _component);
   sp_int32 parallelism =
       config::TopologyConfigHelper::GetComponentParallelism(_pplan.topology(), _component);
-  sp_int64 burst_read_bsp = read_bsp + read_bsp / 2;
+  // burst rate is 1.5 x of regular rate
+  sp_int64 burst_read_bps = read_bps + read_bps / 2;
 
-  // There should be parallelism hint and the per instance rate limit should be at least
-  // one byte per second
-  if (parallelism > 0 && read_bsp > parallelism && burst_read_bsp > parallelism) {
-    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bsp << "/" << burst_read_bsp;
-    _conn->setRateLimit(read_bsp / parallelism, burst_read_bsp / parallelism);
+  LOG(INFO) << "Parallelism of component " << _component << " is " << parallelism;
+  LOG(INFO) << "Read BPS of component " << _component << " is " << read_bps;
+  if (parallelism > 0 && read_bps >= 0 && burst_read_bps >= 0) {
+    LOG(INFO) << "Set rate limit in " << _component << " to " << read_bps << "/" << burst_read_bps;
+    _conn->setRateLimit(read_bps / parallelism, burst_read_bps / parallelism);
   } else {
     LOG(INFO) << "Disable rate limit in " << _component;
     _conn->disableRateLimit();

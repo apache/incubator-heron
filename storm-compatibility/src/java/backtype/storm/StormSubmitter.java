@@ -20,7 +20,7 @@ package backtype.storm;
 
 import java.util.Map;
 
-import com.twitter.heron.api.HeronSubmitter;
+import org.apache.heron.api.HeronSubmitter;
 
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -55,14 +55,14 @@ public final class StormSubmitter {
 
     // First do topology config translation. Bolt and Spout config translation is handled
     // in their own DeclarerImpl classes.
-    com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
+    org.apache.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
 
     // Now submit a heron topology
     try {
       HeronSubmitter.submitTopology(name, heronConfig, topology.getStormTopology());
-    } catch (com.twitter.heron.api.exception.AlreadyAliveException e) {
+    } catch (org.apache.heron.api.exception.AlreadyAliveException e) {
       throw new AlreadyAliveException();
-    } catch (com.twitter.heron.api.exception.InvalidTopologyException e) {
+    } catch (org.apache.heron.api.exception.InvalidTopologyException e) {
       throw new InvalidTopologyException();
     }
   }
