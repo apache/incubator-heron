@@ -29,10 +29,12 @@ import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.CommonPackingTests;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.IPacking;
 import org.apache.heron.spi.packing.IRepacking;
+import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
@@ -558,5 +560,94 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
         Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
       }
     }
+  }
+
+  /**
+   * Test the scenario where scaling down removes instances from containers that are most imbalanced
+   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
+   * container with the fewest instances, to favor ultimately removing  containers. If there is
+   * still a tie, favor removing from higher numbered containers
+   */
+  @Test
+  public void testScaleDownOneComponentRemoveContainer() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 2)),
+        new Pair<>(4, new InstanceId(BOLT_NAME, 6, 3)),
+        new Pair<>(4, new InstanceId(BOLT_NAME, 7, 4))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(BOLT_NAME, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 2)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownTwoComponentsRemoveContainer() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(SPOUT_NAME, 5, 2)),
+        new Pair<>(3, new InstanceId(SPOUT_NAME, 6, 3)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 7, 2)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 8, 3))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, -2);
+    componentChanges.put(BOLT_NAME, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 4, 1)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownHomogenousFirst() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 4, 1)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 5, 2)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 6, 3)),
+        new Pair<>(3, new InstanceId(BOLT_NAME, 7, 4))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(BOLT_NAME, -4);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 1, 0)),
+        new Pair<>(1, new InstanceId(SPOUT_NAME, 2, 1)),
+        new Pair<>(1, new InstanceId(BOLT_NAME, 3, 0))
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
   }
 }

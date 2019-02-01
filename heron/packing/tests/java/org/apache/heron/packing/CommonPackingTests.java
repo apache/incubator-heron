@@ -48,7 +48,7 @@ import static org.apache.heron.packing.AssertPacking.DELTA;
 public abstract class CommonPackingTests {
   protected static final String BOLT_NAME = "B";
   protected static final String SPOUT_NAME = "A";
-  protected static final int DEFAULT_CONTAINER_PADDING_PERCENT = 10;  //????
+  protected static final int DEFAULT_CONTAINER_PADDING_PERCENT = 10;
   protected int spoutParallelism;
   protected int boltParallelism;
   protected Integer totalInstances;
@@ -388,7 +388,7 @@ public abstract class CommonPackingTests {
     return newPackingPlan;
   }
 
-  private void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
+  protected void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
                                Map<String, Integer> componentChanges,
                                Pair<Integer, InstanceId>[] expectedComponentInstances)
       throws ConstraintViolationException {
