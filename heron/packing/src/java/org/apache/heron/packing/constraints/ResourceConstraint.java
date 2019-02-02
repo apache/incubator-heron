@@ -31,7 +31,7 @@ public class ResourceConstraint implements PackingConstraint {
     Resource usedResource = container.getTotalUsedResources();
     Resource newUsedResource = usedResource.plus(instancePlan.getResource());
     Resource capacity = container.getCapacity();
-    if (Double.compare(capacity.getCpu(), newUsedResource.getCpu()) < 0) {
+    if (capacity.getCpu() < newUsedResource.getCpu()) {
       throw new ResourceExceededException(String.format("Adding instance %s with %.3f cores "
               + "to container %d with existing %.3f cores "
               + "would exceed its capacity of %.3f cores",
