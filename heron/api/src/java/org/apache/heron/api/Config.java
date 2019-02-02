@@ -181,8 +181,12 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint";
   /**
-   * Hint for max amount of disk per container to be reserved for this topology.
-   * In bytes.
+   * Max number of instances per container for this topology.
+   */
+  public static final String TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES
+      = "topology.container.max.instances";
+  /**
+   * Percent of resource to pad each container.
    */
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
@@ -191,6 +195,11 @@ public class Config extends HashMap<String, Object> {
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+  /**
+   * Amount of CPU to pad each container.
+   * In decimal form of percent of CPU shares.
+   */
+  public static final String TOPOLOGY_CONTAINER_CPU_PADDING = "topology.container.cpu.padding";
   /**
    * Per component RAM requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
@@ -335,8 +344,10 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_CPU_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_DISK_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
+    apiVars.add(TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
+    apiVars.add(TOPOLOGY_CONTAINER_CPU_PADDING);
     apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
@@ -485,6 +496,14 @@ public class Config extends HashMap<String, Object> {
 
   public static void setContainerRamPadding(Map<String, Object> conf, ByteAmount nbytes) {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
+  }
+
+  public static void setContainerCpuPadding(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_CPU_PADDING, Double.toString(ncpus));
+  }
+
+  public static void setMaxNumInstancesPerContainer(Map<String, Object> conf, int n) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES, Integer.toString(n));
   }
 
   public static void setComponentCpuMap(Map<String, Object> conf, String cpuMap) {
@@ -746,6 +765,14 @@ public class Config extends HashMap<String, Object> {
 
   public void setContainerRamPadding(ByteAmount nbytes) {
     setContainerRamPadding(this, nbytes);
+  }
+
+  public void setContainerCpuPadding(double ncpus) {
+    setContainerCpuPadding(this, ncpus);
+  }
+
+  public void setTopologyContainerMaxNumInstances(int n) {
+    setMaxNumInstancesPerContainer(this, n);
   }
 
   public void setComponentCpuMap(String cpuMap) {
