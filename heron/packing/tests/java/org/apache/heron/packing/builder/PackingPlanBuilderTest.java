@@ -35,7 +35,7 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.AssertPacking;
 import org.apache.heron.packing.PackingTestHelper;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;

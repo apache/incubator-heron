@@ -17,19 +17,29 @@
  * under the License.
  */
 
-package org.apache.heron.packing;
+package org.apache.heron.packing.exceptions;
 
-/**
- * Thrown to indicate that the resources required are not available
- */
-public class ResourceExceededException extends Exception {
-  private static final long serialVersionUID = -3662229190395580148L;
+public abstract class ConstraintViolationException extends Exception {
+  public ConstraintViolationException() {
+    super();
+  }
 
-  public ResourceExceededException(String message) {
+  public ConstraintViolationException(String message) {
     super(message);
   }
 
-  public ResourceExceededException(String message, Throwable cause) {
+  public ConstraintViolationException(String message, Throwable cause) {
     super(message, cause);
+  }
+
+  public ConstraintViolationException(Throwable cause) {
+    super(cause);
+  }
+
+  protected ConstraintViolationException(String message,
+                                         Throwable cause,
+                                         boolean enableSuppression,
+                                         boolean writableStackTrace) {
+    super(message, cause, enableSuppression, writableStackTrace);
   }
 }

@@ -38,7 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;

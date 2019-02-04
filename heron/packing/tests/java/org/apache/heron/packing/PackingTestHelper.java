@@ -22,6 +22,7 @@ package org.apache.heron.packing;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
