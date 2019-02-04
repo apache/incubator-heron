@@ -463,11 +463,15 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    * @return Container RAM requirement
    */
   private ByteAmount getContainerRamHint(Map<Integer, List<InstanceId>> allocation) {
+    ByteAmount defaultContainerRam = instanceRamDefault
+        .multiply(getLargestContainerSize(allocation))
+        .plus(DEFAULT_RAM_PADDING_PER_CONTAINER);
+
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     return TopologyUtils.getConfigWithDefault(
         topologyConfig, org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
-        NOT_SPECIFIED_BYTE_AMOUNT);
+        defaultContainerRam);
   }
 
   /**

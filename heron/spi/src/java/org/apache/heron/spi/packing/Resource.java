@@ -63,6 +63,14 @@ public class Resource {
     return new Resource(this.getCpu(), newRam, this.getDisk());
   }
 
+  public Resource cloneWithCpu(double newCpu) {
+    return new Resource(newCpu, this.getRam(), this.getDisk());
+  }
+
+  public Resource cloneWithDisk(ByteAmount newDisk) {
+    return new Resource(this.getCpu(), this.getRam(), newDisk);
+  }
+
   /**
    * Subtracts a given resource from the current resource. The results is never negative.
    */
