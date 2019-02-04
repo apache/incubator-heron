@@ -24,7 +24,7 @@ import java.util.HashSet;
 import com.google.common.base.Optional;
 
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
@@ -185,7 +185,7 @@ public class Container {
    *
    * @return a Resource object that describes the used CPU, RAM and disk in the container.
    */
-  private Resource getTotalUsedResources() {
+  public Resource getTotalUsedResources() {
     ByteAmount usedRam = ByteAmount.ZERO;
     double usedCpuCores = 0;
     ByteAmount usedDisk = ByteAmount.ZERO;

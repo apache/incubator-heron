@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.Resource;
 import org.apache.heron.spi.utils.PackingTestUtils;
 
