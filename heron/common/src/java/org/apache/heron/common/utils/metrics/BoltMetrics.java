@@ -48,6 +48,7 @@ public class BoltMetrics implements IBoltMetrics {
   private final CountMetric failCount;
   private final CountMetric executeCount;
   private final ReducedMetric<MeanReducerState, Number, Double> executeLatency;
+  private final CountMetric executeTimeNs;
   private final CountMetric tupleAddedToQueue;
   // Time in nano-seconds spending in execute() at every interval
   private final CountMetric emitCount;
@@ -75,6 +76,7 @@ public class BoltMetrics implements IBoltMetrics {
     failCount = new CountMetric();
     executeCount = new CountMetric();
     executeLatency = new ReducedMetric<>(new MeanReducer());
+    executeTimeNs = new CountMetric();
     emitCount = new CountMetric();
     outQueueFullCount = new CountMetric();
     tupleAddedToQueue = new CountMetric();
@@ -95,6 +97,7 @@ public class BoltMetrics implements IBoltMetrics {
     topologyContext.registerMetric("__fail-count/default", failCount, interval);
     topologyContext.registerMetric("__execute-count/default", executeCount, interval);
     topologyContext.registerMetric("__execute-latency/default", executeLatency, interval);
+    topologyContext.registerMetric("__execute-time-ns/default", executeTimeNs, interval);
     topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
@@ -127,6 +130,7 @@ public class BoltMetrics implements IBoltMetrics {
   public void executeTuple(String streamId, String sourceComponent, long latency) {
     executeCount.incr();
     executeLatency.update(latency);
+    executeTimeNs.incrBy(latency);
   }
 
   public void emittedTuple(String streamId) {

@@ -51,6 +51,7 @@ public class SpoutMetrics implements ISpoutMetrics {
   private final CountMetric emitCount;
   private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
+  private final CountMetric nextTupleTimeNs;
   private final CountMetric tupleAddedToQueue;
 
   // The # of times back-pressure happens on outStreamQueue so instance could not
@@ -81,6 +82,7 @@ public class SpoutMetrics implements ISpoutMetrics {
     emitCount = new CountMetric();
     nextTupleLatency = new ReducedMetric<>(new MeanReducer());
     nextTupleCount = new CountMetric();
+    nextTupleTimeNs = new CountMetric();
     outQueueFullCount = new CountMetric();
     pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
     tupleAddedToQueue = new CountMetric();
@@ -103,6 +105,7 @@ public class SpoutMetrics implements ISpoutMetrics {
     topologyContext.registerMetric("__emit-count/default", emitCount, interval);
     topologyContext.registerMetric("__next-tuple-latency", nextTupleLatency, interval);
     topologyContext.registerMetric("__next-tuple-count", nextTupleCount, interval);
+    topologyContext.registerMetric("__next-tuple-time-ns", nextTupleTimeNs, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric("__pending-acked-count", pendingTuplesCount, interval);
     topologyContext.registerMetric("__data-tuple-added-to-outgoing-queue/default",
@@ -147,6 +150,7 @@ public class SpoutMetrics implements ISpoutMetrics {
   public void nextTuple(long latency) {
     nextTupleLatency.update(latency);
     nextTupleCount.incr();
+    nextTupleTimeNs.incrBy(latency);
   }
 
   public void updateOutQueueFullCount() {
