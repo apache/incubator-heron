@@ -140,13 +140,7 @@ public class ResourceCompliantRRPacking extends AbstractPacking {
         LOG.finest(String.format(
             "%s Increasing the number of containers to %s and attempting to place again.",
             e.getMessage(), this.numContainers + 1));
-        increaseNumContainers(1);
-        resetToFirstContainer();
-
-        int totalInstances = TopologyUtils.getTotalInstance(topology);
-        if (numContainers > totalInstances) {
-          throw new PackingException("Cannot add to that container");
-        }
+        retryWithAdditionalContainer();
       }
     }
   }
@@ -178,18 +172,22 @@ public class ResourceCompliantRRPacking extends AbstractPacking {
         return planBuilder.build();
 
       } catch (ConstraintViolationException e) {
-        LOG.info(String.format(
-            "%s Increasing the number of containers to %s and attempting packing again.",
-            e.getMessage(), this.numContainers));
         //Not enough containers. Adjust the number of containers.
-        increaseNumContainers(1);
-        resetToFirstContainer();
-
-        int totalInstances = TopologyUtils.getTotalInstance(topology);
-        if (numContainers > totalInstances) {
-          throw new PackingException("Cannot add to that container");
-        }
+        LOG.info(String.format(
+            "%s Increasing the number of containers to %s and attempting to repack again.",
+            e.getMessage(), this.numContainers + 1));
+        retryWithAdditionalContainer();
       }
+    }
+  }
+
+  private void retryWithAdditionalContainer() {
+    increaseNumContainers(1);
+    resetToFirstContainer();
+
+    int totalInstances = TopologyUtils.getTotalInstance(topology);
+    if (numContainers > totalInstances) {
+      throw new PackingException("Cannot add to that container");
     }
   }
 
