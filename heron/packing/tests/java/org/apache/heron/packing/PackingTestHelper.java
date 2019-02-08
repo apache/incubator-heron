@@ -22,7 +22,7 @@ package org.apache.heron.packing;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
-import org.apache.heron.packing.exceptions.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
@@ -37,7 +37,7 @@ public final class PackingTestHelper {
   public static PackingPlan createTestPackingPlan(String topologyName,
                                                   Pair<Integer, String>[] instances,
                                                   int containerPadding)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     return generateTestPackingPlan(topologyName, null, instances, null, containerPadding);
   }
 
@@ -45,7 +45,7 @@ public final class PackingTestHelper {
                                                  PackingPlan previousPackingPlan,
                                                  Pair<Integer, String>[] instances,
                                                  int containerPadding)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     return generateTestPackingPlan(
         topologyName, previousPackingPlan, instances, null, containerPadding);
   }
@@ -54,7 +54,7 @@ public final class PackingTestHelper {
                                                       PackingPlan previousPackingPlan,
                                                       Pair<Integer, String>[] instances,
                                                       int containerPadding)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     return generateTestPackingPlan(
         topologyName, previousPackingPlan, null, instances, containerPadding);
   }
@@ -68,7 +68,7 @@ public final class PackingTestHelper {
                                                      Pair<Integer, String>[] addInstances,
                                                      Pair<Integer, String>[] removeInstances,
                                                      int containerPadding)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     PackingPlanBuilder builder = new PackingPlanBuilder(topologyName, previousPackingPlan);
 
     int instanceCount = 0;

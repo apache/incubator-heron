@@ -35,6 +35,7 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.AssertPacking;
 import org.apache.heron.packing.PackingTestHelper;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;
@@ -190,12 +191,12 @@ public class PackingPlanBuilderTest {
       PackingTestHelper.toContainerIdComponentNames(testContainerInstances);
 
   @Test
-  public void testBuildPackingPlan() throws ResourceExceededException {
+  public void testBuildPackingPlan() throws ConstraintViolationException {
     doCreatePackingPlanTest(testContainerInstances);
   }
 
   @Test
-  public void testAddToPackingPlan() throws ResourceExceededException {
+  public void testAddToPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -211,7 +212,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = ResourceExceededException.class)
-  public void testExceededCapacityAddingToPackingPlan() throws ResourceExceededException {
+  public void testExceededCapacityAddingToPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -223,7 +224,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test
-  public void testRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -242,7 +243,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = PackingException.class)
-  public void testInvalidContainerRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testInvalidContainerRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -253,7 +254,7 @@ public class PackingPlanBuilderTest {
   }
 
   @Test(expected = PackingException.class)
-  public void testInvalidComponentRemoveFromPackingPlan() throws ResourceExceededException {
+  public void testInvalidComponentRemoveFromPackingPlan() throws ConstraintViolationException {
     PackingPlan plan = doCreatePackingPlanTest(testContainerInstances);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -264,7 +265,7 @@ public class PackingPlanBuilderTest {
   }
 
   private static PackingPlan doCreatePackingPlanTest(
-      Pair<Integer, InstanceId>[] instances) throws ResourceExceededException {
+      Pair<Integer, InstanceId>[] instances) throws ConstraintViolationException {
     PackingPlan plan = PackingTestHelper.createTestPackingPlan(
         TOPOLOGY_ID, PackingTestHelper.toContainerIdComponentNames(instances), 0);
     AssertPacking.assertPackingPlan(TOPOLOGY_ID, instances, plan);
