@@ -19,12 +19,11 @@
 
 package org.apache.heron.packing;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
@@ -36,17 +35,18 @@ import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
 import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.InstanceId;
-import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 import org.apache.heron.spi.utils.PackingTestUtils;
+
+import static org.apache.heron.packing.AssertPacking.DELTA;
 
 /**
  * There is some common functionality in multiple packing plans. This class contains common tests.
  */
 public abstract class CommonPackingTests {
-  private static final String A  = "A";
-  private static final String B = "B";
+  protected static final String A  = "A";
+  protected static final String B = "B";
 
   protected static final String BOLT_NAME = "bolt";
   protected static final String SPOUT_NAME = "spout";
@@ -57,6 +57,7 @@ public abstract class CommonPackingTests {
   protected org.apache.heron.api.Config topologyConfig;
   protected TopologyAPI.Topology topology;
   protected Resource instanceDefaultResources;
+  protected int numContainers;
 
   protected abstract IPacking getPackingImpl();
   protected abstract IRepacking getRepackingImpl();
@@ -92,12 +93,21 @@ public abstract class CommonPackingTests {
     return packing.pack();
   }
 
-  private PackingPlan repack(TopologyAPI.Topology testTopology,
+  protected PackingPlan repack(TopologyAPI.Topology testTopology,
                                PackingPlan initialPackingPlan,
                                Map<String, Integer> componentChanges) {
     IRepacking repacking = getRepackingImpl();
     repacking.initialize(PackingTestUtils.newTestConfig(testTopology), testTopology);
     return repacking.repack(initialPackingPlan, componentChanges);
+  }
+
+  protected Resource getDefaultUnspecifiedContainerResource(int testNumInstances,
+                                                            int testNumContainers,
+                                                            Resource padding) {
+    int largestContainerSize = (int) Math.ceil((double) testNumInstances / testNumContainers);
+    return new Resource(largestContainerSize + padding.getCpu(),
+        ByteAmount.fromGigabytes(largestContainerSize).plus(padding.getRam()),
+        ByteAmount.fromGigabytes(largestContainerSize).plus(padding.getDisk()));
   }
 
   protected PackingPlan doDefaultScalingTest(Map<String, Integer> componentChanges,
@@ -106,6 +116,117 @@ public abstract class CommonPackingTests {
         instanceDefaultResources.getRam(), boltParallelism,
         instanceDefaultResources.getRam(), spoutParallelism,
         numContainersBeforeRepack, totalInstances);
+  }
+
+  protected PackingPlan doPackingTest(TopologyAPI.Topology testTopology,
+                                      Resource boltRes, int testBoltParallelism,
+                                      Resource spoutRes, int testSpoutParallelism,
+                                      int testNumContainers,
+                                      Resource maxContainerResource) {
+    PackingPlan packingPlan = pack(testTopology);
+
+    Assert.assertEquals(testNumContainers, packingPlan.getContainers().size());
+    Assert.assertEquals(testBoltParallelism + testSpoutParallelism,
+        (int) packingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, testBoltParallelism);
+    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, testSpoutParallelism);
+
+    AssertPacking.assertInstanceRam(packingPlan.getContainers(), BOLT_NAME, SPOUT_NAME,
+        boltRes.getRam(), spoutRes.getRam());
+    AssertPacking.assertInstanceCpu(packingPlan.getContainers(), BOLT_NAME, SPOUT_NAME,
+        boltRes.getCpu(), spoutRes.getCpu());
+    AssertPacking.assertInstanceIndices(packingPlan.getContainers(), BOLT_NAME, SPOUT_NAME);
+
+    AssertPacking.assertContainerRam(packingPlan.getContainers(), maxContainerResource.getRam());
+    AssertPacking.assertContainerCpu(packingPlan.getContainers(), maxContainerResource.getCpu());
+
+    return packingPlan;
+  }
+
+  protected PackingPlan doPackingTestWithPartialResource(TopologyAPI.Topology testTopology,
+                                                         Optional<ByteAmount> boltRam,
+                                                         Optional<Double> boltCpu,
+                                                         int testBoltParallelism,
+                                                         Optional<ByteAmount> spoutRam,
+                                                         Optional<Double> spoutCpu,
+                                                         int testSpoutParallelism,
+                                                         int testNumContainers,
+                                                         Resource padding,
+                                                         Resource maxContainerResource) {
+    PackingPlan packingPlan = pack(testTopology);
+    Assert.assertEquals(testNumContainers, packingPlan.getContainers().size());
+    Assert.assertEquals(testBoltParallelism + testSpoutParallelism,
+        (int) packingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(packingPlan.getContainers(), BOLT_NAME, testBoltParallelism);
+    AssertPacking.assertNumInstances(packingPlan.getContainers(), SPOUT_NAME, testSpoutParallelism);
+
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      int instancesCount = containerPlan.getInstances().size();
+
+      if (!boltRam.isPresent() && !spoutRam.isPresent()) {
+        ByteAmount instanceRam = maxContainerResource.getRam()
+            .minus(padding.getRam()).divide(instancesCount);
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          Assert.assertEquals(instanceRam, instancePlan.getResource().getRam());
+        }
+      } else if (!boltRam.isPresent() || !spoutRam.isPresent()) {
+        String explicitComponent = boltRam.isPresent() ? BOLT_NAME : SPOUT_NAME;
+        String implicitComponent = boltRam.isPresent() ? SPOUT_NAME : BOLT_NAME;
+        ByteAmount explicitRam = boltRam.orElseGet(spoutRam::get);
+        int explicitCount = 0;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(explicitComponent)) {
+            Assert.assertEquals(explicitRam, instancePlan.getResource().getRam());
+            explicitCount++;
+          }
+        }
+        int implicitCount = instancesCount - explicitCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(implicitComponent)) {
+            Assert.assertEquals(
+                maxContainerResource.getRam()
+                    .minus(explicitRam.multiply(explicitCount))
+                    .minus(padding.getRam())
+                    .divide(implicitCount),
+                instancePlan.getResource().getRam());
+          }
+        }
+      }
+
+      if (!boltCpu.isPresent() && !spoutCpu.isPresent()) {
+        double instanceCpu = (maxContainerResource.getCpu() - padding.getCpu()) / instancesCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          Assert.assertEquals(instanceCpu, instancePlan.getResource().getCpu(), DELTA);
+        }
+      } else if (!boltCpu.isPresent() || !spoutCpu.isPresent()) {
+        String explicitComponent = boltCpu.isPresent() ? BOLT_NAME : SPOUT_NAME;
+        String implicitComponent = boltCpu.isPresent() ? SPOUT_NAME : BOLT_NAME;
+        double explicitCpu = boltCpu.orElseGet(spoutCpu::get);
+        int explicitCount = 0;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(explicitComponent)) {
+            Assert.assertEquals(explicitCpu, instancePlan.getResource().getCpu(), DELTA);
+            explicitCount++;
+          }
+        }
+        int implicitCount = instancesCount - explicitCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(implicitComponent)) {
+            Assert.assertEquals(
+                (maxContainerResource.getCpu()
+                    - explicitCpu * explicitCount
+                    - padding.getCpu()) / implicitCount,
+                instancePlan.getResource().getCpu(), DELTA);
+          }
+        }
+      }
+    }
+
+    AssertPacking.assertInstanceIndices(packingPlan.getContainers(), BOLT_NAME, SPOUT_NAME);
+    AssertPacking.assertContainerRam(packingPlan.getContainers(), maxContainerResource.getRam());
+    AssertPacking.assertContainerCpu(packingPlan.getContainers(), maxContainerResource.getCpu());
+
+    return packingPlan;
   }
 
   /**
@@ -147,7 +268,101 @@ public abstract class CommonPackingTests {
     return newPackingPlan;
   }
 
-  private void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
+  protected PackingPlan doScalingTestWithPartialResource(TopologyAPI.Topology testTopology,
+                                                         PackingPlan packingPlan,
+                                                         Map<String, Integer> componentChanges,
+                                                         Optional<ByteAmount> boltRam,
+                                                         Optional<Double> boltCpu,
+                                                         int testBoltParallelism,
+                                                         Optional<ByteAmount> spoutRam,
+                                                         Optional<Double> spoutCpu,
+                                                         int testSpoutParallelism,
+                                                         int testNumContainers,
+                                                         Resource padding,
+                                                         Resource maxContainerResource) {
+    System.out.println(packingPlan);
+    PackingPlan newPackingPlan = repack(testTopology, packingPlan, componentChanges);
+    System.out.println(newPackingPlan);
+    Assert.assertEquals(testNumContainers, newPackingPlan.getContainers().size());
+    Assert.assertEquals(testBoltParallelism + testSpoutParallelism
+            + componentChanges.getOrDefault(BOLT_NAME, 0)
+            + componentChanges.getOrDefault(SPOUT_NAME, 0),
+        (int) newPackingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(), BOLT_NAME,
+        testBoltParallelism + componentChanges.getOrDefault(BOLT_NAME, 0));
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(), SPOUT_NAME,
+        testSpoutParallelism + componentChanges.getOrDefault(SPOUT_NAME, 0));
+
+    for (PackingPlan.ContainerPlan containerPlan : newPackingPlan.getContainers()) {
+      int instancesCount = containerPlan.getInstances().size();
+
+      if (!boltRam.isPresent() && !spoutRam.isPresent()) {
+        ByteAmount instanceRam = maxContainerResource.getRam()
+            .minus(padding.getRam()).divide(instancesCount);
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          Assert.assertEquals(instanceRam, instancePlan.getResource().getRam());
+        }
+      } else if (!boltRam.isPresent() || !spoutRam.isPresent()) {
+        String explicitComponent = boltRam.isPresent() ? BOLT_NAME : SPOUT_NAME;
+        String implicitComponent = boltRam.isPresent() ? SPOUT_NAME : BOLT_NAME;
+        ByteAmount explicitRam = boltRam.orElseGet(spoutRam::get);
+        int explicitCount = 0;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(explicitComponent)) {
+            Assert.assertEquals(explicitRam, instancePlan.getResource().getRam());
+            explicitCount++;
+          }
+        }
+        int implicitCount = instancesCount - explicitCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(implicitComponent)) {
+            Assert.assertEquals(
+                maxContainerResource.getRam()
+                    .minus(explicitRam.multiply(explicitCount))
+                    .minus(padding.getRam())
+                    .divide(implicitCount),
+                instancePlan.getResource().getRam());
+          }
+        }
+      }
+
+      if (!boltCpu.isPresent() && !spoutCpu.isPresent()) {
+        double instanceCpu = (maxContainerResource.getCpu() - padding.getCpu()) / instancesCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          Assert.assertEquals(instanceCpu, instancePlan.getResource().getCpu(), DELTA);
+        }
+      } else if (!boltCpu.isPresent() || !spoutCpu.isPresent()) {
+        String explicitComponent = boltCpu.isPresent() ? BOLT_NAME : SPOUT_NAME;
+        String implicitComponent = boltCpu.isPresent() ? SPOUT_NAME : BOLT_NAME;
+        double explicitCpu = boltCpu.orElseGet(spoutCpu::get);
+        int explicitCount = 0;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(explicitComponent)) {
+            Assert.assertEquals(explicitCpu, instancePlan.getResource().getCpu(), DELTA);
+            explicitCount++;
+          }
+        }
+        int implicitCount = instancesCount - explicitCount;
+        for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+          if (instancePlan.getComponentName().equals(implicitComponent)) {
+            Assert.assertEquals(
+                (maxContainerResource.getCpu()
+                    - explicitCpu * explicitCount
+                    - padding.getCpu()) / implicitCount,
+                instancePlan.getResource().getCpu(), DELTA);
+          }
+        }
+      }
+    }
+
+    AssertPacking.assertInstanceIndices(newPackingPlan.getContainers(), BOLT_NAME, SPOUT_NAME);
+    AssertPacking.assertContainerRam(newPackingPlan.getContainers(), maxContainerResource.getRam());
+    AssertPacking.assertContainerCpu(newPackingPlan.getContainers(), maxContainerResource.getCpu());
+
+    return newPackingPlan;
+  }
+
+  protected void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
                                Map<String, Integer> componentChanges,
                                Pair<Integer, InstanceId>[] expectedComponentInstances)
       throws ResourceExceededException {
@@ -163,195 +378,5 @@ public abstract class CommonPackingTests {
     PackingPlan newPackingPlan = repack(this.topology, initialPackingPlan, componentChanges);
 
     AssertPacking.assertPackingPlan(topologyId, expectedComponentInstances, newPackingPlan);
-  }
-
-  /**
-   * Test the scenario where scaling down removes instances from containers that are most imbalanced
-   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
-   * container with the fewest instances, to favor ultimately removing  containers. If there is
-   * still a tie, favor removing from higher numbered containers
-   */
-  @Test
-  public void testScaleDownOneComponentRemoveContainer() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-        new Pair<>(4, new InstanceId(B, 6, 3)),
-        new Pair<>(4, new InstanceId(B, 7, 4))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(B, -2);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  @Test
-  public void testScaleDownTwoComponentsRemoveContainer() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(1, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(A, 5, 2)),
-        new Pair<>(3, new InstanceId(A, 6, 3)),
-        new Pair<>(3, new InstanceId(B, 7, 2)),
-        new Pair<>(3, new InstanceId(B, 8, 3))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(A, -2);
-    componentChanges.put(B, -2);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(1, new InstanceId(B, 4, 1)),
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  @Test
-  public void testScaleDownHomogenousFirst() throws Exception {
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0)),
-        new Pair<>(3, new InstanceId(B, 4, 1)),
-        new Pair<>(3, new InstanceId(B, 5, 2)),
-        new Pair<>(3, new InstanceId(B, 6, 3)),
-        new Pair<>(3, new InstanceId(B, 7, 4))
-    };
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(B, -4);
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
-        new Pair<>(1, new InstanceId(A, 1, 0)),
-        new Pair<>(1, new InstanceId(A, 2, 1)),
-        new Pair<>(1, new InstanceId(B, 3, 0))
-    };
-
-    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
-  }
-
-  /**
-   * Test the scenario where scaling down and up is simultaneously requested
-   */
-  @Test
-  public void scaleDownAndUp() throws Exception {
-    int spoutScalingDown = -4;
-    int boltScalingUp = 6;
-
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
-    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
-    int numContainersBeforeRepack = 2;
-    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-
-    Assert.assertEquals(3, newPackingPlan.getContainers().size());
-    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
-        newPackingPlan.getInstanceCount());
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        BOLT_NAME, 9);
-    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
-        SPOUT_NAME, 0);
-  }
-
-  @Test(expected = PackingException.class)
-  public void testScaleDownInvalidScaleFactor() throws Exception {
-
-    //try to remove more spout instances than possible
-    int spoutScalingDown = -5;
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put(SPOUT_NAME, spoutScalingDown);
-
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-  }
-
-  @Test(expected = PackingException.class)
-  public void testScaleDownInvalidComponent() throws Exception {
-    Map<String, Integer> componentChanges = new HashMap<>();
-    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
-    int numContainersBeforeRepack = 2;
-    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
-  }
-
-  /**
-   * Test invalid RAM for instance
-   */
-  @Test(expected = PackingException.class)
-  public void testInvalidRamInstance() throws Exception {
-    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
-    int defaultNumInstancesperContainer = 4;
-
-    // Explicit set component RAM map
-    ByteAmount boltRam = ByteAmount.ZERO;
-
-    topologyConfig.setContainerMaxRamHint(maxContainerRam);
-    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
-
-    TopologyAPI.Topology topologyExplicitRamMap =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
-    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
-    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
-    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
-    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
-        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
-  }
-
-  @Test
-  public void testTwoContainersRequested() throws Exception {
-    doTestContainerCountRequested(2, 2);
-  }
-
-  /**
-   * Test the scenario where container level resource config are set
-   */
-  protected void doTestContainerCountRequested(int requestedContainers,
-                                            int expectedContainer) throws Exception {
-
-    // Explicit set resources for container
-    topologyConfig.setContainerRamRequested(ByteAmount.fromGigabytes(10));
-    topologyConfig.setContainerDiskRequested(ByteAmount.fromGigabytes(20));
-    topologyConfig.setContainerCpuRequested(30);
-    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, requestedContainers);
-
-    TopologyAPI.Topology topologyExplicitResourcesConfig =
-        getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
-
-    Assert.assertEquals(expectedContainer,
-        packingPlanExplicitResourcesConfig.getContainers().size());
-    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
-
-    // RAM for bolt/spout should be the value in component RAM map
-    for (PackingPlan.ContainerPlan containerPlan
-        : packingPlanExplicitResourcesConfig.getContainers()) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
-      }
-    }
   }
 }
