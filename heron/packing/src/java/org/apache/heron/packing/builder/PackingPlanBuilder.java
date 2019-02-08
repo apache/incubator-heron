@@ -38,6 +38,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.packing.constraints.InstanceConstraint;
+import org.apache.heron.packing.constraints.PackingConstraint;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.InstanceId;
@@ -58,6 +61,8 @@ public class PackingPlanBuilder {
   private Map<String, ByteAmount> componentRamMap;
   private int requestedContainerPadding;
   private int numContainers;
+  private List<PackingConstraint> packingConstraints;
+  private List<InstanceConstraint> instanceConstraints;
 
   private Map<Integer, Container> containers;
   private TreeSet<Integer> taskIds; // globally unique ids assigned to instances
@@ -73,6 +78,8 @@ public class PackingPlanBuilder {
     this.numContainers = 0;
     this.requestedContainerPadding = 0;
     this.componentRamMap = new HashMap<>();
+    this.packingConstraints = new ArrayList<>();
+    this.instanceConstraints = new ArrayList<>();
   }
 
   // set resource settings
@@ -96,6 +103,16 @@ public class PackingPlanBuilder {
     return this;
   }
 
+  public PackingPlanBuilder setPackingConstraints(List<PackingConstraint> packingConstraintLst) {
+    this.packingConstraints = packingConstraintLst;
+    return this;
+  }
+
+  public PackingPlanBuilder setInstanceConstraints(List<InstanceConstraint> instanceConstraintLst) {
+    this.instanceConstraints = instanceConstraintLst;
+    return this;
+  }
+
   // Calling updateNumContainers will produce that many containers, starting with id 1. The build()
   // method will prune out empty containers from the plan.
   public PackingPlanBuilder updateNumContainers(int count) {
@@ -107,7 +124,7 @@ public class PackingPlanBuilder {
   // be lazily initialized, which could result in more containers than those requested using the
   // updateNumContainers method
   public PackingPlanBuilder addInstance(Integer containerId,
-                                        String componentName) throws ResourceExceededException {
+                                        String componentName) throws ConstraintViolationException {
     initContainer(containerId);
 
     Integer taskId = taskIds.isEmpty() ? 1 : taskIds.last() + 1;
@@ -120,15 +137,18 @@ public class PackingPlanBuilder {
         componentName, this.componentRamMap, this.defaultInstanceResource,
         this.maxContainerResource, this.requestedContainerPadding);
 
-    try {
-      addToContainer(containers.get(containerId),
-          new PackingPlan.InstancePlan(instanceId, instanceResource),
-          this.componentIndexes, this.taskIds);
-    } catch (ResourceExceededException e) {
-      throw new ResourceExceededException(String.format(
-          "Insufficient container resources to add instance %s with resources %s to container %d.",
-          instanceId, instanceResource, containerId), e);
+    Container container = containers.get(containerId);
+    PackingPlan.InstancePlan instancePlan
+        = new PackingPlan.InstancePlan(instanceId, instanceResource);
+
+    // Check constraints
+    for (InstanceConstraint constraint : instanceConstraints) {
+      constraint.test(instancePlan);
     }
+    for (PackingConstraint constraint : packingConstraints) {
+      constraint.test(container, instancePlan);
+    }
+    addToContainer(container, instancePlan, this.componentIndexes, this.taskIds);
 
     LOG.finest(String.format("Added to container %d instance %s", containerId, instanceId));
     return this;
@@ -161,7 +181,7 @@ public class PackingPlanBuilder {
       try {
         addInstance(container.getContainerId(), componentName);
         return container.getContainerId();
-      } catch (ResourceExceededException e) {
+      } catch (ConstraintViolationException e) {
         // ignore since we'll continue trying
       }
     }
@@ -423,9 +443,8 @@ public class PackingPlanBuilder {
     container.add(instancePlan);
     String componentName = instancePlan.getComponentName();
 
-    if (componentIndexes.get(componentName) == null) {
-      componentIndexes.put(componentName, new TreeSet<Integer>());
-    }
+    // update componentIndex and taskIds
+    componentIndexes.computeIfAbsent(componentName, k -> new TreeSet<Integer>());
     componentIndexes.get(componentName).add(instancePlan.getComponentIndex());
     taskIds.add(instancePlan.getTaskId());
   }
