@@ -181,6 +181,8 @@ class TMaster {
   void OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
                           proto::system::StatusCode _status);
 
+  // Metrics updates
+  void UpdateUptimeMetric();
   void UpdateProcessMetrics(EventLoop::Status);
 
   // Update configurations in physical plan.

@@ -129,6 +129,8 @@ class StMgr {
   void FetchMetricsCacheLocation();
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
+
+  void UpdateUptimeMetric();
   void UpdateProcessMetrics(EventLoop::Status);
 
   // Utility function to create checkpoint mgr client
