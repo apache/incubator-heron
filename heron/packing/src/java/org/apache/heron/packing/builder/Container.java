@@ -155,8 +155,7 @@ public class Container {
   public Resource getTotalUsedResources() {
     return getInstances().stream()
         .map(PackingPlan.InstancePlan::getResource)
-        .reduce(Resource::plus)
-        .orElse(Resource.EMPTY_RESOURCE)
+        .reduce(Resource.EMPTY_RESOURCE, Resource::plus)
         .plus(getPadding());
   }
 }
