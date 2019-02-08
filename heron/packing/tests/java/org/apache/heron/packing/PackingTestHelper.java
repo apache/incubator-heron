@@ -92,7 +92,7 @@ public final class PackingTestHelper {
         ByteAmount.fromMegabytes(192), ByteAmount.fromMegabytes(1));
 
     Map<String, Resource> componentResourceMap = PackingUtils.getComponentResourceMap(
-        toParallelismMap(previousPackingPlan, addInstances, removeInstances),
+        toParallelismMap(previousPackingPlan, addInstances, removeInstances).keySet(),
         new HashMap<>(), new HashMap<>(), new HashMap<>(), defaultInstanceResource);
 
     builder.setDefaultInstanceResource(defaultInstanceResource);

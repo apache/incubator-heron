@@ -21,6 +21,7 @@ package org.apache.heron.packing.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.heron.api.generated.TopologyAPI;
@@ -44,14 +45,24 @@ public final class PackingUtils {
   private PackingUtils() {
   }
 
+  /**
+   * Compose the component resource map by reading from user configs or default
+   *
+   * @param components component names
+   * @param componentRamMap user configured component ram map
+   * @param componentCpuMap user configured component cpu map
+   * @param componentDiskMap user configured component disk map
+   * @param defaultInstanceResource default instance resources
+   * @return component resource map
+   */
   public static Map<String, Resource> getComponentResourceMap(
-      Map<String, Integer> parallelismMap,
+      Set<String> components,
       Map<String, ByteAmount> componentRamMap,
       Map<String, Double> componentCpuMap,
       Map<String, ByteAmount> componentDiskMap,
       Resource defaultInstanceResource) {
     Map<String, Resource> componentResourceMap = new HashMap<>();
-    for (String component : parallelismMap.keySet()) {
+    for (String component : components) {
       ByteAmount instanceRam = componentRamMap.getOrDefault(component,
           defaultInstanceResource.getRam());
       double instanceCpu = componentCpuMap.getOrDefault(component,
@@ -72,6 +83,14 @@ public final class PackingUtils {
     return value + (paddingPercentage * value) / 100;
   }
 
+  /**
+   * Finalize padding by taking Math.max(containerResource * paddingPercent, paddingValue)
+   *
+   * @param containerResource max container resource
+   * @param padding padding value
+   * @param paddingPercentage padding percent
+   * @return finalized padding amount
+   */
   public static Resource finalizePadding(
       Resource containerResource, Resource padding, int paddingPercentage) {
     double cpuPadding = Math.max(padding.getCpu(),
@@ -80,6 +99,7 @@ public final class PackingUtils {
         containerResource.getRam().asBytes() * paddingPercentage / 100));
     ByteAmount diskPadding = ByteAmount.fromBytes(Math.max(padding.getDisk().asBytes(),
         containerResource.getDisk().asBytes() * paddingPercentage / 100));
+
     return new Resource(cpuPadding, ramPadding, diskPadding);
   }
 

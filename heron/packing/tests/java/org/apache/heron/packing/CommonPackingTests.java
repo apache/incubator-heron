@@ -46,8 +46,8 @@ import static org.apache.heron.packing.AssertPacking.DELTA;
  * There is some common functionality in multiple packing plans. This class contains common tests.
  */
 public abstract class CommonPackingTests {
-  protected static final String BOLT_NAME = "B";
-  protected static final String SPOUT_NAME = "A";
+  protected static final String BOLT_NAME = "bolt";
+  protected static final String SPOUT_NAME = "spout";
   protected static final int DEFAULT_CONTAINER_PADDING_PERCENT = 10;
   protected int spoutParallelism;
   protected int boltParallelism;

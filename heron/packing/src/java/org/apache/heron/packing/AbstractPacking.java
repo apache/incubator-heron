@@ -43,6 +43,41 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
 
 /**
  * Common configuration finalization for packing algorithms
+ * Packing algorithms that extend this class should assume that:
+ * <p>
+ * 1. Instance default resources are read from:
+ *  heron.resources.instance.ram,
+ *  heron.resources.instance.cpu,
+ *  heron.resources.instance.disk
+ * <p>
+ * 2. Padding resource percentage is read from:
+ *  topology.container.padding.percentage
+ *  or taken from PackingUtils.DEFAULT_CONTAINER_PADDING_PERCENTAGE
+ * <p>
+ * 3. Padding resource values are read from:
+ *  topology.container.ram.padding or taken from PackingUtils.DEFAULT_CONTAINER_RAM_PADDING,
+ *  topology.container.cpu.padding or taken from PackingUtils.DEFAULT_CONTAINER_CPU_PADDING
+ * <p>
+ * 4. Max number of instances per container is read from:
+ *  topology.container.max.instances
+ *  or taken from PackingUtils.DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER
+ * <p>
+ * 5. Container resources requirements are read from:
+ *  topology.container.cpu or calculated from maxNumInstancesPerContainer * instanceDefaultCpu
+ *  topology.container.ram or calculated from maxNumInstancesPerContainer * instanceDefaultRam
+ *  topology.container.disk or calculated from maxNumInstancesPerContainer * instanceDefaultDisk
+ * <p>
+ * 6. Padding resource is finalized by:
+ *  Math.max(containerResource * paddingPercentage, paddingValue)
+ * <p>
+ *
+ * Subclasses that extend this class should just need to create PackingPlanBuilder with:
+ *  defaultInstanceResource,
+ *  maxContainerResource,
+ *  containerPadding,
+ *  componentResourceMap,
+ *  instanceConstraints,
+ *  and packingConstraints set.
  */
 public abstract class AbstractPacking implements IPacking, IRepacking {
   private static final Logger LOG = Logger.getLogger(AbstractPacking.class.getName());
@@ -61,11 +96,12 @@ public abstract class AbstractPacking implements IPacking, IRepacking {
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
     setPackingConfigs(config);
+
     LOG.info(String.format("Initalizing Packing: \n"
             + "Max number of instances per container: %d \n"
-            + "Default instance CPU: %f, Default instance RAM: %s, Default instance DISK: %s \n"
+            + "Default instance resource, CPU: %f, RAM: %s, DISK: %s \n"
             + "Paddng: %s \n"
-            + "Container CPU: %f, Container RAM: %s, Container DISK: %s",
+            + "Container resource, CPU: %f, RAM: %s, DISK: %s",
         this.maxNumInstancesPerContainer,
         this.defaultInstanceResources.getCpu(),
         this.defaultInstanceResources.getRam().toString(),
@@ -126,7 +162,7 @@ public abstract class AbstractPacking implements IPacking, IRepacking {
     this.maxContainerResources = containerResource;
 
     this.componentResourceMap = PackingUtils.getComponentResourceMap(
-        TopologyUtils.getComponentParallelism(topology),
+        TopologyUtils.getComponentParallelism(topology).keySet(),
         TopologyUtils.getComponentRamMapConfig(topology),
         TopologyUtils.getComponentCpuMapConfig(topology),
         TopologyUtils.getComponentDiskMapConfig(topology),
