@@ -20,6 +20,7 @@
 package org.apache.heron.packing.roundrobin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -33,6 +34,9 @@ import org.apache.heron.packing.builder.HomogeneityScorer;
 import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
 import org.apache.heron.packing.builder.Scorer;
+import org.apache.heron.packing.constraints.MinRamConstraint;
+import org.apache.heron.packing.constraints.ResourceConstraint;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.common.Config;
@@ -165,7 +169,9 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
         .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
         .setRequestedContainerPadding(paddingPercentage)
-        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology))
+        .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
+        .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
   }
 
   @Override
@@ -179,7 +185,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
         return planBuilder.build();
 
-      } catch (ResourceExceededException e) {
+      } catch (ConstraintViolationException e) {
         //Not enough containers. Adjust the number of containers.
         LOG.finest(String.format(
             "%s Increasing the number of containers to %s and attempting to place again.",
@@ -216,7 +222,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
 
         return planBuilder.build();
 
-      } catch (ResourceExceededException e) {
+      } catch (ConstraintViolationException e) {
         //Not enough containers. Adjust the number of containers.
         increaseNumContainers(1);
         resetToFirstContainer();
@@ -258,7 +264,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
   }
 
   private PackingPlanBuilder getResourceCompliantRRAllocation(
-      PackingPlanBuilder planBuilder) throws ResourceExceededException {
+      PackingPlanBuilder planBuilder) throws ConstraintViolationException {
 
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     int totalInstances = TopologyUtils.getTotalInstance(topology);
@@ -282,7 +288,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private PackingPlanBuilder getResourceCompliantRRAllocation(
       PackingPlanBuilder planBuilder, Map<String, Integer> componentChanges)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
 
     Map<String, Integer> componentsToScaleDown =
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.DOWN);
@@ -309,7 +315,8 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
                                            Map<String, Integer> parallelismMap,
-                                           PolicyType policyType) throws ResourceExceededException {
+                                           PolicyType policyType)
+      throws ConstraintViolationException {
     for (String componentName : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(componentName);
       for (int i = 0; i < numInstance; ++i) {
@@ -326,7 +333,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
    * @throws ResourceExceededException if there is no room on the current container for the instance
    */
   private void strictRRpolicy(PackingPlanBuilder planBuilder,
-                              String componentName) throws ResourceExceededException {
+                              String componentName) throws ConstraintViolationException {
     planBuilder.addInstance(this.containerId, componentName);
     this.containerId = nextContainerId(this.containerId);
   }
@@ -383,7 +390,7 @@ public class ResourceCompliantRRPacking implements IPacking, IRepacking {
     private void assignInstance(PackingPlanBuilder planBuilder,
                                 String componentName,
                                 ResourceCompliantRRPacking packing)
-        throws ResourceExceededException, RuntimeException {
+        throws ConstraintViolationException, RuntimeException {
       switch (this) {
         case STRICT:
           packing.strictRRpolicy(planBuilder, componentName);

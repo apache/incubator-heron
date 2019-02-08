@@ -36,6 +36,9 @@ import org.apache.heron.packing.builder.HomogeneityScorer;
 import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
 import org.apache.heron.packing.builder.Scorer;
+import org.apache.heron.packing.constraints.MinRamConstraint;
+import org.apache.heron.packing.constraints.ResourceConstraint;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.common.Config;
@@ -161,7 +164,9 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
         .setRequestedContainerPadding(paddingPercentage)
-        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology));
+        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology))
+        .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
+        .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
   }
 
   /**
@@ -176,7 +181,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     // Get the instances using FFD allocation
     try {
       planBuilder = getFFDAllocation(planBuilder);
-    } catch (ResourceExceededException e) {
+    } catch (ConstraintViolationException e) {
       throw new PackingException("Could not allocate all instances to packing plan", e);
     }
 
@@ -193,7 +198,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
     // Get the instances using FFD allocation
     try {
       planBuilder = getFFDAllocation(planBuilder, currentPackingPlan, componentChanges);
-    } catch (ResourceExceededException e) {
+    } catch (ConstraintViolationException e) {
       throw new PackingException("Could not repack instances into existing packing plan", e);
     }
 
@@ -239,7 +244,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
   private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder planBuilder)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     assignInstancesToContainers(planBuilder, parallelismMap);
     return planBuilder;
@@ -253,7 +258,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder packingPlanBuilder,
                                               PackingPlan currentPackingPlan,
                                               Map<String, Integer> componentChanges)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     this.numContainers = currentPackingPlan.getContainers().size();
 
     Map<String, Integer> componentsToScaleDown =
@@ -279,7 +284,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    * @param parallelismMap component parallelism
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
-      Map<String, Integer> parallelismMap) throws ResourceExceededException {
+      Map<String, Integer> parallelismMap) throws ConstraintViolationException {
     ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap.keySet());
     for (RamRequirement ramRequirement : ramRequirements) {
       String componentName = ramRequirement.getComponentName();
@@ -326,7 +331,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    *
    */
   private void placeFFDInstance(PackingPlanBuilder planBuilder,
-                                String componentName) throws ResourceExceededException {
+                                String componentName) throws ConstraintViolationException {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }

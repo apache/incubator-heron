@@ -29,7 +29,7 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.Pair;
 import org.apache.heron.common.utils.topology.TopologyTests;
-import org.apache.heron.packing.exceptions.ResourceExceededException;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -365,7 +365,7 @@ public abstract class CommonPackingTests {
   protected void doScaleDownTest(Pair<Integer, InstanceId>[] initialComponentInstances,
                                Map<String, Integer> componentChanges,
                                Pair<Integer, InstanceId>[] expectedComponentInstances)
-      throws ResourceExceededException {
+      throws ConstraintViolationException {
     String topologyId = this.topology.getId();
 
     // The padding percentage used in repack() must be <= one as used in pack(), otherwise we can't
