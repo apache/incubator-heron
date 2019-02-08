@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
  */
 public final class AssertPacking {
 
-  private static final double DELTA = 0.1;
+  public static final double DELTA = 0.1;
 
   private AssertPacking() { }
 
@@ -88,42 +88,63 @@ public final class AssertPacking {
   }
 
   /**
+   * Verifies that the containerPlan has at least one bolt named boltName with RAM equal to
+   * expectedBoltRam and likewise for spouts. If notExpectedContainerRam is not null, verifies that
+   * the container RAM is not that.
+   */
+  public static void assertInstanceRam(Set<PackingPlan.ContainerPlan> containerPlans,
+                                       String boltName, String spoutName,
+                                       ByteAmount expectedBoltRam, ByteAmount expectedSpoutRam) {
+    // RAM for bolt should be the value in component RAM map
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        if (instancePlan.getComponentName().equals(boltName)) {
+          assertEquals("Unexpected bolt RAM",
+              expectedBoltRam, instancePlan.getResource().getRam());
+        }
+        if (instancePlan.getComponentName().equals(spoutName)) {
+          assertEquals("Unexpected spout RAM",
+              expectedSpoutRam, instancePlan.getResource().getRam());
+        }
+      }
+    }
+  }
+
+  /**
    * Verifies that the containerPlan has at least one bolt named boltName with CPU equal to
    * expectedBoltCpu and likewise for spouts. If notExpectedContainerCpu is not null, verifies that
    * the container CPU is not that.
    */
-  public static void assertContainers(Set<PackingPlan.ContainerPlan> containerPlans,
-                                      String boltName, String spoutName,
-                                      Double expectedBoltCpu, Double expectedSpoutCpu,
-                                      Double notExpectedContainerCpu) {
-    boolean boltFound = false;
-    boolean spoutFound = false;
+  public static void assertInstanceCpu(Set<PackingPlan.ContainerPlan> containerPlans,
+                                       String boltName, String spoutName,
+                                       Double expectedBoltCpu, Double expectedSpoutCpu) {
+    // CPU for bolt should be the value in component CPU map
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        if (instancePlan.getComponentName().equals(boltName)) {
+          assertEquals("Unexpected bolt CPU",
+              expectedBoltCpu, instancePlan.getResource().getCpu(), DELTA);
+        }
+        if (instancePlan.getComponentName().equals(spoutName)) {
+          assertEquals("Unexpected spout CPU",
+              expectedSpoutCpu, instancePlan.getResource().getCpu(), DELTA);
+        }
+      }
+    }
+  }
+
+  public static void assertInstanceIndices(Set<PackingPlan.ContainerPlan> containerPlans,
+                                           String boltName, String spoutName) {
     List<Integer> expectedInstanceIndices = new ArrayList<>();
     List<Integer> foundInstanceIndices = new ArrayList<>();
     int expectedInstanceIndex = 1;
     // CPU for bolt should be the value in component CPU map
     for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      if (notExpectedContainerCpu != null) {
-        assertNotEquals(notExpectedContainerCpu, containerPlan.getRequiredResource().getCpu());
-      }
       for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
         expectedInstanceIndices.add(expectedInstanceIndex++);
         foundInstanceIndices.add(instancePlan.getTaskId());
-        if (instancePlan.getComponentName().equals(boltName)) {
-          assertEquals("Unexpected bolt CPU",
-              expectedBoltCpu.doubleValue(), instancePlan.getResource().getCpu(), DELTA);
-          boltFound = true;
-        }
-        if (instancePlan.getComponentName().equals(spoutName)) {
-          assertEquals(
-              "Unexpected spout CPU",
-              expectedSpoutCpu.doubleValue(), instancePlan.getResource().getCpu(), DELTA);
-          spoutFound = true;
-        }
       }
     }
-    assertTrue("Bolt not found in any of the container plans: " + boltName, boltFound);
-    assertTrue("Spout not found in any of the container plans: " + spoutName, spoutFound);
 
     Collections.sort(foundInstanceIndices);
     assertEquals("Unexpected instance global id set found.",
@@ -135,14 +156,10 @@ public final class AssertPacking {
    */
   public static void assertNumInstances(Set<PackingPlan.ContainerPlan> containerPlans,
                                         String component, int numInstances) {
-    int instancesFound = 0;
-    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        if (instancePlan.getComponentName().equals(component)) {
-          instancesFound++;
-        }
-      }
-    }
+    int instancesFound = (int) containerPlans.stream()
+        .flatMap(containerPlan -> containerPlan.getInstances().stream())
+        .filter(instancePlan -> instancePlan.getComponentName().equals(component))
+        .count();
     assertEquals(numInstances, instancesFound);
   }
 
@@ -157,6 +174,20 @@ public final class AssertPacking {
               + " the maximum RAM allowed (%s)", containerPlan.getId(),
           containerPlan.getRequiredResource().getRam(), maxRamforResources),
           containerPlan.getRequiredResource().getRam().lessOrEqual(maxRamforResources));
+    }
+  }
+
+  /**
+   * Verifies that the CPU allocated for every container in a packing plan is less than a given
+   * maximum value.
+   */
+  public static void assertContainerCpu(Set<PackingPlan.ContainerPlan> containerPlans,
+                                        double maxCpuforResources) {
+    for (PackingPlan.ContainerPlan containerPlan : containerPlans) {
+      assertTrue(String.format("Container with id %d requires more CPU (%.3f) than"
+              + " the maximum CPU allowed (%.3f)", containerPlan.getId(),
+          containerPlan.getRequiredResource().getCpu(), maxCpuforResources),
+          containerPlan.getRequiredResource().getCpu() <= maxCpuforResources);
     }
   }
 

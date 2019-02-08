@@ -30,11 +30,13 @@ import org.junit.Test;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.Pair;
 import org.apache.heron.packing.AssertPacking;
 import org.apache.heron.packing.CommonPackingTests;
 import org.apache.heron.packing.utils.PackingUtils;
 import org.apache.heron.spi.packing.IPacking;
 import org.apache.heron.spi.packing.IRepacking;
+import org.apache.heron.spi.packing.InstanceId;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
@@ -554,5 +556,195 @@ public class ResourceCompliantRRPackingTest extends CommonPackingTests {
         BOLT_NAME, boltParallelism + boltScalingUp);
     AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
         SPOUT_NAME, spoutParallelism + spoutScalingUp);
+  }
+
+  /**
+   * Test the scenario where scaling down removes instances from containers that are most imbalanced
+   * (i.e., tending towards homogeneity) first. If there is a tie (e.g. AABB, AB), chooses from the
+   * container with the fewest instances, to favor ultimately removing  containers. If there is
+   * still a tie, favor removing from higher numbered containers
+   */
+  @Test
+  public void testScaleDownOneComponentRemoveContainer() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+        new Pair<>(4, new InstanceId(B, 6, 3)),
+        new Pair<>(4, new InstanceId(B, 7, 4))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(B, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownTwoComponentsRemoveContainer() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(1, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(A, 5, 2)),
+        new Pair<>(3, new InstanceId(A, 6, 3)),
+        new Pair<>(3, new InstanceId(B, 7, 2)),
+        new Pair<>(3, new InstanceId(B, 8, 3))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(A, -2);
+    componentChanges.put(B, -2);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(1, new InstanceId(B, 4, 1)),
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  @Test
+  public void testScaleDownHomogenousFirst() throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] initialComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0)),
+        new Pair<>(3, new InstanceId(B, 4, 1)),
+        new Pair<>(3, new InstanceId(B, 5, 2)),
+        new Pair<>(3, new InstanceId(B, 6, 3)),
+        new Pair<>(3, new InstanceId(B, 7, 4))
+    };
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(B, -4);
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    Pair<Integer, InstanceId>[] expectedComponentInstances = new Pair[] {
+        new Pair<>(1, new InstanceId(A, 1, 0)),
+        new Pair<>(1, new InstanceId(A, 2, 1)),
+        new Pair<>(1, new InstanceId(B, 3, 0))
+    };
+
+    doScaleDownTest(initialComponentInstances, componentChanges, expectedComponentInstances);
+  }
+
+  /**
+   * Test the scenario where scaling down and up is simultaneously requested
+   */
+  @Test
+  public void scaleDownAndUp() throws Exception {
+    int spoutScalingDown = -4;
+    int boltScalingUp = 6;
+
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown); // 0 spouts
+    componentChanges.put(BOLT_NAME, boltScalingUp); // 9 bolts
+    int numContainersBeforeRepack = 2;
+    PackingPlan newPackingPlan = doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+
+    Assert.assertEquals(3, newPackingPlan.getContainers().size());
+    Assert.assertEquals((Integer) (totalInstances + spoutScalingDown + boltScalingUp),
+        newPackingPlan.getInstanceCount());
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        BOLT_NAME, 9);
+    AssertPacking.assertNumInstances(newPackingPlan.getContainers(),
+        SPOUT_NAME, 0);
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidScaleFactor() throws Exception {
+
+    //try to remove more spout instances than possible
+    int spoutScalingDown = -5;
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put(SPOUT_NAME, spoutScalingDown);
+
+    int numContainersBeforeRepack = 2;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  @Test(expected = PackingException.class)
+  public void testScaleDownInvalidComponent() throws Exception {
+    Map<String, Integer> componentChanges = new HashMap<>();
+    componentChanges.put("SPOUT_FAKE", -10); //try to remove a component that does not exist
+    int numContainersBeforeRepack = 2;
+    doDefaultScalingTest(componentChanges, numContainersBeforeRepack);
+  }
+
+  /**
+   * Test invalid RAM for instance
+   */
+  @Test(expected = PackingException.class)
+  public void testInvalidRamInstance() throws Exception {
+    ByteAmount maxContainerRam = ByteAmount.fromGigabytes(10);
+    int defaultNumInstancesperContainer = 4;
+
+    // Explicit set component RAM map
+    ByteAmount boltRam = ByteAmount.ZERO;
+
+    topologyConfig.setContainerMaxRamHint(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap = pack(topologyExplicitRamMap);
+    Assert.assertEquals(totalInstances, packingPlanExplicitRamMap.getInstanceCount());
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), BOLT_NAME, 3);
+    AssertPacking.assertNumInstances(packingPlanExplicitRamMap.getContainers(), SPOUT_NAME, 4);
+    AssertPacking.assertContainerRam(packingPlanExplicitRamMap.getContainers(),
+        instanceDefaultResources.getRam().multiply(defaultNumInstancesperContainer));
+  }
+
+  @Test
+  public void testTwoContainersRequested() throws Exception {
+    doTestContainerCountRequested(2, 2);
+  }
+
+  /**
+   * Test the scenario where container level resource config are set
+   */
+  protected void doTestContainerCountRequested(int requestedContainers,
+                                               int expectedContainer) throws Exception {
+
+    // Explicit set resources for container
+    topologyConfig.setContainerRamRequested(ByteAmount.fromGigabytes(10));
+    topologyConfig.setContainerDiskRequested(ByteAmount.fromGigabytes(20));
+    topologyConfig.setContainerCpuRequested(30);
+    topologyConfig.put(org.apache.heron.api.Config.TOPOLOGY_STMGRS, requestedContainers);
+
+    TopologyAPI.Topology topologyExplicitResourcesConfig =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitResourcesConfig = pack(topologyExplicitResourcesConfig);
+
+    Assert.assertEquals(expectedContainer,
+        packingPlanExplicitResourcesConfig.getContainers().size());
+    Assert.assertEquals(totalInstances, packingPlanExplicitResourcesConfig.getInstanceCount());
+
+    // RAM for bolt/spout should be the value in component RAM map
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitResourcesConfig.getContainers()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        Assert.assertEquals(instanceDefaultResources, instancePlan.getResource());
+      }
+    }
   }
 }
