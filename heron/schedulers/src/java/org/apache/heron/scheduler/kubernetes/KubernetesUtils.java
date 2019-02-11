@@ -41,7 +41,7 @@ final class KubernetesUtils {
   }
 
   static String getConfCommand(Config config) {
-    return String.format("%s %s", Context.downloaderConfKubernetes(config), CONTAINER);
+    return String.format("%s %s", Context.downloaderConf(config), CONTAINER);
   }
 
   static String getFetchCommand(Config config, Config runtime) {
