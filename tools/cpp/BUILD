@@ -24,7 +24,10 @@ extra_action(
     name = "cpp_cppcheck",
     tools = [
         "//third_party/cppcheck:heron-cppcheck",
+        "//tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp",
     ],
     requires_action_output = True,
-    cmd = "$(location //third_party/cppcheck:heron-cppcheck) ./"
+    cmd = "$(location //tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp) " +
+              "--extra_action_file $(EXTRA_ACTION_FILE) " +
+              "--cppcheck_file $$(pwd)/$(location //third_party/cppcheck:heron-cppcheck)"
 )
