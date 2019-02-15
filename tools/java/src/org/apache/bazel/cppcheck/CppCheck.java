@@ -83,6 +83,10 @@ public final class CppCheck {
       // Create and run the command
       List<String> commandBuilder = new ArrayList<>();
       commandBuilder.add(cppcheckFile);
+      commandBuilder.add("--std=c++11");
+      commandBuilder.add("--language=c++");
+      commandBuilder.add("--error-exitcode=1"); // exit with 1 on error
+      commandBuilder.add("--library=googletest"); // use googletest cfg so that TEST_F is not considered syntax error
       commandBuilder.addAll(sourceFiles);
       runChecker(commandBuilder);
 
