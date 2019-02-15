@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.heron.packing;
+package org.apache.heron.packing.builder;
 
 import org.apache.heron.common.basics.ByteAmount;
 

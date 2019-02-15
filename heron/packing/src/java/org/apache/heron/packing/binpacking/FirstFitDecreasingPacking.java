@@ -26,33 +26,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
-import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.packing.RamRequirement;
+import org.apache.heron.packing.AbstractPacking;
 import org.apache.heron.packing.builder.Container;
 import org.apache.heron.packing.builder.ContainerIdScorer;
 import org.apache.heron.packing.builder.HomogeneityScorer;
 import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
+import org.apache.heron.packing.builder.RamRequirement;
 import org.apache.heron.packing.builder.Scorer;
 import org.apache.heron.packing.constraints.MinRamConstraint;
 import org.apache.heron.packing.constraints.ResourceConstraint;
 import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
-import org.apache.heron.spi.common.Config;
-import org.apache.heron.spi.common.Context;
-import org.apache.heron.spi.packing.IPacking;
-import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
-
-import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT;
-import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT;
-import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT;
-import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
 
 /**
  * FirstFitDecreasing packing algorithm
@@ -99,72 +89,18 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE;
  * 10. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of RAM for an instance is less than the minimal required value.
  */
-public class FirstFitDecreasingPacking implements IPacking, IRepacking {
-
-  private static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
-  private static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
+public class FirstFitDecreasingPacking extends AbstractPacking {
 
   private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
 
-  private TopologyAPI.Topology topology;
-  private Resource defaultInstanceResources;
-  private Resource maxContainerResources;
-  private int paddingPercentage;
-
   private int numContainers = 0;
-
-  @Override
-  public void initialize(Config config, TopologyAPI.Topology inputTopology) {
-    this.topology = inputTopology;
-    setPackingConfigs(config);
-    LOG.info(String.format("Initalizing FirstFitDecreasingPacking. "
-        + "CPU default: %f, RAM default: %s, DISK default: %s, Paddng percentage: %d, "
-        + "CPU max: %f, RAM max: %s, DISK max: %s.",
-        this.defaultInstanceResources.getCpu(),
-        this.defaultInstanceResources.getRam().toString(),
-        this.defaultInstanceResources.getDisk().toString(),
-        this.paddingPercentage,
-        this.maxContainerResources.getCpu(),
-        this.maxContainerResources.getRam().toString(),
-        this.maxContainerResources.getDisk().toString()));
-  }
-
-  /**
-   * Instatiate the packing algorithm parameters related to this topology.
-   */
-  private void setPackingConfigs(Config config) {
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-
-    this.defaultInstanceResources = new Resource(
-        Context.instanceCpu(config),
-        Context.instanceRam(config),
-        Context.instanceDisk(config));
-
-    this.paddingPercentage = TopologyUtils.getConfigWithDefault(topologyConfig,
-        TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, DEFAULT_CONTAINER_PADDING_PERCENTAGE);
-
-    double defaultCpu = this.defaultInstanceResources.getCpu()
-        * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER;
-    ByteAmount defaultRam = this.defaultInstanceResources.getRam()
-        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
-    ByteAmount defaultDisk = this.defaultInstanceResources.getDisk()
-        .multiply(DEFAULT_NUMBER_INSTANCES_PER_CONTAINER);
-
-    this.maxContainerResources = new Resource(
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_CPU_HINT,
-            (double) Math.round(PackingUtils.increaseBy(defaultCpu, paddingPercentage))),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-            defaultRam.increaseBy(paddingPercentage)),
-        TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-            defaultDisk.increaseBy(paddingPercentage)));
-  }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
-        .setMaxContainerResource(maxContainerResources)
         .setDefaultInstanceResource(defaultInstanceResources)
-        .setRequestedContainerPadding(paddingPercentage)
-        .setRequestedComponentRam(TopologyUtils.getComponentRamMapConfig(topology))
+        .setMaxContainerResource(maxContainerResources)
+        .setRequestedContainerPadding(padding)
+        .setRequestedComponentResource(componentResourceMap)
         .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
         .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
   }
@@ -213,11 +149,6 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
         + " creating a new packing plan with a new number of containers.");
   }
 
-  @Override
-  public void close() {
-
-  }
-
   /**
    * Sort the components in decreasing order based on their RAM requirements
    *
@@ -225,12 +156,9 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
-    Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
     for (String componentName : componentNames) {
-      Resource requiredResource = PackingUtils.getResourceRequirement(
-          componentName, ramMap, this.defaultInstanceResources,
-          this.maxContainerResources, this.paddingPercentage);
+      Resource requiredResource = this.componentResourceMap.getOrDefault(componentName,
+          defaultInstanceResources);
       ramRequirements.add(new RamRequirement(componentName, requiredResource.getRam()));
     }
     Collections.sort(ramRequirements, Collections.reverseOrder());
@@ -285,7 +213,8 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
       Map<String, Integer> parallelismMap) throws ConstraintViolationException {
-    ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances(parallelismMap.keySet());
+    ArrayList<RamRequirement> ramRequirements
+        = getSortedRAMInstances(parallelismMap.keySet());
     for (RamRequirement ramRequirement : ramRequirements) {
       String componentName = ramRequirement.getComponentName();
       int numInstance = parallelismMap.get(componentName);

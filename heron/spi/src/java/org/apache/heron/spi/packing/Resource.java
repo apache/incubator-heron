@@ -29,6 +29,9 @@ public class Resource {
   private ByteAmount ram;
   private ByteAmount disk;
 
+  public static final Resource EMPTY_RESOURCE
+      = new Resource(0.0, ByteAmount.ZERO, ByteAmount.ZERO);
+
   public Resource(double cpu, ByteAmount ram, ByteAmount disk) {
     this.cpu = cpu;
     this.ram = ram;

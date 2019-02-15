@@ -53,9 +53,12 @@ public class PackingPlanBuilderTest {
   @Before
   public void init() {
     testContainers = new ArrayList<>();
-    testContainers.add(new Container(3, null, 5));
-    testContainers.add(new Container(6, null, 20));
-    testContainers.add(new Container(4, null, 20));
+    testContainers.add(new Container(3, null,
+        new Resource(5, ByteAmount.fromGigabytes(5), ByteAmount.fromGigabytes(5))));
+    testContainers.add(new Container(6, null,
+        new Resource(20, ByteAmount.fromGigabytes(20), ByteAmount.fromGigabytes(20))));
+    testContainers.add(new Container(4, null,
+        new Resource(20, ByteAmount.fromGigabytes(20), ByteAmount.fromGigabytes(20))));
   }
 
   @Test
@@ -118,9 +121,8 @@ public class PackingPlanBuilderTest {
    * Tests the getContainers method.
    */
   @Test
-  public void testGetContainers() throws ResourceExceededException {
-
-    int paddingPercentage = 10;
+  public void testGetContainers() {
+    Resource padding = new Resource(1.0, ByteAmount.fromGigabytes(1), ByteAmount.fromGigabytes(1));
     Map<Integer, List<InstanceId>> packing = new HashMap<>();
     packing.put(7, Arrays.asList(
         new InstanceId("spout", 1, 0),
@@ -131,12 +133,12 @@ public class PackingPlanBuilderTest {
 
     PackingPlan packingPlan = generatePacking(packing);
     Map<Integer, Container> containers = PackingPlanBuilder.getContainers(
-        packingPlan, paddingPercentage,
+        packingPlan, packingPlan.getMaxContainerResources(), padding,
         new HashMap<String, TreeSet<Integer>>(), new TreeSet<Integer>());
     assertEquals(packing.size(), containers.size());
     for (Integer containerId : packing.keySet()) {
       Container foundContainer = containers.get(containerId);
-      assertEquals(paddingPercentage, foundContainer.getPaddingPercentage());
+      assertEquals(padding, foundContainer.getPadding());
       assertEquals(packingPlan.getMaxContainerResources(), foundContainer.getCapacity());
       assertEquals(2, foundContainer.getInstances().size());
     }
@@ -217,7 +219,8 @@ public class PackingPlanBuilderTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     Pair<Integer, InstanceId>[] added = new Pair[] {
-        new Pair<>(3, new InstanceId("componentB", 4, 1))
+        new Pair<>(3, new InstanceId("componentB", 4, 1)),
+        new Pair<>(3, new InstanceId("componentB", 5, 2))
     };
     PackingTestHelper.addToTestPackingPlan(
         TOPOLOGY_ID, plan, PackingTestHelper.toContainerIdComponentNames(added), 0);
@@ -292,7 +295,7 @@ public class PackingPlanBuilderTest {
 
     @Override
     public double getScore(Container container) {
-      return container.getPaddingPercentage();
+      return container.getPadding().getCpu();
     }
   }
 }
