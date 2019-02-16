@@ -912,6 +912,13 @@ new_http_archive(
     strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     build_file = "third_party/yaml-cpp/yaml.BUILD",
 )
+
+new_http_archive(
+    name = "com_github_danmar_cppcheck",
+    urls = ["https://github.com/danmar/cppcheck/archive/1.87.zip"],
+    strip_prefix = "cppcheck-1.87",
+    build_file = "third_party/cppcheck/cppcheck.BUILD",
+)
 # end 3rdparty C++ dependencies
 
 # for helm
