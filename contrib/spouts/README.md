@@ -15,7 +15,7 @@ The spout implementations are maintained by Heron community.
 
 Spout implementation files should be organized in this directory structure:
 
-`spouts/{client_name}/{language}/{spout_name}`
+`external/spouts/{client_name}/{language}/{spout_name}`
 
 Client name: kafka, pulsar, etc
 Language: java, python, scala, etc
@@ -30,7 +30,7 @@ Files in each spout should be organized into these subdirectories:
 
 ### Documentation
 
-Each spout should have a design doc as well as related information in the doc/ directory in the project.
+Each spout should have a design doc as well as related information in the doc/ directory.
 
 ### License
 
