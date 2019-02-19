@@ -49,7 +49,7 @@ import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
 /**
- * FirstFitDecreasing packing algorithm
+ * TwoDimensionVectorBinPacking packing algorithm
  * <p>
  * This IPacking implementation generates a PackingPlan based on the
  * First Fit Decreasing heuristic for the binpacking problem. The algorithm attempts to minimize

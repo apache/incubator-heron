@@ -23,6 +23,9 @@ import org.apache.heron.packing.builder.Container;
 import org.apache.heron.packing.exceptions.TooManyInstancesException;
 import org.apache.heron.spi.packing.PackingPlan;
 
+/**
+ * Constraint on the number of instances in one container
+ */
 public class InstanceDensityConstraint implements PackingConstraint {
   private final int maxNumInstancesPerContainer;
 

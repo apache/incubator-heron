@@ -24,7 +24,7 @@ import java.util.Objects;
 import org.apache.heron.common.basics.ByteAmount;
 
 /**
- * Helper class that captures the RAM requirements of each component
+ * Helper class that captures the RAM and CPU requirements of each component
  */
 public class ResourceRequirement implements Comparable<ResourceRequirement> {
 
