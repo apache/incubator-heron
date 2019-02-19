@@ -36,7 +36,7 @@ import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.CPUShare;
 import org.apache.heron.common.basics.ResourceMeasure;
-import org.apache.heron.packing.builder.RamRequirement;
+import org.apache.heron.packing.builder.ResourceRequirement;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -377,7 +377,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     // To ensure we spread out the big instances first
     // Only sorting by RAM here because only RAM can be explicitly capped by JVM processes
     List<String> sortedInstances = getSortedRAMComponents(parallelismMap.keySet()).stream()
-        .map(RamRequirement::getComponentName).collect(Collectors.toList());
+        .map(ResourceRequirement::getComponentName).collect(Collectors.toList());
     for (String component : sortedInstances) {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
@@ -395,16 +395,16 @@ public class RoundRobinPacking implements IPacking, IRepacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<RamRequirement> getSortedRAMComponents(Set<String> componentNames) {
-    ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
+  private ArrayList<ResourceRequirement> getSortedRAMComponents(Set<String> componentNames) {
+    ArrayList<ResourceRequirement> resourceRequirements = new ArrayList<>();
     Map<String, ByteAmount> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     for (String componentName : componentNames) {
-      ramRequirements.add(new RamRequirement(componentName,
+      resourceRequirements.add(new ResourceRequirement(componentName,
           ramMap.getOrDefault(componentName, ByteAmount.ZERO)));
     }
-    Collections.sort(ramRequirements, Collections.reverseOrder());
-    return ramRequirements;
+    Collections.sort(resourceRequirements, Collections.reverseOrder());
+    return resourceRequirements;
   }
 
   /**

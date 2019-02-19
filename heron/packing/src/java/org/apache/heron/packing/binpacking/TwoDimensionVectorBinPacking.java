@@ -20,6 +20,7 @@
 package org.apache.heron.packing.binpacking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,9 @@ import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
 import org.apache.heron.packing.builder.ResourceRequirement;
 import org.apache.heron.packing.builder.Scorer;
+import org.apache.heron.packing.builder.SortingStrategy;
+import org.apache.heron.packing.constraints.InstanceDensityConstraint;
+import org.apache.heron.packing.constraints.MinCpuConstraint;
 import org.apache.heron.packing.constraints.MinRamConstraint;
 import org.apache.heron.packing.constraints.ResourceConstraint;
 import org.apache.heron.packing.exceptions.ConstraintViolationException;
@@ -89,9 +93,9 @@ import org.apache.heron.spi.packing.Resource;
  * 10. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of RAM for an instance is less than the minimal required value.
  */
-public class FirstFitDecreasingPacking extends AbstractPacking {
+public class TwoDimensionVectorBinPacking extends AbstractPacking {
 
-  private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
+  private static final Logger LOG = Logger.getLogger(TwoDimensionVectorBinPacking.class.getName());
 
   private int numContainers = 0;
 
@@ -101,8 +105,9 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
         .setMaxContainerResource(maxContainerResources)
         .setRequestedContainerPadding(padding)
         .setRequestedComponentResource(componentResourceMap)
-        .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
-        .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
+        .setInstanceConstraints(Arrays.asList(new MinRamConstraint(), new MinCpuConstraint()))
+        .setPackingConstraints(Arrays.asList(new ResourceConstraint(),
+            new InstanceDensityConstraint(maxNumInstancesPerContainer)));
   }
 
   /**
@@ -112,16 +117,94 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    */
   @Override
   public PackingPlan pack() {
-    PackingPlanBuilder planBuilder = newPackingPlanBuilder(null);
+    PackingPlanBuilder ramFirstPlanBuilder = newPackingPlanBuilder(null);
+    PackingPlanBuilder cpuFirstPlanBuilder = newPackingPlanBuilder(null);
 
     // Get the instances using FFD allocation
     try {
-      planBuilder = getFFDAllocation(planBuilder);
+      numContainers = 0;
+      ramFirstPlanBuilder = get2DVectorBinAllocation(ramFirstPlanBuilder,
+          SortingStrategy.RAM_FIRST);
+      numContainers = 0;
+      cpuFirstPlanBuilder = get2DVectorBinAllocation(cpuFirstPlanBuilder,
+          SortingStrategy.CPU_FIRST);
+
+      PackingPlan ramFirstPlan = ramFirstPlanBuilder.build();
+      PackingPlan cpuFirstPlan = cpuFirstPlanBuilder.build();
+
+      return pickBetter(ramFirstPlan, cpuFirstPlan);
     } catch (ConstraintViolationException e) {
       throw new PackingException("Could not allocate all instances to packing plan", e);
     }
+  }
 
-    return planBuilder.build();
+  /**
+   * Pick the better plan by checking which plan dominates in terms of:
+   * overall resource utility, average container resource utility,
+   * container ram utility stdev, and container cpu utility stdev.
+   * @param plan1
+   * @param plan2
+   * @return the better plan
+   */
+  private PackingPlan pickBetter(PackingPlan plan1, PackingPlan plan2) {
+    int plan1Points = 0;
+    int plan2Points = 0;
+
+    // Checking packing plan overall resource utility
+    PackingPlan.ResourceUtility plan1ResourceUtility = plan1.getPackingPlanResourceUtility();
+    PackingPlan.ResourceUtility plan2ResourceUtility = plan2.getPackingPlanResourceUtility();
+    if (plan1ResourceUtility.compareTo(plan2ResourceUtility) > 0) {
+      plan1Points++;
+    } else if (plan1ResourceUtility.compareTo(plan2ResourceUtility) < 0) {
+      plan2Points++;
+    }
+
+    // Checking average container resource utility
+    PackingPlan.ResourceUtility plan1AvgContainerResourceUtility
+        = plan1.getAvgContainerResourceUtility();
+    PackingPlan.ResourceUtility plan2AvgContainerResourceUtility
+        = plan2.getAvgContainerResourceUtility();
+    if (plan1AvgContainerResourceUtility.compareTo(plan2AvgContainerResourceUtility) > 0) {
+      plan1Points++;
+    } else if (plan1AvgContainerResourceUtility.compareTo(plan2AvgContainerResourceUtility) < 0) {
+      plan2Points++;
+    }
+
+    // Checking container RAM utility stdev
+    double plan1ContainerRamUtilityStdev = plan1.getContainerRamUtilityStdev();
+    double plan2ContainerRamUtilityStdev = plan2.getContainerRamUtilityStdev();
+    if (plan1ContainerRamUtilityStdev > plan2ContainerRamUtilityStdev) {
+      plan1Points++;
+    } else if (plan1ContainerRamUtilityStdev < plan2ContainerRamUtilityStdev) {
+      plan2Points++;
+    }
+
+    // Checking container CPU utility stdev
+    double plan1ContainerCpuUtilityStdev = plan1.getContainerCpuUtilityStdev();
+    double plan2ContainerCpuUtilityStdev = plan2.getContainerCpuUtilityStdev();
+    if (plan1ContainerCpuUtilityStdev > plan2ContainerCpuUtilityStdev) {
+      plan1Points++;
+    } else if (plan1ContainerCpuUtilityStdev < plan2ContainerCpuUtilityStdev) {
+      plan2Points++;
+    }
+
+    LOG.info(String.format("Plan1: overall=%s, avg container=%s, "
+        + "container RAM stdev=%.3f, container CPU stdev=%.3f",
+        plan1ResourceUtility.toString(),
+        plan1AvgContainerResourceUtility.toString(),
+        plan1ContainerRamUtilityStdev,
+        plan1ContainerCpuUtilityStdev));
+
+    LOG.info(String.format("Plan2: overall=%s, avg container=%s, "
+            + "container RAM stdev=%.3f, container CPU stdev=%.3f",
+        plan2ResourceUtility.toString(),
+        plan2AvgContainerResourceUtility.toString(),
+        plan2ContainerRamUtilityStdev,
+        plan2ContainerCpuUtilityStdev));
+
+    LOG.info(String.format("Plan1 score=%d, Plan2 score=%d", plan1Points, plan2Points));
+
+    return plan1Points >= plan2Points ? plan1 : plan2;
   }
 
   /**
@@ -129,24 +212,38 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * @return new packing plan
    */
   public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
-    PackingPlanBuilder planBuilder = newPackingPlanBuilder(currentPackingPlan);
+    PackingPlanBuilder ramFirstPlanBuilder = newPackingPlanBuilder(currentPackingPlan);
+    PackingPlanBuilder cpuFirstPlanBuilder = newPackingPlanBuilder(currentPackingPlan);
 
     // Get the instances using FFD allocation
     try {
-      planBuilder = getFFDAllocation(planBuilder, currentPackingPlan, componentChanges);
+      numContainers = 0;
+      ramFirstPlanBuilder = get2DVectorBinAllocation(ramFirstPlanBuilder, SortingStrategy.RAM_FIRST,
+          currentPackingPlan, componentChanges);
+      numContainers = 0;
+      cpuFirstPlanBuilder = get2DVectorBinAllocation(cpuFirstPlanBuilder, SortingStrategy.CPU_FIRST,
+          currentPackingPlan, componentChanges);
+
+      PackingPlan ramFirstPlan = ramFirstPlanBuilder.build();
+      PackingPlan cpuFirstPlan = cpuFirstPlanBuilder.build();
+
+      return pickBetter(ramFirstPlan, cpuFirstPlan);
     } catch (ConstraintViolationException e) {
       throw new PackingException("Could not repack instances into existing packing plan", e);
     }
-
-    return planBuilder.build();
   }
 
   @Override
   public PackingPlan repack(PackingPlan currentPackingPlan, int containers,
                             Map<String, Integer> componentChanges)
       throws PackingException, UnsupportedOperationException {
-    throw new UnsupportedOperationException("FirstFitDecreasingPacking does not currently support"
-        + " creating a new packing plan with a new number of containers.");
+    throw new UnsupportedOperationException("TwoDimensionVectorBinPacking does not currently "
+        + "support creating a new packing plan with a new number of containers.");
+  }
+
+  @Override
+  public void close() {
+
   }
 
   /**
@@ -154,12 +251,14 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<ResourceRequirement> getSortedRAMInstances(Set<String> componentNames) {
-    ArrayList<ResourceRequirement> resourceRequirements = new ArrayList<>();
+  private List<ResourceRequirement> getSortedInstances(Set<String> componentNames,
+                                                       SortingStrategy sortingStrategy) {
+    List<ResourceRequirement> resourceRequirements = new ArrayList<>();
     for (String componentName : componentNames) {
       Resource requiredResource = this.componentResourceMap.getOrDefault(componentName,
           defaultInstanceResources);
-      resourceRequirements.add(new ResourceRequirement(componentName, requiredResource.getRam()));
+      resourceRequirements.add(new ResourceRequirement(componentName,
+          requiredResource.getRam(), requiredResource.getCpu(), sortingStrategy));
     }
     Collections.sort(resourceRequirements, Collections.reverseOrder());
 
@@ -171,10 +270,11 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder planBuilder)
+  private PackingPlanBuilder get2DVectorBinAllocation(PackingPlanBuilder planBuilder,
+                                                      SortingStrategy sortingStrategy)
       throws ConstraintViolationException {
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    assignInstancesToContainers(planBuilder, parallelismMap);
+    assignInstancesToContainers(planBuilder, parallelismMap, sortingStrategy);
     return planBuilder;
   }
 
@@ -183,9 +283,10 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  private PackingPlanBuilder getFFDAllocation(PackingPlanBuilder packingPlanBuilder,
-                                              PackingPlan currentPackingPlan,
-                                              Map<String, Integer> componentChanges)
+  private PackingPlanBuilder get2DVectorBinAllocation(PackingPlanBuilder packingPlanBuilder,
+                                                      SortingStrategy sortingStrategy,
+                                                      PackingPlan currentPackingPlan,
+                                                      Map<String, Integer> componentChanges)
       throws ConstraintViolationException {
     this.numContainers = currentPackingPlan.getContainers().size();
 
@@ -195,11 +296,11 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
         PackingUtils.getComponentsToScale(componentChanges, PackingUtils.ScalingDirection.UP);
 
     if (!componentsToScaleDown.isEmpty()) {
-      removeInstancesFromContainers(packingPlanBuilder, componentsToScaleDown);
+      removeInstancesFromContainers(packingPlanBuilder, componentsToScaleDown, sortingStrategy);
     }
 
     if (!componentsToScaleUp.isEmpty()) {
-      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp);
+      assignInstancesToContainers(packingPlanBuilder, componentsToScaleUp, sortingStrategy);
     }
 
     return packingPlanBuilder;
@@ -212,14 +313,16 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * @param parallelismMap component parallelism
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
-      Map<String, Integer> parallelismMap) throws ConstraintViolationException {
-    ArrayList<ResourceRequirement> resourceRequirements
-        = getSortedRAMInstances(parallelismMap.keySet());
+                                           Map<String, Integer> parallelismMap,
+                                           SortingStrategy sortingStrategy)
+      throws ConstraintViolationException {
+    List<ResourceRequirement> resourceRequirements
+        = getSortedInstances(parallelismMap.keySet(), sortingStrategy);
     for (ResourceRequirement resourceRequirement : resourceRequirements) {
       String componentName = resourceRequirement.getComponentName();
       int numInstance = parallelismMap.get(componentName);
       for (int j = 0; j < numInstance; j++) {
-        placeFFDInstance(planBuilder, componentName);
+        place2DVectorBinInstance(planBuilder, componentName);
       }
     }
   }
@@ -231,10 +334,11 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * @param componentsToScaleDown scale down factor for the components.
    */
   private void removeInstancesFromContainers(PackingPlanBuilder packingPlanBuilder,
-                                             Map<String, Integer> componentsToScaleDown) {
+                                             Map<String, Integer> componentsToScaleDown,
+                                             SortingStrategy sortingStrategy) {
 
-    ArrayList<ResourceRequirement> resourceRequirements =
-        getSortedRAMInstances(componentsToScaleDown.keySet());
+    List<ResourceRequirement> resourceRequirements =
+        getSortedInstances(componentsToScaleDown.keySet(), sortingStrategy);
 
     InstanceCountScorer instanceCountScorer = new InstanceCountScorer();
     ContainerIdScorer containerIdScorer = new ContainerIdScorer(false);
@@ -259,8 +363,8 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * Assign a particular instance to an existing container or to a new container
    *
    */
-  private void placeFFDInstance(PackingPlanBuilder planBuilder,
-                                String componentName) throws ConstraintViolationException {
+  private void place2DVectorBinInstance(PackingPlanBuilder planBuilder,
+                                        String componentName) throws ConstraintViolationException {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
