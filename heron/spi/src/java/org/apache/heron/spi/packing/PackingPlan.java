@@ -390,39 +390,4 @@ public class PackingPlan {
       return str + "}";
     }
   }
-
-  public static class ResourceUtility implements Comparable<ResourceUtility> {
-    private final double ramUtility;
-    private final double cpuUtility;
-
-    public ResourceUtility(double ramUtility, double cpuUtility) {
-      this.ramUtility = ramUtility;
-      this.cpuUtility = cpuUtility;
-    }
-
-    public double getRamUtility() {
-      return ramUtility;
-    }
-
-    public double getCpuUtility() {
-      return cpuUtility;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("RAM Utility=%.3f%%, CPU Utility=%.3f%%",
-          ramUtility * 100, cpuUtility * 100);
-    }
-
-    @Override
-    public int compareTo(ResourceUtility o) {
-      if (ramUtility > o.ramUtility && cpuUtility > o.cpuUtility) {
-        return 1;
-      } else if (ramUtility < o.ramUtility && cpuUtility < o.cpuUtility) {
-        return -1;
-      } else {
-        return 0;
-      }
-    }
-  }
 }

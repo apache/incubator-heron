@@ -88,16 +88,6 @@ java_test(
 )
 
 java_test(
-    name = "TwoDimensionVectorBinPackingTest",
-    srcs = glob(
-        ["**/binpacking/TwoDimensionVectorBinPackingTest.java"]
-    ),
-    deps = binpacking_deps_files +
-           ["//heron/packing/src/java:utils"],
-    size = "small",
-)
-
-java_test(
     name = "PackingUtilsTest",
     srcs = glob(
         ["**/PackingUtilsTest.java"]
