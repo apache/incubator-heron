@@ -21,10 +21,8 @@ package org.apache.heron.spi.packing;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -153,54 +151,6 @@ public class PackingPlan {
     return ramMapBuilder.toString();
   }
 
-  public ResourceUtility getPackingPlanResourceUtility() {
-    ByteAmount totalRamUsed = containers.stream()
-        .map(ContainerPlan::getTotalInstanceRamUsed)
-        .reduce(ByteAmount::plus).orElse(ByteAmount.ZERO);
-    double totalCpuUsed = containers.stream()
-        .mapToDouble(ContainerPlan::getTotalInstanceCpuUsed).sum();
-
-    ByteAmount totalRam = containers.stream()
-        .map(containerPlan -> containerPlan.getScheduledResource()
-            .or(containerPlan.getRequiredResource()).getRam())
-        .reduce(ByteAmount::plus).orElse(ByteAmount.ZERO);
-    double totalCpu = containers.stream()
-        .mapToDouble(containerPlan -> containerPlan.getScheduledResource()
-            .or(containerPlan.getRequiredResource()).getCpu()).sum();
-
-    return new ResourceUtility(totalRamUsed.asBytes() / (double) totalRam.asBytes(),
-        totalCpuUsed / totalCpu);
-  }
-
-  public ResourceUtility getAvgContainerResourceUtility() {
-    double sumContainerRamUtility = containers.stream()
-        .mapToDouble(container -> container.getContainerResourceUtility().getRamUtility()).sum();
-    double sumContainerCpuUtility = containers.stream()
-        .mapToDouble(container -> container.getContainerResourceUtility().getCpuUtility()).sum();
-    return new ResourceUtility(sumContainerRamUtility / containers.size(),
-        sumContainerCpuUtility / containers.size());
-  }
-
-  private static double stdev(List<Double> data) {
-    double mean = data.stream().mapToDouble(d -> d).average().orElse(0.0);
-    double sum = data.stream().mapToDouble(d -> (d - mean) * (d - mean)).sum();
-    return Math.sqrt(sum / (data.size() - 1));
-  }
-
-  public double getContainerRamUtilityStdev() {
-    return stdev(containers.stream()
-        .mapToDouble(container -> container.getContainerResourceUtility().getRamUtility())
-        .boxed()
-        .collect(Collectors.toList()));
-  }
-
-  public double getContainerCpuUtilityStdev() {
-    return stdev(containers.stream()
-        .mapToDouble(container -> container.getContainerResourceUtility().getCpuUtility())
-        .boxed()
-        .collect(Collectors.toList()));
-  }
-
   @Override
   public String toString() {
     return String.format("{plan-id: %s, containers-list: %s}",
@@ -326,22 +276,6 @@ public class PackingPlan {
 
     public Optional<Resource> getScheduledResource() {
       return scheduledResource;
-    }
-
-    ByteAmount getTotalInstanceRamUsed() {
-      return instances.stream().map(instancePlan -> instancePlan.getResource().getRam())
-          .reduce(ByteAmount::plus).orElse(ByteAmount.ZERO);
-    }
-
-    double getTotalInstanceCpuUsed() {
-      return instances.stream()
-          .mapToDouble(instancePlan -> instancePlan.getResource().getCpu()).sum();
-    }
-
-    public ResourceUtility getContainerResourceUtility() {
-      return new ResourceUtility(getTotalInstanceRamUsed().asBytes()
-          / (double) getRequiredResource().getRam().asBytes(),
-          getTotalInstanceCpuUsed() / getRequiredResource().getCpu());
     }
 
     @Override
