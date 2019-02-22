@@ -83,6 +83,7 @@ public final class CppCheck {
       // Create and run the command
       List<String> commandBuilder = new ArrayList<>();
       commandBuilder.add(cppcheckFile);
+      commandBuilder.add("--quiet");
       commandBuilder.add("--std=c++11");
       commandBuilder.add("--language=c++");
       commandBuilder.add("--error-exitcode=1"); // exit with 1 on error

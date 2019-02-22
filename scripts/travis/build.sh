@@ -85,6 +85,18 @@ python ${UTILS}/save-logs.py "heron_build.txt" bazel\
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
+# run valgrind tests on cpp tests
+# excluding tuple-cache_unittest because its results are flaky when running under valgrind
+T="heron valgrind test"
+start_timer "$T"
+python ${UTILS}/save-logs.py "heron_valgrind_test.txt" bazel\
+  --bazelrc=tools/travis/bazel.rc test\
+  --run_under=valgrind\
+  --test_summary=detailed --test_output=errors\
+  --config=$PLATFORM --jobs=0\
+  $(bazel query 'kind("cc_test rule", ...)' | grep -v //heron/stmgr/tests/cpp/util:tuple-cache_unittest)
+end_timer "$T"
+
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
@@ -106,18 +118,6 @@ python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
   eco-storm-examples/... eco-heron-examples/...
-end_timer "$T"
-
-# run valgrind tests on cpp tests
-# excluding tuple-cache_unittest because its results are flaky when running under valgrind
-T="heron valgrind test"
-start_timer "$T"
-python ${UTILS}/save-logs.py "heron_valgrind_test.txt" bazel\
-  --bazelrc=tools/travis/bazel.rc test\
-  --run_under=valgrind\
-  --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --jobs=0\
-  $(bazel query 'kind("cc_test rule", ...)' | grep -v //heron/stmgr/tests/cpp/util:tuple-cache_unittest)
 end_timer "$T"
 
 # build packages
