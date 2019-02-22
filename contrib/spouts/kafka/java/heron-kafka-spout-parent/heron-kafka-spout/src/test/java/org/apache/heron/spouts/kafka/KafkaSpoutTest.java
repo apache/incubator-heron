@@ -6,14 +6,10 @@ import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.config.SystemConfigKey;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,13 +56,6 @@ class KafkaSpoutTest {
     private ArgumentCaptor<List<Object>> listArgumentCaptor;
     @Captor
     private ArgumentCaptor<ConsumerRebalanceListener> consumerRebalanceListenerArgumentCaptor;
-
-    @BeforeAll
-    static void setUpAll() {
-        SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, SystemConfig.newBuilder(true)
-                .put(SystemConfigKey.HERON_METRICS_EXPORT_INTERVAL, 60)
-                .build());
-    }
 
     @BeforeEach
     void setUp() {

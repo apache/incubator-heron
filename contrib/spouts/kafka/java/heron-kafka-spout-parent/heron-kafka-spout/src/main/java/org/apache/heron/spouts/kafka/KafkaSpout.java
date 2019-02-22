@@ -6,8 +6,6 @@ import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.config.SystemConfig;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
@@ -238,9 +236,7 @@ public class KafkaSpout<K, V> extends BaseRichSpout {
     }
 
     private void registerConsumerMetrics() {
-        SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
-        int interval = (int) systemConfig.getHeronMetricsExportInterval().getSeconds();
-        consumer.metrics().forEach((metricName, o) -> topologyContext.registerMetric(extractKafkaMetricName(metricName), new KafkaMetricDecorator<>(o), interval));
+        consumer.metrics().forEach((metricName, o) -> topologyContext.registerMetric(extractKafkaMetricName(metricName), new KafkaMetricDecorator<>(o), 60));
     }
 
     private String extractKafkaMetricName(MetricName metricName) {
