@@ -66,7 +66,8 @@ def main(file, cmd):
    sys.stdout.write("\r%d seconds %d log lines"%(diff.seconds, count))
   print "\n %s finished with errcode: %d" % (cmd, errcode)
   if errcode != 0:
-     lines = tail(file, 1000)
+     lines = tail(file, count)
+     print "Errors: "
      print '\n'.join(lines)
      sys.exit(errcode)
   return errcode
