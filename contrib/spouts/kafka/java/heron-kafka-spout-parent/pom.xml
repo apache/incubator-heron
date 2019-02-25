@@ -33,6 +33,7 @@
 
     <modules>
         <module>heron-kafka-spout</module>
+        <module>heron-kafka-spout-sample</module>
     </modules>
 
     <dependencyManagement>

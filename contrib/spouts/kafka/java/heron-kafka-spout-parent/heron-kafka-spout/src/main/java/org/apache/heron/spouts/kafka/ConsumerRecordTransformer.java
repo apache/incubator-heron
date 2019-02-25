@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-interface ConsumerRecordTransformer<K, V> extends Serializable {
+public interface ConsumerRecordTransformer<K, V> extends Serializable {
     default String getOutputStream() {
         return "default";
     }
