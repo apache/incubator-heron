@@ -22,10 +22,22 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.Map;
 
+/**
+ * a simple Kafka Consumer factory that builds a KafkaConsumer instance from a {@link Map} as the properties to configure it.
+ *
+ * @param <K> the type of the key of the Kafka record
+ * @param <V> the type of the value of the Kafka record
+ */
 public class DefaultKafkaConsumerFactory<K, V> implements KafkaConsumerFactory<K, V> {
     private static final long serialVersionUID = -2346087278604915148L;
     private Map<String, Object> config;
 
+    /**
+     * the config map, key strings should be from {@link ConsumerConfig}
+     *
+     * @param config the configuration map
+     * @see <a href="https://kafka.apache.org/documentation/#consumerconfigs">Kafka Consumer Configs</a>
+     */
     public DefaultKafkaConsumerFactory(Map<String, Object> config) {
         this.config = config;
     }

@@ -19,6 +19,11 @@ package org.apache.heron.spouts.kafka;
 import com.twitter.heron.api.metric.IMetric;
 import org.apache.kafka.common.Metric;
 
+/**
+ * a decorator to convert a Kafka Metric to a Heron Metric so that Kafka metrics can be exposed via Heron Metrics Manager
+ *
+ * @param <M> the Kafka Metric type
+ */
 public class KafkaMetricDecorator<M extends Metric> implements IMetric<Object> {
     private M metric;
 

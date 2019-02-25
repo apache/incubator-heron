@@ -20,6 +20,17 @@ import org.apache.kafka.clients.consumer.Consumer;
 
 import java.io.Serializable;
 
+/**
+ * the factory to create the underlying KafkaConsumer instance the Kafka Spout will be using to consume data from Kafka cluster
+ *
+ * @param <K> the type of the key of the Kafka record
+ * @param <V> the type of the value of the Kafka record
+ */
 public interface KafkaConsumerFactory<K, V> extends Serializable {
+    /**
+     * create the underlying KafkaConsumer
+     *
+     * @return kafka consumer instance
+     */
     Consumer<K, V> create();
 }

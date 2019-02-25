@@ -19,6 +19,15 @@ package org.apache.heron.spouts.kafka;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
+/**
+ * convenient interface to provider a topic match pattern
+ *
+ * @see org.apache.kafka.clients.consumer.Consumer#subscribe(Pattern)
+ */
 public interface TopicPatternProvider extends Serializable {
+
+    /**
+     * @return a matching pattern for topics to subscribe to
+     */
     Pattern create();
 }

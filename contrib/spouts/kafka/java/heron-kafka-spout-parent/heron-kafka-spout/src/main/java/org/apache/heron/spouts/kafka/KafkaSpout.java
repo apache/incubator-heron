@@ -34,6 +34,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+/**
+ * Kafka spout to consume data from Kafka topic(s), each record is converted into a tuple via {@link ConsumerRecordTransformer}, and emitted into a topology
+ *
+ * @param <K> the type of the key field of the Kafka record
+ * @param <V> the type of the value field of the Kafka record
+ */
 public class KafkaSpout<K, V> extends BaseRichSpout {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaSpout.class);
     private static final long serialVersionUID = -2271355516537883361L;
@@ -51,23 +57,42 @@ public class KafkaSpout<K, V> extends BaseRichSpout {
     private Config.TopologyReliabilityMode topologyReliabilityMode = Config.TopologyReliabilityMode.ATMOST_ONCE;
     private boolean isConsumerMetricsOutOfDate = false;
 
-    @SuppressWarnings("WeakerAccess")
+    /**
+     * create a KafkaSpout instance that subscribes to a list of topics
+     *
+     * @param kafkaConsumerFactory kafka consumer factory
+     * @param topicNames           list of topic names
+     */
     public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory, Collection<String> topicNames) {
         this.kafkaConsumerFactory = kafkaConsumerFactory;
         this.topicNames = topicNames;
     }
 
+    /**
+     * create a KafkaSpout instance that subscribe to all topics matching the topic pattern
+     *
+     * @param kafkaConsumerFactory kafka consumer factory
+     * @param topicPatternProvider provider of the topic matching pattern
+     */
     @SuppressWarnings("WeakerAccess")
     public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory, TopicPatternProvider topicPatternProvider) {
         this.kafkaConsumerFactory = kafkaConsumerFactory;
         this.topicPatternProvider = topicPatternProvider;
     }
 
+    /**
+     * @return the Kafka record transformer instance used by this Kafka Spout
+     */
     @SuppressWarnings("WeakerAccess")
     public ConsumerRecordTransformer<K, V> getConsumerRecordTransformer() {
         return consumerRecordTransformer;
     }
 
+    /**
+     * set the Kafka record transformer
+     *
+     * @param consumerRecordTransformer kafka record transformer
+     */
     @SuppressWarnings("WeakerAccess")
     public void setConsumerRecordTransformer(ConsumerRecordTransformer<K, V> consumerRecordTransformer) {
         this.consumerRecordTransformer = consumerRecordTransformer;

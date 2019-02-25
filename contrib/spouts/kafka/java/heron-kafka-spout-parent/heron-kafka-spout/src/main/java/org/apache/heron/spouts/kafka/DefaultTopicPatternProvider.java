@@ -18,10 +18,18 @@ package org.apache.heron.spouts.kafka;
 
 import java.util.regex.Pattern;
 
+/**
+ * the built-in default pattern provider to create a topic pattern out of a regex string
+ */
 public class DefaultTopicPatternProvider implements TopicPatternProvider {
     private static final long serialVersionUID = 5534026856505613199L;
     private String regex;
 
+    /**
+     * create a provider out of a regular expression string
+     *
+     * @param regex topic name regular expression
+     */
     @SuppressWarnings("WeakerAccess")
     public DefaultTopicPatternProvider(String regex) {
         this.regex = regex;
