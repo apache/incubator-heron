@@ -219,7 +219,8 @@ public class Config extends HashMap<String, Object> {
    * Sorting strategy for FirstFitDecreasingPacking algorithm.
    * RAM_FIRST (default), or CPU_FIRST
    */
-  public static final String TOPOLOGY_FFD_SORTING_STRATEGY = "topology.ffd.sorting.strategy";
+  public static final String TOPOLOGY_PACKING_FFD_SORTING_STRATEGY
+      = "topology.packing.ffd.sorting.strategy";
   /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
@@ -356,7 +357,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
-    apiVars.add(TOPOLOGY_FFD_SORTING_STRATEGY);
+    apiVars.add(TOPOLOGY_PACKING_FFD_SORTING_STRATEGY);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_STATEFUL_CKPTMGR_RAM);
@@ -525,7 +526,7 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void setFFDSortingStrategy(Map<String, Object> conf, String sortingStrategy) {
-    conf.put(Config.TOPOLOGY_FFD_SORTING_STRATEGY, sortingStrategy);
+    conf.put(Config.TOPOLOGY_PACKING_FFD_SORTING_STRATEGY, sortingStrategy);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {

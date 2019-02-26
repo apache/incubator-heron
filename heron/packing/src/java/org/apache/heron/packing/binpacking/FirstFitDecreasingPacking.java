@@ -50,7 +50,7 @@ import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
-import static org.apache.heron.api.Config.TOPOLOGY_FFD_SORTING_STRATEGY;
+import static org.apache.heron.api.Config.TOPOLOGY_PACKING_FFD_SORTING_STRATEGY;
 
 /**
  * FirstFitDecreasing packing algorithm
@@ -112,7 +112,8 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     this.sortingStrategy = SortingStrategy.valueOf(
         TopologyUtils.getConfigWithDefault(topologyConfig,
-            TOPOLOGY_FFD_SORTING_STRATEGY, DEFAULT_SORTING_STRATEGY.toString()).toUpperCase());
+            TOPOLOGY_PACKING_FFD_SORTING_STRATEGY, DEFAULT_SORTING_STRATEGY.toString())
+            .toUpperCase());
   }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {

@@ -26,7 +26,8 @@ public class MinCpuConstraint implements InstanceConstraint {
   private static final double MIN_CPU_PER_INSTANCE = 0.1;
 
   @Override
-  public void test(PackingPlan.InstancePlan instancePlan) throws MinResourceNotSatisfiedException {
+  public void validate(PackingPlan.InstancePlan instancePlan)
+      throws MinResourceNotSatisfiedException {
     if (instancePlan.getResource().getCpu() < MIN_CPU_PER_INSTANCE) {
       throw new MinResourceNotSatisfiedException(String.format("Instance %s is "
           + "configured %.3f CPU that is less than the minimum CPU per instance %.3f",

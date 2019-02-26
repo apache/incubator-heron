@@ -27,7 +27,8 @@ public class MinRamConstraint implements InstanceConstraint {
   private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
 
   @Override
-  public void test(PackingPlan.InstancePlan instancePlan) throws MinResourceNotSatisfiedException {
+  public void validate(PackingPlan.InstancePlan instancePlan)
+      throws MinResourceNotSatisfiedException {
     if (instancePlan.getResource().getRam().lessThan(MIN_RAM_PER_INSTANCE)) {
       throw new MinResourceNotSatisfiedException(String.format("Instance %s is "
           + "configured %s RAM that is less than the minimum RAM per instance %s",

@@ -34,7 +34,7 @@ public class InstanceDensityConstraint implements PackingConstraint {
   }
 
   @Override
-  public void test(Container container, PackingPlan.InstancePlan instancePlan)
+  public void validate(Container container, PackingPlan.InstancePlan instancePlan)
       throws TooManyInstancesException {
     if (container.getInstances().size() + 1 > maxNumInstancesPerContainer) {
       throw new TooManyInstancesException(String.format("Adding instance %s to container %d "

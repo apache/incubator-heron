@@ -24,6 +24,6 @@ import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.spi.packing.PackingPlan;
 
 public interface PackingConstraint {
-  void test(Container container, PackingPlan.InstancePlan instancePlan)
+  void validate(Container container, PackingPlan.InstancePlan instancePlan)
       throws ConstraintViolationException;
 }
