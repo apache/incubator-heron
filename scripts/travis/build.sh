@@ -91,6 +91,7 @@ T="heron valgrind test"
 start_timer "$T"
 python ${UTILS}/save-logs.py "heron_valgrind_test.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
+  --test_timeout=3600\
   --run_under=valgrind\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --jobs=0\
