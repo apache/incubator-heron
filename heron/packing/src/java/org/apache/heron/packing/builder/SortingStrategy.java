@@ -19,7 +19,23 @@
 
 package org.apache.heron.packing.builder;
 
-public enum SortingStrategy {
-  RAM_FIRST,
-  CPU_FIRST,
+import java.util.Comparator;
+
+public enum SortingStrategy implements Comparator<ResourceRequirement> {
+  RAM_FIRST {
+    @Override
+    public int compare(ResourceRequirement o1, ResourceRequirement o2) {
+      int ramComparison = o1.getRamRequirement().compareTo(o2.getRamRequirement());
+      return ramComparison == 0
+          ? Double.compare(o1.getCpuRequirement(), o2.getCpuRequirement()) : ramComparison;
+    }
+  },
+  CPU_FIRST {
+    @Override
+    public int compare(ResourceRequirement o1, ResourceRequirement o2) {
+      int cpuComparison = Double.compare(o1.getCpuRequirement(), o2.getCpuRequirement());
+      return cpuComparison == 0
+          ? o1.getRamRequirement().compareTo(o2.getRamRequirement()) : cpuComparison;
+    }
+  }
 }

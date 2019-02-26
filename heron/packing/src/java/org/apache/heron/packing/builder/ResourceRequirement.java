@@ -26,48 +26,34 @@ import org.apache.heron.common.basics.ByteAmount;
 /**
  * Helper class that captures the RAM and CPU requirements of each component
  */
-public class ResourceRequirement implements Comparable<ResourceRequirement> {
+public class ResourceRequirement {
 
   private String componentName;
   private ByteAmount ramRequirement;
   private double cpuRequirement;
-  private SortingStrategy sortingStrategy;
 
   public ResourceRequirement(String componentName, ByteAmount ram) {
     this(componentName, ram, 0.0);
   }
 
-  public ResourceRequirement(String componentName, ByteAmount ram, double cpu) {
-    this(componentName, ram, cpu, SortingStrategy.RAM_FIRST);
-  }
-
   public ResourceRequirement(String componentName,
                              ByteAmount ram,
-                             double cpu,
-                             SortingStrategy sortingStrategy) {
+                             double cpu) {
     this.componentName = componentName;
     this.ramRequirement = ram;
     this.cpuRequirement = cpu;
-    this.sortingStrategy = sortingStrategy;
   }
 
   public String getComponentName() {
     return componentName;
   }
 
-  @Override
-  public int compareTo(ResourceRequirement other) {
-    if (sortingStrategy == SortingStrategy.RAM_FIRST) {
-      int ramComparison = this.ramRequirement.compareTo(other.ramRequirement);
-      return ramComparison == 0
-          ? Double.compare(this.cpuRequirement, other.cpuRequirement) : ramComparison;
-    } else if (sortingStrategy == SortingStrategy.CPU_FIRST) {
-      int cpuComparison = Double.compare(this.cpuRequirement, other.cpuRequirement);
-      return cpuComparison == 0
-          ? this.ramRequirement.compareTo(other.ramRequirement) : cpuComparison;
-    } else {
-      throw new IllegalStateException("Unknown SortingStrategy " + sortingStrategy.toString());
-    }
+  public ByteAmount getRamRequirement() {
+    return ramRequirement;
+  }
+
+  public double getCpuRequirement() {
+    return cpuRequirement;
   }
 
   @Override

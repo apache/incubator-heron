@@ -182,9 +182,9 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
       Resource requiredResource = this.componentResourceMap.getOrDefault(componentName,
           defaultInstanceResources);
       resourceRequirements.add(new ResourceRequirement(componentName,
-          requiredResource.getRam(), requiredResource.getCpu(), sortingStrategy));
+          requiredResource.getRam(), requiredResource.getCpu()));
     }
-    Collections.sort(resourceRequirements, Collections.reverseOrder());
+    Collections.sort(resourceRequirements, sortingStrategy.reversed());
 
     return resourceRequirements;
   }

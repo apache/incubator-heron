@@ -37,6 +37,7 @@ import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.common.basics.CPUShare;
 import org.apache.heron.common.basics.ResourceMeasure;
 import org.apache.heron.packing.builder.ResourceRequirement;
+import org.apache.heron.packing.builder.SortingStrategy;
 import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.common.Context;
 import org.apache.heron.spi.packing.IPacking;
@@ -403,7 +404,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       resourceRequirements.add(new ResourceRequirement(componentName,
           ramMap.getOrDefault(componentName, ByteAmount.ZERO)));
     }
-    Collections.sort(resourceRequirements, Collections.reverseOrder());
+    Collections.sort(resourceRequirements, SortingStrategy.RAM_FIRST.reversed());
     return resourceRequirements;
   }
 
