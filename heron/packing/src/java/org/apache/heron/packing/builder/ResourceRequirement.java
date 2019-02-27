@@ -19,8 +19,6 @@
 
 package org.apache.heron.packing.builder;
 
-import java.util.Objects;
-
 import org.apache.heron.common.basics.ByteAmount;
 
 /**
@@ -54,22 +52,5 @@ public class ResourceRequirement {
 
   public double getCpuRequirement() {
     return cpuRequirement;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ResourceRequirement)) {
-      return false;
-    }
-    ResourceRequirement that = (ResourceRequirement) o;
-    return that.cpuRequirement == cpuRequirement && ramRequirement.equals(that.ramRequirement);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(ramRequirement, cpuRequirement);
   }
 }
