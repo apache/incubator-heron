@@ -144,10 +144,10 @@ public class PackingPlanBuilder {
 
     // Check constraints
     for (InstanceConstraint constraint : instanceConstraints) {
-      constraint.test(instancePlan);
+      constraint.validate(instancePlan);
     }
     for (PackingConstraint constraint : packingConstraints) {
-      constraint.test(container, instancePlan);
+      constraint.validate(container, instancePlan);
     }
     addToContainer(container, instancePlan, this.componentIndexes, this.taskIds);
 

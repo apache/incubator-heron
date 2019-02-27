@@ -26,7 +26,7 @@ import org.apache.heron.spi.packing.Resource;
 
 public class ResourceConstraint implements PackingConstraint {
   @Override
-  public void test(Container container, PackingPlan.InstancePlan instancePlan)
+  public void validate(Container container, PackingPlan.InstancePlan instancePlan)
       throws ResourceExceededException {
     Resource usedResource = container.getTotalUsedResources();
     Resource newUsedResource = usedResource.plus(instancePlan.getResource());

@@ -19,21 +19,20 @@
 
 package org.apache.heron.packing.constraints;
 
-import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.packing.exceptions.MinResourceNotSatisfiedException;
 import org.apache.heron.spi.packing.PackingPlan;
 
-public class MinRamConstraint implements InstanceConstraint {
-  private static final ByteAmount MIN_RAM_PER_INSTANCE = ByteAmount.fromMegabytes(192);
+public class MinCpuConstraint implements InstanceConstraint {
+  private static final double MIN_CPU_PER_INSTANCE = 0.1;
 
   @Override
   public void validate(PackingPlan.InstancePlan instancePlan)
       throws MinResourceNotSatisfiedException {
-    if (instancePlan.getResource().getRam().lessThan(MIN_RAM_PER_INSTANCE)) {
+    if (instancePlan.getResource().getCpu() < MIN_CPU_PER_INSTANCE) {
       throw new MinResourceNotSatisfiedException(String.format("Instance %s is "
-          + "configured %s RAM that is less than the minimum RAM per instance %s",
-          instancePlan.getComponentName(), instancePlan.getResource().getRam().toString(),
-          MIN_RAM_PER_INSTANCE.toString()));
+          + "configured %.3f CPU that is less than the minimum CPU per instance %.3f",
+          instancePlan.getComponentName(), instancePlan.getResource().getCpu(),
+          MIN_CPU_PER_INSTANCE));
     }
   }
 }

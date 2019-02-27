@@ -115,20 +115,21 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     PackingPlan packingPlan = doPackingTest(topology,
         instanceDefaultResources, boltParallelism,
         instanceDefaultResources, spoutParallelism,
-        1, containerResource);
+        2, containerResource);
 
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      Assert.assertEquals(Math.round(totalInstances * instanceDefaultResources.getCpu()
+      int instanceCount = containerPlan.getInstances().size();
+      Assert.assertEquals(Math.round(instanceCount * instanceDefaultResources.getCpu()
               + padding.getCpu()),
           (long) containerPlan.getRequiredResource().getCpu());
 
       Assert.assertEquals(instanceDefaultResources.getRam()
-              .multiply(totalInstances)
+              .multiply(instanceCount)
               .plus(padding.getRam()),
           containerPlan.getRequiredResource().getRam());
 
       Assert.assertEquals(instanceDefaultResources.getDisk()
-              .multiply(totalInstances)
+              .multiply(instanceCount)
               .plus(padding.getDisk()),
           containerPlan.getRequiredResource().getDisk());
 
@@ -170,7 +171,7 @@ public class FirstFitDecreasingPackingTest extends CommonPackingTests {
     doPackingTest(topology,
         instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
         instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
-        1, containerResource);
+        2, containerResource);
   }
 
   /**
