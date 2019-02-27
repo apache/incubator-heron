@@ -78,7 +78,7 @@ cp ./bazel-bin/heron/spi/src/java/libheron-spi-src.jar ./$OUTPUT_DIR/$VERSION_TA
 echo "Copy heron-simulator artifacts ... "
 cp ./release/heron-simulator-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/
 cp ./bazel-bin/heron/simulator/src/java/simulator-shaded.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG.jar
-cp ./bazel-bin/heron/simulator/src/java/heron-simulator-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-spi/heron-simulator-$VERSION_TAG-javadoc.jar
+cp ./bazel-bin/heron/simulator/src/java/heron-simulator-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-javadoc.jar
 cp ./bazel-bin/heron/simulator/src/java/libsimulator-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-simulator/heron-simulator-$VERSION_TAG-sources.jar
 
 echo "Copy heron-storm artifacts ... "
