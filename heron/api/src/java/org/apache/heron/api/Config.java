@@ -216,6 +216,12 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";
   /**
+   * Sorting strategy for FirstFitDecreasingPacking algorithm.
+   * RAM_FIRST (default), or CPU_FIRST
+   */
+  public static final String TOPOLOGY_PACKING_FFD_SORTING_STRATEGY
+      = "topology.packing.ffd.sorting.strategy";
+  /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
   public static final String TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS =
@@ -351,6 +357,7 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
+    apiVars.add(TOPOLOGY_PACKING_FFD_SORTING_STRATEGY);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_STATEFUL_CKPTMGR_RAM);
@@ -516,6 +523,10 @@ public class Config extends HashMap<String, Object> {
 
   public static void setComponentDiskMap(Map<String, Object> conf, String diskMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_DISKMAP, diskMap);
+  }
+
+  public static void setFFDSortingStrategy(Map<String, Object> conf, String sortingStrategy) {
+    conf.put(Config.TOPOLOGY_PACKING_FFD_SORTING_STRATEGY, sortingStrategy);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
@@ -797,6 +808,10 @@ public class Config extends HashMap<String, Object> {
 
   public void setComponentDisk(String component, ByteAmount diskInBytes) {
     setComponentDisk(this, component, diskInBytes);
+  }
+
+  public void setFFDSortingStrategy(String sortingStrategy) {
+    setFFDSortingStrategy(this, sortingStrategy);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {

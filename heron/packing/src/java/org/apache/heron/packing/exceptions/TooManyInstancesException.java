@@ -17,13 +17,17 @@
  * under the License.
  */
 
-package org.apache.heron.packing.constraints;
+package org.apache.heron.packing.exceptions;
 
-import org.apache.heron.packing.builder.Container;
-import org.apache.heron.packing.exceptions.ConstraintViolationException;
-import org.apache.heron.spi.packing.PackingPlan;
+/**
+ * Thrown to indicate that the resources required are not available
+ */
+public class TooManyInstancesException extends ConstraintViolationException {
+  public TooManyInstancesException(String message) {
+    super(message);
+  }
 
-public interface PackingConstraint {
-  void validate(Container container, PackingPlan.InstancePlan instancePlan)
-      throws ConstraintViolationException;
+  public TooManyInstancesException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

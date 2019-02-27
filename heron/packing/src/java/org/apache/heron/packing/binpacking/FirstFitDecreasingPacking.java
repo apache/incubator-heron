@@ -20,12 +20,14 @@
 package org.apache.heron.packing.binpacking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.utils.TopologyUtils;
 import org.apache.heron.packing.AbstractPacking;
 import org.apache.heron.packing.builder.Container;
@@ -33,16 +35,22 @@ import org.apache.heron.packing.builder.ContainerIdScorer;
 import org.apache.heron.packing.builder.HomogeneityScorer;
 import org.apache.heron.packing.builder.InstanceCountScorer;
 import org.apache.heron.packing.builder.PackingPlanBuilder;
-import org.apache.heron.packing.builder.RamRequirement;
+import org.apache.heron.packing.builder.ResourceRequirement;
 import org.apache.heron.packing.builder.Scorer;
+import org.apache.heron.packing.builder.SortingStrategy;
+import org.apache.heron.packing.constraints.InstanceDensityConstraint;
+import org.apache.heron.packing.constraints.MinCpuConstraint;
 import org.apache.heron.packing.constraints.MinRamConstraint;
 import org.apache.heron.packing.constraints.ResourceConstraint;
 import org.apache.heron.packing.exceptions.ConstraintViolationException;
 import org.apache.heron.packing.exceptions.ResourceExceededException;
 import org.apache.heron.packing.utils.PackingUtils;
+import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
+
+import static org.apache.heron.api.Config.TOPOLOGY_PACKING_FFD_SORTING_STRATEGY;
 
 /**
  * FirstFitDecreasing packing algorithm
@@ -93,7 +101,20 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
 
   private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
 
+  private static final SortingStrategy DEFAULT_SORTING_STRATEGY = SortingStrategy.RAM_FIRST;
+
   private int numContainers = 0;
+  private SortingStrategy sortingStrategy = DEFAULT_SORTING_STRATEGY;
+
+  @Override
+  public void initialize(Config config, TopologyAPI.Topology inputTopology) {
+    super.initialize(config, inputTopology);
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    this.sortingStrategy = SortingStrategy.valueOf(
+        TopologyUtils.getConfigWithDefault(topologyConfig,
+            TOPOLOGY_PACKING_FFD_SORTING_STRATEGY, DEFAULT_SORTING_STRATEGY.toString())
+            .toUpperCase());
+  }
 
   private PackingPlanBuilder newPackingPlanBuilder(PackingPlan existingPackingPlan) {
     return new PackingPlanBuilder(topology.getId(), existingPackingPlan)
@@ -101,8 +122,9 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
         .setMaxContainerResource(maxContainerResources)
         .setRequestedContainerPadding(padding)
         .setRequestedComponentResource(componentResourceMap)
-        .setInstanceConstraints(Collections.singletonList(new MinRamConstraint()))
-        .setPackingConstraints(Collections.singletonList(new ResourceConstraint()));
+        .setInstanceConstraints(Arrays.asList(new MinRamConstraint(), new MinCpuConstraint()))
+        .setPackingConstraints(Arrays.asList(new ResourceConstraint(),
+            new InstanceDensityConstraint(maxNumInstancesPerContainer)));
   }
 
   /**
@@ -154,16 +176,17 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    *
    * @return The sorted list of components and their RAM requirements
    */
-  private ArrayList<RamRequirement> getSortedRAMInstances(Set<String> componentNames) {
-    ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
+  private List<ResourceRequirement> getSortedInstances(Set<String> componentNames) {
+    List<ResourceRequirement> resourceRequirements = new ArrayList<>();
     for (String componentName : componentNames) {
       Resource requiredResource = this.componentResourceMap.getOrDefault(componentName,
           defaultInstanceResources);
-      ramRequirements.add(new RamRequirement(componentName, requiredResource.getRam()));
+      resourceRequirements.add(new ResourceRequirement(componentName,
+          requiredResource.getRam(), requiredResource.getCpu()));
     }
-    Collections.sort(ramRequirements, Collections.reverseOrder());
+    Collections.sort(resourceRequirements, sortingStrategy.reversed());
 
-    return ramRequirements;
+    return resourceRequirements;
   }
 
   /**
@@ -212,11 +235,12 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * @param parallelismMap component parallelism
    */
   private void assignInstancesToContainers(PackingPlanBuilder planBuilder,
-      Map<String, Integer> parallelismMap) throws ConstraintViolationException {
-    ArrayList<RamRequirement> ramRequirements
-        = getSortedRAMInstances(parallelismMap.keySet());
-    for (RamRequirement ramRequirement : ramRequirements) {
-      String componentName = ramRequirement.getComponentName();
+                                           Map<String, Integer> parallelismMap)
+      throws ConstraintViolationException {
+    List<ResourceRequirement> resourceRequirements
+        = getSortedInstances(parallelismMap.keySet());
+    for (ResourceRequirement resourceRequirement : resourceRequirements) {
+      String componentName = resourceRequirement.getComponentName();
       int numInstance = parallelismMap.get(componentName);
       for (int j = 0; j < numInstance; j++) {
         placeFFDInstance(planBuilder, componentName);
@@ -233,14 +257,14 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
   private void removeInstancesFromContainers(PackingPlanBuilder packingPlanBuilder,
                                              Map<String, Integer> componentsToScaleDown) {
 
-    ArrayList<RamRequirement> ramRequirements =
-        getSortedRAMInstances(componentsToScaleDown.keySet());
+    List<ResourceRequirement> resourceRequirements =
+        getSortedInstances(componentsToScaleDown.keySet());
 
     InstanceCountScorer instanceCountScorer = new InstanceCountScorer();
     ContainerIdScorer containerIdScorer = new ContainerIdScorer(false);
 
-    for (RamRequirement ramRequirement : ramRequirements) {
-      String componentName = ramRequirement.getComponentName();
+    for (ResourceRequirement resourceRequirement : resourceRequirements) {
+      String componentName = resourceRequirement.getComponentName();
       int numInstancesToRemove = -componentsToScaleDown.get(componentName);
       List<Scorer<Container>> scorers = new ArrayList<>();
 
@@ -259,8 +283,8 @@ public class FirstFitDecreasingPacking extends AbstractPacking {
    * Assign a particular instance to an existing container or to a new container
    *
    */
-  private void placeFFDInstance(PackingPlanBuilder planBuilder,
-                                String componentName) throws ConstraintViolationException {
+  private void placeFFDInstance(PackingPlanBuilder planBuilder, String componentName)
+      throws ConstraintViolationException {
     if (this.numContainers == 0) {
       planBuilder.updateNumContainers(++numContainers);
     }
