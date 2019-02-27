@@ -71,6 +71,7 @@ public abstract class CommonPackingTests {
     // object Config and Topology objects. This is typically fine for packing tests since they don't
     // access the protobuf values.
     this.topologyConfig = new org.apache.heron.api.Config();
+    this.topologyConfig.setTopologyContainerMaxNumInstances(4);
     this.topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
     Config config = PackingTestUtils.newTestConfig(this.topology);
