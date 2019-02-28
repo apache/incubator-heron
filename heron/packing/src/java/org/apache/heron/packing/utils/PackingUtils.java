@@ -40,7 +40,7 @@ public final class PackingUtils {
   public static final ByteAmount DEFAULT_CONTAINER_RAM_PADDING = ByteAmount.fromGigabytes(1);
   public static final ByteAmount DEFAULT_CONTAINER_DISK_PADDING = ByteAmount.fromGigabytes(1);
   public static final double DEFAULT_CONTAINER_CPU_PADDING = 1.0;
-  public static final int DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER = 4;
+  public static final int DEFAULT_MAX_NUM_INSTANCES_PER_CONTAINER = 10;
 
   private PackingUtils() {
   }
