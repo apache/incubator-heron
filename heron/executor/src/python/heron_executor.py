@@ -514,23 +514,31 @@ class HeronExecutor(object):
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
-    tmaster_cmd = [
-        self.tmaster_binary,
-        '--topology_name=%s' % self.topology_name,
-        '--topology_id=%s' % self.topology_id,
-        '--zkhostportlist=%s' % self.state_manager_connection,
-        '--zkroot=%s' % self.state_manager_root,
-        '--myhost=%s' % self.master_host,
-        '--master_port=%s' % str(self.master_port),
-        '--controller_port=%s' % str(self.tmaster_controller_port),
-        '--stats_port=%s' % str(self.tmaster_stats_port),
-        '--config_file=%s' % self.heron_internals_config_file,
-        '--override_config_file=%s' % self.override_config_file,
-        '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
-        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
-        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
-    retval["heron-tmaster"] = tmaster_cmd
+    tmaster_cmd = {
+        'cmd': [
+            self.tmaster_binary,
+            '--topology_name=%s' % self.topology_name,
+            '--topology_id=%s' % self.topology_id,
+            '--zkhostportlist=%s' % self.state_manager_connection,
+            '--zkroot=%s' % self.state_manager_root,
+            '--myhost=%s' % self.master_host,
+            '--master_port=%s' % str(self.master_port),
+            '--controller_port=%s' % str(self.tmaster_controller_port),
+            '--stats_port=%s' % str(self.tmaster_stats_port),
+            '--config_file=%s' % self.heron_internals_config_file,
+            '--override_config_file=%s' % self.override_config_file,
+            '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
+            '--metricsmgr_port=%s' % str(self.metrics_manager_port),
+            '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
+    }
 
+    if os.environ.get('ENABLE_HEAPCHECK') is not None:
+      tmaster_cmd['env'] = {
+          'LD_PRELOAD': "/usr/lib/libtcmalloc.so",
+          'HEAPCHECK': "normal"
+      }
+
+    retval["heron-tmaster"] = tmaster_cmd
 
     if self.metricscache_manager_mode.lower() != "disabled":
       retval["heron-metricscache"] = self._get_metrics_cache_cmd()
@@ -748,25 +756,34 @@ class HeronExecutor(object):
       instance_id = "container_%s_%s_%d" % (str(self.shard), component_name, global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
-    stmgr_cmd = [
-        self.stmgr_binary,
-        '--topology_name=%s' % self.topology_name,
-        '--topology_id=%s' % self.topology_id,
-        '--topologydefn_file=%s' % self.topology_defn_file,
-        '--zkhostportlist=%s' % self.state_manager_connection,
-        '--zkroot=%s' % self.state_manager_root,
-        '--stmgr_id=%s' % self.stmgr_ids[self.shard],
-        '--instance_ids=%s' % ','.join(map(lambda x: x[0], instance_info)),
-        '--myhost=%s' % self.master_host,
-        '--data_port=%s' % str(self.master_port),
-        '--local_data_port=%s' % str(self.tmaster_controller_port),
-        '--metricsmgr_port=%s' % str(self.metrics_manager_port),
-        '--shell_port=%s' % str(self.shell_port),
-        '--config_file=%s' % self.heron_internals_config_file,
-        '--override_config_file=%s' % self.override_config_file,
-        '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
-        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
+    stmgr_cmd = {
+        'cmd': [
+            self.stmgr_binary,
+            '--topology_name=%s' % self.topology_name,
+            '--topology_id=%s' % self.topology_id,
+            '--topologydefn_file=%s' % self.topology_defn_file,
+            '--zkhostportlist=%s' % self.state_manager_connection,
+            '--zkroot=%s' % self.state_manager_root,
+            '--stmgr_id=%s' % self.stmgr_ids[self.shard],
+            '--instance_ids=%s' % ','.join(map(lambda x: x[0], instance_info)),
+            '--myhost=%s' % self.master_host,
+            '--data_port=%s' % str(self.master_port),
+            '--local_data_port=%s' % str(self.tmaster_controller_port),
+            '--metricsmgr_port=%s' % str(self.metrics_manager_port),
+            '--shell_port=%s' % str(self.shell_port),
+            '--config_file=%s' % self.heron_internals_config_file,
+            '--override_config_file=%s' % self.override_config_file,
+            '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
+            '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
+            '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
+    }
+
+    if os.environ.get('ENABLE_HEAPCHECK') is not None:
+      stmgr_cmd['env'] = {
+          'LD_PRELOAD': "/usr/lib/libtcmalloc.so",
+          'HEAPCHECK': "normal"
+      }
+
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -881,10 +898,17 @@ class HeronExecutor(object):
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
-      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 env=env_to_exec, bufsize=1)
-
-      proc.async_stream_process_stdout(process, stdout_log_fn(name))
+      if isinstance(cmd, dict) and cmd.has_key('env'):
+        Log.info("command %s env %s" % (' '.join(cmd['cmd']), ' '.join(cmd['env'])))
+        if env_to_exec is not None:
+          cmd['env'].update(env_to_exec)
+        process = subprocess.Popen(cmd['cmd'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   env=cmd['env'], bufsize=1)
+        proc.async_stream_process_stdout(process, stdout_log_fn(name))
+      else:
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   env=env_to_exec, bufsize=1)
+        proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
       Log.info("Exception running command %s", cmd)
       traceback.print_exc()
@@ -1120,6 +1144,12 @@ def setup(executor):
     1. Terminate all children processes
     """
     Log.info('Executor terminated; exiting all process in executor.')
+
+    if os.environ.get('ENABLE_HEAPCHECK') is not None:
+      for pid in executor.processes_to_monitor.keys():
+        os.kill(pid, signal.SIGTERM)
+      time.sleep(5) #wait for log collection to finish
+
     # We would not wait or check whether process spawned dead or not
     os.killpg(0, signal.SIGTERM)
 
