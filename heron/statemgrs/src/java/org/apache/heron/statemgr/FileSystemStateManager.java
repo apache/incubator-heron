@@ -295,7 +295,7 @@ public abstract class FileSystemStateManager implements IStateManager {
     if (isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
       try {
-        print("==> Topology %s:", getTopology(null, topologyName).get());
+        print("==> Topology:\n%s", getTopology(null, topologyName).get());
       } catch (ExecutionException e) {
         print("Topology node not found %s", e.getMessage());
       }
