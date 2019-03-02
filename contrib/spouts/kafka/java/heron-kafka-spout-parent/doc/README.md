@@ -34,3 +34,29 @@ new KafkaSpout<>(kafkaConsumerFactory, Collections.singletonList("test-topic"))
 //subscribe to topics matching a pattern
 new KafkaSpout<>(kafkaConsumerFactory, new DefaultTopicPatternProvider("test-.*"));
 ```
+
+##Convert ConsumerRecord to Tuple
+
+The Spout delegates the conversion of each Kafka [ConsumerRecord](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html) into an output tuple to the [ConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/ConsumerRecordTransformer.java), the [DefaultConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/DefaultConsumerRecordTransformer.java) is provided to simply convert the incoming record into a tuple with 2 fields: "key", being the key of the record, and "value", being the value of the record, and also defines the output stream to be the "default" stream.
+
+User can create their own implementation of the `ConsumerRecordTransformer` interface, and set it to the `KafkaSpout` via [setConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/KafkaSpout.java) method.
+
+##Behavior in Different Topology Reliability Mode
+
+### `ATMOST_ONCE` mode
+The whole topology will not turn the `acking` mechanism on. so, the KafkaSpout can afford to emit the tuple without any message id, and it also immediately commit the currently-read offset back to Kafka broker, and neither `ack()` nor `fail()` callback will be invoked. Therefore, "in-flight" tuple will just get lost in case the KafkaSpout instance is blown up or the topology is restarted. That's what `ATMOST_ONCE` offers.
+
+### `ATLEAST_ONCE` mode
+The `acking` mechanism is turned on topology-wise, so the KafkaSpout uses the `ack registry` to keep tracking all the **continuous** acknowledgement ranges for each partition, while the `failure registry` keeps tracking the **lowest** failed acknowledgement for each partition. When it comes to the time that the Kafka Consumer needs to poll the Kafka cluster for more records (because it's emitted everything it got from the previous poll), then the KafkaSpout reconciles as following for each partition that it is consuming:
+
+1. if there's any failed tuple, seek back to the lowest corresponding offset
+2. discard all the acknowledgements that it's received but is greater than the lowest failed offset
+3. clear the lowest failed offset in `failure registry`
+4. commit the offset to be the upper boundary of the first range in the `ack registry`
+
+then, it polls the Kafka cluster for next batch of records (i.e. from the lowest failed tuple if any)
+
+So, it guarantees each tuple emitted by the KafkaSpout must be successfully processed across the whole topology at least once.
+
+### `EFFECTIVE_ONCE`
+Not implemented yet
