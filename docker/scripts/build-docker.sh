@@ -48,6 +48,18 @@ run_build() {
   TARGET_PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $3)
+
+  EXTRA_ARGS=${@:4}
+    # Boolean for Docker experimental parameter --squash
+  DOCKER_SQUASH=false
+  for element in $EXTRA_ARGS; do
+    if [ $element = '-s' ] || [ $element = '--squash' ]; then
+      DOCKER_SQUASH=true
+      break
+    fi
+  done
+  echo $DOCKER_SQUASH
+
   DOCKER_FILE="$SCRATCH_DIR/dist/Dockerfile.dist.$TARGET_PLATFORM"
   DOCKER_TAG="heron/heron:$HERON_VERSION"
   DOCKER_LATEST_TAG="heron/heron:latest"
@@ -61,7 +73,11 @@ run_build() {
   export HERON_VERSION
 
   echo "Building docker image with tag:$DOCKER_TAG"
-  docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  if [ $DOCKER_SQUASH = true ]; then
+    docker build --squash -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  else
+    docker build -t "$DOCKER_TAG" -t "$DOCKER_LATEST_TAG" -f "$DOCKER_FILE" "$SCRATCH_DIR"
+  fi
   # save the image as a tar file
   DOCKER_IMAGE_FILE="$OUTPUT_DIRECTORY/heron-docker-$HERON_VERSION-$TARGET_PLATFORM.tar"
 
@@ -71,23 +87,27 @@ run_build() {
 } 
 
 case $# in
-  3)
-    run_build $1 $2 $3
-    ;;
-
-  *)
+  0|1|2)
     echo "  "
     echo "Script to build heron docker image for different platforms"
     echo "  Input - directory containing the artifacts from the directory <artifact-directory>"
     echo "  Output - docker image tar file saved in the directory <artifact-directory> "
     echo "  "
-    echo "Usage: $0 <platform> <version_string> <artifact-directory> "
+    echo "Usage: $0 <platform> <version_string> <artifact-directory> [-s|--squash]"
     echo "  "
-    echo "Platforms Supported: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
+    echo "Argument options:"
+    echo "  <platform>: darwin, debian9, ubuntu14.04, ubuntu16.04, ubuntu18.04, centos7"
+    echo "  <version_string>: Version of Heron build, e.g. v0.17.5.1-rc"
+    echo "  <artifact-directory>: Location of compiled Heron artifact"
+    echo "  [-s|--squash]: Enables using Docker experimental feature --squash"
     echo "  "
     echo "Example:"
     echo "  ./build-docker.sh ubuntu14.04 0.12.0 ~/ubuntu"
     echo "  "
     exit 1
+    ;;
+
+  *)
+    run_build $1 $2 $3 ${@:4}
     ;;
 esac
