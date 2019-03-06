@@ -864,11 +864,7 @@ new_http_archive(
 
 new_http_archive(
     name = "org_apache_zookeeper",
-    urls = [
-      "http://apache.cs.utah.edu/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz",
-      "http://apache.claz.org/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz",
-      "http://apache.mesi.com.ar/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz",
-    ],
+    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
     strip_prefix = "zookeeper-3.4.10",
     build_file = "third_party/zookeeper/zookeeper.BUILD",
     sha256 = "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27",
