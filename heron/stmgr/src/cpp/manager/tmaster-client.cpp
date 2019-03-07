@@ -116,7 +116,7 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
       return;
     }
     LOG(ERROR) << "Could not connect to tmaster at " << get_clientoptions().get_host() << ":"
-               << get_clientoptions().get_port() << std::endl;
+               << get_clientoptions().get_port() << ", Status code: " << _status << std::endl;
     LOG(INFO) << "Will retry again..." << std::endl;
     // Shouldn't be in a state where a previous timer is not cleared yet.
     if (reconnect_timer_id == 0) {
