@@ -257,7 +257,8 @@ public class AppsV1beta1Controller extends KubernetesController {
     return Arrays.asList(
         "sh",
         "-c",
-        KubernetesUtils.getFetchCommand(configuration, runtimeConfiguration)
+        KubernetesUtils.getConfCommand(configuration)
+            + " && " + KubernetesUtils.getFetchCommand(configuration, runtimeConfiguration)
             + " && " + setShardIdEnvironmentVariableCommand()
             + " && " + String.join(" ", executorCommand)
     );

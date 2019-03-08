@@ -17,49 +17,40 @@
  * under the License.
  */
 
-package org.apache.heron.packing;
+package org.apache.heron.packing.builder;
 
 import org.apache.heron.common.basics.ByteAmount;
 
 /**
- * Helper class that captures the RAM requirements of each component
+ * Helper class that captures the RAM and CPU requirements of each component
  */
-public class RamRequirement implements Comparable<RamRequirement> {
+public class ResourceRequirement {
 
   private String componentName;
   private ByteAmount ramRequirement;
+  private double cpuRequirement;
 
-  public RamRequirement(String componentName, ByteAmount ram) {
+  public ResourceRequirement(String componentName, ByteAmount ram) {
+    this(componentName, ram, 0.0);
+  }
+
+  public ResourceRequirement(String componentName,
+                             ByteAmount ram,
+                             double cpu) {
     this.componentName = componentName;
     this.ramRequirement = ram;
+    this.cpuRequirement = cpu;
   }
 
   public String getComponentName() {
     return componentName;
   }
 
-  @Override
-  public int compareTo(RamRequirement other) {
-    return this.ramRequirement.compareTo(other.ramRequirement);
+  public ByteAmount getRamRequirement() {
+    return ramRequirement;
   }
 
-  @Override
-  public boolean equals(Object o) {
-
-    if (o == this) {
-      return true;
-    }
-    if (!(o instanceof RamRequirement)) {
-      return false;
-    }
-    RamRequirement c = (RamRequirement) o;
-
-    // Compare the ramRequirement values and return accordingly
-    return ramRequirement.equals(c.ramRequirement);
-  }
-
-  @Override
-  public int hashCode() {
-    return ramRequirement.hashCode();
+  public double getCpuRequirement() {
+    return cpuRequirement;
   }
 }

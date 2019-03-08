@@ -75,7 +75,7 @@ public final class ComponentJVMOptionsTopology {
 
     // container resource configuration
     conf.setContainerDiskRequested(ByteAmount.fromGigabytes(2));
-    conf.setContainerRamRequested(ByteAmount.fromGigabytes(2));
+    conf.setContainerRamRequested(ByteAmount.fromGigabytes(3));
     conf.setContainerCpuRequested(2);
 
     // Specify the size of RAM padding to per container.

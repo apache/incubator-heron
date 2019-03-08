@@ -346,6 +346,10 @@ public class Context {
     return cfg.getStringValue(Key.DOWNLOADER_BINARY);
   }
 
+  public static String downloaderConf(Config cfg) {
+    return cfg.getStringValue(Key.DOWNLOADER_CONF);
+  }
+
   public static String updatePrompt(Config cfg) {
     return cfg.getStringValue(Key.UPDATE_PROMPT);
   }

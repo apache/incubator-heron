@@ -41,7 +41,7 @@ java_library(
 
 java_library(
     name='builder',
-    srcs = glob(["**/packing/builder/*.java","**/packing/ResourceExceededException.java"]),
+    srcs = glob(["**/packing/builder/*.java","**/packing/constraints/*.java","**/packing/exceptions/*.java"]),
     deps = heron_java_proto_files() + [
         "@com_google_guava_guava//jar",
         "//heron/api/src/java:classification",

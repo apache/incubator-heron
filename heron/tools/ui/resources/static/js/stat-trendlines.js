@@ -133,7 +133,9 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
           .attr('y2', rowHeight);
       var yScale = d3.scale.linear()
         .domain(extent)
-        .range([rowHeight, 0]);
+        // yScale starts from 1 so that value 0 is visible and users can tell
+        // if metrics are loaded or not
+        .range([rowHeight - 1, 0]);
 
       // request data and render the line chart
       (metric.queryTrendline || makeTrendlineQuery)(metric, name, instance, startTime, endTime, function (data) {

@@ -29,6 +29,9 @@ public class Resource {
   private ByteAmount ram;
   private ByteAmount disk;
 
+  public static final Resource EMPTY_RESOURCE
+      = new Resource(0.0, ByteAmount.ZERO, ByteAmount.ZERO);
+
   public Resource(double cpu, ByteAmount ram, ByteAmount disk) {
     this.cpu = cpu;
     this.ram = ram;
@@ -61,6 +64,14 @@ public class Resource {
 
   public Resource cloneWithRam(ByteAmount newRam) {
     return new Resource(this.getCpu(), newRam, this.getDisk());
+  }
+
+  public Resource cloneWithCpu(double newCpu) {
+    return new Resource(newCpu, this.getRam(), this.getDisk());
+  }
+
+  public Resource cloneWithDisk(ByteAmount newDisk) {
+    return new Resource(this.getCpu(), this.getRam(), newDisk);
   }
 
   /**

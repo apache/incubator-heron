@@ -31,7 +31,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.ByteAmount;
 import org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking;
-import org.apache.heron.packing.roundrobin.RoundRobinPacking;
 import org.apache.heron.proto.system.ExecutionEnvironment;
 import org.apache.heron.proto.system.PackingPlans;
 import org.apache.heron.scheduler.client.ISchedulerClient;
@@ -307,7 +306,7 @@ public class RuntimeManagerMainTest {
     SchedulerStateManagerAdaptor manager = mock(SchedulerStateManagerAdaptor.class);
     PowerMockito.when(Runtime.schedulerStateManagerAdaptor(any(Config.class))).thenReturn(manager);
 
-    RoundRobinPacking packing = new RoundRobinPacking();
+    ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
     PackingPlans.PackingPlan currentPlan =
         PackingTestUtils.testProtoPackingPlan(TOPOLOGY_NAME, packing);
 

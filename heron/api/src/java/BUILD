@@ -38,7 +38,7 @@ java_library(
     ]
 )
 
-# Functional Api
+# Low level and functional Api
 java_library(
     name = "api-java-low-level-functional",
     javacopts = DOCLINT_HTML_AND_SYNTAX,

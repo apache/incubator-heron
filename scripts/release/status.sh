@@ -59,8 +59,7 @@ then
     build_version=${HERON_BUILD_VERSION}
   fi
 else
-  current_dir=$(pwd)
-  build_version=$(basename "$current_dir")
+  build_version=${HERON_BUILD_VERSION}
 fi
 echo "HERON_BUILD_VERSION ${build_version}"
 

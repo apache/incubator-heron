@@ -68,6 +68,7 @@ const sp_string METRIC_DROPPED_DURING_RESTORE = "__dropped_during_restore";
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_INIT =
     "__server/__time_spent_back_pressure_initiated";
 const sp_int64 PROCESS_METRICS_FREQUENCY = 10_s;
+const sp_int64 UPTIME_METRIC_FREQUENCY = 1_s;
 const sp_int64 TMASTER_RETRY_FREQUENCY = 10_s;
 
 StMgr::StMgr(EventLoop* eventLoop, const sp_string& _myhost, sp_int32 _data_port,
@@ -184,6 +185,11 @@ void StMgr::Init() {
                    1_s),
            0);
 
+  // Update uptime metric every 1 second
+  CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
+    this->UpdateUptimeMetric();
+  }, true, UPTIME_METRIC_FREQUENCY), 0);
+
   // Update Process related metrics every 10 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
     this->UpdateProcessMetrics(status);
@@ -244,12 +250,13 @@ void StMgr::CheckTMasterLocation(EventLoop::Status) {
   }
 }
 
-void StMgr::UpdateProcessMetrics(EventLoop::Status) {
-  // Uptime
+void StMgr::UpdateUptimeMetric() {
   auto end_time = std::chrono::high_resolution_clock::now();
-  auto delta = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time_).count();
-  stmgr_process_metrics_->scope(METRIC_UPTIME)->SetValue(delta);
+  auto uptime = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time_).count();
+  stmgr_process_metrics_->scope(METRIC_UPTIME)->SetValue(uptime);
+}
 
+void StMgr::UpdateProcessMetrics(EventLoop::Status) {
   // CPU
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);

@@ -181,8 +181,12 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint";
   /**
-   * Hint for max amount of disk per container to be reserved for this topology.
-   * In bytes.
+   * Max number of instances per container for this topology.
+   */
+  public static final String TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES
+      = "topology.container.max.instances";
+  /**
+   * Percent of resource to pad each container.
    */
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
@@ -191,6 +195,11 @@ public class Config extends HashMap<String, Object> {
    * In bytes.
    */
   public static final String TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding";
+  /**
+   * Amount of CPU to pad each container.
+   * In decimal form of percent of CPU shares.
+   */
+  public static final String TOPOLOGY_CONTAINER_CPU_PADDING = "topology.container.cpu.padding";
   /**
    * Per component RAM requirement.  The format of this flag is something like
    * spout0:0.2,spout1:0.2,bolt1:0.5.
@@ -206,6 +215,12 @@ public class Config extends HashMap<String, Object> {
    * spout0:12434,spout1:345353,bolt1:545356.
    */
   public static final String TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap";
+  /**
+   * Sorting strategy for FirstFitDecreasingPacking algorithm.
+   * RAM_FIRST (default), or CPU_FIRST
+   */
+  public static final String TOPOLOGY_PACKING_FFD_SORTING_STRATEGY
+      = "topology.packing.ffd.sorting.strategy";
   /**
    * What's the checkpoint interval for stateful topologies in seconds
    */
@@ -335,11 +350,14 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_CONTAINER_MAX_CPU_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_DISK_HINT);
     apiVars.add(TOPOLOGY_CONTAINER_MAX_RAM_HINT);
+    apiVars.add(TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES);
     apiVars.add(TOPOLOGY_CONTAINER_PADDING_PERCENTAGE);
     apiVars.add(TOPOLOGY_CONTAINER_RAM_PADDING);
+    apiVars.add(TOPOLOGY_CONTAINER_CPU_PADDING);
     apiVars.add(TOPOLOGY_COMPONENT_CPUMAP);
     apiVars.add(TOPOLOGY_COMPONENT_RAMMAP);
     apiVars.add(TOPOLOGY_COMPONENT_DISKMAP);
+    apiVars.add(TOPOLOGY_PACKING_FFD_SORTING_STRATEGY);
     apiVars.add(TOPOLOGY_STATEFUL_START_CLEAN);
     apiVars.add(TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS);
     apiVars.add(TOPOLOGY_STATEFUL_CKPTMGR_RAM);
@@ -487,6 +505,14 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_PADDING, Long.toString(nbytes.asBytes()));
   }
 
+  public static void setContainerCpuPadding(Map<String, Object> conf, double ncpus) {
+    conf.put(Config.TOPOLOGY_CONTAINER_CPU_PADDING, Double.toString(ncpus));
+  }
+
+  public static void setMaxNumInstancesPerContainer(Map<String, Object> conf, int n) {
+    conf.put(Config.TOPOLOGY_CONTAINER_MAX_NUM_INSTANCES, Integer.toString(n));
+  }
+
   public static void setComponentCpuMap(Map<String, Object> conf, String cpuMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_CPUMAP, cpuMap);
   }
@@ -497,6 +523,10 @@ public class Config extends HashMap<String, Object> {
 
   public static void setComponentDiskMap(Map<String, Object> conf, String diskMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_DISKMAP, diskMap);
+  }
+
+  public static void setFFDSortingStrategy(Map<String, Object> conf, String sortingStrategy) {
+    conf.put(Config.TOPOLOGY_PACKING_FFD_SORTING_STRATEGY, sortingStrategy);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
@@ -748,6 +778,14 @@ public class Config extends HashMap<String, Object> {
     setContainerRamPadding(this, nbytes);
   }
 
+  public void setContainerCpuPadding(double ncpus) {
+    setContainerCpuPadding(this, ncpus);
+  }
+
+  public void setTopologyContainerMaxNumInstances(int n) {
+    setMaxNumInstancesPerContainer(this, n);
+  }
+
   public void setComponentCpuMap(String cpuMap) {
     setComponentCpuMap(this, cpuMap);
   }
@@ -770,6 +808,10 @@ public class Config extends HashMap<String, Object> {
 
   public void setComponentDisk(String component, ByteAmount diskInBytes) {
     setComponentDisk(this, component, diskInBytes);
+  }
+
+  public void setFFDSortingStrategy(String sortingStrategy) {
+    setFFDSortingStrategy(this, sortingStrategy);
   }
 
   public void setUpdateDeactivateWaitDuration(int seconds) {
