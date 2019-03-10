@@ -99,7 +99,7 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/applatix/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/...
+  --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/...
 end_timer "$T"
 
 T="heron build binpkgs"
