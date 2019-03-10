@@ -44,8 +44,8 @@ Lastly, make sure that `tools/build_rules/BUILD` exists, even if it is empty,
 so that Bazel can find your `prelude_bazel` file.
 """
 
-pex_file_types = FileType([".py"])
-egg_file_types = FileType([".egg", ".whl"])
+pex_file_types = FileType(types=[".py"])
+egg_file_types = FileType(types=[".egg", ".whl"])
 
 # As much as I think this test file naming convention is a good thing, it's
 # probably a bad idea to impose it as a policy to all OSS users of these rules,
@@ -304,8 +304,7 @@ pex_attrs = {
     "eggs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = egg_file_types),
     "reqs": attr.string_list(),
-    "data": attr.label_list(allow_files = True,
-                            cfg = "data"),
+    "data": attr.label_list(allow_files = True),
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
@@ -411,7 +410,7 @@ _pytest_pex_test = rule(
         "runner": attr.label(
             executable = True,
             mandatory = True,
-            cfg = "data",
+            cfg = "target",
         ),
         "launcher_template": attr.label(
             allow_files = True,
