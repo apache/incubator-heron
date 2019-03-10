@@ -28,9 +28,9 @@ env:
 
 before_install:
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel-0.14.1-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.14.1-installer-linux-x86_64.sh
-  - ./bazel-0.14.1-installer-linux-x86_64.sh --user
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.23.1/bazel-0.23.1-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.23.1-installer-linux-x86_64.sh
+  - ./bazel-0.23.1-installer-linux-x86_64.sh --user
 
 before_script:
   # install python module for wheel files
