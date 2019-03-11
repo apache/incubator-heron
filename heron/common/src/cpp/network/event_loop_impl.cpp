@@ -76,7 +76,14 @@ EventLoopImpl::~EventLoopImpl() {
   event_base_free(mDispatcher);
 }
 
+static void handleTerm(evutil_socket_t _, sp_int16 what, void* ctx) {
+  struct event_base *evb = (struct event_base*) ctx;
+  event_base_loopbreak(evb);
+}
+
 void EventLoopImpl::loop() {
+  struct event *term = evsignal_new(mDispatcher, SIGTERM, handleTerm, mDispatcher);
+  event_add(term, NULL);
   // This never returns
   event_base_dispatch(mDispatcher);
 }
