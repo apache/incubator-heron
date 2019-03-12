@@ -47,6 +47,11 @@ def get_test_heron_internal_yaml():
 INTERNAL_CONF_PATH, OVERRIDE_PATH = get_test_heron_internal_yaml()
 HOSTNAME = socket.gethostname()
 
+class CommandEncoder(json.JSONEncoder):
+  """Customized JSONEncoder that works with Command object"""
+  def default(self, o):
+    return o.cmd
+
 class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
@@ -335,7 +340,7 @@ class HeronExecutorTest(unittest.TestCase):
         map((lambda process_info: (process_info.name, process_info.command.split(' '))),
             self.expected_processes_container_1))
 
-    current_json = json.dumps(current_commands, sort_keys=True).split(' ')
+    current_json = json.dumps(current_commands, sort_keys=True, cls=CommandEncoder).split(' ')
     temp_json = json.dumps(temp_dict, sort_keys=True).split(' ')
 
     print ("current_json: %s" % current_json)

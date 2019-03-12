@@ -22,9 +22,11 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
+      - google-perftools
+      - libgoogle-perftools-dev
 
 env:
-  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
+  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
 
 before_install:
   # download and install bazel
