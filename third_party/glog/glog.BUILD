@@ -36,7 +36,7 @@ common_script = [
     'export INSTALL_DIR=$$(pwd)/$(@D)',
     'export TMP_DIR=$$(mktemp -d -t glog.XXXXX)',
     'mkdir -p $$TMP_DIR',
-    'cp -R $$(pwd)/external/com_github_google_glog/* $$TMP_DIR',
+    'cp -R $$(pwd)/external/com_github_google_glog/* $$TMP_DIR', 
     'cd $$TMP_DIR',
 ]
 

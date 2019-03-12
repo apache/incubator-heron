@@ -14,10 +14,10 @@ include_files = [
     "include/event2/event.h",
     "include/event2/http_struct.h",
     "include/event2/rpc_struct.h",
-    "include/event2/buffer_compat.h",
+    "include/event2/buffer_compat.h",      
     "include/event2/dns.h",
     "include/event2/event_compat.h",
-    "include/event2/keyvalq_struct.h",
+    "include/event2/keyvalq_struct.h", 
     "include/event2/tag.h",
     "include/event2/bufferevent.h",
     "include/event2/dns_compat.h",
@@ -37,9 +37,9 @@ include_files = [
 ]
 
 lib_files = [
-    "lib/libevent.a",
+    "lib/libevent.a", 
     "lib/libevent_core.a",
-    "lib/libevent_extra.a",
+    "lib/libevent_extra.a", 
     "lib/libevent_pthreads.a",
 ]
 
