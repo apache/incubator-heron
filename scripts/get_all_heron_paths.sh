@@ -44,7 +44,7 @@ function get_heron_thirdparty_dependencies() {
   # bazel-genfiles/external for third_party deps
   # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
   # bazel-heron/bazel-out/host/genfiles/external more third_party deps
-  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-heron/bazel-out/host/bin/third_party,bazel-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-incubator-heron/bazel-out/host/bin/third_party,bazel-incubator-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
