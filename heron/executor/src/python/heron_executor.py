@@ -147,13 +147,12 @@ def stdout_log_fn(cmd):
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
 class Command(object):
-  """Command to run as a separate process using subprocess.POpen"""
+  """
+  Command to run as a separate process using subprocess.POpen
+  :param cmd: command to run (as a list)
+  :param env: env variables for the process (as a map)
+  """
   def __init__(self, cmd, env):
-    """
-    Command to run as a separate process using subprocess.POpen
-    :param cmd: command to run (as a list)
-    :param env: env variables for the process (as a map)
-    """
     if isinstance(cmd, list):
       self.cmd = cmd
     else:
