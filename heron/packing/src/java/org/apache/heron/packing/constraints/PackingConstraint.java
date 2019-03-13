@@ -17,19 +17,13 @@
  * under the License.
  */
 
-package org.apache.heron.packing;
+package org.apache.heron.packing.constraints;
 
-/**
- * Thrown to indicate that the resources required are not available
- */
-public class ResourceExceededException extends Exception {
-  private static final long serialVersionUID = -3662229190395580148L;
+import org.apache.heron.packing.builder.Container;
+import org.apache.heron.packing.exceptions.ConstraintViolationException;
+import org.apache.heron.spi.packing.PackingPlan;
 
-  public ResourceExceededException(String message) {
-    super(message);
-  }
-
-  public ResourceExceededException(String message, Throwable cause) {
-    super(message, cause);
-  }
+public interface PackingConstraint {
+  void validate(Container container, PackingPlan.InstancePlan instancePlan)
+      throws ConstraintViolationException;
 }

@@ -54,6 +54,7 @@ const sp_string METRIC_UPTIME = "__uptime_sec";
 const sp_string METRIC_MEM_USED = "__mem_used_bytes";
 const sp_int64 STATE_MANAGER_RETRY_FREQUENCY = 10_s;
 const sp_int64 PROCESS_METRICS_FREQUENCY = 60_s;
+const sp_int64 UPTIME_METRIC_FREQUENCY = 1_s;
 const sp_string METRIC_PREFIX = "__process";
 
 TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_name,
@@ -132,12 +133,17 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
                    1_s),
            0);
 
-  // Flush logs every 10 seconds
+  // Flush logs every interval
   CHECK_GT(eventLoop_->registerTimer(
                [](EventLoop::Status) { ::heron::common::FlushLogs(); }, true,
                config::HeronInternalsConfigReader::Instance()->GetHeronLoggingFlushIntervalSec() *
                    1_s),
            0);
+
+  // Update uptime metric every 1 second
+  CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
+    this->UpdateUptimeMetric();
+  }, true, UPTIME_METRIC_FREQUENCY), 0);
 
   // Update Process related metrics every 60 seconds
   CHECK_GT(eventLoop_->registerTimer([this](EventLoop::Status status) {
@@ -250,13 +256,13 @@ TMaster::~TMaster() {
   delete dns_;
 }
 
-void TMaster::UpdateProcessMetrics(EventLoop::Status) {
-  // Uptime
-  auto delta = std::chrono::duration_cast<std::chrono::seconds>(
-                   std::chrono::high_resolution_clock::now() - start_time_)
-                   .count();
-  tmasterProcessMetrics->scope(METRIC_UPTIME)->SetValue(delta);
+void TMaster::UpdateUptimeMetric() {
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto uptime = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time_).count();
+  tmasterProcessMetrics->scope(METRIC_UPTIME)->SetValue(uptime);
+}
 
+void TMaster::UpdateProcessMetrics(EventLoop::Status) {
   // CPU
   struct rusage usage;
   ProcessUtils::getResourceUsage(&usage);

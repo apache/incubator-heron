@@ -864,9 +864,7 @@ new_http_archive(
 
 new_http_archive(
     name = "org_apache_zookeeper",
-    urls = [
-        "https://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"
-    ],
+    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
     strip_prefix = "zookeeper-3.4.10",
     build_file = "third_party/zookeeper/zookeeper.BUILD",
     sha256 = "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27",
@@ -909,6 +907,13 @@ new_http_archive(
     urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
     strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     build_file = "third_party/yaml-cpp/yaml.BUILD",
+)
+
+new_http_archive(
+    name = "com_github_danmar_cppcheck",
+    urls = ["https://github.com/danmar/cppcheck/archive/1.87.zip"],
+    strip_prefix = "cppcheck-1.87",
+    build_file = "third_party/cppcheck/cppcheck.BUILD",
 )
 # end 3rdparty C++ dependencies
 
