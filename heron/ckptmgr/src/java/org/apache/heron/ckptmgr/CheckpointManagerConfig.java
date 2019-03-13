@@ -174,8 +174,8 @@ public final class CheckpointManagerConfig {
         //overridden yaml always has flattened key value pair
         keyValues.putAll(overridden);
         Object storageConfigMap = keyValues.get(CheckpointManagerConfigKey.STORAGE_CONFIG.value());
-        if(storageConfigMap instanceof Map){
-          ((Map)storageConfigMap).putAll(overridden);
+        if (storageConfigMap instanceof Map) {
+          ((Map) storageConfigMap).putAll(overridden);
         }
       }
       return this;
