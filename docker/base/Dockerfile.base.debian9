@@ -29,7 +29,7 @@ RUN apt-get -y update && apt-get -y install \
 # install zookeeper
 ARG ZK_DIST=zookeeper-3.4.10
 
-RUN curl -O "http://www.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
+RUN curl -O "https://archive.apache.org/dist/zookeeper/$ZK_DIST/$ZK_DIST.tar.gz" \
     && tar -xzf $ZK_DIST.tar.gz -C /opt \
     && rm -r $ZK_DIST.tar.gz \
     && mv /opt/$ZK_DIST /opt/zookeeper \

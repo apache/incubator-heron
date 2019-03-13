@@ -103,6 +103,13 @@ public class CheckpointManager {
         .required()
         .build();
 
+    Option ckptMgrOverridenConfig = Option.builder("o")
+        .desc("Config name of the checkpoint manager")
+        .longOpt("ckptMgrOverridenConfig")
+        .hasArgs()
+        .argName("ckptMgrOverridenConfig")
+        .build();
+
     Option heronInternalConfig = Option.builder("g")
         .desc("Heron internal config filename")
         .longOpt("heroninternalconfig")
@@ -116,6 +123,7 @@ public class CheckpointManager {
     options.addOption(ckptMgrId);
     options.addOption(ckptMgrPort);
     options.addOption(ckptMgrConfig);
+    options.addOption(ckptMgrOverridenConfig);
     options.addOption(heronInternalConfig);
 
     return options;
@@ -228,11 +236,15 @@ public class CheckpointManager {
     String ckptmgrId = cmd.getOptionValue("ckptmgrid");
     int port = Integer.parseInt(cmd.getOptionValue("ckptmgrport"));
     String stateConfigFilename = cmd.getOptionValue("ckptmgrconfig");
+    String overriddenConfigFilename = cmd.getOptionValue("ckptMgrOverridenConfig");
     String heronInternalConfig = cmd.getOptionValue("heroninternalconfig");
     SystemConfig systemConfig = SystemConfig.newBuilder(true).putAll(heronInternalConfig,
                                                                      true).build();
-    CheckpointManagerConfig ckptmgrConfig =
-        CheckpointManagerConfig.newBuilder(true).putAll(stateConfigFilename, true).build();
+    CheckpointManagerConfig ckptmgrConfig = CheckpointManagerConfig
+        .newBuilder(true)
+        .putAll(stateConfigFilename, true)
+        .override(overriddenConfigFilename)
+        .build();
 
     // Add the SystemConfig into SingletonRegistry
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
@@ -256,6 +268,7 @@ public class CheckpointManager {
         topologyName, topologyId, ckptmgrId, port));
 
     LOG.info("System Config: " + systemConfig);
+    LOG.info(() -> "Checkpoint Manager Config: " + ckptmgrConfig);
 
     CheckpointManager checkpointManager = new CheckpointManager();
     checkpointManager.init(topologyName, topologyId, ckptmgrId,
