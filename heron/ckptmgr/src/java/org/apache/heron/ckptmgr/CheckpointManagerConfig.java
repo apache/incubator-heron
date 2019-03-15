@@ -167,6 +167,21 @@ public final class CheckpointManagerConfig {
       return this;
     }
 
+    public Builder override(String fileName) {
+      File file = new File(fileName);
+      if (file.exists()) {
+        Map<String, Object> overridden = ConfigReader.loadFile(fileName);
+        //overridden yaml always has flattened key value pair
+        keyValues.putAll(overridden);
+        Object storageConfigMap = keyValues.get(CheckpointManagerConfigKey.STORAGE_CONFIG.value());
+        if (storageConfigMap instanceof Map) {
+          ((Map) storageConfigMap).putAll(overridden);
+        }
+      }
+      return this;
+    }
+
+
     private static void convertAndAdd(Map<String, Object> config,
                                       CheckpointManagerConfigKey key,
                                       Object value) {
