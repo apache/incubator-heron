@@ -21,6 +21,7 @@ package org.apache.heron.streamlet.impl.sources;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
@@ -38,6 +39,7 @@ import org.apache.heron.streamlet.impl.ContextImpl;
 public class ComplexSource<R> extends StreamletSource {
 
   private static final long serialVersionUID = -5086763670301450007L;
+  private static final Logger LOG = Logger.getLogger(ComplexSource.class.getName());
   private Source<R> generator;
   private State<Serializable, Serializable> state;
 
@@ -62,8 +64,40 @@ public class ComplexSource<R> extends StreamletSource {
   @Override
   public void nextTuple() {
     Collection<R> tuples = generator.get();
+    msgId = null;
     if (tuples != null) {
-      tuples.forEach(tuple -> collector.emit(new Values(tuple)));
+      for (R tuple : tuples) {
+        if (enableAcking) {
+          msgId = getUniqueMessageId();
+          ackCache.put(msgId, tuple);
+          collector.emit(new Values(tuple), msgId);
+          LOG.info("Emitting: [" + msgId + "]");
+        } else {
+          collector.emit(new Values(tuple));
+        }
+      }
+    }
+  }
+
+  @Override
+  public void ack(Object mid) {
+    if (enableAcking) {
+      ackCache.invalidate(mid);
+      LOG.info("Acked:    [" + mid + "]");
+    }
+  }
+
+  @Override
+  public void fail(Object mid) {
+    if (enableAcking) {
+      Values values = new Values(ackCache.getIfPresent(mid));
+      if (values.get(0) != null) {
+        collector.emit(values, mid);
+        LOG.info("Re-emit:  [" + mid + "]");
+      } else {
+        // will not re-emit since value cannot be retrieved.
+        LOG.severe("Failed to retrieve cached value for msg: " + mid);
+      }
     }
   }
 }

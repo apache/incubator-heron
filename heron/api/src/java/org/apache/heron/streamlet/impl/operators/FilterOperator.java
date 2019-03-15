@@ -42,7 +42,7 @@ public class FilterOperator<R> extends StreamletOperator<R, R> {
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
     if (filterFn.test(obj)) {
-      collector.emit(new Values(obj));
+      collector.emit(tuple, new Values(obj));
     }
     collector.ack(tuple);
   }

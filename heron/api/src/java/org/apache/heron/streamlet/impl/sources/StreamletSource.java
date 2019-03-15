@@ -20,6 +20,10 @@ package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import org.apache.heron.api.spout.BaseRichSpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
@@ -28,6 +32,9 @@ import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
+
+import static org.apache.heron.api.Config.TOPOLOGY_RELIABILITY_MODE;
+import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
 
 /**
  * StreamletSource is the base class for all streamlet sources.
@@ -39,6 +46,9 @@ public abstract class StreamletSource extends BaseRichSpout
   private static final long serialVersionUID = 8583965332619565343L;
   private static final String OUTPUT_FIELD_NAME = "output";
 
+  protected boolean enableAcking = false;
+  protected Cache<String, Object> ackCache;
+  protected String msgId;
   protected SpoutOutputCollector collector;
 
   @Override
@@ -52,6 +62,17 @@ public abstract class StreamletSource extends BaseRichSpout
   public void open(Map<String, Object> map, TopologyContext topologyContext,
                    SpoutOutputCollector outputCollector) {
     collector = outputCollector;
+    enableAcking = map.get(TOPOLOGY_RELIABILITY_MODE).equals(ATLEAST_ONCE.toString());
+    if (enableAcking) {
+      ackCache = createCache();
+    }
+  }
+
+  /**
+   * Create a cache for storing messageId/tuple associations when using ATLEAST_ONCE semantics.
+   */
+  <K, V> Cache<K, V> createCache() {
+    return CacheBuilder.newBuilder().build();
   }
 
   /**
@@ -64,4 +85,14 @@ public abstract class StreamletSource extends BaseRichSpout
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
     outputFieldsDeclarer.declare(new Fields(OUTPUT_FIELD_NAME));
   }
+
+  /**
+   * Return a unique message ID for use with ATLEAST_ONCE topologies.
+   *
+   * @return a unique message id string.
+   */
+  String getUniqueMessageId() {
+    return UUID.randomUUID().toString();
+  }
+
 }

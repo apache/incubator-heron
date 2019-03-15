@@ -62,7 +62,7 @@ public class GeneralReduceByKeyOperator<R, K, T> extends StreamletOperator<R, Ke
     T newValue = reduceFn.apply(oldValue, obj);
 
     reduceMap.put(key, newValue);
-    collector.emit(new Values(new KeyValue<K, T>(key, newValue)));
+    collector.emit(tuple, new Values(new KeyValue<K, T>(key, newValue)));
     collector.ack(tuple);
   }
 }

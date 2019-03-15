@@ -79,7 +79,7 @@ public class TransformOperator<R, T> extends StreamletOperator<R, T>
   @Override
   public void execute(Tuple tuple) {
     R obj = (R) tuple.getValue(0);
-    serializableTransformer.transform(obj, x -> collector.emit(new Values(x)));
+    serializableTransformer.transform(obj, x -> collector.emit(tuple, new Values(x)));
     collector.ack(tuple);
   }
 }
