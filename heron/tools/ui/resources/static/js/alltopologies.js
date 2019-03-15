@@ -22,6 +22,7 @@
 var TopologyItem = React.createClass({
   render: function() {
     var topology = this.props.topology;
+    var index = this.props.index;
 
     var divStyle = {
       position: 'relative',
@@ -51,12 +52,13 @@ var TopologyItem = React.createClass({
 
     return (
        <tr className={state_class}>
+         <td className="col-md-1 index no-break">{index}</td>
          <td className="col-md-3 break-all"><a className="toponame" href={'./topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
          <td className="col-md-1 topostatus">{topology.status}</td>
          <td className="col-md-1 topocluster">{displaycluster}</td>
          <td className="col-md-1 toporunrole break-all">{topology.role}</td>
          <td className="col-md-1 topoenviron">{displayenv}</td>
-         <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
+         <td className="col-md-2 toporeleaseversion break-all">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
        </tr>
@@ -142,9 +144,9 @@ var TopologyTable = React.createClass({
       });
     }
 
-    var items = topologies.map(function (topo) {
+    var items = topologies.map(function (topo, index) {
       return (
-        <TopologyItem topology={topo}/>
+        <TopologyItem topology={topo} index={index + 1}/>
       );
     });
 
@@ -173,6 +175,9 @@ var TopologyTable = React.createClass({
         <div className="table-responsive">
           <table className="table table-striped topotable">
             <thead>
+              <th>
+                Index
+              </th>
               <th onClick={sortBy("name")} className={sortClass("name")}>
                 Name
               </th>
