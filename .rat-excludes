@@ -36,3 +36,6 @@ META-INF
 cpplint\.py
 kashmir
 semver
+
+# Unrecognizable license
+cloudpickle.py
