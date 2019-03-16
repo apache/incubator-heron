@@ -350,9 +350,11 @@ java_library(
     srcs = [ "Empty.java" ],
     exports = [ 
         "@org_apache_distributedlog_core//jar",
+        "@io_netty_netty_all//jar",
     ],
     deps = [ 
         "@org_apache_distributedlog_core//jar",
+        "@io_netty_netty_all//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
         "@commons_collections_commons_collections//jar",
