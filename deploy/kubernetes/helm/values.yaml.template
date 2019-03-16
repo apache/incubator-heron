@@ -66,7 +66,7 @@ bookieStorageCapacity: 3G
 zkReplicas: 1
 
 bookkeeper:
-  image: apachedistributedlog/distributedlog:latest
+  image: apache/bookkeeper:4.7.3
   imagePullPolicy: IfNotPresent
 
 zookeeper:
