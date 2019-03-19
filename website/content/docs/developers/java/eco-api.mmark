@@ -10,7 +10,7 @@ description: Create Heron topologies in Java from reusable spouts and bolts
 
 ## What about Storm Flux?  Is it compatible with Eco?
 
-ECO is an extension Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
+ECO is an extension of Flux.  Most Storm Flux topologies should be able to deployed in Heron with minimal changes.
 Start reading [Migrate Storm Topologies To Heron] (../../../migrate-storm-to-heron) to learn how to migrate your Storm Flux topology then come back.
 
 ## Getting started
@@ -189,7 +189,7 @@ If you want to stop here and try to deploy the above topology you can execute:
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
   org.apache.heron.eco.Eco \
-  --eco-config-file ~/.heron/examples/fibonacci.yaml
+  --eco-config-file ~/.heron/examples/storm_fibonacci.yaml
 ```
 
 This ECO topology does not do anything spectacular, but it's a good starting point to go through some of ECO's concepts.
@@ -530,7 +530,7 @@ Run the simple wordcount example
 $ heron submit local \
   ~/.heron/examples/heron-eco-examples.jar \
    org.apache.heron.eco.Eco \
-   --eco-config-file ~/.heron/examples/simple_wordcount.yaml 
+   --eco-config-file ~/.heron/examples/storm_wordcount.yaml
 ```
 
 Run the simple windowing example
@@ -539,5 +539,5 @@ Run the simple windowing example
 $ heron submit local \
    ~/.heron/examples/heron-eco-examples.jar \
    org.apache.heron.eco.Eco \
-   --eco-config-file ~/.heron/examples/simple_windowing.yaml 
+   --eco-config-file ~/.heron/examples/storm_windowing.yaml
 ```
