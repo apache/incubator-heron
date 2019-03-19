@@ -17,7 +17,7 @@
 
 ---
 
-name: "fibonacci-topology"
+name: "storm-fibonacci-topology"
 
 config:
   topology.workers: 1
