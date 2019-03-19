@@ -105,6 +105,8 @@ public class DlogStorage implements IStatefulStorage {
         .setNumWorkerThreads(1)                           // use 1 worker thread
         .setBKClientNumberIOThreads(1);
 
+    conf.addProperty("bkc.allowShadedLedgerManagerFactoryClass", true);
+
     return this.nsBuilderSupplier.get()
         .clientId("heron-stateful-storage")
         .conf(conf)

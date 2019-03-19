@@ -27,7 +27,7 @@ jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-distributedlog_version = "0.5.0"
+distributedlog_version = "4.7.3"
 http_client_version = "4.5.2"
 
 # heron API server
@@ -338,7 +338,7 @@ maven_jar(
 
 maven_jar(
   name = "io_netty_netty_all",
-  artifact = "io.netty:netty-all:4.0.21.Final"
+  artifact = "io.netty:netty-all:4.1.22.Final"
 )
 
 maven_jar(
@@ -738,7 +738,7 @@ maven_jar(
 # bookkeeper & distributedlog dependencies
 maven_jar(
   name = "org_apache_distributedlog_core",
-  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:" + distributedlog_version
+  artifact = "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version
 )
 # end bookkeeper & distributedlog dependencies
 
