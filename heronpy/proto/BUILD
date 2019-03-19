@@ -39,7 +39,7 @@ pex_library(
         ":proto_ckptmgr_py",
     ],
     reqs = [
-        "protobuf==3.4.0",
+        "protobuf==3.6.1",
         "setuptools==18.0.1",
     ],
 )
@@ -62,7 +62,7 @@ pex_binary(
         ":proto_ckptmgr_py",
     ],
     reqs = [
-        "protobuf==3.4.0",
+        "protobuf==3.6.1",
         "setuptools==18.0.1",
     ],
 )

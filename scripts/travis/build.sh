@@ -103,7 +103,7 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/... \
+  --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
   eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
