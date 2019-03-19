@@ -30,8 +30,6 @@ data:
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: zookeeper
-  # the default manager is flat, which is not good for supporting large number of ledgers
-  BK_ledgerManagerType: "hierarchical"
 ---
 
 ## BookKeeper servers need to access the local disks and the pods
@@ -56,15 +54,15 @@ spec:
       initContainers:
         # The first time, initialize BK to wipe data for minikube
         - name: bookie-format
-          image: apachedistributedlog/distributedlog:0.5.0
+          image: apache/bookkeeper:4.7.3
           args: ["/opt/bookkeeper/bin/bookkeeper", "shell", "bookieformat", "--nonInteractive", "-f", "-deleteCookie"]
-          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           envFrom:
             - configMapRef:
                 name: bookie-config
       containers:
         - name: bookie
-          image: apachedistributedlog/distributedlog:0.5.0
+          image: apache/bookkeeper:4.7.3
           resources:
             requests:
               memory: "1Gi"
@@ -72,8 +70,7 @@ spec:
             limits:
               memory: "2Gi"
               cpu: "2000m"
-          # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
-          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           args: ["/opt/bookkeeper/bin/bookkeeper", "bookie"]
           ports:
             - name: client

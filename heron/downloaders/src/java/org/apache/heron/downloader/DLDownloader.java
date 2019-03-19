@@ -64,6 +64,9 @@ public class DLDownloader implements Downloader {
         parentName,
         uri.getQuery(),
         uri.getFragment());
+
+    CONF.addProperty("bkc.allowShadedLedgerManagerFactoryClass", true);
+
     Namespace ns = builder
         .clientId("heron-downloader")
         .conf(CONF)
