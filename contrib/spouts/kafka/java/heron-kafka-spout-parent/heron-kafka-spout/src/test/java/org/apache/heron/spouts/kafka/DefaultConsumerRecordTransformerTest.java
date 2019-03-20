@@ -21,11 +21,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DefaultConsumerRecordTransformerTest {
+    private static final String DEFAULT_STREAM = "default";
     private ConsumerRecordTransformer<String, byte[]> consumerRecordTransformer;
 
     @BeforeEach
@@ -35,18 +38,18 @@ class DefaultConsumerRecordTransformerTest {
 
     @Test
     void getOutputStreams() {
-        assertEquals("default", consumerRecordTransformer.getOutputStream());
+        assertEquals(Collections.singletonList(DEFAULT_STREAM), consumerRecordTransformer.getOutputStreams());
     }
 
     @Test
     void getFieldNames() {
-        assertEquals(Arrays.asList("key", "value"), consumerRecordTransformer.getFieldNames());
+        assertEquals(Arrays.asList("key", "value"), consumerRecordTransformer.getFieldNames(DEFAULT_STREAM));
     }
 
     @Test
     void transform() {
         ConsumerRecord<String, byte[]> consumerRecord = new ConsumerRecord<>("partition", 0, 0, "key", new byte[]{0x1, 0x2, 0x3});
-        List<Object> expected = Arrays.asList(consumerRecord.key(), consumerRecord.value());
+        Map<String, List<Object>> expected = Collections.singletonMap(DEFAULT_STREAM, Arrays.asList(consumerRecord.key(), consumerRecord.value()));
         assertEquals(expected, consumerRecordTransformer.transform(consumerRecord));
     }
 }
