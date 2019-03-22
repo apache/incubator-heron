@@ -143,10 +143,16 @@ public class DlogStorage implements IStatefulStorage {
     OutputStream out = null;
     try {
       out = openOutputStream(checkpointPath);
+      LOG.info(()->"writing a check point of "+ checkpoint.getCheckpoint().getSerializedSize() + " bytes");
       checkpoint.getCheckpoint().writeTo(out);
+      out.flush();
     } catch (IOException e) {
       throw new StatefulStorageException("Failed to persist checkpoint @ " + checkpointPath, e);
     } finally {
+      if (out != null) {
+        final long num = ((DLOutputStream) out).getNumOfBytesWritten();
+        LOG.info(() -> num + "bytes written");
+      }
       SysUtils.closeIgnoringExceptions(out);
     }
   }
@@ -168,6 +174,10 @@ public class DlogStorage implements IStatefulStorage {
     } catch (IOException ioe) {
       throw new StatefulStorageException("Failed to read checkpoint from " + checkpointPath, ioe);
     } finally {
+      if (in != null) {
+        final long num = ((DLInputStream) in).getNumOfBytesRead();
+        LOG.info(() -> num + " bytes read");
+      }
       SysUtils.closeIgnoringExceptions(in);
     }
 
