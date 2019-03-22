@@ -34,7 +34,6 @@ container_push(
     registry = "index.docker.io",
     repository = "tmpscratch/heron",
     tag = '{BUILD_USER}',
-    stamp = True,
 )
 
 container_push(
@@ -44,5 +43,4 @@ container_push(
     registry = "index.docker.io",
     repository = "heron/heron",
     tag = '{BUILD_USER}',
-    stamp = True,
 )

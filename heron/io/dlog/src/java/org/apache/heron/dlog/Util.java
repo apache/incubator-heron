@@ -126,10 +126,12 @@ public final class Util {
   }
 
   private static Namespace openNamespace(URI uri) throws IOException {
+    DistributedLogConfiguration distributedLogConfiguration = new DistributedLogConfiguration();
+    distributedLogConfiguration.addProperty("bkc.allowShadedLedgerManagerFactoryClass", true);
     return NamespaceBuilder.newBuilder()
         .uri(uri)
         .clientId("dlog-util")
-        .conf(new DistributedLogConfiguration())
+        .conf(distributedLogConfiguration)
         .build();
   }
 

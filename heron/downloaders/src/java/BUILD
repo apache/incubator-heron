@@ -13,6 +13,7 @@ downloader_deps = [
   "//third_party/java:commons-compress",
   "@commons_cli_commons_cli//jar",
   "@org_apache_distributedlog_core//jar",
+  "@io_netty_netty_all//jar",
 ]
 
 java_library(

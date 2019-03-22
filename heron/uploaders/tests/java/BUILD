@@ -22,6 +22,7 @@ dlog_deps_files = \
     common_deps_files + \
     spi_deps_files + [
         "@org_apache_distributedlog_core//jar",
+        "@io_netty_netty_all//jar",
         "//heron/uploaders/src/java:dlog-uploader-java",
     ]
 

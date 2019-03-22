@@ -50,6 +50,7 @@ dlog_deps_files = [
   "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
   "@com_google_guava_guava//jar",
   "@org_apache_distributedlog_core//jar",
+  "@io_netty_netty_all//jar",
 ]
 
 java_library(

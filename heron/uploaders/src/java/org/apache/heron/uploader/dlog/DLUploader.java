@@ -130,6 +130,8 @@ public class DLUploader implements IUploader {
         .setAckQuorumSize(numReplicas)
         .setUseDaemonThread(true);                        // use daemon thread
 
+    conf.addProperty("bkc.allowShadedLedgerManagerFactoryClass", true);
+
     URI uri = URI.create(DLContext.dlTopologiesNamespaceURI(this.config));
     LOG.info(String.format(
         "Initializing distributedlog namespace for uploading topologies : %s",

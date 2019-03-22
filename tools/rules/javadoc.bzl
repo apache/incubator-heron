@@ -65,7 +65,7 @@ java_doc = rule(
             allow_files = True,
         ),
         "_jdk": attr.label(
-            default = Label("@local_jdk//:jdk-default"),
+            default = Label("@local_jdk//:bin/javadoc"),
             allow_files = True,
         ),
     },
