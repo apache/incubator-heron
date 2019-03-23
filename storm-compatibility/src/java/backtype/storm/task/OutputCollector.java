@@ -144,7 +144,6 @@ public class OutputCollector implements IOutputCollector {
    * as direct, or the target bolt subscribes with a non-direct grouping,
    * an error will occur at runtime. The emitted values must be
    * immutable.
-   * <p>
    * <p>The default stream must be declared as direct in the topology definition.
    * See OutputDeclarer#declare for how this is done when defining topologies
    * in Java.</p>
@@ -164,7 +163,6 @@ public class OutputCollector implements IOutputCollector {
    * as direct, or the target bolt subscribes with a non-direct grouping,
    * an error will occur at runtime. The emitted values must be
    * immutable.
-   * <p>
    * <p>The default stream must be declared as direct in the topology definition.
    * See OutputDeclarer#declare for how this is done when defining topologies
    * in Java.</p>
@@ -185,11 +183,9 @@ public class OutputCollector implements IOutputCollector {
    * as direct, or the target bolt subscribes with a non-direct grouping,
    * an error will occur at runtime. The emitted values must be
    * immutable.
-   * <p>
    * <p>The default stream must be declared as direct in the topology definition.
    * See OutputDeclarer#declare for how this is done when defining topologies
    * in Java.</p>
-   * <p>
    * <p>Note that this method does not use anchors, so downstream failures won't
    * affect the failure status of any spout tuples.</p>
    *

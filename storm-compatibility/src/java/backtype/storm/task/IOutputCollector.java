@@ -26,6 +26,10 @@ import backtype.storm.tuple.Tuple;
 public interface IOutputCollector extends IErrorReporter {
   /**
    * Returns the task ids that received the tuples.
+   * @param  streamId the stream id
+   * @param anchors the anchors
+   * @param tuple the tuple
+   * @return the task ids that recieved the tuples
    */
   List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple);
 
