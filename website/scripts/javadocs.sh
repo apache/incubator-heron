@@ -50,7 +50,7 @@ GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
 rm -rf $JAVADOC_OUTPUT_DIR
 mkdir -p $JAVADOC_OUTPUT_DIR
 
-BIN_JARS=`find $HERON_ROOT_DIR/bazel-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
+BIN_JARS=`find $HERON_ROOT_DIR/bazel-incubator-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-genfiles/external/. -name "*\.jar" | tr '\n' ':'`
 SCRIBE_JARS=`find $HERON_ROOT_DIR/bazel-bin/. -name "libthrift_scribe_java.jar" | tr '\n' ':'`
 PROTO_JARS=`find $HERON_ROOT_DIR/bazel-bin/heron/proto/. -name "*\.jar" | tr '\n' ':'`
