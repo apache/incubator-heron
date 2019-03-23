@@ -18,7 +18,7 @@
 set -e
 
 JAVADOC=javadoc
-FLAGS="-quiet"
+FLAGS="-quiet -Xdoclint:none"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 # for display on GitHub website
