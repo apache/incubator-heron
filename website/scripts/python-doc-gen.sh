@@ -21,14 +21,12 @@ HERONPY_VERSION=$1
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 INPUT=heronpy
 TMP_DIR=$(mktemp -d)
-echo 'after temp'
 VENV="$(mktemp -d)"
 virtualenv "$VENV"
 source "$VENV/bin/activate"
 # TODO: make this a virtualenv
 pip install "heronpy==${HERONPY_VERSION}" "pdoc~=0.3.2"
 pip install --ignore-installed six
-echo 'after pip install'
 mkdir -p static/api && rm -rf static/api/python
 
 pdoc heronpy \
