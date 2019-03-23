@@ -44,7 +44,7 @@ import org.apache.heron.streamlet.impl.StreamletImpl;
  * object(stream):
  *
  * StreamletImpl shadow = new StreamletShadow(stream) {
- *   @Override
+ *   Override
  *   public String getStreamId() {
  *     return "test";
  *   }

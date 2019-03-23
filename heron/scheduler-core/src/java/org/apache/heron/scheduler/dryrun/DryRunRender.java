@@ -31,7 +31,7 @@ public interface DryRunRender {
 
   /**
    * Render dry-run response
-   * @return
+   * @return the string
    */
   String render();
 }
