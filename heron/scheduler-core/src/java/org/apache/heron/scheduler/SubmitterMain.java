@@ -66,11 +66,14 @@ public class SubmitterMain {
   /**
    * Load the config parameters from the command line
    *
-   * @param cluster, name of the cluster
-   * @param role, user role
-   * @param environ, user provided environment/tag
-   * @param verbose, enable verbose logging
-   * @return config, the command line config
+   * @param cluster name of the cluster
+   * @param role user role
+   * @param environ user provided environment/tag
+   * @param submitUser the submit user
+   * @param dryRun run as dry run
+   * @param dryRunFormat the dry run format
+   * @param verbose enable verbose logging
+   * @return config the command line config
    */
   protected static Config commandLineConfigs(String cluster,
                                              String role,

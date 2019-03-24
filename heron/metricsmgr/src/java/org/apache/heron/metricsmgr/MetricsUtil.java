@@ -36,7 +36,7 @@ public final class MetricsUtil {
    * So splitting the source would be an array with 3 elements:
    * ["host:port", componentName, instanceId]
    * @param record
-   * @return
+   * @return the split record source
    */
   public static String[] splitRecordSource(MetricsRecord record) {
     return record.getSource().split(SOURCE_DELIMITER);

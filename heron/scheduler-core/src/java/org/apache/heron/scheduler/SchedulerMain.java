@@ -316,9 +316,9 @@ public class SchedulerMain {
   /**
    * Get the http server for receiving scheduler requests
    *
-   * @param runtime, the runtime configuration
-   * @param scheduler, an instance of the scheduler
-   * @param port, the port for scheduler to listen on
+   * @param runtime the runtime configuration
+   * @param scheduler an instance of the scheduler
+   * @param port the port for scheduler to listen on
    * @return an instance of the http server
    */
   protected SchedulerServer getServer(

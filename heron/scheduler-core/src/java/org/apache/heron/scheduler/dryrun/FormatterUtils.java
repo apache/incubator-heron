@@ -148,7 +148,7 @@ public final class FormatterUtils {
     /**
      * Convert Cell to String
      * @param rich if render in rich format
-     * @return
+     * @return the cell string
      */
     public String toString(boolean rich) {
       StringBuilder builder = new StringBuilder();

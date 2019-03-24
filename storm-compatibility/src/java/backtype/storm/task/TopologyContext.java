@@ -149,6 +149,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /**
    * Gets the component id for this task. The component id maps
    * to a component id specified for a Spout or Bolt in the topology definition.
+   * @return the compoenent id
    */
   public String getThisComponentId() {
     return delegate.getThisComponentId();
@@ -158,6 +159,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    * Gets the declared output fields for the specified stream id for the component
    * this task is a part of.
    * @param streamId The id of the output field.
+   * @return the declared output fields for the specified stream id
    */
   public Fields getThisOutputFields(String streamId) {
     return new Fields(delegate.getThisOutputFields(streamId));
@@ -165,6 +167,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
 
   /**
    * Gets the set of streams declared for the component of this task.
+   * @return the set of streams
    */
   public Set<String> getThisStreams() {
     return delegate.getThisStreams();
@@ -174,6 +177,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    * Gets the index of this task id in getComponentTasks(getThisComponentId()).
    * An example use case for this method is determining which task
    * accesses which resource in a distributed resource to ensure an even distribution.
+   * @return the task index
    */
   public int getThisTaskIndex() {
     return delegate.getThisTaskIndex();

@@ -65,7 +65,7 @@ public class Eco {
    * @param fileInputStream  The input stream associated with ECO topology definition file
    * @param propertiesFile  The optional key-value property file for optional property substitution.
    * @param envFilter The optional flag to tell ECO to perform environment variable substitution
-   * @throws Exception
+   * @throws Exception the exception thrown
    */
   public void submit(FileInputStream fileInputStream,
                      FileInputStream propertiesFile, boolean envFilter)

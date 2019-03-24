@@ -35,6 +35,8 @@ public interface ILauncher extends AutoCloseable {
    * will be passed from submitter main. Config will contain information that launcher may use
    * to setup scheduler and other parameters required by launcher to contact
    * services which will launch scheduler.
+   * @param config the config
+   * @param runtime the runtime
    */
   void initialize(Config config, Config runtime);
 
