@@ -35,6 +35,7 @@ public interface AuroraController {
   /**
    * Restarts a given container, or the entire job if containerId is null
    * @param containerId ID of container to restart, or entire job if null
+   * @return the boolean return value
    */
   boolean restart(Integer containerId);
 

@@ -43,7 +43,7 @@ public interface Builder {
    * Creates a new Streamlet using the underlying generator
    * @param generator The generator that generates the tuples of the streamlet
    * @param <R>
-   * @return
+   * @return the new streamlet
    */
   <R> Streamlet<R> newSource(Source<R> generator);
 
@@ -51,7 +51,7 @@ public interface Builder {
    * Creates a new Streamlet using the provided spout
    * @param spout The spout that emits the tuples of the streamlet
    * @param <R>
-   * @return
+   * @return the new streamlet
    */
   <R> Streamlet<R> newSource(IRichSpout spout);
 }
