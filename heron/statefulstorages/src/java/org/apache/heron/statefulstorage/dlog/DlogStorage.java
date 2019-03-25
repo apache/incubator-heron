@@ -143,7 +143,8 @@ public class DlogStorage implements IStatefulStorage {
     OutputStream out = null;
     try {
       out = openOutputStream(checkpointPath);
-      LOG.info(()->"writing a check point of "+ checkpoint.getCheckpoint().getSerializedSize() + " bytes");
+      LOG.info(() -> String.format("writing a check point of %d bytes",
+          checkpoint.getCheckpoint().getSerializedSize()));
       checkpoint.getCheckpoint().writeTo(out);
       out.flush();
     } catch (IOException e) {
