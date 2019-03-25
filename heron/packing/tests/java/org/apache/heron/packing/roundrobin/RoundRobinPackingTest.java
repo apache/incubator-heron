@@ -20,12 +20,9 @@
 package org.apache.heron.packing.roundrobin;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +33,6 @@ import org.apache.heron.spi.packing.IRepacking;
 import org.apache.heron.spi.packing.PackingException;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
-
-import static org.apache.heron.packing.AssertPacking.DELTA;
 
 public class RoundRobinPackingTest extends CommonPackingTests {
   @Override
@@ -93,11 +88,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
 
   @Test
   public void testDefaultResources() throws Exception {
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
 
@@ -117,29 +111,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setContainerCpuRequested(containerCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(), containerResource);
-
-    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      // All instances' resource requirement should be equal
-      // So the size of set should be 1
-      Set<Resource> differentResources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        differentResources.add(instancePlan.getResource());
-      }
-
-      Assert.assertEquals(1, differentResources.size());
-      int instancesCount = containerPlan.getInstances().size();
-      Assert.assertEquals(containerRam
-          .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
-          differentResources.iterator().next().getRam());
-
-      Assert.assertEquals(
-          (containerCpu - RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) / instancesCount,
-          differentResources.iterator().next().getCpu(), DELTA);
-    }
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, containerResource);
   }
 
   /**
@@ -160,29 +135,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setContainerRamPadding(containerRamPadding);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding().cloneWithRam(containerRamPadding), containerResource);
-
-    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
-      // All instances' resource requirement should be equal
-      // So the size of set should be 1
-      Set<Resource> resources = new HashSet<>();
-      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
-        resources.add(instancePlan.getResource());
-      }
-
-      Assert.assertEquals(1, resources.size());
-      int instancesCount = containerPlan.getInstances().size();
-      Assert.assertEquals(containerRam
-              .minus(containerRamPadding).divide(instancesCount),
-          resources.iterator().next().getRam());
-
-      Assert.assertEquals(
-          (containerCpu - RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) / instancesCount,
-          resources.iterator().next().getCpu(), DELTA);
-    }
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, containerResource);
   }
 
   /**
@@ -203,11 +159,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.of(boltRam), Optional.empty(), boltParallelism,
-        Optional.of(spoutRam), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithRam(containerRam));
   }
 
@@ -229,11 +184,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.of(boltRam), Optional.empty(), boltParallelism,
-        Optional.of(spoutRam), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithRam(containerRam));
   }
 
@@ -255,11 +209,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.of(boltRam), Optional.empty(), boltParallelism,
-        Optional.of(spoutRam), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithRam(containerRam));
   }
 
@@ -281,11 +234,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.of(boltRam), Optional.empty(), boltParallelism,
-        Optional.of(spoutRam), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources.cloneWithRam(spoutRam), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithRam(containerRam));
   }
 
@@ -306,11 +258,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.of(boltCpu), boltParallelism,
-        Optional.empty(), Optional.of(spoutCpu), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithCpu(boltCpu), boltParallelism,
+        instanceDefaultResources.cloneWithCpu(spoutCpu), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
   }
 
@@ -331,11 +282,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.of(boltCpu), boltParallelism,
-        Optional.empty(), Optional.of(spoutCpu), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithCpu(boltCpu), boltParallelism,
+        instanceDefaultResources.cloneWithCpu(spoutCpu), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
   }
 
@@ -356,11 +306,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.of(boltCpu), boltParallelism,
-        Optional.empty(), Optional.of(spoutCpu), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithCpu(boltCpu), boltParallelism,
+        instanceDefaultResources.cloneWithCpu(spoutCpu), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
   }
 
@@ -382,11 +331,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentCpu(SPOUT_NAME, spoutCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.of(boltCpu), boltParallelism,
-        Optional.empty(), Optional.of(spoutCpu), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithCpu(boltCpu), boltParallelism,
+        instanceDefaultResources.cloneWithCpu(spoutCpu), spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
   }
 
@@ -405,11 +353,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentRam(BOLT_NAME, boltRam);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.of(boltRam), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithRam(boltRam), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithRam(containerRam));
   }
 
@@ -428,12 +375,12 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     topologyConfig.setComponentCpu(BOLT_NAME, boltCpu);
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.of(boltCpu), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources.cloneWithCpu(boltCpu), boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
+
   }
 
   /**
@@ -447,11 +394,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
 
     topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
 
-    doPackingTestWithPartialResource(topology,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doPackingTest(topology,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
 
@@ -478,11 +424,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     componentChanges.put(SPOUT_NAME, -1);
     componentChanges.put(BOLT_NAME,  +1);
 
-    doScalingTestWithPartialResource(topology, packingPlan, componentChanges,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers, getDefaultPadding(),
-        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+    doScalingTest(topology, packingPlan, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers, getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
 
@@ -508,10 +453,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     componentChanges.put(SPOUT_NAME, +1);
     componentChanges.put(BOLT_NAME,  +1);
 
-    doScalingTestWithPartialResource(topology, packingPlan, componentChanges,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers + 1, getDefaultPadding(),
+    doScalingTest(topology, packingPlan, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers + 1,
         getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
@@ -538,10 +483,10 @@ public class RoundRobinPackingTest extends CommonPackingTests {
     componentChanges.put(SPOUT_NAME, -2);
     componentChanges.put(BOLT_NAME,  -2);
 
-    doScalingTestWithPartialResource(topology, packingPlan, componentChanges,
-        Optional.empty(), Optional.empty(), boltParallelism,
-        Optional.empty(), Optional.empty(), spoutParallelism,
-        numContainers - 1, getDefaultPadding(),
+    doScalingTest(topology, packingPlan, componentChanges,
+        instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        numContainers - 1,
         getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
