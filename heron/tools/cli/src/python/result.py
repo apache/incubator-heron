@@ -186,8 +186,8 @@ def render(results):
 # check if all results are successful
 def is_successful(results):
   if isinstance(results, list):
-    return all([result.status == Status.Ok for result in results])
+    return all([is_successful(result) for result in results])
   elif isinstance(results, Result):
-    return results.status == Status.Ok
+    return results.status == Status.Ok or results.status == Status.DryRun
   else:
     raise RuntimeError("Unknown result instance: %s", str(results.__class__))
