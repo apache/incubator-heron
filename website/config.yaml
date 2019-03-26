@@ -46,6 +46,7 @@ params:
     logo: /img/logo54x54.png #logo.png
     textlogo: /img/HeronTextLogo.png #logo.png
     textLogoSmall: /img/HeronTextLogo-small.png #logo.png
+    incubator: /img/incubator_feather_egg_logo.png
     js:
       - https://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js

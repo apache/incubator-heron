@@ -12,6 +12,8 @@ nav.hn-top-navbar.navbar.navbar-inverse.navbar-fixed-top role=navigation
     #hn-navbar.navbar-collapse.collapse
       ul.nav.navbar-nav.navbar-right
         li
+          a href="#apache" Apache
+        li
           a href=/docs/getting-started Docs
         li
           a href=/docs/resources Resources
