@@ -21,6 +21,7 @@ package org.apache.heron.dlog;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 import org.apache.distributedlog.DLSN;
 import org.apache.distributedlog.LogRecordWithDLSN;
@@ -29,6 +30,7 @@ import org.apache.distributedlog.api.LogReader;
 import org.apache.distributedlog.exceptions.EndOfStreamException;
 
 public class DLInputStream extends InputStream {
+  private static final Logger LOG = Logger.getLogger(DLInputStream.class.getName());
   private final DistributedLogManager dlm;
   private LogRecordWithInputStream currentLogRecord = null;
   private LogReader reader;
@@ -75,6 +77,7 @@ public class DLInputStream extends InputStream {
       return nextLogRecord(reader);
     } catch (EndOfStreamException e) {
       eos = true;
+      LOG.info(()->"end of stream is reached");
       return null;
     }
   }
