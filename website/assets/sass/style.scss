@@ -5,8 +5,8 @@
 // Helpers
 div[class^="landing-feature"] {
   margin-bottom: 50px;
-  margin-left:0px;
-  margin-right:0px;
+  margin-left:20px;
+  margin-right:20px;
 
   .panel {
     min-height: 150px;
@@ -175,7 +175,7 @@ section.hn-docs-main {
   margin-top: 40px;
   color: $light-gray;
   background-color: $heron-blue-gray;
-  
+
   .hn-footer-links {
     padding-left: 0;
 
