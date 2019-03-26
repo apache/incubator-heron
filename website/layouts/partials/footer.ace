@@ -1,4 +1,4 @@
-footer.footer.hn-footer role=contentinfo
+footer.footer.hn-footer role=contentinfo id="apache"
   .container-fluid
     .row-fluid
       .col-md-4
