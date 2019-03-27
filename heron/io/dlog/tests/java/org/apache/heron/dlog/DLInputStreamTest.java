@@ -54,7 +54,7 @@ public class DLInputStreamTest {
     byte[] b = new byte[1];
     DLInputStream in = new DLInputStream(dlm);
     assertEquals("Should return 0 when reading an empty eos stream",
-        0, in.read(b, 0, 1));
+        -1, in.read(b, 0, 1));
     assertEquals("Should return -1 when reading an empty eos stream",
         -1, in.read(b, 0, 1));
   }
