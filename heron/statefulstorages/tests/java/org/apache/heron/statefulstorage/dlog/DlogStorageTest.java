@@ -19,7 +19,6 @@
 
 package org.apache.heron.statefulstorage.dlog;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.apache.distributedlog.DistributedLogConfiguration;
 import org.apache.distributedlog.api.DistributedLogManager;
 import org.apache.distributedlog.api.namespace.Namespace;
 import org.apache.distributedlog.api.namespace.NamespaceBuilder;
+import org.apache.heron.dlog.DLInputStream;
 import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.spi.statefulstorage.Checkpoint;
@@ -118,7 +118,7 @@ public class DlogStorageTest {
 
   @Test
   public void testRestore() throws Exception {
-    InputStream mockInputStream = mock(InputStream.class);
+    DLInputStream mockInputStream = mock(DLInputStream.class);
     doReturn(mockInputStream).when(dlogStorage).openInputStream(anyString());
 
     PowerMockito.spy(CheckpointManager.InstanceStateCheckpoint.class);
