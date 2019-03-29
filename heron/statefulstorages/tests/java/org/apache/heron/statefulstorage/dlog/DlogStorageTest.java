@@ -19,7 +19,6 @@
 
 package org.apache.heron.statefulstorage.dlog;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
