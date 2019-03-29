@@ -160,7 +160,6 @@ void StatsInterface::HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest*
   http_response->AddHeader("Content-Length", std::to_string(response_string.size()));
   http_response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, http_response);
-  delete stmgrs_reg_summary_response;
   delete _request;
   LOG(INFO) << "Returned stream managers registration summary response";
 }
