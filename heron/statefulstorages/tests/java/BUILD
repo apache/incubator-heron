@@ -48,6 +48,7 @@ java_tests(
 
 dlog_deps_files = [
   "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
+  "//heron/io/dlog/src/java:dlog-lib",
   "@com_google_guava_guava//jar",
   "@org_apache_distributedlog_core//jar",
   "@io_netty_netty_all//jar",
