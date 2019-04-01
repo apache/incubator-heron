@@ -847,15 +847,19 @@ bool TMaster::DistributePhysicalPlan() {
   return false;
 }
 
-proto::tmaster::StmgrsRegistrationSummaryResponse* TMaster::GetStmgrsRegSummary() {
-  auto response = new proto::tmaster::StmgrsRegistrationSummaryResponse();
+std::unique_ptr<proto::tmaster::StmgrsRegistrationSummaryResponse> TMaster::GetStmgrsRegSummary() {
+  auto response = std::unique_ptr<proto::tmaster::StmgrsRegistrationSummaryResponse>(
+          new proto::tmaster::StmgrsRegistrationSummaryResponse());
+
   for (auto it = stmgrs_.begin(); it != stmgrs_.end(); ++it) {
     response->add_registered_stmgrs(it->first);
   }
+
   for (auto it = absent_stmgrs_.begin(); it != absent_stmgrs_.end(); ++it) {
     response->add_absent_stmgrs(*it);
   }
-  return response;
+
+  return std::move(response);
 }
 
 proto::system::PhysicalPlan* TMaster::MakePhysicalPlan() {
