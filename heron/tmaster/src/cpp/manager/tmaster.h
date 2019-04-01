@@ -90,7 +90,7 @@ class TMaster {
   void HandleCleanStatefulCheckpointResponse(proto::system::StatusCode);
 
   // Get stream managers registration summary
-  proto::tmaster::StmgrsRegistrationSummaryResponse* GetStmgrsRegSummary();
+  std::unique_ptr<proto::tmaster::StmgrsRegistrationSummaryResponse> GetStmgrsRegSummary();
 
   // Accessors
   const proto::system::PhysicalPlan* getPhysicalPlan() const { return current_pplan_; }
