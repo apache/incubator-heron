@@ -188,8 +188,8 @@ public class SpoutInstance implements IInstance {
 
     spoutMetrics.registerMetrics(topologyContext);
 
-    // Initialize the instanceState if the spout is stateful
-    if (spout instanceof IStatefulComponent) {
+    // Initialize the instanceState if the topology is stateful and spout is a stateful component
+    if (isTopologyStateful && spout instanceof IStatefulComponent) {
       this.instanceState = state;
       ((IStatefulComponent<Serializable, Serializable>) spout).initState(instanceState);
 
