@@ -24,6 +24,7 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 STATEMGRS_KEY = "statemgrs"
 VIZ_URL_FORMAT_KEY = "viz.url.format"
+MONVIZ_URL_FORMAT_KEY = "monviz.url.format"
 
 
 class Config(object):
@@ -36,6 +37,7 @@ class Config(object):
     self.configs = configs
     self.statemgr_config = StateMgrConfig()
     self.viz_url_format = None
+    self.monviz_url_format = None
 
     self.load_configs()
 
@@ -46,6 +48,11 @@ class Config(object):
       self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
     else:
       self.viz_url_format = ""
+
+    if MONVIZ_URL_FORMAT_KEY in self.configs:
+      self.monviz_url_format = self.validated_viz_url_format(self.configs[MONVIZ_URL_FORMAT_KEY])
+    else:
+      self.monviz_url_format = ""
 
   # pylint: disable=no-self-use
   def validated_viz_url_format(self, viz_url_format):
@@ -71,7 +78,7 @@ class Config(object):
     # No error is thrown, so the format is valid.
     return viz_url_format
 
-  def get_formatted_viz_url(self, execution_state):
+  def get_formatted_viz_url(self, execution_state, formatter):
     """
     @param execution_state: The python dict representing JSON execution_state
     @return Formatted viz url
@@ -86,7 +93,7 @@ class Config(object):
         "${USER}": execution_state["submission_user"],
     }
 
-    formatted_viz_url = self.viz_url_format
+    formatted_viz_url = formatter
 
     for key, value in valid_parameters.items():
       formatted_viz_url = formatted_viz_url.replace(key, value)

@@ -278,8 +278,10 @@ class Tracker(object):
         "has_scheduler_location": None,
     }
 
-    viz_url = self.config.get_formatted_viz_url(executionState)
+    viz_url = self.config.get_formatted_viz_url(executionState, self.config.viz_url_format)
+    monviz_url = self.config.get_formatted_viz_url(executionState, self.config.monviz_url_format)
     executionState["viz"] = viz_url
+    executionState["monviz"] = monviz_url
     return executionState
 
   def extract_metadata(self, topology):
@@ -300,8 +302,10 @@ class Tracker(object):
         "release_version": execution_state.release_state.release_version,
     }
     # refactor get_formatteed_viz_url
-    viz_url = self.config.get_formatted_viz_url(metadata)
+    viz_url = self.config.get_formatted_viz_url(metadata, self.config.viz_url_format)
+    monviz_url = self.config.get_formatted_viz_url(metadata, self.config.monviz_url_format)
     metadata["viz"] = viz_url
+    metadata["monviz"] = monviz_url
     return metadata
 
   @staticmethod

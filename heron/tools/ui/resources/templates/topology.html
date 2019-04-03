@@ -150,6 +150,7 @@ under the License.
             <a class="btn btn-primary btn-xs" href="./{{topology}}/config" target="_blank">Config</a>
             <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
             <a id="vizLink" class="btn btn-primary btn-xs" href="{{execution_state['viz']}}" target="_blank">Viz</a>
+            <a id="monvizLink" class="btn btn-primary btn-xs" href="{{execution_state['monviz']}}" target="_blank">MonViz</a>
           </td>
         </tr>
       </tbody>
@@ -204,6 +205,10 @@ under the License.
     // hide viz link if it is not there
     if ("{{execution_state['viz']}}" === "") {
       document.getElementById("vizLink").style.display = "none";
+    }
+
+    if ("{{execution_state['monviz']}}" === "") {
+      document.getElementById("monvizLink").style.display = "none";
     }
 
     // display the topology name as the title
