@@ -29,6 +29,7 @@ from functools import partial
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
+from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
 from heron.tools.tracker.src.python import pyutils
@@ -276,12 +277,13 @@ class Tracker(object):
         "has_physical_plan": None,
         "has_tmaster_location": None,
         "has_scheduler_location": None,
+        "extra_links": [],
     }
 
-    viz_url = self.config.get_formatted_viz_url(executionState, self.config.viz_url_format)
-    monviz_url = self.config.get_formatted_viz_url(executionState, self.config.monviz_url_format)
-    executionState["viz"] = viz_url
-    executionState["monviz"] = monviz_url
+    for extra_link in self.config.extra_links:
+      extra_link["url"] = self.config.get_formatted_url(executionState,
+                                                        extra_link[EXTRA_LINK_FORMATTER_KEY])
+      executionState["extra_links"].append(extra_link)
     return executionState
 
   def extract_metadata(self, topology):
@@ -300,12 +302,13 @@ class Tracker(object):
         "release_username": execution_state.release_state.release_username,
         "release_tag": execution_state.release_state.release_tag,
         "release_version": execution_state.release_state.release_version,
+        "extra_links": [],
     }
-    # refactor get_formatteed_viz_url
-    viz_url = self.config.get_formatted_viz_url(metadata, self.config.viz_url_format)
-    monviz_url = self.config.get_formatted_viz_url(metadata, self.config.monviz_url_format)
-    metadata["viz"] = viz_url
-    metadata["monviz"] = monviz_url
+
+    for extra_link in self.config.extra_links:
+      extra_link["url"] = self.config.get_formatted_url(metadata,
+                                                        extra_link[EXTRA_LINK_FORMATTER_KEY])
+      metadata["extra_links"].append(extra_link)
     return metadata
 
   @staticmethod

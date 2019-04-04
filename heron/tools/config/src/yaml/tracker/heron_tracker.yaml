@@ -64,4 +64,8 @@ statemgrs:
 #
 # This is a sample, and should be changed to point to corresponding dashboard.
 #
-# viz.url.format: "http://127.0.0.1/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"
+# extra.links:
+# - name: "Viz"
+#   formatter: "http://127.0.0.1/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}"
+# - name: "Alerts"
+#   formatter: "http://127.0.0.1/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}"
