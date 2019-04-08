@@ -19,6 +19,7 @@
 
 package org.apache.heron.eco.builder.heron;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.bolt.IRichBolt;
+import org.apache.heron.api.bolt.IStatefulWindowedBolt;
 import org.apache.heron.api.bolt.IWindowedBolt;
 import org.apache.heron.api.grouping.CustomStreamGrouping;
 import org.apache.heron.api.topology.BoltDeclarer;
@@ -42,8 +44,8 @@ import org.apache.heron.eco.definition.StreamDefinition;
 
 public class StreamBuilder {
 
-  protected void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder,
-                              ObjectBuilder objectBuilder)
+  protected <K extends Serializable, V extends Serializable> void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder,
+                                                      ObjectBuilder objectBuilder)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
       NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
@@ -65,6 +67,15 @@ public class StreamBuilder {
           declarer = builder.setBolt(
               stream.getTo(),
               (IBasicBolt) boltObj,
+              topologyDefinition.parallelismForBolt(stream.getTo()));
+          declarers.put(stream.getTo(), declarer);
+        }
+      } else if (boltObj instanceof IStatefulWindowedBolt) {
+        if (declarer == null) {
+          //noinspection unchecked
+          declarer = builder.setBolt(
+              stream.getTo(),
+              (IStatefulWindowedBolt<K, V>) boltObj,
               topologyDefinition.parallelismForBolt(stream.getTo()));
           declarers.put(stream.getTo(), declarer);
         }

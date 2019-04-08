@@ -32,12 +32,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.apache.heron.api.bolt.BaseStatefulWindowedBolt;
 import org.apache.heron.api.bolt.BasicOutputCollector;
 import org.apache.heron.api.bolt.IBasicBolt;
 import org.apache.heron.api.bolt.IRichBolt;
 import org.apache.heron.api.bolt.IWindowedBolt;
 import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.grouping.CustomStreamGrouping;
+import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.BoltDeclarer;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyBuilder;
@@ -262,6 +264,56 @@ public class HeronStreamBuilderTest {
     verify(mockObjectBuilder).buildObject(same(mockCustomObjectDefinition), same(mockContext));
   }
 
+  @Test
+  public void buildStreams_SpoutToIStatefulWindowedBolt() throws ClassNotFoundException,
+      InvocationTargetException,
+      NoSuchFieldException,
+      InstantiationException,
+      IllegalAccessException {
+    final int iRichBoltParallelism = 1;
+    final String to = "to";
+    final String from = "from";
+    final String streamId  = "id";
+    StreamDefinition streamDefinition  = new StreamDefinition();
+    streamDefinition.setFrom(from);
+    streamDefinition.setTo(to);
+    streamDefinition.setId(streamId);
+    List<StreamDefinition> streams = new ArrayList<>();
+    streams.add(streamDefinition);
+    GroupingDefinition groupingDefinition = new GroupingDefinition();
+    groupingDefinition.setType(GroupingDefinition.Type.CUSTOM);
+    MockCustomObjectDefinition mockCustomObjectDefinition = new MockCustomObjectDefinition();
+
+    groupingDefinition.setCustomClass(mockCustomObjectDefinition);
+    List<String> args = new ArrayList<>();
+    args.add("arg1");
+    groupingDefinition.setArgs(args);
+    groupingDefinition.setStreamId(streamId);
+    streamDefinition.setGrouping(groupingDefinition);
+    MockIStatefulWindowedBolt mockIStatefulWindowedBolt = new MockIStatefulWindowedBolt();
+    MockCustomStreamGrouping mockCustomStreamGrouping = new MockCustomStreamGrouping();
+
+    when(mockContext.getTopologyDefinition()).thenReturn(mockDefinition);
+    when(mockContext.getBolt(eq(to))).thenReturn(mockIStatefulWindowedBolt);
+    when(mockDefinition.getStreams()).thenReturn(streams);
+    when(mockDefinition.parallelismForBolt(eq(to))).thenReturn(iRichBoltParallelism);
+    when(mockTopologyBuilder.setBolt(eq(to),
+        eq(mockIStatefulWindowedBolt), eq(iRichBoltParallelism))).thenReturn(mockBoltDeclarer);
+    when(mockObjectBuilder.buildObject(eq(mockCustomObjectDefinition),
+        eq(mockContext))).thenReturn(mockCustomStreamGrouping);
+
+    subject.buildStreams(mockContext, mockTopologyBuilder, mockObjectBuilder);
+
+    verify(mockContext).getTopologyDefinition();
+    verify(mockContext).getBolt(eq(to));
+    verify(mockDefinition).parallelismForBolt(eq(to));
+    verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIStatefulWindowedBolt), eq(iRichBoltParallelism));
+    verify(mockBoltDeclarer).customGrouping(eq(from), eq(streamId), eq(mockCustomStreamGrouping));
+    verify(mockContext).setStreams(anyMap());
+    verify(mockDefinition).getStreams();
+    verify(mockObjectBuilder).buildObject(same(mockCustomObjectDefinition), same(mockContext));
+  }
+
   private class MockCustomObjectDefinition extends ObjectDefinition {
 
   }
@@ -341,6 +393,19 @@ public class HeronStreamBuilderTest {
     @Override
     public Map<String, Object> getComponentConfiguration() {
       return null;
+    }
+  }
+
+  private class MockIStatefulWindowedBolt extends BaseStatefulWindowedBolt<String, byte[]> {
+
+    @Override
+    public void execute(TupleWindow inputWindow) {
+
+    }
+
+    @Override
+    public void initState(State<String, byte[]> state) {
+
     }
   }
 
