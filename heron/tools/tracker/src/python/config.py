@@ -23,7 +23,9 @@
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 STATEMGRS_KEY = "statemgrs"
-VIZ_URL_FORMAT_KEY = "viz.url.format"
+EXTRA_LINKS_KEY = "extra.links"
+EXTRA_LINK_NAME_KEY = "name"
+EXTRA_LINK_FORMATTER_KEY = "formatter"
 
 
 class Config(object):
@@ -35,20 +37,28 @@ class Config(object):
   def __init__(self, configs):
     self.configs = configs
     self.statemgr_config = StateMgrConfig()
-    self.viz_url_format = None
+    self.extra_links = []
 
     self.load_configs()
 
   def load_configs(self):
     """load config files"""
     self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
-    if VIZ_URL_FORMAT_KEY in self.configs:
-      self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
-    else:
-      self.viz_url_format = ""
+    if EXTRA_LINKS_KEY in self.configs:
+      for extra_link in self.configs[EXTRA_LINKS_KEY]:
+        self.extra_links.append(self.validate_extra_link(extra_link))
+
+  def validate_extra_link(self, extra_link):
+    """validate extra link"""
+    if EXTRA_LINK_NAME_KEY not in extra_link or EXTRA_LINK_FORMATTER_KEY not in extra_link:
+      raise Exception("Invalid extra.links format. " +
+                      "Extra link must include a 'name' and 'formatter' field")
+
+    self.validated_formatter(extra_link[EXTRA_LINK_FORMATTER_KEY])
+    return extra_link
 
   # pylint: disable=no-self-use
-  def validated_viz_url_format(self, viz_url_format):
+  def validated_formatter(self, url_format):
     """validate visualization url format"""
     # We try to create a string by substituting all known
     # parameters. If an unknown parameter is present, an error
@@ -60,18 +70,18 @@ class Config(object):
         "${ROLE}": "role",
         "${USER}": "user",
     }
-    dummy_formatted_viz_url = viz_url_format
+    dummy_formatted_url = url_format
     for key, value in valid_parameters.items():
-      dummy_formatted_viz_url = dummy_formatted_viz_url.replace(key, value)
+      dummy_formatted_url = dummy_formatted_url.replace(key, value)
 
     # All $ signs must have been replaced
-    if '$' in dummy_formatted_viz_url:
-      raise Exception("Invalid viz.url.format: %s" % (viz_url_format))
+    if '$' in dummy_formatted_url:
+      raise Exception("Invalid viz.url.format: %s" % (url_format))
 
     # No error is thrown, so the format is valid.
-    return viz_url_format
+    return url_format
 
-  def get_formatted_viz_url(self, execution_state):
+  def get_formatted_url(self, execution_state, formatter):
     """
     @param execution_state: The python dict representing JSON execution_state
     @return Formatted viz url
@@ -86,12 +96,12 @@ class Config(object):
         "${USER}": execution_state["submission_user"],
     }
 
-    formatted_viz_url = self.viz_url_format
+    formatted_url = formatter
 
     for key, value in valid_parameters.items():
-      formatted_viz_url = formatted_viz_url.replace(key, value)
+      formatted_url = formatted_url.replace(key, value)
 
-    return formatted_viz_url
+    return formatted_url
 
   def __str__(self):
     return "".join((self.config_str(c) for c in self.configs[STATEMGRS_KEY]))
