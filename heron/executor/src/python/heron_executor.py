@@ -1033,11 +1033,11 @@ class HeronExecutor(object):
       return {}
     if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
       retval = {}
-      retval['heron-shell'] = [
+      retval['heron-shell'] = Command([
           '%s' % self.heron_shell_binary,
           '--port=%s' % self.shell_port,
           '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
-          '--secret=%s' % self.topology_id]
+          '--secret=%s' % self.topology_id], self.shell_env)
       return retval
 
     if self.shard == 0:
