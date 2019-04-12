@@ -281,9 +281,10 @@ class Tracker(object):
     }
 
     for extra_link in self.config.extra_links:
-      extra_link["url"] = self.config.get_formatted_url(executionState,
-                                                        extra_link[EXTRA_LINK_FORMATTER_KEY])
-      executionState["extra_links"].append(extra_link)
+      link = extra_link.copy()
+      link["url"] = self.config.get_formatted_url(executionState,
+                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      executionState["extra_links"].append(link)
     return executionState
 
   def extract_metadata(self, topology):
@@ -306,9 +307,10 @@ class Tracker(object):
     }
 
     for extra_link in self.config.extra_links:
-      extra_link["url"] = self.config.get_formatted_url(metadata,
-                                                        extra_link[EXTRA_LINK_FORMATTER_KEY])
-      metadata["extra_links"].append(extra_link)
+      link = extra_link.copy()
+      link["url"] = self.config.get_formatted_url(metadata,
+                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      metadata["extra_links"].append(link)
     return metadata
 
   @staticmethod
