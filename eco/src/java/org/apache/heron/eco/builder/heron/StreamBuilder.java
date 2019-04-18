@@ -44,8 +44,8 @@ import org.apache.heron.eco.definition.StreamDefinition;
 
 public class StreamBuilder {
 
-  protected <K extends Serializable, V extends Serializable> void buildStreams(EcoExecutionContext executionContext, TopologyBuilder builder,
-                                                      ObjectBuilder objectBuilder)
+  protected <K extends Serializable, V extends Serializable> void buildStreams(
+      EcoExecutionContext executionContext, TopologyBuilder builder, ObjectBuilder objectBuilder)
       throws IllegalAccessException, InstantiationException, ClassNotFoundException,
       NoSuchFieldException, InvocationTargetException {
     EcoTopologyDefinition topologyDefinition = executionContext.getTopologyDefinition();
