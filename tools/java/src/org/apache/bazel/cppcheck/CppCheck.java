@@ -86,7 +86,8 @@ public final class CppCheck {
       commandBuilder.add("--std=c++11");
       commandBuilder.add("--language=c++");
       commandBuilder.add("--error-exitcode=1"); // exit with 1 on error
-      commandBuilder.add("--library=googletest"); // use googletest cfg so that TEST_F is not considered syntax error
+      // use googletest cfg so that TEST_F is not considered syntax error
+      commandBuilder.add("--library=googletest");
       commandBuilder.addAll(sourceFiles);
       runChecker(commandBuilder);
 
@@ -113,7 +114,7 @@ public final class CppCheck {
 
     if (cppcheck.exitValue() == 1) {
       LOG.warning("cppcheck detected bad cpp files.");
-      System.exit(1);
+      throw new RuntimeException("cppcheck detected bad cpp files.");
     }
 
     if (cppcheck.exitValue() != 0) {
