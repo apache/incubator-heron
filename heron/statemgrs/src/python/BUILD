@@ -7,7 +7,7 @@ pex_library(
     '//heron/proto:proto-py',
   ],
   reqs = [
-    'PyYAML==3.10',
+    'PyYAML==3.13',
     'kazoo==1.3.1',
     'zope.interface==4.0.5'
   ],
