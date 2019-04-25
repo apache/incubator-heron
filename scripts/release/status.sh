@@ -43,9 +43,10 @@ function disable_e_and_execute {
 }
 
 # get the release tag version or the branch name
-if [ -d .git ];
+if [ -z ${HERON_BUILD_VERSION+x} ];
 then
-  if [ -z ${HERON_BUILD_VERSION+x} ];
+  # variable HERON_BUILD_VERSION is not available, use git branch as build version
+  if [ -d .git ];
   then
     cmd="git rev-parse --abbrev-ref HEAD"
     build_version=$($cmd) || die "Failed to run command to check head: $cmd"
@@ -56,9 +57,12 @@ then
       build_version=$($cmd) || die "Failed to run command to get git release: $cmd"
     fi
   else
-    build_version=${HERON_BUILD_VERSION}
+    # not git managed, use current dir as build version
+    current_dir=$(pwd)
+    build_version=$(basename "$current_dir")
   fi
 else
+  # variable HERON_BUILD_VERSION is available, use it.
   build_version=${HERON_BUILD_VERSION}
 fi
 echo "HERON_BUILD_VERSION ${build_version}"
