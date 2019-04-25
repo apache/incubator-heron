@@ -19,6 +19,6 @@ pex_binary(
     deps = [":instance-py"],
     reqs = [
         'colorlog==2.6.1',
-        'PyYAML==3.10'
+        'PyYAML==3.13'
     ]
 )
