@@ -365,7 +365,9 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     Map<Integer, List<InstanceId>> allocation = new HashMap<>();
     int totalInstance = TopologyUtils.getTotalInstance(parallelismMap);
     if (numContainer > totalInstance) {
-      throw new RuntimeException("More containers allocated than instance.");
+      throw new RuntimeException(
+          String.format("More containers (%d) allocated than instances (%d).",
+              numContainer, totalInstance));
     }
 
     for (int i = 1; i <= numContainer; ++i) {
