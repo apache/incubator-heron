@@ -37,6 +37,8 @@
 class IncomingHTTPRequest;
 class OutgoingHTTPResponse;
 
+using std::unique_ptr;
+
 class HTTPServer {
  public:
   // Constructor
@@ -56,7 +58,7 @@ class HTTPServer {
   void InstallGenericCallBack(VCallback<IncomingHTTPRequest*> cb);
 
   void SendReply(IncomingHTTPRequest* _request, sp_int32 status_code,
-                 OutgoingHTTPResponse* _response);
+                 unique_ptr<OutgoingHTTPResponse> _response);
   void SendErrorReply(IncomingHTTPRequest* _request, sp_int32 status_code);
   void SendErrorReply(IncomingHTTPRequest* _request, sp_int32 status_code,
                       const sp_string& _reason);

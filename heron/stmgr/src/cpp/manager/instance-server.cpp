@@ -40,6 +40,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::make_shared;
+
 // Num data tuples sent to instances associated with this stream manager
 const sp_string METRIC_DATA_TUPLES_TO_INSTANCES = "__tuples_to_workers";
 // Num ack tuples sent to instances associated with this stream manager
@@ -107,8 +109,8 @@ InstanceServer::InstanceServer(EventLoop* eventLoop, const NetworkOptions& _opti
   InstallMessageHandler(&InstanceServer::HandleStoreInstanceStateCheckpointMessage);
   InstallMessageHandler(&InstanceServer::HandleRestoreInstanceStateResponse);
 
-  instance_server_metrics_ = new heron::common::MultiCountMetric();
-  back_pressure_metric_aggr_ = new heron::common::TimeSpentMetric();
+  instance_server_metrics_ = make_shared<heron::common::MultiCountMetric>();
+  back_pressure_metric_aggr_ = make_shared<heron::common::TimeSpentMetric>();
   metrics_manager_client_->register_metric("__server", instance_server_metrics_);
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR,
                                            back_pressure_metric_aggr_);
@@ -133,8 +135,10 @@ InstanceServer::~InstanceServer() {
   Stop();
   // Unregister and delete the metrics.
   for (auto immIter = instance_metric_map_.begin();
-      immIter != instance_metric_map_.end(); ++immIter) {
-    sp_string instance_id = immIter->first;
+            immIter != instance_metric_map_.end();
+            immIter = instance_metric_map_.erase(immIter)) {
+    const sp_string& instance_id = immIter->first;
+
     for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
       if (iter->second->instance_->instance_id() != instance_id) continue;
       InstanceData* data = iter->second;
@@ -142,14 +146,14 @@ InstanceServer::~InstanceServer() {
       if (!iConn) break;
       sp_string metric_name = MakeBackPressureCompIdMetricName(instance_id);
       metrics_manager_client_->unregister_metric(metric_name);
-      delete immIter->second;
     }
   }
 
   // Clean the connection_buffer_metric_map
   for (auto qmmIter = connection_buffer_metric_map_.begin();
-      qmmIter != connection_buffer_metric_map_.end(); ++qmmIter) {
+            qmmIter != connection_buffer_metric_map_.end();) {
     const sp_string& instance_id = qmmIter->first;
+
     for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
       if (iter->second->instance_->instance_id() != instance_id) continue;
       InstanceData* data = iter->second;
@@ -157,24 +161,22 @@ InstanceServer::~InstanceServer() {
       if (!iConn) break;
       sp_string metric_name = MakeQueueSizeCompIdMetricName(instance_id);
       metrics_manager_client_->unregister_metric(metric_name);
-      delete qmmIter->second;
     }
+
+    qmmIter = connection_buffer_metric_map_.erase(qmmIter);
   }
 
   // Clean the connection_buffer_length_metric_map
   for (auto qlmIter = connection_buffer_length_metric_map_.begin();
-    qlmIter != connection_buffer_length_metric_map_.end(); ++qlmIter) {
+            qlmIter != connection_buffer_length_metric_map_.end();) {
     const sp_string& instance_id = qlmIter->first;
     sp_string metric_name = MakeQueueLengthCompIdMetricName(instance_id);
     metrics_manager_client_->unregister_metric(metric_name);
-    delete qlmIter->second;
+    qlmIter = connection_buffer_length_metric_map_.erase(qlmIter);
   }
 
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
-
-  delete instance_server_metrics_;
-  delete back_pressure_metric_aggr_;
 
   // cleanup the instance info
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
@@ -235,7 +237,7 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
       remote_ends_who_caused_back_pressure_.end()) {
     _conn->unsetCausedBackPressure();
     remote_ends_who_caused_back_pressure_.erase(GetInstanceName(_conn));
-    heron::common::TimeSpentMetric* instance_metric = instance_metric_map_[GetInstanceName(_conn)];
+    auto instance_metric = instance_metric_map_[GetInstanceName(_conn)];
     instance_metric->Stop();
     if (!stmgr_->DidAnnounceBackPressure()) {
       stmgr_->SendStopBackPressureToOtherStMgrs();
@@ -262,7 +264,6 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
     auto immiter = instance_metric_map_.find(instance_id);
     if (immiter != instance_metric_map_.end()) {
       metrics_manager_client_->unregister_metric(MakeBackPressureCompIdMetricName(instance_id));
-      delete instance_metric_map_[instance_id];
       instance_metric_map_.erase(instance_id);
     }
 
@@ -270,7 +271,6 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
     auto qmmiter = connection_buffer_metric_map_.find(instance_id);
     if (qmmiter != connection_buffer_metric_map_.end()) {
       metrics_manager_client_->unregister_metric(MakeQueueSizeCompIdMetricName(instance_id));
-      delete connection_buffer_metric_map_[instance_id];
       connection_buffer_metric_map_.erase(instance_id);
     }
 
@@ -278,7 +278,6 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
     auto qlmiter = connection_buffer_length_metric_map_.find(instance_id);
     if (qlmiter != connection_buffer_length_metric_map_.end()) {
       metrics_manager_client_->unregister_metric(MakeQueueLengthCompIdMetricName(instance_id));
-      delete connection_buffer_length_metric_map_[instance_id];
       connection_buffer_length_metric_map_.erase(instance_id);
     }
 
@@ -333,13 +332,13 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
     }
     // Create a metric for this instance
     if (instance_metric_map_.find(instance_id) == instance_metric_map_.end()) {
-      auto instance_metric = new heron::common::TimeSpentMetric();
+      auto instance_metric = make_shared<heron::common::TimeSpentMetric>();
       metrics_manager_client_->register_metric(MakeBackPressureCompIdMetricName(instance_id),
                                                instance_metric);
       instance_metric_map_[instance_id] = instance_metric;
     }
     if (connection_buffer_metric_map_.find(instance_id) == connection_buffer_metric_map_.end()) {
-      auto queue_metric = new heron::common::MultiMeanMetric();
+      auto queue_metric = make_shared<heron::common::MultiMeanMetric>();
       metrics_manager_client_->register_metric(MakeQueueSizeCompIdMetricName(instance_id),
                                                queue_metric);
       connection_buffer_metric_map_[instance_id] = queue_metric;
@@ -348,7 +347,7 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
     if (connection_buffer_length_metric_map_.find(instance_id) ==
       connection_buffer_length_metric_map_.end()) {
       task_id_to_name[task_id] = instance_id;
-      auto queue_metric = new heron::common::MultiCountMetric();
+      auto queue_metric = make_shared<heron::common::MultiCountMetric>();
       metrics_manager_client_->register_metric(MakeQueueLengthCompIdMetricName(instance_id),
                                                queue_metric);
       connection_buffer_length_metric_map_[instance_id] = queue_metric;
@@ -563,7 +562,7 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   }
 
   // Indicate which instance component had back pressure
-  heron::common::TimeSpentMetric* instance_metric = instance_metric_map_[instance_name];
+  auto instance_metric = instance_metric_map_[instance_name];
   instance_metric->Start();
 
   remote_ends_who_caused_back_pressure_.insert(instance_name);
@@ -592,7 +591,7 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   remote_ends_who_caused_back_pressure_.erase(instance_name);
 
   // Indicate which instance component stopped back pressure
-  heron::common::TimeSpentMetric* instance_metric = instance_metric_map_[instance_name];
+  auto instance_metric = instance_metric_map_[instance_name];
   instance_metric->Stop();
 
   if (!stmgr_->DidAnnounceBackPressure()) {

@@ -27,6 +27,9 @@
 namespace heron {
 namespace stmgr {
 
+using std::unique_ptr;
+using proto::ckptmgr::SaveInstanceStateRequest;
+
 CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _options,
                              const sp_string& _topology_name, const sp_string& _topology_id,
                              const sp_string& _ckptmgr_id, const sp_string& _stmgr_id,
@@ -50,11 +53,11 @@ CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _option
   // TODO(nlu): take the value from config
   reconnect_cpktmgr_interval_sec_ = 10;
 
-  InstallResponseHandler(new proto::ckptmgr::RegisterStMgrRequest(),
+  InstallResponseHandler(make_unique<proto::ckptmgr::RegisterStMgrRequest>(),
                          &CkptMgrClient::HandleRegisterStMgrResponse);
-  InstallResponseHandler(new proto::ckptmgr::SaveInstanceStateRequest(),
+  InstallResponseHandler(make_unique<proto::ckptmgr::SaveInstanceStateRequest>(),
                          &CkptMgrClient::HandleSaveInstanceStateResponse);
-  InstallResponseHandler(new proto::ckptmgr::GetInstanceStateRequest(),
+  InstallResponseHandler(make_unique<proto::ckptmgr::GetInstanceStateRequest>(),
                          &CkptMgrClient::HandleGetInstanceStateResponse);
 }
 
@@ -141,17 +144,17 @@ void CkptMgrClient::HandleRegisterStMgrResponse(void*,
 void CkptMgrClient::OnReconnectTimer() { Start(); }
 
 void CkptMgrClient::SendRegisterRequest() {
-  auto request = new proto::ckptmgr::RegisterStMgrRequest();
+  auto request = make_unique<proto::ckptmgr::RegisterStMgrRequest>();
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
   request->set_stmgr_id(stmgr_id_);
   request->mutable_physical_plan()->CopyFrom(*pplan_);
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
 }
 
-void CkptMgrClient::SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request) {
+void CkptMgrClient::SaveInstanceState(unique_ptr<SaveInstanceStateRequest> _request) {
   LOG(INFO) << "Sending SaveInstanceState to ckptmgr" << std::endl;
-  SendRequest(_request, NULL);
+  SendRequest(std::move(_request), NULL);
 }
 
 void CkptMgrClient::SetPhysicalPlan(proto::system::PhysicalPlan& _pplan) {
@@ -170,10 +173,10 @@ void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,
 void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,
                                      const std::string& _checkpoint_id,
                                      int32_t* _nattempts) {
-  auto request = new proto::ckptmgr::GetInstanceStateRequest();
+  auto request = make_unique<proto::ckptmgr::GetInstanceStateRequest>();
   request->mutable_instance()->CopyFrom(_instance);
   request->set_checkpoint_id(_checkpoint_id);
-  SendRequest(request, _nattempts);
+  SendRequest(std::move(request), _nattempts);
 }
 
 void CkptMgrClient::HandleSaveInstanceStateResponse(void*,

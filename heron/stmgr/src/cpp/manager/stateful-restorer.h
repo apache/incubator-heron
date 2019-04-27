@@ -47,6 +47,8 @@ class TimeSpentMetric;
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class InstanceServer;
 class TupleCache;
 class StMgrClientMgr;
@@ -156,8 +158,8 @@ class StatefulRestorer {
   std::function<void(proto::system::StatusCode, std::string, sp_int64)> restore_done_watcher_;
 
   // Different metrics
-  common::MultiCountMetric* multi_count_metric_;
-  common::TimeSpentMetric* time_spent_metric_;
+  shared_ptr<common::MultiCountMetric> multi_count_metric_;
+  shared_ptr<common::TimeSpentMetric>  time_spent_metric_;
 };
 }  // namespace stmgr
 }  // namespace heron

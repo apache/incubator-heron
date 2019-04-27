@@ -35,6 +35,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::make_shared;
+
 // The scope the metrics in this file are under
 const sp_string SERVER_SCOPE = "__server/";
 // Num data tuples received from other stream managers
@@ -66,16 +68,16 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
   // The metrics need to be registered one by one here because the "__server" scope
   // is already registered in heron::stmgr::InstanceServer. Duplicated registrations
   // will only have one successfully registered.
-  tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  tuples_from_stmgrs_metrics_ = make_shared<heron::common::CountMetric>();
   metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS,
                                            tuples_from_stmgrs_metrics_);
-  ack_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  ack_tuples_from_stmgrs_metrics_ = make_shared<heron::common::CountMetric>();
   metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS,
                                            ack_tuples_from_stmgrs_metrics_);
-  fail_tuples_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  fail_tuples_from_stmgrs_metrics_ = make_shared<heron::common::CountMetric>();
   metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS,
                                            fail_tuples_from_stmgrs_metrics_);
-  bytes_from_stmgrs_metrics_ = new heron::common::CountMetric();
+  bytes_from_stmgrs_metrics_ = make_shared<heron::common::CountMetric>();
   metrics_manager_client_->register_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS,
                                            bytes_from_stmgrs_metrics_);
 }
@@ -83,13 +85,9 @@ StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
 StMgrServer::~StMgrServer() {
   Stop();
   metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_DATA_TUPLES_FROM_STMGRS);
-  delete tuples_from_stmgrs_metrics_;
   metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_ACK_TUPLES_FROM_STMGRS);
-  delete ack_tuples_from_stmgrs_metrics_;
   metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_FAIL_TUPLES_FROM_STMGRS);
-  delete fail_tuples_from_stmgrs_metrics_;
   metrics_manager_client_->unregister_metric(SERVER_SCOPE + METRIC_BYTES_FROM_STMGRS);
-  delete bytes_from_stmgrs_metrics_;
 }
 
 void StMgrServer::HandleNewConnection(Connection* _conn) {

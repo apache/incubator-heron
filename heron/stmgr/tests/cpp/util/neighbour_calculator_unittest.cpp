@@ -47,6 +47,8 @@ const sp_string CONTAINER_INDEX = "0";
 const sp_string STMGR_NAME = "stmgr";
 const sp_string LOCALHOST = "127.0.0.1";
 
+using std::unique_ptr;
+
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
     const sp_string& topology_name, const sp_string& topology_id, int num_spouts,
@@ -134,10 +136,10 @@ std::string GenerateStMgrId(int32_t _index) {
   return ostr.str();
 }
 
-heron::proto::system::Instance* CreateInstance(int32_t _comp, int32_t _comp_instance,
-                                               int32_t _stmgr_id,
-                                               int32_t _global_index, bool _is_spout) {
-  heron::proto::system::Instance* imap = new heron::proto::system::Instance();
+unique_ptr<heron::proto::system::Instance> CreateInstance(int32_t _comp, int32_t _comp_instance,
+                                                          int32_t _stmgr_id,
+                                                          int32_t _global_index, bool _is_spout) {
+  auto imap = make_unique<heron::proto::system::Instance>();
   imap->set_instance_id(CreateInstanceId(_global_index));
   imap->set_stmgr_id(GenerateStMgrId(_stmgr_id));
   heron::proto::system::InstanceInfo* inst = imap->mutable_info();
@@ -175,24 +177,20 @@ heron::proto::system::PhysicalPlan* CreatePplan(int32_t _ncontainers,
   int32_t global_index = 1;
   for (int spout = 0; spout < nSpouts; ++spout) {
     for (int spout_instance = 0; spout_instance < nSpoutInstances; ++spout_instance) {
-      heron::proto::system::Instance* instance =
-          CreateInstance(spout, spout_instance, stmgr_assignment, global_index++, true);
+      auto instance = CreateInstance(spout, spout_instance, stmgr_assignment, global_index++, true);
       if (++stmgr_assignment >= nContainers) {
         stmgr_assignment = 0;
       }
       pplan->add_instances()->CopyFrom(*instance);
-      delete instance;
     }
   }
   for (int bolt = 0; bolt < nBolts; ++bolt) {
     for (int bolt_instance = 0; bolt_instance < nBoltInstances; ++bolt_instance) {
-      heron::proto::system::Instance* instance =
-          CreateInstance(bolt, bolt_instance, stmgr_assignment, global_index++, false);
+      auto instance = CreateInstance(bolt, bolt_instance, stmgr_assignment, global_index++, false);
       if (++stmgr_assignment >= nContainers) {
         stmgr_assignment = 0;
       }
       pplan->add_instances()->CopyFrom(*instance);
-      delete instance;
     }
   }
   return pplan;

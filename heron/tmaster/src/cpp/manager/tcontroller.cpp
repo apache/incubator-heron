@@ -42,7 +42,7 @@ namespace tmaster {
  */
 TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TMaster* tmaster)
     : tmaster_(tmaster) {
-  http_server_ = new HTTPServer(eventLoop, options);
+  http_server_ = make_unique<HTTPServer>(eventLoop, options);
   /*
    * Install the handlers
    */
@@ -74,7 +74,7 @@ TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TM
   http_server_->InstallCallBack("/get_current_physical_plan", std::move(cbGetCurPPlan));
 }
 
-TController::~TController() { delete http_server_; }
+TController::~TController() {}
 
 sp_int32 TController::Start() { return http_server_->Start(); }
 
@@ -111,9 +111,9 @@ void TController::HandleActivateRequestDone(IncomingHTTPRequest* request,
   } else {
     std::string s = "Topology successfully activated";
     LOG(INFO) << s;
-    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    auto response = make_unique<OutgoingHTTPResponse>(request);
     response->AddResponse(s);
-    http_server_->SendReply(request, 200, response);
+    http_server_->SendReply(request, 200, std::move(response));
   }
   delete request;
 }
@@ -150,9 +150,9 @@ void TController::HandleDeActivateRequestDone(IncomingHTTPRequest* request,
   } else {
     std::string s = "Topology successfully deactivated";
     LOG(INFO) << s;
-    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    auto response = make_unique<OutgoingHTTPResponse>(request);
     response->AddResponse(s);
-    http_server_->SendReply(request, 200, response);
+    http_server_->SendReply(request, 200, std::move(response));
   }
   delete request;
 }
@@ -197,9 +197,9 @@ void TController::HandleCleanStatefulCheckpointRequestDone(IncomingHTTPRequest* 
   } else {
     std::string msg = "Checkpoints successfully cleaned";
     LOG(INFO) << msg;
-    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    auto response = make_unique<OutgoingHTTPResponse>(request);
     response->AddResponse(msg);
-    http_server_->SendReply(request, 200, response);
+    http_server_->SendReply(request, 200, std::move(response));
   }
   delete request;
 }
@@ -262,9 +262,9 @@ void TController::HandleUpdateRuntimeConfigRequestDone(IncomingHTTPRequest* requ
   } else {
     const std::string message("Runtime config updated");
     LOG(INFO) << message;
-    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    auto response = make_unique<OutgoingHTTPResponse>(request);
     response->AddResponse(message);
-    http_server_->SendReply(request, 200, response);
+    http_server_->SendReply(request, 200, std::move(response));
   }
   delete request;
 }
@@ -293,9 +293,9 @@ void TController::HandleGetCurPPlanRequest(IncomingHTTPRequest* request) {
 
     const std::string message("Get current physical plan");
     LOG(INFO) << message;
-    OutgoingHTTPResponse* response = new OutgoingHTTPResponse(request);
+    auto response = make_unique<OutgoingHTTPResponse>(request);
     response->AddResponse(pplanStringFixed);
-    http_server_->SendReply(request, 200, response);
+    http_server_->SendReply(request, 200, std::move(response));
   }
   delete request;
 }

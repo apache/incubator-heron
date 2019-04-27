@@ -29,13 +29,15 @@
 namespace heron {
 namespace tmaster {
 
+using std::shared_ptr;
+
 class TMaster;
 class TMetricsCollector;
 
 class TMasterServer : public Server {
  public:
-  TMasterServer(EventLoop* eventLoop, const NetworkOptions& options, TMetricsCollector* _collector,
-                TMaster* _tmaster);
+  TMasterServer(EventLoop* eventLoop, const NetworkOptions& options,
+          shared_ptr<TMetricsCollector> _collector, TMaster* _tmaster);
   virtual ~TMasterServer();
 
  protected:
@@ -62,7 +64,7 @@ class TMasterServer : public Server {
                                      proto::ckptmgr::ResetTopologyState* _message);
 
   // our tmaster
-  TMetricsCollector* collector_;
+  shared_ptr<TMetricsCollector> collector_;
   TMaster* tmaster_;
 };
 }  // namespace tmaster

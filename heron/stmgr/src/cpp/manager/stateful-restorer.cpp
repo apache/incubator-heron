@@ -39,6 +39,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::make_shared;
+
 // Stats for restore
 const sp_string METRIC_START_RESTORE = "__start_restore";
 const sp_string METRIC_START_RESTORE_IN_PROGRESS = "__start_restore_in_progress";
@@ -65,8 +67,8 @@ StatefulRestorer::StatefulRestorer(CkptMgrClient* _ckptmgr,
   in_progress_ = false;
   restore_done_watcher_ = _restore_done_watcher;
   metrics_manager_client_ = _metrics_manager_client;
-  multi_count_metric_ = new common::MultiCountMetric();
-  time_spent_metric_ = new common::TimeSpentMetric();
+  multi_count_metric_ = make_shared<common::MultiCountMetric>();
+  time_spent_metric_  = make_shared<common::TimeSpentMetric>();
   metrics_manager_client_->register_metric("__stateful_restore_count", multi_count_metric_);
   metrics_manager_client_->register_metric("__stateful_restore_time", time_spent_metric_);
 }
@@ -74,8 +76,6 @@ StatefulRestorer::StatefulRestorer(CkptMgrClient* _ckptmgr,
 StatefulRestorer::~StatefulRestorer() {
   metrics_manager_client_->unregister_metric("__stateful_restore_count");
   metrics_manager_client_->unregister_metric("__stateful_restore_time");
-  delete multi_count_metric_;
-  delete time_spent_metric_;
 }
 
 void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,

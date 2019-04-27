@@ -66,9 +66,9 @@ TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _option
   reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
   heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
-  InstallResponseHandler(new proto::tmaster::StMgrRegisterRequest(),
+  InstallResponseHandler(make_unique<proto::tmaster::StMgrRegisterRequest>(),
                          &TMasterClient::HandleRegisterResponse);
-  InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
+  InstallResponseHandler(make_unique<proto::tmaster::StMgrHeartbeatRequest>(),
                          &TMasterClient::HandleHeartbeatResponse);
   InstallMessageHandler(&TMasterClient::HandleNewAssignmentMessage);
   InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointMessage);
@@ -234,7 +234,7 @@ void TMasterClient::CleanInstances() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  auto request = new proto::tmaster::StMgrRegisterRequest();
+  auto request = make_unique<proto::tmaster::StMgrRegisterRequest>();
 
   sp_string cwd;
   FileUtils::getCwd(cwd);
@@ -251,7 +251,7 @@ void TMasterClient::SendRegisterRequest() {
     request->add_instances()->CopyFrom(*(*iter));
   }
 
-  SendRequest(request, nullptr);
+  SendRequest(std::move(request), nullptr);
   return;
 }
 
@@ -268,11 +268,11 @@ void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>&
 }
 
 void TMasterClient::SendHeartbeatRequest() {
-  auto request = new proto::tmaster::StMgrHeartbeatRequest();
+  auto request = make_unique<proto::tmaster::StMgrHeartbeatRequest>();
   request->set_heartbeat_time(time(nullptr));
   // TODO(vikasr) Send actual stats
   request->mutable_stats();
-  SendRequest(request, nullptr);
+  SendRequest(std::move(request), nullptr);
   return;
 }
 

@@ -32,8 +32,11 @@
 namespace heron {
 namespace tmaster {
 
+using std::unique_ptr;
+using std::shared_ptr;
+
 TMasterServer::TMasterServer(EventLoop* eventLoop, const NetworkOptions& _options,
-                             TMetricsCollector* _collector, TMaster* _tmaster)
+                             shared_ptr<TMetricsCollector> _collector, TMaster* _tmaster)
     : Server(eventLoop, _options), collector_(_collector), tmaster_(_tmaster) {
   // Install the stmgr handlers
   InstallRequestHandler(&TMasterServer::HandleStMgrRegisterRequest);
@@ -65,15 +68,15 @@ void TMasterServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 
 void TMasterServer::HandleStMgrRegisterRequest(REQID _reqid, Connection* _conn,
                                                proto::tmaster::StMgrRegisterRequest* _request) {
-  StMgrRegisterProcessor* processor =
-      new StMgrRegisterProcessor(_reqid, _conn, _request, tmaster_, this);
+  unique_ptr<StMgrRegisterProcessor> processor =
+      make_unique<StMgrRegisterProcessor>(_reqid, _conn, _request, tmaster_, this);
   processor->Start();
 }
 
 void TMasterServer::HandleStMgrHeartbeatRequest(REQID _reqid, Connection* _conn,
                                                 proto::tmaster::StMgrHeartbeatRequest* _request) {
-  StMgrHeartbeatProcessor* processor =
-      new StMgrHeartbeatProcessor(_reqid, _conn, _request, tmaster_, this);
+  unique_ptr<StMgrHeartbeatProcessor> processor =
+      make_unique<StMgrHeartbeatProcessor>(_reqid, _conn, _request, tmaster_, this);
   processor->Start();
 }
 

@@ -34,6 +34,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::make_shared;
+
 // New connections made with other stream managers.
 const sp_string METRIC_STMGR_NEW_CONNECTIONS = "__stmgr_new_connections";
 
@@ -52,14 +54,13 @@ StMgrClientMgr::StMgrClientMgr(EventLoop* eventLoop, const sp_string& _topology_
       high_watermark_(_high_watermark),
       low_watermark_(_low_watermark),
       droptuples_upon_backpressure_(_droptuples_upon_backpressure) {
-  stmgr_clientmgr_metrics_ = new heron::common::MultiCountMetric();
+  stmgr_clientmgr_metrics_ = make_shared<heron::common::MultiCountMetric>();
   metrics_manager_client_->register_metric("__clientmgr", stmgr_clientmgr_metrics_);
 }
 
 StMgrClientMgr::~StMgrClientMgr() {
   // This should not be called
   metrics_manager_client_->unregister_metric("__clientmgr");
-  delete stmgr_clientmgr_metrics_;
 }
 
 void StMgrClientMgr::StartConnections(const proto::system::PhysicalPlan* _pplan) {

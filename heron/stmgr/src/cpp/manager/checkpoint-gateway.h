@@ -102,7 +102,7 @@ class CheckpointGateway {
   sp_uint64 current_size_;
   NeighbourCalculator* neighbour_calculator_;
   common::MetricsMgrSt* metrics_manager_client_;
-  common::AssignableMetric* size_metric_;
+  std::shared_ptr<common::AssignableMetric> size_metric_;
   std::unordered_map<sp_int32, CheckpointInfo*> pending_tuples_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer_;
   std::function<void(proto::stmgr::TupleStreamMessage*)> tuplestream_drainer_;

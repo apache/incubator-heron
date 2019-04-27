@@ -57,6 +57,8 @@ sp_string heron_internals_config_filename =
 sp_string metrics_sinks_config_filename =
     "heron/config/src/yaml/conf/test/test_metrics_sinks.yaml";
 
+using std::shared_ptr;
+
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
     const sp_string& topology_name, const sp_string& topology_id, int num_spouts,
@@ -223,9 +225,9 @@ const sp_string CreateInstanceId(sp_int8 type, sp_int8 instance, bool spout) {
   return instanceid_stream.str();
 }
 
-heron::proto::system::Instance* CreateInstanceMap(sp_int8 type, sp_int8 instance, sp_int32 stmgr_id,
-                                                  sp_int32 global_index, bool spout) {
-  heron::proto::system::Instance* imap = new heron::proto::system::Instance();
+std::shared_ptr<heron::proto::system::Instance> CreateInstanceMap(sp_int8 type, sp_int8 instance,
+                                             sp_int32 stmgr_id, sp_int32 global_index, bool spout) {
+  auto imap = std::make_shared<heron::proto::system::Instance>();
   imap->set_instance_id(CreateInstanceId(type, instance, spout));
 
   imap->set_stmgr_id(STMGR_NAME + "-" + std::to_string(stmgr_id));
@@ -299,7 +301,7 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
 void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_thread,
                      sp_int32& stmgr_port, sp_int32 tmaster_port, sp_int32 shell_port,
                      const sp_string& stmgr_id,
-                     const std::vector<heron::proto::system::Instance*>& instances) {
+                     const std::vector<shared_ptr<heron::proto::system::Instance>>& instances) {
   // Create the select server for this stmgr to use
   ss = new EventLoopImpl();
 
@@ -435,10 +437,10 @@ struct CommonResources {
   std::map<sp_int32, std::vector<sp_string> > stmgr_instance_id_list_;
 
   // Stmgr to Instance
-  std::map<sp_int32, std::vector<heron::proto::system::Instance*> > stmgr_instance_list_;
+  std::map<sp_int32, std::vector<shared_ptr<heron::proto::system::Instance>>> stmgr_instance_list_;
 
   // Instanceid to instance
-  std::map<sp_string, heron::proto::system::Instance*> instanceid_instance_;
+  std::map<sp_string, shared_ptr<heron::proto::system::Instance>> instanceid_instance_;
 
   std::map<sp_string, sp_int32> instanceid_stmgr_;
 
@@ -509,7 +511,7 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
   for (size_t spout = 0; spout < common.num_spouts_; ++spout) {
     for (size_t spout_instance = 0; spout_instance < common.num_spout_instances_;
         ++spout_instance) {
-      heron::proto::system::Instance* imap =
+      auto imap =
           CreateInstanceMap(spout, spout_instance, stmgr_assignment_round, global_index++, true);
       common.stmgr_instance_id_list_[stmgr_assignment_round].push_back(imap->instance_id());
       common.stmgr_instance_list_[stmgr_assignment_round].push_back(imap);
@@ -527,7 +529,7 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
   // Distribute the bolts
   for (size_t bolt = 0; bolt < common.num_bolts_; ++bolt) {
     for (size_t bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
-      heron::proto::system::Instance* imap =
+      auto imap =
           CreateInstanceMap(bolt, bolt_instance, stmgr_assignment_round, global_index++, false);
       // Have we completed a round of distribution of components
       common.stmgr_instance_id_list_[stmgr_assignment_round].push_back(imap->instance_id());
@@ -679,7 +681,7 @@ void TearCommonResources(CommonResources& common) {
 
   for (auto itr = common.instanceid_instance_.begin();
        itr != common.instanceid_instance_.end(); ++itr)
-    delete itr->second;
+      common.instanceid_instance_.erase(itr->first);
 
   // Clean up the local filesystem state
   FileUtils::removeRecursive(common.dpath_, true);
