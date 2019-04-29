@@ -545,4 +545,19 @@ public class RoundRobinPackingTest extends CommonPackingTests {
         getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
             numContainers, getDefaultPadding()));
   }
+
+  @Test(expected = RuntimeException.class)
+  public void testZeroContainersFailure() throws Exception {
+    // Explicit set insufficient RAM for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    topologyConfig.setContainerRamRequested(containerRam);
+    topologyConfig.setNumStmgrs(0);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    doPackingTest(topology, instanceDefaultResources, boltParallelism,
+        instanceDefaultResources, spoutParallelism,
+        0,  // 0 containers
+        getDefaultUnspecifiedContainerResource(boltParallelism + spoutParallelism,
+            numContainers, getDefaultPadding()).cloneWithRam(containerRam));
+  }
 }
