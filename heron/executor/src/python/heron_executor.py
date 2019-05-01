@@ -787,6 +787,10 @@ class HeronExecutor(object):
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
     stmgr_cmd_lst = [
+        'valgrind',
+        '--leak-check=full',
+        '--show-leak-kinds=all',
+        '--log-file=valgrind-stmgr-log.txt',
         self.stmgr_binary,
         '--topology_name=%s' % self.topology_name,
         '--topology_id=%s' % self.topology_id,
