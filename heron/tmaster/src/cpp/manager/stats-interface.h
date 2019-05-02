@@ -27,13 +27,16 @@
 namespace heron {
 namespace tmaster {
 
+using std::unique_ptr;
+using std::shared_ptr;
+
 class TMetricsCollector;
 class TMaster;
 
 class StatsInterface {
  public:
   StatsInterface(EventLoop* eventLoop, const NetworkOptions& options,
-                 TMetricsCollector* _collector, TMaster* tmaster);
+                 shared_ptr<TMetricsCollector> _collector, TMaster* tmaster);
   virtual ~StatsInterface();
 
  private:
@@ -43,8 +46,8 @@ class StatsInterface {
   void HandleExceptionSummaryRequest(IncomingHTTPRequest* _request);
   void HandleStmgrsRegistrationSummaryRequest(IncomingHTTPRequest* _request);
 
-  HTTPServer* http_server_;  // Our http server
-  TMetricsCollector* metrics_collector_;
+  unique_ptr<HTTPServer> http_server_;  // Our http server
+  shared_ptr<TMetricsCollector> metrics_collector_;
   TMaster* tmaster_;
 };
 }  // namespace tmaster

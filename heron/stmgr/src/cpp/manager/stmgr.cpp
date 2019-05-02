@@ -52,6 +52,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::make_shared;
+
 // Stats for the process
 const sp_string METRIC_CPU_USER = "__cpu_user_usec";
 const sp_string METRIC_CPU_SYSTEM = "__cpu_system_usec";
@@ -118,17 +120,17 @@ void StMgr::Init() {
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zkhostport_, zkroot_, eventLoop_, false);
   metrics_manager_client_ = new heron::common::MetricsMgrSt(
       metricsmgr_port_, metrics_export_interval_sec, eventLoop_);
-  stmgr_process_metrics_ = new heron::common::MultiAssignableMetric();
+  stmgr_process_metrics_ = make_shared<heron::common::MultiAssignableMetric>();
   metrics_manager_client_->register_metric(METRIC_PROCESS, stmgr_process_metrics_);
-  restore_initiated_metrics_ = new heron::common::CountMetric();
+  restore_initiated_metrics_ = make_shared<heron::common::CountMetric>();
   metrics_manager_client_->register_metric(METRIC_RESTORE_INITIALIZED, restore_initiated_metrics_);
-  dropped_during_restore_metrics_ = new heron::common::MultiCountMetric();
+  dropped_during_restore_metrics_ = make_shared<heron::common::MultiCountMetric>();
   metrics_manager_client_->register_metric(METRIC_DROPPED_DURING_RESTORE,
                                            dropped_during_restore_metrics_);
-  instance_bytes_received_metrics_ = new heron::common::MultiCountMetric();
+  instance_bytes_received_metrics_ = make_shared<heron::common::MultiCountMetric>();
   metrics_manager_client_->register_metric(METRIC_INSTANCE_BYTES_RECEIVED,
                                            instance_bytes_received_metrics_);
-  back_pressure_metric_initiated_ = new heron::common::TimeSpentMetric();
+  back_pressure_metric_initiated_ = make_shared<heron::common::TimeSpentMetric>();
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT,
                                            back_pressure_metric_initiated_);
   state_mgr_->SetTMasterLocationWatch(topology_name_, [this]() { this->FetchTMasterLocation(); });
@@ -205,13 +207,7 @@ StMgr::~StMgr() {
   metrics_manager_client_->unregister_metric(METRIC_DROPPED_DURING_RESTORE);
   metrics_manager_client_->unregister_metric(METRIC_INSTANCE_BYTES_RECEIVED);
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_INIT);
-  delete stmgr_process_metrics_;
-  delete restore_initiated_metrics_;
-  delete dropped_during_restore_metrics_;
-  delete instance_bytes_received_metrics_;
-  delete back_pressure_metric_initiated_;
   delete tuple_cache_;
-  delete state_mgr_;
   delete pplan_;
   delete stmgr_server_;
   delete instance_server_;
@@ -1050,11 +1046,10 @@ void StMgr::HandleStoreInstanceStateCheckpoint(
   }
 
   // save the checkpoint
-  proto::ckptmgr::SaveInstanceStateRequest* message =
-         new proto::ckptmgr::SaveInstanceStateRequest();
+  auto message = make_unique<proto::ckptmgr::SaveInstanceStateRequest>();
   message->mutable_instance()->CopyFrom(_instance);
   message->mutable_checkpoint()->CopyFrom(_message);
-  ckptmgr_client_->SaveInstanceState(message);
+  ckptmgr_client_->SaveInstanceState(std::move(message));
 }
 
 // Invoked by CheckpointMgr Client when it finds out that the ckptmgr

@@ -36,6 +36,8 @@
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
   options_.set_host("127.0.0.1");
   options_.set_port(_metricsmgr_port);
@@ -52,9 +54,6 @@ MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventL
 MetricsMgrSt::~MetricsMgrSt() {
   CHECK_EQ(client_->getEventLoop()->unRegisterTimer(timerid_), 0);
   delete client_;
-  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
-    delete iter->second;
-  }
 }
 
 void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
@@ -74,7 +73,7 @@ void MetricsMgrSt::RefreshMetricsCacheLocation(
   client_->SendMetricsCacheLocation(location);
 }
 
-void MetricsMgrSt::register_metric(const sp_string& _metric_name, IMetric* _metric) {
+void MetricsMgrSt::register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric) {
   metrics_[_metric_name] = _metric;
 }
 

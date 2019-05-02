@@ -49,9 +49,9 @@ void DummyTMaster::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 
 void DummyTMaster::HandleRegisterRequest(REQID _id, Connection* _conn,
                                          proto::tmaster::StMgrRegisterRequest* _request) {
-  std::vector<proto::system::Instance*> instances;
+  std::vector<std::shared_ptr<proto::system::Instance>> instances;
   stmgrs_[_request->stmgr().id()] =
-    new tmaster::StMgrState(_conn, _request->stmgr(), instances, this);
+          std::make_shared<tmaster::StMgrState>(_conn, _request->stmgr(), instances, *this);
   delete _request;
   proto::tmaster::StMgrRegisterResponse response;
   response.mutable_status()->set_status(proto::system::OK);

@@ -87,7 +87,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   void CreateTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
   void DeleteTopology(const std::string& _topology_name, VCallback<proto::system::StatusCode> _cb);
   void SetTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
-  void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+  void GetTopology(const std::string& _topology_name, proto::api::Topology& _return,
                    VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets physical plan
@@ -97,10 +97,12 @@ class HeronZKStateMgr : public HeronStateMgr {
                           VCallback<proto::system::StatusCode> _cb);
   void SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
                        VCallback<proto::system::StatusCode> _cb);
-  void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlan(const std::string& _topology_name,
+                       shared_ptr<proto::system::PhysicalPlan> _return,
                        VCallback<proto::system::StatusCode> _cb);
 
-  void GetPackingPlan(const std::string& _topology_name, proto::system::PackingPlan* _return,
+  void GetPackingPlan(const std::string& _topology_name,
+                      shared_ptr<proto::system::PackingPlan> _return,
                       VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets execution state
@@ -115,16 +117,16 @@ class HeronZKStateMgr : public HeronStateMgr {
 
   // Gets/Sets the Stateful Checkpoints
   void CreateStatefulCheckpoints(const std::string& _topology_name,
-               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
-               VCallback<proto::system::StatusCode> _cb);
+          shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
+          VCallback<proto::system::StatusCode> _cb);
   void DeleteStatefulCheckpoints(const std::string& _topology_name,
                VCallback<proto::system::StatusCode> _cb);
   void SetStatefulCheckpoints(const std::string& _topology_name,
-               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+               shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                VCallback<proto::system::StatusCode> _cb);
   void GetStatefulCheckpoints(const std::string& _topology_name,
-               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
-               VCallback<proto::system::StatusCode> _cb);
+                              shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
+                              VCallback<proto::system::StatusCode> _cb);
 
   void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
   void ListExecutionStateTopologies(std::vector<sp_string>* _return,
@@ -153,15 +155,15 @@ class HeronZKStateMgr : public HeronStateMgr {
   void CreateTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeleteTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetTopologyDone(std::string* _contents, proto::api::Topology* _return,
+  void GetTopologyDone(std::string* _contents, proto::api::Topology& _return,
                        VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreatePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeletePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetPhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetPhysicalPlanDone(std::string* _contents, proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlanDone(std::string* _contents, shared_ptr<proto::system::PhysicalPlan> _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetPackingPlanDone(std::string* _contents, proto::system::PackingPlan* _return,
+  void GetPackingPlanDone(std::string* _contents, shared_ptr<proto::system::PackingPlan> _return,
                           VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreateExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
@@ -174,7 +176,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   void DeleteStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetStatefulCheckpointsDone(std::string* _contents,
-                           proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                           shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void ListTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);

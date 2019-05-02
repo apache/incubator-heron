@@ -34,6 +34,9 @@ class MultiCountMetric;
 
 namespace heron {
 namespace stmgr {
+
+using std::shared_ptr;
+
 class StMgr;
 class StMgrClient;
 
@@ -89,7 +92,7 @@ class StMgrClientMgr {
   StMgr* stream_manager_;
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::MultiCountMetric* stmgr_clientmgr_metrics_;
+  shared_ptr<heron::common::MultiCountMetric> stmgr_clientmgr_metrics_;
 
   sp_int64 high_watermark_;
   sp_int64 low_watermark_;

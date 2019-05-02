@@ -35,6 +35,9 @@
 namespace heron {
 namespace tmaster {
 
+using std::unique_ptr;
+using std::shared_ptr;
+
 class StMgrState;
 class TController;
 class StatsInterface;
@@ -43,7 +46,7 @@ class TMetricsCollector;
 class StatefulController;
 class CkptMgrClient;
 
-typedef std::map<std::string, StMgrState*> StMgrMap;
+typedef std::map<std::string, shared_ptr<StMgrState>> StMgrMap;
 typedef StMgrMap::iterator StMgrMapIter;
 
 typedef std::map<std::string, std::string> ConfigValueMap;
@@ -75,8 +78,8 @@ class TMaster {
   bool ValidateRuntimeConfig(const ComponentConfigMap& _config) const;
 
   proto::system::Status* RegisterStMgr(const proto::system::StMgr& _stmgr,
-                                       const std::vector<proto::system::Instance*>& _instances,
-                                       Connection* _conn, proto::system::PhysicalPlan*& _pplan);
+                                const std::vector<shared_ptr<proto::system::Instance>>& _instances,
+                                Connection* _conn, shared_ptr<proto::system::PhysicalPlan>& _pplan);
   // function to update heartbeat for a nodemgr
   proto::system::Status* UpdateStMgrHeartbeat(Connection* _conn, sp_int64 _time,
                                               proto::system::StMgrStats* _stats);
@@ -93,12 +96,12 @@ class TMaster {
   std::unique_ptr<proto::tmaster::StmgrsRegistrationSummaryResponse> GetStmgrsRegSummary();
 
   // Accessors
-  const proto::system::PhysicalPlan* getPhysicalPlan() const { return current_pplan_; }
+  const shared_ptr<proto::system::PhysicalPlan> getPhysicalPlan() const { return current_pplan_; }
   // TODO(mfu): Should we provide this?
   // topology_ should only be used to construct physical plan when TMaster first starts
   // Providing an accessor is bug prone.
   // Now used in GetMetrics function in tmetrics-collector
-  const proto::api::Topology* getInitialTopology() const { return topology_; }
+  const proto::api::Topology& getInitialTopology() const { return *topology_; }
 
   // Timer function to start the stateful checkpoint process
   void SendCheckpointMarker();
@@ -131,7 +134,7 @@ class TMaster {
   // If _new_stmgr is null, this means that there was a plan
   // existing, but a _new_stmgr joined us. So redo his part
   // If _new_stmgr is empty, this means do pplan from scratch
-  proto::system::PhysicalPlan* MakePhysicalPlan();
+  shared_ptr<proto::system::PhysicalPlan> MakePhysicalPlan();
 
   // Check to see if the topology is of correct format
   bool ValidateTopology(const proto::api::Topology& _topology);
@@ -142,7 +145,7 @@ class TMaster {
 
   // Check to see if the stmgrs and pplan match
   // in terms of workers
-  bool ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan* _pplan);
+  bool ValidateStMgrsWithPhysicalPlan(shared_ptr<proto::system::PhysicalPlan> _pplan);
 
   // Check if incoming runtime configs are valid or not.
   // All incoming configurations must exist. If there is any non-existing
@@ -159,26 +162,28 @@ class TMaster {
   void GetTopologyDone(proto::system::StatusCode _code);
 
   // Function called after we get StatefulConsistentCheckpoints
-  void GetStatefulCheckpointsDone(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
+  void GetStatefulCheckpointsDone(shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                                   proto::system::StatusCode _code);
   // Function called after we set an initial StatefulConsistentCheckpoints
   void SetStatefulCheckpointsDone(proto::system::StatusCode _code,
-                            proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+                                  shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt);
   // Helper function to setup stateful coordinator
-  void SetupStatefulController(proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt);
+  void SetupStatefulController(shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt);
 
   // Function called after we try to get assignment
-  void GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan, proto::system::StatusCode _code);
+  void GetPhysicalPlanDone(shared_ptr<proto::system::PhysicalPlan> _pplan,
+          proto::system::StatusCode _code);
 
   // Function called after we try to commit a new assignment
-  void SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan, proto::system::StatusCode _code);
+  void SetPhysicalPlanDone(shared_ptr<proto::system::PhysicalPlan> _pplan,
+                           proto::system::StatusCode _code);
 
   // Function called when we want to setup ourselves as tmaster
   void EstablishTMaster(EventLoop::Status);
 
   void EstablishPackingPlan(EventLoop::Status);
   void FetchPackingPlan();
-  void OnPackingPlanFetch(proto::system::PackingPlan* newPackingPlan,
+  void OnPackingPlanFetch(shared_ptr<proto::system::PackingPlan> newPackingPlan,
                           proto::system::StatusCode _status);
 
   // Metrics updates
@@ -207,20 +212,20 @@ class TMaster {
   std::set<std::string> absent_stmgrs_;
 
   // The current physical plan
-  proto::system::PhysicalPlan* current_pplan_;
+  shared_ptr<proto::system::PhysicalPlan> current_pplan_;
 
   // The topology as first submitted by the user
   // It shall only be used to construct the physical plan when TMaster first time starts
   // Any runtime changes shall be made to current_pplan_->topology
-  proto::api::Topology* topology_;
+  unique_ptr<proto::api::Topology> topology_;
 
-  proto::system::PackingPlan* packing_plan_;
+  shared_ptr<proto::system::PackingPlan> packing_plan_;
 
   // The statemgr where we store/retrieve our state
-  heron::common::HeronStateMgr* state_mgr_;
+  shared_ptr<heron::common::HeronStateMgr> state_mgr_;
 
   // Our copy of the tmasterlocation
-  proto::tmaster::TMasterLocation* tmaster_location_;
+  unique_ptr<proto::tmaster::TMasterLocation> tmaster_location_;
 
   // When we are in the middle of doing assignment
   // we set this to true
@@ -232,11 +237,11 @@ class TMaster {
   std::string topdir_;
 
   // Servers that implement our services
-  TController* tmaster_controller_;
+  unique_ptr<TController> tmaster_controller_;
   sp_int32 tmaster_controller_port_;
-  TMasterServer* master_;
+  unique_ptr<TMasterServer> master_;
   sp_int32 master_port_;
-  StatsInterface* stats_;
+  unique_ptr<StatsInterface> stats_;
   sp_int32 stats_port_;
   std::string myhost_name_;
 
@@ -245,24 +250,24 @@ class TMaster {
   sp_int32 master_establish_attempts_;
 
   // collector
-  TMetricsCollector* metrics_collector_;
+  shared_ptr<TMetricsCollector> metrics_collector_;
 
   sp_int32 mMetricsMgrPort;
   // Metrics Manager
-  heron::common::MetricsMgrSt* mMetricsMgrClient;
+  shared_ptr<heron::common::MetricsMgrSt> mMetricsMgrClient;
 
   // Ckpt Manager
-  CkptMgrClient* ckptmgr_client_;
+  unique_ptr<CkptMgrClient> ckptmgr_client_;
   sp_int32 ckptmgr_port_;
 
   // Process related metrics
-  heron::common::MultiAssignableMetric* tmasterProcessMetrics;
+  shared_ptr<heron::common::MultiAssignableMetric> tmasterProcessMetrics;
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;
 
   // Stateful Controller
-  StatefulController* stateful_controller_;
+  unique_ptr<StatefulController> stateful_controller_;
 
   // HTTP client
   AsyncDNS* dns_;

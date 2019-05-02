@@ -29,6 +29,8 @@
 namespace heron {
 namespace stmgr {
 
+using std::unique_ptr;
+
 class CkptMgrClient : public Client {
  public:
   CkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
@@ -44,7 +46,7 @@ class CkptMgrClient : public Client {
 
   void Quit();
 
-  virtual void SaveInstanceState(proto::ckptmgr::SaveInstanceStateRequest* _request);
+  virtual void SaveInstanceState(unique_ptr<proto::ckptmgr::SaveInstanceStateRequest> _request);
   virtual void GetInstanceState(const proto::system::Instance& _instance,
                                 const std::string& _checkpoint_id);
   virtual void SetPhysicalPlan(proto::system::PhysicalPlan& _pplan);

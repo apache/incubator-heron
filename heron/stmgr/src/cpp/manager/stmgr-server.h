@@ -39,6 +39,8 @@ class CountMetric;
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class StMgr;
 
 class StMgrServer : public Server {
@@ -99,10 +101,10 @@ class StMgrServer : public Server {
 
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::CountMetric* tuples_from_stmgrs_metrics_;
-  heron::common::CountMetric* ack_tuples_from_stmgrs_metrics_;
-  heron::common::CountMetric* fail_tuples_from_stmgrs_metrics_;
-  heron::common::CountMetric* bytes_from_stmgrs_metrics_;
+  shared_ptr<heron::common::CountMetric> tuples_from_stmgrs_metrics_;
+  shared_ptr<heron::common::CountMetric> ack_tuples_from_stmgrs_metrics_;
+  shared_ptr<heron::common::CountMetric> fail_tuples_from_stmgrs_metrics_;
+  shared_ptr<heron::common::CountMetric> bytes_from_stmgrs_metrics_;
 };
 
 }  // namespace stmgr

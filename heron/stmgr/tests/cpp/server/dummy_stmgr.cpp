@@ -26,18 +26,20 @@
 #include "network/network.h"
 #include "server/dummy_stmgr.h"
 
+using std::shared_ptr;
+
 ///////////////////////////// DummyTMasterClient ///////////////////////////////////////////
 DummyTMasterClient::DummyTMasterClient(
     EventLoopImpl* eventLoop, const NetworkOptions& _options, const sp_string& stmgr_id,
     const sp_string& stmgr_host, sp_int32 stmgr_port, sp_int32 shell_port,
-    const std::vector<heron::proto::system::Instance*>& _instances)
+    const std::vector<shared_ptr<heron::proto::system::Instance>>& _instances)
     : Client(eventLoop, _options),
       stmgr_id_(stmgr_id),
       stmgr_host_(stmgr_host),
       stmgr_port_(stmgr_port),
       shell_port_(shell_port),
       instances_(_instances) {
-  InstallResponseHandler(new heron::proto::tmaster::StMgrRegisterRequest(),
+  InstallResponseHandler(make_unique<heron::proto::tmaster::StMgrRegisterRequest>(),
                          &DummyTMasterClient::HandleRegisterResponse);
   // Setup the call back function to be invoked when retrying
   retry_cb_ = [this]() { this->Retry(); };
@@ -62,8 +64,7 @@ void DummyTMasterClient::HandleConnect(NetworkErrorCode _status) {
 void DummyTMasterClient::HandleClose(NetworkErrorCode) {}
 
 void DummyTMasterClient::CreateAndSendRegisterRequest() {
-  heron::proto::tmaster::StMgrRegisterRequest* request =
-      new heron::proto::tmaster::StMgrRegisterRequest();
+  auto request = make_unique<heron::proto::tmaster::StMgrRegisterRequest>();
   heron::proto::system::StMgr* stmgr = request->mutable_stmgr();
   sp_string cwd;
   stmgr->set_id(stmgr_id_);
@@ -76,14 +77,14 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(**iter);
   }
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
 }
 
 ///////////////////////////// DummyStMgr /////////////////////////////////////////////////
 DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const sp_string& stmgr_id,
                        const sp_string& stmgr_host, sp_int32 stmgr_port,
                        const sp_string& tmaster_host, sp_int32 tmaster_port, sp_int32 shell_port,
-                       const std::vector<heron::proto::system::Instance*>& _instances)
+                       const std::vector<shared_ptr<heron::proto::system::Instance>>& _instances)
     : Server(ss, options), num_start_bp_(0), num_stop_bp_(0) {
   NetworkOptions tmaster_options;
   tmaster_options.set_host(tmaster_host);

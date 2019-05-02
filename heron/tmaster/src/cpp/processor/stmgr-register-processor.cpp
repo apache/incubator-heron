@@ -45,13 +45,14 @@ void StMgrRegisterProcessor::Start() {
   // Get the relevant info and ask tmaster to register
   proto::tmaster::StMgrRegisterRequest* request =
       static_cast<proto::tmaster::StMgrRegisterRequest*>(request_);
-  std::vector<proto::system::Instance*> instances;
+  std::vector<shared_ptr<proto::system::Instance>> instances;
   for (sp_int32 i = 0; i < request->instances_size(); ++i) {
-    proto::system::Instance* instance = new proto::system::Instance();
+    auto instance = std::make_shared<proto::system::Instance>();
     instance->CopyFrom(request->instances(i));
     instances.push_back(instance);
   }
-  proto::system::PhysicalPlan* pplan = NULL;
+
+  shared_ptr<proto::system::PhysicalPlan> pplan;
 
   proto::system::Status* status =
       tmaster_->RegisterStMgr(request->stmgr(), instances, GetConnection(), pplan);
@@ -65,7 +66,6 @@ void StMgrRegisterProcessor::Start() {
     }
   }
   SendResponse(response);
-  delete this;
   return;
 }
 }  // namespace tmaster

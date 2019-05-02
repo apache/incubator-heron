@@ -37,12 +37,13 @@ void Client::Start() { Start_Base(); }
 
 void Client::Stop() { Stop_Base(); }
 
-void Client::SendRequest(google::protobuf::Message* _request, void* _ctx) {
-  SendRequest(_request, _ctx, -1);
+void Client::SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* _ctx) {
+  SendRequest(std::move(_request), _ctx, -1);
 }
 
-void Client::SendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
-  InternalSendRequest(_request, _ctx, _msecs);
+void Client::SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* _ctx,
+        sp_int64 _msecs) {
+  InternalSendRequest(std::move(_request), _ctx, _msecs);
 }
 
 void Client::SendResponse(REQID _id, const google::protobuf::Message& _response) {
@@ -93,12 +94,12 @@ void Client::HandleClose_Base(NetworkErrorCode _status) { HandleClose(_status); 
 
 void Client::Init() { message_rid_gen_ = new REQID_Generator(); }
 
-void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
+void Client::InternalSendRequest(std::unique_ptr<google::protobuf::Message> _request, void* _ctx,
+        sp_int64 _msecs) {
   auto iter = requestResponseMap_.find(_request->GetTypeName());
   CHECK(iter != requestResponseMap_.end());
   const sp_string& _expected_response_type = iter->second;
   if (state_ != CONNECTED) {
-    delete _request;
     responseHandlers[_expected_response_type](NULL, WRITE_ERROR);
     return;
   }
@@ -117,9 +118,6 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
   CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
   CHECK_EQ(opkt->PackREQID(rid), 0);
   CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
-
-  // delete the request
-  delete _request;
 
   Connection* conn = static_cast<Connection*>(conn_);
   if (conn->sendPacket(opkt) != 0) {

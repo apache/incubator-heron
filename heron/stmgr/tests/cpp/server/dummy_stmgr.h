@@ -28,7 +28,7 @@ class DummyTMasterClient : public Client {
   DummyTMasterClient(EventLoopImpl* eventLoop, const NetworkOptions& _options,
                      const sp_string& stmgr_id, const sp_string& stmgr_host, sp_int32 stmgr_port,
                      sp_int32 shell_port,
-                     const std::vector<heron::proto::system::Instance*>& instances);
+                     const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
   virtual ~DummyTMasterClient();
 
   void setStmgrPort(sp_int32 stmgrPort) {
@@ -52,7 +52,7 @@ class DummyTMasterClient : public Client {
   sp_string stmgr_host_;
   sp_int32 stmgr_port_;
   sp_int32 shell_port_;
-  std::vector<heron::proto::system::Instance*> instances_;
+  std::vector<std::shared_ptr<heron::proto::system::Instance>> instances_;
 };
 
 class DummyStMgr : public Server {
@@ -60,7 +60,7 @@ class DummyStMgr : public Server {
   DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const sp_string& stmgr_id,
              const sp_string& stmgr_host, sp_int32 stmgr_port, const sp_string& tmaster_host,
              sp_int32 tmaster_port, sp_int32 shell_port,
-             const std::vector<heron::proto::system::Instance*>& instances);
+             const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
 
   virtual ~DummyStMgr();
   sp_int32 Start();

@@ -104,10 +104,10 @@ class Client : public BaseClient {
   // a user owned piece of context that is not interpreted by the
   // client which is passed on to the HandleResponse
   // A negative value of the msecs means no timeout.
-  void SendRequest(google::protobuf::Message* _request, void* ctx, sp_int64 msecs);
+  void SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* ctx, sp_int64 msecs);
 
   // Convinience method of the above function with no timeout
-  void SendRequest(google::protobuf::Message* _request, void* ctx);
+  void SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* ctx);
 
   // This interface is used if you want to communicate with the other end
   // on a non-request-response based communication.
@@ -129,15 +129,13 @@ class Client : public BaseClient {
 
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
-  void InstallResponseHandler(S* _request,
+  void InstallResponseHandler(std::unique_ptr<S> _request,
                               void (T::*method)(void* _ctx, M*, NetworkErrorCode status)) {
-    google::protobuf::Message* m = new M();
+    auto m = make_unique<M>();
     T* t = static_cast<T*>(this);
     responseHandlers[m->GetTypeName()] = std::bind(&Client::dispatchResponse<T, M>, this, t, method,
                                                    std::placeholders::_1, std::placeholders::_2);
     requestResponseMap_[_request->GetTypeName()] = m->GetTypeName();
-    delete m;
-    delete _request;
   }
 
   // Register a handler for a particular message type
@@ -197,7 +195,8 @@ class Client : public BaseClient {
   //! Handle most of the init stuff
   void Init();
 
-  void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
+  void InternalSendRequest(std::unique_ptr<google::protobuf::Message> _request, void* _ctx,
+          sp_int64 _msecs);
   void InternalSendMessage(const google::protobuf::Message& _message);
   void InternalSendResponse(OutgoingPacket* _packet);
 

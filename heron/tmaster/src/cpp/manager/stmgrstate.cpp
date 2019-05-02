@@ -33,34 +33,25 @@ namespace heron {
 namespace tmaster {
 
 StMgrState::StMgrState(Connection* _conn, const proto::system::StMgr& _stmgr,
-                       const std::vector<proto::system::Instance*>& _instances,
-                       Server* _server) {
+                       const std::vector<shared_ptr<proto::system::Instance>>& _instances,
+                       Server& _server) : server_(_server) {
   last_heartbeat_ = time(NULL);
   last_stats_ = NULL;
   instances_ = _instances;
-  stmgr_ = new proto::system::StMgr(_stmgr);
+  stmgr_ = std::make_shared<proto::system::StMgr>(_stmgr);
   connection_ = _conn;
-  server_ = _server;
 }
 
 StMgrState::~StMgrState() {
-  delete stmgr_;
-  for (size_t i = 0; i < instances_.size(); ++i) {
-    delete instances_[i];
-  }
   delete last_stats_;
 }
 
 void StMgrState::UpdateWithNewStMgr(const proto::system::StMgr& _stmgr,
-                                    const std::vector<proto::system::Instance*>& _instances,
-                                    Connection* _conn) {
+                                const std::vector<shared_ptr<proto::system::Instance>>& _instances,
+                                Connection* _conn) {
   delete last_stats_;
   last_stats_ = NULL;
-  delete stmgr_;
-  for (size_t i = 0; i < instances_.size(); ++i) {
-    delete instances_[i];
-  }
-  stmgr_ = new proto::system::StMgr(_stmgr);
+  stmgr_ = std::make_shared<proto::system::StMgr>(_stmgr);
   instances_ = _instances;
   connection_ = _conn;
 }
@@ -97,7 +88,7 @@ void StMgrState::SendRestoreTopologyStateMessage(
             const proto::ckptmgr::RestoreTopologyStateRequest& _message) {
   LOG(INFO) << "Sending restore topology state message to stmgr " << stmgr_->id()
             << " with checkpoint " << _message.checkpoint_id();
-  server_->SendMessage(connection_, _message);
+  server_.SendMessage(connection_, _message);
 }
 
 void StMgrState::SendStartStatefulProcessingMessage(const std::string& _checkpoint_id) {
@@ -105,19 +96,19 @@ void StMgrState::SendStartStatefulProcessingMessage(const std::string& _checkpoi
             << " with checkpoint " << _checkpoint_id;
   proto::ckptmgr::StartStmgrStatefulProcessing message;
   message.set_checkpoint_id(_checkpoint_id);
-  server_->SendMessage(connection_, message);
+  server_.SendMessage(connection_, message);
 }
 
 void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   LOG(INFO) << "Sending a new physical plan to stmgr " << stmgr_->id();
   proto::stmgr::NewPhysicalPlanMessage message;
   message.mutable_new_pplan()->CopyFrom(_pplan);
-  server_->SendMessage(connection_, message);
+  server_.SendMessage(connection_, message);
 }
 
 void StMgrState::NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request) {
   LOG(INFO) << "Sending a new stateful checkpoint request to stmgr" << stmgr_->id();
-  server_->SendMessage(connection_, _request);
+  server_.SendMessage(connection_, _request);
 }
 
 /*

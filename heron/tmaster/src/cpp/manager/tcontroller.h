@@ -69,7 +69,7 @@ class TController {
   void HandleGetCurPPlanRequest(IncomingHTTPRequest* request);
 
   // We are a http server
-  HTTPServer* http_server_;
+  unique_ptr<HTTPServer> http_server_;
 
   // our tmaster
   TMaster* tmaster_;

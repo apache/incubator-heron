@@ -51,7 +51,7 @@ StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& options,
   max_reconnect_times_ = config::HeronInternalsConfigReader::Instance()
                                ->GetHeronInstanceReconnectStreammgrTimes();
   reconnect_attempts_ = 0;
-  InstallResponseHandler(new proto::stmgr::RegisterInstanceRequest(),
+  InstallResponseHandler(make_unique<proto::stmgr::RegisterInstanceRequest>(),
                          &StMgrClient::HandleRegisterResponse);
   InstallMessageHandler(&StMgrClient::HandlePhysicalPlan);
   InstallMessageHandler(&StMgrClient::HandleTupleMessage);
@@ -128,11 +128,11 @@ void StMgrClient::HandleRegisterResponse(void*, proto::stmgr::RegisterInstanceRe
 void StMgrClient::OnReconnectTimer() { Start(); }
 
 void StMgrClient::SendRegisterRequest() {
-  auto request = new proto::stmgr::RegisterInstanceRequest();
+  auto request = make_unique<proto::stmgr::RegisterInstanceRequest>();
   request->set_topology_name(topologyName_);
   request->set_topology_id(topologyId_);
   request->mutable_instance()->CopyFrom(instanceProto_);
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
   return;
 }
 

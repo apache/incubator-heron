@@ -42,6 +42,9 @@ class MultiMeanMetric;
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+using std::unordered_map;
+
 class StMgr;
 class NeighbourCalculator;
 class CheckpointGateway;
@@ -157,15 +160,16 @@ class InstanceServer : public Server {
 
   // map of Instance_id to metric
   // Used for back pressure metrics
-  typedef std::unordered_map<sp_string, heron::common::TimeSpentMetric*> InstanceMetricMap;
+  typedef unordered_map<sp_string, shared_ptr<heron::common::TimeSpentMetric>> InstanceMetricMap;
   InstanceMetricMap instance_metric_map_;
 
   // map of Instance_id to queue metric
-  typedef std::unordered_map<sp_string, heron::common::MultiMeanMetric*> ConnectionBufferMetricMap;
+  typedef unordered_map<sp_string,
+                        shared_ptr<heron::common::MultiMeanMetric>> ConnectionBufferMetricMap;
   ConnectionBufferMetricMap connection_buffer_metric_map_;
 
   // map of Instance_id to queue length metric
-  typedef std::unordered_map<sp_string, heron::common::MultiCountMetric*>
+  typedef std::unordered_map<sp_string, shared_ptr<heron::common::MultiCountMetric>>
     ConnectionBufferLengthMetricMap;
   ConnectionBufferLengthMetricMap connection_buffer_length_metric_map_;
 
@@ -183,8 +187,8 @@ class InstanceServer : public Server {
 
   // Metrics
   heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::MultiCountMetric* instance_server_metrics_;
-  heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
+  shared_ptr<heron::common::MultiCountMetric> instance_server_metrics_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_aggr_;
 
   bool spouts_under_back_pressure_;
 
