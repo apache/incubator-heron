@@ -780,7 +780,7 @@ TEST(StMgr, test_runtime_config) {
     EXPECT_EQ(updated_bolt_config[bolt_init_config + ":runtime"], "4");
   }
   std::map<std::string, std::string> updated_config, updated_spout_config, updated_bolt_config;
-  const heron::proto::system::PhysicalPlan* pplan = common.tmaster_->getPhysicalPlan();
+  const auto pplan = common.tmaster_->getPhysicalPlan();
   heron::config::TopologyConfigHelper::GetTopologyRuntimeConfig(pplan->topology(), updated_config);
   EXPECT_EQ(updated_config[topology_init_config_1 + ":runtime"], "1");
   EXPECT_EQ(updated_config[topology_init_config_2 + ":runtime"], "2");

@@ -43,7 +43,7 @@ MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
       tmaster_location_(NULL),
       metricscache_location_(NULL),
       registered_(false) {
-  InstallResponseHandler(new proto::system::MetricPublisherRegisterRequest(),
+  InstallResponseHandler(make_unique<proto::system::MetricPublisherRegisterRequest>(),
                          &MetricsMgrClient::HandleRegisterResponse);
   Start();
 }
@@ -69,8 +69,7 @@ void MetricsMgrClient::HandleClose(NetworkErrorCode) {
 void MetricsMgrClient::ReConnect() { Start(); }
 
 void MetricsMgrClient::SendRegisterRequest() {
-  proto::system::MetricPublisherRegisterRequest* request;
-  request = new proto::system::MetricPublisherRegisterRequest();
+  auto request = make_unique<proto::system::MetricPublisherRegisterRequest>();
 
   proto::system::MetricPublisher* publisher = request->mutable_publisher();
   publisher->set_hostname(hostname_);
@@ -79,7 +78,7 @@ void MetricsMgrClient::SendRegisterRequest() {
   publisher->set_instance_id(instance_id_);
   publisher->set_instance_index(instance_index_);
 
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
 }
 
 void MetricsMgrClient::HandleRegisterResponse(

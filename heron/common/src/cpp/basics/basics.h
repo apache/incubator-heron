@@ -46,4 +46,13 @@
 #include "basics/sptest.h"
 #include "basics/mempool.h"
 
+// The standard std::make_unique(...) was introduced starting from C++ 14. Heron uses C++ 11.
+// Unfortunatelly we can not bump a compiler version used in Heron since we are tight coupled with
+// CentOS 7 whih comes with very old version of GCC (4.8.5). That's why we introduced
+// make_unique(...) manually here.
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 #endif  // HERON_BASICS_H_

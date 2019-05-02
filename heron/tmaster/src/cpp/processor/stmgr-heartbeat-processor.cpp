@@ -49,7 +49,6 @@ void StMgrHeartbeatProcessor::Start() {
   proto::tmaster::StMgrHeartbeatResponse response;
   response.set_allocated_status(status);
   SendResponse(response);
-  delete this;
 }
 }  // namespace tmaster
 }  // namespace heron

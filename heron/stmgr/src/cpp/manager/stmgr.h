@@ -47,6 +47,8 @@ class TimeSpentMetric;
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class StMgrServer;
 class InstanceServer;
 class StMgrClientMgr;
@@ -199,7 +201,7 @@ class StMgr {
   static void PatchPhysicalPlanWithHydratedTopology(proto::system::PhysicalPlan* _pplan,
                                                     proto::api::Topology* _topology);
 
-  heron::common::HeronStateMgr* state_mgr_;
+  shared_ptr<heron::common::HeronStateMgr> state_mgr_;
   proto::system::PhysicalPlan* pplan_;
   sp_string topology_name_;
   sp_string topology_id_;
@@ -241,17 +243,17 @@ class StMgr {
   CkptMgrClient* ckptmgr_client_;
 
   // Process related metrics
-  heron::common::MultiAssignableMetric* stmgr_process_metrics_;
+  shared_ptr<heron::common::MultiAssignableMetric> stmgr_process_metrics_;
 
   // Stateful Restore metric
-  heron::common::CountMetric* restore_initiated_metrics_;
-  heron::common::MultiCountMetric* dropped_during_restore_metrics_;
+  shared_ptr<heron::common::CountMetric> restore_initiated_metrics_;
+  shared_ptr<heron::common::MultiCountMetric> dropped_during_restore_metrics_;
 
   // Instance related metrics
-  heron::common::MultiCountMetric* instance_bytes_received_metrics_;
+  shared_ptr<heron::common::MultiCountMetric> instance_bytes_received_metrics_;
 
   // Backpressure relarted metrics
-  heron::common::TimeSpentMetric* back_pressure_metric_initiated_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_initiated_;
 
   // The time at which the stmgr was started up
   std::chrono::high_resolution_clock::time_point start_time_;

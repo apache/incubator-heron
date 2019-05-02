@@ -180,12 +180,12 @@ void HeronZKStateMgr::SetTopology(const proto::api::Topology& _topology,
   zkclient_->Set(path, value, std::move(wCb));
 }
 
-void HeronZKStateMgr::GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+void HeronZKStateMgr::GetTopology(const std::string& _topology_name, proto::api::Topology& _return,
                                   VCallback<proto::system::StatusCode> cb) {
   std::string path = GetTopologyPath(_topology_name);
   std::string* contents = new std::string();
 
-  auto wCb = [contents, _return, cb, this](sp_int32 rc) {
+  auto wCb = [contents, &_return, cb, this](sp_int32 rc) {
     this->GetTopologyDone(contents, _return, std::move(cb), rc);
   };
 
@@ -221,7 +221,7 @@ void HeronZKStateMgr::SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
 }
 
 void HeronZKStateMgr::GetPhysicalPlan(const std::string& _topology_name,
-                                      proto::system::PhysicalPlan* _return,
+                                      shared_ptr<proto::system::PhysicalPlan> _return,
                                       VCallback<proto::system::StatusCode> cb) {
   std::string path = GetPhysicalPlanPath(_topology_name);
   std::string* contents = new std::string();
@@ -233,7 +233,7 @@ void HeronZKStateMgr::GetPhysicalPlan(const std::string& _topology_name,
 }
 
 void HeronZKStateMgr::GetPackingPlan(const std::string& _topology_name,
-                                      proto::system::PackingPlan* _return,
+                                      shared_ptr<proto::system::PackingPlan> _return,
                                       VCallback<proto::system::StatusCode> cb) {
   std::string path = GetPackingPlanPath(_topology_name);
   std::string* contents = new std::string();
@@ -285,11 +285,11 @@ void HeronZKStateMgr::GetExecutionState(const std::string& _topology_name,
 }
 
 void HeronZKStateMgr::CreateStatefulCheckpoints(const std::string& _topology_name,
-                                  const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                  shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                                   VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointsPath(_topology_name);
   std::string contents;
-  _ckpt.SerializeToString(&contents);
+  _ckpt->SerializeToString(&contents);
   auto wCb = [cb, this](sp_int32 rc) { this->CreateStatefulCheckpointsDone(std::move(cb), rc); };
 
   zkclient_->CreateNode(path, contents, false, std::move(wCb));
@@ -304,19 +304,19 @@ void HeronZKStateMgr::DeleteStatefulCheckpoints(const std::string& _topology_nam
 }
 
 void HeronZKStateMgr::SetStatefulCheckpoints(const std::string& _topology_name,
-                                  const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                                  shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                                   VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointsPath(_topology_name);
   std::string contents;
-  _ckpt.SerializeToString(&contents);
+  _ckpt->SerializeToString(&contents);
   auto wCb = [cb, this](sp_int32 rc) { this->SetStatefulCheckpointsDone(std::move(cb), rc); };
 
   zkclient_->Set(path, contents, std::move(wCb));
 }
 
 void HeronZKStateMgr::GetStatefulCheckpoints(const std::string& _topology_name,
-                                   proto::ckptmgr::StatefulConsistentCheckpoints* _return,
-                                   VCallback<proto::system::StatusCode> cb) {
+                                 shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
+                                 VCallback<proto::system::StatusCode> cb) {
   std::string path = GetStatefulCheckpointsPath(_topology_name);
   std::string* contents = new std::string();
   auto wCb = [contents, _return, cb, this](sp_int32 rc) {
@@ -483,11 +483,11 @@ void HeronZKStateMgr::SetTopologyDone(VCallback<proto::system::StatusCode> cb, s
   cb(code);
 }
 
-void HeronZKStateMgr::GetTopologyDone(std::string* _contents, proto::api::Topology* _return,
+void HeronZKStateMgr::GetTopologyDone(std::string* _contents, proto::api::Topology& _return,
                                       VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZOK) {
-    if (!_return->ParseFromString(*_contents)) {
+    if (!_return.ParseFromString(*_contents)) {
       LOG(ERROR) << "topology parsing failed; zk corruption?" << std::endl;
       code = proto::system::STATE_CORRUPTED;
     }
@@ -541,7 +541,7 @@ void HeronZKStateMgr::SetPhysicalPlanDone(VCallback<proto::system::StatusCode> c
 }
 
 void HeronZKStateMgr::GetPhysicalPlanDone(std::string* _contents,
-                                          proto::system::PhysicalPlan* _return,
+                                          shared_ptr<proto::system::PhysicalPlan> _return,
                                           VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZOK) {
@@ -559,7 +559,7 @@ void HeronZKStateMgr::GetPhysicalPlanDone(std::string* _contents,
 }
 
 void HeronZKStateMgr::GetPackingPlanDone(std::string* _contents,
-                                          proto::system::PackingPlan* _return,
+                                          shared_ptr<proto::system::PackingPlan> _return,
                                           VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZOK) {
@@ -678,8 +678,8 @@ void HeronZKStateMgr::SetStatefulCheckpointsDone(VCallback<proto::system::Status
 }
 
 void HeronZKStateMgr::GetStatefulCheckpointsDone(std::string* _contents,
-                                     proto::ckptmgr::StatefulConsistentCheckpoints* _return,
-                                     VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
+                                 shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
+                                 VCallback<proto::system::StatusCode> cb, sp_int32 _rc) {
   proto::system::StatusCode code = proto::system::OK;
   if (_rc == ZOK) {
     if (!_return->ParseFromString(*_contents)) {

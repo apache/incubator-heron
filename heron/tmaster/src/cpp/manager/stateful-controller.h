@@ -36,6 +36,9 @@ class MultiCountMetric;
 namespace heron {
 namespace tmaster {
 
+using std::unique_ptr;
+using std::shared_ptr;
+
 class StatefulRestorer;
 class StatefulCheckpointer;
 
@@ -51,10 +54,10 @@ class StatefulCheckpointer;
 class StatefulController {
  public:
   explicit StatefulController(const std::string& _topology_name,
-               proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
-               heron::common::HeronStateMgr* _state_mgr,
+               shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
+               shared_ptr<heron::common::HeronStateMgr> _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
-               common::MetricsMgrSt* _metrics_manager_client,
+               shared_ptr<common::MetricsMgrSt> _metrics_manager_client,
                std::function<void(std::string)> _ckpt_save_watcher);
   virtual ~StatefulController();
   // Start a new restore process
@@ -85,20 +88,20 @@ class StatefulController {
   // Get the youngest ckpt id that is older than the given ckpt_id
   const std::string& GetNextInLineCheckpointId(const std::string& _ckpt_id);
   // Creates a new ckpt record adding the latest one
-  proto::ckptmgr::StatefulConsistentCheckpoints*
+  shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints>
     AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
                                const std::string& _packing_plan);
   // Handler when statemgr saves the new checkpoint record
-  void HandleCheckpointSave(proto::ckptmgr::StatefulConsistentCheckpoints* _new_ckpt,
+  void HandleCheckpointSave(shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _new_ckpt,
                             proto::system::StatusCode _status);
 
   std::string topology_name_;
-  proto::ckptmgr::StatefulConsistentCheckpoints* ckpt_record_;
-  heron::common::HeronStateMgr* state_mgr_;
-  StatefulCheckpointer* checkpointer_;
-  StatefulRestorer* restorer_;
-  common::MetricsMgrSt* metrics_manager_client_;
-  common::MultiCountMetric* count_metrics_;
+  shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> ckpt_record_;
+  shared_ptr<heron::common::HeronStateMgr> state_mgr_;
+  unique_ptr<StatefulCheckpointer> checkpointer_;
+  unique_ptr<StatefulRestorer> restorer_;
+  shared_ptr<common::MetricsMgrSt> metrics_manager_client_;
+  shared_ptr<common::MultiCountMetric> count_metrics_;
   std::function<void(std::string)> ckpt_save_watcher_;
 };
 }  // namespace tmaster

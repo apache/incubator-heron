@@ -42,9 +42,9 @@ DummyStMgr::DummyStMgr(EventLoop* eventLoop, const NetworkOptions& options,
       pplan_(nullptr),
       got_restore_message_(false),
       got_start_message_(false) {
-  InstallResponseHandler(new proto::tmaster::StMgrRegisterRequest(),
+  InstallResponseHandler(std::move(make_unique<proto::tmaster::StMgrRegisterRequest>()),
                          &DummyStMgr::HandleRegisterResponse);
-  InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
+  InstallResponseHandler(std::move(make_unique<proto::tmaster::StMgrHeartbeatRequest>()),
                          &DummyStMgr::HandleHeartbeatResponse);
   InstallMessageHandler(&DummyStMgr::HandleNewAssignmentMessage);
   InstallMessageHandler(&DummyStMgr::HandleRestoreTopologyStateRequest);
@@ -139,7 +139,7 @@ void DummyStMgr::OnHeartbeatTimer() {
 }
 
 void DummyStMgr::SendRegisterRequest() {
-  proto::tmaster::StMgrRegisterRequest* request = new proto::tmaster::StMgrRegisterRequest();
+  auto request = make_unique<proto::tmaster::StMgrRegisterRequest>();
   proto::system::StMgr* stmgr = request->mutable_stmgr();
   stmgr->set_id(my_id_);
   stmgr->set_host_name(my_host_);
@@ -149,15 +149,15 @@ void DummyStMgr::SendRegisterRequest() {
        iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(**iter);
   }
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
   return;
 }
 
 void DummyStMgr::SendHeartbeatRequest() {
-  proto::tmaster::StMgrHeartbeatRequest* request = new proto::tmaster::StMgrHeartbeatRequest();
+  auto request = make_unique<proto::tmaster::StMgrHeartbeatRequest>();
   request->set_heartbeat_time(time(NULL));
   request->mutable_stats();
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), NULL);
   return;
 }
 

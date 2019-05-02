@@ -45,7 +45,7 @@ CheckpointGateway::CheckpointGateway(sp_uint64 _drain_threshold,
     neighbour_calculator_(_neighbour_calculator),
     metrics_manager_client_(_metrics_manager_client), tupleset_drainer_(_tupleset_drainer),
     tuplestream_drainer_(_tuplestream_drainer), ckpt_drainer_(_ckpt_drainer) {
-  size_metric_ = new common::AssignableMetric(current_size_);
+  size_metric_ = std::make_shared<common::AssignableMetric>(current_size_);
   metrics_manager_client_->register_metric("__stateful_gateway_size", size_metric_);
 }
 
@@ -53,8 +53,8 @@ CheckpointGateway::~CheckpointGateway() {
   for (auto kv : pending_tuples_) {
     delete kv.second;
   }
+
   metrics_manager_client_->unregister_metric("__stateful_gateway_size");
-  delete size_metric_;
 }
 
 void CheckpointGateway::SendToInstance(sp_int32 _task_id,

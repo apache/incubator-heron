@@ -65,9 +65,9 @@ void TestHttpServer::HandleMetaRequest(IncomingHTTPRequest* _request) {
     EXPECT_EQ(value.str(), keyvalues[i].second);
   }
 
-  OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
+  auto response = make_unique<OutgoingHTTPResponse>(_request);
   response->AddResponse("This is response for meta object\r\n");
-  server_->SendReply(_request, 200, response);
+  server_->SendReply(_request, 200, std::move(response));
 }
 
 void TestHttpServer::HandleGenericRequest(IncomingHTTPRequest* _request) {

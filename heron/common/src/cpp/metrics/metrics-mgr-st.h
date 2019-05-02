@@ -44,6 +44,8 @@ class TMasterLocation;
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 class MetricsMgrClient;
 class IMetric;
 
@@ -52,7 +54,7 @@ class MetricsMgrSt {
   MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop);
   virtual ~MetricsMgrSt();
 
-  void register_metric(const sp_string& _metric_name, IMetric* _metric);
+  void register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric);
   void unregister_metric(const sp_string& _metric_name);
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
@@ -72,7 +74,7 @@ class MetricsMgrSt {
   void gather_metrics(EventLoop::Status);
 
   VCallback<EventLoop::Status> timer_cb_;
-  std::map<sp_string, IMetric*> metrics_;
+  std::map<sp_string, shared_ptr<IMetric>> metrics_;
   MetricsMgrClient* client_;
   NetworkOptions options_;
   sp_int64 timerid_;

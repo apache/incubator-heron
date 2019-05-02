@@ -43,7 +43,7 @@ DummyInstance::DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _op
       stmgr_id_(_stmgr_id),
       recvd_stmgr_pplan_(NULL),
       register_response_status(heron::proto::system::STMGR_DIDNT_REGISTER) {
-  InstallResponseHandler(new heron::proto::stmgr::RegisterInstanceRequest(),
+  InstallResponseHandler(make_unique<heron::proto::stmgr::RegisterInstanceRequest>(),
                          &DummyInstance::HandleInstanceResponse);
   InstallMessageHandler(&DummyInstance::HandleTupleMessage);
   InstallMessageHandler(&DummyInstance::HandleNewInstanceAssignmentMsg);
@@ -95,7 +95,7 @@ void DummyInstance::HandleNewInstanceAssignmentMsg(
     heron::proto::stmgr::NewInstanceAssignmentMessage*) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
-  auto request = new heron::proto::stmgr::RegisterInstanceRequest();
+  auto request = make_unique<heron::proto::stmgr::RegisterInstanceRequest>();
   heron::proto::system::Instance* instance = request->mutable_instance();
   instance->set_instance_id(instance_id_);
   instance->set_stmgr_id(stmgr_id_);
@@ -104,7 +104,7 @@ void DummyInstance::CreateAndSendInstanceRequest() {
   instance->mutable_info()->set_component_name(component_name_);
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
-  SendRequest(request, nullptr);
+  SendRequest(std::move(request), nullptr);
   return;
 }
 

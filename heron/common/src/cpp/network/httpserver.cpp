@@ -89,10 +89,9 @@ void HTTPServer::HandleHTTPRequest(struct evhttp_request* _request) {
 }
 
 void HTTPServer::SendReply(IncomingHTTPRequest* _request, sp_int32 _code,
-                           OutgoingHTTPResponse* _response) {
+                           unique_ptr<OutgoingHTTPResponse> _response) {
   CHECK(_request->underlying_request() == _response->underlying_response());
   evhttp_send_reply(_request->underlying_request(), _code, "", NULL);
-  delete _response;
 }
 
 void HTTPServer::SendErrorReply(IncomingHTTPRequest* _request, sp_int32 _code) {
