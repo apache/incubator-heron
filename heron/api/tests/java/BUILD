@@ -37,7 +37,9 @@ java_tests(
     "org.apache.heron.streamlet.impl.utils.StreamletUtilsTest",
     "org.apache.heron.api.ConfigTest",
     "org.apache.heron.api.HeronSubmitterTest",
-    "org.apache.heron.api.utils.UtilsTest"
+    "org.apache.heron.api.utils.UtilsTest",
+    "org.apache.heron.streamlet.impl.sources.SupplierSourceTest",
+    "org.apache.heron.streamlet.impl.sources.ComplexSourceTest"
   ],
   runtime_deps = [ ":api-tests" ],
   size = "small",

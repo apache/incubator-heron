@@ -32,6 +32,7 @@ import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.streamlet.impl.ContextImpl;
 
 import static org.apache.heron.api.Config.TOPOLOGY_RELIABILITY_MODE;
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
@@ -46,9 +47,7 @@ public abstract class StreamletSource extends BaseRichSpout
   private static final long serialVersionUID = 8583965332619565343L;
   private static final String OUTPUT_FIELD_NAME = "output";
 
-  protected boolean enableAcking = false;
-  protected Cache<String, Object> ackCache;
-  protected String msgId;
+  protected boolean ackingEnabled = false;
   protected SpoutOutputCollector collector;
 
   @Override
@@ -62,15 +61,10 @@ public abstract class StreamletSource extends BaseRichSpout
   public void open(Map<String, Object> map, TopologyContext topologyContext,
                    SpoutOutputCollector outputCollector) {
     collector = outputCollector;
-    enableAcking = map.get(TOPOLOGY_RELIABILITY_MODE).equals(ATLEAST_ONCE.toString());
-    if (enableAcking) {
-      ackCache = createCache();
-    }
   }
 
-  /**
-   * Create a cache for storing messageId/tuple associations when using ATLEAST_ONCE semantics.
-   */
+  // a convenience method for creating cache
+  // TODO set appropriate properties in builder
   <K, V> Cache<K, V> createCache() {
     return CacheBuilder.newBuilder().build();
   }
@@ -91,8 +85,17 @@ public abstract class StreamletSource extends BaseRichSpout
    *
    * @return a unique message id string.
    */
-  String getUniqueMessageId() {
+  public String getUniqueMessageId() {
     return UUID.randomUUID().toString();
   }
 
+  /**
+   * Determine if streamlet acknowledgments (i.e., ATLEAST_ONCE) are set.
+   *
+   * @return true if acking is enabled; false otherwise.
+   */
+  public boolean isAckingEnabled(Map map, TopologyContext topologyContext) {
+    ContextImpl context = new ContextImpl(topologyContext, map, null);
+    return context.getConfig().get(TOPOLOGY_RELIABILITY_MODE).equals(ATLEAST_ONCE.toString());
+  }
 }

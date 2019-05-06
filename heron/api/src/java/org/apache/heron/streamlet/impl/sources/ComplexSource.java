@@ -20,8 +20,12 @@ package org.apache.heron.streamlet.impl.sources;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.cache.Cache;
 
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
@@ -43,6 +47,13 @@ public class ComplexSource<R> extends StreamletSource {
   private Source<R> generator;
   private State<Serializable, Serializable> state;
 
+  // protected used to allow unit test access
+  protected Cache<String, Object> msgIdCache;
+  protected String msgId;
+  // taskIds are collected to facilitate units tests
+  protected List<Integer> taskIds;
+  private Level logLevel = Level.INFO;
+
   public ComplexSource(Source<R> generator) {
     this.generator = generator;
   }
@@ -59,6 +70,8 @@ public class ComplexSource<R> extends StreamletSource {
     super.open(map, topologyContext, outputCollector);
     Context context = new ContextImpl(topologyContext, map, state);
     generator.setup(context);
+    ackingEnabled = isAckingEnabled(map, topologyContext);
+    msgIdCache = createCache();
   }
 
   @Override
@@ -67,37 +80,30 @@ public class ComplexSource<R> extends StreamletSource {
     msgId = null;
     if (tuples != null) {
       for (R tuple : tuples) {
-        if (enableAcking) {
+        if (ackingEnabled) {
           msgId = getUniqueMessageId();
-          ackCache.put(msgId, tuple);
-          collector.emit(new Values(tuple), msgId);
-          LOG.info("Emitting: [" + msgId + "]");
+          msgIdCache.put(msgId, tuple);
+          taskIds = collector.emit(new Values(tuple), msgId);
         } else {
-          collector.emit(new Values(tuple));
+          taskIds = collector.emit(new Values(tuple));
         }
+        LOG.log(logLevel, "emitting: [" + msgId + "]");
       }
     }
   }
 
-  @Override
-  public void ack(Object mid) {
-    if (enableAcking) {
-      ackCache.invalidate(mid);
-      LOG.info("Acked:    [" + mid + "]");
+  @Override public void ack(Object mid) {
+    if (ackingEnabled) {
+      msgIdCache.invalidate(mid);
+      LOG.log(logLevel, "acked:    [" + mid + "]");
     }
   }
 
-  @Override
-  public void fail(Object mid) {
-    if (enableAcking) {
-      Values values = new Values(ackCache.getIfPresent(mid));
-      if (values.get(0) != null) {
-        collector.emit(values, mid);
-        LOG.info("Re-emit:  [" + mid + "]");
-      } else {
-        // will not re-emit since value cannot be retrieved.
-        LOG.severe("Failed to retrieve cached value for msg: " + mid);
-      }
+  @Override public void fail(Object mid) {
+    if (ackingEnabled) {
+      Values values = new Values(msgIdCache.getIfPresent(mid));
+      taskIds = collector.emit(values, mid);
+      LOG.log(logLevel, "re-emit:  [" + mid + "]");
     }
   }
 }
