@@ -46,6 +46,15 @@ public final class Utils {
   private Utils() {
   }
 
+  public static Object newInstance(String klass) {
+    try {
+      Class<?> c = Class.forName(klass);
+      return c.newInstance();
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      throw new RuntimeException("Failed to create instance for class: " + klass, e);
+    }
+  }
+
   public static List<Object> tuple(Object... values) {
     List<Object> ret = new ArrayList<>();
     Collections.addAll(ret, values);

@@ -23,7 +23,6 @@ package org.apache.heron.streamlet;
 import java.io.Serializable;
 
 import org.apache.heron.common.basics.ByteAmount;
-import org.apache.heron.streamlet.impl.KryoSerializer;
 
 /**
  * Config is the way users configure the execution of the topology.
@@ -33,11 +32,12 @@ import org.apache.heron.streamlet.impl.KryoSerializer;
  */
 public final class Config implements Serializable {
   private static final long serialVersionUID = 6204498077403076352L;
+
+  private org.apache.heron.api.Config heronConfig;
   private final double cpu;
   private final ByteAmount ram;
   private final DeliverySemantics deliverySemantics;
   private final Serializer serializer;
-  private org.apache.heron.api.Config heronConfig;
   private static final long MB = 1024 * 1024;
   private static final long GB = 1024 * MB;
 
@@ -61,7 +61,6 @@ public final class Config implements Serializable {
   }
 
   private static class Defaults {
-    static final boolean USE_KRYO = true;
     static final double CPU = -1.0;                             // -1 means undefined
     static final ByteAmount RAM = ByteAmount.fromBytes(-1);     // -1 means undefined
     static final DeliverySemantics SEMANTICS = DeliverySemantics.ATMOST_ONCE;
@@ -69,10 +68,10 @@ public final class Config implements Serializable {
   }
 
   private Config(Builder builder) {
-    serializer = builder.serializer;
     heronConfig = builder.config;
     cpu = builder.cpu;
     ram = builder.ram;
+    serializer = builder.serializer;
     deliverySemantics = builder.deliverySemantics;
   }
 
@@ -167,6 +166,18 @@ public final class Config implements Serializable {
     }
   }
 
+  private static String translateSerializer(Serializer serializer) {
+    switch (serializer) {
+      case JAVA:
+        return org.apache.heron.api.serializer.JavaSerializer.class.getName();
+      case KRYO:
+        return org.apache.heron.api.serializer.KryoSerializer.class.getName();
+      default:
+        // KryoSerializer is the default in Streamlet API
+        return org.apache.heron.api.serializer.KryoSerializer.class.getName();
+    }
+  }
+
   public static final class Builder {
     private org.apache.heron.api.Config config;
     private double cpu;
@@ -179,7 +190,7 @@ public final class Config implements Serializable {
       cpu = Defaults.CPU;
       ram = Defaults.RAM;
       deliverySemantics = Defaults.SEMANTICS;
-      serializer = Serializer.KRYO;
+      serializer = Defaults.SERIALIZER;
     }
 
     /**
@@ -245,8 +256,11 @@ public final class Config implements Serializable {
      */
     public Builder setDeliverySemantics(DeliverySemantics semantics) {
       this.deliverySemantics = semantics;
-      config.setTopologyReliabilityMode(Config.translateSemantics(semantics));
       return this;
+    }
+
+    private void applyDeliverySemantics() {
+      config.setTopologyReliabilityMode(Config.translateSemantics(deliverySemantics));
     }
 
     /**
@@ -259,14 +273,6 @@ public final class Config implements Serializable {
       return this;
     }
 
-    private void useKryo() {
-      try {
-        config.setSerializationClassName(KryoSerializer.class.getName());
-      } catch (NoClassDefFoundError e) {
-        throw new RuntimeException("Linking with kryo is needed because useKryoSerializer is used");
-      }
-    }
-
     /**
      * Sets the {@link Serializer} to be used by the topology (current options are {@link
      * KryoSerializer} and the native Java serializer.
@@ -277,10 +283,20 @@ public final class Config implements Serializable {
       return this;
     }
 
-    public Config build() {
-      if (serializer.equals(Serializer.KRYO)) {
-        useKryo();
+    private void applySerializer() {
+      try {
+        String serializerClass = translateSerializer(serializer);
+        config.setSerializationClassName(serializerClass);
+      } catch (NoClassDefFoundError e) {
+        throw new RuntimeException("Linking with serializer" + serializer + " is needed");
       }
+    }
+
+    public Config build() {
+      // Translate and apply Streamlet configs to Heron configs
+      applySerializer();
+      applyDeliverySemantics();
+
       return new Config(this);
     }
   }

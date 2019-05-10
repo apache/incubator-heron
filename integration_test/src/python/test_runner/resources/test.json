@@ -100,6 +100,11 @@
       "expectedResultRelativePath" : "serialization/SerializationTopologyResults.json"
     },
     {
+      "topologyName": "IntegrationTest_CustomKryoSerialization",
+      "classPath": "serialization.KryoSerializationTopology",
+      "expectedResultRelativePath": "serialization/KryoSerializationTopologyResults.json"
+    },
+    {
       "topologyName" : "IntegrationTest_SlidingCountWindow1",
       "classPath"    : "windowing.count.SlidingCountWindowTest1",
       "expectedResultRelativePath" : "windowing/count/SlidingCountWindowTest1Results.json"
