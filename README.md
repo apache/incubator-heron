@@ -44,6 +44,7 @@ Heron on Twitter: [@heronstreaming](https://twitter.com/heronstreaming)
 * [Twitter Heron: Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (YouTube video)
 * [Flying Faster with Twitter Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog post)
+* [Stream Processing with Heron](http://shop.oreilly.com/product/0636920203131.do) (book)
 
 ## Update
 
