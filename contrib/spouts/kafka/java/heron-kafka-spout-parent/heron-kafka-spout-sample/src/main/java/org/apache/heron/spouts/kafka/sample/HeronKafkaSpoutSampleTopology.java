@@ -16,15 +16,15 @@
 
 package org.apache.heron.spouts.kafka.sample;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.common.basics.ByteAmount;
-import com.twitter.heron.simulator.Simulator;
+import org.apache.heron.api.Config;
+import org.apache.heron.api.bolt.BaseRichBolt;
+import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyBuilder;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Tuple;
+import org.apache.heron.common.basics.ByteAmount;
+import org.apache.heron.simulator.Simulator;
 import org.apache.heron.spouts.kafka.DefaultKafkaConsumerFactory;
 import org.apache.heron.spouts.kafka.KafkaConsumerFactory;
 import org.apache.heron.spouts.kafka.KafkaSpout;

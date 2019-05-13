@@ -16,16 +16,16 @@
 
 package org.apache.heron.spouts.kafka;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.state.State;
-import com.twitter.heron.api.topology.IStatefulComponent;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.config.SystemConfig;
+import org.apache.heron.api.Config;
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.OutputFieldsDeclarer;
+import org.apache.heron.api.topology.TopologyContext;
+import org.apache.heron.api.tuple.Fields;
+import org.apache.heron.common.basics.SingletonRegistry;
+import org.apache.heron.common.config.SystemConfig;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;

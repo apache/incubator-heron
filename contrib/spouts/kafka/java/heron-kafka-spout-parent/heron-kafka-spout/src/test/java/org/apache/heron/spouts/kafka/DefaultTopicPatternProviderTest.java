@@ -16,16 +16,16 @@
 
 package org.apache.heron.spouts.kafka;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-class DefaultTopicPatternProviderTest {
+public class DefaultTopicPatternProviderTest {
 
     @Test
-    void create() {
+    public void create() {
         assertEquals(Pattern.compile("a").pattern(), new DefaultTopicPatternProvider("a").create().pattern());
     }
 }

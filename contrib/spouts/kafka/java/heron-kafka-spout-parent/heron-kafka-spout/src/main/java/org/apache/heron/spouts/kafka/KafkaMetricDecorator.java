@@ -16,7 +16,7 @@
 
 package org.apache.heron.spouts.kafka;
 
-import com.twitter.heron.api.metric.IMetric;
+import org.apache.heron.api.metric.IMetric;
 import org.apache.kafka.common.Metric;
 
 /**

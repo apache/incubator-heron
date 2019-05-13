@@ -17,27 +17,27 @@
 package org.apache.heron.spouts.kafka;
 
 import org.apache.kafka.common.Metric;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class KafkaMetricDecoratorTest {
+@RunWith(MockitoJUnitRunner.class)
+public class KafkaMetricDecoratorTest {
     @Mock
     private Metric metric;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         when(metric.metricValue()).thenReturn("dummy value");
     }
 
     @Test
-    void getValueAndReset() {
+    public void getValueAndReset() {
         assertEquals("dummy value", new KafkaMetricDecorator<>(metric).getValueAndReset());
     }
 }
