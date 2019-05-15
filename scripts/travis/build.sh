@@ -82,7 +82,7 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
   heronpy/... examples/... storm-compatibility-examples/... \
-  eco-storm-examples/... eco-heron-examples/...
+  eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
 
 # run heron unit tests

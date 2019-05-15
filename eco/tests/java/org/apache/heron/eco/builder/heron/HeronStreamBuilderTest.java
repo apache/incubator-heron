@@ -307,7 +307,8 @@ public class HeronStreamBuilderTest {
     verify(mockContext).getTopologyDefinition();
     verify(mockContext).getBolt(eq(to));
     verify(mockDefinition).parallelismForBolt(eq(to));
-    verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIStatefulWindowedBolt), eq(iRichBoltParallelism));
+    verify(mockTopologyBuilder).setBolt(eq(to), eq(mockIStatefulWindowedBolt),
+        eq(iRichBoltParallelism));
     verify(mockBoltDeclarer).customGrouping(eq(from), eq(streamId), eq(mockCustomStreamGrouping));
     verify(mockContext).setStreams(anyMap());
     verify(mockDefinition).getStreams();

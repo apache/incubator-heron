@@ -1,17 +1,20 @@
-/*
- * Copyright 2019
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.heron.spouts.kafka;
@@ -52,7 +55,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
     private KafkaConsumerFactory<K, V> kafkaConsumerFactory;
     private TopicPatternProvider topicPatternProvider;
     private Collection<String> topicNames;
-    private ConsumerRecordTransformer<K, V> consumerRecordTransformer = new DefaultConsumerRecordTransformer<>();
+    private ConsumerRecordTransformer<K, V> consumerRecordTransformer =
+        new DefaultConsumerRecordTransformer<>();
     private transient SpoutOutputCollector collector;
     private transient TopologyContext topologyContext;
     private transient Queue<ConsumerRecord<K, V>> buffer;
@@ -61,7 +65,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
     private transient Set<MetricName> reportedMetrics;
     private transient Map<TopicPartition, NavigableMap<Long, Long>> ackRegistry;
     private transient Map<TopicPartition, Long> failureRegistry;
-    private Config.TopologyReliabilityMode topologyReliabilityMode = Config.TopologyReliabilityMode.ATMOST_ONCE;
+    private Config.TopologyReliabilityMode topologyReliabilityMode =
+        Config.TopologyReliabilityMode.ATMOST_ONCE;
     private long previousKafkaMetricsUpdatedTimestamp = 0;
     private State<TopicPartition, Long> state;
 
@@ -71,7 +76,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
      * @param kafkaConsumerFactory kafka consumer factory
      * @param topicNames           list of topic names
      */
-    public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory, Collection<String> topicNames) {
+    public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory,
+                      Collection<String> topicNames) {
         this.kafkaConsumerFactory = kafkaConsumerFactory;
         this.topicNames = topicNames;
     }
@@ -83,7 +89,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
      * @param topicPatternProvider provider of the topic matching pattern
      */
     @SuppressWarnings("WeakerAccess")
-    public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory, TopicPatternProvider topicPatternProvider) {
+    public KafkaSpout(KafkaConsumerFactory<K, V> kafkaConsumerFactory,
+                      TopicPatternProvider topicPatternProvider) {
         this.kafkaConsumerFactory = kafkaConsumerFactory;
         this.topicPatternProvider = topicPatternProvider;
     }
@@ -102,7 +109,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
      * @param consumerRecordTransformer kafka record transformer
      */
     @SuppressWarnings("WeakerAccess")
-    public void setConsumerRecordTransformer(ConsumerRecordTransformer<K, V> consumerRecordTransformer) {
+    public void setConsumerRecordTransformer(ConsumerRecordTransformer<K, V>
+                                                     consumerRecordTransformer) {
         this.consumerRecordTransformer = consumerRecordTransformer;
     }
 
@@ -117,15 +125,19 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
         LOG.info("save state {}", state);
         consumer.commitAsync(state.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new OffsetAndMetadata(entry.getValue() + 1))), null);
+                .collect(Collectors.toMap(Map.Entry::getKey, entry ->
+                    new OffsetAndMetadata(entry.getValue() + 1))), null);
     }
 
     @Override
     public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
         this.collector = collector;
         this.topologyContext = context;
-        this.topologyReliabilityMode = Config.TopologyReliabilityMode.valueOf(conf.get(Config.TOPOLOGY_RELIABILITY_MODE).toString());
-        metricsIntervalInSecs = (int) ((SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG)).getHeronMetricsExportInterval().getSeconds();
+        this.topologyReliabilityMode = Config.TopologyReliabilityMode.valueOf(
+            conf.get(Config.TOPOLOGY_RELIABILITY_MODE).toString());
+        metricsIntervalInSecs = (int) ((SystemConfig) SingletonRegistry.INSTANCE
+            .getSingleton(SystemConfig.HERON_SYSTEM_CONFIG))
+            .getHeronMetricsExportInterval().getSeconds();
         consumer = kafkaConsumerFactory.create();
         if (topicNames != null) {
             consumer.subscribe(topicNames, new KafkaConsumerRebalanceListener());
@@ -146,7 +158,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
             // there are still records remaining for emission from the previous poll
             emitConsumerRecord(record);
         } else {
-            //all the records from previous poll have been emitted or this is very first time to poll
+            //all the records from previous poll have been
+            //emitted or this is very first time to poll
             if (topologyReliabilityMode == Config.TopologyReliabilityMode.ATLEAST_ONCE) {
                 ackRegistry.forEach((key, value) -> {
                     if (value != null) {
@@ -195,33 +208,27 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
         long ceilingBottom = ceilingRange != null ? ceilingRange.getKey() : Long.MAX_VALUE;
         long ceilingTop = ceilingRange != null ? ceilingRange.getValue() : Long.MAX_VALUE;
 
-        /*
-          the ack is for a message that has already been acknowledged. This happens when a failed tuple has caused
-          Kafka consumer to seek back to earlier position and some messages are replayed.
-         */
-        if ((offset >= floorBottom && offset <= floorTop) || (offset >= ceilingBottom && offset <= ceilingTop))
+        //the ack is for a message that has already been acknowledged.
+        //This happens when a failed tuple has caused
+        //Kafka consumer to seek back to earlier position and some messages are replayed.
+        if ((offset >= floorBottom && offset <= floorTop) ||
+            (offset >= ceilingBottom && offset <= ceilingTop))
             return;
         if (ceilingBottom - floorTop == 2) {
-            /*
-            the ack connects the two adjacent range
-             */
+            //the ack connects the two adjacent range
             navigableMap.put(floorBottom, ceilingTop);
             navigableMap.remove(ceilingBottom);
         } else if (offset == floorTop + 1) {
-            /*
-            the acknowledged offset is the immediate neighbour of the upper bound of the floor range
-             */
+            //the acknowledged offset is the immediate neighbour
+            // of the upper bound of the floor range
             navigableMap.put(floorBottom, offset);
         } else if (offset == ceilingBottom - 1) {
-            /*
-            the acknowledged offset is the immediate neighbour of the lower bound of the ceiling range
-             */
+            //the acknowledged offset is the immediate neighbour
+            // of the lower bound of the ceiling range
             navigableMap.remove(ceilingBottom);
             navigableMap.put(offset, ceilingTop);
         } else {
-            /*
-            it is a new born range
-             */
+            //it is a new born range
             navigableMap.put(offset, offset);
         }
         LOG.debug("ack {} in {} ns", msgId, System.nanoTime() - start);
@@ -234,7 +241,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
         ConsumerRecordMessageId consumerRecordMessageId = (ConsumerRecordMessageId) msgId;
         TopicPartition topicPartition = consumerRecordMessageId.getTopicPartition();
         long offset = consumerRecordMessageId.getOffset();
-        failureRegistry.put(topicPartition, Math.min(failureRegistry.getOrDefault(topicPartition, Long.MAX_VALUE), offset));
+        failureRegistry.put(topicPartition, Math.min(failureRegistry.getOrDefault(topicPartition,
+            Long.MAX_VALUE), offset));
         LOG.warn("fail {}", msgId);
     }
 
@@ -246,7 +254,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         consumerRecordTransformer.getOutputStreams()
-                .forEach(s -> declarer.declareStream(s, new Fields(consumerRecordTransformer.getFieldNames(s))));
+                .forEach(s -> declarer.declareStream(s,
+                    new Fields(consumerRecordTransformer.getFieldNames(s))));
     }
 
     private void emitConsumerRecord(ConsumerRecord<K, V> record) {
@@ -255,12 +264,16 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
                     if (topologyReliabilityMode != Config.TopologyReliabilityMode.ATLEAST_ONCE) {
                         collector.emit(s, objects);
                         //only in effective once mode, we need to track the offset of the record that is just emitted into the topology
-                        if (topologyReliabilityMode == Config.TopologyReliabilityMode.EFFECTIVELY_ONCE) {
-                            state.put(new TopicPartition(record.topic(), record.partition()), record.offset());
+                        if (topologyReliabilityMode ==
+                            Config.TopologyReliabilityMode.EFFECTIVELY_ONCE) {
+                            state.put(new TopicPartition(record.topic(), record.partition()),
+                                record.offset());
                         }
                     } else {
                         //build message id based on topic, partition, offset of the consumer record
-                        ConsumerRecordMessageId consumerRecordMessageId = new ConsumerRecordMessageId(new TopicPartition(record.topic(), record.partition()), record.offset());
+                        ConsumerRecordMessageId consumerRecordMessageId =
+                            new ConsumerRecordMessageId(new TopicPartition(record.topic(),
+                                record.partition()), record.offset());
                         //emit tuple with the message id
                         collector.emit(s, objects, consumerRecordMessageId);
                     }
@@ -272,10 +285,12 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
             long earliestFailedOffset = failureRegistry.get(topicPartition);
             //rewind back to the earliest failed offset
             consumer.seek(topicPartition, earliestFailedOffset);
-            //discard the ack whose offset is greater than the earliest failed offset if there is any because we've rewound the consumer back
+            //discard the ack whose offset is greater than the earliest failed offset if there
+            //is any because we've rewound the consumer back
             SortedMap<Long, Long> sortedMap = ackRanges.headMap(earliestFailedOffset);
             if (!sortedMap.isEmpty()) {
-                sortedMap.put(sortedMap.lastKey(), Math.min(earliestFailedOffset, sortedMap.get(sortedMap.lastKey())));
+                sortedMap.put(sortedMap.lastKey(), Math.min(earliestFailedOffset,
+                    sortedMap.get(sortedMap.lastKey())));
             }
             ackRegistry.put(topicPartition, new ConcurrentSkipListMap<>(sortedMap));
             //failure for this partition has been dealt with
@@ -284,21 +299,22 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
     }
 
     private void manualCommit(TopicPartition topicPartition, NavigableMap<Long, Long> ackRanges) {
-        //the first entry in the acknowledgement registry keeps track of the lowest possible offset that can be committed
+        //the first entry in the acknowledgement registry keeps track of the lowest possible
+        //offset that can be committed
         Map.Entry<Long, Long> firstEntry = ackRanges.firstEntry();
         if (firstEntry != null) {
-            consumer.commitAsync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(firstEntry.getValue() + 1)), null);
+            consumer.commitAsync(Collections.singletonMap(topicPartition,
+                new OffsetAndMetadata(firstEntry.getValue() + 1)), null);
         }
     }
 
     private Iterable<ConsumerRecord<K, V>> poll() {
         ConsumerRecords<K, V> records = consumer.poll(Duration.ofMillis(200));
         if (!records.isEmpty()) {
-            /*
-            since the Kafka Consumer metrics are built gradually based on the partitions it consumes,
-            we need to periodically check whether there's any new metrics to register after each polling.
-             */
-            if (System.currentTimeMillis() - previousKafkaMetricsUpdatedTimestamp > metricsIntervalInSecs) {
+            //since the Kafka Consumer metrics are built gradually based on the partitions it consumes,
+            //we need to periodically check whether there's any new metrics to register after each polling.
+            if (System.currentTimeMillis() - previousKafkaMetricsUpdatedTimestamp >
+                metricsIntervalInSecs) {
                 registerConsumerMetrics();
                 previousKafkaMetricsUpdatedTimestamp = System.currentTimeMillis();
             }
@@ -316,7 +332,8 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
                 reportedMetrics.add(metricName);
                 String exposedName = extractKafkaMetricName(metricName);
                 LOG.info("register Kakfa Consumer metric {}", exposedName);
-                topologyContext.registerMetric(exposedName, new KafkaMetricDecorator<>(o), metricsIntervalInSecs);
+                topologyContext.registerMetric(exposedName, new KafkaMetricDecorator<>(o),
+                    metricsIntervalInSecs);
             }
         });
     }
@@ -389,7 +406,10 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
                     if (navigableMap != null) {
                         Map.Entry<Long, Long> entry = navigableMap.firstEntry();
                         if (entry != null) {
-                            consumer.commitAsync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(Math.min(failureRegistry.getOrDefault(topicPartition, Long.MAX_VALUE), entry.getValue()) + 1)), null);
+                            consumer.commitAsync(Collections.singletonMap(topicPartition,
+                                new OffsetAndMetadata(Math.min(
+                                    failureRegistry.getOrDefault(topicPartition, Long.MAX_VALUE),
+                                    entry.getValue()) + 1)), null);
                         }
                     }
                     failureRegistry.remove(topicPartition);
@@ -405,8 +425,11 @@ public class KafkaSpout<K, V> extends BaseRichSpout implements IStatefulComponen
             if (topologyReliabilityMode == Config.TopologyReliabilityMode.ATLEAST_ONCE) {
                 collection.forEach(topicPartition -> {
                     try {
-                        long nextRecordPosition = consumer.position(topicPartition, Duration.ofSeconds(5));
-                        ackRegistry.put(topicPartition, new ConcurrentSkipListMap<>(Collections.singletonMap(nextRecordPosition - 1, nextRecordPosition - 1)));
+                        long nextRecordPosition = consumer.position(topicPartition,
+                            Duration.ofSeconds(5));
+                        ackRegistry.put(topicPartition, new ConcurrentSkipListMap<>(
+                            Collections.singletonMap(nextRecordPosition - 1, nextRecordPosition - 1)
+                        ));
                     } catch (TimeoutException e) {
                         LOG.warn("can not get the position of the next record to consume for partition {}", topicPartition);
                         ackRegistry.remove(topicPartition);
