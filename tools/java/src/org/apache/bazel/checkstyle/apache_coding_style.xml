@@ -70,7 +70,7 @@ under the License.
       <property name="fileExtensions" value="java"/>
       <property name="ignoreLines" value="9,11"/>
       <message key="header.mismatch"
-               value="Line does not match expected header line of ''{0}''. See header template in tools/java/src/org/apache/bazel/checkstyle/header.txt"/>
+               value="Line does not match expected header line of ''{0}''. See header template in tools/java/src/org/apache/bazel/checkstyle/apache_header.txt"/>
     </module>
 
     <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method
