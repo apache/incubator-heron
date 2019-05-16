@@ -30,6 +30,11 @@ public class CustomObject implements Serializable {
   private String name;
   private Integer age;
 
+  public CustomObject() {
+    this.name = null;
+    this.age = null;
+  }
+
   public CustomObject(String name, Integer age) {
     this.name = name;
     this.age = age;

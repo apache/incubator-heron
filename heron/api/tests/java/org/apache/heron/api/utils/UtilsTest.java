@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import org.apache.heron.api.serializer.KryoSerializer;
+
 import junit.framework.TestCase;
 
 public class UtilsTest extends TestCase {
@@ -38,5 +40,13 @@ public class UtilsTest extends TestCase {
     assertEquals(Utils.assignKeyToTask(101, taskIds), Integer.valueOf(2));
     assertEquals(Utils.assignKeyToTask(-100, taskIds), Integer.valueOf(1));
     assertEquals(Utils.assignKeyToTask(-101, taskIds), Integer.valueOf(2));
+  }
+
+  @Test
+  public void testnewInstance() {
+    // Verify newInstance() works as expected to create a new instance of
+    // org.apache.heron.api.serializer.KryoSerializer.
+    Object o = Utils.newInstance("org.apache.heron.api.serializer.KryoSerializer");
+    assertTrue(o instanceof KryoSerializer);
   }
 }
