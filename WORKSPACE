@@ -454,7 +454,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_kafka_kafka_clients",
-  artifact = "org.apache.kafka:kafka-clients:0.8.2.1",
+  artifact = "org.apache.kafka:kafka-clients:2.2.0",
 )
 
 maven_jar(
