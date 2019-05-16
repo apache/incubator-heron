@@ -21,6 +21,7 @@ package org.apache.heron.api;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,10 @@ import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.esotericsoftware.kryo.Serializer;
+
+import org.apache.heron.api.serializer.IKryoDecorator;
+import org.apache.heron.api.serializer.IKryoFactory;
 import org.apache.heron.common.basics.ByteAmount;
 
 /**
@@ -105,6 +110,45 @@ public class Config extends HashMap<String, Object> {
    * The serialization class that is used to serialize/deserialize tuples
    */
   public static final String TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
+  /**
+   * Class that specifies how to create a Kryo instance for serialization. Heron will then apply
+   * topology.kryo.register. The default implementation
+   * implements topology.fall.back.on.java.serialization and turns references off.
+   */
+  public static final String TOPOLOGY_KRYO_FACTORY = "topology.kryo.factory";
+  /**
+   * A list of serialization registrations if KryoSerializor is used.
+   * In Kryo, the serialization can be the name of a class (in which case Kryo will automatically
+   * create a serializer for the class that saves all the object's fields), or an implementation
+   * of Kryo Serializer.
+   * <p>
+   * See Kryo's documentation for more information about writing custom serializers.
+   */
+  public static final String TOPOLOGY_KRYO_REGISTER = "topology.kryo.register";
+  /**
+   * A list of classes that customize storm's kryo instance during start-up.
+   * Each listed class name must implement IKryoDecorator. During start-up the
+   * listed class is instantiated with 0 arguments, then its 'decorate' method
+   * is called with storm's kryo instance as the only argument.
+   */
+  public static final String TOPOLOGY_KRYO_DECORATORS = "topology.kryo.decorators";
+  /**
+   * Whether or not Heron should skip the loading of kryo registrations for which it
+   * does not know the class or have the serializer implementation. Otherwise, the task will
+   * fail to load and will throw an error at runtime. The use case of this is if you want to
+   * declare your serializations on the heron.yaml files on the cluster rather than every single
+   * time you submit a topology. Different applications may use different serializations and so
+   * a single application may not have the code for the other serializers used by other apps.
+   * By setting this config to true, Heron will ignore that it doesn't have those other serializations
+   * rather than throw an error.
+   */
+  public static final String TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS =
+      "topology.skip.missing.kryo.registrations";
+  /**
+   * Whether or not to fallback to Java serialization in a topology.
+   */
+  public static final String TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION =
+      "topology.fall.back.on.java.serialization";
   /**
    * Is the topology running in atleast-once mode?
    * <p>
@@ -415,6 +459,58 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
+  public static void setKryoFactory(Map conf, Class<? extends IKryoFactory> klass) {
+    conf.put(Config.TOPOLOGY_KRYO_FACTORY, klass.getName());
+  }
+
+  public static void setSkipMissingKryoRegistrations(Map conf, boolean skip) {
+    conf.put(Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, skip);
+  }
+
+  @SuppressWarnings("rawtypes") // List can contain strings or maps
+  private static List getRegisteredKryoSerializations(Map<String, Object> conf) {
+    List ret;
+    if (!conf.containsKey(Config.TOPOLOGY_KRYO_REGISTER)) {
+      ret = new ArrayList();
+    } else {
+      ret = new ArrayList((List) conf.get(Config.TOPOLOGY_KRYO_REGISTER));
+    }
+    conf.put(Config.TOPOLOGY_KRYO_REGISTER, ret);
+    return ret;
+  }
+
+  public static void registerKryoSerialization(Map<String, Object> conf, Class klass) {
+    getRegisteredKryoSerializations(conf).add(klass.getName());
+  }
+
+  public static void registerKryoSerialization(
+      Map<String, Object> conf, Class klass, Class<? extends Serializer> serializerClass) {
+    Map<String, String> register = new HashMap<>();
+    register.put(klass.getName(), serializerClass.getName());
+    getRegisteredKryoSerializations(conf).add(register);
+  }
+
+  private static List<String> getRegisteredDecorators(Map conf) {
+    List<String> ret;
+    if (!conf.containsKey(Config.TOPOLOGY_KRYO_DECORATORS)) {
+      ret = new ArrayList<>();
+    } else {
+      ret = new ArrayList<>((List) conf.get(Config.TOPOLOGY_KRYO_DECORATORS));
+    }
+    conf.put(Config.TOPOLOGY_KRYO_DECORATORS, ret);
+    return ret;
+  }
+
+  public static void registerDecorator(
+      Map conf,
+      Class<? extends IKryoDecorator> klass) {
+    getRegisteredDecorators(conf).add(klass.getName());
+  }
+
+  public static void setFallBackOnJavaSerialization(Map conf, boolean fallback) {
+    conf.put(Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION, fallback);
+  }
+
   /**
    * Is topology running with acking enabled?
    * @deprecated use {@link #setTopologyReliabilityMode(Map, TopologyReliabilityMode)} instead.
@@ -713,6 +809,31 @@ public class Config extends HashMap<String, Object> {
 
   public void setSerializationClassName(String className) {
     setSerializationClassName(this, className);
+  }
+
+  public void setKryoFactory(Class<? extends IKryoFactory> klass) {
+    setKryoFactory(this, klass);
+  }
+
+  public void setSkipMissingKryoRegistrations(boolean skip) {
+    setSkipMissingKryoRegistrations(this, skip);
+  }
+
+  public void registerKryoSerialization(Class klass) {
+    registerKryoSerialization(this, klass);
+  }
+
+  public void registerKryoSerialization(Class klass,
+      Class<? extends Serializer> serializerClass) {
+    registerKryoSerialization(this, klass, serializerClass);
+  }
+
+  public void registerDecorator(Class<? extends IKryoDecorator> klass) {
+    registerDecorator(this, klass);
+  }
+
+  public void setFallBackOnJavaSerialization(boolean fallback) {
+    setFallBackOnJavaSerialization(this, fallback);
   }
 
   /**

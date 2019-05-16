@@ -17,13 +17,10 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl;
+package org.apache.heron.api.serializer;
 
-/**
- * KryoSerializer has been moved to heron.api.serializer package so that it can be used
- * by Heron topologies written in low level API. This is just an alias for backward compatible
- * purpose in case some users use this class directly. The class should NOT be used in Heron code
- * and it should be avoid by users.
- */
-public class KryoSerializer extends org.apache.heron.api.serializer.KryoSerializer {
+import com.esotericsoftware.kryo.Kryo;
+
+public interface IKryoDecorator {
+  void decorate(Kryo k);
 }

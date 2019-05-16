@@ -17,13 +17,31 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl;
+package org.apache.heron.api.serializer;
+
+import java.util.Map;
+
+import com.esotericsoftware.kryo.Kryo;
 
 /**
- * KryoSerializer has been moved to heron.api.serializer package so that it can be used
- * by Heron topologies written in low level API. This is just an alias for backward compatible
- * purpose in case some users use this class directly. The class should NOT be used in Heron code
- * and it should be avoid by users.
+ * An interface that controls the Kryo instance used by Storm for serialization.
+ * The lifecycle is:
+ * <p>
+ * 1. The Kryo instance is constructed using getKryo
+ * 2. Heron registers the default classes (e.g. arrays, lists, maps, etc.)
+ * 3. Heron calls preRegister hook
+ * 4. Heron registers all user-defined registrations through topology.kryo.register
+ * 5. Heron calls postRegister hook
+ * 6. Heron calls all user-defined decorators through topology.kryo.decorators
+ * 7. Heron calls postDecorate hook
  */
-public class KryoSerializer extends org.apache.heron.api.serializer.KryoSerializer {
+@SuppressWarnings("rawtypes")
+public interface IKryoFactory {
+  Kryo getKryo(Map conf);
+
+  void preRegister(Kryo k, Map conf);
+
+  void postRegister(Kryo k, Map conf);
+
+  void postDecorate(Kryo k, Map conf);
 }

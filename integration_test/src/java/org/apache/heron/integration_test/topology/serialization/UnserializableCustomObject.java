@@ -17,13 +17,24 @@
  * under the License.
  */
 
-package org.apache.heron.streamlet.impl;
+package org.apache.heron.integration_test.topology.serialization;
 
 /**
- * KryoSerializer has been moved to heron.api.serializer package so that it can be used
- * by Heron topologies written in low level API. This is just an alias for backward compatible
- * purpose in case some users use this class directly. The class should NOT be used in Heron code
- * and it should be avoid by users.
+ * An example unserializable custom object. It contains a CustomObject.
  */
-public class KryoSerializer extends org.apache.heron.api.serializer.KryoSerializer {
+public class UnserializableCustomObject {
+
+  private CustomObject obj;
+
+  public UnserializableCustomObject() {
+    this.obj = null;
+  }
+
+  public UnserializableCustomObject(CustomObject obj) {
+    this.obj = obj;
+  }
+
+  public CustomObject getObj() {
+    return obj;
+  }
 }

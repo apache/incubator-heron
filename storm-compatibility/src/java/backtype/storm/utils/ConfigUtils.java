@@ -78,6 +78,9 @@ public final class ConfigUtils {
   }
 
   private static void doSerializationTranslation(Config heronConfig) {
+    // Serialization config is handled by HeronPluggableSerializerDelegate therefore the storm
+    // configs are used here instead of translating to the Heron configs. Storm relies on Kryo but
+    // Heron abstracts serailizers differently. KryoSerializer is one of the PluggableSerializer.
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
         && (heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
         instanceof Boolean)
