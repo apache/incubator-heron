@@ -91,8 +91,8 @@ import static org.apache.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED;
  * 7. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of RAM for an instance is less than the minimal required value.
  */
-public class RoundRobinPacking implements IPacking, IRepacking {
-  private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
+public class RoundRobinPackingV2 implements IPacking, IRepacking {
+  private static final Logger LOG = Logger.getLogger(RoundRobinPackingV2.class.getName());
 
   @VisibleForTesting
   static final ByteAmount DEFAULT_RAM_PADDING_PER_CONTAINER = ByteAmount.fromGigabytes(2);
@@ -127,7 +127,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceDiskDefault = Context.instanceDisk(config);
     this.containerRamPadding = getContainerRamPadding(topology.getTopologyConfig().getKvsList());
-    LOG.info(String.format("Initalizing RoundRobinPacking. "
+    LOG.info(String.format("Initalizing RoundRobinPackingV2. "
         + "CPU default: %f, RAM default: %s, DISK default: %s, RAM padding: %s.",
         this.instanceCpuDefault,
         this.instanceRamDefault.toString(),
@@ -286,7 +286,6 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       List<InstanceId> instanceIds = allocation.get(containerId);
       Map<InstanceId, T> resInsideContainer = new HashMap<>();
       instancesResMapInContainer.put(containerId, resInsideContainer);
-      List<InstanceId> unspecifiedInstances = new ArrayList<>();
 
       // Register the instance resource allocation and calculate the used resource so far
       T usedRes = zero;
@@ -297,12 +296,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
           resInsideContainer.put(instanceId, res);
           usedRes = (T) usedRes.plus(res);
         } else {
-          unspecifiedInstances.add(instanceId);
+          resInsideContainer.put(instanceId, instanceResDefault);
+          usedRes = (T) usedRes.plus(instanceResDefault);
         }
       }
 
       // Soft padding constraint validation: warn if padding amount cannot be accommodated
-      boolean paddingThrottling = false;
       if (!containerResHint.equals(notSpecified)
           && usedRes.greaterThan(containerResHint.minus(containerResPadding))) {
         // Validate instance resources specified so far don't violate container-level constraint
@@ -313,42 +312,12 @@ public class RoundRobinPacking implements IPacking, IRepacking {
               resourceType, usedRes.toString(), containerId, containerResHint.toString()));
         }
 
-        paddingThrottling = true;
         LOG.warning(String.format("Container#%d (max %s: %s) is now hosting instances that "
                 + "take up to %s %s. The container may not have enough resource to accommodate "
                 + "internal processes which take up to %s %s.",
             containerId, resourceType, containerResHint.toString(),
             usedRes.toString(), resourceType,
             containerResPadding.toString(), resourceType));
-      }
-
-      // calculate resource for the remaining unspecified instances if any
-      if (!unspecifiedInstances.isEmpty()) {
-        T individualInstanceRes = instanceResDefault;
-
-        // If container resource is specified
-        if (!containerResHint.equals(notSpecified)) {
-          // discount resource for heron internal process (padding) and used (usedRes)
-          T remainingRes;
-          if (paddingThrottling) {
-            remainingRes = (T) containerResHint.minus(usedRes);
-          } else {
-            remainingRes = (T) containerResHint.minus(containerResPadding).minus(usedRes);
-          }
-
-          if (remainingRes.lessOrEqual(zero)) {
-            throw new PackingException(String.format("Invalid packing plan generated. "
-                + "No enough %s to allocate for unspecified instances", resourceType));
-          }
-
-          // Split remaining resource evenly
-          individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
-        }
-
-        // Put the results in resInsideContainer
-        for (InstanceId instanceId : unspecifiedInstances) {
-          resInsideContainer.put(instanceId, individualInstanceRes);
-        }
       }
     }
 
@@ -434,9 +403,9 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     return new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
-            (double) Math.round(instanceCpuDefault * largestContainerSize + containerCpuPadding)),
+            NOT_SPECIFIED_CPU_SHARE),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            instanceRamDefault.multiply(largestContainerSize).plus(containerRamPadding)),
+            NOT_SPECIFIED_BYTE_AMOUNT),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
             instanceDiskDefault.multiply(largestContainerSize)
                 .plus(DEFAULT_DISK_PADDING_PER_CONTAINER)));
