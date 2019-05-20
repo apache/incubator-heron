@@ -119,6 +119,13 @@ build` command. For example, the following command would build the [Heron Tracke
 $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
 ```
 
+### Installing Heron to system
+
+All compiled files are placed under `bazel-bin/` folder. If you need to install Heron into your system, the install script is located in `bazel-bin/scripts/packages/heron-install.sh`. Simply executing the command can do the installation for you:
+```bash
+$ bash azel-bin/scripts/packages/heron-install.sh
+```
+
 ## Testing Heron
 
 Instructions for running Heron unit tests can be found at [Testing
