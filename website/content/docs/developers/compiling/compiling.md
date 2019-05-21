@@ -123,7 +123,17 @@ $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
 
 All compiled files are placed under `bazel-bin/` folder. If you need to install Heron into your system, the install script is located in `bazel-bin/scripts/packages/heron-install.sh`. Simply executing the command can do the installation for you:
 ```bash
-$ bash azel-bin/scripts/packages/heron-install.sh
+$ bash bazel-bin/scripts/packages/heron-install.sh
+```
+
+If you would like to install it under your user folder, you can execute this command:
+```bash
+$ bash bazel-bin/scripts/packages/heron-install.sh --user
+```
+
+By default, Heron will be installed into `/usr/local/heron`. If you would like to install into an alternative path, you can execute this command (default: `/usr/local`):
+```bash
+$ bash bazel-bin/scripts/packages/heron-install.sh --prefix /opt
 ```
 
 ## Testing Heron
