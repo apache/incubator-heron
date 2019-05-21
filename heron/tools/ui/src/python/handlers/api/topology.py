@@ -93,25 +93,27 @@ class ListTopologiesJsonHandler(base.BaseHandler):
     # get all the topologies from heron nest
     topologies = yield access.get_topologies_states()
 
-    result = dict()
+    result = []
+    # result = dict()
 
     # now convert some of the fields to be displayable
-    for cluster, cluster_value in topologies.items():
-      result[cluster] = dict()
-      for environ, environ_value in cluster_value.items():
-        result[cluster][environ] = dict()
-        for topology, topology_value in environ_value.items():
-          if "jobname" not in topology_value or topology_value["jobname"] is None:
-            continue
+    for item in topologies:
+      # if item.get('cluster', None) and item['cluster'] not in result:
+      #   result[item['cluster']] = dict()
+      # if item.get('environ', None) and item['environ'] not in result[item['cluster']]:
+      #   result[item['cluster']][item['environ']] = dict()
 
-          if "submission_time" in topology_value:
-            topology_value["submission_time"] = topology_value["submission_time"]
-          else:
-            topology_value["submission_time"] = '-'
+      if not item.get('jobname', None):
+        continue
 
-          result[cluster][environ][topology] = topology_value
+      if not item.get('submission_time', None):
+        item['submission_time'] = '-'
 
-    self.write(result)
+      result += [item]
+      # result[item['cluster']][item['environ']][item['jobname']] = item
+
+    # Tornado doesn't support List object
+    self.write({'result': result})
 
 
 class TopologyLogicalPlanJsonHandler(base.BaseHandler):

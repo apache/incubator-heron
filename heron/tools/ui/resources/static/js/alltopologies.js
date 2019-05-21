@@ -83,24 +83,20 @@ var TopologyTable = React.createClass({
       data:     { format: 'json' },
       success:  function (result) {
         topologies = [];
-        for (var cluster in result) {
-          for (var env in result[cluster]) {
-            for (var topologyName in result[cluster][env]) {
-              estate = result[cluster][env][topologyName];
-              topologies.push({
-                name: topologyName,
-                cluster: estate.cluster,
-                environ: env,
-                role: estate.role,
-                has_physical_plan: estate.has_physical_plan,
-                has_tmaster_location: estate.has_tmaster_location,
-                release_version: estate.release_version,
-                submission_time: estate.submission_time,
-                submission_user: estate.submission_user,
-                status: estate.status
-              });
-            }
-          }
+        for (var i = 0; i < result.result.length; i++) {
+          var topology = result.result[i];
+          topologies.push({
+            name: topology.jobname,
+            cluster: topology.cluster,
+            environ: topology.environ,
+            role: topology.role,
+            has_physical_plan: topology.has_physical_plan,
+            has_tmaster_location: topology.has_tmaster_location,
+            release_version: topology.release_version,
+            submission_time: topology.submission_time,
+            submission_user: topology.submission_user,
+            status: topology.status
+          });
         }
         this.setState({ topologies: topologies });
       }.bind(this),
