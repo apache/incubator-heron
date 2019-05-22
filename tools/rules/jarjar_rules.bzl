@@ -16,40 +16,45 @@ def jarjar_binary_impl(ctx):
   src_file = ctx.file.src
   shade_file = ctx.file.shade
   jarjar = ctx.executable._jarjar
-
   class_jar = ctx.outputs.class_jar
+
   ctx.action(
       executable = jarjar,
       inputs = [ src_file, shade_file, jarjar ],
       outputs = [ class_jar ],
       arguments = ["process", shade_file.path, src_file.path, class_jar.path])
 
-  return struct(files = depset([class_jar]))
+  return [
+      JavaInfo(
+          output_jar = class_jar,
+          compile_jar = class_jar,
+      ),
+      DefaultInfo(files = depset([class_jar])),
+  ]
 
 jarjar_attrs = {
     "src": attr.label(
-        allow_files = FileType([".jar"]),
+        allow_files = [".jar"],
         single_file = True,
     ),
-
     "shade": attr.label(
         allow_files = True,
         single_file = True,
+    ),
+    "deps": attr.label_list(),
+    "_jarjar": attr.label(
+        default = Label("//third_party/java/jarjar:jarjar_bin"),
+        allow_files = True,
+        executable = True,
+        cfg = "host",
     ),
 }
 
 jarjar_binary = rule(
     jarjar_binary_impl,
-    attrs = jarjar_attrs + {
-        "deps": attr.label_list(),
-        "_jarjar": attr.label(
-            default = Label("//third_party/java/jarjar:jarjar_bin"),
-            allow_files = True,
-            executable = True,
-            cfg = 'host',
-        ),
-    },
+    attrs = jarjar_attrs,
     outputs = {
         "class_jar": "%{name}.jar",
     },
+    provides = [JavaInfo],
 )
