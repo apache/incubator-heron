@@ -156,7 +156,7 @@ $ heron-tracker
 
 You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
 and see something like the following upon successful submission of the topology:
-![Heron Tracker](/img/heron-tracker.png)
+![Heron Tracker](assets/heron-tracker.png)
 
 To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
 
@@ -174,7 +174,7 @@ $ heron-ui
 
 You can open Heron UI in your browser at [http://localhost:8889](http://localhost:8889)
 and see something like this upon successful submission of the topology:
-![Heron UI](/img/heron-ui.png)
+![Heron UI](assets/heron-ui.png)
 
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
 

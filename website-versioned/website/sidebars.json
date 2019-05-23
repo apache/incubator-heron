@@ -10,6 +10,13 @@
       "deployment-overview",
       "deployment-configuration",
       "deployment-api-server"
+    ],
+    "Topology Development APIs": [
+      "streamlet-api",
+      "eco-api",
+      "topology-api-java",
+      "topology-api-python"
+
     ]
   }
 }
