@@ -17,23 +17,24 @@
 
 
 /* for drop down menus */
+#community-dropdown.hide,
 #apache-dropdown.hide {
   display: none;
 }
 
-
+#community-dropdown.visible,
 #apache-dropdown.visible {
   display: flex;
 }
 
-
+#community-dropdown,
 #apache-dropdown {
   pointer-events: none;
   position: absolute;
   width: 100%;
   color: #000000;
 }
-
+#community-dropdown-items,
 #apache-dropdown-items {
   color: #000000;
   background-color: white;
@@ -43,4 +44,9 @@
   pointer-events: all;
   border: 1px solid rgba(35, 41, 55, 0.15);
   border-radius: 0.25rem;
+}
+
+.apache-disclaimer {
+  color: #ffffff;
+  padding: 25px 25px 25px 25px;
 }

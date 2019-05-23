@@ -42,7 +42,7 @@ const siteConfig = {
   headerLinks: [
     {doc: 'local-single-node', label: 'Docs'},
     {doc: 'doc4', label: 'API'},
-    {page: 'help', label: 'Help'},
+    {href: '#community', label: 'Community'},
     {blog: true, label: 'Blog'},
     {href: '#apache', label: 'Apache'},
   ],
@@ -73,10 +73,12 @@ const siteConfig = {
       "system-ui"
     ]
   },
-  */
+  */ 
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
-  copyright: `Copyright © ${new Date().getFullYear()} Your Name or Your Company Name`,
+  copyright: `Copyright © ${new Date().getFullYear()} the Apache Software Foundation, Apache Heron, Heron, 
+  Apache, the Apache feather Logo, and the Apache Heron project logo are either registered 
+  trademarks or trademarks of the Apache Software Foundation.`,
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
