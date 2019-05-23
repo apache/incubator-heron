@@ -49,6 +49,15 @@ import org.apache.commons.lang.ArrayUtils;
 public final class JavaCheckstyle {
   public static final Logger LOG = Logger.getLogger(JavaCheckstyle.class.getName());
   private static final String CLASSNAME = JavaCheckstyle.class.getCanonicalName();
+  private static final Predicate APACHE_STYLE_FILES = Predicates.or(
+      Predicates.containsPattern("storm-compatibility-examples.src.java"),
+      Predicates.containsPattern("storm-compatibility.src.java"),
+      Predicates.containsPattern("tools/test/LcovMerger"),
+      Predicates.containsPattern("contrib")
+  );
+  private static final Predicate NO_CHECK_FILES = Predicates.or(
+      Predicates.containsPattern("external") // from external/ directory for bazel
+  );
 
   private JavaCheckstyle() {
   }
@@ -114,22 +123,14 @@ public final class JavaCheckstyle {
 
   @SuppressWarnings("unchecked")
   private static String[] getHeronSourceFiles(String extraActionFile) {
-    return getSourceFiles(extraActionFile, Predicates.not(Predicates.or(
-        Predicates.containsPattern("storm-compatibility-examples.src.java"),
-        Predicates.containsPattern("storm-compatibility.src.java"),
-        Predicates.containsPattern("tools/test/LcovMerger"),
-        Predicates.containsPattern("contrib"),
-        Predicates.containsPattern("external") // from external/ directory for bazel
-    )));
+    return getSourceFiles(extraActionFile, Predicates.not(
+      Predicates.or(APACHE_STYLE_FILES, NO_CHECK_FILES)
+    ));
   }
 
   @SuppressWarnings("unchecked")
   private static String[] getApacheSourceFiles(String extraActionFile) {
-    return getSourceFiles(extraActionFile, Predicates.or(
-        Predicates.containsPattern("storm-compatibility-examples.src.java"),
-        Predicates.containsPattern("storm-compatibility.src.java"),
-        Predicates.containsPattern("contrib")
-    ));
+    return getSourceFiles(extraActionFile, APACHE_STYLE_FILES);
   }
 
   private static String[] getSourceFiles(String extraActionFile,

@@ -49,5 +49,3 @@ script:
   - which python2.7
   - python2.7 -V
   - scripts/travis/ci.sh
-  # run unit tests for heron kafka spout
-  - mvn -f contrib/spouts/kafka/java/heron-kafka-spout-parent/pom.xml test

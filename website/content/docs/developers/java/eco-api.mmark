@@ -267,12 +267,13 @@ the message at a later time.
  of when you'd do this is to add a hook that integrates with your internal
 monitoring system. These hooks are instantiated using the zero-arg constructor.
 * `"topology.serializer.classname"` : The serialization class that is used to serialize/deserialize tuples
+* `"topology.kryo.register"` : A list of serialization registrations when KryoSerializor is used.
+* `"topology.kryo.decorators"` : A list of classes that customize storm's kryo instance during start-up when KryoSerializor is used.
+* `"topology.skip.missing.kryo.registrations"` : When KryoSerializor is used, whether or not Heron should skip the loading of kryo registrations for which it does not know the class or have the serializer implementation.
+* `"topology.fall.back.on.java.serialization"` : When KryoSerializor is used, whether or not to fallback to Java serialization in a topology.
 * `"topology.reliability.mode"` : A Heron topology can be run in any one of the TopologyReliabilityMode
  mode. The format of this flag is the string encoded values of the
 underlying TopologyReliabilityMode value.  Values are `ATMOST_ONCE`, `ATLEAST_ONCE`, and `EFFECTIVELY_ONCE`.
-* `"topology.reliability.mode"` :  A Heron topology can be run in any one of the TopologyReliabilityMode
-mode. The format of this flag is the string encoded values of the
-underlying TopologyReliabilityMode value.
 * `"topology.container.cpu"` : Number of CPU cores per container to be reserved for this topology.
 * `"topology.container.ram"` : Amount of RAM per container to be reserved for this topology. In bytes.
 * `"topology.container.disk"` : Amount of disk per container to be reserved for this topology. In bytes.
