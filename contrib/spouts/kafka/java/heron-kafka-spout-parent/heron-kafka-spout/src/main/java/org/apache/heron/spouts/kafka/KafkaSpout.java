@@ -298,6 +298,7 @@ public class KafkaSpout<K, V> extends BaseRichSpout
         == Config.TopologyReliabilityMode.ATLEAST_ONCE) {
       ack(new ConsumerRecordMessageId(new TopicPartition(record.topic(), record.partition()),
           record.offset()));
+      return;
     }
     tupleByStream.forEach((s, objects) -> {
       switch (topologyReliabilityMode) {
