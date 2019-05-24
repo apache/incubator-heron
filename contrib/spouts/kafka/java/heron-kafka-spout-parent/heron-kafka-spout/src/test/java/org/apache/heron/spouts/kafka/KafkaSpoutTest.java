@@ -38,6 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.heron.api.Config;
 import org.apache.heron.api.metric.IMetric;
 import org.apache.heron.api.spout.SpoutOutputCollector;
+import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
 import org.apache.heron.api.tuple.Fields;
@@ -55,6 +56,7 @@ import org.apache.kafka.common.TopicPartition;
 
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE;
+import static org.apache.heron.api.Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -93,6 +95,8 @@ public class KafkaSpoutTest {
   private ArgumentCaptor<List<Object>> listArgumentCaptor;
   @Captor
   private ArgumentCaptor<ConsumerRebalanceListener> consumerRebalanceListenerArgumentCaptor;
+  @Mock
+  private State<TopicPartition, Long> state;
 
   @BeforeClass
   public static void setUpAll() {
@@ -194,6 +198,11 @@ public class KafkaSpoutTest {
 
     kafkaSpout.open(Collections.singletonMap(Config.TOPOLOGY_RELIABILITY_MODE,
         ATLEAST_ONCE.name()), topologyContext, collector);
+    verify(consumer).subscribe(eq(Collections.singleton(DUMMY_TOPIC_NAME)),
+        consumerRebalanceListenerArgumentCaptor.capture());
+    ConsumerRebalanceListener consumerRebalanceListener =
+        consumerRebalanceListenerArgumentCaptor.getValue();
+    consumerRebalanceListener.onPartitionsAssigned(Collections.singleton(topicPartition));
     //poll the topic
     kafkaSpout.nextTuple();
     //emit all of the five records
@@ -228,6 +237,11 @@ public class KafkaSpoutTest {
 
     kafkaSpout.open(Collections.singletonMap(Config.TOPOLOGY_RELIABILITY_MODE,
         ATLEAST_ONCE.name()), topologyContext, collector);
+    verify(consumer).subscribe(eq(Collections.singleton(DUMMY_TOPIC_NAME)),
+        consumerRebalanceListenerArgumentCaptor.capture());
+    ConsumerRebalanceListener consumerRebalanceListener =
+        consumerRebalanceListenerArgumentCaptor.getValue();
+    consumerRebalanceListener.onPartitionsAssigned(Collections.singleton(topicPartition));
     //poll the topic
     kafkaSpout.nextTuple();
     //emit all of the five records
@@ -265,23 +279,20 @@ public class KafkaSpoutTest {
 
   @Test
   public void consumerRebalanceListener() {
+    kafkaSpout.initState(state);
     when(kafkaConsumerFactory.create()).thenReturn(consumer);
 
     kafkaSpout.open(Collections.singletonMap(Config.TOPOLOGY_RELIABILITY_MODE,
-        ATLEAST_ONCE.name()), topologyContext, collector);
+        EFFECTIVELY_ONCE.name()), topologyContext, collector);
     verify(consumer).subscribe(eq(Collections.singleton(DUMMY_TOPIC_NAME)),
         consumerRebalanceListenerArgumentCaptor.capture());
     ConsumerRebalanceListener consumerRebalanceListener =
         consumerRebalanceListenerArgumentCaptor.getValue();
     TopicPartition topicPartition = new TopicPartition(DUMMY_TOPIC_NAME, 0);
+    when(state.get(topicPartition)).thenReturn(5L);
+    when(state.containsKey(topicPartition)).thenReturn(true);
     consumerRebalanceListener.onPartitionsAssigned(Collections.singleton(topicPartition));
-    verify(consumer).position(topicPartition, Duration.ofSeconds(5));
-
-    kafkaSpout.ack(new KafkaSpout.ConsumerRecordMessageId(topicPartition, 0));
-    kafkaSpout.ack(new KafkaSpout.ConsumerRecordMessageId(topicPartition, 1));
-    consumerRebalanceListener.onPartitionsRevoked(Collections.singleton(topicPartition));
-    verify(consumer).commitAsync(Collections.singletonMap(topicPartition,
-        new OffsetAndMetadata(2)), null);
+    verify(consumer).seek(topicPartition, 5L);
   }
 
   @Test
