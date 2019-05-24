@@ -1,11 +1,7 @@
 ---
-id: topology-api-python
-title: The Heron Topology API for Python
-sidebar_label: The Heron Topology API for Python
----
-
----
+id: python-topologies
 title: Python Topologies
+sidebar_label: Python Topologies
 ---
 
 > The current version of `heronpy` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).

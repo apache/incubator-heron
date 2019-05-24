@@ -16,6 +16,10 @@
 }
 
 
+a {
+  color: #4F8992;
+  text-decoration: none;
+}
 /* for drop down menus */
 #community-dropdown.hide,
 #apache-dropdown.hide {
