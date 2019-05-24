@@ -300,22 +300,27 @@ public class KafkaSpout<K, V> extends BaseRichSpout
           record.offset()));
     }
     tupleByStream.forEach((s, objects) -> {
-      if (topologyReliabilityMode != Config.TopologyReliabilityMode.ATLEAST_ONCE) {
-        collector.emit(s, objects);
-        //only in effective once mode, we need to track the offset of the record //that is just
-        //emitted into the topology
-        if (topologyReliabilityMode
-            == Config.TopologyReliabilityMode.EFFECTIVELY_ONCE) {
+      switch (topologyReliabilityMode) {
+        case ATMOST_ONCE:
+          collector.emit(s, objects);
+          break;
+        case ATLEAST_ONCE:
+          //build message id based on topic, partition, offset of the consumer record
+          ConsumerRecordMessageId consumerRecordMessageId =
+              new ConsumerRecordMessageId(new TopicPartition(record.topic(),
+                  record.partition()), record.offset());
+          //emit tuple with the message id
+          collector.emit(s, objects, consumerRecordMessageId);
+          break;
+        case EFFECTIVELY_ONCE:
+          collector.emit(s, objects);
+          //only in effective once mode, we need to track the offset of the record //that is just
+          //emitted into the topology
           state.put(new TopicPartition(record.topic(), record.partition()),
               record.offset());
-        }
-      } else {
-        //build message id based on topic, partition, offset of the consumer record
-        ConsumerRecordMessageId consumerRecordMessageId =
-            new ConsumerRecordMessageId(new TopicPartition(record.topic(),
-                record.partition()), record.offset());
-        //emit tuple with the message id
-        collector.emit(s, objects, consumerRecordMessageId);
+          break;
+        default:
+          LOG.warn("unsupported reliability mode {}", topologyReliabilityMode);
       }
     });
   }
