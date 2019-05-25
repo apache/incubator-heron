@@ -40,7 +40,7 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'local-single-node', label: 'Docs'},
+    {doc: 'getting-started-local-single-node', label: 'Docs'},
     {doc: 'doc4', label: 'API'},
     {href: '#community', label: 'Community'},
     {blog: true, label: 'Blog'},

@@ -1,5 +1,5 @@
 ---
-id: local-single-node
+id: getting-started-local-single-node
 title: Local (Single Node)
 sidebar_label: Local (Single Node)
 ---

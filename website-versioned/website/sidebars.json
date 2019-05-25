@@ -2,9 +2,9 @@
 {
   "docs": {
     "Getting Started": [
-      "local-single-node",
-      "migrate-storm-toplogies",
-      "troubleshooting-guide"
+      "getting-started-local-single-node",
+      "getting-started-migrate-storm-topologies",
+      "getting-started-troubleshooting-guide"
     ],
     "Deployment": [
       "deployment-overview",

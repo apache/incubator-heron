@@ -1,5 +1,5 @@
 ---
-id: migrate-storm-toplogies
+id: getting-started-migrate-storm-topologies
 title: Migrate Storm Topologies
 sidebar_label: Migrate Storm Topologies
 ---

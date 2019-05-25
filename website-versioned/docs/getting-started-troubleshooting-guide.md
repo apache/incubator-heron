@@ -1,5 +1,5 @@
 ---
-id: troubleshooting-guide
+id: getting-started-troubleshooting-guide
 title: Troubleshooting Guide
 sidebar_label: Troubleshooting Guide
 ---
