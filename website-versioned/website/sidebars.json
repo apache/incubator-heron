@@ -12,10 +12,10 @@
       "deployment-api-server"
     ],
     "Topology Development APIs": [
-      "streamlet-api",
-      "eco-api",
-      "topology-api-java",
-      "topology-api-python"
+      "topology-development-streamlet-api",
+      "topology-development-eco-api",
+      "topology-development-topology-api-java",
+      "topology-development-topology-api-python"
     ],
     "Client API Docs": [
     ],

@@ -1,5 +1,5 @@
 ---
-id: streamlet-api
+id: topology-development-streamlet-api
 title: The Heron Streamlet API for Java
 sidebar_label: The Heron Streamlet API for Java
 ---

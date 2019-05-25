@@ -1,5 +1,5 @@
 ---
-id: topology-api-python
+id: topology-development-topology-api-python
 title: The Heron Topology API for Python
 sidebar_label: The Heron Topology API for Python
 ---
