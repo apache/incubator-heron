@@ -390,6 +390,160 @@ public class RoundRobinPackingTest extends CommonPackingTests {
             numContainers, getDefaultPadding()).cloneWithCpu(containerCpu));
   }
 
+  @Test
+  public void testFullRamMapWithoutContainerRequestedResources() throws Exception {
+    // Explicit set resources for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(6); // max container resource is 6G
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
+    double containerCpu = 30;
+    ByteAmount spoutRam = ByteAmount.fromMegabytes(500);
+    ByteAmount boltRam = ByteAmount.fromMegabytes(1000);
+    Resource containerResource = new Resource(containerCpu, containerRam, containerDisk);
+
+    // Don't set container RAM
+    topologyConfig.setContainerDiskRequested(containerDisk);
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentRam(SPOUT_NAME, spoutRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
+        Optional.of(boltRam), Optional.empty(), boltParallelism,
+        Optional.of(spoutRam), Optional.empty(), spoutParallelism,
+        numContainers, getDefaultPadding(), containerResource);
+
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      // All instances' resource requirement should be equal
+      // So the size of set should be 1
+      Set<Resource> differentResources = new HashSet<>();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        differentResources.add(instancePlan.getResource());
+      }
+
+      // Bolt and spout ram sizes are both fixed.
+      Assert.assertEquals(2, differentResources.size());
+    }
+  }
+
+  @Test
+  public void testNoRamMapWithoutContainerRequestedResources() throws Exception {
+    // Explicit set resources for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(6); // max container resource is 6G
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
+    double containerCpu = 30;
+    Resource containerResource = new Resource(containerCpu, containerRam, containerDisk);
+
+    // Container RAM is not set in config
+    topologyConfig.setContainerDiskRequested(containerDisk);
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
+        Optional.empty(), Optional.empty(), boltParallelism,
+        Optional.empty(), Optional.empty(), spoutParallelism,
+        numContainers, getDefaultPadding(), containerResource);
+
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      // All instances' resource requirement should be equal
+      // So the size of set should be 1
+      Set<Resource> differentResources = new HashSet<>();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        differentResources.add(instancePlan.getResource());
+      }
+
+      Assert.assertEquals(1, differentResources.size());
+      int instancesCount = containerPlan.getInstances().size();
+      Assert.assertEquals(containerRam
+          .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
+          differentResources.iterator().next().getRam());
+
+      Assert.assertEquals(
+          (containerCpu - RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) / instancesCount,
+          differentResources.iterator().next().getCpu(), DELTA);
+    }
+  }
+
+  @Test
+  public void testPartialRamMapWithoutContainerRequestedResources() throws Exception {
+    // Explicit set resources for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(6); // max container resource is 6G
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
+    double containerCpu = 30;
+    ByteAmount boltRam = ByteAmount.fromGigabytes(1);
+    Resource containerResource = new Resource(containerCpu, containerRam, containerDisk);
+
+    // Don't set container RAM
+    topologyConfig.setContainerDiskRequested(containerDisk);
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
+        Optional.of(boltRam), Optional.empty(), boltParallelism,
+        Optional.empty(), Optional.empty(), spoutParallelism,
+        numContainers, getDefaultPadding(), containerResource);
+
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      // All instances' resource requirement should be equal
+      // So the size of set should be 1
+      Set<Resource> differentResources = new HashSet<>();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        differentResources.add(instancePlan.getResource());
+      }
+
+      int instancesCount = containerPlan.getInstances().size();
+      if (instancesCount == 4) {
+        // Biggest container
+        Assert.assertEquals(1, differentResources.size());
+      } else {
+        // Smaller container
+        Assert.assertEquals(2, differentResources.size());
+      }
+    }
+  }
+
+  // Throw an error if default container resource (default instance resource * number of instances
+  // + padding) is not enough.
+  @Test(expected = PackingException.class)
+  public void testHugePartialRamMapWithoutContainerRequestedResources() throws Exception {
+    // Explicit set resources for container
+    ByteAmount containerRam = ByteAmount.fromGigabytes(10);
+    ByteAmount containerDisk = ByteAmount.fromGigabytes(20);
+    double containerCpu = 30;
+    Resource containerResource = new Resource(containerCpu, containerRam, containerDisk);
+    ByteAmount boltRam = ByteAmount.fromGigabytes(10);
+
+    // Don't set container RAM
+    topologyConfig.setContainerDiskRequested(containerDisk);
+    topologyConfig.setContainerCpuRequested(containerCpu);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+    topology = getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    PackingPlan packingPlan = doPackingTestWithPartialResource(topology,
+        Optional.of(boltRam), Optional.empty(), boltParallelism,
+        Optional.empty(), Optional.empty(), spoutParallelism,
+        numContainers, getDefaultPadding(), containerResource);
+
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      // All instances' resource requirement should be equal
+      // So the size of set should be 1
+      Set<Resource> differentResources = new HashSet<>();
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.getInstances()) {
+        differentResources.add(instancePlan.getResource());
+      }
+
+      Assert.assertEquals(1, differentResources.size());
+      int instancesCount = containerPlan.getInstances().size();
+      Assert.assertEquals(containerRam
+          .minus(RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER).divide(instancesCount),
+          differentResources.iterator().next().getRam());
+
+      Assert.assertEquals(
+          (containerCpu - RoundRobinPacking.DEFAULT_CPU_PADDING_PER_CONTAINER) / instancesCount,
+          differentResources.iterator().next().getCpu(), DELTA);
+    }
+  }
+
   /**
    * Test the scenario RAM map config is partially set
    */

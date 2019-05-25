@@ -149,13 +149,17 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         getRoundRobinAllocation(numContainer, parallelismMap);
 
     Resource containerResourceHint = getContainerResourceHint(roundRobinAllocation);
+    int largestContainerSize = getLargestContainerSize(roundRobinAllocation);
 
     // Get the RAM map for every instance
+    ByteAmount containerRamDefault =
+        instanceRamDefault.multiply(largestContainerSize).plus(containerRamPadding);
     Map<Integer, Map<InstanceId, ByteAmount>> instancesRamMap =
         calculateInstancesResourceMapInContainer(
         roundRobinAllocation,
         TopologyUtils.getComponentRamMapConfig(topology),
         containerResourceHint.getRam(),
+        containerRamDefault,
         instanceRamDefault,
         containerRamPadding,
         ByteAmount.ZERO,
@@ -163,11 +167,14 @@ public class RoundRobinPacking implements IPacking, IRepacking {
         RAM);
 
     // Get the CPU map for every instance
+    float containerCPUDefault =
+        Math.round(instanceCpuDefault * largestContainerSize + containerCpuPadding);
     Map<Integer, Map<InstanceId, CPUShare>> instancesCpuMap =
         calculateInstancesResourceMapInContainer(
         roundRobinAllocation,
         CPUShare.convertDoubleMapToCpuShareMap(TopologyUtils.getComponentCpuMapConfig(topology)),
         CPUShare.fromDouble(containerResourceHint.getCpu()),
+        CPUShare.fromDouble(containerCPUDefault),
         CPUShare.fromDouble(instanceCpuDefault),
         CPUShare.fromDouble(containerCpuPadding),
         CPUShare.fromDouble(0.0),
@@ -205,22 +212,26 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       }
 
       // finalize container resource
+      containerCpu += containerCpuPadding;
+      if (containerResourceHint.getCpu() != NOT_SPECIFIED_CPU_SHARE) {
+        containerCpu = Math.min(containerCpu, containerResourceHint.getCpu());
+      }
+
+      containerRam = containerRam.plus(containerRamPadding);
       if (!containerResourceHint.getRam().equals(NOT_SPECIFIED_BYTE_AMOUNT)) {
         containerRam = ByteAmount.fromBytes(
-            Math.min(containerRam.plus(containerRamPadding).asBytes(),
-                containerResourceHint.getRam().asBytes()));
-      } else {
-        containerRam = containerRam.plus(containerRamPadding);
+            Math.min(containerRam.asBytes(), containerResourceHint.getRam().asBytes()));
       }
 
-      if (containerResourceHint.getCpu() != NOT_SPECIFIED_CPU_SHARE) {
-        containerCpu = Math.min(containerCpu + containerCpuPadding, containerResourceHint.getCpu());
-      } else {
-        containerCpu += containerCpuPadding;
+      ByteAmount containerDisk = containerResourceHint.getDisk();
+      if (containerDisk.equals(NOT_SPECIFIED_BYTE_AMOUNT)) {
+        containerDisk = instanceDiskDefault
+            .multiply(largestContainerSize).plus(DEFAULT_DISK_PADDING_PER_CONTAINER);
       }
 
-      Resource resource = new Resource(Math.max(containerCpu, containerResourceHint.getCpu()),
-          containerRam, containerResourceHint.getDisk());
+      Resource resource = new Resource(
+          Math.max(containerCpu, containerResourceHint.getCpu()),
+          containerRam, containerDisk);
       PackingPlan.ContainerPlan containerPlan = new PackingPlan.ContainerPlan(
           containerId, new HashSet<>(instancePlanMap.values()), resource);
 
@@ -275,6 +286,7 @@ public class RoundRobinPacking implements IPacking, IRepacking {
                 Map<Integer, List<InstanceId>> allocation,
                 Map<String, T> resMap,
                 T containerResHint,
+                T defaultContainerRes,
                 T instanceResDefault,
                 T containerResPadding,
                 T zero,
@@ -323,27 +335,29 @@ public class RoundRobinPacking implements IPacking, IRepacking {
       }
 
       // calculate resource for the remaining unspecified instances if any
+      T containerRes = containerResHint;
+      if (containerResHint.equals(notSpecified)) {
+        containerRes = defaultContainerRes;
+      }
+
       if (!unspecifiedInstances.isEmpty()) {
         T individualInstanceRes = instanceResDefault;
 
-        // If container resource is specified
-        if (!containerResHint.equals(notSpecified)) {
-          // discount resource for heron internal process (padding) and used (usedRes)
-          T remainingRes;
-          if (paddingThrottling) {
-            remainingRes = (T) containerResHint.minus(usedRes);
-          } else {
-            remainingRes = (T) containerResHint.minus(containerResPadding).minus(usedRes);
-          }
-
-          if (remainingRes.lessOrEqual(zero)) {
-            throw new PackingException(String.format("Invalid packing plan generated. "
-                + "No enough %s to allocate for unspecified instances", resourceType));
-          }
-
-          // Split remaining resource evenly
-          individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
+        // discount resource for heron internal process (padding) and used (usedRes)
+        T remainingRes;
+        if (paddingThrottling) {
+          remainingRes = (T) containerRes.minus(usedRes);
+        } else {
+          remainingRes = (T) containerRes.minus(containerResPadding).minus(usedRes);
         }
+
+        if (remainingRes.lessOrEqual(zero)) {
+          throw new PackingException(String.format("Invalid packing plan generated. "
+              + "No enough %s to allocate for unspecified instances", resourceType));
+        }
+
+        // Split remaining resource evenly
+        individualInstanceRes = (T) remainingRes.divide(unspecifiedInstances.size());
 
         // Put the results in resInsideContainer
         for (InstanceId instanceId : unspecifiedInstances) {
@@ -434,12 +448,11 @@ public class RoundRobinPacking implements IPacking, IRepacking {
 
     return new Resource(
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_CPU_REQUESTED,
-            (double) Math.round(instanceCpuDefault * largestContainerSize + containerCpuPadding)),
+            NOT_SPECIFIED_CPU_SHARE),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_RAM_REQUESTED,
-            instanceRamDefault.multiply(largestContainerSize).plus(containerRamPadding)),
+            NOT_SPECIFIED_BYTE_AMOUNT),
         TopologyUtils.getConfigWithDefault(topologyConfig, TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            instanceDiskDefault.multiply(largestContainerSize)
-                .plus(DEFAULT_DISK_PADDING_PER_CONTAINER)));
+            NOT_SPECIFIED_BYTE_AMOUNT));
   }
 
   /**

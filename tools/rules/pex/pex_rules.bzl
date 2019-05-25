@@ -44,44 +44,28 @@ Lastly, make sure that `tools/build_rules/BUILD` exists, even if it is empty,
 so that Bazel can find your `prelude_bazel` file.
 """
 
-pex_file_types = FileType(types=[".py"])
-egg_file_types = FileType(types=[".egg", ".whl"])
+pex_file_types = [".py"]
+egg_file_types = [".egg", ".whl"]
 
-# As much as I think this test file naming convention is a good thing, it's
-# probably a bad idea to impose it as a policy to all OSS users of these rules,
-# so I guess let's skip it.
-#
-# pex_test_file_types = FileType(["_unittest.py", "_test.py"])
-
+PexProvider = provider(fields=["transitive_sources", "transitive_eggs", "transitive_reqs"])
 
 def _collect_transitive_sources(ctx):
-  source_files = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    source_files += dep.py.transitive_sources
-  source_files += pex_file_types.filter(ctx.files.srcs)
-  return source_files
+  return depset(ctx.files.srcs,
+                transitive=[dep[PexProvider].transitive_sources for dep in ctx.attr.deps])
 
 
 def _collect_transitive_eggs(ctx):
-  transitive_eggs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_eggs"):
-      transitive_eggs += dep.py.transitive_eggs
-  transitive_eggs += egg_file_types.filter(ctx.files.eggs)
-  return transitive_eggs
+  return depset(ctx.files.eggs,
+                transitive=[dep[PexProvider].transitive_eggs for dep in ctx.attr.deps])
 
 
 def _collect_transitive_reqs(ctx):
-  transitive_reqs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_reqs"):
-      transitive_reqs += dep.py.transitive_reqs
-  transitive_reqs += ctx.attr.reqs
-  return transitive_reqs
+  return depset(ctx.attr.reqs,
+                transitive=[dep[PexProvider].transitive_reqs for dep in ctx.attr.deps])
 
 
 def _collect_transitive(ctx):
-  return struct(
+  return PexProvider(
       # These rules don't use transitive_sources internally; it's just here for
       # parity with the native py_library rule type.
       transitive_sources = _collect_transitive_sources(ctx),
@@ -92,15 +76,13 @@ def _collect_transitive(ctx):
 
 
 def _pex_library_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
+  transitive_files = depset(ctx.files.srcs,
+                            transitive = [dep.default_runfiles.files for dep in ctx.attr.deps])
   return struct(
-      files = depset(),
-      py = _collect_transitive(ctx),
+      providers = [_collect_transitive(ctx)],
       runfiles = ctx.runfiles(
           collect_default = True,
-          transitive_files = depset(transitive_files),
+          transitive_files = transitive_files,
       )
   )
 
@@ -152,8 +134,6 @@ def _gen_manifest(py, runfiles, resources):
 
 
 def _pex_binary_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
-
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
   if ctx.attr.entrypoint:
@@ -162,7 +142,9 @@ def _pex_binary_impl(ctx):
   elif ctx.file.main:
     main_file = ctx.file.main
   else:
-    main_file = pex_file_types.filter(ctx.files.srcs)[0]
+    main_file = ctx.files.srcs[0]
+
+  transitive_files = list(ctx.files.srcs)
   if main_file:
     # Translate main_file's short path into a python module name
     main_pkg = main_file.short_path.replace('/', '.')[:-3]
@@ -173,11 +155,12 @@ def _pex_binary_impl(ctx):
 
   py = _collect_transitive(ctx)
 
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
+  transitive_files = depset(transitive_files,
+                            transitive = [dep.default_runfiles.files for dep in ctx.attr.deps])
+
   runfiles = ctx.runfiles(
       collect_default = True,
-      transitive_files = transitive_files,
+      transitive_files = depset(transitive_files),
   )
 
   resources = ctx.files.resources
@@ -300,7 +283,7 @@ pex_attrs = {
     "srcs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = pex_file_types),
     "deps": attr.label_list(allow_files = False,
-                            providers = ["py"]),
+                            providers = [PexProvider]),
     "eggs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = egg_file_types),
     "reqs": attr.string_list(),
