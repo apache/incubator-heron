@@ -20,16 +20,15 @@
     "Client API Docs": [
     ],
     "Guides": [
-      "effectively-once-java-topologies",
-      "python-topologies",
-      "data-model",
-      "assets",
-      "tuple-serialization",
-      "ui-guide",
-      "topology-tuning",
-      "packing-algorithms",
-      "simulator-mode",
-      "troubeshooting-guide"
+      "guides-effectively-once-java-topologies",
+      "guides-python-topologies",
+      "guides-data-model",
+      "guides-tuple-serialization",
+      "guides-ui-guide",
+      "guides-topology-tuning",
+      "guides-packing-algorithms",
+      "guides-simulator-mode",
+      "guides-troubeshooting-guide"
     ],
     "Heron Concepts": [
       "heron-design-goals",
