@@ -1,5 +1,5 @@
 ---
-id: simulator-mode
+id: guides-simulator-mode
 title: Simulator Mode
 sidebar_label: Simulator Mode
 ---

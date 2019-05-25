@@ -1,5 +1,5 @@
 ---
-id: python-topologies
+id: guides-python-topologies
 title: Python Topologies
 sidebar_label: Python Topologies
 ---

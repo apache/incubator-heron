@@ -1,5 +1,5 @@
 ---
-id: packing-algorithms
+id: guides-packing-algorithms
 title: Packing Algorithms
 sidebar_label: Packing Algorithms
 ---

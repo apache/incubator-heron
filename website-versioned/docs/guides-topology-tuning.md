@@ -1,5 +1,5 @@
 ---
-id: topology-tuning
+id: guides-topology-tuning
 title: Topology Tuning Guide
 sidebar_label: Topology Tuning Guide
 ---

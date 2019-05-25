@@ -1,5 +1,5 @@
 ---
-id: ui-guide
+id: guides-ui-guide
 title: Heron UI Guide
 sidebar_label: Heron UI Guide
 ---

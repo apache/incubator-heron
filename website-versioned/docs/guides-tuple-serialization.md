@@ -1,5 +1,5 @@
 ---
-id: tuple-serialization
+id: guides-tuple-serialization
 title: Tuple Serialization
 sidebar_label: Tuple Serialization
 ---

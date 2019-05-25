@@ -1,5 +1,5 @@
 ---
-id: effectively-once-java-topologies
+id: guides-effectively-once-java-topologies
 title: Effectively Once Java Topologies
 sidebar_label: Effectively Once Java Topologies
 ---
