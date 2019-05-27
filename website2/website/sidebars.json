@@ -40,6 +40,14 @@
     "State Managers": [
       "state-managers-zookeeper",
       "state-managers-local-fs"
+    ],
+    "Uploaders": [
+      "uploaders-local-fs",
+      "uploaders-hdfs",
+      "uploaders-http",
+      "uploaders-amazon-s3",
+      "uploaders-scp"
+
     ]
   }
 }
