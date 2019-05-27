@@ -36,7 +36,10 @@
       "heron-streamlet-concepts",
       "heron-architecture",
       "heron-delivery-semantics"
-      
+    ],
+    "State Managers": [
+      "state-managers-zookeeper",
+      "state-managers-local-fs"
     ]
   }
 }
