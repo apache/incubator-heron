@@ -50,3 +50,10 @@ cat ./maven/heron-with-kryo.template.pom | \
     sed "s/NAME/heron-simulator/g" | \
     sed "s/DESCRIPTION/Heron Simulator/g" \
     >> ./heron-simulator-$1.pom
+
+cat ./maven/heron-kafka-spout.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-kafka-spout/g" | \
+    sed "s/NAME/heron-kafka-spout/g" | \
+    sed "s/DESCRIPTION/Heron Kafka Spout/g" \
+    >> ./heron-kafka-spout-$1.pom
