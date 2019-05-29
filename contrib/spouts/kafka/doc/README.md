@@ -1,12 +1,12 @@
 # Heron Kafka Spout
 
-[Kafka Spout](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/KafkaSpout.java) enables a Heron topology to consume data from Kafka cluster as input into the stream processing pipeline. Primarily, it is written using 2 APIs, the Heron API and Kafka Client API.
+[Kafka Spout](../src/java/org/apache/heron/spouts/kafka/KafkaSpout.java) enables a Heron topology to consume data from Kafka cluster as input into the stream processing pipeline. Primarily, it is written using 2 APIs, the Heron API and Kafka Client API.
 
 ##Configuring the underlying Kafka Consumer
 
-Each Kafka Spout instance creates its underlying [Consumer](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html) instance via a factory interface [KafkaConsumerFactory](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/KafkaConsumerFactory.java) that is passed in as one of the constructor arguments.
+Each Kafka Spout instance creates its underlying [Consumer](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html) instance via a factory interface [KafkaConsumerFactory](../src/java/org/apache/heron/spouts/kafka/KafkaConsumerFactory.java) that is passed in as one of the constructor arguments.
 
-The simplest way is to use the provided [DefaultKafkaConsumerFactory](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/DefaultKafkaConsumerFactory.java). It takes a `Map<String, Object>` as its only input, which should contain all the user configured properties as instituted by [ConsumerConfig](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html)
+The simplest way is to use the provided [DefaultKafkaConsumerFactory](../src/java/org/apache/heron/spouts/kafka/DefaultKafkaConsumerFactory.java). It takes a `Map<String, Object>` as its only input, which should contain all the user configured properties as instituted by [ConsumerConfig](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html)
 
 _Note: `enable.auto.commit` is always set to false in `DefaultKafkaConsumerFactory` because the Kafka Spout needs to manually manage the committing of offset. Any custom implementation of `KafkaConsumerFactory` should adhere to the same thing_
 
@@ -25,7 +25,7 @@ KafkaConsumerFactory<String, String> kafkaConsumerFactory = new DefaultKafkaCons
 
 ##Subscribe to topic(s)
 
-The Kafka Spout instance can be configured to subscribe either a collection of topics by specifying the list of topic name strings in `Collection<String>`, or it can take an implementation of [TopicPatternProvider](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/TopicPatternProvider.java) to provide a regular expression to match all the topics that it wants to subscribe to. There is a [DefaultTopicPatternProvider](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/DefaultTopicPatternProvider.java) to convert a regex string to a pattern.
+The Kafka Spout instance can be configured to subscribe either a collection of topics by specifying the list of topic name strings in `Collection<String>`, or it can take an implementation of [TopicPatternProvider](../src/java/org/apache/heron/spouts/kafka/TopicPatternProvider.java) to provide a regular expression to match all the topics that it wants to subscribe to. There is a [DefaultTopicPatternProvider](../src/java/org/apache/heron/spouts/kafka/DefaultTopicPatternProvider.java) to convert a regex string to a pattern.
 
 ```java
 //subscribe to specific named topic
@@ -37,9 +37,9 @@ new KafkaSpout<>(kafkaConsumerFactory, new DefaultTopicPatternProvider("test-.*"
 
 ##Convert ConsumerRecord to Tuple
 
-The Spout delegates the conversion of each Kafka [ConsumerRecord](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html) into an output tuple to the [ConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/ConsumerRecordTransformer.java), the [DefaultConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/DefaultConsumerRecordTransformer.java) is provided to simply convert the incoming record into a tuple with 2 fields: "key", being the key of the record, and "value", being the value of the record, and also defines the output stream to be the "default" stream.
+The Spout delegates the conversion of each Kafka [ConsumerRecord](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html) into an output tuple to the [ConsumerRecordTransformer](../src/java/org/apache/heron/spouts/kafka/ConsumerRecordTransformer.java), the [DefaultConsumerRecordTransformer](../src/java/org/apache/heron/spouts/kafka/DefaultConsumerRecordTransformer.java) is provided to simply convert the incoming record into a tuple with 2 fields: "key", being the key of the record, and "value", being the value of the record, and also defines the output stream to be the "default" stream.
 
-User can create their own implementation of the `ConsumerRecordTransformer` interface, and set it to the `KafkaSpout` via [setConsumerRecordTransformer](../heron-kafka-spout/src/main/java/org/apache/heron/spouts/kafka/KafkaSpout.java) method.
+User can create their own implementation of the `ConsumerRecordTransformer` interface, and set it to the `KafkaSpout` via [setConsumerRecordTransformer](../src/java/org/apache/heron/spouts/kafka/KafkaSpout.java) method.
 
 ##Behavior in Different Topology Reliability Mode
 
