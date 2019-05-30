@@ -47,7 +47,9 @@
       "uploaders-http",
       "uploaders-amazon-s3",
       "uploaders-scp"
-
+    ],
+    "Schedulers": [
+      "schedulers-k8s-by-hand"
     ]
   }
 }
