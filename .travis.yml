@@ -27,7 +27,7 @@ addons:
 
 env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
-  - BAZEL_VERSION=0.25.3
+  - BAZEL_VERSION=0.26.0
 
 before_install:
   # download and install bazel
