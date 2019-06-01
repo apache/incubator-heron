@@ -61,7 +61,11 @@
     ],
     "Cluster Configuration": [
       "cluster-config-overview",
-      "cluster-config-system-level"
+      "cluster-config-system-level",
+      "cluster-config-instance",
+      "cluster-config-metrics",
+      "cluster-config-stream",
+      "cluster-config-tmaster"
     ]
   }
 }
