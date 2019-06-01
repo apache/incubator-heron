@@ -49,7 +49,8 @@
       "uploaders-scp"
     ],
     "Schedulers": [
-      "schedulers-k8s-by-hand"
+      "schedulers-k8s-by-hand",
+      "schedulers-k8s-with-helm"
     ]
   }
 }
