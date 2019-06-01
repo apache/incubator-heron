@@ -1,5 +1,5 @@
 ---
-id: data-model
+id: guides-data-model
 title: Heron Data Model
 sidebar_label: Heron Data Model
 ---

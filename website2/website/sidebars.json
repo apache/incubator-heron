@@ -58,6 +58,10 @@
       "schedulers-mesos-local-mac",
       "schedulers-slurm",
       "schedulers-yarn"
+    ],
+    "Cluster Configuration": [
+      "cluster-config-overview",
+      "cluster-config-system-level"
     ]
   }
 }
