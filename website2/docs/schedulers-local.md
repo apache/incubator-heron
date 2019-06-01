@@ -1,7 +1,7 @@
 ---
-id: schedulers-aurora-local
-title: Local Aurora Cluster
-sidebar_label:  Local Aurora Cluster
+id: schedulers-local
+title: Local Cluster
+sidebar_label:  Local Cluster
 ---
 
 In addition to out-of-the-box schedulers for
