@@ -66,6 +66,19 @@
       "cluster-config-metrics",
       "cluster-config-stream",
       "cluster-config-tmaster"
+    ],
+    "Observability": [
+      "observability-prometheus",
+      "observability-graphite",
+      "observability-scribe"
+    ],
+    "User Manuals": [
+      "user-manuals-heron-cli",
+      "user-manuals-heron-explorer",
+      "user-manuals-tracker-rest",
+      "user-manuals-heron-tracker-runbook",
+      "user-manuals-heron-ui-runbook"
+      
     ]
   }
 }

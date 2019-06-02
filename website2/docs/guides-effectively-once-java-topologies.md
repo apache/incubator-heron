@@ -256,7 +256,7 @@ $ heron-ui
 
 Once the Heron UI is running, navigate to http://localhost:8889 and click on the `RunningSumTopology` link. You should see something like this in the window that opens up:
 
-![Logical topology drilldown](/img/logical-topology.png)
+![Logical topology drilldown](assets/logical-topology.png)
 
 Click on **addition-bolt** on the right (under **1 Container and 1 Instances**) and then click on the blug **logs** button. You should see log output like this:
 
