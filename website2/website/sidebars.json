@@ -78,7 +78,18 @@
       "user-manuals-tracker-rest",
       "user-manuals-heron-tracker-runbook",
       "user-manuals-heron-ui-runbook"
-      
+    ],
+    "Compiling": [
+      "compiling-overview",
+      "compiling-linux",
+      "compiling-osx",
+      "compiling-docker",
+      "compiling-running-tests",
+      "compiling-code-organization"
+    ],
+    "Extending Heron": [
+      "extending-heron-scheduler",
+      "extending-heron-metric-sink"
     ]
   }
 }
