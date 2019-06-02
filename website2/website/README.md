@@ -1,213 +1,156 @@
-This website was created with [Docusaurus](https://docusaurus.io/).
+# The Heron website and documentation
 
-# What's In This Document
+This `README` is basically the meta-documentation for the Heron website and documentation. You will find instructions on running the site locally.
 
-* [Get Started in 5 Minutes](#get-started-in-5-minutes)
-* [Directory Structure](#directory-structure)
-* [Editing Content](#editing-content)
-* [Adding Content](#adding-content)
-* [Full Documentation](#full-documentation)
+## Tools
 
-# Get Started in 5 Minutes
+Framework [Docusaurus](https://docusaurus.io/).
 
-1. Make sure all the dependencies for the website are installed:
+Ensure you have installed the latest version of [Node](https://nodejs.org/en/download/). You can install [Yarn](https://yarnpkg.com/en/docs/install) as well.
 
-```sh
-# Install dependencies
-$ yarn
+> You have to be on Node >= 8.x and Yarn >= 1.5.
+
+
+## Running the site locally
+
+To run the site locally:
+
+```bash 
+git clone https://github.com/apache/incubator-heron.git
+cd incubator-heron/website2/website
+yarn install
+yarn start
 ```
-2. Run your dev server:
+> Notes
+> 
+> 1. If you have installed `yarn`, you can skip the `yarn install` command.
+> 2. After you enter the `yarn start` command, you will be navigated to a local address, for example, `http://localhost:3000`. Click `Docs` to see documentation for the latest release of Heron. 
+> 3. The `http://localhost:3000/en/versions` path shows the documentation for all versions. To view your local changes, click `Documentation` in **Latest Version**, or enter `http://localhost:3000/docs/en/next/standalone` in a browser.
 
-```sh
-# Start the site
-$ yarn start
+## Contribute
+
+The website is comprised of two parts: one is documentation, the other is website pages (including blog posts).
+
+Documentation related pages are placed in the `docs` directory. They are written in [Markdown](http://daringfireball.net/projects/markdown/syntax).
+All documentation pages are versioned. For more details, refer to [versioning](#versioning).
+
+Website pages are non-versioned. They are placed in the `website` directory.
+
+### Documentation
+
+#### Layout
+
+All the markdown files are placed in the `docs` directory. It is a flat structure.
+
+```
+docs
+|
+├── cluster-config-instance.md
+├── cluster-config-metrics.md
+├── cluster-config-overview.md
+├── cluster-config-stream.md
+├── cluster-config-system-level.md
+├── cluster-config-tmaster.md
+├── compiling-code-organization.md
+├── compiling-docker.md
+├── compiling-linux.md
+├── compiling-osx.md
+├── compiling-overview.md
+├── compiling-running-tests.md
+├── deployment-api-server.md
+...
 ```
 
-## Directory Structure
-
-Your project file structure should look something like this
+All the files are named in the following convention:
 
 ```
-my-docusaurus/
-  docs/
-    doc-1.md
-    doc-2.md
-    doc-3.md
-  website/
-    blog/
-      2016-3-11-oldest-post.md
-      2017-10-24-newest-post.md
-    core/
-    node_modules/
-    pages/
-    static/
-      css/
-      img/
-    package.json
-    sidebar.json
-    siteConfig.js
+<category>-<page-name>.md
 ```
 
-# Editing Content
+`<category>` is the category within the sidebar that this file belongs to, while `<page-name>` is the string to name the file within this category.
 
-## Editing an existing docs page
+There isn't any constraints on how files are named. It is just a naming convention for better maintenance.
 
-Edit docs by navigating to `docs/` and editing the corresponding document:
+#### Document
 
-`docs/doc-to-be-edited.md`
+##### Markdown Headers
 
-```markdown
+All the documents are usual Markdown files. However you need to add some Docusaurus-specific fields in Markdown headers in order to link them
+correctly to the [Sidebar](#sidebar) and [Navigation Bar](#navigation).
+
+`id`: A unique document ID. If this field is not specified, the document ID defaults to its file name (without the extension).
+
+`title`: The title of the document. If this field is not specified, the document title defaults to its id.
+
+`hide_title`: Whether to hide the title at the top of the doc.
+
+`sidebar_label`: The text shown in the document sidebar for this document. If this field is not specified, the document `sidebar_label` defaults to its title.
+
+For example:
+
+```bash
 ---
-id: page-needs-edit
-title: This Doc Needs To Be Edited
+id: extending-heron-scheduler
+title: Implementing a Custom Scheduler
+sidebar_label: Custom Scheduler
 ---
-
-Edit me...
 ```
 
-For more information about docs, click [here](https://docusaurus.io/docs/en/navigation)
+##### Linking to another document
 
-## Editing an existing blog post
+To link to other documentation files, you can use relative URLs, which will be automatically converted to the corresponding HTML links when they are rendered.
 
-Edit blog posts by navigating to `website/blog` and editing the corresponding post:
-
-`website/blog/post-to-be-edited.md`
-```markdown
----
-id: post-needs-edit
-title: This Blog Post Needs To Be Edited
----
-
-Edit me...
-```
-
-For more information about blog posts, click [here](https://docusaurus.io/docs/en/adding-blog)
-
-# Adding Content
-
-## Adding a new docs page to an existing sidebar
-
-1. Create the doc as a new markdown file in `/docs`, example `docs/newly-created-doc.md`:
+Example:
 
 ```md
----
-id: newly-created-doc
-title: This Doc Needs To Be Edited
----
-
-My new content here..
+[This links to another document](other-document.md)
 ```
 
-1. Refer to that doc's ID in an existing sidebar in `website/sidebar.json`:
+The markdown file will be automatically converted into a link to /docs/other-document.html (or the appropriately translated/versioned link) once it is rendered.
 
-```javascript
-// Add newly-created-doc to the Getting Started category of docs
+This helps when you want to navigate through docs on GitHub since the links there are functional links to other documents (still on GitHub),
+and the documents have the correct HTML links when they are rendered.
+
+#### Sidebar
+
+All the sidebars are defined in a `sidebars.json` file in the `website` directory. The documentation sidebar is named `docs` in the JSON structure.
+
+When you want to add a page to sidebar, you can add the document `id` you used in the document header to the existing sidebar/category. In the example below,
+`docs` is the name of the sidebar, "Getting started" is a category within the sidebar, and "getting-started-local-single-node" is the `id` of a document.
+
+```bash
 {
   "docs": {
     "Getting Started": [
-      "quick-start",
-      "newly-created-doc" // new doc here
+      "getting-started-local-single-node",
+      "getting-started-migrate-storm-topologies",
+      "getting-started-troubleshooting-guide"
     ],
     ...
-  },
-  ...
-}
-```
-
-For more information about adding new docs, click [here](https://docusaurus.io/docs/en/navigation)
-
-## Adding a new blog post
-
-1. Make sure there is a header link to your blog in `website/siteConfig.js`:
-
-`website/siteConfig.js`
-```javascript
-headerLinks: [
-    ...
-    { blog: true, label: 'Blog' },
-    ...
-]
-```
-
-2. Create the blog post with the format `YYYY-MM-DD-My-Blog-Post-Title.md` in `website/blog`:
-
-`website/blog/2018-05-21-New-Blog-Post.md`
-
-```markdown
----
-author: Frank Li
-authorURL: https://twitter.com/foobarbaz
-authorFBID: 503283835
-title: New Blog Post
----
-
-Lorem Ipsum...
-```
-
-For more information about blog posts, click [here](https://docusaurus.io/docs/en/adding-blog)
-
-## Adding items to your site's top navigation bar
-
-1. Add links to docs, custom pages or external links by editing the headerLinks field of `website/siteConfig.js`:
-
-`website/siteConfig.js`
-```javascript
-{
-  headerLinks: [
-    ...
-    /* you can add docs */
-    { doc: 'my-examples', label: 'Examples' },
-    /* you can add custom pages */
-    { page: 'help', label: 'Help' },
-    /* you can add external links */
-    { href: 'https://github.com/facebook/Docusaurus', label: 'GitHub' },
-    ...
-  ],
-  ...
-}
-```
-
-For more information about the navigation bar, click [here](https://docusaurus.io/docs/en/navigation)
-
-## Adding custom pages
-
-1. Docusaurus uses React components to build pages. The components are saved as .js files in `website/pages/en`:
-1. If you want your page to show up in your navigation header, you will need to update `website/siteConfig.js` to add to the `headerLinks` element:
-
-`website/siteConfig.js`
-```javascript
-{
-  headerLinks: [
-    ...
-    { page: 'my-new-custom-page', label: 'My New Custom Page' },
-    ...
-  ],
-  ...
-}
-```
-
-For more information about custom pages, click [here](https://docusaurus.io/docs/en/custom-pages).
-
-# Full Documentation
-
-Full documentation can be found on the [website](https://docusaurus.io/).
-
-
-
-
-
-{
-  "docs": {
-    "Getting Started": [
-      "local-single-node",
-      "migrate-storm-toplogies",
-      "troubleshooting-guide"
-    ],
-    "Deployment": [
-      "deployment-overview",
-      "deployment-configuration",
-      "deployment-api-server"
-    ]
   }
 }
+```
 
+#### Navigation
+
+To add links to the top navigation bar, you can add entries to the `headerLinks` of `siteConfig.js` under `website` directory.
+
+To learn different types of links you can add to the top navigation bar, refer to [Navigation and Sidebars](https://docusaurus.io/docs/en/navigation).
+
+## Versioning
+
+Documentation versioning with Docusaurus becomes simpler. When done with a new release, just simply run following command:
+
+```shell
+yarn run version ${version}
+```
+
+This preserves all markdown files in the `docs` directory and make them available as documentation for version `${version}`.
+Versioned documents are placed into `website/versioned_docs/version-${version}`, where `${version}` is the version number
+you supplied in the command above.
+
+Versioned sidebars are also copied into `website/versioned_sidebars` and are named as `version-${version}-sidebars.json`.
+
+If you want to change the documentation for a previous version, you can access files for that respective version.
+
+For more details about versioning, refer to [Versioning](https://docusaurus.io/docs/en/versioning).
