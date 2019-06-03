@@ -90,6 +90,9 @@
     "Extending Heron": [
       "extending-heron-scheduler",
       "extending-heron-metric-sink"
+    ],
+    "Heron Resources": [
+      "heron-resources-resources"
     ]
   }
 }
