@@ -28,13 +28,13 @@ https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 * [Building Apache Heron - BazelCon 2018](https://www.youtube.com/watch?v=yBTSfA4YDtY&t=1s)(Oct, 2018)
 
 ##  Blog Posts
-
+* [Leaving the Nest: Heron donated to Apache Software Foundation](https://blog.twitter.com/engineering/en_us/topics/open-source/2018/heron-donated-to-apache-software-foundation.html) (Feb, 2018)
 * [Open Sourcing Twitter Heron](https://blog.twitter.com/2016/open-sourcing-twitter-heron) (May, 2016)
 * [Flying Faster with Twitter
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (June, 2015)
 * [Deploying Heron on a Cluster of Machines with Apache Aurora](http://streamanalytics.blogspot.com/2016/06/deploying-heron-on-cluster-of-machines.html) (Supun Kamburugamuve, Jun, 2016)
 * [Setting up Heron Locally with Apache Aurora](http://pulasthisupun.blogspot.com/2016/06/setting-up-heron-cluster-with-apache.html) (Pulasthi Supun, Jun, 2016)
-* [Introducing Heron’s ECO; A Flexible Way To Manage Topologies](https://1904labs.com/2018/02/14/introducing-herons-eco-flexible-way-manage-topologies/)
+* [Introducing Heron’s ECO; A Flexible Way To Manage Topologies](https://1904labs.com/2018/02/14/introducing-herons-eco-flexible-way-manage-topologies/) (Feb, 2018)
 
 ## Slides
 
