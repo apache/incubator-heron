@@ -65,7 +65,7 @@ class IncomingHTTPResponse;
 class HTTPClient {
  public:
   // Constructor
-  HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns);
+  HTTPClient(std::shared_ptr<EventLoop> eventLoop, AsyncDNS* _dns);
 
   // Destructor.
   virtual ~HTTPClient();
@@ -82,7 +82,7 @@ class HTTPClient {
   sp_int32 SendRequest(OutgoingHTTPRequest* _request, VCallback<IncomingHTTPResponse*> _cb);
 
   // get the underlying select server
-  EventLoop* getEventLoop() { return eventLoop_; }
+  std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
  private:
   //! A structure used for internal purposes
@@ -117,7 +117,7 @@ class HTTPClient {
   std::unordered_map<void*, VCallback<IncomingHTTPResponse*>> inflight_urls_;
 
   //! the EventLoop and the aysnc dns pointers
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   AsyncDNS* dns_;
 
   //! friend functions

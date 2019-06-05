@@ -40,7 +40,7 @@ namespace instance {
 
 class SpoutInstance : public InstanceBase {
  public:
-  SpoutInstance(EventLoop* eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
+  SpoutInstance(std::shared_ptr<EventLoop> eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
                 NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
                 void* dllHandle);
   virtual ~SpoutInstance();
@@ -51,7 +51,7 @@ class SpoutInstance : public InstanceBase {
   virtual void Deactivate();
   virtual bool IsRunning() { return active_; }
   virtual void DoWork();
-  virtual void HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet);
+  virtual void HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet);
 
  private:
   void lookForTimeouts();
@@ -63,7 +63,7 @@ class SpoutInstance : public InstanceBase {
 
   std::shared_ptr<TaskContextImpl> taskContext_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   api::spout::ISpout* spout_;
   std::shared_ptr<api::serializer::IPluggableSerializer> serializer_;
   std::shared_ptr<SpoutOutputCollectorImpl> collector_;

@@ -63,9 +63,11 @@ class HeronStateMgr {
   virtual ~HeronStateMgr();
 
   // Factory method to create
-  static shared_ptr<HeronStateMgr> MakeStateMgr(const std::string& _zk_hostport,
-                                             const std::string& _topleveldir, EventLoop* eventLoop,
-                                             bool exitOnSessionExpiry = true);
+  static shared_ptr<HeronStateMgr> MakeStateMgr(
+    const std::string& _zk_hostport,
+    const std::string& _topleveldir,
+    shared_ptr<EventLoop> eventLoop,
+    bool exitOnSessionExpiry = true);
 
   //
   // Interface methods
@@ -85,12 +87,12 @@ class HeronStateMgr {
 
   // Sets/Gets the Tmaster
   virtual void GetTMasterLocation(const std::string& _topology_name,
-                                  proto::tmaster::TMasterLocation* _return,
+                                  shared_ptr<proto::tmaster::TMasterLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetMetricsCacheLocation(const std::string& _topology_name,
-                                  proto::tmaster::MetricsCacheLocation* _return,
+                                  shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;

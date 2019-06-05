@@ -44,7 +44,7 @@ class HTTPServer {
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
-  HTTPServer(EventLoop* eventLoop, const NetworkOptions& options);
+  HTTPServer(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Destructor.
   virtual ~HTTPServer();
@@ -64,7 +64,7 @@ class HTTPServer {
                       const sp_string& _reason);
 
   // Accessors
-  EventLoop* getEventLoop() { return eventLoop_; }
+  std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
  private:
   void HandleHTTPRequest(struct evhttp_request* _request);
@@ -76,7 +76,7 @@ class HTTPServer {
   std::unordered_map<sp_string, VCallback<IncomingHTTPRequest*>> cbs_;
   VCallback<IncomingHTTPRequest*> generic_cb_;
   NetworkOptions options_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
   // friend declarations
   friend void HTTPServerRequestCallback(struct evhttp_request*, void*);

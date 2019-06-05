@@ -36,7 +36,7 @@ class InstanceBase {
   virtual void Deactivate() = 0;
   virtual bool IsRunning() = 0;
   virtual void DoWork() = 0;
-  virtual void HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet) = 0;
+  virtual void HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) = 0;
 };
 
 }  // namespace instance

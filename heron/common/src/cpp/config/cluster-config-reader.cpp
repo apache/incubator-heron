@@ -32,8 +32,8 @@
 namespace heron {
 namespace config {
 
-ClusterConfigReader::ClusterConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file)
-    : YamlFileReader(eventLoop, _defaults_file) {
+ClusterConfigReader::ClusterConfigReader(std::shared_ptr<EventLoop> eventLoop,
+        const sp_string& _defaults_file): YamlFileReader(eventLoop, _defaults_file) {
   LoadConfig();
 }
 

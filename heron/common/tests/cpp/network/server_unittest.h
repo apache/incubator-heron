@@ -29,7 +29,7 @@
 
 class TestServer : public Server {
  public:
-  TestServer(EventLoopImpl* ss, const NetworkOptions& options);
+  TestServer(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options);
 
   ~TestServer();
 
@@ -47,10 +47,10 @@ class TestServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
   // handle the test message
-  virtual void HandleTestMessage(Connection* connection, TestMessage* message);
+  virtual void HandleTestMessage(Connection* connection, unique_ptr<TestMessage> message);
 
   // handle the terminate message
-  virtual void HandleTerminateMessage(Connection* connection, TerminateMessage* message);
+  virtual void HandleTerminateMessage(Connection* connection, unique_ptr<TerminateMessage> message);
 
  private:
   void Terminate();

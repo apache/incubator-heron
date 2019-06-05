@@ -56,7 +56,7 @@ class AsyncDNS {
   };
 
   // Constructor/Destructor
-  explicit AsyncDNS(EventLoop* eventLoop);
+  explicit AsyncDNS(std::shared_ptr<EventLoop> eventLoop);
   ~AsyncDNS();
 
   // The main interface function.

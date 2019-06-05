@@ -35,7 +35,9 @@
 namespace heron {
 namespace common {
 
-TMasterMetrics::TMasterMetrics(const sp_string& sinks_filename, EventLoop* eventLoop) {
+using std::shared_ptr;
+
+TMasterMetrics::TMasterMetrics(const sp_string& sinks_filename, shared_ptr<EventLoop> eventLoop) {
   sinks_reader_ = new config::MetricsSinksReader(eventLoop, sinks_filename);
   std::list<std::pair<sp_string, sp_string> > metrics;
   sinks_reader_->GetTMasterMetrics(metrics);

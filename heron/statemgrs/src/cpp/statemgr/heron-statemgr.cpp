@@ -32,9 +32,12 @@
 namespace heron {
 namespace common {
 
-shared_ptr<HeronStateMgr> HeronStateMgr::MakeStateMgr(const std::string& _zk_hostport,
-                                           const std::string& _topleveldir, EventLoop* eventLoop,
-                                           bool exitOnSessionExpiry) {
+shared_ptr<HeronStateMgr> HeronStateMgr::MakeStateMgr(
+    const std::string& _zk_hostport,
+    const std::string& _topleveldir,
+    shared_ptr<EventLoop> eventLoop,
+    bool exitOnSessionExpiry) {
+
   if (_zk_hostport.empty()) {
     return std::make_shared<HeronLocalFileStateMgr>(_topleveldir, eventLoop);
   } else {

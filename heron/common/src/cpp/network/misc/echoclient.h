@@ -38,7 +38,7 @@ class EchoClient : public Client
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleEchoResponse(void*, EchoServerResponse* response,
+  void HandleEchoResponse(void*, std::unique_ptr<EchoServerResponse> response,
                           NetworkErrorCode status);
   void CreateAndSendRequest();
   sp_int32 nrequests_;

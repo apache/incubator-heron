@@ -29,7 +29,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 
-OrderClient::OrderClient(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+OrderClient::OrderClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                          sp_uint64 _ntotal)
     : Client(eventLoop, _options), ntotal_(_ntotal) {
   InstallMessageHandler(&OrderClient::HandleOrderMessage);
@@ -60,12 +60,10 @@ void OrderClient::HandleConnect(NetworkErrorCode _status) {
 
 void OrderClient::HandleClose(NetworkErrorCode) {}
 
-void OrderClient::HandleOrderMessage(OrderMessage* _message) {
+void OrderClient::HandleOrderMessage(unique_ptr<OrderMessage> _message) {
   ++nrecv_;
 
   EXPECT_EQ(msgidr_++, _message->id());
-
-  delete _message;
 
   if (nrecv_ >= ntotal_) {
     Stop();

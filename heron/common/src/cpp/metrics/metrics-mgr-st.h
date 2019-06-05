@@ -51,7 +51,7 @@ class IMetric;
 
 class MetricsMgrSt {
  public:
-  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop);
+  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, shared_ptr<EventLoop> eventLoop);
   virtual ~MetricsMgrSt();
 
   void register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric);
@@ -78,7 +78,7 @@ class MetricsMgrSt {
   MetricsMgrClient* client_;
   NetworkOptions options_;
   sp_int64 timerid_;
-  EventLoop* eventLoop_;
+  shared_ptr<EventLoop> eventLoop_;
 };
 }  // namespace common
 }  // namespace heron

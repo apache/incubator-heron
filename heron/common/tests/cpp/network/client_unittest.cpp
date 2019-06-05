@@ -28,8 +28,8 @@
 #include "errors/errors.h"
 #include "threads/threads.h"
 
-TestClient::TestClient(EventLoopImpl* eventLoop, const NetworkOptions& _options, sp_uint64 _ntotal)
-    : Client(eventLoop, _options), ntotal_(_ntotal) {
+TestClient::TestClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
+        sp_uint64 _ntotal): Client(eventLoop, _options), ntotal_(_ntotal) {
   InstallMessageHandler(&TestClient::HandleTestMessage);
   start_time_ = time(NULL);
   nsent_ = nrecv_ = 0;
@@ -62,9 +62,8 @@ void TestClient::HandleConnect(NetworkErrorCode _status) {
 
 void TestClient::HandleClose(NetworkErrorCode) {}
 
-void TestClient::HandleTestMessage(TestMessage* _message) {
+void TestClient::HandleTestMessage(unique_ptr<TestMessage> _message) {
   ++nrecv_;
-  delete _message;
 
   if (nrecv_ >= ntotal_) {
     Stop();

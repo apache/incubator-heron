@@ -81,6 +81,8 @@
 #include "network/network_error.h"
 #include "network/packet.h"
 
+using std::unique_ptr;
+
 /*
  * Server class definition
  * Given a host/port, the server binds and listens on that host/port
@@ -104,7 +106,7 @@ class Server : public BaseServer {
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
-  Server(EventLoop* eventLoop, const NetworkOptions& options);
+  Server(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Destructor.
   virtual ~Server();
@@ -149,22 +151,20 @@ class Server : public BaseServer {
 
   // Register a handler for a particular request type
   template <typename T, typename M>
-  void InstallRequestHandler(void (T::*method)(REQID id, Connection* conn, M*)) {
-    google::protobuf::Message* m = new M();
+  void InstallRequestHandler(void (T::*method)(REQID id, Connection* conn, unique_ptr<M>)) {
+    unique_ptr<google::protobuf::Message> m = make_unique<M>();
     T* t = static_cast<T*>(this);
     requestHandlers[m->GetTypeName()] = std::bind(&Server::dispatchRequest<T, M>, this, t, method,
                                                   std::placeholders::_1, std::placeholders::_2);
-    delete m;
   }
 
   // Register a handler for a particular message type
   template <typename T, typename M>
-  void InstallMessageHandler(void (T::*method)(Connection* conn, M*)) {
-    google::protobuf::Message* m = new M();
+  void InstallMessageHandler(void (T::*method)(Connection* conn, unique_ptr<M>)) {
+    unique_ptr<google::protobuf::Message> m = make_unique<M>();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] = std::bind(&Server::dispatchMessage<T, M>, this, t, method,
                                                   std::placeholders::_1, std::placeholders::_2);
-    delete m;
   }
 
   // One can also send requests to the client
@@ -179,7 +179,7 @@ class Server : public BaseServer {
   virtual void StopBackPressureConnectionCb(Connection* _connection);
 
   // Return the underlying EventLoop.
-  EventLoop* getEventLoop() { return eventLoop_; }
+  std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
  protected:
   // Called when a new connection is accepted.
@@ -199,7 +199,7 @@ class Server : public BaseServer {
 
   // Create the connection
   BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                   EventLoop* ss);
+                                   std::shared_ptr<EventLoop> ss);
 
   // Called when connection is accepted
   virtual void HandleNewConnection_Base(BaseConnection* newConnection);
@@ -214,44 +214,47 @@ class Server : public BaseServer {
   void InternalSendResponse(Connection* _connection, OutgoingPacket* _packet);
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t, void (T::*method)(REQID id, Connection* conn, M*), Connection* _conn,
+  void dispatchRequest(T* _t, void (T::*method)(REQID id, Connection* conn, unique_ptr<M>),
+                       Connection* _conn,
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = nullptr;
-    m = __global_protobuf_pool_acquire__(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
+
+    auto m = make_unique<M>();
+
+    if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
+
     CHECK(m->IsInitialized());
 
-    std::function<void()> cb = std::bind(method, _t, rid, _conn, m);
+    auto cb = std::bind(method, _t, rid, _conn, std::placeholders::_1);
 
-    cb();
+    cb(std::move(m));
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t, void (T::*method)(Connection* conn, M*), Connection* _conn,
+  void dispatchMessage(T* _t, void (T::*method)(Connection* conn, unique_ptr<M>),
+                       Connection* _conn,
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = nullptr;
-    m = __global_protobuf_pool_acquire__(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
+
+    auto m = make_unique<M>();
+
+    if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      __global_protobuf_pool_release__(m);
       CloseConnection(_conn);
       return;
     }
 
-    std::function<void()> cb = std::bind(method, _t, _conn, m);
+    auto cb = std::bind(method, _t, _conn, std::placeholders::_1);
 
-    cb();
+    cb(std::move(m));
   }
 
   void InternalSendRequest(Connection* _conn, google::protobuf::Message* _request, sp_int64 _msecs,

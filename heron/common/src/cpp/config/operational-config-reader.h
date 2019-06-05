@@ -32,7 +32,7 @@ namespace config {
 
 class OperationalConfigReader : public YamlFileReader {
  public:
-  OperationalConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
+  OperationalConfigReader(std::shared_ptr<EventLoop> eventLoop, const sp_string& _defaults_file);
   virtual ~OperationalConfigReader();
 
   // Gets release override for this topology name

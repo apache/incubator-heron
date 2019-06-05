@@ -220,7 +220,7 @@ static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(int num_stmgr
 // Method to create the local zk state on the filesystem
 const std::string CreateLocalStateOnFS(heron::proto::api::Topology* topology,
                                        heron::proto::system::PackingPlan* packingPlan) {
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // Create a temporary directory to write out the state
   char dpath[255];
@@ -229,7 +229,7 @@ const std::string CreateLocalStateOnFS(heron::proto::api::Topology* topology,
 
   // Write the dummy topology/tmaster location out to the local file system
   // via thestate mgr
-  heron::common::HeronLocalFileStateMgr state_mgr(dpath, &ss);
+  heron::common::HeronLocalFileStateMgr state_mgr(dpath, ss);
   state_mgr.CreateTopology(*topology, NULL);
   state_mgr.CreatePackingPlan(topology->name(), *packingPlan, NULL);
 
@@ -270,7 +270,7 @@ void DummyTimerCb(EventLoop::Status) {
 }
 
 // Function to start the threads
-void StartServer(EventLoopImpl* ss) {
+void StartServer(std::shared_ptr<EventLoopImpl> ss) {
   // In the ss register a dummy timer. This is to make sure that the
   // exit from the loop happens timely. If there are no timers registered
   // with the select server and also no activity on any of the fds registered
@@ -279,12 +279,12 @@ void StartServer(EventLoopImpl* ss) {
   ss->loop();
 }
 
-void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
+void StartTMaster(std::shared_ptr<EventLoopImpl>& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const std::string& zkhostportlist,
                   const std::string& topology_name, const std::string& topology_id,
                   const std::string& dpath, const std::string& tmaster_host, sp_int32 tmaster_port,
                   sp_int32 tmaster_controller_port, sp_int32 ckptmgr_port) {
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_port + 2,
                                   tmaster_port + 3, ckptmgr_port,
@@ -293,12 +293,12 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
   // tmaster_thread->start();
 }
 
-void StartDummyStMgr(EventLoopImpl*& ss, heron::testing::DummyStMgr*& mgr,
+void StartDummyStMgr(std::shared_ptr<EventLoopImpl>& ss, heron::testing::DummyStMgr*& mgr,
                      std::thread*& stmgr_thread, const std::string tmaster_host,
                      sp_int32 tmaster_port, const std::string& stmgr_id, sp_int32 stmgr_port,
                      const std::vector<heron::proto::system::Instance*>& instances) {
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
 
   NetworkOptions options;
   options.set_host(tmaster_host);
@@ -333,7 +333,7 @@ struct CommonResources {
 
   // returns - filled in by init
   std::string dpath_;
-  std::vector<EventLoopImpl*> ss_list_;
+  std::vector<std::shared_ptr<EventLoopImpl>> ss_list_;
   std::vector<std::string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
   heron::proto::system::PackingPlan* packing_plan_;
@@ -384,7 +384,7 @@ void StartTMaster(CommonResources& common) {
   }
 
   // Start the tmaster
-  EventLoopImpl* tmaster_eventLoop;
+  std::shared_ptr<EventLoopImpl> tmaster_eventLoop;
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
                common.topology_name_, common.topology_id_, common.dpath_,
@@ -435,7 +435,7 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
 void StartStMgrs(CommonResources& common) {
   // Spawn and start the stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
-    EventLoopImpl* stmgr_ss = NULL;
+    std::shared_ptr<EventLoopImpl> stmgr_ss;
     heron::testing::DummyStMgr* mgr = NULL;
     std::thread* stmgr_thread = NULL;
     StartDummyStMgr(stmgr_ss, mgr, stmgr_thread, LOCALHOST, common.tmaster_port_,
@@ -480,7 +480,7 @@ void TearCommonResources(CommonResources& common) {
     delete common.stmgrs_threads_list_[i];
   }
 
-  for (size_t i = 0; i < common.ss_list_.size(); ++i) delete common.ss_list_[i];
+  common.ss_list_.clear();
 
   for (std::map<std::string, heron::proto::system::Instance*>::iterator itr =
            common.instanceid_instance_.begin();
@@ -503,9 +503,9 @@ void ControlTopologyDone(HTTPClient* client, IncomingHTTPResponse* response) {
 }
 
 void ControlTopology(std::string topology_id, sp_int32 port, bool activate) {
-  EventLoopImpl ss;
-  AsyncDNS dns(&ss);
-  HTTPClient* client = new HTTPClient(&ss, &dns);
+  auto ss = std::make_shared<EventLoopImpl>();
+  AsyncDNS dns(ss);
+  HTTPClient* client = new HTTPClient(ss, &dns);
   HTTPKeyValuePairs kvs;
   kvs.push_back(make_pair("topologyid", topology_id));
   std::string requesturl = activate ? "/activate" : "/deactivate";
@@ -516,7 +516,7 @@ void ControlTopology(std::string topology_id, sp_int32 port, bool activate) {
   if (client->SendRequest(request, std::move(cb)) != SP_OK) {
     FAIL() << "Unable to send the request\n";
   }
-  ss.loop();
+  ss->loop();
 }
 
 void UpdateRuntimeConfigDone(HTTPClient* client,
@@ -538,9 +538,9 @@ void UpdateRuntimeConfig(std::string topology_id,
                          std::vector<std::string> configs,
                          sp_int32 code,
                          const std::string& message) {
-  EventLoopImpl ss;
-  AsyncDNS dns(&ss);
-  HTTPClient* client = new HTTPClient(&ss, &dns);
+  auto ss = std::make_shared<EventLoopImpl>();
+  AsyncDNS dns(ss);
+  HTTPClient* client = new HTTPClient(ss, &dns);
   HTTPKeyValuePairs kvs;
   kvs.push_back(make_pair("topologyid", topology_id));
   for (std::vector<std::string>::iterator iter = configs.begin(); iter != configs.end(); ++iter) {
@@ -558,7 +558,7 @@ void UpdateRuntimeConfig(std::string topology_id,
   if (client->SendRequest(request, std::move(cb)) != SP_OK) {
     FAIL() << "Unable to send the runtime config request\n";
   }
-  ss.loop();
+  ss->loop();
 }
 
 

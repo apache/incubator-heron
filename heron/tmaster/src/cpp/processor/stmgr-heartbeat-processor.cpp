@@ -31,9 +31,9 @@ namespace heron {
 namespace tmaster {
 
 StMgrHeartbeatProcessor::StMgrHeartbeatProcessor(REQID reqid, Connection* conn,
-                                                 proto::tmaster::StMgrHeartbeatRequest* request,
-                                                 TMaster* tmaster, Server* server)
-    : Processor(reqid, conn, request, tmaster, server) {}
+                                         unique_ptr<proto::tmaster::StMgrHeartbeatRequest> request,
+                                         TMaster* tmaster, Server* server)
+    : Processor(reqid, conn, std::move(request), tmaster, server) {}
 
 StMgrHeartbeatProcessor::~StMgrHeartbeatProcessor() {
   // nothing to be done here
@@ -41,7 +41,7 @@ StMgrHeartbeatProcessor::~StMgrHeartbeatProcessor() {
 
 void StMgrHeartbeatProcessor::Start() {
   proto::tmaster::StMgrHeartbeatRequest* request =
-      static_cast<proto::tmaster::StMgrHeartbeatRequest*>(request_);
+      static_cast<proto::tmaster::StMgrHeartbeatRequest*>(request_.get());
 
   proto::system::Status* status = tmaster_->UpdateStMgrHeartbeat(
       GetConnection(), request->heartbeat_time(), request->release_stats());

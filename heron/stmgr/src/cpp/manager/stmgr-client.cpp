@@ -55,11 +55,11 @@ const sp_string METRIC_BYTES_TO_STMGRS_LOST = "__bytes_to_stmgrs_lost";
 // Number of times we send hello messages to stmgrs
 const sp_string METRIC_HELLO_MESSAGES_TO_STMGRS = "__hello_messages_to_stmgrs";
 
-StMgrClient::StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
+StMgrClient::StMgrClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
                          const sp_string& _our_id, const sp_string& _other_id,
                          StMgrClientMgr* _client_manager,
-                         heron::common::MetricsMgrSt* _metrics_manager_client,
+                         shared_ptr<heron::common::MetricsMgrSt> const& _metrics_manager_client,
                          bool _droptuples_upon_backpressure)
     : Client(eventLoop, _options),
       topology_name_(_topology_name),
@@ -114,7 +114,6 @@ void StMgrClient::HandleConnect(NetworkErrorCode _status) {
                  << " due to: " << _status << std::endl;
     if (quit_) {
       LOG(ERROR) << "Instructed to quit. Quitting...";
-      delete this;
       return;
     } else {
       LOG(INFO) << "Retrying again..." << std::endl;
@@ -135,9 +134,7 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
               << ":" << get_clientoptions().get_port() << " closed connection with code " << _code
               << std::endl;
   }
-  if (quit_) {
-    delete this;
-  } else {
+  if (!quit_) {
     client_manager_->HandleDeadStMgrConnection(other_stmgr_id_);
     LOG(INFO) << "Will try to reconnect again after 1 seconds" << std::endl;
     AddTimer([this]() { this->OnReConnectTimer(); },
@@ -145,30 +142,34 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
   }
 }
 
-void StMgrClient::HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response,
-                                      NetworkErrorCode _status) {
+void StMgrClient::HandleHelloResponse(
+                                        void*,
+                                        unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
+                                        NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code " << _status << " for register response from stmgr "
                << other_stmgr_id_ << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
-    __global_protobuf_pool_release__(_response);
     Stop();
     return;
   }
+
   proto::system::StatusCode status = _response->status().status();
+
   if (status != proto::system::OK) {
     LOG(ERROR) << "NonOK register response " << status << " from stmgr " << other_stmgr_id_
                << " running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
-    __global_protobuf_pool_release__(_response);
     Stop();
     return;
   }
-  __global_protobuf_pool_release__(_response);
+
   is_registered_ = true;
+
   if (client_manager_->DidAnnounceBackPressure()) {
     SendStartBackPressureMessage();
   }
+
   client_manager_->HandleStMgrClientRegistered();
 }
 
@@ -184,7 +185,7 @@ void StMgrClient::SendHelloRequest() {
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
   request->set_stmgr(our_stmgr_id_);
-  SendRequest(std::move(request), NULL);
+  SendRequest(std::move(request), nullptr);
   stmgr_client_metrics_->scope(METRIC_HELLO_MESSAGES_TO_STMGRS)->incr_by(1);
   return;
 }
@@ -238,8 +239,7 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
   return retval;
 }
 
-void StMgrClient::HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message) {
-  __global_protobuf_pool_release__(_message);
+void StMgrClient::HandleTupleStreamMessage(unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 
@@ -268,30 +268,24 @@ void StMgrClient::SendStartBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StartBackPressureMessage* message = nullptr;
-  message = __global_protobuf_pool_acquire__(message);
+  auto message = make_unique<proto::stmgr::StartBackPressureMessage>();
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
-
-  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendStopBackPressureMessage() {
   REQID_Generator generator;
   REQID rand = generator.generate();
   // generator.generate(rand);
-  proto::stmgr::StopBackPressureMessage* message = nullptr;
-  message = __global_protobuf_pool_acquire__(message);
+  auto message = make_unique<proto::stmgr::StopBackPressureMessage>();
   message->set_topology_name(topology_name_);
   message->set_topology_id(topology_id_);
   message->set_stmgr(our_stmgr_id_);
   message->set_message_id(rand.str());
   SendMessage(*message);
-
-  __global_protobuf_pool_release__(message);
 }
 
 void StMgrClient::SendDownstreamStatefulCheckpoint(
@@ -301,7 +295,7 @@ void StMgrClient::SendDownstreamStatefulCheckpoint(
             << _message->destination_task_id() << " checkpoint: "
             << _message->checkpoint_id();
   SendMessage(*_message);
-  __global_protobuf_pool_release__(_message);
+  delete _message;
 }
 }  // namespace stmgr
 }  // namespace heron

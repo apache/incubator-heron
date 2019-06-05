@@ -50,6 +50,8 @@
 #include "network/network_error.h"
 #include "network/packet.h"
 
+using std::unique_ptr;
+
 /*
  * Client class definition
  * Given a host/port, the client tries to connect to the host port.
@@ -73,7 +75,7 @@ class Client : public BaseClient {
   // Note that constructor doesn't do much beyond initializing some members.
   // Users must explicitly invoke the Start method to be able to send requests
   // and receive responses.
-  Client(EventLoop* eventLoop, const NetworkOptions& options);
+  Client(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
   virtual ~Client();
 
   // This starts the connect opereation.
@@ -129,8 +131,9 @@ class Client : public BaseClient {
 
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
-  void InstallResponseHandler(std::unique_ptr<S> _request,
-                              void (T::*method)(void* _ctx, M*, NetworkErrorCode status)) {
+  void InstallResponseHandler(unique_ptr<S> _request,
+                              void (T::*method)(void* _ctx, unique_ptr<M>,
+                              NetworkErrorCode status)) {
     auto m = make_unique<M>();
     T* t = static_cast<T*>(this);
     responseHandlers[m->GetTypeName()] = std::bind(&Client::dispatchResponse<T, M>, this, t, method,
@@ -140,7 +143,7 @@ class Client : public BaseClient {
 
   // Register a handler for a particular message type
   template <typename T, typename M>
-  void InstallMessageHandler(void (T::*method)(M* _message)) {
+  void InstallMessageHandler(void (T::*method)(unique_ptr<M> _message)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] =
@@ -157,7 +160,7 @@ class Client : public BaseClient {
   }
 
   // Return the underlying EventLoop.
-  EventLoop* getEventLoop() { return eventLoop_; }
+  std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
  protected:
   // Derived class should implement this method to handle Connection
@@ -188,7 +191,7 @@ class Client : public BaseClient {
  private:
   //! Imlement methods of BaseClient
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                           EventLoop* eventLoop);
+                                           std::shared_ptr<EventLoop> eventLoop);
   virtual void HandleConnect_Base(NetworkErrorCode status);
   virtual void HandleClose_Base(NetworkErrorCode status);
 
@@ -209,10 +212,10 @@ class Client : public BaseClient {
   void OnPacketTimer(REQID _id, EventLoop::Status status);
 
   template <typename T, typename M>
-  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, M*, NetworkErrorCode),
+  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, unique_ptr<M>, NetworkErrorCode),
                         IncomingPacket* _ipkt, NetworkErrorCode _code) {
     void* ctx = nullptr;
-    M* m = nullptr;
+    unique_ptr<M> m = nullptr;
     NetworkErrorCode status = _code;
     if (status == OK && _ipkt) {
       REQID rid;
@@ -220,9 +223,9 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = __global_protobuf_pool_acquire__(m);
+        m = make_unique<M>();
         context_map_.erase(rid);
-        _ipkt->UnPackProtocolBuffer(m);
+        _ipkt->UnPackProtocolBuffer(m.get());
       } else {
         // This is either some unknown message type or the response of an
         // already timed out request
@@ -232,26 +235,26 @@ class Client : public BaseClient {
       }
     }
 
-    std::function<void()> cb = std::bind(method, _t, ctx, m, status);
+    auto cb = std::bind(method, _t, ctx, std::placeholders::_1, status);
 
-    cb();
+    cb(std::move(m));
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = nullptr;
-    m = __global_protobuf_pool_acquire__(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
+  void dispatchMessage(T* _t, void (T::*method)(unique_ptr<M>), IncomingPacket* _ipkt) {
+    unique_ptr<M> m = make_unique<M>();
+
+    if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      __global_protobuf_pool_release__(m);
       return;
     }
+
     CHECK(m->IsInitialized());
 
-    std::function<void()> cb = std::bind(method, _t, m);
+    auto cb = std::bind(method, _t, std::placeholders::_1);
 
-    cb();
+    cb(std::move(m));
   }
 
   //! Map from reqid to the response/context pair of the request

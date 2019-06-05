@@ -49,9 +49,9 @@ template<typename T>
 class NotifyingCommunicator {
  public:
   // Constructor/Destructor
-  NotifyingCommunicator(EventLoop* consumer_loop,
+  NotifyingCommunicator(std::shared_ptr<EventLoop> consumer_loop,
                         std::function<void(T)> consumer_function,
-                        EventLoop* notification_loop,
+                        std::shared_ptr<EventLoop> notification_loop,
                         std::function<void()> notification_function) {
     consumption_function_ = std::move(consumer_function);
     notification_function_ = std::move(notification_function);
@@ -69,7 +69,7 @@ class NotifyingCommunicator {
   }
 
   void enqueue(T t) {
-    forward_channel_->enqueue(t);
+    forward_channel_->enqueue(std::move(t));
   }
 
   int size() {
@@ -88,7 +88,7 @@ class NotifyingCommunicator {
     notification_function_();
   }
   void consumption_function(T t) {
-    consumption_function_(t);
+    consumption_function_(std::move(t));
     notification_channel_->enqueue(&unused_);
   }
 

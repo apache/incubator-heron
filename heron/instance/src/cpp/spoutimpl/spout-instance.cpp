@@ -33,7 +33,7 @@
 namespace heron {
 namespace instance {
 
-SpoutInstance::SpoutInstance(EventLoop* eventLoop,
+SpoutInstance::SpoutInstance(std::shared_ptr<EventLoop> eventLoop,
                              std::shared_ptr<TaskContextImpl> taskContext,
                              NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
                              void* dllHandle)
@@ -178,10 +178,11 @@ bool SpoutInstance::canContinueWork() {
           collector_->numInFlight() < maxSpoutPending));
 }
 
-void SpoutInstance::HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet) {
+void SpoutInstance::HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (tupleSet->has_data()) {
     LOG(FATAL) << "Spout cannot get incoming data tuples from other components";
   }
+
   if (tupleSet->has_control()) {
     for (auto ack : tupleSet->control().acks()) {
       handleAckTuple(ack, true);
@@ -190,7 +191,7 @@ void SpoutInstance::HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet)
       handleAckTuple(ack, false);
     }
   }
-  delete tupleSet;
+
   if (canContinueWork()) {
     eventLoop_->registerInstantCallback([this]() { this->DoWork(); });
   }

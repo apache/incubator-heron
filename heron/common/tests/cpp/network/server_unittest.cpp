@@ -27,7 +27,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 
-TestServer::TestServer(EventLoopImpl* eventLoop, const NetworkOptions& _options)
+TestServer::TestServer(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options)
     : Server(eventLoop, _options) {
   InstallMessageHandler(&TestServer::HandleTestMessage);
   InstallMessageHandler(&TestServer::HandleTerminateMessage);
@@ -55,7 +55,7 @@ void TestServer::HandleConnectionClose(Connection* _conn,
 }
 
 void TestServer::HandleTestMessage(Connection* _connection __attribute__((unused)),
-                                   TestMessage* _message) {
+                                   unique_ptr<TestMessage> _message) {
   nrecv_++;
 
   // find a random client to send the message to
@@ -73,6 +73,6 @@ void TestServer::Terminate() {
 }
 
 void TestServer::HandleTerminateMessage(Connection* _connection __attribute__((unused)),
-                                        TerminateMessage* _message __attribute__((unused))) {
+                                    unique_ptr<TerminateMessage> _message __attribute__((unused))) {
   AddTimer([this]() { this->Terminate(); }, 1);
 }

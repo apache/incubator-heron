@@ -31,12 +31,15 @@
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class TMasterClient : public Client {
  public:
-  TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
+  TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
+                const sp_string& _stmgr_id,
                 const sp_string& _stmgr_host, sp_int32 _data_port, sp_int32 _local_data_port,
                 sp_int32 _shell_port,
-                VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
                 VCallback<sp_string> _stateful_checkpoint_watch,
                 VCallback<sp_string, sp_int64> _restore_topology_watch,
                 VCallback<sp_string> _start_stateful_watch);
@@ -70,15 +73,18 @@ class TMasterClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* _response,
+  void HandleRegisterResponse(void*, unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*, proto::tmaster::StMgrHeartbeatResponse* response,
+  void HandleHeartbeatResponse(void*, unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
 
-  void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message);
-  void HandleStatefulCheckpointMessage(proto::ckptmgr::StartStatefulCheckpoint* _message);
-  void HandleRestoreTopologyStateRequest(proto::ckptmgr::RestoreTopologyStateRequest* _message);
-  void HandleStartStmgrStatefulProcessing(proto::ckptmgr::StartStmgrStatefulProcessing* _msg);
+  void HandleNewAssignmentMessage(unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message);
+  void HandleStatefulCheckpointMessage(
+                                      unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message);
+  void HandleRestoreTopologyStateRequest(
+                                  unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message);
+  void HandleStartStmgrStatefulProcessing(
+                                     unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _msg);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();
@@ -94,11 +100,11 @@ class TMasterClient : public Client {
   sp_int32 shell_port_;
 
   // Set of instances to be reported to tmaster
-  std::set<proto::system::Instance*> instances_;
+  std::set<unique_ptr<proto::system::Instance>> instances_;
 
   bool to_die_;
   // We invoke this callback upon a new physical plan from tmaster
-  VCallback<proto::system::PhysicalPlan*> pplan_watch_;
+  VCallback<shared_ptr<proto::system::PhysicalPlan>> pplan_watch_;
   // We invoke this callback upon receiving a checkpoint message from tmaster
   // passing in the checkpoint id
   VCallback<sp_string> stateful_checkpoint_watch_;

@@ -62,7 +62,7 @@ class BaseServer {
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
-  BaseServer(EventLoop* eventLoop, const NetworkOptions& options);
+  BaseServer(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Destructor.
   virtual ~BaseServer();
@@ -101,7 +101,7 @@ class BaseServer {
  protected:
   // Instantiate a new Connection
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                           EventLoop* eventLoop) = 0;
+                                           std::shared_ptr<EventLoop> eventLoop) = 0;
 
   // Called when a new connection is accepted.
   virtual void HandleNewConnection_Base(BaseConnection* newConnection) = 0;
@@ -111,14 +111,14 @@ class BaseServer {
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status) = 0;
 
   // The underlying EventLoop
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
   // The set of active connections
   std::unordered_set<BaseConnection*> active_connections_;
 
  private:
   // Internal helper function to initialize things
-  void Init(EventLoop* eventLoop, const NetworkOptions& options);
+  void Init(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Internal method to be called when a write event happens on listen_fd_
   void OnNewConnection(EventLoop::Status status);

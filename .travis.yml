@@ -24,6 +24,7 @@ addons:
       - zlib1g-dev
       - google-perftools
       - libgoogle-perftools-dev
+      - libtool-bin
 
 env:
   - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1

@@ -42,7 +42,7 @@ using std::shared_ptr;
 class TMetricsCollector {
  public:
   // _max_interval is how far along we keep individual metric blobs.
-  TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
+  TMetricsCollector(sp_int32 _max_interval, std::shared_ptr<EventLoop> eventLoop,
                     const std::string& metrics_sinks_yaml);
 
   // Deletes all stored ComponentMetrics.
@@ -252,7 +252,7 @@ class TMetricsCollector {
   sp_int32 max_interval_;
   sp_int32 nintervals_;
   sp_int32 interval_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   std::string metrics_sinks_yaml_;
   std::unique_ptr<common::TMasterMetrics> tmetrics_info_;
   time_t start_time_;

@@ -97,7 +97,8 @@ class BaseConnection {
     TO_BE_DISCONNECTED,
   };
 
-  BaseConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options, EventLoop* eventLoop);
+  BaseConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
+          std::shared_ptr<EventLoop> eventLoop);
   virtual ~BaseConnection();
 
   /**
@@ -212,7 +213,7 @@ class BaseConnection {
   ConnectionEndPoint* mEndpoint;
 
   // The underlying event loop
-  EventLoop* mEventLoop;
+  std::shared_ptr<EventLoop> mEventLoop;
   // The underlying bufferevent
   struct bufferevent* buffer_;
 

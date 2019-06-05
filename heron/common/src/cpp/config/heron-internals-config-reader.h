@@ -45,7 +45,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
   static bool Exists();
   // Create a singleton reader from a config file,
   // which will check and reload the config change
-  static void Create(EventLoop* eventLoop,
+  static void Create(std::shared_ptr<EventLoop> eventLoop,
                      const sp_string& _defaults_file, const sp_string& _override_file);
   // Create a singleton reader from a config file,
   // which will not check or reload the config change
@@ -235,7 +235,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
   int GetHeronInstanceAcknowledgementNbuckets();
 
  protected:
-  HeronInternalsConfigReader(EventLoop* eventLoop,
+  HeronInternalsConfigReader(std::shared_ptr<EventLoop> eventLoop,
                              const sp_string& _defaults_file,
                              const sp_string& _override_file);
   virtual ~HeronInternalsConfigReader();

@@ -154,7 +154,7 @@ unique_ptr<heron::proto::system::Instance> CreateInstance(int32_t _comp, int32_t
   return imap;
 }
 
-heron::proto::system::PhysicalPlan* CreatePplan(int32_t _ncontainers,
+std::shared_ptr<heron::proto::system::PhysicalPlan> CreatePplan(int32_t _ncontainers,
                                                 int32_t _nsbcomp, int32_t _ninstances) {
   int32_t nContainers = _ncontainers;
   int32_t nSpouts = _nsbcomp;
@@ -164,7 +164,7 @@ heron::proto::system::PhysicalPlan* CreatePplan(int32_t _ncontainers,
   auto topology = GenerateDummyTopology("TestTopology", "TestTopology-12345",
                                         nSpouts, nSpoutInstances, nBolts, nBoltInstances,
                                         heron::proto::api::SHUFFLE);
-  auto pplan = new heron::proto::system::PhysicalPlan();
+  auto pplan = std::make_shared<heron::proto::system::PhysicalPlan>();
   pplan->mutable_topology()->CopyFrom(*topology);
   delete topology;
   for (int32_t i = 0; i < nContainers; ++i) {
@@ -200,6 +200,7 @@ heron::proto::system::PhysicalPlan* CreatePplan(int32_t _ncontainers,
 static std::vector<sp_int32> drainer1_tuples;
 static std::vector<sp_int32> drainer2_tuples;
 static std::vector<sp_int32> drainer3_markers;
+
 void drainer1(sp_int32 _task_id, heron::proto::system::HeronTupleSet2* _tup) {
   drainer1_tuples.push_back(_task_id);
   delete _tup;
@@ -210,9 +211,9 @@ void drainer2(heron::proto::stmgr::TupleStreamMessage* _tup) {
   delete _tup;
 }
 
-void drainer3(sp_int32 _task_id, heron::proto::ckptmgr::InitiateStatefulCheckpoint* _ckpt) {
+void drainer3(sp_int32 _task_id,
+        std::unique_ptr<heron::proto::ckptmgr::InitiateStatefulCheckpoint> _ckpt) {
   drainer3_markers.push_back(_task_id);
-  delete _ckpt;
 }
 
 // Test to make sure that without any checkpoint business, things work smoothly
@@ -220,12 +221,14 @@ TEST(CheckpointGateway, emptyckptid) {
   for (int i = 1; i < 4; ++i) {
     for (int j = 1; j < 4; ++j) {
       auto pplan = CreatePplan(2, i, j);
-      auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
+      auto neighbour_calculator = std::make_shared<heron::stmgr::NeighbourCalculator>();
       neighbour_calculator->Reconstruct(*pplan);
-      EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      auto dummyLoop = std::make_shared<EventLoopImpl>();
+      auto dummy_metrics_client_ =
+              std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
       dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-      auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
+      auto gateway = std::make_shared<heron::stmgr::CheckpointGateway>(1024 * 1024,
+                                                         neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);
       int nTuples = 100;
@@ -243,17 +246,12 @@ TEST(CheckpointGateway, emptyckptid) {
       drainer1_tuples.clear();
       drainer2_tuples.clear();
       drainer3_markers.clear();
-      delete pplan;
-      delete neighbour_calculator;
-      delete gateway;
-      delete dummy_metrics_client_;
-      delete dummyLoop;
     }
   }
 }
 
 void computeTasks(const heron::proto::system::PhysicalPlan& _pplan,
-                  heron::stmgr::NeighbourCalculator* _neighbour_calculator,
+                  std::shared_ptr<heron::stmgr::NeighbourCalculator> _neighbour_calculator,
                   std::unordered_set<sp_int32>& _local_tasks,
                   std::unordered_set<sp_int32>& _local_spouts,
                   std::unordered_set<sp_int32>& _local_bolts,
@@ -276,12 +274,14 @@ TEST(CheckpointGateway, normaloperation) {
   for (int i = 1; i < 4; ++i) {
     for (int j = 1; j < 4; ++j) {
       auto pplan = CreatePplan(2, i, j);
-      auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
+      auto neighbour_calculator = std::make_shared<heron::stmgr::NeighbourCalculator>();
       neighbour_calculator->Reconstruct(*pplan);
-      EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      auto dummyLoop = std::make_shared<EventLoopImpl>();
+      auto dummy_metrics_client_ =
+              std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
       dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-      auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
+      auto gateway = std::make_shared<heron::stmgr::CheckpointGateway>(1024 * 1024,
+                                                         neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);
       // We will pretend to be one of the stmgrs
@@ -351,11 +351,6 @@ TEST(CheckpointGateway, normaloperation) {
       drainer1_tuples.clear();
       drainer2_tuples.clear();
       drainer3_markers.clear();
-      delete pplan;
-      delete neighbour_calculator;
-      delete gateway;
-      delete dummy_metrics_client_;
-      delete dummyLoop;
     }
   }
 }
@@ -365,12 +360,14 @@ TEST(CheckpointGateway, overflow) {
   for (int i = 1; i < 4; ++i) {
     for (int j = 1; j < 4; ++j) {
       auto pplan = CreatePplan(2, i, j);
-      auto neighbour_calculator = new heron::stmgr::NeighbourCalculator();
+      auto neighbour_calculator = std::make_shared<heron::stmgr::NeighbourCalculator>();
       neighbour_calculator->Reconstruct(*pplan);
-      EventLoop* dummyLoop = new EventLoopImpl();
-      auto dummy_metrics_client_ = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+      auto dummyLoop = std::make_shared<EventLoopImpl>();
+      auto dummy_metrics_client_ =
+              std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
       dummy_metrics_client_->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-      auto gateway = new heron::stmgr::CheckpointGateway(1024 * 1024, neighbour_calculator,
+      auto gateway = std::make_shared<heron::stmgr::CheckpointGateway>(1024 * 1024,
+                                                         neighbour_calculator,
                                                          dummy_metrics_client_,
                                                          drainer1, drainer2, drainer3);
       // We will pretend to be one of the stmgrs
@@ -447,11 +444,6 @@ TEST(CheckpointGateway, overflow) {
       drainer1_tuples.clear();
       drainer2_tuples.clear();
       drainer3_markers.clear();
-      delete pplan;
-      delete neighbour_calculator;
-      delete gateway;
-      delete dummy_metrics_client_;
-      delete dummyLoop;
     }
   }
 }

@@ -37,7 +37,7 @@ from heron.statemgrs.src.python.filestatemanager import FileStateManager
 DEFAULT_TEST_CONF_FILE = "integration_test/src/python/topology_test_runner/resources/test.json"
 
 #seconds
-RETRY_ATTEMPTS = 15
+RETRY_ATTEMPTS = 25
 RETRY_INTERVAL = 10
 WAIT_FOR_DEACTIVATION = 5
 

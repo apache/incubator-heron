@@ -31,11 +31,11 @@ void CallHandleConnectionCloseAndDelete(BaseServer* _server, BaseConnection* _co
   delete _connection;
 }
 
-BaseServer::BaseServer(EventLoop* eventLoop, const NetworkOptions& _options) {
+BaseServer::BaseServer(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options) {
   Init(eventLoop, _options);
 }
 
-void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
+void BaseServer::Init(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   listen_fd_ = -1;

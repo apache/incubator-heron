@@ -28,7 +28,7 @@
 void RunUserCb(VCallback<> cb) { cb(); }
 
 // Constructor. We create a new event_base
-Piper::Piper(EventLoop* eventLoop)
+Piper::Piper(std::shared_ptr<EventLoop> eventLoop)
     : eventLoop_(eventLoop) {
   cbs_ = new PCQueue<CallBack*>();
   auto wakeup_cb = [this](EventLoop::Status status) {

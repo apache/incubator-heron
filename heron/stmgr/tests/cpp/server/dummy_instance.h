@@ -25,7 +25,7 @@
 
 class DummyInstance : public Client {
  public:
-  DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+  DummyInstance(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                 const sp_string& _topology_name, const sp_string& _topology_id,
                 const sp_string& _instance_id, const sp_string& _component_name, sp_int32 _task_id,
                 sp_int32 _component_index, const sp_string& _stmgr_id);
@@ -39,13 +39,15 @@ class DummyInstance : public Client {
   void Retry() { Start(); }
 
   // Handle incoming message
-  virtual void HandleInstanceResponse(void* ctx,
-                                      heron::proto::stmgr::RegisterInstanceResponse* _message,
-                                      NetworkErrorCode status);
+  virtual void HandleInstanceResponse(
+                                void* ctx,
+                                unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
+                                NetworkErrorCode status);
   // Handle incoming tuples
-  virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
+  virtual void HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> _message);
   // Handle the instance assignment message
-  virtual void HandleNewInstanceAssignmentMsg(heron::proto::stmgr::NewInstanceAssignmentMessage*);
+  virtual void HandleNewInstanceAssignmentMsg(
+                               std::unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>);
 
   sp_string topology_name_;
   sp_string topology_id_;
@@ -70,7 +72,7 @@ class DummyInstance : public Client {
 
 class DummySpoutInstance : public DummyInstance {
  public:
-  DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+  DummySpoutInstance(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                      const sp_string& _topology_name, const sp_string& _topology_id,
                      const sp_string& _instance_id, const sp_string& _component_name,
                      sp_int32 _task_id, sp_int32 _component_index, const sp_string& _stmgr_id,
@@ -80,7 +82,7 @@ class DummySpoutInstance : public DummyInstance {
  protected:
   // Handle incoming message
   virtual void HandleNewInstanceAssignmentMsg(
-      heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
+      unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
   void CreateAndSendTupleMessages();
   virtual void StartBackPressureConnectionCb(Connection* connection) {
     under_backpressure_ = true;
@@ -102,7 +104,7 @@ class DummySpoutInstance : public DummyInstance {
 
 class DummyBoltInstance : public DummyInstance {
  public:
-  DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+  DummyBoltInstance(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                     const sp_string& _topology_name, const sp_string& _topology_id,
                     const sp_string& _instance_id, const sp_string& _component_name,
                     sp_int32 _task_id, sp_int32 _component_index, const sp_string& _stmgr_id,
@@ -113,9 +115,9 @@ class DummyBoltInstance : public DummyInstance {
  protected:
   // Handle incoming message
   // Handle incoming tuples
-  virtual void HandleTupleMessage(heron::proto::system::HeronTupleSet2* _message);
+  virtual void HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> _message);
   virtual void HandleNewInstanceAssignmentMsg(
-      heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
+      unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
 
  private:
   sp_int32 expected_msgs_to_recv_;

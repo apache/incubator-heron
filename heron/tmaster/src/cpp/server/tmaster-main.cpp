@@ -51,11 +51,11 @@ int main(int argc, char* argv[]) {
     FLAGS_zkhostportlist = "";
   }
 
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss,
+  heron::config::HeronInternalsConfigReader::Create(ss,
     FLAGS_config_file, FLAGS_override_config_file);
 
   heron::common::Initialize(argv[0], FLAGS_topology_id.c_str());
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
   heron::tmaster::TMaster tmaster(FLAGS_zkhostportlist, FLAGS_topology_name, FLAGS_topology_id,
                                   FLAGS_zkroot, FLAGS_controller_port, FLAGS_master_port,
                                   FLAGS_stats_port, FLAGS_metricsmgr_port,
-                                  FLAGS_ckptmgr_port, FLAGS_metrics_sinks_yaml, FLAGS_myhost, &ss);
-  ss.loop();
+                                  FLAGS_ckptmgr_port, FLAGS_metrics_sinks_yaml, FLAGS_myhost, ss);
+  ss->loop();
   return 0;
 }

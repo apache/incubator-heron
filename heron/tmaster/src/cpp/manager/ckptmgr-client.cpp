@@ -26,7 +26,7 @@
 namespace heron {
 namespace tmaster {
 
-CkptMgrClient::CkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
+CkptMgrClient::CkptMgrClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                             const sp_string& _topology_name, const sp_string& _topology_id,
                             std::function<void(proto::system::StatusCode)> _clean_response_watcher)
     : Client(eventLoop, _options),
@@ -98,18 +98,20 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _status) {
   }
 }
 
-void CkptMgrClient::HandleTMasterRegisterResponse(void*,
-                                                proto::ckptmgr::RegisterTMasterResponse* _response,
-                                                NetworkErrorCode _status) {
+void CkptMgrClient::HandleTMasterRegisterResponse(
+                                    void*,
+                                    unique_ptr<proto::ckptmgr::RegisterTMasterResponse> _response,
+                                    NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code" << _status << " for register response from ckptmgr "
                << "running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port() << std::endl;
-    delete _response;
     Stop();
     return;
   }
+
   proto::system::StatusCode status = _response->status().status();
+
   if (status != proto::system::OK) {
     LOG(ERROR) << "NonOK register response " << status << " from ckptmgr "
                << "running at " << get_clientoptions().get_host() << ":"
@@ -120,7 +122,6 @@ void CkptMgrClient::HandleTMasterRegisterResponse(void*,
               << "running at " << get_clientoptions().get_host() << ":"
               << get_clientoptions().get_port() << std::endl;
   }
-  delete _response;
 }
 
 void CkptMgrClient::OnReconnectTimer() { Start(); }
@@ -130,7 +131,7 @@ void CkptMgrClient::SendRegisterRequest() {
   auto request = make_unique<proto::ckptmgr::RegisterTMasterRequest>();
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
-  SendRequest(std::move(request), NULL);
+  SendRequest(std::move(request), nullptr);
 }
 
 void CkptMgrClient::SendCleanStatefulCheckpointRequest(const std::string& _oldest_ckpt,
@@ -140,21 +141,24 @@ void CkptMgrClient::SendCleanStatefulCheckpointRequest(const std::string& _oldes
   auto request = make_unique<proto::ckptmgr::CleanStatefulCheckpointRequest>();
   request->set_oldest_checkpoint_preserved(_oldest_ckpt);
   request->set_clean_all_checkpoints(_clean_all);
-  SendRequest(std::move(request), NULL);
+  SendRequest(std::move(request), nullptr);
 }
 
-void CkptMgrClient::HandleCleanStatefulCheckpointResponse(void*,
-                                  proto::ckptmgr::CleanStatefulCheckpointResponse* _response,
-                                  NetworkErrorCode status) {
+void CkptMgrClient::HandleCleanStatefulCheckpointResponse(
+                              void*,
+                              unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
+                              NetworkErrorCode status) {
   LOG(INFO) << "Got CleanStatefulCheckpoint response from ckptmgr" << std::endl;
+
   proto::system::StatusCode code = proto::system::OK;
+
   if (status != OK) {
     code = proto::system::NOTOK;
   } else {
     code = _response->status().status();
   }
+
   clean_response_watcher_(code);
-  delete _response;
 }
 
 }  // namespace tmaster
