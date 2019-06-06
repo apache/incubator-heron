@@ -480,11 +480,19 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static void registerKryoSerialization(Map<String, Object> conf, Class klass) {
+    // Set to Kryo Seralizer when this function is caled. In Storm API, Kryo seralizer is
+    // the default but it is not in Heron. This implicit set could make migration easier
+    // since it is more consistent.
+    setSerializationClassName("org.apache.heron.api.serializer.KryoSerializer");
     getRegisteredKryoSerializations(conf).add(klass.getName());
   }
 
   public static void registerKryoSerialization(
       Map<String, Object> conf, Class klass, Class<? extends Serializer> serializerClass) {
+    // Set to Kryo Seralizer when this function is caled. In Storm API, Kryo seralizer is
+    // the default but it is not in Heron. This implicit set could make migration easier
+    // since it is more consistent.
+    setSerializationClassName("org.apache.heron.api.serializer.KryoSerializer");
     Map<String, String> register = new HashMap<>();
     register.put(klass.getName(), serializerClass.getName());
     getRegisteredKryoSerializations(conf).add(register);
