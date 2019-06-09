@@ -91,8 +91,8 @@ heron.build.version : {{% heronVersion %}}
 
 If you set the `--user` flag when running the installation scripts, some example
 topologies will be installed in your `~/.heron/examples` directory. You can
-launch an example [topology](../concepts/topologies) locally (on your machine)
-using the [Heron CLI tool](../operators/heron-cli):
+launch an example [topology](heron-topology-concepts) locally (on your machine)
+using the [Heron CLI tool](user-manuals-heron-cli):
 
 ```bash
 $ heron submit local \
@@ -144,7 +144,7 @@ total 408
 
 ## Step 3 --- Start Heron Tracker
 
-The [Heron Tracker](../operators/heron-tracker) is a web service that
+The [Heron Tracker](user-manuals-heron-tracker-runbook) is a web service that
 continuously gathers information about your Heron cluster. You can launch the
 tracker by running the `heron-tracker` command (which is already installed):
 
@@ -158,11 +158,11 @@ You can reach Heron Tracker in your browser at [http://localhost:8888](http://lo
 and see something like the following upon successful submission of the topology:
 ![Heron Tracker](assets/heron-tracker.png)
 
-To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
+To explore Heron Tracker, please refer to [Heron Tracker Rest API](user-manuals-tracker-rest)
 
 ## Step 4 --- Start Heron UI
 
-[Heron UI](../operators/heron-ui) is a user interface that uses Heron Tracker to
+[Heron UI](user-manuals-heron-ui-runbook) is a user interface that uses Heron Tracker to
 provide detailed visual representations of your Heron topologies. To launch
 Heron UI:
 
@@ -176,7 +176,7 @@ You can open Heron UI in your browser at [http://localhost:8889](http://localhos
 and see something like this upon successful submission of the topology:
 ![Heron UI](assets/heron-ui.png)
 
-To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
+To play with Heron UI, please refer to [Heron UI Usage Guide](guides-ui-guide)
 
 ## Step 5 --- Explore topology management commands
 
@@ -197,7 +197,7 @@ INFO: Elapsed time: 1.980s.
 ```
 
 For more info on these commands, read about [topology
-lifecycles](../concepts/topologies#topology-lifecycle).
+lifecycles](heron-topology-concepts#topology-lifecycle).
 
 To list the available CLI commands, run `heron` by itself:
 
@@ -257,13 +257,13 @@ The included example topologies:
    event notifications.
 
 ## Troubleshooting
-In case of any issues, please refer to [Quick Start Troubleshooting](../getting-started-troubleshooting).
+In case of any issues, please refer to [Quick Start Troubleshooting](getting-started-troubleshooting-guide).
 
 ### Next Steps
 
-* [Migrate Storm topologies](../migrate-storm-to-heron) to Heron with simple `pom.xml`
+* [Migrate Storm topologies](getting-started-migrate-storm-topologies) to Heron with simple `pom.xml`
   changes
-* [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
-  environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
-  and [locally](../operators/deployment/schedulers/local))
-* [Develop topologies](../concepts/architecture) for Heron
+* [Deploy topologies](deployment-overview) in clustered, scheduler-driven
+  environments (such as on [Aurora](schedulers-aurora-cluster)
+  and [locally](schedulers-local))
+* [Develop topologies](heron-architecture) for Heron

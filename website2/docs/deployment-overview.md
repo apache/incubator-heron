@@ -1,7 +1,7 @@
 ---
 id: deployment-overview
-title: Overiew
-sidebar_label: Overiew
+title: Deployment Overiew
+sidebar_label: Deployment Overiew
 ---
 
 Heron is designed to be run in clustered, scheduler-driven environments. It can
@@ -11,7 +11,7 @@ of the cluster can use `different scheduler`. A typical Heron deployment is show
 in the following figure.
 
 <br />
-![Heron Deployment](/img/heron-deployment.png)
+![Heron Deployment](assets/heron-deployment.png)
 <br/>
 
 A Heron deployment requires several components working together. The following must
