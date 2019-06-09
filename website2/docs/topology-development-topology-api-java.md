@@ -133,6 +133,109 @@ HeronTopology topology = builder.createTopology();
 
 See the [`ExclamationTopology`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
 
+## Spouts
+
+A Heron **spout** is a source of streams, responsible for emitting
+[tuples](../../developers/data-model) into the topology. A spout may, for
+example, read data from a Kestrel queue or read tweets from the Twitter API and
+emit tuples to one or more bolts.
+
+Information on building spouts can be found in [Building
+Spouts](../../developers/java/spouts).
+
+### Implementing a Spout
+
+Spouts must implement the [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html) interface.
+
+```java
+public interface ISpout extends Serializable {
+  void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
+  void close();
+  void activate();
+  void deactivate();
+  void nextTuple();
+  void ack(Object msgId);
+  void fail(Object msgId);
+}
+```
+
+* The `open` method is called when the spout is initialized and provides the
+spout with the executing environment.
+
+* The `close` method is called when the spout is shutdown. There's no guarantee
+that this method is called due to how the instance is killed.
+
+* The `activate` method is called when the spout is asked to back into active
+state.
+
+* The `deactivate` method is called when the spout is asked to enter deactive
+state.
+
+* The `nextTuple` method is used to fetch tuples from input source and emit it
+to [`OutputCollector`](/api/org/apache/heron/api/bolt/).
+
+* The `ack` method is called when the `Tuple` with the `msgId` emitted by this
+spout is successfully processed.
+
+* The `fail` method is called when the `Tuple` with the `msgId` emitted by this
+spout is not processed successfully.
+
+See [`TestWordSpout`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/spout/TestWordSpout.java) for a simple spout example.
+
+Instead of implementing the [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html) interface directly, you can also implement [`IRichSpout`](/api/org/apache/heron/api/spout/IRichSpout.html).
+
+
+## Bolts
+
+A Heron **bolt** consumes streams of
+[tuples](guides-data-model) emitted by spouts and performs some
+set of user-defined processing operations on those tuples, which may include
+performing complex stream transformations, performing storage operations,
+aggregating multiple streams into one, emitting tuples to other bolts within the
+topology, and much more.
+
+### Implementing a Bolt
+
+
+Spouts must implement the [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html) interface.
+
+```java
+public interface ISpout extends Serializable {
+  void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
+  void close();
+  void activate();
+  void deactivate();
+  void nextTuple();
+  void ack(Object msgId);
+  void fail(Object msgId);
+}
+```
+
+* The `open` method is called when the spout is initialized and provides the
+spout with the executing environment.
+
+* The `close` method is called when the spout is shutdown. There's no guarantee
+that this method is called due to how the instance is killed.
+
+* The `activate` method is called when the spout is asked to back into active
+state.
+
+* The `deactivate` method is called when the spout is asked to enter deactive
+state.
+
+* The `nextTuple` method is used to fetch tuples from input source and emit it
+to [`OutputCollector`](/api/org/apache/heron/api/bolt/).
+
+* The `ack` method is called when the `Tuple` with the `msgId` emitted by this
+spout is successfully processed.
+
+* The `fail` method is called when the `Tuple` with the `msgId` emitted by this
+spout is not processed successfully.
+
+See [`TestWordSpout`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/spout/TestWordSpout.java) for a simple spout example.
+
+Instead of implementing the [`ISpout`](/api/org/apache/heron/api/spout/ISpout.html) interface directly, you can also implement [`IRichSpout`](/api/org/apache/heron/api/spout/IRichSpout.html).
+
 ## Applying delivery semantics to topologies
 
 ```java

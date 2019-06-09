@@ -178,31 +178,12 @@ RAM | 512 MB | 192MB
 
 For instructions on allocating resources to topologies, see the language-specific documentation for:
 
-* [Java](../../developers/java/streamlet-api#containers-and-resources)
+* [Java](topology-development-streamlet-api#containers-and-resources)
 
-## Spouts
-
-A Heron **spout** is a source of streams, responsible for emitting
-[tuples](../../developers/data-model) into the topology. A spout may, for
-example, read data from a Kestrel queue or read tweets from the Twitter API and
-emit tuples to one or more bolts.
-
-Information on building spouts can be found in [Building
-Spouts](../../developers/java/spouts).
-
-## Bolts
-
-A Heron **bolt** consumes streams of
-[tuples](../../developers/data-model) emitted by spouts and performs some
-set of user-defined processing operations on those tuples, which may include
-performing complex stream transformations, performing storage operations,
-aggregating multiple streams into one, emitting tuples to other bolts within the
-topology, and much more.
-
-Information on building bolts can be found in [Building
-Bolts](../../developers/java/bolts).
 
 ## Data Model
 
 Heron's original topology API required using a fundamentally tuple-driven data model.
-You can find more information in [Heron's Data Model](../../developers/data-model).
+You can find more information in [Heron's Data Model](guides-data-model).
+
+
