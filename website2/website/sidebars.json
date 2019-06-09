@@ -15,7 +15,8 @@
       "topology-development-streamlet-api",
       "topology-development-eco-api",
       "topology-development-topology-api-java",
-      "topology-development-topology-api-python"
+      "topology-development-topology-api-python",
+      "topology-development-streamlet-scala"
     ],
     "Client API Docs": [
     ],

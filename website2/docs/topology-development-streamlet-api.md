@@ -10,17 +10,16 @@ sidebar_label: The Heron Streamlet API for Java
 
 Heron processing topologies can be written using an API called the **Heron Streamlet API**. The Heron Streamlet API is currently available for the following languages:
 
-* [Java](../../../developers/java/streamlet-api)
-* [Scala](../../../developers/scala/streamlet-api)
-<!-- * [Python](../../../developers/python/functional-api) -->
+* [Java](topology-development-streamlet-api)
+* [Scala](topology-development-streamlet-scala)
 
-> Although this document covers the new Heron Streamlet API, topologies created using the original [topology API](../../../concepts/topologies) can still be used with Heron (which means that all of your older topologies will still run).
+> Although this document covers the new Heron Streamlet API, topologies created using the original [topology API](topology-development-topology-api-java) can still be used with Heron (which means that all of your older topologies will still run).
 
-For a more in-depth conceptual guide to the new API, see [The Heron Streamlet API](../../../concepts/streamlet-api). A high-level overview can also be found in the section immediately [below](#the-heron-streamlet-api-vs-the-topology-api).
+For a more in-depth conceptual guide to the new API, see [The Heron Streamlet API](topology-development-streamlet-api). A high-level overview can also be found in the section immediately [below](#the-heron-streamlet-api-vs-the-topology-api).
 
 ## The Heron Streamlet API vs. The Topology API
 
-When Heron was first released, all Heron topologies needed to be written using an API based on the [Storm Topology API](../topologies). Although this API is quite powerful (and can still be used), the **Heron Streamlet API** enables you to create topologies without needing to implement spouts and bolts directly or to connect spouts and bolts together.
+When Heron was first released, all Heron topologies needed to be written using an API based on the [Storm Topology API](topology-development-topology-api-java). Although this API is quite powerful (and can still be used), the **Heron Streamlet API** enables you to create topologies without needing to implement spouts and bolts directly or to connect spouts and bolts together.
 
 Here are some crucial differences between the two APIs:
 
@@ -28,12 +27,12 @@ Domain | Original Topology API | Heron Streamlet API
 :------|:----------------------|:--------------------
 Programming style | Procedural, processing component based | Functional
 Abstraction level | **Low level**. Developers must think in terms of "physical" spout and bolt implementation logic. | **High level**. Developers can write processing logic in an idiomatic fashion in the language of their choice, without needing to write and connect spouts and bolts.
-Processing model | [Spout](../spouts) and [bolt](../bolts) logic must be created explicitly, and connecting spouts and bolts is the responsibility of the developer | Spouts and bolts are created for you automatically on the basis of the processing graph that you build
+Processing model | [Spout](heron-topology-concepts#spouts) and [bolt](heron-topology-concepts#bolts) logic must be created explicitly, and connecting spouts and bolts is the responsibility of the developer | Spouts and bolts are created for you automatically on the basis of the processing graph that you build
 
 The two APIs also have a few things in common:
 
-* Topologies' [logical](../../../concepts/topologies#logical-plan) and [physical](../../../concepts/topologies#physical-plan) plans are automatically created by Heron
-* Topologies are [managed](../../../operators/heron-cli) in the same way using the `heron` CLI tool
+* Topologies' [logical](heron-topology-concepts#logical-plan) and [physical](heron-topology-concepts#physical-plan) plans are automatically created by Heron
+* Topologies are [managed](user-manuals-heron-cli) in the same way using the `heron` CLI tool
 
 ## Getting started
 
@@ -109,7 +108,7 @@ target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar
 target/heron-java-streamlet-api-example-latest.jar
 ```
 
-If you're running a [local Heron cluster](../../../getting-started), you can submit the built example topology like this:
+If you're running a [local Heron cluster](getting-started-local-single-node), you can submit the built example topology like this:
 
 ```bash
 $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
@@ -119,7 +118,7 @@ $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dep
 
 #### Selecting delivery semantics
 
-Heron enables you to apply one of three [delivery semantics](../../../concepts/delivery-semantics) to any Heron topology. For the [example topology](#java-streamlet-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](../../../concepts/delivery-semantics) to the example topology:
+Heron enables you to apply one of three [delivery semantics](heron-delivery-semantics) to any Heron topology. For the [example topology](#java-streamlet-api-starter-project) above, you can select the delivery semantics when you submit the topology with the topology's second argument. This command, for example, would apply [effectively-once](heron-delivery-semantics) to the example topology:
 
 ```bash
 $ heron submit local target/heron-java-streamlet-api-example-latest-jar-with-dependencies.jar \
@@ -170,7 +169,7 @@ Config topologyConfig = Config.newBuilder()
 
 ### Delivery semantics
 
-You can apply [delivery semantics](../../../concepts/delivery-semantics) to a Streamlet API topology like this:
+You can apply [delivery semantics](heron-delivery-semantics) to a Streamlet API topology like this:
 
 ```java
 topologyConfig
@@ -181,7 +180,7 @@ The other available options in the `DeliverySemantics` enum are `ATMOST_ONCE` an
 
 ## Streamlets
 
-In the Heron Streamlet API for Java, processing graphs consist of [streamlets](../../../concepts/topologies#streamlets). One or more supplier streamlets inject data into your graph to be processed by downstream operators.
+In the Heron Streamlet API for Java, processing graphs consist of streamlets. One or more supplier streamlets inject data into your graph to be processed by downstream operators.
 
 ## Operations
 
@@ -279,7 +278,7 @@ In this example, a streamlet of random integers between 1 and 100 is split into 
 
 Transform operations are highly flexible operations that are most useful for:
 
-* operations involving state in [stateful topologies](../../concepts/delivery-semantics#stateful-topologies)
+* operations involving state in [stateful topologies](heron-delivery-semantics#stateful-topologies)
 * operations that don't neatly fit into the other categories or into a lambda-based logic
 
 Transform operations require you to implement three different methods:

@@ -6,14 +6,14 @@ sidebar_label: The Heron Topology API for Java
 
 > This document pertains to the older, Storm-based, Heron Topology API.  Heron now offers two separate APIs for building topologies: the original, [Storm](https://storm.apache.org)-based Topology API, and the newer [Streamlet API](../../../concepts/topologies#the-heron-streamlet-api). Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
 
-A topology specifies components like [spouts](../spouts) and [bolts](../bolts), as well as the relation
+A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations. The
 [`heron-api`](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.apache.heron%22%20AND%20a%3A%22heron-api%22)
 enables you to create topology logic in Java.
 
 > If you're interested in creating stateful topologies with [effectively-once
-> semantics](../../../concepts/delivery-semantics) in Java, see [this new
-> guide](../effectively-once).
+> semantics](heron-delivery-semantics) in Java, see [this new
+> guide](guides-effectively-once-java-topologies).
 
 ## Getting started
 
@@ -80,10 +80,10 @@ $ heron submit local \
 
 ### Writing your topology logic
 
-Heron [topologies](../../../concepts/topologies) are processing graphs consisting
-of [spouts](../spouts) that ingest data and [bolts](../bolts) that process that data.
+Heron [topologies](heron-topology-concpets) are processing graphs consisting
+of spouts that ingest data and bolts that process that data.
 
-> **Don't want to manually create spouts and bolts? Try the Heron Streamlet API.**  If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](../streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.
+> **Don't want to manually create spouts and bolts? Try the Heron Streamlet API.**  If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](topology-development-streamlet-api-java) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts.
 
 Once you've defined the spouts and bolts, a topology can be composed using a
 [`TopologyBuilder`](/api/org/apache/heron/api/topology/TopologyBuilder.html). The
@@ -131,7 +131,7 @@ Once the components and the grouping are specified, the topology can be built.
 HeronTopology topology = builder.createTopology();
 ```
 
-See the [`ExclamationTopology`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
+See the [`ExclamationTopology`](https://github.com/apache/incubator-heron/blob/master/examples/src/java/org/apache/heron/examples/api/ExclamationTopology.java) for the complete example. More examples can be found in the  [`examples package`](https://github.com/apache/incubator-heron/tree/master/examples/src/java/org/apache/heron/examples).
 
 ## Applying delivery semantics to topologies
 

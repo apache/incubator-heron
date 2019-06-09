@@ -12,7 +12,7 @@ Heron processing topologies can be written using an API called the **Heron ECO A
 * `org.apache.storm`
 * `org.apache.heron`
 
-> Although this document focuses on the ECO API, both the [Streamlet API](../../../concepts/streamlet-api) and [Topology API](../../../concepts/topologies) topologies you have built can still be used with Heron
+> Although this document focuses on the ECO API, both the [Streamlet API](heron-streamlet-concepts) and [Topology API](heron-topology-concepts) topologies you have built can still be used with Heron
 
 ## The Heron ECO API vs. The Streamlet and Topology APIs
 
@@ -104,25 +104,25 @@ $ heron submit local \
 ```
 
 ### Reference Links
-[Topology Name]({{<ref "#topology-name" >}})
+[Topology Name](#topology-name)
 
-[Configuration]({{<ref "#configuration" >}})
+[Configuration](#configuration)
 
-[Components]({{<ref "#components" >}})
+[Components](#components)
 
-[Property Injection]({{<ref "#property-injection" >}})
+[Property Injection](#property-injection)
 
-[The Topology Definition]({{<ref "#the-topology-definition" >}})
+[The Topology Definition](#the-topology-definition)
 
-[Streams and Groupings]({{<ref "#streams-and-groupings" >}})
+[Streams and Groupings](#streams-and-groupings)
 
-[Handling Enums]({{<ref "#handling-enums" >}})
+[Handling Enums](#handling-enums)
 
-[Property Substitution]({{<ref "#property-substitution" >}})
+[Property Substitution](#property-substitution)
 
-[Environment Variable Substitution]({{<ref "#environment-variable-substitution" >}})
+[Environment Variable Substitution](#environment-variable-substitution)
 
-[Other ECO Examples]({{<ref "#other-eco-examples" >}})
+[Other ECO Examples](#other-eco-examples)
 
 Notice how the above example submission command is referencing the main class `org.apache.heron.eco.Eco`.  This part of the command
 needs to stay the same.  Eco is the main class that will assemble your topology from the `--eco-config-file` you specify.
