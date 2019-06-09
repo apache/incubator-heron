@@ -21,22 +21,24 @@ be deployed to run Heron topologies in a cluster:
 be deployed on an existing cluster running alongside other big data frameworks.
 Alternatively, it can be deployed on a cluster of its own. Heron currently
 supports several scheduler options:
-  * [Aurora](schedulers/aurora)
-  * [Local](schedulers/local)
-  * [Slurm](schedulers/slurm)
-  * [YARN](schedulers/yarn)
+  * [Aurora](schedulers-aurora-cluster)
+  * [Local](schedulers-local)
+  * [Slurm](schedulers-slurm)
+  * [YARN](schedulers-yarn)
+  * [Kubernetes By Hand](schedulers-k8s-by-hand)
+  * [Kubernetes with Helm](schedulers-k8s-with-helm)
 
 * **State Manager** --- Heron state manager tracks the state of all deployed
 topologies. The topology state includes its logical plan,
 physical plan, and execution state. Heron supports the following state managers:
-  * [Local File System] (statemanagers/localfs)
-  * [Zookeeper] (statemanagers/zookeeper)
+  * [Local File System](state-managers-local-fs)
+  * [Zookeeper](state-managers-zookeeper)
 
 * **Uploader** --- The Heron uploader distributes the topology jars to the
 servers that run them. Heron supports several uploaders
-  * [HDFS] (uploaders/hdfs)
-  * [Local File System] (uploaders/localfs)
-  * [Amazon S3] (uploaders/s3)
+  * [HDFS](uploaders-hdfs)
+  * [Local File System](uploaders-local-fs)
+  * [Amazon S3](uploaders-amazon-s3)
 
 * **Metrics Sinks** --- Heron collects several metrics during topology execution.
 These metrics can be routed to a sink for storage and offline analysis.

@@ -10,7 +10,7 @@ The **Heron API server** is a necessary component
 
 ## Installation
 
-The Heron API server executable (`heron-apiserver`) is installed automatically when you install the [Heron tools](../../getting-started#step-1-download-the-heron-tools).
+The Heron API server executable (`heron-apiserver`) is installed automatically when you install the [Heron tools](getting-started-local-single-node#step-1-download-the-heron-tools).
 
 ## Running the Heron API server
 
@@ -29,12 +29,12 @@ $ heron-apiserver \
 
 ## Base templates
 
-The Heron API server works by accepting incoming commands from the [Heron CLI tool](../heron-cli) and interacts with a variety of Heron components, including:
+The Heron API server works by accepting incoming commands from the [Heron CLI tool](user-manuals-heron-cli) and interacts with a variety of Heron components, including:
 
-* a scheduler ([Mesos](../deployment/schedulers/mesos), [Aurora](../deployment/schedulers/aurora), the [local filesystem](../deployment/schedulers/localfs), etc.)
-* an uploader ([Amazon S3](../deployment/uploaders/s3), the [local filesystem](../deployment/uploaders/localfs), etc.)
+* a scheduler ([Mesos](schedulers-mesos-local-mac), [Aurora](schedulers-aurora-cluster), the [local filesystem](schedulers-local), etc.)
+* an uploader ([Amazon S3](uploaders-amazon-s3), the [local filesystem](uploaders-local-fs), etc.)
 
-When you [install](#installation) the Heron tools, a directory will automatically be created in `~/.herontools/conf` on MacOS and `/usr/local/herontools/conf` on other platforms. That directory contains a number of base templates for all of the currently supported schedulers. Modify the configuration for your scheduler, for example [Mesos](../deployment/schedulers/mesos) using the YAML files in the `mesos` folder, and then select the proper base template using the `--base-template` flag. Here's an example for Mesos:
+When you [install](#installation) the Heron tools, a directory will automatically be created in `~/.herontools/conf` on MacOS and `/usr/local/herontools/conf` on other platforms. That directory contains a number of base templates for all of the currently supported schedulers. Modify the configuration for your scheduler, for example [Mesos](schedulers-mesos-local-mac) using the YAML files in the `mesos` folder, and then select the proper base template using the `--base-template` flag. Here's an example for Mesos:
 
 ```bash
 $ heron-apiserver \
@@ -42,7 +42,7 @@ $ heron-apiserver \
   --cluster my-cluster
 ```
 
-> For a full guide to Heron configuration, see [Configuring a cluster](../deployment/configuration).
+> For a full guide to Heron configuration, see [Configuring a cluster](cluster-config-overview).
 
 ## Cluster name
 
