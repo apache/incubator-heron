@@ -5,8 +5,8 @@ sidebar_label: Migrate Storm Topologies
 ---
 
 Heron is designed to be fully backwards compatible with existing [Apache
-Storm](http://storm.apache.org/index.html) projects, which means that you can
-migrate an existing Storm [topology](../concepts/topologies) to Heron by making
+Storm](http://storm.apache.org/index.html) v1 projects, which means that you can
+migrate an existing Storm [topology](heron-topology-concepts) to Heron by making
 just a few adjustments to the topology's `pom.xml` [Maven configuration
 file](https://maven.apache.org/pom.html).
 
@@ -78,7 +78,7 @@ $ mvn package
 ## Step 4 (optional). Launch your upgraded Heron topology
 
 You can launch the compiled Maven project on your [local
-cluster](../operators/deployment/schedulers/local) using `heron submit`.
+cluster](schedulers-local) using `heron submit`.
 
 First, modify your project's base directory `{basedir}` and
 `{PATH-TO-PROJECT}.jar`, which is located in `${basedir}/target` by [Maven
@@ -93,7 +93,7 @@ $ heron submit local \
 ```
 
 Here's an example submit command using the example topology from the [Quick
-Start Guide](../getting-started) guide:
+Start Guide](getting-started-local-single-node) guide:
 
 ```bash
 $ heron submit local \
@@ -104,8 +104,8 @@ $ heron submit local \
 
 ### Next Steps
 
-* [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
-  environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
+* [Deploy topologies](deployment-overview) in clustered, scheduler-driven
+  environments (such as on [Aurora](schedulers-aurora-cluster)
   and
-  [locally](../operators/deployment/schedulers/local))
-* [Develop topologies](../concepts/architecture) for Heron
+  [locally](schedulers-local)
+* [Develop topologies](heron-architecture) for Heron
