@@ -6,7 +6,7 @@ sidebar_label: Tuple Serialization
 
 The tuple is Heron's core data type. Heron's native
 [`Tuple`](/api/org/apache/heron/api/tuple/Tuple.html) interface supports
-a broad range of [basic data types](../data-model/#using-tuples), such as
+a broad range of [basic data types](guides-data-model#using-tuples), such as
 strings, integers, and booleans, out of the box, but tuples can contain values
 of any type. You can use data types beyond the core types by providing a custom
 serializer using the instructions below.
@@ -36,4 +36,4 @@ your topology. Here's an example:
   ```
 
 Once your custom serializer is on Heron's classpath and Heron is aware of its
-existence, you must [re-compile](../compiling/compiling) Heron.
+existence, you must [re-compile](compiling-overview) Heron.

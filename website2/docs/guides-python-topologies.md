@@ -30,9 +30,9 @@ from heronpy.api.topology import Topology
 
 ## Writing topologies in Python
 
-Heron [topologies](../../../concepts/topologies) are networks of [spouts](../spouts) that pull data into a topology and [bolts](../bolts) that process that ingested data.
+Heron [topologies](heron-topology-concepts) are networks of [spouts](topology-development-topology-api-python#spouts) that pull data into a topology and [bolts](topology-development-topology-api-python#bolts) that process that ingested data.
 
-> You can see how to create Python spouts in the [Implementing Python Spouts](../spouts) guide and how to create Python bolts in the [Implementing Python Bolts](../bolts) guide.
+> You can see how to create Python spouts in the [Implementing Python Spouts](topology-development-topology-api-python#spouts) guide and how to create Python bolts in the [Implementing Python Bolts](topology-development-topology-api-python#bolts) guide.
 
 Once you've defined spouts and bolts for a topology, you can then compose the topology in one of two ways:
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     builder = TopologyBuilder("MyTopology")
 ```
 
-Once you've created a `TopologyBuilder` object, you can add [bolts](../bolts) using the [`add_bolt`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_bolt) method and [spouts](../spouts) using the [`add_spout`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_spout) method. Here's an example:
+Once you've created a `TopologyBuilder` object, you can add bolts using the [`add_bolt`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_bolt) method and spouts using the [`add_spout`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_spout) method. Here's an example:
 
 ```python
 builder = TopologyBuilder("MyTopology")

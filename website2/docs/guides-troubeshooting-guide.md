@@ -16,8 +16,8 @@ This guide is organized into following broad sections:
 * [Identify topology problems](#problem)
 * [Frequently seen issues](#frequent)
 
-This guide is useful for topology developers. Issues related to Heron [configuration setup](../../../docs/operators/configuration/config-intro) or
-its [internal architecture](../../../docs/concepts/architecture), like `schedulers`, etc, are discussed in Configuration and Heron Developers respectively, and not discussed here.
+This guide is useful for topology developers. Issues related to Heron configuration setup or
+its [internal architecture](heron-architecture), like `schedulers`, etc, are discussed in Configuration and Heron Developers respectively, and not discussed here.
 
 <a name="running"></a>
 

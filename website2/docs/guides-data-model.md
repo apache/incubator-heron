@@ -69,14 +69,14 @@ public void execute(Tuple input) {
 ```
 
 More info on custom serialization can be found in [Creating Custom Tuple
-Serializers](../serialization).
+Serializers](guides-tuple-serialization).
 
 ### Fields
 
 The `getFields` method returns a
 [`Fields`](http://heronproject.github.io/topology-api/org/apache/heron/api/tuple/Fields)
 object that contains all of the fields in the tuple. More on fields can be found
-[below]({{< ref "#Fields" >}}).
+[below](#Fields).
 
 ### Other Methods
 

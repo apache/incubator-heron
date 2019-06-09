@@ -42,8 +42,8 @@ The following information or actions can be found on this page.
 Below is the main page to monitor a topology.
 
 1. Name of the topology
-2. [Logical plan](../../concepts/topologies#logical-plan) of the topology
-3. [Physical plan](../../concepts/topologies#physical-plan) of the topology
+2. [Logical plan](heron-topology-concepts#logical-plan) of the topology
+3. [Physical plan](heron-topology-concepts#physical-plan) of the topology
 4. Health metrics for the topology
 5. General info about the topology
 6. General metrics for the topology

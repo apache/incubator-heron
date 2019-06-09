@@ -6,14 +6,14 @@ sidebar_label: Effectively Once Java Topologies
 
 > **This document pertains to the older, Storm-based, Heron Topology API.** Heron now offers several APIs for building topologies. Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
 
-You can create Heron topologies that have [effectively-once](../../../concepts/delivery-semantics#stateful-topologies) semantics by doing two things:
+You can create Heron topologies that have [effectively-once](heron-delivery-semantics#stateful-topologies) semantics by doing two things:
 
 1. Set the [delivery semantics](#specifying-delivery-semantics) of the topology to `EFFECTIVELY_ONCE`.
 2. Create topology processing logic in which each component (i.e. each spout and bolt) implements the [`IStatefulComponent`](/api/java/org/apache/heron/api/topology/IStatefulComponent.html) interface.
 
 ## Specifying delivery semantics
 
-You can specify the [delivery semantics](../../../concepts/delivery-semantics) of a Heron topology via configuration. To apply effectively-once semantics to a topology:
+You can specify the [delivery semantics](heron-delivery-semantics) of a Heron topology via configuration. To apply effectively-once semantics to a topology:
 
 ```java
 import org.apache.heron.api.Config;
@@ -35,7 +35,7 @@ Method | Input | Description
 `preSave` | Checkpoint ID (`String`)| The action taken immediately prior to the component's state being saved. 
 `initState` | Initial state ([`State<K, V>`](/api/java/org/apache/heron/examples/api/StatefulWordCountTopology.ConsumerBolt.html#initState-org.apache.heron.api.state.State-)) | Initializes the state of the function or operator to that of a previous checkpoint.
 
-> Remember that stateful components automatically handle all state storage in the background using a State Manager (the currently available State Managers are [ZooKeeper](../../../operators/deployment/statemanagers/zookeeper) and the [local filesystem](../../../operators/deployment/statemanagers/localfs). You don't need to, for example, save state to an external database.
+> Remember that stateful components automatically handle all state storage in the background using a State Manager (the currently available State Managers are [ZooKeeper](state-managers-zookeeper) and the [local filesystem](state-managers-local-fs). You don't need to, for example, save state to an external database.
 
 ## The `State` class
 
@@ -230,7 +230,7 @@ The code for this topology can be found in [this GitHub repository](https://gith
 $ git clone https://github.com/streamlio/heron-java-effectively-once-example
 ```
 
-Once you have the repo locally, you can submit the topology to a [running Heron installation](../../../getting-started) like this (if you have [Maven](https://maven.apache.org/) installed):
+Once you have the repo locally, you can submit the topology to a [running Heron installation](getting-started-local-single-node) like this (if you have [Maven](https://maven.apache.org/) installed):
 
 ```bash
 $ cd heron-java-effectively-once-example
@@ -241,9 +241,9 @@ $ heron submit local \
   RunningSumTopology
 ```
 
-> By default, Heron uses the [local filesystem](../../../operators/deployment/statemanagers/localfs) as a State Manager. If you're running Heron locally using the instructions in the [Quick Start Guide](../../../getting-started) then you won't need to change any settings to run this example stateful topology with effectively-once semantics.
+> By default, Heron uses the [local filesystem](state-managers-local-fs) as a State Manager. If you're running Heron locally using the instructions in the [Quick Start Guide](getting-started-local-single-node) then you won't need to change any settings to run this example stateful topology with effectively-once semantics.
 
-From there, you can see the log output for the bolt by running the [Heron Tracker](../../../operators/heron-tracker) and [Heron UI](../../../operators/heron-ui):
+From there, you can see the log output for the bolt by running the [Heron Tracker](user-manuals-heron-tracker-runbook) and [Heron UI](user-manuals-heron-ui):
 
 ```bash
 $ heron-tracker
@@ -252,8 +252,7 @@ $ heron-tracker
 $ heron-ui
 ```
 
-> For installation instructions for the Heron Tracker and the Heron UI, see the [Quick Start Guide](../../../getting-started).
-
+> For installation instructions for the Heron Tracker and the Heron UI, see the [Quick Start Guide](../../../getting-getting-started-local-single-node
 Once the Heron UI is running, navigate to http://localhost:8889 and click on the `RunningSumTopology` link. You should see something like this in the window that opens up:
 
 ![Logical topology drilldown](assets/logical-topology.png)
