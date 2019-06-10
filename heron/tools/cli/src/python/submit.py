@@ -234,6 +234,14 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
       return SimpleResult(Status.HeronError, err_context)
 
+    # log topology and components configurations
+    Log.debug("Topology config: %s", topology_defn.topology_config)
+    Log.debug("Component config:")
+    for spout in topology_defn.spouts:
+      Log.debug("%s => %s", spout.comp.name, spout.comp.config)
+    for bolt in topology_defn.bolts:
+      Log.debug("%s => %s", bolt.comp.name, bolt.comp.config)
+
     # launch the topology
     Log.info("Launching topology: \'%s\'%s", topology_defn.name, launch_mode_msg(cl_args))
 
