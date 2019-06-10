@@ -1,20 +1,20 @@
 ---
 id: heron-topology-concepts
-title: Heron Topolgies
-sidebar_label: Heron Topolgies
+title: Heron Topologies
+sidebar_label: Heron Topologies
 ---
 
-> **Don't want to manually create spouts and bolts? Try the Heron Streamlet API.**.  If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](../streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts. 
+> **Don't want to manually create spouts and bolts? Try the Heron Streamlet API.**.  If you find manually creating and connecting spouts and bolts to be overly cumbersome, we recommend trying out the [Heron Streamlet API](topology-development-streamlet-api) for Java, which enables you to create your topology logic using a highly streamlined logic inspired by functional programming concepts. 
 
 A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) used to process
 streams of data. Topologies can be stateless or 
-[stateful](../delivery-semantics#stateful-topologies) depending on your use case.
+[stateful](heron-delivery-semantics#stateful-topologies) depending on your use case.
 
 Heron topologies consist of two basic components:
 
-* [Spouts](#spouts) inject data into Heron topologies, potentially from external sources like pub-sub messaging systems (Apache Kafka, Apache Pulsar, etc.)
-* [Bolts](#bolts) apply user-defined processing logic to data supplied by spouts
+* [Spouts](topology-development-topology-api-java#spouts) inject data into Heron topologies, potentially from external sources like pub-sub messaging systems (Apache Kafka, Apache Pulsar, etc.)
+* [Bolts](topology-development-topology-api-java#bolts) apply user-defined processing logic to data supplied by spouts
 
 Spouts and bolts are connected to one another via **streams** of data. Below is a
 visual illustration of a simple Heron topology:
@@ -30,27 +30,27 @@ simple example; you can create arbitrarily complex topologies in Heron.
 
 There are currently two APIs available that you can use to build Heron topologies:
 
-1. The higher-level [Heron Streamlet API](#the-heron-streamlet-api) (recommended for new topologies), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)
-1. The lower-level [topology API](#the-topology-api) (*not* recommended for new topologies), based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
+1. The higher-level [Heron Streamlet API](topology-development-streamlet-api), which enables you to create topologies in a declarative, developer-friendly style inspired by functional programming concepts (such as map, flatMap, and filter operations)
+1. The lower-level [topology API](topology-development-topology-api-java) , based on the original [Apache Storm](http://storm.apache.org/about/simple-api.html) API, which requires you to specify spout and bolt logic directly
 
 ## Topology Lifecycle
 
-Once you've set up a [Heron cluster](../../operators/deployment), you
-can use Heron's [CLI tool](../../operators/heron-cli) to manage the entire
+Once you've set up a Heron cluster, you
+can use Heron's [CLI tool](user-manuals-heron-cli) to manage the entire
 lifecycle of a topology, which typically goes through the following stages:
 
-1. [Submit](../../operators/heron-cli#submitting-a-topology) the topology
+1. [Submit](user-manuals-heron-cli#submitting-a-topology) the topology
    to the cluster. The topology is not yet processing streams but is ready to be
    activated.
-2. [Activate](../../operators/heron-cli#activating-a-topology) the
+2. [Activate](user-manuals-heron-cli#activating-a-topology) the
    topology. The topology will begin processing streams in accordance with
    the topology architecture that you've created.
-3. [Restart](../../operators/heron-cli#restarting-a-topology) an
+3. [Restart](user-manuals-heron-cli#restarting-a-topology) an
    active topology if, for example, you need to update the topology configuration.
-4. [Deactivate](../../operators/heron-cli#deactivating-a-topology) the
+4. [Deactivate](user-manuals-heron-cli#deactivating-a-topology) the
    topology. Once deactivated, the topology will stop processing but
    remain running in the cluster.
-5. [Kill](../../operators/heron-cli#killing-a-topology) a topology to completely
+5. [Kill](user-manuals-heron-cli#killing-a-topology) a topology to completely
    remove it from the cluster.  It is no longer known to the Heron cluster and
    can no longer be activated. Once killed, the only way to run that topology is
    to re-submit and re-activate it.
@@ -78,8 +78,8 @@ physical plan:
 
 ![Topology Physical Plan](https://www.lucidchart.com/publicSegments/view/5c2fe0cb-e4cf-4192-9416-b1b64b5ce958/image.png)
 
-In this example, a Heron topology consists of two [spout](#spouts) and five
-different [bolts](#bolts) (each of which has multiple instances) that have automatically 
+In this example, a Heron topology consists of two [spout](topology-development-topology-api-java#spouts) and five
+different [bolts](topology-development-topology-api-java#bolts) (each of which has multiple instances) that have automatically 
 been distributed between five different containers.
 
 

@@ -536,7 +536,7 @@ from heronpy.api.topology import Topology
 
 ## Writing topologies in Python
 
-Heron [topologies](../../../concepts/topologies) are networks of [spouts](../spouts) that pull data into a topology and [bolts](../bolts) that process that ingested data.
+Heron [topologies](heron-topologies-concepts) are networks of [spouts](../spouts) that pull data into a topology and [bolts](../bolts) that process that ingested data.
 
 > You can see how to create Python spouts in the [Implementing Python Spouts](../spouts) guide and how to create Python bolts in the [Implementing Python Bolts](../bolts) guide.
 

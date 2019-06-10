@@ -9,26 +9,26 @@ Heron is a general-purpose stream processing engine designed for speedy performa
 low latency, isolation, reliability, and ease of use for developers and administrators
 alike. Heron was [open
 sourced](https://blog.twitter.com/engineering/en_us/topics/open-source/2016/open-sourcing-twitter-heron.html)
-by [Twitter](https://twitter.github.io/) in May 2016.
+by [Twitter](https://twitter.github.io/).
 
-> We recommend reading [Heron's Design Goals](../design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
+> We recommend reading [Heron's Design Goals](heron-design-goals) and [Heron Topologies](../topologies) in conjunction with this guide.
 
 The sections below:
 
 * clarify the distinction between Heron and [Apache Storm](#relationship-with-apache-storm)
 * describe Heron's basic [system architecture](#basic-system-architecture)
 * explain the role of major [components](#topology-components) of Heron's architecture
-* provide an overview of what happens when [submit a topology](#topology-submission-description)
+* provide an overview of what happens when [submit a topology](#topology-submission)
 
 ## Topologies
 
 You can think of a Heron cluster as a mechanism for managing the lifecycle of
 stream-processing entities called **topologies**. Topologies can be written in
-[Java](../../developers/java/streamlet-api) or [Python](../../developers/python/topologies).
+Java or Python.
 
 
 More information can be found
-in the [Heron Topologies](../topologies) document.
+in the [Heron Topologies](heron-topology-concepts) document.
 
 ## Relationship with Apache Storm
 
@@ -46,13 +46,13 @@ Throughput | For a variety of architectural reasons, Heron has consistently been
 ### Storm compatibility
 
 Heron was built to be fully backwards compatible with Storm and thus to enable
-[topology](../topologies) developers to use Heron to run topologies created using
+[topology](heron-topology-concepts) developers to use Heron to run topologies created using
 Storm's [topology API](http://storm.apache.org/about/simple-api.html).
 
 Currently, Heron is compatible with topologies written using:
 
-1. The new [Heron Streamlet API](../topologies#the-streamlet-api) (recommended for new work), or
-1. The [Heron Topology API](../topologies#the-heron-topology-api)
+1. The new [Heron Streamlet API](topology-development-streamlet-api) 
+1. The [Heron Topology API](topology-development-topology-api-java)
 
 If you have existing topologies created using the [Storm API](http://storm.apache.org/about/simple-api.html),
 you can make them Heron compatible by following [these simple instructions](../../migrate-storm-to-heron)
@@ -71,15 +71,10 @@ latency, reliability---without needing to sacrifice engineering resources.
 ## Heron Design Goals
 
 For a description of the core goals of Heron as well as the principles that have
-guided its development, see [Heron Design Goals](/docs/concepts/design-goals).
+guided its development, see [Heron Design Goals](heron-design-goals).
 
 ## Basic system architecture
 
-In a Heron cluster
-
-### Schedulers
-
-### Uploaders
 
 # Topology Components
 
@@ -105,7 +100,7 @@ a topology it starts a single TM and multiple [containers](heron-architecture#co
 The **TM** creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
 ensure that there's only one **TM** for the topology and that the **TM** is easily
 discoverable by any process in the topology. The **TM** also constructs the [physical
-plan](../topologies#physical-plan) for a topology which it relays to different
+plan](heron-topology-concepts#physical-plan) for a topology which it relays to different
 components.
 
 ![Topology Master](assets/tmaster.png)
@@ -114,20 +109,20 @@ components.
 
 TMs have a variety of [configurable
 parameters](../../operators/configuration/tmaster) that you can adjust at each
-phase of a topology's [lifecycle](../topologies#topology-lifecycle).
+phase of a topology's [lifecycle](heron-topology-concepts#topology-lifecycle).
 
-### Container
+### Containers
 
 Each Heron topology consists of multiple **containers**, each of which houses
-multiple [Heron Instances]({{< ref "#heron-instance" >}}), a [Stream
-Manager]({{< ref "#stream-manager" >}}), and a [Metrics Manager]({{< ref "#metrics-manager" >}}). Containers
+multiple [Heron Instances](#heron-instance), a [Stream
+Manager](#stream-manager), and a [Metrics Manager](#metrics-manager). Containers
 communicate with the topology's **TM** to ensure that the topology forms a fully
 connected graph.
 
-For an illustration, see the figure in the [Topology Master]({{< ref "#topology-master" >}})
+For an illustration, see the figure in the [Topology Master](#topology-master)
 section above.
 
-> In Heron, all topology containerization is handled by the scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Kubernetes](../../operators/deployment/schedulers/kubernetes), [YARN](../../operators/deployment/schedulers/yarn), or something else. Heron schedulers typically use [cgroups](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch01) to manage Heron topology processes.
+> In Heron, all topology containerization is handled by the scheduler, be it [Mesos](schedulers-meso-local-mac), [Kubernetes](schedulers-k8s-with-helm), [YARN](schedulers-k8s-by-hand), or something else. Heron schedulers typically use [cgroups](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch01) to manage Heron topology processes.
 
 ### Stream Manager
 
@@ -164,13 +159,13 @@ return to normal.
 #### Stream Manager Configuration
 
 **SMs** have a variety of [configurable
-parameters](../../operators/configuration/stmgr) that you can adjust at each
-phase of a topology's [lifecycle](../topologies#topology-lifecycle).
+parameters](state-managers-local-fs) that you can adjust at each
+phase of a topology's [lifecycle](heron-topology-concepts#topology-lifecycle).
 
 ### Heron Instance
 
 A **Heron Instance** (HI) is a process that handles a single task of a
-[spout](../topologies#spouts) or [bolt](../topologies#bolts), which allows
+[spout](../topologies#spouts) or [bolt](heron-topology-concepts##bolts), which allows
 for easy debugging and profiling.
 
 Currently, Heron only supports Java, so all
@@ -180,8 +175,8 @@ this will change in the future.
 #### Heron Instance Configuration
 
 **HIs** have a variety of [configurable
-parameters](../../operators/configuration/instance) that you can adjust at
-each phase of a topology's [lifecycle](../topologies#topology-lifecycle).
+parameters](cluster-config-instance) that you can adjust at
+each phase of a topology's [lifecycle](heron-topology-concepts##topology-lifecycle).
 
 ### Metrics Manager
 
@@ -192,7 +187,7 @@ both the [Topology Master]({{< ref "#topology-master" >}}) and to external colle
 [Graphite](http://graphite.wikidot.com/), or analogous systems.
 
 You can adapt Heron to support additional systems by implementing your own
-[custom metrics sink](../../contributors/custom-metrics-sink).
+[custom metrics sink](extending-heron-metric-sink).
 
 # Cluster-level Components
 
@@ -204,15 +199,15 @@ outside of particular topologies.
 
 Heron has a **CLI** tool called `heron` that is used to manage topologies.
 Documentation can be found in [Managing
-Topologies](../../operators/heron-cli).
+Topologies](user-manuals-heron-cli).
 
 ### Heron API server
 
-The [Heron API server](../../operators/heron-api-server) handles all requests from
+The [Heron API server](deployment-api-server) handles all requests from
 the [Heron CLI tool](#heron-cli), uploads topology artifacts to the designated storage
 system, and interacts with the scheduler.
 
-> When running Heron [locally](../../getting-started), you won't need to deploy
+> When running Heron [locally](getting-started-local-single-node), you won't need to deploy
 > or configure the Heron API server.
 
 ### Heron Tracker
@@ -223,19 +218,19 @@ running, being launched, being killed, etc. It relies on the same
 [ZooKeeper](http://zookeeper.apache.org) nodes as the topologies in the cluster
 and exposes that information through a JSON REST API. The Tracker can be
 run within your Heron cluster (on the same set of machines managed by your
-Heron [scheduler](../../operators/deployment)) or outside of it.
+Heron [scheduler](schedulers-local)) or outside of it.
 
 Instructions on running the tracker including JSON API docs can be found in [Heron
-Tracker](../../operators/heron-tracker).
+Tracker](user-manuals-heron-tracker-runbook).
 
 ### Heron UI
 
 **Heron UI** is a rich visual interface that you can use to interact with
 topologies. Through **Heron UI** you can see color-coded visual representations of
-the [logical](../topologies#logical-plan) and
-[physical](../topologies#physical-plan) plan of each topology in your cluster.
+the [logical](heron-topology-concepts#logical-plan) and
+[physical](heron-topology-concepts#physical-plan) plan of each topology in your cluster.
 
-For more information, see the [Heron UI](../../operators/heron-ui) document.
+For more information, see the [Heron UI](user-manuals-heron-ui) document.
 
 <!--
 ## Topology Submit Sequence
@@ -261,9 +256,9 @@ The diagram below illustrates what happens when you submit a Heron topology:
 
 Component | Description
 :---------|:-----------
-Client | When a topology is submitted using the [`heron submit`](../../operators/heron-cli#submitting-a-topology) command of the [Heron CLI tool](../../operators/heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](../../concepts/topologies#logical-plan). Then, it runs [`org.apache.heron.scheduler.SubmitterMain`](/api/java/org/apache/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](../../operators/heron-api-server).
-Heron API server | When the [Heron API server](../../operators/heron-api-server) has been notified that a topology is being submitted, it does two things. First, it uploads the topology artifacts (a JAR for Java or a PEX for Python, plus a few other files) to a storage service; Heron supports multiple [uploaders](../../operators/deployment/uploaders) for a variety of storage systems, such as [Amazon S3](../../operators/deployment/uploaders/s3), [HDFS](../../operators/deployment/uploaders/hdfs), and the [local filesystem](../../operators/deployment/uploaders/localfs).
-Heron scheduler | When the Heron CLI (client) submits a topology to the Heron API server, the API server notifies the Heron scheduler and also provides the scheduler with the topology's [logical plan](../../concepts/topologies#logical-plan), [physical plan](../../concepts/topologies#physical-plan), and some other artifacts. The scheduler, be it [Mesos](../../operators/deployment/schedulers/mesos), [Aurora](../../operators/deployment/schedulers/aurora), the [local filesystem](../../operators/deployment/schedulers/localfs), or something else, then deploys the topology using containers.
+Client | When a topology is submitted using the [`heron submit`](user-manuals-heron-cli#submitting-a-topology) command of the [Heron CLI tool](user-manuals-heron-cli), it first executes the `main` function of the topology and creates a `.defn` file containing the topology's [logical plan](heron-topology-concepts#logical-plan). Then, it runs [`org.apache.heron.scheduler.SubmitterMain`](/api/java/org/apache/heron/scheduler/SubmitterMain.html), which is responsible for uploading the topology artifact to the [Heron API server](deployment-api-server).
+Heron API server | When the [Heron API server](deployment-api-server) has been notified that a topology is being submitted, it does two things. First, it uploads the topology artifacts (a JAR for Java or a PEX for Python, plus a few other files) to a storage service; Heron supports multiple uploaders for a variety of storage systems, such as [Amazon S3](uploaders-amazon-s3), [HDFS](uploaders-hdfs), and the [local filesystem](uploaders-local-fs).
+Heron scheduler | When the Heron CLI (client) submits a topology to the Heron API server, the API server notifies the Heron scheduler and also provides the scheduler with the topology's [logical plan](heron-topology-concepts#logical-plan), [physical plan](heron-topology-concepts#physical-plan), and some other artifacts. The scheduler, be it [Mesos](schedulers-mesos-local-mac), [Aurora](schedulers-aurora-cluster), the [local filesystem](schedulers-local), or something else, then deploys the topology using containers.
 Storage | When the topology is deployed to containers by the scheduler, the code running in those containers then downloads the remaining necessary topology artifacts (essentially the code that will run in those containers) from the storage system.
 
 * Shared Services
@@ -304,4 +299,4 @@ Storage | When the topology is deployed to containers by the scheduler, the code
 Heron is primarily written in **Java**, **C++**, and **Python**.
 
 A detailed guide to the Heron codebase can be found
-[here](../../contributors/codebase).
+[here](compiling-code-organization).

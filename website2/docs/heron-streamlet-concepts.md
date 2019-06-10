@@ -6,7 +6,7 @@ sidebar_label: Heron Streamlets
 
 When it was first released, Heron offered a **Topology API**---heavily indebted to the [Storm API](http://storm.apache.org/about/simple-api.html)---for developing topology logic. In the original Topology API, developers creating topologies were required to explicitly:
 
-* define the behavior of every [spout](../topologies/spouts) and [bolt](../topologies/bolts) in the topology 
+* define the behavior of every [spout](topology-development-topology-api-java#spouts) and [bolt](topology-development-topology-api-java#bolts) in the topology 
 * specify how those spouts and bolts are meant to be interconnected
 
 ### Problems with the Topology API
@@ -27,7 +27,7 @@ Advantage | Description
 :---------|:-----------
 Boilerplate-free code | Instead of needing to implement spout and bolt classes over and over again, the Heron Streamlet API enables you to create stream processing logic out of functions, such as map, flatMap, join, and filter functions, instead.
 Easy debugging | With the Heron Streamlet API, you don't have to worry about spouts and bolts, which means that you can more easily surface problems with your processing logic.
-Completely flexible, type-safe data model | Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.<br /><br />In the Streamlet API for [Java](../../developers/java/streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than at runtime.
+Completely flexible, type-safe data model | Instead of requiring that all processing components pass tuples to one another (which implicitly requires serialization to and deserializaton from your application-specific types), the Heron Streamlet API enables you to write your processing logic in accordance with whatever types you'd like---including tuples, if you wish.<br /><br />In the Streamlet API for [Java](topology-development-streamlet-api), all streamlets are typed (e.g. `Streamlet<MyApplicationType>`), which means that type errors can be caught at compile time rather than at runtime.
 
 ## Streamlet API topology model
 
@@ -71,12 +71,12 @@ In this diagram, the **source streamlet** is produced by a random generator that
 
 The Heron Streamlet API is currently available for:
 
-* [Java](/docs/developers/java/streamlet-api)
-* [Scala](/docs/developers/scala/streamlet-api)
+* [Java](topology-development-streamlet-api)
+* [Scala](topology-development-streamlet-scala)
 
 ### The Heron Streamlet API and topologies
 
-With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron automatically performs the heavy lifting of converting the streamlet-based processing logic that you create into spouts and bolts and, from there, into containers that are then deployed using whichever [scheduler](../../operators/deployment) your Heron cluster relies upon.
+With the Heron Streamlet API *you still create topologies*, but only implicitly. Heron automatically performs the heavy lifting of converting the streamlet-based processing logic that you create into spouts and bolts and, from there, into containers that are then deployed using whichever [scheduler](schedulers-local.md) your Heron cluster relies upon.
 
 From the standpoint of both operators and developers [managing topologies' lifecycles](#topology-lifecycle), the resulting topologies are equivalent. From a development workflow standpoint, however, the difference is profound. You can think of the Streamlet API as a highly convenient tool for creating spouts, bolts, and the logic that connects them.
 
@@ -84,11 +84,11 @@ The basic workflow looks like this:
 
 ![Streamlet](https://www.lucidchart.com/publicSegments/view/6b2e9b49-ef1f-45c9-8094-1e2cefbaed7b/image.png)
 
-When creating topologies using the Heron Streamlet API, you simply write code (example [below](#complete-streamlet-processing-graph-example)) in a highly functional style. From there:
+When creating topologies using the Heron Streamlet API, you simply write code (example [below](#java-processing-graph-example)) in a highly functional style. From there:
 
 * that code is automatically converted into spouts, bolts, and the necessary connective logic between spouts and bolts
-* the spouts and bolts are automatically converted into a [logical plan](../topologies#logical-plan) that specifies how the spouts and bolts are connected to each other
-* the logical plan is automatically converted into a [physical plan](../topologies#physical-plan) that determines how the spout and bolt [instances](../architecture#heron-instances) (the colored boxes above) are distributed across the specified number of containers (in this case two)
+* the spouts and bolts are automatically converted into a [logical plan](topology-development-topology-api-java#logical-plan) that specifies how the spouts and bolts are connected to each other
+* the logical plan is automatically converted into a [physical plan](topology-development-topology-api-java#physical-plan) that determines how the spout and bolt instances (the colored boxes above) are distributed across the specified number of containers (in this case two)
 
 With a physical plan in place, the Streamlet API topology can be submitted to a Heron cluster.
 
@@ -241,7 +241,7 @@ In this example, a streamlet of random integers between 1 and 100 is split into 
 
 Transform operations are highly flexible operations that are most useful for:
 
-* operations involving state in [stateful topologies](../../concepts/delivery-semantics#stateful-topologies)
+* operations involving state in [stateful topologies](heron-delivery-semantics#stateful-topologies)
 * operations that don't neatly fit into the other categories or into a lambda-based logic
 
 Transform operations require you to implement three different methods:
@@ -360,7 +360,7 @@ You can apply [reduce](https://docs.oracle.com/javase/tutorial/collections/strea
 
 * a key extractor that determines what counts as the key for the streamlet
 * a value extractor that determines which final value is chosen for each element of the streamlet
-* a [time window](../topologies#window-operations) across which the operation will take place
+* a [time window](heron-topology-concepts#window-operations) across which the operation will take place
 * a reduce function that produces a single value for each key in the streamlet
 
 Reduce by key and window operations produce a new streamlet of key-value window objects (which include a key-value pair including the extracted key and calculated value, as well as information about the window in which the operation took place).

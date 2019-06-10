@@ -50,7 +50,7 @@ The Heron topologies that you create can be either stateful or non stateful.
 * In **stateful topologies**, each component must implement an interface that requires it to store its state every time it processes a tuple (both spouts *and* bolts must do so).
 * In **non-stateful topologies**, there is no requirement that any processing components store a state snapshot. Non-stateful topologies can provide at-most-once or at-least-once semantics, but never effectively-once semantics.
 
-> Heron currently supports two state managers: [ZooKeeper](../../operators/deployment/statemanagers/zookeeper) and the [local filesystem](../../operators/deployment/statemanagers/localfs), although others are currently under development.
+> Heron currently supports two state managers: [ZooKeeper](state-managers-zookeeper) and the [local filesystem](state-managers-local-fs), although others are currently under development.
 
 Stateful topologies, in turn, are of two types:
 

@@ -35,10 +35,10 @@ Heron was designed to serve a wide range of requirements, use cases, platforms,
 programming languages and so on. In order to suit varying---and often
 unforeseeable---needs, Heron provides support for mulitple:
 
-* [schedulers](../architecture#schedulers)
+* [schedulers](heron-architecture#schedulers)
 * metrics sinks
 * operating systems and platforms
-* topology [uploaders](../architecture#schedulers)
+* topology [uploaders](heron-architecture#uploaders)
 
 ### Extensibility
 
@@ -49,19 +49,19 @@ uploaders, etc.
 
 ### Isolation
 
-Heron [topologies](../topologies) should be process based rather than
+Heron topologies should be process based rather than
 thread based, and each process should run in isolation for the sake of easy
 debugging, profiling, and troubleshooting.
 
 ### Constrained resource usage
 
-Heron [topologies](../topologies) should use only those resources that they are
+Heron topologies should use only those resources that they are
 initially allocated and never exceed those bounds. This makes Heron safe to run
 in shared infrastructure.
 
 ### Apache Storm compatibility
 
-Although Heron has a [Functional API](../topologies#the-heron-functional-api)
+Although Heron has a [Functional API](topology-development-streamlet-api)
 that we recommend for all future topology development, Heron is fully API and
 data model compatible with [Apache Storm](http://storm.apache.org), making it
 easy for developers to transition from Storm to Heron.
@@ -70,13 +70,13 @@ easy for developers to transition from Storm to Heron.
 
 In a distributed system like Heron, there are no guarantees that all system
 components will execute at the same speed. Heron has built-in [back pressure
-mechanisms](../architecture#stream-manager) to ensure that topologies can
+mechanisms](heron-architecture#stream-manager) to ensure that topologies can
 self-adjust in case components lag.
 
 ### Multiple delivery semantics
 
 Heron provides support for
-[at-most-once](../delivery-semantics#available-semantics),
-[at-least-once](../delivery-semantics#available-semantics), and
-[effectively-once](../delivery-semantics#available-semantics) processing
+[at-most-once](heron-delivery-semantics#available-semantics),
+[at-least-once](heron-delivery-semantics#available-semantics), and
+[effectively-once](heron-delivery-semantics#available-semantics) processing
 semantics.
