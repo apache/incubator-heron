@@ -38,7 +38,7 @@ namespace config {
 
 class YamlFileReader {
  public:
-  YamlFileReader(EventLoop* eventLoop, const sp_string& _config_file);
+  YamlFileReader(std::shared_ptr<EventLoop> eventLoop, const sp_string& _config_file);
   virtual ~YamlFileReader();
 
  protected:

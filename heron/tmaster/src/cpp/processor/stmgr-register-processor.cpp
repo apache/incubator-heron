@@ -32,9 +32,9 @@ namespace heron {
 namespace tmaster {
 
 StMgrRegisterProcessor::StMgrRegisterProcessor(REQID _reqid, Connection* _conn,
-                                               proto::tmaster::StMgrRegisterRequest* _request,
-                                               TMaster* _tmaster, Server* _server)
-    : Processor(_reqid, _conn, _request, _tmaster, _server) {}
+                                         unique_ptr<proto::tmaster::StMgrRegisterRequest> _request,
+                                         TMaster* _tmaster, Server* _server)
+    : Processor(_reqid, _conn, std::move(_request), _tmaster, _server) {}
 
 StMgrRegisterProcessor::~StMgrRegisterProcessor() {
   // nothing to be done here
@@ -44,7 +44,7 @@ void StMgrRegisterProcessor::Start() {
   // We got a new stream manager registering to us
   // Get the relevant info and ask tmaster to register
   proto::tmaster::StMgrRegisterRequest* request =
-      static_cast<proto::tmaster::StMgrRegisterRequest*>(request_);
+      static_cast<proto::tmaster::StMgrRegisterRequest*>(request_.get());
   std::vector<shared_ptr<proto::system::Instance>> instances;
   for (sp_int32 i = 0; i < request->instances_size(); ++i) {
     auto instance = std::make_shared<proto::system::Instance>();

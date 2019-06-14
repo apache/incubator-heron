@@ -51,17 +51,19 @@ class CheckpointGateway;
 
 class InstanceServer : public Server {
  public:
-  InstanceServer(EventLoop* eventLoop, const NetworkOptions& options,
-                 const sp_string& _topology_name, const sp_string& _topology_id,
-                 const sp_string& _stmgr_id, const std::vector<sp_string>& _expected_instances,
-                 StMgr* _stmgr, heron::common::MetricsMgrSt* _metrics_manager_client,
-                 NeighbourCalculator* _neighbour_calculator,
-                 bool _droptuples_upon_backpressure);
+  InstanceServer(shared_ptr<EventLoop> eventLoop, const NetworkOptions& options,
+             const sp_string& _topology_name, const sp_string& _topology_id,
+             const sp_string& _stmgr_id,
+             const std::vector<sp_string>& _expected_instances,
+             StMgr* _stmgr,
+             shared_ptr<heron::common::MetricsMgrSt> const& _metrics_manager_client,
+             shared_ptr<NeighbourCalculator> _neighbour_calculator,
+             bool _droptuples_upon_backpressure);
   virtual ~InstanceServer();
 
   // We own the message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance2(proto::stmgr::TupleStreamMessage* _message);
+  void SendToInstance2(unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   // When we get a checkpoint marker from _src_task_id destined for _destination_task_id
   // this function in invoked, so that we might register it in gateway
@@ -104,7 +106,8 @@ class InstanceServer : public Server {
  private:
   void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void DrainTupleStream(proto::stmgr::TupleStreamMessage* _message);
-  void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
+  void DrainCheckpoint(sp_int32 _task_id,
+          unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueLengthCompIdMetricName(const sp_string& instanceid);
@@ -115,12 +118,12 @@ class InstanceServer : public Server {
 
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
-                                     proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
+                                     unique_ptr<proto::stmgr::RegisterInstanceRequest> _request);
+  void HandleTupleSetMessage(Connection* _conn, unique_ptr<proto::system::HeronTupleSet> _message);
   void HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
-      proto::ckptmgr::StoreInstanceStateCheckpoint* _message);
+                                 unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message);
   void HandleRestoreInstanceStateResponse(Connection* _conn,
-                                          proto::ckptmgr::RestoreInstanceStateResponse* _message);
+                                 unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message);
 
   // Back pressure related connection callbacks
   // Do back pressure
@@ -186,15 +189,15 @@ class InstanceServer : public Server {
   StMgr* stmgr_;
 
   // Metrics
-  heron::common::MetricsMgrSt* metrics_manager_client_;
+  shared_ptr<heron::common::MetricsMgrSt> metrics_manager_client_;
   shared_ptr<heron::common::MultiCountMetric> instance_server_metrics_;
   shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_aggr_;
 
   bool spouts_under_back_pressure_;
 
   // Stateful processing related member variables
-  NeighbourCalculator* neighbour_calculator_;
-  CheckpointGateway* stateful_gateway_;
+  shared_ptr<NeighbourCalculator> neighbour_calculator_;
+  shared_ptr<CheckpointGateway> stateful_gateway_;
 
   bool droptuples_upon_backpressure_;
 

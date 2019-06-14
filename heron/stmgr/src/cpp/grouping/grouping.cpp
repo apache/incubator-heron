@@ -45,43 +45,44 @@ Grouping::Grouping(const std::vector<sp_int32>& _task_ids)
 
 Grouping::~Grouping() {}
 
-Grouping* Grouping::Create(proto::api::Grouping grouping_, const proto::api::InputStream& _is,
+unique_ptr<Grouping> Grouping::Create(proto::api::Grouping grouping_,
+                           const proto::api::InputStream& _is,
                            const proto::api::StreamSchema& _schema,
                            const std::vector<sp_int32>& _task_ids) {
   switch (grouping_) {
     case proto::api::SHUFFLE: {
-      return new ShuffleGrouping(_task_ids);
+      return make_unique<ShuffleGrouping>(_task_ids);
       break;
     }
 
     case proto::api::FIELDS: {
-      return new FieldsGrouping(_is, _schema, _task_ids);
+      return make_unique<FieldsGrouping>(_is, _schema, _task_ids);
       break;
     }
 
     case proto::api::ALL: {
-      return new AllGrouping(_task_ids);
+      return make_unique<AllGrouping>(_task_ids);
       break;
     }
 
     case proto::api::LOWEST: {
-      return new LowestGrouping(_task_ids);
+      return make_unique<LowestGrouping>(_task_ids);
       break;
     }
 
     case proto::api::NONE: {
       // This is what storm does right now
-      return new ShuffleGrouping(_task_ids);
+      return make_unique<ShuffleGrouping>(_task_ids);
       break;
     }
 
     case proto::api::DIRECT: {
-      return new DirectGrouping(_task_ids);
+      return make_unique<DirectGrouping>(_task_ids);
       break;
     }
 
     case proto::api::CUSTOM: {
-      return new CustomGrouping(_task_ids);
+      return make_unique<CustomGrouping>(_task_ids);
       break;
     }
 

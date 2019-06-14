@@ -27,7 +27,8 @@
 
 class OrderClient : public Client {
  public:
-  OrderClient(EventLoopImpl* eventLoop, const NetworkOptions& _options, sp_uint64 _ntotal);
+  OrderClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
+          sp_uint64 _ntotal);
 
   ~OrderClient() {}
 
@@ -42,7 +43,7 @@ class OrderClient : public Client {
 
  private:
   // Handle incoming message
-  void HandleOrderMessage(OrderMessage* _message);
+  void HandleOrderMessage(unique_ptr<OrderMessage> _message);
 
   void SendMessages();
   void CreateAndSendMessage();

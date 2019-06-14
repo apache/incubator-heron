@@ -35,10 +35,10 @@
 namespace heron {
 namespace stmgr {
 
-TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
+TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                              const sp_string& _stmgr_id, const sp_string& _stmgr_host,
                              sp_int32 _data_port, sp_int32 _local_data_port, sp_int32 _shell_port,
-                             VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                             VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
                              VCallback<sp_string> _stateful_checkpoint_watch,
                              VCallback<sp_string, sp_int64> _restore_topology_watch,
                              VCallback<sp_string> _start_stateful_watch)
@@ -145,41 +145,45 @@ void TMasterClient::HandleClose(NetworkErrorCode _code) {
   reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
 }
 
-void TMasterClient::HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* _response,
-                                           NetworkErrorCode _status) {
+void TMasterClient::HandleRegisterResponse(
+                                      void*,
+                                      unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
+                                      NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "non ok network stack code for Register Response from Tmaster" << std::endl;
-    delete _response;
     Stop();
     return;
   }
+
   proto::system::StatusCode status = _response->status().status();
+
   if (status != proto::system::OK) {
     LOG(ERROR) << "Register with Tmaster failed with status " << status << std::endl;
     Stop();
   } else {
     LOG(INFO) << "Registered successfully with Tmaster" << std::endl;
     if (_response->has_pplan()) {
-      pplan_watch_(_response->release_pplan());
+      pplan_watch_(shared_ptr<proto::system::PhysicalPlan>(_response->release_pplan()));
     }
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(heartbeat_timer_id, 0);
     heartbeat_timer_id =
         AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
   }
-  delete _response;
 }
 
-void TMasterClient::HandleHeartbeatResponse(void*,
-                                            proto::tmaster::StMgrHeartbeatResponse* _response,
-                                            NetworkErrorCode _status) {
+void TMasterClient::HandleHeartbeatResponse(
+                                      void*,
+                                      unique_ptr<proto::tmaster::StMgrHeartbeatResponse> _response,
+                                      NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for heartbeat Response" << std::endl;
-    delete _response;
     Stop();
     return;
   }
+
   proto::system::StatusCode status = _response->status().status();
+
   if (status != proto::system::OK) {
     LOG(ERROR) << "Heartbeat failed with status " << status << std::endl;
     return Stop();
@@ -189,21 +193,19 @@ void TMasterClient::HandleHeartbeatResponse(void*,
     heartbeat_timer_id =
         AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
   }
-  delete _response;
 }
 
-void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message) {
+void TMasterClient::HandleNewAssignmentMessage(
+                                      unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message) {
   LOG(INFO) << "Got a new assignment" << std::endl;
-  pplan_watch_(_message->release_new_pplan());
-  delete _message;
+  pplan_watch_(shared_ptr<proto::system::PhysicalPlan>(_message->release_new_pplan()));
 }
 
 void TMasterClient::HandleStatefulCheckpointMessage(
-                                        proto::ckptmgr::StartStatefulCheckpoint* _message) {
+                                    unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message) {
   LOG(INFO) << "Got a new start stateful checkpoint message from tmaster with id "
             << _message->checkpoint_id();
   stateful_checkpoint_watch_(_message->checkpoint_id());
-  __global_protobuf_pool_release__(_message);
 }
 
 void TMasterClient::OnReConnectTimer() {
@@ -227,9 +229,6 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::CleanInstances() {
-  for (auto it = instances_.begin(); it != instances_.end(); ++it) {
-    delete *it;
-  }
   instances_.clear();
 }
 
@@ -261,9 +260,9 @@ void TMasterClient::SetInstanceInfo(const std::vector<proto::system::Instance*>&
     }
 
     for (auto iter = _instances.begin(); iter != _instances.end(); ++iter) {
-      auto instance = new proto::system::Instance();
+      auto instance = make_unique<proto::system::Instance>();
       instance->CopyFrom(*(*iter));
-      instances_.insert(instance);
+      instances_.insert(std::move(instance));
     }
 }
 
@@ -295,15 +294,13 @@ void TMasterClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _
 }
 
 void TMasterClient::HandleRestoreTopologyStateRequest(
-              proto::ckptmgr::RestoreTopologyStateRequest* _message) {
+                                unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message) {
   restore_topology_watch_(_message->checkpoint_id(), _message->restore_txid());
-  __global_protobuf_pool_release__(_message);
 }
 
 void TMasterClient::HandleStartStmgrStatefulProcessing(
-              proto::ckptmgr::StartStmgrStatefulProcessing* _message) {
+                               unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _message) {
   start_stateful_watch_(_message->checkpoint_id());
-  __global_protobuf_pool_release__(_message);
 }
 
 void TMasterClient::SendResetTopologyState(const std::string& _dead_stmgr,

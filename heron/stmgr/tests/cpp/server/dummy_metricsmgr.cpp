@@ -30,7 +30,7 @@
 
 #include "server/dummy_metricsmgr.h"
 ///////////////////////////// DummyMtrMgr /////////////////////////////////////////////////
-DummyMtrMgr::DummyMtrMgr(EventLoopImpl* ss, const NetworkOptions& options,
+DummyMtrMgr::DummyMtrMgr(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
                          const sp_string& stmgr_id, CountDownLatch* tmasterLatch,
                          CountDownLatch* connectionCloseLatch)
     : Server(ss, options),
@@ -56,24 +56,20 @@ void DummyMtrMgr::HandleConnectionClose(Connection*, NetworkErrorCode status) {
   }
 }
 
-void DummyMtrMgr::HandleMetricPublisherRegisterRequest(
-    REQID id, Connection* conn, heron::proto::system::MetricPublisherRegisterRequest* request) {
+void DummyMtrMgr::HandleMetricPublisherRegisterRequest(REQID id, Connection* conn,
+        unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> request) {
   LOG(INFO) << "Got a register request ";
   heron::proto::system::MetricPublisherRegisterResponse response;
   response.mutable_status()->set_status(heron::proto::system::OK);
   SendResponse(id, conn, response);
-  delete request;
 }
 
 void DummyMtrMgr::HandleMetricPublisherPublishMessage(
-    Connection*, heron::proto::system::MetricPublisherPublishMessage* message) {
-  delete message;
-}
+    Connection*, unique_ptr<heron::proto::system::MetricPublisherPublishMessage> message) {}
 
 void DummyMtrMgr::HandleTMasterLocationMessage(
-    Connection*, heron::proto::system::TMasterLocationRefreshMessage* message) {
+    Connection*, unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> message) {
   location_ = message->release_tmaster();
-  delete message;
 
   LOG(INFO) << "Got tmaster location: " << location_->host() << ":" << location_->master_port();
 

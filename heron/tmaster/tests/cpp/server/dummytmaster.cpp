@@ -32,7 +32,7 @@
 namespace heron {
 namespace testing {
 
-DummyTMaster::DummyTMaster(EventLoop* eventLoop, const NetworkOptions& options)
+DummyTMaster::DummyTMaster(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options)
   : Server(eventLoop, options) {
   InstallRequestHandler(&DummyTMaster::HandleRegisterRequest);
 }
@@ -48,11 +48,10 @@ void DummyTMaster::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 }
 
 void DummyTMaster::HandleRegisterRequest(REQID _id, Connection* _conn,
-                                         proto::tmaster::StMgrRegisterRequest* _request) {
+                                        unique_ptr<proto::tmaster::StMgrRegisterRequest> _request) {
   std::vector<std::shared_ptr<proto::system::Instance>> instances;
   stmgrs_[_request->stmgr().id()] =
           std::make_shared<tmaster::StMgrState>(_conn, _request->stmgr(), instances, *this);
-  delete _request;
   proto::tmaster::StMgrRegisterResponse response;
   response.mutable_status()->set_status(proto::system::OK);
   SendResponse(_id, _conn, response);

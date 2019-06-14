@@ -124,12 +124,12 @@ void ExistsCompletionHandler(sp_int32 _rc, const struct Stat*, const void* _data
 }
 
 // Constructor. We create a new event_base.
-ZKClient::ZKClient(const std::string& hostportlist, EventLoop* eventLoop)
+ZKClient::ZKClient(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop)
     : eventLoop_(eventLoop), hostportlist_(hostportlist) {
   Init();
 }
 
-ZKClient::ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
+ZKClient::ZKClient(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop,
                    VCallback<ZkWatchEvent> global_watcher_cb)
     : eventLoop_(eventLoop),
       hostportlist_(hostportlist),

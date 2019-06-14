@@ -36,7 +36,7 @@ namespace testing {
 
 class DummyTMaster : public Server {
  public:
-  DummyTMaster(EventLoop* eventLoop, const NetworkOptions& options);
+  DummyTMaster(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
   ~DummyTMaster();
 
   const tmaster::StMgrMap& stmgrs() const { return stmgrs_; }
@@ -47,7 +47,7 @@ class DummyTMaster : public Server {
 
  private:
   void HandleRegisterRequest(REQID _id, Connection* _conn,
-                             proto::tmaster::StMgrRegisterRequest* _request);
+                             unique_ptr<proto::tmaster::StMgrRegisterRequest> _request);
   void HandleHeartbeatRequest(REQID _id, Connection* _conn,
                               proto::tmaster::StMgrHeartbeatRequest* _request);
   tmaster::StMgrMap stmgrs_;

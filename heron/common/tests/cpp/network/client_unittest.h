@@ -28,7 +28,8 @@
 
 class TestClient : public Client {
  public:
-  TestClient(EventLoopImpl* eventLoop, const NetworkOptions& _options, sp_uint64 _ntotal);
+  TestClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
+          sp_uint64 _ntotal);
 
   ~TestClient();
 
@@ -43,7 +44,7 @@ class TestClient : public Client {
 
  private:
   // Handle incoming message
-  void HandleTestMessage(TestMessage* _message);
+  void HandleTestMessage(unique_ptr<TestMessage> _message);
 
   void SendMessages();
   void CreateAndSendMessage();

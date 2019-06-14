@@ -29,7 +29,7 @@
 
 class DummyCkptMgrClient : public heron::stmgr::CkptMgrClient {
  public:
-  DummyCkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
+  DummyCkptMgrClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                      const std::string& _stmgr,
                      heron::proto::system::PhysicalPlan* _pplan);
 

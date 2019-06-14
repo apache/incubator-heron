@@ -26,7 +26,7 @@
 #include <utility>
 #include "basics/basics.h"
 
-Server::Server(EventLoop* eventLoop, const NetworkOptions& _options)
+Server::Server(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options)
     : BaseServer(eventLoop, _options) {
   request_rid_gen_ = new REQID_Generator();
 }
@@ -94,7 +94,7 @@ void Server::SendRequest(Connection* _conn, google::protobuf::Message* _request,
 
 // The interfaces of BaseServer being implemented
 BaseConnection* Server::CreateConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
-                                         EventLoop* eventLoop) {
+                                         std::shared_ptr<EventLoop> eventLoop) {
   // Create the connection object and register our callbacks on various events.
   auto conn = new Connection(_endpoint, _options, eventLoop);
   auto npcb = [conn, this](IncomingPacket* packet) { this->OnNewPacket(conn, packet); };

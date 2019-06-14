@@ -30,7 +30,7 @@ namespace stmgr {
 using std::unique_ptr;
 using proto::ckptmgr::SaveInstanceStateRequest;
 
-CkptMgrClient::CkptMgrClient(EventLoop* eventloop, const NetworkOptions& _options,
+CkptMgrClient::CkptMgrClient(std::shared_ptr<EventLoop> eventloop, const NetworkOptions& _options,
                              const sp_string& _topology_name, const sp_string& _topology_id,
                              const sp_string& _ckptmgr_id, const sp_string& _stmgr_id,
                              std::function<void(const proto::system::Instance&,
@@ -115,18 +115,20 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _code) {
   }
 }
 
-void CkptMgrClient::HandleRegisterStMgrResponse(void*,
-                                                proto::ckptmgr::RegisterStMgrResponse* _response,
-                                                NetworkErrorCode _status) {
+void CkptMgrClient::HandleRegisterStMgrResponse(
+                                        void*,
+                                        unique_ptr<proto::ckptmgr::RegisterStMgrResponse> _response,
+                                        NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code " << _status << " for register response from ckptmgr "
                << ckptmgr_id_ << "running at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port();
-    delete _response;
     Stop();
     return;
   }
+
   proto::system::StatusCode status = _response->status().status();
+
   if (status != proto::system::OK) {
     LOG(ERROR) << "NonOK register response " << status << " from ckptmgr " << ckptmgr_id_
                << " running at " << get_clientoptions().get_host() << ":"
@@ -138,7 +140,6 @@ void CkptMgrClient::HandleRegisterStMgrResponse(void*,
               << get_clientoptions().get_port();
     register_watcher_();
   }
-  delete _response;
 }
 
 void CkptMgrClient::OnReconnectTimer() { Start(); }
@@ -149,12 +150,12 @@ void CkptMgrClient::SendRegisterRequest() {
   request->set_topology_id(topology_id_);
   request->set_stmgr_id(stmgr_id_);
   request->mutable_physical_plan()->CopyFrom(*pplan_);
-  SendRequest(std::move(request), NULL);
+  SendRequest(std::move(request), nullptr);
 }
 
 void CkptMgrClient::SaveInstanceState(unique_ptr<SaveInstanceStateRequest> _request) {
   LOG(INFO) << "Sending SaveInstanceState to ckptmgr" << std::endl;
-  SendRequest(std::move(_request), NULL);
+  SendRequest(std::move(_request), nullptr);
 }
 
 void CkptMgrClient::SetPhysicalPlan(proto::system::PhysicalPlan& _pplan) {
@@ -179,31 +180,31 @@ void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,
   SendRequest(std::move(request), _nattempts);
 }
 
-void CkptMgrClient::HandleSaveInstanceStateResponse(void*,
-                             proto::ckptmgr::SaveInstanceStateResponse* _response,
+void CkptMgrClient::HandleSaveInstanceStateResponse(
+                             void*,
+                             unique_ptr<proto::ckptmgr::SaveInstanceStateResponse> _response,
                              NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for SaveInstanceStateResponse";
-    delete _response;
     Stop();
     return;
   }
+
   if (_response->status().status() != proto::system::OK) {
     LOG(ERROR) << "CkptMgr could not save " << _response->status().status();
-    delete _response;
     return;
   }
+
   ckpt_saved_watcher_(_response->instance(), _response->checkpoint_id());
-  delete _response;
 }
 
-void CkptMgrClient::HandleGetInstanceStateResponse(void* _ctx,
-                             proto::ckptmgr::GetInstanceStateResponse* _response,
+void CkptMgrClient::HandleGetInstanceStateResponse(
+                             void* _ctx,
+                             unique_ptr<proto::ckptmgr::GetInstanceStateResponse> _response,
                              NetworkErrorCode _status) {
   int32_t* nattempts = static_cast<int32_t*>(_ctx);
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for GetInstanceStateResponse";
-    delete _response;
     delete nattempts;
     Stop();
     return;
@@ -229,7 +230,6 @@ void CkptMgrClient::HandleGetInstanceStateResponse(void* _ctx,
                       _response->instance().info().task_id(), _response->checkpoint_id(),
                       _response->checkpoint());
   }
-  delete _response;
 }
 }  // namespace stmgr
 }  // namespace heron

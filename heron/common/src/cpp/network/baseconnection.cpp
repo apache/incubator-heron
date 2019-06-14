@@ -48,7 +48,7 @@ void eventcb(struct bufferevent *bev, sp_int16 events, void *ctx) {
 }
 
 BaseConnection::BaseConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                               EventLoop* eventLoop)
+                               std::shared_ptr<EventLoop> eventLoop)
     : mOptions(options), mEndpoint(endpoint), mEventLoop(eventLoop) {
   mState = INIT;
   mOnClose = NULL;

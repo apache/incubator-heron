@@ -27,7 +27,7 @@
 
 class ZKClientFactory {
  public:
-  virtual ZKClient* create(const std::string& hostportlist, EventLoop* eventLoop,
+  virtual ZKClient* create(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop,
                            VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) = 0;
 
   virtual ~ZKClientFactory() {}
@@ -35,7 +35,7 @@ class ZKClientFactory {
 
 class DefaultZKClientFactory : public ZKClientFactory {
  public:
-  virtual ZKClient* create(const std::string& hostportlist, EventLoop* eventLoop,
+  virtual ZKClient* create(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop,
                            VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) {
     if (global_watcher_cb == NULL) {
       return new ZKClient(hostportlist, eventLoop);

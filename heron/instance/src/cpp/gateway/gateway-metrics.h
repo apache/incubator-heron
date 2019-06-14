@@ -36,7 +36,7 @@ namespace instance {
 class GatewayMetrics {
  public:
   GatewayMetrics(std::shared_ptr<common::MetricsMgrClient> metricsMgrClient,
-                 EventLoop* eventLoop);
+                 std::shared_ptr<EventLoop> eventLoop);
   virtual ~GatewayMetrics();
 
   void updateReceivedPacketsCount(int64_t count) {

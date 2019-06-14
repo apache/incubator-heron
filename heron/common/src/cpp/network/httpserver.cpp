@@ -32,7 +32,7 @@ void HTTPServerRequestCallback(struct evhttp_request* _request, void* _arg) {
   server->HandleHTTPRequest(_request);
 }
 
-HTTPServer::HTTPServer(EventLoop* eventLoop, const NetworkOptions& _options) {
+HTTPServer::HTTPServer(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   http_ = evhttp_new(eventLoop->dispatcher());

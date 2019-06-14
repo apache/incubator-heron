@@ -206,10 +206,10 @@ static heron::proto::system::PackingPlan* GenerateDummyPackingPlan(size_t num_st
 // Method to create the local zk state on the filesystem
 void CreateLocalStateOnFS(heron::proto::api::Topology* topology,
                           heron::proto::system::PackingPlan* packingPlan, sp_string dpath) {
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // Write the dummy topology/tmaster location out to the local file system via the state mgr
-  heron::common::HeronLocalFileStateMgr state_mgr(dpath, &ss);
+  heron::common::HeronLocalFileStateMgr state_mgr(dpath, ss);
   state_mgr.CreateTopology(*topology, NULL);
   state_mgr.CreatePackingPlan(topology->name(), *packingPlan, NULL);
 }
@@ -247,7 +247,7 @@ void DummyTimerCb(EventLoop::Status) {
 }
 
 // Function to start the threads
-void StartServer(EventLoopImpl* ss) {
+void StartServer(std::shared_ptr<EventLoopImpl> ss) {
   // In the ss register a dummy timer. This is to make sure that the
   // exit from the loop happens timely. If there are no timers registered
   // with the select server and also no activity on any of the fds registered
@@ -256,14 +256,14 @@ void StartServer(EventLoopImpl* ss) {
   ss->loop();
 }
 
-void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
+void StartTMaster(std::shared_ptr<EventLoopImpl>& ss, heron::tmaster::TMaster*& tmaster,
                   std::thread*& tmaster_thread, const sp_string& zkhostportlist,
                   const sp_string& topology_name, const sp_string& topology_id,
                   const sp_string& dpath,
                   sp_int32 tmaster_port, sp_int32 tmaster_controller_port,
                   sp_int32 tmaster_stats_port, sp_int32 metrics_mgr_port,
                   sp_int32 ckptmgr_port) {
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   tmaster = new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id, dpath,
                                   tmaster_controller_port, tmaster_port, tmaster_stats_port,
                                   metrics_mgr_port, ckptmgr_port,
@@ -271,7 +271,8 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
   tmaster_thread = new std::thread(StartServer, ss);
 }
 
-void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stmgr_thread,
+void StartStMgr(std::shared_ptr<EventLoopImpl>& ss, heron::stmgr::StMgr*& mgr,
+                std::thread*& stmgr_thread,
                 const sp_string& stmgr_host, sp_int32& stmgr_port, sp_int32& local_data_port,
                 const sp_string& topology_name,
                 const sp_string& topology_id, const heron::proto::api::Topology* topology,
@@ -280,10 +281,10 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
                 sp_int32 shell_port, sp_int32 ckptmgr_port, const sp_string& ckptmgr_id,
                 sp_int64 _high_watermark, sp_int64 _low_watermark) {
   // The topology will be owned and deleted by the strmgr
-  heron::proto::api::Topology* stmgr_topology = new heron::proto::api::Topology();
+  auto stmgr_topology = std::make_shared<heron::proto::api::Topology>();
   stmgr_topology->CopyFrom(*topology);
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   mgr = new heron::stmgr::StMgr(ss, stmgr_host, stmgr_port, local_data_port, topology_name,
                                 topology_id,
                                 stmgr_topology, stmgr_id, workers, zkhostportlist, dpath,
@@ -298,12 +299,13 @@ void StartStMgr(EventLoopImpl*& ss, heron::stmgr::StMgr*& mgr, std::thread*& stm
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
-void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_thread,
+void StartDummyStMgr(std::shared_ptr<EventLoopImpl>& ss, DummyStMgr*& mgr,
+                     std::thread*& stmgr_thread,
                      sp_int32& stmgr_port, sp_int32 tmaster_port, sp_int32 shell_port,
                      const sp_string& stmgr_id,
                      const std::vector<shared_ptr<heron::proto::system::Instance>>& instances) {
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
 
   NetworkOptions options;
   options.set_host(LOCALHOST);
@@ -320,11 +322,12 @@ void StartDummyStMgr(EventLoopImpl*& ss, DummyStMgr*& mgr, std::thread*& stmgr_t
   stmgr_thread = new std::thread(StartServer, ss);
 }
 
-void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr_thread,
+void StartDummyMtrMgr(std::shared_ptr<EventLoopImpl>& ss, DummyMtrMgr*& mgr,
+                      std::thread*& mtmgr_thread,
                       sp_int32& mtmgr_port, const sp_string& stmgr_id, CountDownLatch* tmasterLatch,
                       CountDownLatch* connectionCloseLatch) {
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
 
   NetworkOptions options;
   options.set_host(LOCALHOST);
@@ -339,7 +342,7 @@ void StartDummyMtrMgr(EventLoopImpl*& ss, DummyMtrMgr*& mgr, std::thread*& mtmgr
   mtmgr_thread = new std::thread(StartServer, ss);
 }
 
-void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
+void StartDummySpoutInstance(std::shared_ptr<EventLoopImpl>& ss, DummySpoutInstance*& worker,
                              std::thread*& worker_thread, sp_int32 stmgr_port,
                              const sp_string& topology_name, const sp_string& topology_id,
                              const sp_string& instance_id, const sp_string& component_name,
@@ -347,7 +350,7 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
                              const sp_string& stream_id, sp_int32 max_msgs_to_send,
                              bool _do_custom_grouping) {
   // Create the select server for this worker to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   // Create the network option
   NetworkOptions options;
   options.set_host(LOCALHOST);
@@ -362,14 +365,14 @@ void StartDummySpoutInstance(EventLoopImpl*& ss, DummySpoutInstance*& worker,
   worker_thread = new std::thread(StartServer, ss);
 }
 
-void StartDummyBoltInstance(EventLoopImpl*& ss, DummyBoltInstance*& worker,
+void StartDummyBoltInstance(std::shared_ptr<EventLoopImpl>& ss, DummyBoltInstance*& worker,
                             std::thread*& worker_thread, sp_int32 stmgr_port,
                             const sp_string& topology_name, const sp_string& topology_id,
                             const sp_string& instance_id, const sp_string& component_name,
                             sp_int32 task_id, sp_int32 component_index, const sp_string& stmgr_id,
                             sp_int32 expected_msgs_to_recv) {
   // Create the select server for this worker to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   // Create the network option
   NetworkOptions options;
   options.set_host(LOCALHOST);
@@ -411,7 +414,7 @@ struct CommonResources {
 
   // returns - filled in by init
   sp_string dpath_;
-  std::vector<EventLoopImpl*> ss_list_;
+  std::vector<std::shared_ptr<EventLoopImpl>> ss_list_;
   std::vector<sp_string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
   heron::proto::system::PackingPlan* packing_plan_;
@@ -494,7 +497,7 @@ void StartTMaster(CommonResources& common) {
   }
 
   // Start the tmaster
-  EventLoopImpl* tmaster_eventLoop;
+  std::shared_ptr<EventLoopImpl> tmaster_eventLoop;
 
   StartTMaster(tmaster_eventLoop, common.tmaster_, common.tmaster_thread_, common.zkhostportlist_,
                common.topology_name_, common.topology_id_, common.dpath_,
@@ -546,7 +549,7 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
 void StartDummySpoutInstanceHelper(CommonResources& common, sp_int8 spout, sp_int8 spout_instance,
                                    sp_int32 num_msgs_sent_by_spout_instance) {
   // Start the spout
-  EventLoopImpl* worker_ss = NULL;
+  std::shared_ptr<EventLoopImpl> worker_ss;
   DummySpoutInstance* worker = NULL;
   std::thread* worker_thread = NULL;
   sp_string streamid = STREAM_NAME;
@@ -591,7 +594,7 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
   std::vector<std::thread*> bolt_workers_threads_list;
   for (size_t bolt = 0; bolt < common.num_bolts_; ++bolt) {
     for (size_t bolt_instance = 0; bolt_instance < common.num_bolt_instances_; ++bolt_instance) {
-      EventLoopImpl* worker_ss = NULL;
+      std::shared_ptr<EventLoopImpl> worker_ss;
       DummyBoltInstance* worker = NULL;
       std::thread* worker_thread = NULL;
       sp_string instanceid = CreateInstanceId(bolt, bolt_instance, false);
@@ -622,7 +625,7 @@ void StartWorkerComponents(CommonResources& common, sp_int32 num_msgs_sent_by_sp
 void StartStMgrs(CommonResources& common) {
   // Spawn and start the stmgrs
   for (size_t i = 0; i < common.num_stmgrs_; ++i) {
-    EventLoopImpl* stmgr_ss = NULL;
+    std::shared_ptr<EventLoopImpl> stmgr_ss;
     heron::stmgr::StMgr* mgr = NULL;
     std::thread* stmgr_thread = NULL;
 
@@ -641,7 +644,7 @@ void StartStMgrs(CommonResources& common) {
 
 void StartMetricsMgr(CommonResources& common, CountDownLatch* tmasterLatch,
                      CountDownLatch* connectionCloseLatch) {
-  EventLoopImpl* ss = NULL;
+  std::shared_ptr<EventLoopImpl> ss;
   DummyMtrMgr* mgr = NULL;
   std::thread* metrics_mgr = NULL;
   StartDummyMtrMgr(ss, mgr, metrics_mgr, common.metricsmgr_port_, "stmgr", tmasterLatch,
@@ -677,7 +680,7 @@ void TearCommonResources(CommonResources& common) {
     delete common.bolt_workers_threads_list_[w];
   }
 
-  for (size_t i = 0; i < common.ss_list_.size(); ++i) delete common.ss_list_[i];
+  common.ss_list_.clear();
 
   for (auto itr = common.instanceid_instance_.begin();
        itr != common.instanceid_instance_.end(); ++itr)
@@ -762,7 +765,8 @@ TEST(StMgr, test_pplan_decode) {
   }
 
   // Verify that the pplan was decoded properly
-  const heron::proto::system::PhysicalPlan* pplan0 = common.stmgrs_list_[0]->GetPhysicalPlan();
+  const shared_ptr<heron::proto::system::PhysicalPlan> pplan0 =
+          common.stmgrs_list_[0]->GetPhysicalPlan();
   EXPECT_EQ(pplan0->stmgrs_size(), common.num_stmgrs_);
   for (size_t i = 0; i < common.num_stmgrs_; i++) {
     EXPECT_NE(common.stmgr_ports_.end(),
@@ -921,9 +925,11 @@ TEST(StMgr, test_custom_grouping_route) {
   // threads
   common.tmaster_thread_->join();
   common.metrics_mgr_thread_->join();
+
   for (size_t i = 0; i < common.stmgrs_threads_list_.size(); ++i) {
     common.stmgrs_threads_list_[i]->join();
   }
+
   for (size_t i = 0; i < common.spout_workers_threads_list_.size(); ++i) {
     common.spout_workers_threads_list_[i]->join();
   }
@@ -936,6 +942,7 @@ TEST(StMgr, test_custom_grouping_route) {
     if (common.bolt_workers_list_[w]->get_task_id() < lowest_bolt_task_id) {
       lowest_bolt_task_id = common.bolt_workers_list_[w]->get_task_id();
     }
+
     if (common.bolt_workers_list_[w]->MsgsRecvd() != 0) {
       EXPECT_EQ(
           common.bolt_workers_list_[w]->MsgsRecvd(),
@@ -986,7 +993,7 @@ TEST(StMgr, test_back_pressure_instance) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -998,7 +1005,7 @@ TEST(StMgr, test_back_pressure_instance) {
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
 
   std::thread* dummy_stmgr_thread = NULL;
@@ -1097,7 +1104,7 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -1109,7 +1116,7 @@ TEST(StMgr, test_spout_death_under_backpressure) {
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
@@ -1236,7 +1243,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start two regular stmgrs and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss1 = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss1;
   heron::stmgr::StMgr* regular_stmgr1 = NULL;
   std::thread* regular_stmgr_thread1 = NULL;
 
@@ -1248,7 +1255,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
              common.ckptmgr_id_, common.high_watermark_, common.low_watermark_);
   common.ss_list_.push_back(regular_stmgr_ss1);
 
-  EventLoopImpl* regular_stmgr_ss2 = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss2;
   heron::stmgr::StMgr* regular_stmgr2 = NULL;
   std::thread* regular_stmgr_thread2 = NULL;
 
@@ -1263,7 +1270,7 @@ TEST(StMgr, test_back_pressure_stmgr) {
   common.ss_list_.push_back(regular_stmgr_ss2);
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[2],
@@ -1354,7 +1361,7 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -1366,7 +1373,7 @@ TEST(StMgr, test_back_pressure_stmgr_reconnect) {
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
@@ -1480,7 +1487,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -1498,7 +1505,7 @@ TEST(StMgr, test_tmaster_restart_on_new_address) {
   EXPECT_EQ(static_cast<sp_uint32>(3), metricsMgrTmasterLatch->getCount());
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
@@ -1628,7 +1635,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -1645,7 +1652,7 @@ TEST(StMgr, test_tmaster_restart_on_same_address) {
   EXPECT_EQ(static_cast<sp_uint32>(3), metricsMgrTmasterLatch->getCount());
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],
@@ -1768,7 +1775,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   StartMetricsMgr(common, metricsMgrTmasterLatch, metricsMgrConnectionCloseLatch);
 
   // lets remember this
-  EventLoopImpl* mmgr_ss = common.ss_list_.back();
+  std::shared_ptr<EventLoopImpl> mmgr_ss = common.ss_list_.back();
 
   // Start the tmaster etc.
   StartTMaster(common);
@@ -1777,7 +1784,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   DistributeWorkersAcrossStmgrs(common);
 
   // We'll start one regular stmgr and one dummy stmgr
-  EventLoopImpl* regular_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> regular_stmgr_ss;
   heron::stmgr::StMgr* regular_stmgr = NULL;
   std::thread* regular_stmgr_thread = NULL;
   StartStMgr(regular_stmgr_ss, regular_stmgr, regular_stmgr_thread, common.tmaster_host_,
@@ -1789,7 +1796,7 @@ TEST(StMgr, test_metricsmgr_reconnect) {
   common.ss_list_.push_back(regular_stmgr_ss);
 
   // Start a dummy stmgr
-  EventLoopImpl* dummy_stmgr_ss = NULL;
+  std::shared_ptr<EventLoopImpl> dummy_stmgr_ss;
   DummyStMgr* dummy_stmgr = NULL;
   std::thread* dummy_stmgr_thread = NULL;
   StartDummyStMgr(dummy_stmgr_ss, dummy_stmgr, dummy_stmgr_thread, common.stmgr_ports_[1],

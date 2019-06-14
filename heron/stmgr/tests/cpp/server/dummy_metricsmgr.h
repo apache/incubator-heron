@@ -33,7 +33,8 @@ class TMasterLocation;
 
 class DummyMtrMgr : public Server {
  public:
-  DummyMtrMgr(EventLoopImpl* ss, const NetworkOptions& options, const sp_string& stmgr_id,
+  DummyMtrMgr(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
+              const sp_string& stmgr_id,
               CountDownLatch* tmasterLatch, CountDownLatch* connectionCloseLatch);
   virtual ~DummyMtrMgr();
 
@@ -47,12 +48,12 @@ class DummyMtrMgr : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
   // Handle metrics publisher request
-  virtual void HandleMetricPublisherRegisterRequest(
-      REQID _id, Connection* _conn, heron::proto::system::MetricPublisherRegisterRequest* _request);
+  virtual void HandleMetricPublisherRegisterRequest(REQID _id, Connection* _conn,
+          unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> _request);
   virtual void HandleMetricPublisherPublishMessage(
-      Connection* _conn, heron::proto::system::MetricPublisherPublishMessage* _message);
+      Connection* _conn, unique_ptr<heron::proto::system::MetricPublisherPublishMessage> _message);
   virtual void HandleTMasterLocationMessage(
-      Connection*, heron::proto::system::TMasterLocationRefreshMessage* _message);
+      Connection*, unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> _message);
 
  private:
   sp_string stmgr_id_expected_;

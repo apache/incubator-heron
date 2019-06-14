@@ -31,7 +31,7 @@
 namespace heron {
 namespace stmgr {
 
-TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
+TupleCache::TupleCache(std::shared_ptr<EventLoop> eventLoop, sp_uint32 _drain_threshold)
     : eventLoop_(eventLoop), drain_threshold_bytes_(_drain_threshold) {
   cache_drain_frequency_ms_ =
       config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainFrequencyMs();

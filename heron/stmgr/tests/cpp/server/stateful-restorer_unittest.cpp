@@ -57,6 +57,8 @@ const sp_string LOCALHOST = "127.0.0.1";
 sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
 
+using std::shared_ptr;
+
 // Generate a dummy topology
 static heron::proto::api::Topology* GenerateDummyTopology(
     const sp_string& topology_name, const sp_string& topology_id, int num_spouts,
@@ -208,19 +210,19 @@ heron::proto::system::PhysicalPlan* CreatePplan(int32_t _ncontainers,
   return pplan;
 }
 
-DummyCkptMgrClient* CreateDummyCkptMgr(heron::proto::system::PhysicalPlan* _pplan,
-                                       EventLoop* _eventLoop) {
+shared_ptr<DummyCkptMgrClient> CreateDummyCkptMgr(heron::proto::system::PhysicalPlan* _pplan,
+                                       std::shared_ptr<EventLoop> _eventLoop) {
   NetworkOptions options;
-  return new DummyCkptMgrClient(_eventLoop, options, GenerateStMgrId(1), _pplan);
+  return std::make_shared<DummyCkptMgrClient>(_eventLoop, options, GenerateStMgrId(1), _pplan);
 }
 
-DummyInstanceServer* CreateDummyInstanceServer(EventLoop* _eventLoop,
-                                         const std::string& _stmgr,
-                                         heron::proto::system::PhysicalPlan* _pplan,
-                                         heron::common::MetricsMgrSt* _metrics) {
-  NetworkOptions options;
+shared_ptr<DummyInstanceServer> CreateDummyInstanceServer(std::shared_ptr<EventLoop> _eventLoop,
+                                 const std::string& _stmgr,
+                                 heron::proto::system::PhysicalPlan* _pplan,
+                                 std::shared_ptr<heron::common::MetricsMgrSt> const& _metrics) {
+NetworkOptions options;
   std::vector<std::string> dummy_instances;
-  return new DummyInstanceServer(_eventLoop, options, _stmgr, _pplan, dummy_instances,
+  return std::make_shared<DummyInstanceServer>(_eventLoop, options, _stmgr, _pplan, dummy_instances,
                                  _metrics);
 }
 
@@ -232,15 +234,18 @@ void RestoreDone(bool* _restore_done) {
 // and then the done watcher called
 TEST(StatefulRestorer, normalcase) {
   auto pplan = CreatePplan(2, 4, 3);
-  EventLoop* dummyLoop = new EventLoopImpl();
+  auto dummyLoop = std::make_shared<EventLoopImpl>();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
-  auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  auto tuple_cache = std::make_shared<DummyTupleCache>(dummyLoop);
+  auto dummy_metrics_client = std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
   dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-  auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
+  auto dummy_stmgr_clientmgr = std::make_shared<DummyStMgrClientMgr>(dummyLoop,
+                                                       dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
                                                       pplan, dummy_metrics_client);
+  dummy_instance_server->Start();
+
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
   auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
@@ -251,7 +256,7 @@ TEST(StatefulRestorer, normalcase) {
   EXPECT_FALSE(restorer->InProgress());
   std::unordered_set<sp_int32> local_taskids;
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
-  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, *pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
   // Make sure that the ckpt messages were sent to our tasks
@@ -293,27 +298,25 @@ TEST(StatefulRestorer, normalcase) {
   EXPECT_TRUE(restore_done);
 
   delete restorer;
-  delete dummy_stmgr_clientmgr;
-  delete dummy_metrics_client;
-  delete tuple_cache;
-  delete ckptmgr_client;
   delete pplan;
-  delete dummyLoop;
 }
 
 // If instances die in the middle of a restore, make sure that
 // they have to be recovered again
 TEST(StatefulRestorer, deadinstances) {
   auto pplan = CreatePplan(2, 4, 3);
-  EventLoop* dummyLoop = new EventLoopImpl();
+  auto dummyLoop = std::make_shared<EventLoopImpl>();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
-  auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  auto tuple_cache = std::make_shared<DummyTupleCache>(dummyLoop);
+  auto dummy_metrics_client = std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
   dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-  auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
+  auto dummy_stmgr_clientmgr = std::make_shared<DummyStMgrClientMgr>(dummyLoop,
+                                                       dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
                                                          pplan, dummy_metrics_client);
+  dummy_instance_server->Start();
+
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
   auto restorer = new heron::stmgr::StatefulRestorer(ckptmgr_client, dummy_stmgr_clientmgr,
@@ -324,7 +327,7 @@ TEST(StatefulRestorer, deadinstances) {
   EXPECT_FALSE(restorer->InProgress());
   std::unordered_set<sp_int32> local_taskids;
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
-  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, *pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
   // Just have all stmgrs connected to us
@@ -383,28 +386,25 @@ TEST(StatefulRestorer, deadinstances) {
   EXPECT_TRUE(restore_done);
 
   delete restorer;
-  delete dummy_stmgr_clientmgr;
-  delete dummy_metrics_client;
-  delete tuple_cache;
-  delete ckptmgr_client;
   delete pplan;
-  delete dummyLoop;
 }
 
 // This tests the scenario where ckptmgr
 // dies in the middle of a restore
 TEST(StatefulRestorer, deadckptmgr) {
   auto pplan = CreatePplan(2, 4, 3);
-  EventLoop* dummyLoop = new EventLoopImpl();
+  auto dummyLoop = std::make_shared<EventLoopImpl>();
   auto ckptmgr_client = CreateDummyCkptMgr(pplan, dummyLoop);
-  auto tuple_cache = new DummyTupleCache(dummyLoop);
-  auto dummy_metrics_client = new heron::common::MetricsMgrSt(11001, 100, dummyLoop);
+  auto tuple_cache = std::make_shared<DummyTupleCache>(dummyLoop);
+  auto dummy_metrics_client = std::make_shared<heron::common::MetricsMgrSt>(11001, 100, dummyLoop);
   dummy_metrics_client->Start("127.0.0.1", 11000, "_stmgr", "_stmgr");
-  auto dummy_stmgr_clientmgr = new DummyStMgrClientMgr(dummyLoop, dummy_metrics_client,
+  auto dummy_stmgr_clientmgr = std::make_shared<DummyStMgrClientMgr>(dummyLoop,
+                                                       dummy_metrics_client,
                                                        GenerateStMgrId(1), pplan);
   dummy_stmgr_clientmgr->SetAllStMgrClientsRegistered(true);
   auto dummy_instance_server = CreateDummyInstanceServer(dummyLoop, GenerateStMgrId(1),
                                                          pplan, dummy_metrics_client);
+  dummy_instance_server->Start();
   dummy_instance_server->SetAllInstancesConnectedToUs(true);
   bool restore_done = false;
   std::string ckpt_id = "ckpt1";
@@ -416,7 +416,7 @@ TEST(StatefulRestorer, deadckptmgr) {
   EXPECT_FALSE(restorer->InProgress());
   std::unordered_set<sp_int32> local_taskids;
   heron::config::PhysicalPlanHelper::GetTasks(*pplan, GenerateStMgrId(1), local_taskids);
-  restorer->StartRestore(ckpt_id, 1, local_taskids, pplan);
+  restorer->StartRestore(ckpt_id, 1, local_taskids, *pplan);
   // Now we are in restore
   EXPECT_TRUE(restorer->InProgress());
 
@@ -458,12 +458,7 @@ TEST(StatefulRestorer, deadckptmgr) {
   EXPECT_TRUE(restore_done);
 
   delete restorer;
-  delete dummy_stmgr_clientmgr;
-  delete dummy_metrics_client;
-  delete tuple_cache;
-  delete ckptmgr_client;
   delete pplan;
-  delete dummyLoop;
 }
 
 int main(int argc, char** argv) {

@@ -35,7 +35,7 @@ class TMaster;
 
 class StatsInterface {
  public:
-  StatsInterface(EventLoop* eventLoop, const NetworkOptions& options,
+  StatsInterface(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options,
                  shared_ptr<TMetricsCollector> _collector, TMaster* tmaster);
   virtual ~StatsInterface();
 

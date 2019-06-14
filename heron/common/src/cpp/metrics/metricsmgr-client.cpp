@@ -30,10 +30,12 @@
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
                                    const sp_string& _component_name, const sp_string& _instance_id,
                                    int _instance_index,
-                                   EventLoop* eventLoop, const NetworkOptions& _options)
+                                   shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options)
     : Client(eventLoop, _options),
       hostname_(_hostname),
       port_(_port),
@@ -78,11 +80,12 @@ void MetricsMgrClient::SendRegisterRequest() {
   publisher->set_instance_id(instance_id_);
   publisher->set_instance_index(instance_index_);
 
-  SendRequest(std::move(request), NULL);
+  SendRequest(std::move(request), nullptr);
 }
 
 void MetricsMgrClient::HandleRegisterResponse(
-    void*, proto::system::MetricPublisherRegisterResponse* _response, NetworkErrorCode _status) {
+    void*, unique_ptr<proto::system::MetricPublisherRegisterResponse> _response,
+    NetworkErrorCode _status) {
   if (_status == OK && _response->status().status() != proto::system::OK) {
     // What the heck we explicitly got a non ok response
     LOG(ERROR) << "Recieved a non-ok status from metrics mgr" << std::endl;
@@ -91,7 +94,7 @@ void MetricsMgrClient::HandleRegisterResponse(
     LOG(INFO) << "Successfully registered ourselves to the metricsmgr";
     registered_ = true;
   }
-  delete _response;
+
   // Check if we need to send tmaster location
   if (tmaster_location_) {
     LOG(INFO) << "Sending TMaster Location to metricsmgr";

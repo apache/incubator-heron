@@ -37,7 +37,7 @@ Gateway::Gateway(const std::string& topologyName,
                  const std::string& topologyId, const std::string& instanceId,
                  const std::string& componentName, int taskId, int componentIndex,
                  const std::string& stmgrId, int stmgrPort, int metricsMgrPort,
-                 EventLoop* eventLoop)
+                 std::shared_ptr<EventLoop> eventLoop)
   : topologyName_(topologyName), topologyId_(topologyId), stmgrPort_(stmgrPort),
     metricsMgrPort_(metricsMgrPort), dataToSlave_(NULL), dataFromSlave_(NULL),
     metricsFromSlave_(NULL), eventLoop_(eventLoop),
@@ -91,7 +91,7 @@ void Gateway::Start() {
   eventLoop_->loop();
 }
 
-void Gateway::HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan) {
+void Gateway::HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan) {
   LOG(INFO) << "Received a new physical plan from Stmgr";
   if (config::TopologyConfigHelper::IsComponentSpout(pplan->topology(),
                                                      instanceProto_.info().component_name())) {
@@ -105,11 +105,12 @@ void Gateway::HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan) {
     maxWriteBufferSize_ = config::HeronInternalsConfigReader::Instance()
                                 ->GetHeronInstanceInternalBoltWriteQueueCapacity();
   }
-  dataToSlave_->enqueue(pplan);
+
+  dataToSlave_->enqueue(std::move(pplan));
 }
 
-void Gateway::HandleStMgrTuples(proto::system::HeronTupleSet2* msg) {
-  dataToSlave_->enqueue(msg);
+void Gateway::HandleStMgrTuples(unique_ptr<proto::system::HeronTupleSet2> msg) {
+  dataToSlave_->enqueue(std::move(msg));
   if (dataToSlave_->size() > maxReadBufferSize_) {
     stmgrClient_->putBackPressure();
   }
