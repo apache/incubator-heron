@@ -32,7 +32,8 @@ class Grouping {
   explicit Grouping(const std::vector<sp_int32>& _task_ids);
   virtual ~Grouping();
 
-  static Grouping* Create(proto::api::Grouping grouping_, const proto::api::InputStream& _is,
+  static std::unique_ptr<Grouping> Create(proto::api::Grouping grouping_,
+                          const proto::api::InputStream& _is,
                           const proto::api::StreamSchema& _schema,
                           const std::vector<sp_int32>& _task_ids);
 

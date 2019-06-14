@@ -31,7 +31,8 @@ namespace tmaster {
 class StMgrRegisterProcessor : public Processor {
  public:
   StMgrRegisterProcessor(REQID _reqid, Connection* _conn,
-                         proto::tmaster::StMgrRegisterRequest* _request, TMaster* _tmaster,
+                         unique_ptr<proto::tmaster::StMgrRegisterRequest> _request,
+                         TMaster* _tmaster,
                          Server* _server);
   virtual ~StMgrRegisterProcessor();
 

@@ -52,18 +52,19 @@ int main(int argc, char* argv[]) {
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  EventLoopImpl eventLoop;
-  heron::config::HeronInternalsConfigReader::Create(&eventLoop, FLAGS_config_file,
+  auto eventLoop = std::make_shared<EventLoopImpl>();
+  heron::config::HeronInternalsConfigReader::Create(eventLoop, FLAGS_config_file,
                                                     FLAGS_override_config_file);
 
   auto gateway = new heron::instance::Gateway(FLAGS_topology_name, FLAGS_topology_id,
                                               FLAGS_instance_id, FLAGS_component_name,
                                               FLAGS_task_id, FLAGS_component_index,
                                               FLAGS_stmgr_id, FLAGS_stmgr_port,
-                                              FLAGS_metricsmgr_port, &eventLoop);
+                                              FLAGS_metricsmgr_port, eventLoop);
   auto slave = new heron::instance::Slave(FLAGS_task_id, FLAGS_topology_binary);
 
-  auto dataToSlave = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
+  auto dataToSlave =
+          new heron::instance::NotifyingCommunicator<unique_ptr<google::protobuf::Message>>(
                                slave->eventLoop(),
                                std::bind(&heron::instance::Slave::HandleGatewayData,
                                          slave, std::placeholders::_1),

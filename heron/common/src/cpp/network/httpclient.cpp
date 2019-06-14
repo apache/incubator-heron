@@ -64,7 +64,8 @@ void httpconnectionclose(struct evhttp_connection* _connection, void* _arg) {
   client->HandleConnectionClose(_connection);
 }
 
-HTTPClient::HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns) : eventLoop_(eventLoop), dns_(_dns) {}
+HTTPClient::HTTPClient(std::shared_ptr<EventLoop> eventLoop,
+        AsyncDNS* _dns) : eventLoop_(eventLoop), dns_(_dns) {}
 
 HTTPClient::~HTTPClient() {
   for (auto iter = connections_.begin(); iter != connections_.end(); ++iter) {

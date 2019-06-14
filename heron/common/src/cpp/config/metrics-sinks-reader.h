@@ -36,7 +36,7 @@ namespace config {
 
 class MetricsSinksReader : public YamlFileReader {
  public:
-  MetricsSinksReader(EventLoop* eventLoop, const sp_string& _defaults_file);
+  MetricsSinksReader(std::shared_ptr<EventLoop> eventLoop, const sp_string& _defaults_file);
   virtual ~MetricsSinksReader();
 
   // Get the list of metrics whitelisted for tmaster along

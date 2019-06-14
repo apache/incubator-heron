@@ -29,7 +29,7 @@
 namespace heron {
 namespace config {
 
-YamlFileReader::YamlFileReader(EventLoop* eventLoop, const sp_string& _config_file)
+YamlFileReader::YamlFileReader(std::shared_ptr<EventLoop> eventLoop, const sp_string& _config_file)
     : config_file_(_config_file), last_reload_(-1) {
   if (eventLoop) {
     // If we have specified the EventLoopImpl,

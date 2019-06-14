@@ -29,7 +29,8 @@
 #include "network/network.h"
 #include "server/dummy_ckptmgr_client.h"
 
-DummyCkptMgrClient::DummyCkptMgrClient(EventLoop* _eventLoop, const NetworkOptions& _options,
+DummyCkptMgrClient::DummyCkptMgrClient(std::shared_ptr<EventLoop> _eventLoop,
+                                       const NetworkOptions& _options,
                                        const std::string& _stmgr,
                                        heron::proto::system::PhysicalPlan* _pplan)
   : heron::stmgr::CkptMgrClient(_eventLoop, _options, _pplan->topology().name(),

@@ -28,7 +28,7 @@
 #include "threads/threads.h"
 #include "network/network.h"
 
-OrderServer::OrderServer(EventLoopImpl* eventLoop, const NetworkOptions& _options)
+OrderServer::OrderServer(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options)
     : Server(eventLoop, _options) {
   InstallMessageHandler(&OrderServer::HandleOrderMessage);
   InstallMessageHandler(&OrderServer::HandleTerminateMessage);
@@ -56,7 +56,7 @@ void OrderServer::HandleConnectionClose(Connection* _conn,
   delete ids;
 }
 
-void OrderServer::HandleOrderMessage(Connection* _conn, OrderMessage* _message) {
+void OrderServer::HandleOrderMessage(Connection* _conn, unique_ptr<OrderMessage> _message) {
   if (clients_.find(_conn) == clients_.end()) return;
 
   nrecv_++;
@@ -77,6 +77,6 @@ void OrderServer::Terminate() {
 }
 
 void OrderServer::HandleTerminateMessage(Connection* _connection __attribute__((unused)),
-                                         TerminateMessage* _message __attribute__((unused))) {
+                                   unique_ptr<TerminateMessage> _message __attribute__((unused))) {
   AddTimer([this]() { std::cout << "OrderServer:Terminate"; this->Terminate(); }, 1);
 }

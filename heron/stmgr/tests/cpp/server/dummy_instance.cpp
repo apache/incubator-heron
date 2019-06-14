@@ -28,7 +28,8 @@
 #include "network/network.h"
 #include "server/dummy_instance.h"
 
-DummyInstance::DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummyInstance::DummyInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                             const NetworkOptions& _options,
                              const sp_string& _topology_name, const sp_string& _topology_id,
                              const sp_string& _instance_id, const sp_string& _component_name,
                              sp_int32 _task_id, sp_int32 _component_index,
@@ -74,25 +75,27 @@ heron::proto::system::StatusCode DummyInstance::GetRegisterResponseStatus() {
   return register_response_status;
 }
 
-void DummyInstance::HandleInstanceResponse(void*,
-    heron::proto::stmgr::RegisterInstanceResponse* _message,
-    NetworkErrorCode status) {
+void DummyInstance::HandleInstanceResponse(
+                                void*,
+                                unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
+                                NetworkErrorCode status) {
   CHECK_EQ(status, OK);
   if (_message->has_pplan()) {
     if (recvd_stmgr_pplan_) {
       delete recvd_stmgr_pplan_;
     }
+
     recvd_stmgr_pplan_ = new heron::proto::system::PhysicalPlan();
     recvd_stmgr_pplan_->CopyFrom(_message->pplan());
   }
+
   register_response_status = _message->status().status();
-  delete _message;
 }
 
-void DummyInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2*) {}
+void DummyInstance::HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2>) {}
 
 void DummyInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage*) {}
+    std::unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
   auto request = make_unique<heron::proto::stmgr::RegisterInstanceRequest>();
@@ -109,7 +112,8 @@ void DummyInstance::CreateAndSendInstanceRequest() {
 }
 
 //////////////////////////////////////// DummySpoutInstance ////////////////////////////////////
-DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummySpoutInstance::DummySpoutInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                                       const NetworkOptions& _options,
                                        const sp_string& _topology_name,
                                        const sp_string& _topology_id, const sp_string& _instance_id,
                                        const sp_string& _component_name, sp_int32 _task_id,
@@ -126,11 +130,14 @@ DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOp
       under_backpressure_(false) {}
 
 void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage* _msg) {
-  DummyInstance::HandleNewInstanceAssignmentMsg(_msg);
+    unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
+
+  const heron::proto::system::PhysicalPlan pplan = _msg->pplan();
+
+  DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
+
   custom_grouping_dest_task_ = std::numeric_limits<sp_int32>::max() - 1;
   if (do_custom_grouping_) {
-    const heron::proto::system::PhysicalPlan& pplan = _msg->pplan();
     for (sp_int32 i = 0; i < pplan.instances_size(); ++i) {
       if (pplan.instances(i).info().component_name() != component_name_ &&
           pplan.instances(i).info().task_id() < custom_grouping_dest_task_) {
@@ -138,6 +145,7 @@ void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
       }
     }
   }
+
   CreateAndSendTupleMessages();
 }
 
@@ -168,7 +176,8 @@ void DummySpoutInstance::CreateAndSendTupleMessages() {
 }
 
 //////////////////////////////////////// DummyBoltInstance ////////////////////////////////////
-DummyBoltInstance::DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummyBoltInstance::DummyBoltInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                                     const NetworkOptions& _options,
                                      const sp_string& _topology_name, const sp_string& _topology_id,
                                      const sp_string& _instance_id,
                                      const sp_string& _component_name, sp_int32 _task_id,
@@ -179,14 +188,14 @@ DummyBoltInstance::DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOpti
       expected_msgs_to_recv_(_expected_msgs_to_recv),
       msgs_recvd_(0) {}
 
-void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
+void DummyBoltInstance::HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 
 void DummyBoltInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage* _msg) {
-  DummyInstance::HandleNewInstanceAssignmentMsg(_msg);
+    unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
+  DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
   if (expected_msgs_to_recv_ == 0) {
     getEventLoop()->loopExit();
   }

@@ -48,7 +48,7 @@ typedef heron::proto::tmaster::PublishMetrics PublishMetrics;
 namespace heron {
 namespace tmaster {
 
-TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
+TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, std::shared_ptr<EventLoop> eventLoop,
                                      const std::string& metrics_sinks_yaml)
     : max_interval_(_max_interval),
       eventLoop_(eventLoop),

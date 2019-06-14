@@ -40,7 +40,7 @@ namespace instance {
 Slave::Slave(int myTaskId, const std::string& topologySo)
   : myTaskId_(myTaskId), taskContext_(new TaskContextImpl(myTaskId_)),
     dataToSlave_(NULL), dataFromSlave_(NULL), metricsFromSlave_(NULL),
-    instance_(NULL), eventLoop_(new EventLoopImpl()) {
+    instance_(NULL), eventLoop_(std::make_shared<EventLoopImpl>()) {
   auto pplan = new proto::system::PhysicalPlan();
   pplan_typename_ = pplan->GetTypeName();
   delete pplan;
@@ -57,9 +57,10 @@ Slave::~Slave() {
   }
 }
 
-void Slave::setCommunicators(NotifyingCommunicator<google::protobuf::Message*>* dataToSlave,
-                             NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                             NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
+void Slave::setCommunicators(
+                        NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
+                        NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                        NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
   dataToSlave_ = dataToSlave;
   dataFromSlave_ = dataFromSlave;
   metricsFromSlave_ = metricsFromSlave;
@@ -79,19 +80,22 @@ void Slave::InternalStart() {
   eventLoop_->loop();
 }
 
-void Slave::HandleGatewayData(google::protobuf::Message* msg) {
+void Slave::HandleGatewayData(unique_ptr<google::protobuf::Message> msg) {
   if (msg->GetTypeName() == pplan_typename_) {
     LOG(INFO) << "Slave Received a new pplan message from Gateway";
-    auto pplan = static_cast<proto::system::PhysicalPlan*>(msg);
-    HandleNewPhysicalPlan(pplan);
+    auto pplan = unique_ptr<proto::system::PhysicalPlan>(
+            static_cast<proto::system::PhysicalPlan*>(msg.release()));
+    HandleNewPhysicalPlan(std::move(pplan));
   } else {
-    auto tupleSet = static_cast<proto::system::HeronTupleSet2*>(msg);
-    HandleStMgrTuples(tupleSet);
+    auto tupleSet = unique_ptr<proto::system::HeronTupleSet2>(
+            static_cast<proto::system::HeronTupleSet2*>(msg.release()));
+    HandleStMgrTuples(std::move(tupleSet));
   }
 }
 
-void Slave::HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan) {
-  taskContext_->newPhysicalPlan(pplan);
+void Slave::HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan) {
+  std::shared_ptr<proto::system::PhysicalPlan> newPplan = std::move(pplan);
+  taskContext_->newPhysicalPlan(newPplan);
   if (!instance_) {
     LOG(INFO) << "Creating the instance for the first time";
     if (taskContext_->isSpout()) {
@@ -103,7 +107,7 @@ void Slave::HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan) {
       instance_ = new BoltInstance(eventLoop_, taskContext_,
                                    dataToSlave_, dataFromSlave_, dllHandle_);
     }
-    if (pplan->topology().state() == proto::api::TopologyState::RUNNING) {
+    if (newPplan->topology().state() == proto::api::TopologyState::RUNNING) {
       LOG(INFO) << "Starting the instance";
       instance_->Start();
       instance_->DoWork();
@@ -111,19 +115,19 @@ void Slave::HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan) {
       LOG(INFO) << "Not starting the instance";
     }
   } else {
-    if (pplan->topology().state() == proto::api::TopologyState::RUNNING &&
+    if (newPplan->topology().state() == proto::api::TopologyState::RUNNING &&
         !instance_->IsRunning()) {
       instance_->Activate();
-    } else if (pplan->topology().state() == proto::api::TopologyState::PAUSED &&
+    } else if (newPplan->topology().state() == proto::api::TopologyState::PAUSED &&
         instance_->IsRunning()) {
       instance_->Deactivate();
     }
   }
 }
 
-void Slave::HandleStMgrTuples(proto::system::HeronTupleSet2* tupleSet) {
+void Slave::HandleStMgrTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (instance_) {
-    instance_->HandleGatewayTuples(tupleSet);
+    instance_->HandleGatewayTuples(std::move(tupleSet));
   } else {
     LOG(FATAL) << "Received StMgr tuples before instance was instantiated";
   }

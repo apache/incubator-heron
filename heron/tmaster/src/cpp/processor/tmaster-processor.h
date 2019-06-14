@@ -31,7 +31,8 @@ class TMaster;
 
 class Processor {
  public:
-  Processor(REQID _reqid, Connection* _conn, google::protobuf::Message* _request, TMaster* _tmaster,
+  Processor(REQID _reqid, Connection* _conn, unique_ptr<google::protobuf::Message> _request,
+            TMaster* _tmaster,
             Server* _server);
   virtual ~Processor();
   virtual void Start() = 0;
@@ -40,7 +41,7 @@ class Processor {
   void SendResponse(const google::protobuf::Message& _response);
   Connection* GetConnection() { return conn_; }
   void CloseConnection();
-  google::protobuf::Message* request_;
+  unique_ptr<google::protobuf::Message> request_;
   TMaster* tmaster_;
   Server* server_;
 

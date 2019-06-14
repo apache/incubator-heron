@@ -100,14 +100,14 @@ class Drainer {
   bool ckpt_message_seen_;
 };
 
-void DoneHandler(EventLoopImpl* _ss, EventLoopImpl::Status) { _ss->loopExit(); }
+void DoneHandler(std::shared_ptr<EventLoopImpl> _ss, EventLoopImpl::Status) { _ss->loopExit(); }
 
 // Test simple data tuples drain
 TEST(TupleCache, test_simple_data_drain) {
   sp_int32 data_tuples_count = 23354;
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
   sp_uint32 drain_threshold = 1024 * 1024;
-  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
+  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(ss, drain_threshold);
   std::map<sp_int32, sp_int32> data_tuples;
   data_tuples[1] = data_tuples_count;
   std::map<sp_int32, sp_int32> ack_tuples;
@@ -125,10 +125,10 @@ TEST(TupleCache, test_simple_data_drain) {
   }
 
   // 300 milliseconds second
-  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
-  ss.registerTimer(std::move(cb), false, 300_ms);
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(ss, status); };
+  ss->registerTimer(std::move(cb), false, 300_ms);
 
-  ss.loop();
+  ss->loop();
 
   EXPECT_EQ(drainer->Verify(false), true);
   delete drainer;
@@ -140,9 +140,9 @@ TEST(TupleCache, test_data_ack_fail_mix) {
   sp_int32 data_tuples_count = 23354;
   sp_int32 ack_tuples_count = 3543;
   sp_int32 fail_tuples_count = 6564;
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
   sp_uint32 drain_threshold = 1024 * 1024;
-  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
+  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(ss, drain_threshold);
   std::map<sp_int32, sp_int32> data_tuples;
   data_tuples[1] = data_tuples_count;
   std::map<sp_int32, sp_int32> ack_tuples;
@@ -174,11 +174,11 @@ TEST(TupleCache, test_data_ack_fail_mix) {
     }
   }
 
-  // 300 milliseconds second
-  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
-  ss.registerTimer(std::move(cb), false, 300000);
+  // 2000 milliseconds second
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(ss, status); };
+  ss->registerTimer(std::move(cb), false, 2000000);
 
-  ss.loop();
+  ss->loop();
 
   EXPECT_EQ(drainer->Verify(false), true);
   delete drainer;
@@ -190,9 +190,9 @@ TEST(TupleCache, test_different_stream_mix) {
   sp_int32 data_tuples_count = 23354;  // make sure this is even
   sp_int32 ack_tuples_count = 3544;    // make sure this is even
   sp_int32 fail_tuples_count = 6564;   // make sure this is even
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
   sp_uint32 drain_threshold = 1024 * 1024;
-  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
+  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(ss, drain_threshold);
   std::map<sp_int32, sp_int32> data_tuples;
   data_tuples[1] = data_tuples_count / 2;
   data_tuples[2] = data_tuples_count / 2;
@@ -242,11 +242,11 @@ TEST(TupleCache, test_different_stream_mix) {
     }
   }
 
-  // 400 milliseconds second
-  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
-  ss.registerTimer(std::move(cb), false, 300000);
+  // 1000 milliseconds second
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(ss, status); };
+  ss->registerTimer(std::move(cb), false, 1000000);
 
-  ss.loop();
+  ss->loop();
 
   EXPECT_EQ(drainer->Verify(false), true);
   delete drainer;
@@ -256,9 +256,9 @@ TEST(TupleCache, test_different_stream_mix) {
 // Test drain with checkpoint marker
 TEST(TupleCache, test_checkpoint_drain) {
   sp_int32 data_tuples_count = 23354;
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
   sp_uint32 drain_threshold = 1024 * 1024;
-  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
+  heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(ss, drain_threshold);
   std::map<sp_int32, sp_int32> data_tuples;
   data_tuples[1] = data_tuples_count;
   std::map<sp_int32, sp_int32> ack_tuples;
@@ -286,10 +286,10 @@ TEST(TupleCache, test_checkpoint_drain) {
   }
 
   // 300 milliseconds second
-  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
-  ss.registerTimer(std::move(cb), false, 300_ms);
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(ss, status); };
+  ss->registerTimer(std::move(cb), false, 300_ms);
 
-  ss.loop();
+  ss->loop();
 
   EXPECT_EQ(drainer->Verify(true), true);
   delete drainer;

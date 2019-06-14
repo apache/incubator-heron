@@ -40,7 +40,7 @@ class Gateway {
         const std::string& topologyId, const std::string& instanceId,
         const std::string& componentName, int taskId, int componentIndex,
         const std::string& stmgrId, int stmgrPort, int metricsMgrPort,
-        EventLoop* eventLoop);
+        std::shared_ptr<EventLoop> eventLoop);
   virtual ~Gateway();
 
   // All kinds of initialization like starting clients
@@ -55,8 +55,8 @@ class Gateway {
   // Called when we need to consume metrics from slave
   void HandleSlaveMetrics(google::protobuf::Message* msg);
 
-  EventLoop* eventLoop() { return eventLoop_; }
-  void setCommunicators(NotifyingCommunicator<google::protobuf::Message*>* dataToSlave,
+  std::shared_ptr<EventLoop> eventLoop() { return eventLoop_; }
+  void setCommunicators(NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
                         NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
                         NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
     dataToSlave_ = dataToSlave;
@@ -65,8 +65,8 @@ class Gateway {
   }
 
  private:
-  void HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan);
-  void HandleStMgrTuples(proto::system::HeronTupleSet2* tuples);
+  void HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan);
+  void HandleStMgrTuples(unique_ptr<proto::system::HeronTupleSet2> tuples);
   void ResumeConsumingFromSlaveTimer();
   std::string topologyName_;
   std::string topologyId_;
@@ -76,10 +76,10 @@ class Gateway {
   std::shared_ptr<StMgrClient> stmgrClient_;
   std::shared_ptr<common::MetricsMgrClient> metricsMgrClient_;
   std::shared_ptr<GatewayMetrics> gatewayMetrics_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataToSlave_;
+  NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   // This is the max number of outstanding packets that are yet to be
   // consumed by the Slave
   int maxReadBufferSize_;

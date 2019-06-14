@@ -48,10 +48,10 @@ const sp_string METRIC_FAIL_TUPLES_FROM_STMGRS = "__fail_tuples_from_stmgrs";
 // Bytes received from other stream managers
 const sp_string METRIC_BYTES_FROM_STMGRS = "__bytes_from_stmgrs";
 
-StMgrServer::StMgrServer(EventLoop* eventLoop, const NetworkOptions& _options,
+StMgrServer::StMgrServer(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                          const sp_string& _topology_name, const sp_string& _topology_id,
                          const sp_string& _stmgr_id, StMgr* _stmgr,
-                         heron::common::MetricsMgrSt* _metrics_manager_client)
+                         shared_ptr<heron::common::MetricsMgrSt> const& _metrics_manager_client)
     : Server(eventLoop, _options),
       topology_name_(_topology_name),
       topology_id_(_topology_id),
@@ -125,7 +125,7 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 }
 
 void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                          proto::stmgr::StrMgrHelloRequest* _request) {
+                                          unique_ptr<proto::stmgr::StrMgrHelloRequest> _request) {
   LOG(INFO) << "Got a hello message from stmgr " << _request->stmgr() << " on connection " << _conn;
   proto::stmgr::StrMgrHelloResponse response;
   // Some basic checks
@@ -152,15 +152,13 @@ void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
     response.mutable_status()->set_status(proto::system::OK);
   }
   SendResponse(_id, _conn, response);
-  delete _request;
 }
 
 void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
-                                           proto::stmgr::TupleStreamMessage* _message) {
+                                           unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
-    __global_protobuf_pool_release__(_message);
   } else {
     proto::system::HeronTupleSet2* tuple_set = nullptr;
     tuple_set = __global_protobuf_pool_acquire__(tuple_set);
@@ -175,7 +173,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
     }
     __global_protobuf_pool_release__(tuple_set);
 
-    stmgr_->HandleStreamManagerData(iter->second, _message);
+    stmgr_->HandleStreamManagerData(iter->second, std::move(_message));
   }
 }
 
@@ -206,15 +204,13 @@ void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
 }
 
 void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
-                                                 proto::stmgr::StartBackPressureMessage* _message) {
+                                      unique_ptr<proto::stmgr::StartBackPressureMessage> _message) {
   // Close spouts
   LOG(INFO) << "Received start back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
     LOG(ERROR) << "Received start back pressure message from unknown stream manager "
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr() << " " << _message->message_id();
-
-    __global_protobuf_pool_release__(_message);
     return;
   }
   auto iter = rstmgrs_.find(_conn);
@@ -223,21 +219,18 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
   stmgrs_who_announced_back_pressure_.insert(stmgr_id);
 
   stmgr_->StartBackPressureOnSpouts();
-
-  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
-                                                proto::stmgr::StopBackPressureMessage* _message) {
+                                       unique_ptr<proto::stmgr::StopBackPressureMessage> _message) {
   LOG(INFO) << "Received stop back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
     LOG(ERROR) << "Received stop back pressure message from unknown stream manager "
                << _message->topology_name() << " " << _message->topology_id() << " "
                << _message->stmgr();
-
-    __global_protobuf_pool_release__(_message);
     return;
   }
+
   auto iter = rstmgrs_.find(_conn);
   CHECK(iter != rstmgrs_.end());
   sp_string stmgr_id = iter->second;
@@ -250,14 +243,11 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
   if (!stmgr_->DidAnnounceBackPressure() && !stmgr_->DidOthersAnnounceBackPressure()) {
     stmgr_->AttemptStopBackPressureFromSpouts();
   }
-
-  __global_protobuf_pool_release__(_message);
 }
 
 void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
-                               proto::ckptmgr::DownstreamStatefulCheckpoint* _message) {
+                               unique_ptr<proto::ckptmgr::DownstreamStatefulCheckpoint> _message) {
   stmgr_->HandleDownStreamStatefulCheckpoint(*_message);
-  __global_protobuf_pool_release__(_message);
 }
 
 }  // namespace stmgr

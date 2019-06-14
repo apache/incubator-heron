@@ -77,10 +77,11 @@ class CkptMgrClient;
 // and in particular the recovery section.
 class StatefulRestorer {
  public:
-  explicit StatefulRestorer(CkptMgrClient* _ckptmgr,
-                            StMgrClientMgr* _clientmgr, TupleCache* _tuple_cache,
-                            InstanceServer* _server,
-                            common::MetricsMgrSt* _metrics_manager_client,
+  explicit StatefulRestorer(shared_ptr<CkptMgrClient> _ckptmgr,
+                            shared_ptr<StMgrClientMgr> _clientmgr,
+                            shared_ptr<TupleCache> _tuple_cache,
+                            shared_ptr<InstanceServer> _server,
+                            shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
                             std::function<void(proto::system::StatusCode,
                                                std::string, sp_int64)> _restore_done_watcher);
   virtual ~StatefulRestorer();
@@ -94,7 +95,7 @@ class StatefulRestorer {
   // and the _restore_txid
   void StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
                     const std::unordered_set<sp_int32>& _local_taskids,
-                    proto::system::PhysicalPlan* _pplan);
+                    proto::system::PhysicalPlan const& _pplan);
   // Called when ckptmgr client restarts
   void HandleCkptMgrRestart();
   // Called when local instance _task_id is done restoring its state at
@@ -144,11 +145,11 @@ class StatefulRestorer {
   // What are all our local taskids that we need to restore
   std::unordered_set<sp_int32> local_taskids_;
 
-  CkptMgrClient* ckptmgr_;
-  StMgrClientMgr* clientmgr_;
-  TupleCache* tuple_cache_;
-  InstanceServer* server_;
-  common::MetricsMgrSt* metrics_manager_client_;
+  shared_ptr<CkptMgrClient> ckptmgr_;
+  shared_ptr<StMgrClientMgr> clientmgr_;
+  shared_ptr<TupleCache> tuple_cache_;
+  shared_ptr<InstanceServer> server_;
+  shared_ptr<common::MetricsMgrSt> metrics_manager_client_;
 
   // Are we in the middle of a restore
   bool in_progress_;

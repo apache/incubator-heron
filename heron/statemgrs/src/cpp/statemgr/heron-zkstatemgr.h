@@ -57,7 +57,7 @@ namespace common {
 class HeronZKStateMgr : public HeronStateMgr {
  public:
   HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
-                  EventLoop* eventLoop, bool exitOnSessionExpiry);
+                  std::shared_ptr<EventLoop> eventLoop, bool exitOnSessionExpiry);
   virtual ~HeronZKStateMgr();
 
   //
@@ -75,12 +75,12 @@ class HeronZKStateMgr : public HeronStateMgr {
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetTMasterLocation(const std::string& _topology_name,
-                          proto::tmaster::TMasterLocation* _return,
+                          shared_ptr<proto::tmaster::TMasterLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetMetricsCacheLocation(const std::string& _topology_name,
-                          proto::tmaster::MetricsCacheLocation* _return,
+                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets the Topology
@@ -138,17 +138,18 @@ class HeronZKStateMgr : public HeronStateMgr {
   // A test ONLY constructor used to pass a ZKClientFactory which could
   // return a MockZKClient
   HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
-                  EventLoop* eventLoop, ZKClientFactory* zkclient_factory,
+                  std::shared_ptr<EventLoop> eventLoop, ZKClientFactory* zkclient_factory,
                   bool exitOnSessionExpiry = false);
 
  private:
   // Done methods
   void SetTMasterLocationDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetMetricsCacheLocationDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetTMasterLocationDone(std::string* _contents, proto::tmaster::TMasterLocation* _return,
+  void GetTMasterLocationDone(std::string* _contents,
+                              shared_ptr<proto::tmaster::TMasterLocation> _return,
                               VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetMetricsCacheLocationDone(std::string* _contents,
-                                   proto::tmaster::MetricsCacheLocation* _return,
+                                   shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                                    VCallback<proto::system::StatusCode> _cb,
                                    sp_int32 _rc);
 
@@ -227,7 +228,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // For tests it could be overriden to a factor that returns a MockZkClient
   // This class owns the factory, and is responsible for deleting it.
   ZKClientFactory* const zkclient_factory_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   // A permanent callback initialized to wrap the WatchEventHandler
   VCallback<ZKClient::ZkWatchEvent> watch_event_cb_;
 

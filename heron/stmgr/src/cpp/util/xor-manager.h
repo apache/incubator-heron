@@ -33,7 +33,8 @@ class RotatingMap;
 
 class XorManager {
  public:
-  XorManager(EventLoop* eventLoop, sp_int32 _timeout, const std::vector<sp_int32>& _task_ids);
+  XorManager(std::shared_ptr<EventLoop> eventLoop, sp_int32 _timeout,
+          const std::vector<sp_int32>& _task_ids);
   virtual ~XorManager();
 
   // Create a new entry for the tuple.
@@ -61,11 +62,11 @@ class XorManager {
  private:
   void rotate(EventLoopImpl::Status _status);
 
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   sp_int32 timeout_;
 
   // map of task_id to a RotatingMap
-  std::unordered_map<sp_int32, RotatingMap*> tasks_;
+  std::unordered_map<sp_int32, unique_ptr<RotatingMap>> tasks_;
 
   // Configs to be read
   sp_int32 n_buckets_;

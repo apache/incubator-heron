@@ -60,7 +60,7 @@ class TMaster {
           sp_int32 _tmaster_controller_port, sp_int32 _master_port,
           sp_int32 _stats_port, sp_int32 metricsMgrPort, sp_int32 _ckptmgr_port,
           const std::string& metrics_sinks_yaml,
-          const std::string& _myhost_name, EventLoop* eventLoop);
+          const std::string& _myhost_name, shared_ptr<EventLoop> eventLoop);
 
   virtual ~TMaster();
 
@@ -274,7 +274,7 @@ class TMaster {
   HTTPClient* http_client_;
 
   // Copy of the EventLoop
-  EventLoop* eventLoop_;
+  shared_ptr<EventLoop> eventLoop_;
 };
 }  // namespace tmaster
 }  // namespace heron

@@ -40,9 +40,11 @@ using ::testing::InvokeWithoutArgs;
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 class MockZKClientFactory : public ZKClientFactory {
  public:
-  MOCK_METHOD3(create, ZKClient*(const std::string& hostportlist, EventLoop* eventLoop,
+  MOCK_METHOD3(create, ZKClient*(const std::string& hostportlist, shared_ptr<EventLoop> eventLoop,
                                  VCallback<ZKClient::ZkWatchEvent> global_watcher_cb));
   MOCK_METHOD0(Die, void());
   virtual ~MockZKClientFactory() { Die(); }
@@ -53,7 +55,7 @@ class MockZKClientFactory : public ZKClientFactory {
 class HeronZKStateMgrWithMock : public heron::common::HeronZKStateMgr {
  public:
   HeronZKStateMgrWithMock(const std::string& zkhostport, const std::string& topleveldir,
-                          EventLoop* eventLoop, ZKClientFactory* zkclient_factory)
+                          std::shared_ptr<EventLoop> eventLoop, ZKClientFactory* zkclient_factory)
       : HeronZKStateMgr(zkhostport, topleveldir, eventLoop, zkclient_factory) {}
 
   virtual ~HeronZKStateMgrWithMock() {}
@@ -99,7 +101,7 @@ class HeronZKStateMgrTest : public ::testing::Test {
 
   MockZKClient* mock_zkclient;
   MockZKClientFactory* mock_zkclient_factory;
-  EventLoopImpl ss;
+  std::shared_ptr<EventLoop> ss;
   std::string hostportlist;
   std::string topleveldir;
   // used to verify the number of calls to TmasterLocationWatchHandler
@@ -114,10 +116,10 @@ int HeronZKStateMgrTest::packing_plan_watch_handler_count = 0;
 // Ensure that ZKClient is created and deleted appropriately.
 TEST_F(HeronZKStateMgrTest, testCreateDelete) {
   // Calling the factory create method ensures that ZkClient is created once
-  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, &ss, _)).Times(1);
+  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, ss, _)).Times(1);
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
   // Ensure zkclient is deleted
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
@@ -132,10 +134,10 @@ TEST_F(HeronZKStateMgrTest, testSetTMasterLocationWatch) {
   const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
 
   // Calling the factory create method ensures that ZkClient is created once
-  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, &ss, _)).Times(1);
+  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, ss, _)).Times(1);
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
   // Ensure that it sets a watch to the tmaster location
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
@@ -153,7 +155,7 @@ TEST_F(HeronZKStateMgrTest, testTMasterLocationWatch) {
   const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
   heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
 
@@ -176,7 +178,7 @@ TEST_F(HeronZKStateMgrTest, testPackingPlanWatch) {
   const std::string expected_path = topleveldir + "/packingplans/" + topology_name;
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
   heron_zkstatemgr->SetPackingPlanWatch(topology_name, []() { PackingPlanWatchHandler(); });
 
@@ -199,7 +201,7 @@ TEST_F(HeronZKStateMgrTest, testGlobalWatchEventHandler) {
   const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
 
   heron::common::HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, ss, mock_zkclient_factory);
 
   heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
 
@@ -210,7 +212,7 @@ TEST_F(HeronZKStateMgrTest, testGlobalWatchEventHandler) {
   // Ensure current ZkClient is destroyed
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
   // Ensure new ZkClient is created
-  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, &ss, _)).Times(1);
+  EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, ss, _)).Times(1);
 
   CallGlobalWatchEventHandler(heron_zkstatemgr, session_expired_event);
 

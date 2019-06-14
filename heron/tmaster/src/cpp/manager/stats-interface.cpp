@@ -32,7 +32,7 @@
 namespace heron {
 namespace tmaster {
 
-StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _options,
+StatsInterface::StatsInterface(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                                shared_ptr<TMetricsCollector> _collector, TMaster* _tmaster)
     : metrics_collector_(_collector), tmaster_(_tmaster) {
   http_server_ = make_unique<HTTPServer>(eventLoop, _options);

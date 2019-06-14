@@ -39,7 +39,7 @@
 class Piper {
  public:
   // Constructor/Destructor
-  explicit Piper(EventLoop* eventLoop);
+  explicit Piper(std::shared_ptr<EventLoop> eventLoop);
 
   virtual ~Piper();
 
@@ -55,7 +55,7 @@ class Piper {
   // to be called when awoken
   void OnWakeUp(EventLoop::Status status);
 
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
   // These pipers are how they communicate it across to our thread
   sp_int32 pipers_[2];

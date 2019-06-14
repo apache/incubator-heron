@@ -35,7 +35,7 @@ namespace heron {
 namespace common {
 
 HeronLocalFileStateMgr::HeronLocalFileStateMgr(const std::string& _topleveldir,
-                                               EventLoop* eventLoop)
+                                               shared_ptr<EventLoop> eventLoop)
     : HeronStateMgr(_topleveldir), eventLoop_(eventLoop) {
   InitTree();
 }
@@ -107,7 +107,7 @@ void HeronLocalFileStateMgr::SetPackingPlanWatch(const std::string& topology_nam
 }
 
 void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_name,
-                                                proto::tmaster::TMasterLocation* _return,
+                                                shared_ptr<proto::tmaster::TMasterLocation> _return,
                                                 VCallback<proto::system::StatusCode> cb) {
   std::string contents;
   proto::system::StatusCode status =
@@ -123,8 +123,8 @@ void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_nam
 }
 
 void HeronLocalFileStateMgr::GetMetricsCacheLocation(const std::string& _topology_name,
-                                                proto::tmaster::MetricsCacheLocation* _return,
-                                                VCallback<proto::system::StatusCode> cb) {
+                                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
+                                          VCallback<proto::system::StatusCode> cb) {
   std::string contents;
   proto::system::StatusCode status =
       ReadAllFileContents(GetMetricsCacheLocationPath(_topology_name), contents);

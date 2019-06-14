@@ -31,7 +31,8 @@ namespace tmaster {
 class StMgrHeartbeatProcessor : public Processor {
  public:
   StMgrHeartbeatProcessor(REQID _reqid, Connection* _conn,
-                          proto::tmaster::StMgrHeartbeatRequest* _request, TMaster* _tmaster,
+                          unique_ptr<proto::tmaster::StMgrHeartbeatRequest> _request,
+                          TMaster* _tmaster,
                           Server* _server);
   virtual ~StMgrHeartbeatProcessor();
 

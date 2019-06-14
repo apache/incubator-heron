@@ -53,10 +53,11 @@ const sp_string METRIC_INSTANCE_RESTORE_REQUESTS = "__instance_restore_requests"
 const sp_string METRIC_INSTANCE_RESTORE_RESPONSES = "__instance_restore_responses";
 const sp_string METRIC_INSTANCE_RESTORE_RESPONSES_IGNORED = "__instance_restore_response_ignored";
 
-StatefulRestorer::StatefulRestorer(CkptMgrClient* _ckptmgr,
-                             StMgrClientMgr* _clientmgr, TupleCache* _tuple_cache,
-                             InstanceServer* _server,
-                             common::MetricsMgrSt* _metrics_manager_client,
+StatefulRestorer::StatefulRestorer(shared_ptr<CkptMgrClient> _ckptmgr,
+                             shared_ptr<StMgrClientMgr> _clientmgr,
+                             shared_ptr<TupleCache> _tuple_cache,
+                             shared_ptr<InstanceServer> _server,
+                             shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
                              std::function<void(proto::system::StatusCode,
                                                 std::string, sp_int64)> _restore_done_watcher) {
   ckptmgr_ = _ckptmgr;
@@ -80,7 +81,7 @@ StatefulRestorer::~StatefulRestorer() {
 
 void StatefulRestorer::StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
                                     const std::unordered_set<sp_int32>& _local_taskids,
-                                    proto::system::PhysicalPlan* _pplan) {
+                                    proto::system::PhysicalPlan const& _pplan) {
   multi_count_metric_->scope(METRIC_START_RESTORE)->incr();
   if (in_progress_) {
     multi_count_metric_->scope(METRIC_START_RESTORE_IN_PROGRESS)->incr();

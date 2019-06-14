@@ -26,11 +26,11 @@
 #include "glog/logging.h"
 #include "basics/basics.h"
 
-BaseClient::BaseClient(EventLoop* eventLoop, const NetworkOptions& _options) {
+BaseClient::BaseClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options) {
   Init(eventLoop, _options);
 }
 
-void BaseClient::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
+void BaseClient::Init(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   conn_ = NULL;

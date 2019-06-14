@@ -30,15 +30,15 @@
 
 class DummyInstanceServer : public heron::stmgr::InstanceServer {
  public:
-  DummyInstanceServer(EventLoop* _eventLoop, const NetworkOptions& _options,
+  DummyInstanceServer(std::shared_ptr<EventLoop> _eventLoop, const NetworkOptions& _options,
                    const std::string& _stmgr,
                    heron::proto::system::PhysicalPlan* _pplan,
                    const std::vector<sp_string>& _expected_instances,
-                   heron::common::MetricsMgrSt* _metrics)
+                   std::shared_ptr<heron::common::MetricsMgrSt> const& _metrics)
   : heron::stmgr::InstanceServer(_eventLoop, _options, _pplan->topology().name(),
                               _pplan->topology().id(), _stmgr,
-                              _expected_instances, NULL, _metrics,
-                              new heron::stmgr::NeighbourCalculator(), false),
+                              _expected_instances, nullptr, _metrics,
+                              std::make_shared<heron::stmgr::NeighbourCalculator>(), false),
     pplan_(_pplan), clear_called_(false), all_instances_connected_(false),
     my_stmgr_id_(_stmgr) {
   }

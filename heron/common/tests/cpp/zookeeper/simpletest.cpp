@@ -28,7 +28,7 @@ std::string topdir = "/";
 std::string testtopdir = "/";
 sp_uint32 nchildren = 10;
 sp_uint32 children_notifications = 0;
-EventLoopImpl* ss;
+std::shared_ptr<EventLoopImpl> ss;
 ZKClient* zk_client = NULL;
 
 void DeleteDone(sp_int32 _rc) {
@@ -187,13 +187,12 @@ int main(int argc, char* argv[]) {
   }
   testtopdir = topdir + "/simplezktest";
 
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
   zk_client = new ZKClient(argv[1], ss);
   zk_client->CreateNode(testtopdir, "Created as part of the unittests", false,
                         [](sp_uint32 rc) { TopDirCreateDone(rc); });
   ss->loop();
   delete zk_client;
-  delete ss;
 
   /*************** Test Session expiry with NO client global watch. *********/
   // ss = new EventLoopImpl();
