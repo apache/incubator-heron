@@ -101,7 +101,7 @@ spec:
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
-          image: {{ .Values.bookkeeper.image }}
+          image: {{ .Values.image }} # use heron image until bookkeeper has nc
           command: 
             - sh
             - -c
@@ -138,7 +138,7 @@ spec:
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
-            - name: data-disk
+            - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
 
 {{- if or (eq .Values.platform "aws") (eq .Values.platform "baremetal") }}
@@ -166,7 +166,7 @@ spec:
           requests:
             storage: {{ $bookieJournalCapacity }}
     - metadata:
-        name: data-disk
+        name: ledgers-disk
         annotations:
           volume.alpha.kubernetes.io/storage-class: default
         labels:
