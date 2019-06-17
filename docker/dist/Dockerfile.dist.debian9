@@ -34,7 +34,6 @@ WORKDIR /heron
 # run heron installer
 RUN /heron/heron-install.sh && \
     rm -rf /heron/heron-install.sh && \
-    rm -rf /usr/local/heron/dist/heron-core.tar.gz && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-local-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-mesos-scheduler.jar && \
     rm -rf /opt/heron/heron-core/lib/scheduler/heron-slurm-scheduler.jar
