@@ -342,7 +342,8 @@ public class MetricsCacheManager {
     LOG.info("System Config: " + systemConfig);
 
     // read sink config file
-    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
+    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename,
+                                                            overrideConfigFilename);
     LOG.info("Sinks Config: " + sinksConfig.toString());
 
     // build config from cli

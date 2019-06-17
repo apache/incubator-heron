@@ -19,19 +19,20 @@
 
 package org.apache.heron.metricsmgr;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.basics.TypeUtils;
 
+@SuppressWarnings("unchecked")
 public class MetricsSinksConfig {
   public static final String CONFIG_KEY_METRICS_SINKS = "sinks";
   public static final String CONFIG_KEY_CLASSNAME = "class";
@@ -41,36 +42,29 @@ public class MetricsSinksConfig {
 
   private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<>();
 
-  @SuppressWarnings("unchecked")
   public MetricsSinksConfig(String metricsSinksConfigFilename, String overrideConfigFilename)
-      throws FileNotFoundException {
-    FileInputStream sinkConfigStream = new FileInputStream(new File(metricsSinksConfigFilename));
-    FileInputStream overrideStream = new FileInputStream(new File(overrideConfigFilename));
-    try {
-      Yaml yaml = new Yaml();
-      Map<Object, Object> sinkConfig = (Map<Object, Object>) yaml.load(sinkConfigStream);
-      Map<Object, Object> overrideConfig = (Map<Object, Object>) yaml.load(overrideStream);
+      throws IOException {
+    Map<Object, Object> allConfig = new HashMap<>();
+    allConfig.putAll(readConfig(metricsSinksConfigFilename));
+    allConfig.putAll(readConfig(overrideConfigFilename));
 
-      if (sinkConfig == null) {
-        throw new RuntimeException(
-            "Could not parse metrics-sinks config file " + metricsSinksConfigFilename);
-      }
+    if (allConfig.isEmpty()) {
+      throw new RuntimeException("Missing required config 'sinks' for metrics manager");
+    }
 
-      if (overrideConfig == null) {
-        throw new RuntimeException(
-            "Could not parse override config file " + overrideConfigFilename);
-      }
+    for (String sinkId : TypeUtils.getListOfStrings(allConfig.get(CONFIG_KEY_METRICS_SINKS))) {
+      sinksConfigs.put(sinkId, (Map<String, Object>) allConfig.get(sinkId));
+    }
+  }
 
-      Map<Object, Object> allConfig = new HashMap<>();
-      allConfig.putAll(sinkConfig);
-      allConfig.putAll(overrideConfig);
+  private Map<Object, Object> readConfig(String configFile) throws IOException {
+    if (configFile == null) {
+      return Collections.emptyMap();
+    }
 
-      for (String sinkId : TypeUtils.getListOfStrings(allConfig.get(CONFIG_KEY_METRICS_SINKS))) {
-        sinksConfigs.put(sinkId, (Map<String, Object>) allConfig.get(sinkId));
-      }
-    } finally {
-      SysUtils.closeIgnoringExceptions(sinkConfigStream);
-      SysUtils.closeIgnoringExceptions(overrideStream);
+    Yaml yaml = new Yaml();
+    try (InputStream inputStream = new FileInputStream(configFile)) {
+      return (Map<Object, Object>) yaml.load(inputStream);
     }
   }
 
