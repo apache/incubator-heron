@@ -109,7 +109,7 @@ spec:
               while true; do
                 status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
                 writestatus=$(echo isro | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
-                if [ "$status" = "imok" ] && [ "$writestatus" == "rw" ]; then
+                if [ "$status" = "imok" ] && [ "$writestatus" = "rw" ]; then
                   break;
                 fi;
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
