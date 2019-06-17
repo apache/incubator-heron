@@ -42,21 +42,33 @@ public class MetricsSinksConfig {
   private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<>();
 
   @SuppressWarnings("unchecked")
-  public MetricsSinksConfig(String filename) throws FileNotFoundException {
-    FileInputStream fin = new FileInputStream(new File(filename));
+  public MetricsSinksConfig(String metricsSinksConfigFilename, String overrideConfigFilename)
+      throws FileNotFoundException {
+    FileInputStream sinkConfigStream = new FileInputStream(new File(metricsSinksConfigFilename));
+    FileInputStream overrideStream = new FileInputStream(new File(overrideConfigFilename));
     try {
       Yaml yaml = new Yaml();
-      Map<Object, Object> ret = (Map<Object, Object>) yaml.load(fin);
+      Map<Object, Object> sinkConfig = (Map<Object, Object>) yaml.load(sinkConfigStream);
+      Map<Object, Object> overrideConfig = (Map<Object, Object>) yaml.load(overrideStream);
 
-      if (ret == null) {
+      if (sinkConfig == null) {
         throw new RuntimeException("Could not parse metrics-sinks config file");
-      } else {
-        for (String sinkId : TypeUtils.getListOfStrings(ret.get(CONFIG_KEY_METRICS_SINKS))) {
-          sinksConfigs.put(sinkId, (Map<String, Object>) ret.get(sinkId));
-        }
+      }
+
+      if (overrideConfig == null) {
+        throw new RuntimeException("Could not parse override config file");
+      }
+
+      Map<Object, Object> allConfig = new HashMap<>();
+      allConfig.putAll(sinkConfig);
+      allConfig.putAll(overrideConfig);
+
+      for (String sinkId : TypeUtils.getListOfStrings(allConfig.get(CONFIG_KEY_METRICS_SINKS))) {
+        sinksConfigs.put(sinkId, (Map<String, Object>) allConfig.get(sinkId));
       }
     } finally {
-      SysUtils.closeIgnoringExceptions(fin);
+      SysUtils.closeIgnoringExceptions(sinkConfigStream);
+      SysUtils.closeIgnoringExceptions(overrideStream);
     }
   }
 
