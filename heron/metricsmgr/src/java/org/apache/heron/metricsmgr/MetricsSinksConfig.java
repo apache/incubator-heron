@@ -52,11 +52,13 @@ public class MetricsSinksConfig {
       Map<Object, Object> overrideConfig = (Map<Object, Object>) yaml.load(overrideStream);
 
       if (sinkConfig == null) {
-        throw new RuntimeException("Could not parse metrics-sinks config file");
+        throw new RuntimeException(
+            "Could not parse metrics-sinks config file " + metricsSinksConfigFilename);
       }
 
       if (overrideConfig == null) {
-        throw new RuntimeException("Could not parse override config file");
+        throw new RuntimeException(
+            "Could not parse override config file " + overrideConfigFilename);
       }
 
       Map<Object, Object> allConfig = new HashMap<>();
