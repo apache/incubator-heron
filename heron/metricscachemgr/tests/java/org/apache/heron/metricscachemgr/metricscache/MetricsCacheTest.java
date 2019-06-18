@@ -42,7 +42,7 @@ public class MetricsCacheTest {
     SystemConfig systemConfig = SystemConfig.newBuilder(true)
         .putAll(CONFIG_SYSTEM_PATH, true)
         .build();
-    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(CONFIG_SINK_PATH);
+    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(CONFIG_SINK_PATH, null);
 
     // initialize metric cache, except looper
     MetricsCache mc = new MetricsCache(systemConfig, sinksConfig, new NIOLooper());

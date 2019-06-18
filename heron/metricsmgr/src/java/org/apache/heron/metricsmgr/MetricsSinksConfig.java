@@ -19,19 +19,20 @@
 
 package org.apache.heron.metricsmgr;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.basics.TypeUtils;
 
+@SuppressWarnings("unchecked")
 public class MetricsSinksConfig {
   public static final String CONFIG_KEY_METRICS_SINKS = "sinks";
   public static final String CONFIG_KEY_CLASSNAME = "class";
@@ -41,22 +42,29 @@ public class MetricsSinksConfig {
 
   private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<>();
 
-  @SuppressWarnings("unchecked")
-  public MetricsSinksConfig(String filename) throws FileNotFoundException {
-    FileInputStream fin = new FileInputStream(new File(filename));
-    try {
-      Yaml yaml = new Yaml();
-      Map<Object, Object> ret = (Map<Object, Object>) yaml.load(fin);
+  public MetricsSinksConfig(String metricsSinksConfigFilename, String overrideConfigFilename)
+      throws IOException {
+    Map<Object, Object> allConfig = new HashMap<>();
+    allConfig.putAll(readConfig(metricsSinksConfigFilename));
+    allConfig.putAll(readConfig(overrideConfigFilename));
 
-      if (ret == null) {
-        throw new RuntimeException("Could not parse metrics-sinks config file");
-      } else {
-        for (String sinkId : TypeUtils.getListOfStrings(ret.get(CONFIG_KEY_METRICS_SINKS))) {
-          sinksConfigs.put(sinkId, (Map<String, Object>) ret.get(sinkId));
-        }
-      }
-    } finally {
-      SysUtils.closeIgnoringExceptions(fin);
+    if (allConfig.isEmpty()) {
+      throw new RuntimeException("Missing required config 'sinks' for metrics manager");
+    }
+
+    for (String sinkId : TypeUtils.getListOfStrings(allConfig.get(CONFIG_KEY_METRICS_SINKS))) {
+      sinksConfigs.put(sinkId, (Map<String, Object>) allConfig.get(sinkId));
+    }
+  }
+
+  private Map<Object, Object> readConfig(String configFile) throws IOException {
+    if (configFile == null) {
+      return Collections.emptyMap();
+    }
+
+    Yaml yaml = new Yaml();
+    try (InputStream inputStream = new FileInputStream(configFile)) {
+      return (Map<Object, Object>) yaml.load(inputStream);
     }
   }
 
