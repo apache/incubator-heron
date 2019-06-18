@@ -1112,6 +1112,8 @@ class HeronExecutor(object):
 
     with open(self.override_config_file, 'r') as stream:
       overrides = yaml.load(stream)
+      if overrides is None:
+        overrides = dict()
     overrides["heron.statemgr.connection.string"] = self.state_manager_connection
 
     statemgr_config = StateMgrConfig()
