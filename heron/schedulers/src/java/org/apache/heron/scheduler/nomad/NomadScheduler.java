@@ -19,7 +19,6 @@
 
 package org.apache.heron.scheduler.nomad;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -581,8 +580,9 @@ public class NomadScheduler implements IScheduler {
   static String getPrometheusMetricsFile(Config config) {
     MetricsSinksConfig metricsSinksConfig;
     try {
-      metricsSinksConfig = new MetricsSinksConfig(Context.metricsSinksFile(config));
-    } catch (FileNotFoundException e) {
+      metricsSinksConfig = new MetricsSinksConfig(Context.metricsSinksFile(config),
+                                                  Context.overrideFile(config));
+    } catch (IOException e) {
       return null;
     }
 
