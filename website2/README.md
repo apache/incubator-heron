@@ -44,22 +44,23 @@ All the markdown files are placed in the `docs` directory. It is a flat structur
 
 ```
 ├── docs
-│   ├── adaptors-kafka.md
-│   ├── adaptors-spark.md
-│   ├── adaptors-storm.md
-│   ├── admin-api-brokers.md
-│   ├── admin-api-clusters.md
-│   ├── admin-api-namespaces.md
-│   ├── admin-api-non-persistent-topics.md
-│   ├── admin-api-overview.md
-│   ├── admin-api-partitioned-topics.md
-│   ├── admin-api-permissions.md
-│   ├── admin-api-persistent-topics.md
-│   ├── admin-api-tenants.md
-│   ├── administration-dashboard.md
-│   ├── administration-geo.md
-│   ├── administration-load-distribution.md
-│   ├── administration-proxy.md
+│   ├── cluster-config-metrics.md
+│   ├── cluster-config-overview.md
+│   ├── cluster-config-stream.md
+│   ├── cluster-config-system-level.md
+│   ├── cluster-config-tmaster.md
+│   ├── compiling-code-organization.md
+│   ├── compiling-docker.md
+│   ├── compiling-linux.md
+│   ├── compiling-osx.md
+│   ├── compiling-overview.md
+│   ├── compiling-running-tests.md
+│   ├── deployment-api-server.md
+│   ├── deployment-configuration.md
+│   ├── deployment-overview.md
+│   ├── extending-heron-metric-sink.md
+│   ├── extending-heron-scheduler.md
+│   ├── getting-started-local-single-node.md
 ...
 ```
 
