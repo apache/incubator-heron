@@ -42,7 +42,11 @@ data:
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
-  #BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
+  {{- if eq .Values.bookkeeper.prometheus.enabled "true" }}
+  BK_enableStatistics: "true"
+  BK_enableTaskExecutionStats: "true"
+  BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
+  {{- end }}
 ---
 
 ## BookKeeper servers need to access the local disks and the pods
@@ -107,8 +111,8 @@ spec:
             - -c
             - >-
               while true; do
-                status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
-                writestatus=$(echo isro | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
+                status=$(echo ruok | nc -w 3 {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
+                writestatus=$(echo isro | nc -w 3 {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
                 if [ "$status" = "imok" ] && [ "$writestatus" = "rw" ]; then
                   break;
                 fi;
@@ -162,6 +166,9 @@ spec:
           component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
+        {{- if ne .Values.bookkeeper.storageClassName "none" }}
+        storageClassName: {{ .Values.bookkeeper.storageClassName }}
+        {{- end }}
         resources:
           requests:
             storage: {{ $bookieJournalCapacity }}
@@ -173,6 +180,9 @@ spec:
           component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
+        {{- if ne .Values.bookkeeper.storageClassName "none" }}
+        storageClassName: {{ .Values.bookkeeper.storageClassName }}
+        {{- end }}
         resources:
           requests:
             storage: {{ $bookieStorageCapacity }}
