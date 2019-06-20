@@ -4,7 +4,7 @@ title: Kubernetes by hand
 sidebar_label:  Kubernetes by hand
 ---
 
-> This document shows you how to install Heron on Kubernetes in a step-by-step, "by hand" fashion. An easier way to install Heron on Kubernetes is to use the [Helm](https://helm.sh) package manager. For instructions on doing so, see [Heron on Kubernetes with Helm](../kubernetes-helm)).
+> This document shows you how to install Heron on Kubernetes in a step-by-step, "by hand" fashion. An easier way to install Heron on Kubernetes is to use the [Helm](https://helm.sh) package manager. For instructions on doing so, see [Heron on Kubernetes with Helm](schedulers-k8s-with-helm)).
 
 Heron supports deployment on [Kubernetes](https://kubernetes.io/) (sometimes called **k8s**). Heron deployments on Kubernetes use Docker as the containerization format for Heron topologies and use the Kubernetes API for scheduling.
 
@@ -20,7 +20,7 @@ In order to run Heron on Kubernetes, you will need:
 
 * A Kubernetes cluster with at least 3 nodes (unless you're running locally on [Minikube](#minikube))
 * The [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLI tool installed and set up to communicate with your cluster
-* The [`heron`](../../../../getting-started) CLI tool
+* The [`heron`](getting-started-local-single-node) CLI tool
 
 Any additional requirements will depend on where you're running Heron on Kubernetes.
 
@@ -82,7 +82,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools
 
-The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
@@ -148,9 +148,9 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 ### Heron UI
 
-The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in Minikube.
+The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in Minikube.
 
-You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
+You can access [Heron UI](user-manuals-heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
 
 ## Google Container Engine
 
@@ -248,7 +248,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools <a id="heron-tools-gke"></a>
 
-The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/tools.yaml
@@ -256,7 +256,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron API server
 
-The [Heron API server](../../../heron-api-server) is the endpoint that the [Heron CLI client](../../../heron-cli) uses to interact with the other components of Heron. Heron on Google Container Engine has two separate versions of the Heron API server that you can run depending on which artifact storage system you're using ([Google Cloud Storage](#google-cloud-storage-setup) or [Apache BookKeeper](#bookkeeper-setup)).
+The [Heron API server](deployment-api-server) is the endpoint that the [Heron CLI client](user-manuals-heron-cli) uses to interact with the other components of Heron. Heron on Google Container Engine has two separate versions of the Heron API server that you can run depending on which artifact storage system you're using ([Google Cloud Storage](#google-cloud-storage-setup) or [Apache BookKeeper](#bookkeeper-setup)).
 
 If you're using Google Cloud Storage:
 
@@ -321,9 +321,9 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 ### Heron UI
 
-The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in your GKE cluster.
+The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in your GKE cluster.
 
-You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
+You can access [Heron UI](user-manuals-heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
 
 ## General Kubernetes clusters
 
@@ -359,7 +359,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools
 
-The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
@@ -425,7 +425,7 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 ### Heron UI
 
-The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in your GKE cluster.
+The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in your GKE cluster.
 
 You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
 
@@ -435,28 +435,138 @@ You can configure Heron on Kubernetes using a variety of YAML config files, list
 
 ### client.yaml
 
-{{< configtable "kubernetes" "client" >}}
+#### Configuration for the `heron` CLI tool.
+
+| name                          | description                                             | default                                                   |
+|-------------------------------|---------------------------------------------------------|-----------------------------------------------------------|
+| heron.package.core.uri        | Location of the core Heron package                      | file:///vagrant/.herondata/dist/heron-core-release.tar.gz |
+| heron.config.is.role.required | Whether a role is required to submit a topology         | False                                                     |
+| heron.config.is.env.required  | Whether an environment is required to submit a topology | False                                                     |
 
 ### heron_internals.yaml
 
-{{< configtable "kubernetes" "heron_internals" >}}
+#### Configuration for a wide variety of Heron components, including logging, each topology's stream manager and topology master, and more.
+
+| name                                                               | description                                                                                                                                         | default   |
+|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| heron.logging.directory                                            | The relative path to the logging directory                                                                                                          | log-files |
+| heron.logging.maximum.size.mb                                      | The maximum log file size (in MB)                                                                                                                   | 100       |
+| heron.logging.maximum.files                                        | The maximum number of log files                                                                                                                     | 5         |
+| heron.check.tmaster.location.interval.sec                          | The interval, in seconds, after which to check if the topology master location has been fetched or not                                              | 120       |
+| heron.logging.prune.interval.sec                                   | The interval, in seconds, at which to prune C++ log files                                                                                           | 300       |
+| heron.logging.flush.interval.sec                                   | The interval, in seconds, at which to flush C++ log files                                                                                           | 10        |
+| heron.logging.err.threshold                                        | The threshold level at which to log errors                                                                                                          | 3         |
+| heron.metrics.export.interval.sec                                  | The interval, in seconds, at which different components export metrics to the metrics manager                                                       | 60        |
+| heron.metrics.max.exceptions.per.message.count                     | The maximum count of exceptions in one `MetricPublisherPublishMessage` protobuf message                                                             | 1024      |
+| heron.streammgr.cache.drain.frequency.ms                           | The frequency, in milliseconds, at which to drain the tuple cache in the stream manager                                                             | 10        |
+| heron.streammgr.stateful.buffer.size.mb                            | The sized-based threshold (in MB) for buffering data tuples waiting for checkpoint markers before giving up                                         | 100       |
+| heron.streammgr.cache.drain.size.mb                                | The sized-based threshold (in MB) for draining the tuple cache                                                                                      | 100       |
+| heron.streammgr.xormgr.rotatingmap.nbuckets                        | For efficient acknowledgements                                                                                                                      | 3         |
+| heron.streammgr.mempool.max.message.number                         | The max number of messages in the memory pool for each message type                                                                                 | 512       |
+| heron.streammgr.client.reconnect.interval.sec                      | The reconnect interval to other stream managers (in seconds) for the stream manager client                                                          | 1         |
+| heron.streammgr.client.reconnect.tmaster.interval.sec              | The reconnect interval to the topology master (in seconds) for the stream manager client                                                            | 10        |
+| heron.streammgr.client.reconnect.tmaster.max.attempts              | The max reconnect attempts to tmaster for stream manager client                                                                                     | 30        |
+| heron.streammgr.network.options.maximum.packet.mb                  | The maximum packet size (in MB) of the stream manager's network options                                                                             | 10        |
+| heron.streammgr.tmaster.heartbeat.interval.sec                     | The interval (in seconds) at which to send heartbeats                                                                                               | 10        |
+| heron.streammgr.connection.read.batch.size.mb                      | The maximum batch size (in MB) for the stream manager to read from socket                                                                           | 1         |
+| heron.streammgr.connection.write.batch.size.mb                     | Maximum batch size (in MB) for the stream manager to write to socket                                                                                | 1         |
+| heron.streammgr.network.backpressure.threshold                     | The number of times Heron should wait to see a buffer full while enqueueing data before declaring the start of backpressure                         | 3         |
+| heron.streammgr.network.backpressure.highwatermark.mb              | The high-water mark on the number (in MB) that can be left outstanding on a connection                                                              | 100       |
+| heron.streammgr.network.backpressure.lowwatermark.mb               | The low-water mark on the number (in MB) that can be left outstanding on a connection                                                               |           |
+| heron.tmaster.metrics.collector.maximum.interval.min               | The maximum interval (in minutes) for metrics to be kept in the topology master                                                                     | 180       |
+| heron.tmaster.establish.retry.times                                | The maximum number of times to retry establishing connection with the topology master                                                               | 30        |
+| heron.tmaster.establish.retry.interval.sec                         | The interval at which to retry establishing connection with the topology master                                                                     | 1         |
+| heron.tmaster.network.master.options.maximum.packet.mb             | Maximum packet size (in MB) of topology master's network options to connect to stream managers                                                      | 16        |
+| heron.tmaster.network.controller.options.maximum.packet.mb         | Maximum packet size (in MB) of the topology master's network options to connect to scheduler                                                        | 1         |
+| heron.tmaster.network.stats.options.maximum.packet.mb              | Maximum packet size (in MB) of the topology master's network options for stat queries                                                               | 1         |
+| heron.tmaster.metrics.collector.purge.interval.sec                 | The interval (in seconds) at which the topology master purges metrics from socket                                                                   | 60        |
+| heron.tmaster.metrics.collector.maximum.exception                  | The maximum number of exceptions to be stored in the topology metrics collector, to prevent out-of-memory errors                                    | 256       |
+| heron.tmaster.metrics.network.bindallinterfaces                    | Whether the metrics reporter should bind on all interfaces                                                                                          | False     |
+| heron.tmaster.stmgr.state.timeout.sec                              | The timeout (in seconds) for the stream manager, compared with (current time - last heartbeat time)                                                 | 60        |
+| heron.metricsmgr.network.read.batch.time.ms                        | The maximum batch time (in milliseconds) for the metrics manager to read from socket                                                                | 16        |
+| heron.metricsmgr.network.read.batch.size.bytes                     | The maximum batch size (in bytes) to read from socket                                                                                               | 32768     |
+| heron.metricsmgr.network.write.batch.time.ms                       | The maximum batch time (in milliseconds) for the metrics manager to write to socket                                                                 | 32768     |
+| heron.metricsmgr.network.options.socket.send.buffer.size.bytes     | The maximum socket send buffer size (in bytes)                                                                                                      | 6553600   |
+| heron.metricsmgr.network.options.socket.received.buffer.size.bytes | The maximum socket received buffer size (in bytes) for the metrics manager's network options                                                        | 8738000   |
+| heron.metricsmgr.network.options.maximum.packetsize.bytes          | The maximum packet size that the metrics manager can read                                                                                           | 1048576   |
+| heron.instance.network.options.maximum.packetsize.bytes            | The maximum size of packets that Heron instances can read                                                                                           | 10485760  |
+| heron.instance.internal.bolt.read.queue.capacity                   | The queue capacity (num of items) in bolt for buffer packets to read from stream manager                                                            | 128       |
+| heron.instance.internal.bolt.write.queue.capacity                  | The queue capacity (num of items) in bolt for buffer packets to write to stream manager                                                             | 128       |
+| heron.instance.internal.spout.read.queue.capacity                  | The queue capacity (num of items) in spout for buffer packets to read from stream manager                                                           | 1024      |
+| heron.instance.internal.spout.write.queue.capacity                 | The queue capacity (num of items) in spout for buffer packets to write to stream manager                                                            | 128       |
+| heron.instance.internal.metrics.write.queue.capacity               | The queue capacity (num of items) for metrics packets to write to metrics manager                                                                   | 128       |
+| heron.instance.network.read.batch.time.ms                          | Time based, the maximum batch time in ms for instance to read from stream manager per attempt                                                       | 16        |
+| heron.instance.network.read.batch.size.bytes                       | Size based, the maximum batch size in bytes to read from stream manager                                                                             | 32768     |
+| heron.instance.network.write.batch.time.ms                         | Time based, the maximum batch time (in milliseconds) for the instance to write to the stream manager per attempt                                    | 16        |
+| heron.instance.network.write.batch.size.bytes                      | Size based, the maximum batch size in bytes to write to stream manager                                                                              | 32768     |
+| heron.instance.network.options.socket.send.buffer.size.bytes       | The maximum socket's send buffer size in bytes                                                                                                      | 6553600   |
+| heron.instance.network.options.socket.received.buffer.size.bytes   | The maximum socket's received buffer size in bytes of instance's network options                                                                    | 8738000   |
+| heron.instance.set.data.tuple.capacity                             | The maximum number of data tuple to batch in a HeronDataTupleSet protobuf                                                                           | 1024      |
+| heron.instance.set.data.tuple.size.bytes                           | The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf                                                                    | 8388608   |
+| heron.instance.set.control.tuple.capacity                          | The maximum number of control tuple to batch in a HeronControlTupleSet protobuf                                                                     | 1024      |
+| heron.instance.ack.batch.time.ms                                   | The maximum time in ms for a spout to do acknowledgement per attempt, the ack batch could also break if there are no more ack tuples to process     | 128       |
+| heron.instance.emit.batch.time.ms                                  | The maximum time in ms for an spout instance to emit tuples per attempt                                                                             | 16        |
+| heron.instance.emit.batch.size.bytes                               | The maximum batch size in bytes for an spout to emit tuples per attempt                                                                             | 32768     |
+| heron.instance.execute.batch.time.ms                               | The maximum time in ms for an bolt instance to execute tuples per attempt                                                                           | 16        |
+| heron.instance.execute.batch.size.bytes                            | The maximum batch size in bytes for an bolt instance to execute tuples per attempt                                                                  | 32768     |
+| heron.instance.state.check.interval.sec                            | The time interval for an instance to check the state change, for example, the interval a spout uses to check whether activate/deactivate is invoked | 5         |
+| heron.instance.force.exit.timeout.ms                               | The time to wait before the instance exits forcibly when uncaught exception happens                                                                 | 2000      |
+| heron.instance.reconnect.streammgr.interval.sec                    | Interval in seconds to reconnect to the stream manager, including the request timeout in connecting                                                 | 5         |
+| heron.instance.reconnect.streammgr.interval.sec                    | Interval in seconds to reconnect to the stream manager, including the request timeout in connecting                                                 | 60        |
+| heron.instance.reconnect.metricsmgr.interval.sec                   | Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting                                                | 5         |
+| heron.instance.reconnect.metricsmgr.times                          | Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting                                                | 60        |
+| heron.instance.metrics.system.sample.interval.sec                  | The interval in second for an instance to sample its system metrics, for instance, CPU load.                                                        | 10        |
+| heron.instance.slave.fetch.pplan.interval.sec                      | The time interval (in seconds) at which Heron instances fetch the physical plan from slaves                                                         | 1         |
+| heron.instance.acknowledgement.nbuckets                            | For efficient acknowledgement                                                                                                                       | 10        |
+| heron.instance.tuning.expected.bolt.read.queue.size                | The expected size on read queue in bolt                                                                                                             | 8         |
+| heron.instance.tuning.expected.bolt.write.queue.size               | The expected size on write queue in bolt                                                                                                            | 8         |
+| heron.instance.tuning.expected.spout.read.queue.size               | The expected size on read queue in spout                                                                                                            | 512       |
+| heron.instance.tuning.expected.spout.write.queue.size              | The exepected size on write queue in spout                                                                                                          | 8         |
+| heron.instance.tuning.expected.metrics.write.queue.size            | The expected size on metrics write queue                                                                                                            | 8         |
+| heron.instance.tuning.current.sample.weight                        |                                                                                                                                                     | 0.8       |
+| heron.instance.tuning.interval.ms                                  | Interval in ms to tune the size of in & out data queue in instance                                                                                  | 100       |
 
 ### packing.yaml
 
-{{< configtable "kubernetes" "packing" >}}
+| name                          | description                                             | default                                               |
+|-------------------------------|---------------------------------------------------------|-------------------------------------------------------|
+| heron.class.packing.algorithm | Packing algorithm for packing instances into containers | org.apache.heron.packing.roundrobin.RoundRobinPacking |
 
 ### scheduler.yaml
 
-{{< configtable "kubernetes" "scheduler" >}}
+| name                              | description                                                 | default                                                   |
+|-----------------------------------|-------------------------------------------------------------|-----------------------------------------------------------|
+| heron.class.scheduler             | scheduler class for distributing the topology for execution | org.apache.heron.scheduler.kubernetes.KubernetesScheduler |
+| heron.class.launcher              | launcher class for submitting and launching the topology    | org.apache.heron.scheduler.kubernetes.KubernetesLauncher  |
+| heron.directory.sandbox.java.home | location of java - pick it up from shell environment        | $JAVA_HOME                                                |
+| heron.kubernetes.scheduler.uri    | The URI of the Kubernetes API                               |                                                           |
+| heron.scheduler.is.service        | Invoke the IScheduler as a library directly                 | false                                                     |
+| heron.executor.docker.image       | docker repo for executor                                    | heron/heron:latest                                        |
 
 ### stateful.yaml
 
-{{< configtable "kubernetes" "stateful" >}}
+| name                            | description                                            | default                                                         |
+|---------------------------------|--------------------------------------------------------|-----------------------------------------------------------------|
+| heron.statefulstorage.classname | The type of storage to be used for state checkpointing | org.apache.heron.statefulstorage.localfs.LocalFileSystemStorage |
 
 ### statemgr.yaml
 
-{{< configtable "kubernetes" "statemgr" >}}
+| name                                           | description                                                           | default                                                         |
+|------------------------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------|
+| heron.class.state.manager                      | local state manager class for managing state in a persistent fashion  | org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager |
+| heron.statemgr.connection.string               | local state manager connection string                                 |                                                                 |
+| heron.statemgr.root.path                       | path of the root address to store the state in a local file system    | /heron                                                          |
+| heron.statemgr.zookeeper.is.initialize.tree    | create the zookeeper nodes, if they do not exist                      | True                                                            |
+| heron.statemgr.zookeeper.session.timeout.ms    | timeout in ms to wait before considering zookeeper session is dead    | 30000                                                           |
+| heron.statemgr.zookeeper.connection.timeout.ms | timeout in ms to wait before considering zookeeper connection is dead | 30000                                                           |
+| heron.statemgr.zookeeper.retry.count           | timeout in ms to wait before considering zookeeper connection is dead | 10                                                              |
+| heron.statemgr.zookeeper.retry.interval.ms     | duration of time to wait until the next retry                         | 10000                                                           |
 
 ### uploader.yaml
 
-{{< configtable "kubernetes" "uploader" >}}
+| name                         | description                                                                             | default                                 |
+|------------------------------|-----------------------------------------------------------------------------------------|-----------------------------------------|
+| heron.class.uploader         | uploader class for transferring the topology files (jars, tars, PEXes, etc.) to storage | org.apache.heron.uploader.s3.S3Uploader |
+| heron.uploader.s3.bucket     | S3 bucket in which topology assets will be stored (if AWS S3 is being used)             |                                         |
+| heron.uploader.s3.access_key | AWS access key (if AWS S3 is being used)                                                |                                         |
+| heron.uploader.s3.secret_key | AWS secret access key (if AWS S3 is being used)                                         |                                         |
