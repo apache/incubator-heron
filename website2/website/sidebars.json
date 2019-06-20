@@ -53,6 +53,7 @@
       "schedulers-k8s-by-hand",
       "schedulers-k8s-with-helm",
       "schedulers-aurora-cluster",
+      "schedulers-aurora-local",
       "schedulers-local",
       "schedulers-standalone",
       "schedulers-nomad",
