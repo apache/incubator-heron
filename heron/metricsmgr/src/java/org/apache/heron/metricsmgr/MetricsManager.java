@@ -382,14 +382,15 @@ public class MetricsManager {
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
-            + "Metrics Manager Id %s, Merics Manager Port: %d, for cluster/role/env %s.",
+            + "Metrics Manager Id %s, Metrics Manager Port: %d, for cluster/role/env %s.",
         topologyName, topologyId, metricsmgrId, metricsPort,
         String.format("%s/%s/%s", cluster, role, environment)));
 
     LOG.info("System Config: " + systemConfig);
 
     // Populate the config
-    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
+    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename,
+                                                            overrideConfigFilename);
 
     LOG.info("Sinks Config:" + sinksConfig.toString());
 
