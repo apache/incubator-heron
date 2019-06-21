@@ -42,7 +42,7 @@ data:
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
-  {{- if eq .Values.bookkeeper.prometheus.enabled "true" }}
+  {{- if eq .Values.bookkeeper.prometheus.enabled true }}
   BK_enableStatistics: "true"
   BK_enableTaskExecutionStats: "true"
   BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
