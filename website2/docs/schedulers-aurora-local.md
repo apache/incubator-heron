@@ -62,9 +62,9 @@ You can verify that the Aurora cluster is properly running by opening the follow
 If you go into http://192.168.33.7:8081/scheduler you can notice that the name of the default cluster that is setup in aurora is
 named `devcluster` this will be important to note when submitting typologies from heron.
 
-![Heron topology](/img/aurora-local-cluster-start.png)
+![Heron topology](assets/aurora-local-cluster-start.png)
 
-## Installing Heron within VM
+## Installing Heron within the Cluster VM
 
 Now that the Aurora cluster is setup you need to install heron within the cluster VM in order to be able to get the Heron
 deployment working. Since this is a fresh VM instance you will have to install the basic software such as "unzip" and set
@@ -190,7 +190,7 @@ create /heron/topologies null
 Next you need to configure Apache Aurora to be used as the Scheduler for our Heron
 local cluster. In order to do this you need to edit the `scheduler.yaml` file that is
 also located in `/home/vagrant/.heron/conf/aurora`. Add/Edit the file to include the
-following. More information regarding parameters can be found in [Aurora Cluster](../aurora)
+following. More information regarding parameters can be found in [Aurora Cluster](schedulers-aurora-cluster)
 
 ```yaml
 # scheduler class for distributing the topology for execution
@@ -238,7 +238,7 @@ $ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/
 
 Now you should be able to see the topology in the Aurora UI ( http://192.168.33.7:8081/scheduler/heronuser ) .
 
-![Heron topology](/img/aurora-local-topology-submitted.png)
+![Heron topology](assets/aurora-local-topology-submitted.png)
 
 ### Understanding the parameters
 
@@ -311,4 +311,4 @@ $ heron-tracker
 $ heron-ui
 ```
 
-![Heron topology](/img/heron-ui-topology-submitted.png)
+![Heron topology](assets/heron-ui-topology-submitted.png)
