@@ -82,7 +82,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools
 
-The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui-runbook) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
@@ -98,7 +98,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 ### Managing topologies
 
-Once all of the [components](#components) have been successfully started up, you need to open up a proxy port to your Minikube Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
+Once all of the [components](#starting-components) have been successfully started up, you need to open up a proxy port to your Minikube Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
 
 ```bash
 $ kubectl proxy -p 8001
@@ -148,9 +148,9 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 ### Heron UI
 
-The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in Minikube.
+The [Heron UI](user-manuals-heron-ui-runbook) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in Minikube.
 
-You can access [Heron UI](user-manuals-heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
+You can access [Heron UI](user-manuals-heron-ui-runbook) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
 
 ## Google Container Engine
 
@@ -248,7 +248,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools <a id="heron-tools-gke"></a>
 
-The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui-runbook) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/tools.yaml
@@ -272,7 +272,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 ### Managing topologies
 
-Once all of the [components](#components) have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
+Once all of the [components](#starting-components) have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
 
 ```bash
 $ kubectl proxy -p 8001
@@ -359,7 +359,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 #### Heron tools
 
-The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
+The so-called "Heron tools" include the [Heron UI](user-manuals-heron-ui-runbook) and the [Heron Tracker](user-manuals-heron-tracker-runbook). To start up the Heron tools:
 
 ```bash
 $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
@@ -375,7 +375,7 @@ $ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/mas
 
 ### Managing topologies
 
-Once all of the [components](#components) have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
+Once all of the [components](#starting-components) have been successfully started up, you need to open up a proxy port to your GKE Kubernetes cluster using the [`kubectl proxy`](https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/) command:
 
 ```bash
 $ kubectl proxy -p 8001
@@ -425,9 +425,9 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 ### Heron UI
 
-The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in your GKE cluster.
+The [Heron UI](user-manuals-heron-ui-runbook) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in your GKE cluster.
 
-You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+You can access [Heron UI](user-manuals-heron-ui-runbook) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
 
 ## Heron on Kubernetes configuration
 
