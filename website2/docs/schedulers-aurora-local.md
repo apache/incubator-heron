@@ -126,7 +126,7 @@ if you have an Zookeeper instance running for some other task you can simply use
 Since Apache Aurora already uses an Zookeeper instance you can directly use that instance
 to execute State Manager tasks of Heron. First you need to configure Heron to work with
 the Zookeeper instance. You can find meanings of each attribute in [Setting Up ZooKeeper
-State Manager] (../../statemanagers/zookeeper). Configurations for State manager are
+State Manager](state-managers-zookeeper). Configurations for State manager are
 located in the directory `/home/vagrant/.heron/conf/aurora`.
 
 Open the file `statemgr.yaml` using vim ( or some other text editor you prefer )
