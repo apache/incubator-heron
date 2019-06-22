@@ -4,11 +4,11 @@ title: Heron Multi-node Standalone Cluster
 sidebar_label:  Heron Multi-node Standalone Cluster
 ---
 
-Heron enables you to easily run a multi-node cluster in **standalone mode**. The difference between standalone mode and [local mode](../local) for Heron is that standalone mode involves running multiple compute nodes---using [Hashicorp](https://www.hashicorp.com/)'s [Nomad](https://www.nomadproject.io/) as a scheduler---rather than just one.
+Heron enables you to easily run a multi-node cluster in **standalone mode**. The difference between standalone mode and [local mode](schedulers-local) for Heron is that standalone mode involves running multiple compute nodes---using [Hashicorp](https://www.hashicorp.com/)'s [Nomad](https://www.nomadproject.io/) as a scheduler---rather than just one.
 
 ## Installation
 
-You can use Heron in standalone mode using the `heron-admin` CLI tool, which can be installed using the instructions [here](../../../../getting-started).
+You can use Heron in standalone mode using the `heron-admin` CLI tool, which can be installed using the instructions [here](getting-started-local-single-node).
 
 ## Requirements
 
@@ -86,7 +86,7 @@ At any time, you can retrieve information about your standalone cluster by runni
 $ heron-admin standalone info
 ```
 
-This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](../../../heron-api-server), [Heron UI](../../../heron-ui), and [Heron Tracker](../../../heron-tracker). Here is a cluster info JSON string if all defaults are retained:
+This will return a JSON string containing a list of hosts for Heron and ZooKeeper as well as URLs for the [Heron API server](deployment-api-server), [Heron UI](user-manuals-heron-ui), and [Heron Tracker](user-manuals-heron-tracker-runbook). Here is a cluster info JSON string if all defaults are retained:
 
 ```json
 {
@@ -128,7 +128,7 @@ $ heron-admin standalone get service-url
 
 ## Setting the service URL
 
-Once your standalone cluster is running, there's one final step before you can interact with the cluster: you need to specify the service URL for the [Heron API server](../../../heron-api-server) for the standalone cluster. You can fetch that URL in two different ways:
+Once your standalone cluster is running, there's one final step before you can interact with the cluster: you need to specify the service URL for the [Heron API server](deployment-api-server) for the standalone cluster. You can fetch that URL in two different ways:
 
 ```bash
 # Using the "get" command
@@ -164,7 +164,7 @@ $ heron config standalone set service_url http://localhost:9000
 
 ## Submitting a topology
 
-Once your standalone cluster is up and running and you've set the service URL for the [`heron` CLI tool](../../../heron-cli), you can submit and manage topologies by specifying the `standalone` cluster. Here's an example topology submission command:
+Once your standalone cluster is up and running and you've set the service URL for the [`heron` CLI tool](user-manuals-heron-cli), you can submit and manage topologies by specifying the `standalone` cluster. Here's an example topology submission command:
 
 ```bash
 $ heron submit standalone \
