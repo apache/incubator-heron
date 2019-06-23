@@ -5,8 +5,8 @@ sidebar_label: Custom Metrics Sink
 ---
 
 Each Heron container has its own centralized [Metrics
-Manager](../../concepts/architecture#metrics-manager) (MM), which collects
-metrics from all [Heron Instances](../../concepts/architecture#heron-instance) in
+Manager](heron-architecture#metrics-manager) (MM), which collects
+metrics from all [Heron Instances](heron-architecture#heron-instance) in
 the container. You can define how the MM processes metrics by implementing a
 **metrics sink**, which specifies how the MM handles incoming
 [`MetricsRecord`](/api/org/apache/heron/spi/metricsmgr/metrics/MetricsRecord.html)
@@ -22,9 +22,9 @@ implementing your own.
 
 Sink | How it works
 :----|:------------
-[Prometheus](../../operators/observability/prometheus) | [`PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
-[Graphite](../../operators/observability/graphite) | [`GraphiteSink`](/api/org/apache/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
-[Scribe](../../operators/observability/scribe) | [`ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
+[Prometheus](observability-prometheus) | [`PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html) sends each `MetricsRecord` object to a specified path in the [Prometheus](https://prometheus.io) instance.
+[Graphite](observability-graphite) | [`GraphiteSink`](/api/org/apache/heron/metricsmgr/sink/GraphiteSink.html) sends each `MetricsRecord` object to a [Graphite](http://graphite.wikidot.com/) instance according to a Graphite prefix.
+[Scribe](observability-scribe) | [`ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html) sends each `MetricsRecord` object to a [Scribe](https://github.com/facebookarchive/scribe) instance according to a Scribe category and namespace.
 Local filesystem | [`FileSink`](/api/org/apache/heron/metricsmgr/sink/FileSink.html) writes each `MetricsRecord` object to a JSON file at a specified path.
 
 ## Java Setup
@@ -65,7 +65,7 @@ Method | Description
 
 Your implementation of those interfaces will need to be packaged into a JAR file
 and distributed to the `heron-core/lib/metricsmgr` folder of your [Heron
-release](../../developers/compiling/compiling).
+release](compiling-overview).
 
 ## Example Implementation
 
@@ -158,5 +158,5 @@ Once you've made a JAR for your custom Java sink, distributed that JAR to
 `metrics_sinks.yaml` file in the base configuration template, any topology submitted using that configuration will include the custom sink.
 
 You must [re-compile
-Heron](../../developers/compiling) if you want to include the configuration in a new distribution of [Heron CLI](../../operators/heron-cli).
+Heron](compiling-overview) if you want to include the configuration in a new distribution of [Heron CLI](user-manuals-heron-cli).
 
