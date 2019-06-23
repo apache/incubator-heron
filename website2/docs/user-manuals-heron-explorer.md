@@ -13,9 +13,9 @@ The **Heron Explorer** is a CLI tool that you can use to gain insight into a Her
 * the topologies running in a given cluster, role, or environment
 
 > #### The Heron Explorer vs. Heron CLI
-> There are two important differences between the Heron Explorer and [Heron CLI](../heron-cli). Unlike Heron CLI, the Heron Explorer (a) requires the [Heron Tracker](../heron-tracker) and (b) performs read-only, observation-oriented commands (rather than commands for actions like submitting, activating, and killing topologies).
+> There are two important differences between the Heron Explorer and [Heron CLI](user-manuals-heron-cli). Unlike Heron CLI, the Heron Explorer (a) requires the [Heron Tracker](user-manuals-heron-tracker-runbook) and (b) performs read-only, observation-oriented commands (rather than commands for actions like submitting, activating, and killing topologies).
 
-In order to use the Heron Explorer, the [Heron Tracker](../heron-tracker) will need to be running. If you've [installed the Tracker](../../getting-started), you can start it up using just one command:
+In order to use the Heron Explorer, the [Heron Tracker](user-manuals-heron-tracker-runbook) will need to be running. If you've [installed the Tracker](getting-started-local-single-node), you can start it up using just one command:
 
 ```shell
 $ heron-tracker
@@ -23,8 +23,8 @@ $ heron-tracker
 
 ## Installation
 
-The Heron Explorer is installed automatically if you follow the Heron tools installation tutorial in the [Quick Start Guide](../../getting-started#step-1-download-the-heron-tools).
-
+The Heron Explorer is installed automatically if you follow the Heron tools installation tutorial in the [Quick Start Guide](getting-started-local-single-node#step-1-download-the-heron-tools).
+x
 ## Commands
 
 The commands available for the Heron Explorer are listed in the table below.

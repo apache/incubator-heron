@@ -5,7 +5,7 @@ sidebar_label: Heron Client
 ---
 
 The **Heron CLI** us used to to manage every aspect of the
-[topology lifecycle](../../concepts/topologies#topology-lifecycle).
+[topology lifecycle](heron-topology-concepts#topology-lifecycle).
 
 ## Deploying the `heron` CLI Executable
 
@@ -31,7 +31,7 @@ See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
 ....
 ```
 
-Alternatively, generate a full [Heron release](../../developers/compiling/compiling) and
+Alternatively, generate a full [Heron release](compiling-overview) and
 distribute the resulting `heron` CLI to all machines used to manage topologies.
 
 ### Common CLI Args
