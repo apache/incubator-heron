@@ -5,7 +5,7 @@ sidebar_label: Metrics Manager
 ---
 
 You can configure all of the [Metrics
-Managers](../../../concepts/architecture#metrics-manager) (MMs) in a topology
+Managers](heron-architecture#metrics-manager) (MMs) in a topology
 using the parameters below.
 
 ## Network Configuration

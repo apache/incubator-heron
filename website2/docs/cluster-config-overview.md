@@ -11,7 +11,7 @@ Heron cluster rather than to any specific component (e.g. logging configurations
 2. **The component level** --- Component-level configurations enable you to establish 
 default configurations for different components. 
 These configurations are fixed at any stage of the topology's
-[lifecycle](../../../concepts/topologies#topology-lifecycle), once the topology
+[lifecycle](heron-topology-concepts#topology-lifecycle), once the topology
 is deployed.
 
 Neither system- nor component-level configurations can be overridden by topology developers.
@@ -19,13 +19,13 @@ Neither system- nor component-level configurations can be overridden by topology
 All system-level configs and component-level defaults are declared in a
 [YAML](http://www.yaml.org/) config file in `heron/config/src/yaml/conf/{cluster}/heron_internals.yaml`
 in the Heron codebase. You can leave that file as is when [compiling
-Heron](../../../developers/compiling) or modify the values to suit your use
+Heron](compiling-overview) or modify the values to suit your use
 case.
 
 ## The System Level
 
 There are a small handful of system-level configs for Heron. These are detailed
-in [System-level Configuration](../system).
+in [System-level Configuration](cluster-config-system-level).
 
 ## The Component Level
 
@@ -33,10 +33,10 @@ There is a wide variety of component-level configurations that you can establish
 as defaults in your Heron cluster. These configurations tend to apply to
 specific components in a topology and are detailed in the docs below:
 
-* [Heron Instance](../instance)
-* [Heron Metrics Manager](../metrics-manager)
-* [Heron Stream Manager](../stmgr)
-* [Heron Topology Master](../tmaster)
+* [Heron Instance](cluster-config-instance)
+* [Heron Metrics Manager](cluster-config-metrics)
+* [Heron Stream Manager](cluster-config-stream)
+* [Heron Topology Master](cluster-config-tmaster)
 
 ### Overriding Heron Cluster Configuration
 
@@ -46,4 +46,4 @@ It is not possible to override the Heron configuration
 for a topology via Heron client or other Heron tools.
 
 More on Heron's CLI tool can be found in [Managing Heron
-Topologies](../../heron-cli).
+Topologies](user-manuals-heron-cli).

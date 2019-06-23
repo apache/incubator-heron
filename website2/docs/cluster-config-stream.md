@@ -6,7 +6,7 @@ sidebar_label: Stream Manager
 
 
 You can configure the [Stream
-Manager](../../../concepts/architecture#stream-manager) (SM) in a
+Manager](heron-architecture#stream-manager) (SM) in a
 topology using the parameters below, including how the SM handles [back
 pressure](#back-pressure-parameters).
 
