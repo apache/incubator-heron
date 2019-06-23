@@ -4,7 +4,7 @@ title: Kubernetes with Helm
 sidebar_label:  Kubernetes with Helm
 ---
 
-> If you'd prefer to install Heron on Kubernetes *without* using the [Helm](https://helm.sh) package manager, see the [Heron on Kubernetes by hand](../kubernetes) document.
+> If you'd prefer to install Heron on Kubernetes *without* using the [Helm](https://helm.sh) package manager, see the [Heron on Kubernetes by hand](schedulers-k8s-by-hand) document.
 
 [Helm](https://helm.sh) is an open source package manager for [Kubernetes](https://kubernetes.io) that enables you to quickly and easily install even the most complex software systems on Kubernetes. Heron has a Helm [chart](https://docs.helm.sh/developing_charts/#charts) that you can use to install Heron on Kubernetes using just a few commands. The chart can be used to install Heron on the following platforms:
 
@@ -92,7 +92,7 @@ Platform | Tag
 :--------|:---
 [Minikube](#minikube) | `minikube`
 [Google Kubernetes Engine](#google-kubernetes-engine) | `gke`
-[Amazon Web Services](#amazone-web-services) | `aws`
+[Amazon Web Services](#amazon-web-services) | `aws`
 [Bare metal](#bare-metal) | `baremetal`
 
 #### Minikube
@@ -189,8 +189,8 @@ Helm enables you to supply sets of variables via YAML files. There are currently
 
 Configuration | Description
 :-------------|:-----------
-[`small.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gcp/small.yaml) | Smaller Heron cluster intended for basic testing, development, and experimentation
-[`large.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gcp/large.yaml) | Larger Heron cluster intended for production usage
+[`small.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gke/small.yaml) | Smaller Heron cluster intended for basic testing, development, and experimentation
+[`medium.yaml`](https://github.com/apache/incubator-heron/blob/master/deploy/kubernetes/gke/medium.yaml) | Closer geared for production usage
 
 To apply the `small` configuration, for example:
 
@@ -267,7 +267,7 @@ You should get a JSON response like this:
 
 ## Running topologies on Heron on Kubernetes
 
-Once you have a Heron cluster up and running on Kubernetes via Helm, you can use the [`heron` CLI tool](../../../heron-cli) like normal if you set the proper URL for the [Heron API server](../../../heron-api-server). When running Heron on Kubernetes, that URL is:
+Once you have a Heron cluster up and running on Kubernetes via Helm, you can use the [`heron` CLI tool](user-manuals-heron-cli) like normal if you set the proper URL for the [Heron API server](deployment-api-server). When running Heron on Kubernetes, that URL is:
 
 ```bash
 $ http://localhost:8001/api/v1/namespaces/default/services/heron-kubernetes-apiserver:9000/proxy

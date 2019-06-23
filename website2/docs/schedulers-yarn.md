@@ -4,7 +4,7 @@ title: Apache Hadoop YARN Cluster (Experimental)
 sidebar_label:  YARN Cluster
 ---
 
-In addition to out-of-the-box schedulers for [Aurora](../aurora), Heron can also be deployed on a
+In addition to out-of-the-box schedulers for [Aurora](schedulers-aurora-cluster), Heron can also be deployed on a
 YARN cluster with the YARN scheduler. The YARN scheduler is implemented using the
 [Apache REEF](https://reef.apache.org/) framework.
 
@@ -19,7 +19,7 @@ across events like topology restarts.
 ## Topology deployment on a YARN Cluster
 
 Using the YARN scheduler is similar to deploying Heron on other clusters, i.e. using the
-[Heron CLI](/docs/operators/heron-cli/).
+[Heron CLI](user-manuals-heron-cli).
 This document assumes that the Hadoop yarn client is installed and configured.
 
 Following steps are executed when a Heron topology is submitted:
@@ -58,8 +58,7 @@ It is unnecessary to copy hadoop-classpath-jars to `HERON_INSTALL_DIR/lib/schedu
 
 ### Configure the YARN scheduler
 
-A set of default configuration files are provided with Heron in the [conf/yarn]
-(https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
+A set of default configuration files are provided with Heron in the [conf/yarn](https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/yarn) directory.
 The default configuration uses the local state manager. This will work with single-node local
 YARN installation only. A Zookeeper based state management will be needed for topology
 deployment on a multi-node YARN cluster.
@@ -87,8 +86,7 @@ deployment on a multi-node YARN cluster.
 >**Tips**
 >
 >1. More details for using the `--extra-launch-classpath` argument in 0.14.3 version. It supports both a single directory which including all `hadoop-lib-jars` and multiple directories separated by colon such as what `hadoop classpath` gives. ***The submit operation will fail if any path is invalid or if any file is missing.***
->2. if you want to submit a topology to a specific YARN queue, you can set the `heron.scheduler.yarn.queue` argument in `--config-property`. For instance, `--config-property heron.scheduler.yarn.queue=test`. This configuration could be found in the [conf/yarn/scheduler]
-(https://github.com/apache/incubator-heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
+>2. if you want to submit a topology to a specific YARN queue, you can set the `heron.scheduler.yarn.queue` argument in `--config-property`. For instance, `--config-property heron.scheduler.yarn.queue=test`. This configuration could be found in the [conf/yarn/scheduler](https://github.com/apache/incubator-heron/blob/master/heron/config/src/yaml/conf/yarn/scheduler.yaml) file too. `default` would be the YARN default queue as YARN provided.
 
 **Sample Output**
 
@@ -150,4 +148,4 @@ Assuming HDFS as the file system, Heron logs and REEF logs can be found in the f
  supported yet. As a result AM failure will result in topology failure.
  Issue: [#949](https://github.com/apache/incubator-heron/issues/949)
 1. TMaster and Scheduler are started in separate containers. Increased network latency can result
- in warnings or failures. Issue: [#951] (https://github.com/apache/incubator-heron/issues/951)
+ in warnings or failures. Issue: [#951](https://github.com/apache/incubator-heron/issues/951)
