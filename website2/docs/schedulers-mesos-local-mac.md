@@ -8,7 +8,7 @@ sidebar_label:  Mesos Cluster Locally
 This is a step by step guide to run Heron on a Mesos cluster locally.
 
 ## Install Heron
-Follow [Quick Start Guide](../../../../getting-started) to install Heron.
+Follow [Quick Start Guide](getting-started-local-single-node) to install Heron.
 
 ## Setting up an Apache Mesos Cluster Locally
 
@@ -18,14 +18,14 @@ to install and run Mesos. To confirm Mesos cluster is ready for accepting Heron 
 the Mesos management console [http://localhost:5050](http://localhost:5050) and confirm there is
 activated slaves.
 
-![console page](/img/mesos-management-console.png)
+![console page](assets/mesos-management-console.png)
 
 ## Configure Heron
 
 ### State Manager
 By default, Heron uses Local File System State Manager on Mesos to manage states. Modify
 `$HOME/.heron/conf/mesos/statemgr.yaml` to use ZooKeeper. For more details see [Setting up
-ZooKeeper](../../statemanagers/zookeeper).
+ZooKeeper](state-managers-zookeeper).
 
 ### Scheduler
 Heron needs to know where to load the lib to interact with Mesos. Change the config
@@ -95,21 +95,21 @@ java.lang.ClassLoader.loadLibrary(ClassLoader.java:1867)
 Another way to check your topology is running is to look at the Mesos management console. If it
 was launched successfully, two containers will be running.
 
-![result page](/img/mesos-management-console-with-topology.png)
+![result page](assets/mesos-management-console-with-topology.png)
 
 To view the process logs, click the `sandbox` on the right side. The sandbox of the heron container
 is shown below.
 
-![container-container-sandbox](/img/container-container-sandbox.png)
+![container-container-sandbox](assets/container-container-sandbox.png)
 
 The `log-files` directory includes the application and GC log of the processes running in this
 container.
 
-![container-log-files](/img/container-log-files.png)
+![container-log-files](assets/container-log-files.png)
 
 The bolt log of the ExclamationTopology is `container_1_exclaim1_1.log.0`. Below is a sample of it.
 
-![bolt-log](/img/bolt-log.png)
+![bolt-log](assets/bolt-log.png)
 
 ## Heron UI
 
@@ -133,15 +133,15 @@ $ heron-ui
 
 Go to the UI at [http://localhost:8889](http://localhost:8889) to see the topology.
 
-![mesos-local-heron-ui](/img/mesos-local-heron-ui.png)
+![mesos-local-heron-ui](assets/mesos-local-heron-ui.png)
 
 To see the metrics, click on the topology.
 
-![mesos-local-heron-ui-more](/img/mesos-local-heron-ui-more.png)
+![mesos-local-heron-ui-more](assets/mesos-local-heron-ui-more.png)
 
 To enter the Mesos Management Console page, click the `job` button.
 
-![mesos-local-heron-ui-to-mesos-console](/img/mesos-local-heron-ui-to-mesos-console.png)
+![mesos-local-heron-ui-to-mesos-console](assets/mesos-local-heron-ui-to-mesos-console.png)
 
 ## Kill Topology
 

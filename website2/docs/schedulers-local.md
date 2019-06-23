@@ -5,18 +5,18 @@ sidebar_label:  Local Cluster
 ---
 
 In addition to out-of-the-box schedulers for
-[Aurora](../aurora), Heron can also be deployed in a local environment, which
+[Aurora](schedulers-aurora-cluster), Heron can also be deployed in a local environment, which
 stands up a mock Heron cluster on a single machine. This can be useful for
 experimenting with Heron's features, testing a wide variety of possible cluster
 events, and so on.
 
 One of two state managers can be used for coordination when deploying locally:
 
-* [ZooKeeper](../../statemanagers/zookeeper)
-* [Local File System](../../statemanagers/localfs)
+* [ZooKeeper](state-managers-zookeeper)
+* [Local File System](state-managers-local-fs)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[simulator mode](../../../../developers/simulator-mode). Simulator mode enables
+[simulator mode](guides-simulator-mode). Simulator mode enables
 you to run topologies in a cluster-agnostic JVM process for the purpose of
 development and debugging, while the local scheduler stands up a Heron cluster
 on a single machine.
@@ -24,7 +24,7 @@ on a single machine.
 ## How Local Deployment Works
 
 Using the local scheduler is similar to deploying Heron on other schedulers.
-The [Heron] (../../../heron-cli) cli is used to deploy and manage topologies
+The [Heron](user-manuals-heron-cli) cli is used to deploy and manage topologies
 as would be done using a distributed scheduler. The main difference is in
 the configuration.
 

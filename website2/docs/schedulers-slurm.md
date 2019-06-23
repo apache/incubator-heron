@@ -10,12 +10,10 @@ This allows a researcher to deploy Heron and execute streaming scientific work-f
 
 ## How Slurm Deployment Works
 
-Using the Slurm scheduler is similar to deploying Heron on other systems. The Heron
-(../../heron-cli) cli is used to deploy and manage topologies similar to other
+Using the Slurm scheduler is similar to deploying Heron on other systems. [The Heron CLI](user-manuals-heron-cli)  is used to deploy and manage topologies similar to other
 schedulers. The main difference is in the configuration.
 
-A set of default configuration files are provided with Heron in the [conf/slurm]
-(https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/slurm) directory.
+A set of default configuration files are provided with Heron in the [conf/slurm](https://github.com/apache/incubator-heron/tree/master/heron/config/src/yaml/conf/slurm) directory.
 The default configuration uses the local file system based state manager. It is
 possible that the local file system is mounted using NFS.
 

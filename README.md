@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/apache/incubator-heron.svg?&branch=master)](https://travis-ci.org/apache/incubator-heron)
 
-![logo](website/static/img/HeronTextLogo.png)
+![logo](website2/docs/assets/HeronTextLogo.png)
 
 Heron is realtime analytics platform developed by Twitter.  It has a wide array of architectural improvements over it's predecessor.
 

@@ -4,7 +4,7 @@ title: Nomad
 sidebar_label:  Nomad
 ---
 
-Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler. You can use Nomad for either small- or large-scale Heron deployments or to run Heron locally in [standalone mode](../standalone).
+Heron supports [Hashicorp](https://hashicorp.com)'s [Nomad](https://nomadproject.io) as a scheduler. You can use Nomad for either small- or large-scale Heron deployments or to run Heron locally in [standalone mode](schedulers-standalone).
 
 > Update: Heron now supports running on Nomad via [raw exec driver](https://www.nomadproject.io/docs/drivers/raw_exec.html) and [docker driver](https://www.nomadproject.io/docs/drivers/docker.html)
 
@@ -22,13 +22,13 @@ The advantages of this mode is that it is incredibly lightweight and likely do n
 
 When setting up your Nomad cluster, the following are required:
 
-* The [Heron CLI tool](../../../heron-cli) must be installed on each machine used to deploy Heron topologies
+* The [Heron CLI tool](user-manuals-heron-cli) must be installed on each machine used to deploy Heron topologies
 * Python 2.7, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
 * A [ZooKeeper cluster](https://zookeeper.apache.org)
 
 ## Configuring Heron settings
 
-Before running Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
+Before running Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](getting-started-local-single-node), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
 
 First, make sure that the `heron.nomad.driver` is set to "raw_exec" in `~/.heron/conf/nomad/scheduler.yaml` e.g.
 
@@ -38,9 +38,9 @@ heron.nomad.driver: "raw_exec"
 
 You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:
 
-* The HTTP uploader in conjunction with Heron's [API server](../../../heron-api-server). The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described [below](#deploying-with-the-api-server)) <!-- TODO: link to upcoming HTTP uploader documentation -->
-* [Amazon S3](../../uploaders/s3). Please note that the S3 uploader requires an AWS account.
-* [SCP](../../uploaders/scp). Please note that the SCP uploader requires SSH access to nodes in the cluster.
+* The HTTP uploader in conjunction with Heron's [API server](deployment-api-server). The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described [below](#deploying-with-the-api-server)) <!-- TODO: link to upcoming HTTP uploader documentation -->
+* [Amazon S3](uploaders-amazon-s3). Please note that the S3 uploader requires an AWS account.
+* [SCP](uploaders-scp). Please note that the SCP uploader requires SSH access to nodes in the cluster.
 
 You can modify the `heron.class.uploader` parameter in `~/.heron/conf/nomad/uploader.yaml` to choose an uploader.
 
@@ -73,7 +73,7 @@ The Heron core package needs to be made available for every machine in the clust
 
 You can do this in one of several ways:
 
-* Use the Heron API server to distribute `heron-core.tar.gz` (see [here](../../heron-api-server) for more info)
+* Use the Heron API server to distribute `heron-core.tar.gz` (see [here](deployment-api-server) for more info)
 * Copy `heron-core.tar.gz` onto every node in the cluster
 * Mount a network drive to every machine in the cluster that contains 
 * Upload `heron-core.tar.gz` to an S3 bucket and expose an HTTP endpoint
@@ -93,7 +93,7 @@ heron.package.core.uri: http://some.webserver.io/heron-core.tar.gz
 
 ## Submitting Heron topologies to the Nomad cluster
 
-You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](../../../heron-cli):
+You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](user-manuals-heron-cli):
 
 ```bash
 $ heron submit nomad \
@@ -113,7 +113,7 @@ $ heron submit nomad \
 
 ## Deploying with the API server
 
-The advantage of running the [Heron API Server](../../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
+The advantage of running the [Heron API Server](deployment-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
 
 ## Running the API server
 
@@ -160,7 +160,7 @@ job "apiserver" {
 
 Make sure to replace the following:
 
-* `<heron_apiserver_executable>` --- The local path to where the [Heron API server](../../../heron-api-server) executable is located (usually `~/.heron/bin/heron-apiserver`)
+* `<heron_apiserver_executable>` --- The local path to where the [Heron API server](deployment-api-server) executable is located (usually `~/.heron/bin/heron-apiserver`)
 * `<zookeeper_uri>` --- The URI for your ZooKeeper cluster
 * `<scheduler_uri>` --- The URI for your Nomad server
 
@@ -174,7 +174,7 @@ heron.class.uploader:    org.apache.heron.uploader.http.HttpUploader
 heron.uploader.http.uri: http://localhost:9000/api/v1/file/upload
 ```
 
-The [Heron CLI](../../../heron-cli) will take care of the upload. When the topology is starting up, the topology package will be automatically downloaded from the API server.
+The [Heron CLI](user-manuals-heron-cli) will take care of the upload. When the topology is starting up, the topology package will be automatically downloaded from the API server.
 
 ## Using the API server to distribute the Heron core package
 
@@ -207,7 +207,7 @@ heron.package.core.uri:     http://localhost:9000/api/v1/file/download/core
 
 ## Using the API server to submit Heron topologies
 
-Users can submit topologies using the [Heron CLI](../../../heron-cli) by specifying a service URL to the API server. Here's the format of that command:
+Users can submit topologies using the [Heron CLI](user-manuals-heron-cli) by specifying a service URL to the API server. Here's the format of that command:
 
 ```bash
 $ heron submit nomad \
@@ -266,7 +266,7 @@ Instructions on running Heron on Nomad via docker containers are located here:
 
 When setting up your Nomad cluster, the following are required:
 
-* The [Heron CLI tool](../../../heron-cli) must be installed on each machine used to deploy Heron topologies
+* The [Heron CLI tool](user-manuals-heron-cli) must be installed on each machine used to deploy Heron topologies
 * Python 2.7, Java 7 or 8, and [curl](https://curl.haxx.se/) must be installed on every machine in the cluster
 * A [ZooKeeper cluster](https://zookeeper.apache.org)
 * Docker installed and enabled on every machine
@@ -274,7 +274,7 @@ When setting up your Nomad cluster, the following are required:
 
 ## Configuring Heron settings
 
-Before running Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](../../../../getting-started), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
+Before running Heron via Nomad, you'll need to configure some settings. Once you've [installed Heron](getting-started-local-single-node), all of the configurations you'll need to modify will be in the `~/.heron/conf/nomad` diredctory.
 
 First, make sure that the `heron.nomad.driver` is set to "docker" in `~/.heron/conf/nomad/scheduler.yaml` e.g.
 
@@ -290,9 +290,9 @@ heron.executor.docker.image: 'heron/heron:latest'
 
 You'll need to use a topology uploader to deploy topology packages to nodes in your cluster. You can use one of the following uploaders:
 
-* The HTTP uploader in conjunction with Heron's [API server](../../../heron-api-server). The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described [below](#deploying-with-the-api-server)) <!-- TODO: link to upcoming HTTP uploader documentation -->
-* [Amazon S3](../../uploaders/s3). Please note that the S3 uploader requires an AWS account.
-* [SCP](../../uploaders/scp). Please note that the SCP uploader requires SSH access to nodes in the cluster.
+* The HTTP uploader in conjunction with Heron's [API server](deployment-api-server). The Heron API server acts like a file server to which users can upload topology packages. The API server distributes the packages, along with the Heron core package, to the relevant machines. You can also use the API server to submit your Heron topology to Nomad (described [below](#deploying-with-the-api-server)) <!-- TODO: link to upcoming HTTP uploader documentation -->
+* [Amazon S3](uploaders-amazon-s3). Please note that the S3 uploader requires an AWS account.
+* [SCP](uploaders-scp). Please note that the SCP uploader requires SSH access to nodes in the cluster.
 
 You can modify the `heron.class.uploader` parameter in `~/.heron/conf/nomad/uploader.yaml` to choose an uploader.
 
@@ -310,7 +310,7 @@ heron.nomad.scheduler.uri: http://127.0.0.1:4646
 
 ## Submitting Heron topologies to the Nomad cluster
 
-You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](../../../heron-cli):
+You can submit Heron topologies to a Nomad cluster via the [Heron CLI tool](user-manuals-heron-cli):
 
 ```bash
 $ heron submit nomad \
@@ -330,7 +330,7 @@ $ heron submit nomad \
 
 ## Deploying with the API server
 
-The advantage of running the [Heron API Server](../../../heron-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
+The advantage of running the [Heron API Server](deployment-api-server) is that it can act as a file server to help you distribute topology package files and submit jobs to Nomad, so that you don't need to modify the configuration files mentioned above.  By using Heron’s API Server, you can set configurations such as the URI of ZooKeeper and the Nomad server once and not need to configure each machine from which you want to submit Heron topologies.
 
 ## Running the API server
 
@@ -377,7 +377,7 @@ job "apiserver" {
 
 Make sure to replace the following:
 
-* `<heron_apiserver_executable>` --- The local path to where the [Heron API server](../../../heron-api-server) executable is located (usually `~/.heron/bin/heron-apiserver`)
+* `<heron_apiserver_executable>` --- The local path to where the [Heron API server](deployment-api-server) executable is located (usually `~/.heron/bin/heron-apiserver`)
 * `<zookeeper_uri>` --- The URI for your ZooKeeper cluster
 * `<scheduler_uri>` --- The URI for your Nomad server
 
