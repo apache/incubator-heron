@@ -4,20 +4,18 @@ title: Compiling Heron
 sidebar_label: Compiling Overview
 ---
 
-Heron is currently available for [Mac OS X 10.10](../../../developers/compiling/mac),
-[Ubuntu 14.04](../../../developers/compiling/linux), and [CentOS
-7](../../../developers/compiling/linux). This guide describes the basics of the
+Heron is currently available for [Mac OS X 10.14](compiling-osx),
+[Ubuntu 14.04](compiling-linux), and [CentOS
+7](compiling-linux#building-on-centos-7). This guide describes the basics of the
 Heron build system. For step-by-step build instructions for a specific platform,
 the following guides are available:
 
-* [Building on Linux Platforms](../../../developers/compiling/linux)
-* [Building on Mac OS X](../../../developers/compiling/mac)
+* [Building on Linux Platforms](compiling-linux)
+* [Building on Mac OS X](compiling-mac)
 
-Heron can be built either [in its entirety]({{< ref "#building-all-components"
->}}), as [individual components]({{< ref "#building-specific-components" >}}),
-or as a [release package]({{< ref "#building-a-full-release-package" >}}).
+Heron can be built either [in its entirety](#building-all-components), as [individual components](#building-specific-components).
 
-Instructions on running unit tests for Heron can also be found in [Testing Heron](../../../contributors/testing).
+Instructions on running unit tests for Heron can also be found in [Testing Heron](compiling-running-tests).
 
 ## Requirements
 
@@ -114,8 +112,8 @@ directory. The `heron-tracker` executable, for example, can be found at
 
 As an alternative to building a full release, you can build Heron executables
 for a single Heron component (such as the [Heron
-Tracker](../../../operators/heron-tracker)) by passing a target to the `bazel
-build` command. For example, the following command would build the [Heron Tracker](../../../operators/heron-tracker):
+Tracker](user-manuals-heron-tracker-runbook)) by passing a target to the `bazel
+build` command. For example, the following command would build the Heron Tracker:
 
 ```bash
 $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
@@ -124,4 +122,4 @@ $ bazel build --config=darwin heron/tools/tracker/src/python:heron-tracker
 ## Testing Heron
 
 Instructions for running Heron unit tests can be found at [Testing
-Heron](../../../contributors/testing).
+Heron](compiling-running-tests).
