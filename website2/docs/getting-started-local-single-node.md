@@ -12,8 +12,7 @@ The easiest way to get started learning Heron is to install the Heron client too
 * [Ubuntu >= 14.04](#using-installation-scripts)
 * [CentOS](#using-installation-scripts)
 
-For other platforms, you need to build from source. Please refer to the [guide to compiling Heron]
-(../developers/compiling/compiling).
+For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
 
 ## Step 1 --- Download the Heron tools
 
@@ -55,7 +54,7 @@ $ chmod +x heron-*.sh
 
 > The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
+Now run the [Heron client](user-manuals-heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
 
 ```bash
 $ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user

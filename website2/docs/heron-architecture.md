@@ -108,7 +108,7 @@ components.
 #### Topology Master Configuration
 
 TMs have a variety of [configurable
-parameters](../../operators/configuration/tmaster) that you can adjust at each
+parameters](cluster-config-tmaster) that you can adjust at each
 phase of a topology's [lifecycle](heron-topology-concepts#topology-lifecycle).
 
 ### Containers

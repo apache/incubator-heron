@@ -4,9 +4,9 @@ title: Running Tests
 sidebar_label: Running Tests
 ---
 
-Heron uses [Bazel](../../developers/compiling#installing-bazel) for building
+Heron uses [Bazel](compiling-overview#installing-bazel) for building
 and running unit tests. Before running tests, first set up your build environment
-as described in [Compiling Heron](../../developers/compiling/compiling).
+as described in [Compiling Heron](compiling-overview).
 
 ### Running Unit Tests
 
