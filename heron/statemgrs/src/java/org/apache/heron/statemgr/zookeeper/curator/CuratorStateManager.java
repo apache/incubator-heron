@@ -63,6 +63,7 @@ import org.apache.zookeeper.Watcher;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
+  private static final int TUNNEL_SETUP_RETRY = 5;
 
   private CuratorFramework client;
   private String connectionString;
@@ -83,17 +84,24 @@ public class CuratorStateManager extends FileSystemStateManager {
         NetworkUtils.TunnelConfig.build(config, NetworkUtils.HeronSystem.STATE_MANAGER);
 
     if (tunnelConfig.isTunnelNeeded()) {
-      Pair<String, List<Process>> tunneledResults = setupZkTunnel(tunnelConfig);
+      for (int setupCount = 0;; ++setupCount) {
+        Pair<String, List<Process>> tunneledResults = setupZkTunnel(tunnelConfig);
+        String newConnectionString = tunneledResults.first;
 
-      String newConnectionString = tunneledResults.first;
-      if (newConnectionString.isEmpty()) {
-        throw new IllegalArgumentException("Failed to connect to tunnel host '"
-            + tunnelConfig.getTunnelHost() + "'");
+        // If tunnel can't be setup correctly. Retry or bail.
+        if (newConnectionString.isEmpty()) {
+          if (setupCount < TUNNEL_SETUP_RETRY) {
+            continue;  // Retry
+          } else {
+            throw new IllegalArgumentException("Failed to connect to tunnel host '"
+                + tunnelConfig.getTunnelHost() + "'");
+          }
+        }
+
+        // Use the new connection string
+        connectionString = newConnectionString;
+        tunnelProcesses.addAll(tunneledResults.second);
       }
-
-      // Use the new connection string
-      connectionString = newConnectionString;
-      tunnelProcesses.addAll(tunneledResults.second);
     }
 
     // Start it
