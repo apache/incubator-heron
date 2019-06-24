@@ -6,14 +6,14 @@ sidebar_label: Heron Tracker Runbook
 
 **Heron Tracker** is a web service that continuously gathers a wide
 variety of information about Heron topologies and exposes
-that information through a [JSON REST API](../heron-tracker-api).
+that information through a [JSON REST API](user-manuals-tracker-rest).
 More on the role of the Tracker can be found
-[here](../../concepts/architecture#heron-tracker).
+[here](heron-architecture#heron-tracker).
 
 ## Building Heron Tracker
 
 Heron uses [bazel](http://bazel.io/) for compiling.
-[Compiling](../../developers/compiling/compiling) describes how to setup bazel
+[Compiling](compiling-overview) describes how to setup bazel
 for heron.
 
 ```bash
@@ -36,8 +36,8 @@ The config file is a `yaml` file that should contain the following information.
 #### 1. State Manager locations
 
 This is a list of locations where topology writes its states. An example of
-[zookeeper state manager](../deployment/statemanagers/zookeeper) and
-[local file state manager](../deployment/statemanagers/localfs) look like this:
+[zookeeper state manager](state-managers-zookeeper) and
+[local file state manager](state-managers-local-fs) look like this:
 
 ```yaml
 ## Contains the sources where the states are stored.

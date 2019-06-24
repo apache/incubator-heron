@@ -5,7 +5,7 @@ sidebar_label: Topology Master
 ---
 
 You can configure the [Topology
-Master](../../../concepts/architecture#metrics-manager) (TM) for a topology
+Master](heron-architecture#topology-master) (TM) for a topology
 using the parameters below.
 
 Parameter | Meaning | Default

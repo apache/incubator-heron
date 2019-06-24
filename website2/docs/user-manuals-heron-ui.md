@@ -4,18 +4,17 @@ title: Heron UI Runbook
 sidebar_label: Heron UI Runbook
 ---
 
-**Heron UI** is a user interface that uses the [Heron
-Tracker](../../concepts/architecture#heron-tracker) to display detailed,
+**Heron UI** is a user interface that uses the [Heron Tracker](heron-architecture#heron-tracker) to display detailed,
 colorful visual representations of topologies, including the
-[logical](../../concepts/topologies/#logical-plan) and [physical
-plan](../../concepts/topologies#physical-plan) for each topology. Check out
-[Heron UI Usage Guide](../../developers/ui-guide) for more information about
+[logical](heron-topology-concepts#logical-plan) and [physical
+plan](heron-topology-concepts#physical-plan) for each topology. Check out
+[Heron UI Usage Guide](guides-ui-guide) for more information about
 various elements that UI exposes.
 
 ### Building Heron UI
 
 Heron uses [bazel](http://bazel.io/) for compiling.
-[This page](../../developers/compiling/compiling) describes how to setup bazel
+[This page](compiling-overview) describes how to setup bazel
 for heron.
 
 ```bash

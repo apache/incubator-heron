@@ -5,7 +5,7 @@ sidebar_label: Heron Instance
 ---
 
 You can configure the behavior of the [Heron
-Instances](../../../concepts/architecture#heron-instance) (HIs) in a
+Instances](heron-architecture#heron-instance) (HIs) in a
 topology using the parameters below.
 
 ## Internal Configuration
@@ -50,7 +50,7 @@ Parameter | Meaning | Default
 ## Metrics Manager Configuration
 
 These parameters deal with how each HI interacts with the topology's [Stream
-Manager](../../../concepts/architecture#stream-manager).
+Manager](heron-architecture#stream-manager).
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------

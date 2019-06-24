@@ -8,9 +8,12 @@ To run a Heron topology, you’ll need to set up a scheduler that is responsible
 for topology management. Note: one scheduler is managing only one topology, 
 for the purpose of better isolation. Heron currently supports the following schedulers out of the box:
 
-* [Aurora](../../operators/deployment/schedulers/aurora)
-* [Local scheduler](../../operators/deployment/schedulers/local)
-* [Slurm scheduler](../../operators/deployment/schedulers/slurm)
+* [Aurora](schedulers-aurora-cluster)
+* [Kubernetes](schedulers-k8s-by-hand)
+* [Kubernetes-Helm](schedulers-k8s-with-helm)
+* [Nomad](schedulers-nomad)
+* [Local scheduler](schedulers-local)
+* [Slurm scheduler](schedulers-slurm)
 
 If you'd like to run Heron on a not-yet-supported system, such as
 [Amazon ECS](https://aws.amazon.com/ecs/), you can create your own scheduler
@@ -59,10 +62,10 @@ Heron provides a number of built-in implementations out of box.
 
 ## Running the Scheduler
 
-To run the a custom scheduler, the implementation of the interfaces above must be specified in the [config](../../operators/deployment/configuration).
+To run the a custom scheduler, the implementation of the interfaces above must be specified in the [config](deployment-configuration).
 By default, the heron-cli looks for configurations under `${HERON_HOME}/conf/`. The location can be overridden using option `--config-path`. 
 Below is an example showing the command for [topology
-submission](../../operators/heron-cli#submitting-a-topology):
+submission](user-manuals-heron-cli#submitting-a-topology):
 
 ```bash
 $ heron submit [cluster-name-storing-your-new-config]/[role]/[env] \

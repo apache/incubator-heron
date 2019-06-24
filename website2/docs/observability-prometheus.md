@@ -8,7 +8,7 @@ You can integrate Heron with [Prometheus](https://prometheus.io/) to monitor and
 
 ## Exporting topology metrics from Heron to Prometheus
 
-Heron supports custom metric exporters from the Metrics Manager. You can either build your own Prometheus metrics sink or use the [provided Prometheus sink](/docs/contributors/custom-metrics-sink/).
+Heron supports custom metric exporters from the Metrics Manager. You can either build your own Prometheus metrics sink or use the [provided Prometheus sink](extending-heron-metric-sink).
 
 To set up your Heron cluster to export to Prometheus, you need to make two changes to the `metrics_sinks.yaml` configuration file:
 

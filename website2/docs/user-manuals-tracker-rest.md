@@ -70,7 +70,7 @@ $ curl "http://heron-tracker-url/topologies?cluster=cluster1&environ=devel"
 
 ### <a name="topologies_logicalplan">/topologies/logicalplan</a>
 
-Returns a JSON representation of the [logical plan](../../concepts/topologies#logical-plan) of a topology.
+Returns a JSON representation of the [logical plan](heron-topology-concepts#logical-plan) of a topology.
 
 ```bash
 $ curl "http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&environ=devel&topology=topologyName"
@@ -101,7 +101,7 @@ The resulting JSON contains the following
 
 ### <a name="topologies_physicalplan">/topologies/physicalplan</a>
 
-Returns a JSON representation of the [physical plan](../../concepts/topologies#physical-plan) of a topology.
+Returns a JSON representation of the [physical plan](heron-topology-concepts#physical-plan) of a topology.
 
 ```bash
 $ curl "http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&environ=prod&topology=topologyName"
@@ -184,7 +184,7 @@ Each execution state object lists the following:
 * `has_physical_plan` --- Whether the topology has a physical plan
 * `has_tmaster_location` --- Whether the topology has a Topology Master Location
 * `has_scheduler_location` --- Whether the topology has a Scheduler Location
-* `viz` --- Metric visualization UI URL for the topology if it was [configured](../heron-tracker)
+* `viz` --- Metric visualization UI URL for the topology if it was [configured](user-manuals-heron-tracker-runbook)
 
 ---
 

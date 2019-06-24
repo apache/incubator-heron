@@ -79,7 +79,8 @@
       "user-manuals-heron-explorer",
       "user-manuals-tracker-rest",
       "user-manuals-heron-tracker-runbook",
-      "user-manuals-heron-ui-runbook"
+      "user-manuals-heron-ui-runbook",
+      "user-manuals-heron-shell"
     ],
     "Compiling": [
       "compiling-overview",

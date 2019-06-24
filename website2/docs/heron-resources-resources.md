@@ -8,7 +8,7 @@ Heron Resources outside this documentation:
 
 ## Books
 
-* [Stream Processing with Heron](http://shop.oreilly.com/product/0636920203131.do) (book)
+* [Stream Processing with Heron](http://shop.oreilly.com/product/0636920203131.do)
 
 ## Conference & Journal Papers
 

@@ -8,7 +8,7 @@ You can integrate Heron with [Scribe](https://github.com/facebookarchive/scribe/
 
 ## Exporting topology metrics from Heron to Scribe
 
-Heron supports custom metric exporters from the Metrics Manager. You can either build your own Scribe metrics sink or use the [provided Scribe sink](/docs/contributors/custom-metrics-sink/).
+Heron supports custom metric exporters from the Metrics Manager. You can either build your own Scribe metrics sink or use the [provided Scribe sink](extending-heron-metric-sink).
 
 To set up your Heron cluster to export to Scribe, you need to make two changes to the `metrics_sinks.yaml` configuration file:
 

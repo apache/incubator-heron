@@ -26,8 +26,8 @@ create the VM), click on the VM, and then click on **Settings**.
 
 **Note**: You will need to stop the VM before modifying these settings.
 
-![VirtualBox Processors](/img/virtual-box-processors.png)
-![VirtualBox Memory](/img/virtual-box-memory.png)
+![VirtualBox Processors](assets/virtual-box-processors.png)
+![VirtualBox Memory](assets/virtual-box-memory.png)
 
 ## Building Heron
 
