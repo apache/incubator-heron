@@ -1,12 +1,6 @@
 module.exports = {
     publications: [
       {
-        forum: 'Yahoo Engineering blog',
-        forum_link: 'https://yahooeng.tumblr.com/',
-        title: 'Open sourcing Pulsar, pub-sub messaging at scale',
-        link: 'https://yahooeng.tumblr.com/post/150078336821/open-sourcing-pulsar-pub-sub-messaging-at-scale'
-      },
-      {
         forum: 'O’Reilly',
         forum_link: 'http://shop.oreilly.com/product/0636920203131.do',
         title: 'Stream Processing with Heron',
