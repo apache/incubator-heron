@@ -8,7 +8,7 @@ window.addEventListener('load', function() {
     '<div id="community-dropdown" class="hide" >' +
       '<ul id="community-dropdown-items">' +
         '<li><a href="/contact" style="color:#1d3f5f">Contact</a></li>' +
-        '<li><a href="community-events" style="color:#1d3f5f">Events</a></li>' +
+        '<li><a href="/events" style="color:#1d3f5f">Events</a></li>' +
         '<li><a href="https://github.com/apache/incubator-heron/issues" style="color:#1d3f5f">Issue tracking</a></li>' +
         '<li><a href="/resources" style="color:#1d3f5f">Resources</a></li>' +
         '<li><a href="/team" style="color:#1d3f5f">Team</a></li>' +
