@@ -63,7 +63,7 @@ import org.apache.zookeeper.Watcher;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
-  private static final int TUNNEL_SETUP_RETRY = 5;
+  private static final int TUNNEL_SETUP_RETRY = 0;  // 0 means no retry
   private static final int TUNNEL_SETUP_RETRY_SLEEP_SEC = 5;
 
   private CuratorFramework client;
@@ -90,23 +90,23 @@ public class CuratorStateManager extends FileSystemStateManager {
         String newConnectionString = tunneledResults.first;
 
         // If tunnel can't be setup correctly. Retry or bail.
-        if (newConnectionString.isEmpty()) {
+        if (!newConnectionString.isEmpty()) {
+          // Success, use the new connection string
+          connectionString = newConnectionString;
+          tunnelProcesses.addAll(tunneledResults.second);
+          break;
+        } else {
           if (setupCount < TUNNEL_SETUP_RETRY) {
             try {
               TimeUnit.SECONDS.sleep(TUNNEL_SETUP_RETRY_SLEEP_SEC);
             } catch (InterruptedException ex) {
               Thread.currentThread().interrupt();
             }
-            continue;  // Retry
           } else {
             throw new IllegalArgumentException("Failed to connect to tunnel host '"
                 + tunnelConfig.getTunnelHost() + "'");
           }
         }
-
-        // Use the new connection string
-        connectionString = newConnectionString;
-        tunnelProcesses.addAll(tunneledResults.second);
       }
     }
 
