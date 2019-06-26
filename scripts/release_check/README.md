@@ -8,14 +8,14 @@ Development environment setup is required. Setup instrctuction can be found here
 
 ## Run all release checks
 ```
-sh ./scripts/release_check/full_release_check.sh
+sh ./scripts/release_check/full_release_check.sh [PATH_TO_RAT_JAR_FILE]
 ```
 
 ## Run individual release checks
 
-### To run a license check with Apache Rat. Apache Rat can be downloaded here: http://ftp.wayne.edu/apache//creadur/apache-rat-0.12/apache-rat-0.12-bin.tar.gz
+### To run a license check with Apache Rat. Apache Rat can be downloaded here: http://ftp.wayne.edu/apache/creadur/apache-rat-0.13/apache-rat-0.13-bin.tar.gz. Decompress it if needed.
 ```
-sh ./scripts/release_check/license_check.sh
+sh ./scripts/release_check/license_check.sh [PATH_TO_RAT_JAR_FILE]
 ```
 
 ### To compile source, into Heron release artifacts (MacOS).

@@ -18,8 +18,20 @@
 
 set -o errexit
 
+if [  $# -lt 1 ]
+  then
+    echo "Usage:"
+    echo "$0 PAT_TO_APACHE_RAT_JAR"
+    echo ""
+    echo "Note: Apache Rat package can be downloaded from:"
+    echo "  http://ftp.wayne.edu/apache/creadur/apache-rat-0.13/apache-rat-0.13-bin.tar.gz"
+    exit 1
+  fi
+
+RAT_JAR_PATH=$1
+
 echo "Check licenses..."
-sh ./scripts/release_check/license_check.sh
+sh ./scripts/release_check/license_check.sh $RAT_JAR_PATH
 
 echo "Build artifacts..."
 sh ./scripts/release_check/build.sh
