@@ -129,6 +129,8 @@ com_crashlytics_export_strings.xml
 website/node_modules/
 website/public/
 /bin/
+website2/website/public
+website2/website/static/api
 
 # Visual Studio Code
 .vscode
