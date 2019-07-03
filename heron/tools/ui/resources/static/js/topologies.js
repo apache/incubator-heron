@@ -726,17 +726,23 @@ var ComponentCounters = React.createClass({
       <div>
         <div className="widget-header">
           <div className="title">
-            <h4>{title}</h4>
-            <div className="btn-group">
-            {
-              extraLinks.map(function (extraLink) {
-                return <a id={extraLink['name']}
-                          className="btn btn-primary btn-xs"
-                          href={extraLink['url']}
-                          target="_blank">{extraLink['name']}
-                       </a>
-              })
-            }
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            {extraLinks.map(function (extraLink) {
+              return <a id={extraLink['name']}
+                        className="btn btn-primary btn-xs"
+                        href={extraLink['url']}
+                        target="_blank"
+                        style={{"margin-right": "5px"}}>{extraLink['name']}
+                     </a>
+            })}
             </div>
           </div>
         </div>
