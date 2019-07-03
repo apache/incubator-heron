@@ -711,10 +711,13 @@ var ComponentCounters = React.createClass({
     headings.push.apply(headings, timeRanges);
 
     var rows = [];
-    var extra_links = [];
+    var extraLinks = [];
     if (this.props.info.comp_name) {
       rows = this.getComponentMetricsRows();
-      extra_links = this.props.info.lplan.spouts[this.props.info.comp_name].extra_links;
+      var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
+      if (spoutDetail) {
+        extraLinks = spoutDetail.extra_links;
+      }
     } else {
       rows = this.getTopologyMetricsRows();
     }
@@ -726,11 +729,11 @@ var ComponentCounters = React.createClass({
             <h4>{title}</h4>
             <div className="btn-group">
             {
-              extra_links.map(function (extra_link) {
-                return <a id={extra_link['name']}
+              extraLinks.map(function (extraLink) {
+                return <a id={extraLink['name']}
                           className="btn btn-primary btn-xs"
-                          href={extra_link['url']}
-                          target="_blank">{extra_link['name']}
+                          href={extraLink['url']}
+                          target="_blank">{extraLink['name']}
                        </a>
               })
             }
