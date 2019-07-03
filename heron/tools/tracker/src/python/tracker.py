@@ -29,7 +29,7 @@ from functools import partial
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
-from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY
+from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY, EXTRA_LINK_URL_KEY
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
 from heron.tools.tracker.src.python import pyutils
@@ -282,8 +282,8 @@ class Tracker(object):
 
     for extra_link in self.config.extra_links:
       link = extra_link.copy()
-      link["url"] = self.config.get_formatted_url(executionState,
-                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                               executionState)
       executionState["extra_links"].append(link)
     return executionState
 
@@ -308,8 +308,8 @@ class Tracker(object):
 
     for extra_link in self.config.extra_links:
       link = extra_link.copy()
-      link["url"] = self.config.get_formatted_url(metadata,
-                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                               metadata)
       metadata["extra_links"].append(link)
     return metadata
 
@@ -375,6 +375,7 @@ class Tracker(object):
 
     return tmasterLocation
 
+  # pylint: disable=too-many-locals
   def extract_logical_plan(self, topology):
     """
     Returns the representation of logical plan that will
@@ -384,6 +385,25 @@ class Tracker(object):
         "spouts": {},
         "bolts": {},
     }
+
+    # Pre-render component extra links with general params
+    execution_state = topology.execution_state
+    executionState = {
+        "cluster": execution_state.cluster,
+        "environ": execution_state.environ,
+        "role": execution_state.role,
+        "jobname": topology.name,
+        "submission_user": execution_state.submission_user,
+    }
+
+    spout_extra_links = {}
+    for spout_type, extra_links in self.config.spout_extra_links.items():
+      spout_extra_links[spout_type] = []
+      for extra_link in extra_links:
+        link = extra_link.copy()
+        link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                                 executionState)
+        spout_extra_links[spout_type].append(link)
 
     # Add spouts.
     for spout in topology.spouts():
@@ -404,8 +424,16 @@ class Tracker(object):
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
-          "outputs": []
+          "outputs": [],
+          "extra_links": [],
       }
+
+      for extra_link in spout_extra_links.get(spoutType, []):
+        extra_link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(
+            extra_link[EXTRA_LINK_URL_KEY],
+            spoutPlan["config"], **{"spout.name": spoutName})
+        spoutPlan["extra_links"].append(extra_link)
+
       for outputStream in list(spout.outputs):
         spoutPlan["outputs"].append({
             "stream_name": outputStream.stream.id
