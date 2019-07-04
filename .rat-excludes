@@ -4,7 +4,6 @@
 # Data/doc files
 .*\.conf
 .*\.json
-.*\.md
 .*\.txt
 .*\.BUILD
 .*\.patch
