@@ -69,3 +69,17 @@ statemgrs:
 #   formatter: "http://127.0.0.1/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}"
 # - name: "Alerts"
 #   formatter: "http://127.0.0.1/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}"
+#
+# spout.extra.links:
+# - spout.type: "kafka"
+#   extra.links:
+#   - name: "Viz"
+#     formatter: "http://127.0.0.1/kafka/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#   - name: "Alerts"
+#     formatter: "http://127.0.0.1/kafka/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+# - spout.type: "default"
+#   extra.links:
+#   - name: "Viz"
+#     formatter: "http://127.0.0.1/default/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#   - name: "Alerts"
+#     formatter: "http://127.0.0.1/default/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
