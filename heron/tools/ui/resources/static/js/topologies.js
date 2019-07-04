@@ -8,9 +8,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -263,7 +263,7 @@ var AllMetrics = React.createClass({
 
   fetchLplan: function () {
     if (this.state.lplan === undefined) {
-      var fetch_url = this.props.baseUrl + 
+      var fetch_url = this.props.baseUrl +
        "/topologies/" +
         this.props.cluster + "/" +
         this.props.environ + "/" +
@@ -545,6 +545,7 @@ var AllMetrics = React.createClass({
       cluster: this.props.cluster,
       environ: this.props.environ,
       metrics: this.state.metrics,
+      lplan: this.state.lplan,
       pplan: this.state.pplan,
       instance: this.props.instance,
     };
@@ -710,8 +711,13 @@ var ComponentCounters = React.createClass({
     headings.push.apply(headings, timeRanges);
 
     var rows = [];
+    var extraLinks = [];
     if (this.props.info.comp_name) {
       rows = this.getComponentMetricsRows();
+      var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
+      if (spoutDetail) {
+        extraLinks = spoutDetail.extra_links;
+      }
     } else {
       rows = this.getTopologyMetricsRows();
     }
@@ -720,7 +726,24 @@ var ComponentCounters = React.createClass({
       <div>
         <div className="widget-header">
           <div className="title">
-            <h4>{title}</h4>
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            {extraLinks.map(function (extraLink) {
+              return <a id={extraLink['name']}
+                        className="btn btn-primary btn-xs"
+                        href={extraLink['url']}
+                        target="_blank"
+                        style={{"margin-right": "5px"}}>{extraLink['name']}
+                     </a>
+            })}
+            </div>
           </div>
         </div>
         <table className="table table-striped table-hover no-margin">
@@ -1037,4 +1060,3 @@ var InstanceCounters = React.createClass({
     );
   }
 });
-

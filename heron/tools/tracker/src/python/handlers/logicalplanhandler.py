@@ -63,6 +63,7 @@ class LogicalPlanHandler(BaseHandler):
             outputs=value["outputs"],
             spout_type=value["type"],
             spout_source=value["source"],
+            extra_links=value["extra_links"],
         )
 
       bolts_map = dict()
