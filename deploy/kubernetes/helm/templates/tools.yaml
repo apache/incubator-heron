@@ -158,7 +158,7 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
         - name: kubectl-proxy
-          image: heron/kubectl:latest
+          image: {{ .Values.kubectlImage }}
           command: ["sh", "-c"]
           args:
             - >

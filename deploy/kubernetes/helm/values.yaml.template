@@ -29,6 +29,7 @@ platform: minikube
 
 # Heron image to use
 image: heron/heron:VERSION
+kubectlImage: heron/kubectl:latest
 
 # Heron image pull policy
 imagePullPolicy: IfNotPresent
@@ -68,6 +69,11 @@ zkReplicas: 1
 bookkeeper:
   image: apache/bookkeeper:4.7.3
   imagePullPolicy: IfNotPresent
+  
+  # set storageClassName to "none" to not use storageClassName
+  storageClassName: "none"
+  prometheus:
+    enabled: false
 
 zookeeper:
   enabled: true
@@ -98,3 +104,5 @@ zookeeper:
     enabled: false
     runAsUser: 1000
     fsGroup: 1000
+  # set storageClassName to "none" to not use storageClassName
+  storageClassName: "none"
