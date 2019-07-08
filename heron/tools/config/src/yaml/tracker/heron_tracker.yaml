@@ -62,6 +62,9 @@ statemgrs:
 #   ${ROLE}
 #   ${USER}
 #
+# In addition to the above common params, one can also use any variable defined
+# in the getComponentConfiguration() methods.
+#
 # This is a sample, and should be changed to point to corresponding dashboard.
 #
 # extra.links:
@@ -74,12 +77,12 @@ statemgrs:
 # - spout.type: "kafka"
 #   extra.links:
 #   - name: "Viz"
-#     formatter: "http://127.0.0.1/kafka/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#     formatter: "http://127.0.0.1/kafka/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${spout.cluster}-${spout.source}"
 #   - name: "Alerts"
-#     formatter: "http://127.0.0.1/kafka/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#     formatter: "http://127.0.0.1/kafka/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${spout.cluster}-${spout.source}"
 # - spout.type: "default"
 #   extra.links:
 #   - name: "Viz"
-#     formatter: "http://127.0.0.1/default/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#     formatter: "http://127.0.0.1/default/viz/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${spout.name}-${spout.source}-${spout.version}"
 #   - name: "Alerts"
-#     formatter: "http://127.0.0.1/default/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${SPOUT_NAME}-${SPOUT_SOURCE}"
+#     formatter: "http://127.0.0.1/default/alerts/${ENVIRON}-${CLUSTER}-${TOPOLOGY}-${spout.name}-${spout.source}-${spout.version}"

@@ -21,6 +21,7 @@
 ''' config.py '''
 
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
+import re
 
 STATEMGRS_KEY = "statemgrs"
 EXTRA_LINKS_KEY = "extra.links"
@@ -29,6 +30,8 @@ EXTRA_LINK_FORMATTER_KEY = "formatter"
 EXTRA_LINK_URL_KEY = "url"
 SPOUT_EXTRA_LINKS_KEY = "spout.extra.links"
 SPOUT_TYPE_KEY = "spout.type"
+
+PARAM_REGEX = re.compile(r"\$\{[^\$\{\}]+\}")
 
 class Config(object):
   """
@@ -54,7 +57,7 @@ class Config(object):
 
     if SPOUT_EXTRA_LINKS_KEY in self.configs:
       for extra_link in self.configs[SPOUT_EXTRA_LINKS_KEY]:
-        self.spout_extra_links[extra_link[SPOUT_TYPE_KEY]] = [self.validate_extra_link(link) for link in extra_link[EXTRA_LINKS_KEY]]
+        self.spout_extra_links[extra_link[SPOUT_TYPE_KEY]] = extra_link[EXTRA_LINKS_KEY]
 
   def validate_extra_link(self, extra_link):
     """validate extra link"""
@@ -77,8 +80,6 @@ class Config(object):
         "${TOPOLOGY}": "topology",
         "${ROLE}": "role",
         "${USER}": "user",
-        "${SPOUT_NAME}": "spout_name",
-        "${SPOUT_SOURCE}": "spout_source",
     }
     dummy_formatted_url = url_format
     for key, value in valid_parameters.items():
@@ -99,7 +100,7 @@ class Config(object):
     """
 
     # Create the parameters based on execution state
-    valid_parameters = {
+    common_parameters = {
         "${CLUSTER}": execution_state.get("cluster",
                                           additional.get("cluster", "${CLUSTER}")),
         "${ENVIRON}": execution_state.get("environ",
@@ -110,16 +111,20 @@ class Config(object):
                                        additional.get("role", "${ROLE}")),
         "${USER}": execution_state.get("submission_user",
                                        additional.get("submission_user", "${USER}")),
-        "${SPOUT_NAME}": execution_state.get("spout.name",
-                                             additional.get("spout.name", "${SPOUT_NAME}")),
-        "${SPOUT_SOURCE}": execution_state.get("spout.source",
-                                               additional.get("spout.source", "${SPOUT_SOURCE}")),
     }
 
     formatted_url = formatter
 
-    for key, value in valid_parameters.items():
+    for key, value in common_parameters.items():
       formatted_url = formatted_url.replace(key, value)
+
+    # Handle specific params
+    remaining_params = set(PARAM_REGEX.findall(formatted_url))
+    for remaining_param in remaining_params:
+      # The actual key
+      key = remaining_param[2:-1]
+      formatted_url = formatted_url.replace(remaining_param,
+                                            execution_state.get(key, additional.get(key, remaining_param)))
 
     return formatted_url
 
