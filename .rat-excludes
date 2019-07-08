@@ -16,8 +16,9 @@ heron\.iml
 # Directories
 bazel-.*
 m4
-website
 META-INF
+# website and website2 are not part of the release
+website
 
 # UI resources
 # Apache 2.0 licenses & MIT Licenses
