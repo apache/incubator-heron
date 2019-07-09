@@ -82,7 +82,7 @@ public class OutgoingPacket {
     buffer.put(message.toByteArray());
 
     // Make the buffer ready for writing out
-    buffer.flip();
+    BufferHelper.flip(buffer);
   }
 
   public static int sizeRequiredToPackString(String str) {
