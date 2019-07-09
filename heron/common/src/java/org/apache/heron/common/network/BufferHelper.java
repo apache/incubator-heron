@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 /**
  * Helper methods for working with {@link Buffer} objects.
  */
-public class BufferHelper {
+final class BufferHelper {
 
   /**
    * Flip the provided buffer.
