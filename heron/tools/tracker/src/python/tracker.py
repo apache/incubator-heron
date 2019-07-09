@@ -386,25 +386,6 @@ class Tracker(object):
         "bolts": {},
     }
 
-    # Pre-render component extra links with general params
-    execution_state = topology.execution_state
-    executionState = {
-        "cluster": execution_state.cluster,
-        "environ": execution_state.environ,
-        "role": execution_state.role,
-        "jobname": topology.name,
-        "submission_user": execution_state.submission_user,
-    }
-
-    spout_extra_links = {}
-    for spout_type, extra_links in self.config.spout_extra_links.items():
-      spout_extra_links[spout_type] = []
-      for extra_link in extra_links:
-        link = extra_link.copy()
-        link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
-                                                                 executionState)
-        spout_extra_links[spout_type].append(link)
-
     # Add spouts.
     for spout in topology.spouts():
       spoutName = spout.comp.name
@@ -412,6 +393,7 @@ class Tracker(object):
       spoutSource = "NA"
       spoutVersion = "NA"
       spoutConfigs = spout.comp.config.kvs
+      spoutExtraLinks = []
       for kvs in spoutConfigs:
         if kvs.key == "spout.type":
           spoutType = javaobj.loads(kvs.serialized_value)
@@ -419,20 +401,31 @@ class Tracker(object):
           spoutSource = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
           spoutVersion = javaobj.loads(kvs.serialized_value)
+        elif kvs.key == "extra.links":
+          spoutExtraLinks = json.loads(javaobj.loads(kvs.serialized_value))
+
       spoutPlan = {
           "config": convert_pb_kvs(spoutConfigs, include_non_primitives=False),
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
           "outputs": [],
-          "extra_links": [],
+          "extra_links": spoutExtraLinks,
       }
 
-      for extra_link in spout_extra_links.get(spoutType, []):
-        extra_link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(
-            extra_link[EXTRA_LINK_URL_KEY],
-            spoutPlan["config"], **{"spout.name": spoutName})
-        spoutPlan["extra_links"].append(extra_link)
+      # render component extra links with general params
+      execution_state = topology.execution_state
+      executionState = {
+          "cluster": execution_state.cluster,
+          "environ": execution_state.environ,
+          "role": execution_state.role,
+          "jobname": topology.name,
+          "submission_user": execution_state.submission_user,
+      }
+
+      for link in spoutPlan["extra_links"]:
+        link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                                 executionState)
 
       for outputStream in list(spout.outputs):
         spoutPlan["outputs"].append({
