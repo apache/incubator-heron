@@ -27,6 +27,9 @@ import java.nio.ByteBuffer;
  */
 final class BufferHelper {
 
+  private BufferHelper() {
+  }
+
   /**
    * Flip the provided buffer.
    * <p>
@@ -41,8 +44,5 @@ final class BufferHelper {
    */
   static void flip(Buffer buffer) {
     buffer.flip();
-  }
-
-  private BufferHelper() {
   }
 }
