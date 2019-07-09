@@ -42,4 +42,7 @@ public class BufferHelper {
   static void flip(Buffer buffer) {
     buffer.flip();
   }
+
+  private BufferHelper() {
+  }
 }
