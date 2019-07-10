@@ -76,7 +76,7 @@ public class IncomingPacket {
       }
       // We read the header fully
       headerRead = true;
-      header.flip();
+      BufferHelper.flip(header);
       int size = header.getInt();
       if (size > limit) {
         LOG.log(Level.SEVERE, "packet size " + size + " exceeds limit " + limit);
@@ -86,7 +86,7 @@ public class IncomingPacket {
     }
     int retval = readFromChannel(channel, data);
     if (retval == 0) {
-      data.flip();
+      BufferHelper.flip(data);
     }
     return retval;
   }
