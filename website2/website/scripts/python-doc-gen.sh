@@ -18,7 +18,7 @@
 
 # Install Dependencies
 sudo apt-get update && sudo apt install -y automake cmake libtool-bin g++ \
- python-setuptools python-dev python-wheel python unzip tree openjdk-8-jdk
+ python-setuptools python-dev python-wheel python python-pip unzip tree openjdk-8-jdk virtualenv
 
 # Install Bazel 0.26
 wget -O ./bazel-0.26.0-installer-linux-x86_64.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh && \
@@ -27,6 +27,9 @@ chmod +x ./bazel-0.26.0-installer-linux-x86_64.sh && \
 export PATH="$PATH:$HOME/bin"
 
 # 
+set -e
+
+HERONPY_VERSION=$1
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 cd ${HERON_ROOT_DIR}
 
@@ -35,15 +38,22 @@ cd ${HERON_ROOT_DIR}
 # Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages/
 bazel build --config=ubuntu scripts/packages:pypkgs
 
-TMP_DIR=$(mktemp -d)
-VENV="$(mktemp -d)"
+cd website2/website/
+mkdir -p ./tmp/
+TMP_DIR=./tmp
+mkdir -p ./venv/
+VENV=./venv/
+echo $VENV
 PIP_LOCATION=${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages
+
+
 virtualenv "$VENV"
 source "$VENV/bin/activate"
 
-pip install PIP_LOCATION/heronpy==${HERONPY_VERSION}-py2.py3-none-any.whl
-pip install "pdoc~=0.3.2"
+pip install pdoc==0.3.2
 pip install --ignore-installed six
+# Install the heronpy
+pip install $PIP_LOCATION/heronpy-${HERONPY_VERSION}-py2.py3-none-any.whl
 
 mkdir -p static/api && rm -rf static/api/python
 
