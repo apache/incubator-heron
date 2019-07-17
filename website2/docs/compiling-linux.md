@@ -64,7 +64,7 @@ $ export JAVA_HOME="/usr/lib/jvm/java-8-oracle"
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
@@ -215,7 +215,7 @@ export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.23.2/bazel-0.23.2-installer-linux-x86_64.sh
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
