@@ -75,8 +75,7 @@ self_extract_binary = rule(
     attrs = {
         "launcher": attr.label(
             mandatory=True,
-            allow_files=True,
-            single_file=True),
+            allow_single_file=True),
         "empty_files": attr.string_list(default=[]),
         "resources": attr.label_list(
             default=[],

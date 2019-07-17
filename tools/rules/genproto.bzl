@@ -22,8 +22,7 @@ def proto_package_impl(ctx):
 
 genproto_base_attrs = {
     "src": attr.label(
-        allow_files = [".proto"],
-        single_file = True,
+        allow_single_file = [".proto"],
     ),
     "deps": attr.label_list(
         allow_files = False,
@@ -40,7 +39,7 @@ def genproto_java_impl(ctx):
   src = ctx.file.src
   protoc = ctx.file._protoc
 
-  srcjar = ctx.new_file(ctx.configuration.genfiles_dir, ctx.label.name + ".srcjar")
+  srcjar = ctx.actions.declare_file("%s.srcjar" % ctx.attr.name)
   java_srcs = srcjar.path + ".srcs"
 
   inputs = [src, protoc]
@@ -52,7 +51,7 @@ def genproto_java_impl(ctx):
       "jar cMf " + srcjar.path + " -C " + java_srcs + " .",
       "rm -rf " + java_srcs,
   ])
-  ctx.action(
+  ctx.actions.run_shell(
       inputs = inputs,
       outputs = [srcjar],
       mnemonic = 'ProtocJava',
@@ -65,8 +64,7 @@ genproto_java_attrs = dict(genproto_base_attrs)
 genproto_java_attrs.update({
     "_protoc": attr.label(
         default = Label("@com_google_protobuf//:protoc"),
-        allow_files = True,
-        single_file = True,
+        allow_single_file = True,
     ),
 })
 
