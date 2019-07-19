@@ -73,18 +73,20 @@ class TMasterClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
+  void HandleRegisterResponse(void*,
+                              pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*, unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
+  void HandleHeartbeatResponse(void*,
+                               pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
 
-  void HandleNewAssignmentMessage(unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message);
+  void HandleNewAssignmentMessage(pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message);
   void HandleStatefulCheckpointMessage(
-                                      unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message);
+          pool_unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message);
   void HandleRestoreTopologyStateRequest(
-                                  unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message);
+          pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message);
   void HandleStartStmgrStatefulProcessing(
-                                     unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _msg);
+          pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _msg);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();

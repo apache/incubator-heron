@@ -46,6 +46,9 @@
 #include "basics/sptest.h"
 #include "basics/mempool.h"
 
+template <typename T>
+using pool_unique_ptr = std::unique_ptr<T, std::function<void(google::protobuf::Message*)>>;
+
 // The standard std::make_unique(...) was introduced starting from C++ 14. Heron uses C++ 11.
 // Unfortunatelly we can not bump a compiler version used in Heron since we are tight coupled with
 // CentOS 7 whih comes with very old version of GCC (4.8.5). That's why we introduced
@@ -53,6 +56,22 @@
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+
+// This is a special version to get unique pointer to protobuf message.
+// It doesn't allocate anythong on heap. Instead it just acquires the existing (preallocated)
+// event from the memory pool. Resulted unique pointer also has a deleter callback which
+// returns the event back to the memory pool when that unique pointer destructed.
+template<typename T>
+pool_unique_ptr<T> make_unique_from_protobuf_pool() {
+    T* event = nullptr;
+    event = __global_protobuf_pool_acquire__(event);
+
+    return pool_unique_ptr<T>(event, [](google::protobuf::Message* ptr) {
+        T* event_to_dispose = static_cast<T*>(ptr);
+        __global_protobuf_pool_release__(event_to_dispose);
+    });
 }
 
 #endif  // HERON_BASICS_H_

@@ -48,7 +48,7 @@ void DummyTMaster::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 }
 
 void DummyTMaster::HandleRegisterRequest(REQID _id, Connection* _conn,
-                                        unique_ptr<proto::tmaster::StMgrRegisterRequest> _request) {
+                                   pool_unique_ptr<proto::tmaster::StMgrRegisterRequest> _request) {
   std::vector<std::shared_ptr<proto::system::Instance>> instances;
   stmgrs_[_request->stmgr().id()] =
           std::make_shared<tmaster::StMgrState>(_conn, _request->stmgr(), instances, *this);

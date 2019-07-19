@@ -57,7 +57,7 @@ void DummyMtrMgr::HandleConnectionClose(Connection*, NetworkErrorCode status) {
 }
 
 void DummyMtrMgr::HandleMetricPublisherRegisterRequest(REQID id, Connection* conn,
-        unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> request) {
+                   pool_unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> request) {
   LOG(INFO) << "Got a register request ";
   heron::proto::system::MetricPublisherRegisterResponse response;
   response.mutable_status()->set_status(heron::proto::system::OK);
@@ -65,10 +65,10 @@ void DummyMtrMgr::HandleMetricPublisherRegisterRequest(REQID id, Connection* con
 }
 
 void DummyMtrMgr::HandleMetricPublisherPublishMessage(
-    Connection*, unique_ptr<heron::proto::system::MetricPublisherPublishMessage> message) {}
+    Connection*, pool_unique_ptr<heron::proto::system::MetricPublisherPublishMessage> message) {}
 
 void DummyMtrMgr::HandleTMasterLocationMessage(
-    Connection*, unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> message) {
+    Connection*, pool_unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> message) {
   location_ = message->release_tmaster();
 
   LOG(INFO) << "Got tmaster location: " << location_->host() << ":" << location_->master_port();

@@ -116,9 +116,9 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _code) {
 }
 
 void CkptMgrClient::HandleRegisterStMgrResponse(
-                                        void*,
-                                        unique_ptr<proto::ckptmgr::RegisterStMgrResponse> _response,
-                                        NetworkErrorCode _status) {
+                                  void*,
+                                  pool_unique_ptr<proto::ckptmgr::RegisterStMgrResponse> _response,
+                                  NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code " << _status << " for register response from ckptmgr "
                << ckptmgr_id_ << "running at " << get_clientoptions().get_host() << ":"
@@ -182,7 +182,7 @@ void CkptMgrClient::GetInstanceState(const proto::system::Instance& _instance,
 
 void CkptMgrClient::HandleSaveInstanceStateResponse(
                              void*,
-                             unique_ptr<proto::ckptmgr::SaveInstanceStateResponse> _response,
+                             pool_unique_ptr<proto::ckptmgr::SaveInstanceStateResponse> _response,
                              NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for SaveInstanceStateResponse";
@@ -200,7 +200,7 @@ void CkptMgrClient::HandleSaveInstanceStateResponse(
 
 void CkptMgrClient::HandleGetInstanceStateResponse(
                              void* _ctx,
-                             unique_ptr<proto::ckptmgr::GetInstanceStateResponse> _response,
+                             pool_unique_ptr<proto::ckptmgr::GetInstanceStateResponse> _response,
                              NetworkErrorCode _status) {
   int32_t* nattempts = static_cast<int32_t*>(_ctx);
   if (_status != OK) {

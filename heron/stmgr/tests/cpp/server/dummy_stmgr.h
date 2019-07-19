@@ -42,9 +42,9 @@ class DummyTMasterClient : public Client {
   // Handle connection close
   virtual void HandleClose(NetworkErrorCode _status);
   virtual void HandleRegisterResponse(
-                                  void*,
-                                  unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
-                                  NetworkErrorCode);
+                            void*,
+                            pool_unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
+                            NetworkErrorCode);
   // Send worker request
   void CreateAndSendRegisterRequest();
 
@@ -80,11 +80,11 @@ class DummyStMgr : public Server {
 
   // Handle st mgr hello message
   virtual void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                      unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request);
+                                 pool_unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request);
   virtual void HandleStartBackPressureMessage(Connection*,
-                                         unique_ptr<heron::proto::stmgr::StartBackPressureMessage>);
+                                    pool_unique_ptr<heron::proto::stmgr::StartBackPressureMessage>);
   virtual void HandleStopBackPressureMessage(Connection*,
-                                          unique_ptr<heron::proto::stmgr::StopBackPressureMessage>);
+                                     pool_unique_ptr<heron::proto::stmgr::StopBackPressureMessage>);
 
  private:
   std::vector<sp_string> other_stmgrs_ids_;

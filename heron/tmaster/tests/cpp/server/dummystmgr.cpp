@@ -76,9 +76,9 @@ void DummyStMgr::HandleClose(NetworkErrorCode code) {
 }
 
 void DummyStMgr::HandleRegisterResponse(
-                                        void*,
-                                        unique_ptr<proto::tmaster::StMgrRegisterResponse> response,
-                                        NetworkErrorCode status) {
+                                    void*,
+                                    pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> response,
+                                    NetworkErrorCode status) {
   if (status != OK) {
     LOG(ERROR) << "NonOK response message for Register Response";
     Stop();
@@ -106,9 +106,9 @@ void DummyStMgr::HandleRegisterResponse(
 }
 
 void DummyStMgr::HandleHeartbeatResponse(
-                                        void*,
-                                        unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
-                                        NetworkErrorCode status) {
+                                  void*,
+                                  pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
+                                  NetworkErrorCode status) {
   if (status != OK) {
     LOG(ERROR) << "NonOK response message for Register Response";
     Stop();
@@ -126,7 +126,7 @@ void DummyStMgr::HandleHeartbeatResponse(
 }
 
 void DummyStMgr::HandleNewAssignmentMessage(
-                                        unique_ptr<proto::stmgr::NewPhysicalPlanMessage> message) {
+                                    pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> message) {
   LOG(INFO) << "Got a new assignment";
   HandleNewPhysicalPlan(message->new_pplan());
 }
@@ -167,12 +167,12 @@ void DummyStMgr::SendHeartbeatRequest() {
 }
 
 void DummyStMgr::HandleRestoreTopologyStateRequest(
-                                    unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _m) {
+                                  pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _m) {
   got_restore_message_ = true;
 }
 
 void DummyStMgr::HandleStartProcessingMessage(
-        unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _m) {
+        pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _m) {
   got_start_message_ = true;
 }
 

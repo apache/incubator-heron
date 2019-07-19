@@ -67,38 +67,38 @@ void TMasterServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 }
 
 void TMasterServer::HandleStMgrRegisterRequest(REQID _reqid, Connection* _conn,
-                                        unique_ptr<proto::tmaster::StMgrRegisterRequest> _request) {
+                                   pool_unique_ptr<proto::tmaster::StMgrRegisterRequest> _request) {
   unique_ptr<StMgrRegisterProcessor> processor =
       make_unique<StMgrRegisterProcessor>(_reqid, _conn, std::move(_request), tmaster_, this);
   processor->Start();
 }
 
 void TMasterServer::HandleStMgrHeartbeatRequest(REQID _reqid, Connection* _conn,
-                                      unique_ptr<proto::tmaster::StMgrHeartbeatRequest> _request) {
+                                  pool_unique_ptr<proto::tmaster::StMgrHeartbeatRequest> _request) {
   unique_ptr<StMgrHeartbeatProcessor> processor =
       make_unique<StMgrHeartbeatProcessor>(_reqid, _conn, std::move(_request), tmaster_, this);
   processor->Start();
 }
 
 void TMasterServer::HandleMetricsMgrStats(Connection*,
-                                          unique_ptr<proto::tmaster::PublishMetrics> _request) {
+                                        pool_unique_ptr<proto::tmaster::PublishMetrics> _request) {
   collector_->AddMetric(*_request);
 }
 
 void TMasterServer::HandleInstanceStateStored(Connection*,
-                                         unique_ptr<proto::ckptmgr::InstanceStateStored> _message) {
+                                    pool_unique_ptr<proto::ckptmgr::InstanceStateStored> _message) {
   tmaster_->HandleInstanceStateStored(_message->checkpoint_id(), _message->instance());
 }
 
 void TMasterServer::HandleRestoreTopologyStateResponse(Connection* _conn,
-                                unique_ptr<proto::ckptmgr::RestoreTopologyStateResponse> _message) {
+                           pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateResponse> _message) {
   tmaster_->HandleRestoreTopologyStateResponse(_conn, _message->checkpoint_id(),
                                                _message->restore_txid(),
                                                _message->status().status());
 }
 
 void TMasterServer::HandleResetTopologyStateMessage(Connection* _conn,
-                                     unique_ptr<proto::ckptmgr::ResetTopologyState> _message) {
+                                    pool_unique_ptr<proto::ckptmgr::ResetTopologyState> _message) {
   tmaster_->ResetTopologyState(_conn, _message->dead_stmgr(),
                                _message->dead_taskid(), _message->reason());
 }

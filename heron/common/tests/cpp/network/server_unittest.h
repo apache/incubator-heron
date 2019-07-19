@@ -47,10 +47,11 @@ class TestServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
   // handle the test message
-  virtual void HandleTestMessage(Connection* connection, unique_ptr<TestMessage> message);
+  virtual void HandleTestMessage(Connection* connection, pool_unique_ptr<TestMessage> message);
 
   // handle the terminate message
-  virtual void HandleTerminateMessage(Connection* connection, unique_ptr<TerminateMessage> message);
+  virtual void HandleTerminateMessage(Connection* connection,
+                                      pool_unique_ptr<TerminateMessage> message);
 
  private:
   void Terminate();

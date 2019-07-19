@@ -146,9 +146,9 @@ void TMasterClient::HandleClose(NetworkErrorCode _code) {
 }
 
 void TMasterClient::HandleRegisterResponse(
-                                      void*,
-                                      unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
-                                      NetworkErrorCode _status) {
+                                  void*,
+                                  pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
+                                  NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "non ok network stack code for Register Response from Tmaster" << std::endl;
     Stop();
@@ -173,9 +173,9 @@ void TMasterClient::HandleRegisterResponse(
 }
 
 void TMasterClient::HandleHeartbeatResponse(
-                                      void*,
-                                      unique_ptr<proto::tmaster::StMgrHeartbeatResponse> _response,
-                                      NetworkErrorCode _status) {
+                                  void*,
+                                  pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> _response,
+                                  NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for heartbeat Response" << std::endl;
     Stop();
@@ -196,13 +196,13 @@ void TMasterClient::HandleHeartbeatResponse(
 }
 
 void TMasterClient::HandleNewAssignmentMessage(
-                                      unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message) {
+        pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message) {
   LOG(INFO) << "Got a new assignment" << std::endl;
   pplan_watch_(shared_ptr<proto::system::PhysicalPlan>(_message->release_new_pplan()));
 }
 
 void TMasterClient::HandleStatefulCheckpointMessage(
-                                    unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message) {
+        pool_unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message) {
   LOG(INFO) << "Got a new start stateful checkpoint message from tmaster with id "
             << _message->checkpoint_id();
   stateful_checkpoint_watch_(_message->checkpoint_id());
@@ -294,12 +294,12 @@ void TMasterClient::SendRestoreTopologyStateResponse(proto::system::StatusCode _
 }
 
 void TMasterClient::HandleRestoreTopologyStateRequest(
-                                unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message) {
+        pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message) {
   restore_topology_watch_(_message->checkpoint_id(), _message->restore_txid());
 }
 
 void TMasterClient::HandleStartStmgrStatefulProcessing(
-                               unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _message) {
+        pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _message) {
   start_stateful_watch_(_message->checkpoint_id());
 }
 

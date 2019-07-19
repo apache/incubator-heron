@@ -58,8 +58,8 @@ class MetricsMgrClient : public Client {
   void ReConnect();
   void SendRegisterRequest();
   void HandleRegisterResponse(void* _ctx,
-                              unique_ptr<proto::system::MetricPublisherRegisterResponse> _respose,
-                              NetworkErrorCode _status);
+                          pool_unique_ptr<proto::system::MetricPublisherRegisterResponse> _respose,
+                          NetworkErrorCode _status);
 
   sp_string hostname_;
   sp_int32 port_;
