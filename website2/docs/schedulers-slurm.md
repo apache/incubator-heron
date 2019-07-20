@@ -1,3 +1,8 @@
+---
+id: schedulers-slurm
+title: Slurm Cluster (Experimental)
+sidebar_label:  Slurm Cluster
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,11 +19,6 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: schedulers-slurm
-title: Slurm Cluster (Experimental)
-sidebar_label:  Slurm Cluster
----
 
 In addition to out-of-the-box scheduler for
 [Aurora](../aurora), Heron can also be deployed in a HPC cluster with the Slurm Scheduler.
