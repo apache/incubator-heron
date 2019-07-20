@@ -101,7 +101,7 @@ def _gen_manifest(py, runfiles, resources):
 
   pex_files = []
 
-  for f in runfiles.files:
+  for f in runfiles.files.to_list():
     dpath = f.short_path
     if dpath.startswith("../"):
       dpath = dpath[3:]
@@ -127,8 +127,8 @@ def _gen_manifest(py, runfiles, resources):
 
   return struct(
       modules = pex_files,
-      requirements = list(py.transitive_reqs),
-      prebuiltLibraries = [f.path for f in py.transitive_eggs],
+      requirements = py.transitive_reqs.to_list(),
+      prebuiltLibraries = [f.path for f in py.transitive_eggs.to_list()],
       resources = res_files,
   )
 
@@ -150,8 +150,7 @@ def _pex_binary_impl(ctx):
     main_pkg = main_file.short_path.replace('/', '.')[:-3]
     transitive_files += [main_file]
 
-  deploy_pex = ctx.new_file(
-      ctx.configuration.bin_dir, ctx.outputs.executable, '.pex')
+  deploy_pex = ctx.actions.declare_file('%s.pex' % ctx.attr.name)
 
   py = _collect_transitive(ctx)
 
@@ -164,12 +163,11 @@ def _pex_binary_impl(ctx):
   )
 
   resources = ctx.files.resources
-  manifest_file = ctx.new_file(
-      ctx.configuration.bin_dir, deploy_pex, '_manifest')
+  manifest_file = ctx.actions.declare_file('%s.pex_manifest' % ctx.attr.name)
 
   manifest = _gen_manifest(py, runfiles, resources)
 
-  ctx.file_action(
+  ctx.actions.write(
       output = manifest_file,
       content = manifest.to_json(),
   )
@@ -183,7 +181,7 @@ def _pex_binary_impl(ctx):
     arguments += ["--python", ctx.attr.interpreter]
   for platform in ctx.attr.platforms:
     arguments += ["--platform", platform]
-  for egg in py.transitive_eggs:
+  for egg in py.transitive_eggs.to_list():
     arguments += ["--find-links", egg.dirname]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
@@ -197,12 +195,12 @@ def _pex_binary_impl(ctx):
   # form the inputs to pex builder
   _inputs = (
       [manifest_file] +
-      list(runfiles.files) +
-      list(py.transitive_eggs) +
+      runfiles.files.to_list() +
+      py.transitive_eggs.to_list() +
       list(resources)
   )
 
-  ctx.action(
+  ctx.actions.run(
       mnemonic = "PexPython",
       inputs = _inputs,
       outputs = [deploy_pex],
@@ -227,7 +225,7 @@ def _pex_binary_impl(ctx):
   # There isn't much point in having both foo.pex and foo as identical pex
   # files, but someone is probably relying on that behaviour by now so we might
   # as well keep doing it.
-  ctx.action(
+  ctx.actions.run_shell(
       mnemonic = "LinkPex",
       inputs = [deploy_pex],
       outputs = [executable],
@@ -256,14 +254,14 @@ def _pex_pytest_impl(ctx):
   output_file = ctx.outputs.executable
 
   test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
-  ctx.template_action(
+  ctx.actions.expand_template(
       template = ctx.file.launcher_template,
       output = output_file,
       substitutions = {
           "%test_runner%": _get_runfile_path(ctx, test_runner),
           "%test_files%": " \\\n    ".join(test_file_paths),
       },
-      executable = True,
+      is_executable = True,
   )
 
   transitive_files = depset(ctx.files.srcs + [test_runner])
@@ -307,8 +305,7 @@ def _dmerge(a, b):
 
 
 pex_bin_attrs = _dmerge(pex_attrs, {
-    "main": attr.label(allow_files = True,
-                       single_file = True),
+    "main": attr.label(allow_single_file = True),
     "entrypoint": attr.string(),
     "interpreter": attr.string(),
     "platforms": attr.string_list(),
@@ -396,8 +393,7 @@ _pytest_pex_test = rule(
             cfg = "target",
         ),
         "launcher_template": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             default = Label("//tools/rules/pex:testlauncher.sh.template"),
         ),
     }),
