@@ -22,6 +22,7 @@ sinks:
   - file-sink
   - tmaster-sink
   - metricscache-sink
+  - prometheus-sink
 
 ########### Now we would specify the detailed configuration for every unique sink
 ########### Syntax: sink-id: - option(s)
@@ -105,14 +106,14 @@ metricscache-sink:
     "__server/__time_spent_back_pressure_initiated": SUM
     "__time_spent_back_pressure_by_compid": SUM
 
-### Config for prometheus-sink
-# prometheus-sink:
-#   class: "org.apache.heron.metricsmgr.sink.PrometheusSink"
-#   port: 8080 # The port on which to run (either port or port-file are mandatory)
-#   path: /metrics # The path on which to publish the metrics (mandatory)
-#   flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
-#   include-topology-name: true # Include topology name in metric name (default false)
-#   metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
+## Config for prometheus-sink
+prometheus-sink:
+  class: "org.apache.heron.metricsmgr.sink.PrometheusSink"
+  port: 8080 # The port on which to run (either port or port-file are mandatory)
+  path: /metrics # The path on which to publish the metrics (mandatory)
+  flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
+  include-topology-name: true # Include topology name in metric name (default false)
+  metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
 #   metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)
 
 ### Config for graphite-sink
