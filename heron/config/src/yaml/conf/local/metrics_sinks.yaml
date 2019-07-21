@@ -114,7 +114,7 @@ prometheus-sink:
   flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
   include-topology-name: true # Include topology name in metric name (default false)
   metrics-cache-max-size: 1000000 # Max number of metrics cached and published (default 1000000)
-#   metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)
+  metrics-cache-ttl-sec: 600 # Time in seconds after which a metric that was collected will stopped being published (default 600)
 
 ### Config for graphite-sink
 ### Currently the graphite-sink is disabled
