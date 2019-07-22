@@ -26,14 +26,13 @@ chmod +x ./bazel-0.26.0-installer-linux-x86_64.sh && \
 ./bazel-0.26.0-installer-linux-x86_64.sh --user && \
 export PATH="$PATH:$HOME/bin"
 
-# 
 set -e
 
 HERONPY_VERSION=$1
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 cd ${HERON_ROOT_DIR}
 
-./bazel_configure.py
+# ./bazel_configure.py
 
 # Generate python whl packages, packages will be generated in ${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages/
 bazel build --config=ubuntu scripts/packages:pypkgs
@@ -45,7 +44,6 @@ mkdir -p ./venv/
 VENV=./venv/
 echo $VENV
 PIP_LOCATION=${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages
-
 
 virtualenv "$VENV"
 source "$VENV/bin/activate"

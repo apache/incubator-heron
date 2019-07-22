@@ -1,3 +1,8 @@
+---
+id: schedulers-aurora-local
+title: Setting up Heron with Aurora Cluster Locally on Linux
+sidebar_label:  Aurora Locally
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,12 +19,6 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: schedulers-aurora-local
-title: Setting up Heron with Aurora Cluster Locally on Linux
-sidebar_label:  Aurora Locally
----
-
 
 It is possible to setup Heron with a locally running Apache Aurora cluster.
 This is a step by step guide on how to configure and setup all the necessary

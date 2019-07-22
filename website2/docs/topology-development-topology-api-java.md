@@ -1,3 +1,8 @@
+---
+id: topology-development-topology-api-java
+title: The Heron Topology API for Java
+sidebar_label: The Heron Topology API for Java
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,13 +19,9 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: topology-development-topology-api-java
-title: The Heron Topology API for Java
-sidebar_label: The Heron Topology API for Java
----
 
 > This document pertains to the older, Storm-based, Heron Topology API.  Heron now offers two separate APIs for building topologies: the original, [Storm](https://storm.apache.org)-based Topology API, and the newer [Streamlet API](../../../concepts/topologies#the-heron-streamlet-api). Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
+
 
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations. The
