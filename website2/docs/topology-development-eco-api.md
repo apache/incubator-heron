@@ -1,3 +1,8 @@
+---
+id: topology-development-eco-api
+title: The ECO API for Java
+sidebar_label: The ECO API for Java
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,14 +19,8 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: topology-development-eco-api
-title: The ECO API for Java
-sidebar_label: The ECO API for Java
----
 
 > **The Heron ECO API is in beta**. The Heron ECO API can be used to build and test topologies on your local or on a cluster.  The API still needs some testing and feedback from the community to understand how we  should continue to develop ECO.
-
 
 Heron processing topologies can be written using an API called the **Heron ECO API**. The ECO API is currently available to work with spouts and bolts from the following packages:
 
