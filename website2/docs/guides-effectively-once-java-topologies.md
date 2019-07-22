@@ -1,3 +1,8 @@
+---
+id: guides-effectively-once-java-topologies
+title: Effectively Once Java Topologies
+sidebar_label: Effectively Once Java Topologies
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,11 +19,6 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: guides-effectively-once-java-topologies
-title: Effectively Once Java Topologies
-sidebar_label: Effectively Once Java Topologies
----
 
 > **This document pertains to the older, Storm-based, Heron Topology API.** Heron now offers several APIs for building topologies. Topologies created using the Topology API can still run on Heron and there are currently no plans to deprecate this API. We would, however, recommend that you use the Streamlet API for future work.
 

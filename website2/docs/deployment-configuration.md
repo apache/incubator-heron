@@ -1,3 +1,8 @@
+---
+id: deployment-configuration
+title: Configuring a Cluster
+sidebar_label: Configuration
+---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -6,9 +11,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,11 +19,6 @@
     specific language governing permissions and limitations
     under the License.
 -->
----
-id: deployment-configuration
-title: Configuring a Cluster
-sidebar_label: Configuration
----
 
 To setup a Heron cluster, you need to configure a few files. Each file configures
 a component of the Heron streaming framework.
