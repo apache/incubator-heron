@@ -48,7 +48,7 @@ Launc the Heron UI by the command:
 heron-ui &
 ```
 
-By default Heron UI will be started at `http://localhost:8888`
+By default Heron UI will be started at `http://localhost:8889`
 
 Below is the home page of Heron UI.
 
