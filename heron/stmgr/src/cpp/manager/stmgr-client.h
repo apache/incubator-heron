@@ -65,9 +65,9 @@ class StMgrClient : public Client {
  private:
   void HandleHelloResponse(
           void*,
-          unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
+          pool_unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
           NetworkErrorCode);
-  void HandleTupleStreamMessage(unique_ptr<proto::stmgr::TupleStreamMessage> _message);
+  void HandleTupleStreamMessage(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   void OnReConnectTimer();
   void SendHelloRequest();

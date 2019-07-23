@@ -76,9 +76,9 @@ heron::proto::system::StatusCode DummyInstance::GetRegisterResponseStatus() {
 }
 
 void DummyInstance::HandleInstanceResponse(
-                                void*,
-                                unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
-                                NetworkErrorCode status) {
+                            void*,
+                            pool_unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
+                            NetworkErrorCode status) {
   CHECK_EQ(status, OK);
   if (_message->has_pplan()) {
     if (recvd_stmgr_pplan_) {
@@ -92,10 +92,10 @@ void DummyInstance::HandleInstanceResponse(
   register_response_status = _message->status().status();
 }
 
-void DummyInstance::HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2>) {}
+void DummyInstance::HandleTupleMessage(pool_unique_ptr<heron::proto::system::HeronTupleSet2>) {}
 
 void DummyInstance::HandleNewInstanceAssignmentMsg(
-    std::unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>) {}
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
   auto request = make_unique<heron::proto::stmgr::RegisterInstanceRequest>();
@@ -130,8 +130,7 @@ DummySpoutInstance::DummySpoutInstance(std::shared_ptr<EventLoopImpl> eventLoop,
       under_backpressure_(false) {}
 
 void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
-    unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
-
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
   const heron::proto::system::PhysicalPlan pplan = _msg->pplan();
 
   DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
@@ -188,13 +187,14 @@ DummyBoltInstance::DummyBoltInstance(std::shared_ptr<EventLoopImpl> eventLoop,
       expected_msgs_to_recv_(_expected_msgs_to_recv),
       msgs_recvd_(0) {}
 
-void DummyBoltInstance::HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> msg) {
+void DummyBoltInstance::HandleTupleMessage(
+        pool_unique_ptr<heron::proto::system::HeronTupleSet2> msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 
 void DummyBoltInstance::HandleNewInstanceAssignmentMsg(
-    unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
   DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
   if (expected_msgs_to_recv_ == 0) {
     getEventLoop()->loopExit();

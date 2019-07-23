@@ -52,16 +52,18 @@ class DummyStMgr : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, unique_ptr<proto::tmaster::StMgrRegisterResponse> response,
+  void HandleRegisterResponse(void*,
+                              pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*, unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
+  void HandleHeartbeatResponse(void*,
+                               pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
-  void HandleNewAssignmentMessage(unique_ptr<proto::stmgr::NewPhysicalPlanMessage> message);
+  void HandleNewAssignmentMessage(pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> message);
   void HandleNewPhysicalPlan(const proto::system::PhysicalPlan& pplan);
   void HandleRestoreTopologyStateRequest(
-                                   unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> message);
+          pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> message);
   void HandleStartProcessingMessage(
-                                  unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> message);
+          pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> message);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();

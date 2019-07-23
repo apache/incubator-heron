@@ -40,14 +40,14 @@ class DummyInstance : public Client {
 
   // Handle incoming message
   virtual void HandleInstanceResponse(
-                                void* ctx,
-                                unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
-                                NetworkErrorCode status);
+                            void* ctx,
+                            pool_unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
+                            NetworkErrorCode status);
   // Handle incoming tuples
-  virtual void HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> _message);
+  virtual void HandleTupleMessage(pool_unique_ptr<heron::proto::system::HeronTupleSet2> _message);
   // Handle the instance assignment message
   virtual void HandleNewInstanceAssignmentMsg(
-                               std::unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>);
+                              pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>);
 
   sp_string topology_name_;
   sp_string topology_id_;
@@ -82,7 +82,7 @@ class DummySpoutInstance : public DummyInstance {
  protected:
   // Handle incoming message
   virtual void HandleNewInstanceAssignmentMsg(
-      unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
+          pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
   void CreateAndSendTupleMessages();
   virtual void StartBackPressureConnectionCb(Connection* connection) {
     under_backpressure_ = true;
@@ -115,9 +115,9 @@ class DummyBoltInstance : public DummyInstance {
  protected:
   // Handle incoming message
   // Handle incoming tuples
-  virtual void HandleTupleMessage(unique_ptr<heron::proto::system::HeronTupleSet2> _message);
+  virtual void HandleTupleMessage(pool_unique_ptr<heron::proto::system::HeronTupleSet2> _message);
   virtual void HandleNewInstanceAssignmentMsg(
-      unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
+          pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg);
 
  private:
   sp_int32 expected_msgs_to_recv_;

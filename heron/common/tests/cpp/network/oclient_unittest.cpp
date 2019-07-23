@@ -60,7 +60,7 @@ void OrderClient::HandleConnect(NetworkErrorCode _status) {
 
 void OrderClient::HandleClose(NetworkErrorCode) {}
 
-void OrderClient::HandleOrderMessage(unique_ptr<OrderMessage> _message) {
+void OrderClient::HandleOrderMessage(pool_unique_ptr<OrderMessage> _message) {
   ++nrecv_;
 
   EXPECT_EQ(msgidr_++, _message->id());

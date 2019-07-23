@@ -37,7 +37,7 @@ namespace instance {
 
 BoltInstance::BoltInstance(std::shared_ptr<EventLoop> eventLoop,
     std::shared_ptr<TaskContextImpl> taskContext,
-    NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
+    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
     NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
     void* dllHandle)
   : taskContext_(taskContext), dataToSlave_(dataToSlave),
@@ -114,7 +114,7 @@ void BoltInstance::executeTuple(const proto::api::StreamId& stream,
   metrics_->executeTuple(stream.id(), stream.component_name(), endTime - startTime);
 }
 
-void BoltInstance::HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
+void BoltInstance::HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (tupleSet->has_control()) {
     LOG(FATAL) << "Bolt cannot get incoming control tuples from other components";
   }

@@ -46,10 +46,11 @@ class OrderServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
   // handle the test message
-  virtual void HandleOrderMessage(Connection* connection, unique_ptr<OrderMessage> message);
+  virtual void HandleOrderMessage(Connection* connection, pool_unique_ptr<OrderMessage> message);
 
   // handle the terminate message
-  virtual void HandleTerminateMessage(Connection* connection, unique_ptr<TerminateMessage> message);
+  virtual void HandleTerminateMessage(Connection* connection,
+          pool_unique_ptr<TerminateMessage> message);
 
  private:
   void Terminate();

@@ -47,7 +47,7 @@ class DummyTMaster : public Server {
 
  private:
   void HandleRegisterRequest(REQID _id, Connection* _conn,
-                             unique_ptr<proto::tmaster::StMgrRegisterRequest> _request);
+                             pool_unique_ptr<proto::tmaster::StMgrRegisterRequest> _request);
   void HandleHeartbeatRequest(REQID _id, Connection* _conn,
                               proto::tmaster::StMgrHeartbeatRequest* _request);
   tmaster::StMgrMap stmgrs_;

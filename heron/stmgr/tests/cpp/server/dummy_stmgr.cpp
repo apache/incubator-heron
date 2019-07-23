@@ -48,7 +48,9 @@ DummyTMasterClient::DummyTMasterClient(
 DummyTMasterClient::~DummyTMasterClient() {}
 
 void DummyTMasterClient::HandleRegisterResponse(
-    void*, unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response, NetworkErrorCode) {
+    void*,
+    pool_unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
+    NetworkErrorCode) {
 }
 
 void DummyTMasterClient::HandleConnect(NetworkErrorCode _status) {
@@ -119,7 +121,7 @@ void DummyStMgr::HandleNewConnection(Connection* conn) {}
 void DummyStMgr::HandleConnectionClose(Connection*, NetworkErrorCode) {}
 
 void DummyStMgr::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                     unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request) {
+                               pool_unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request) {
   other_stmgrs_ids_.push_back(_request->stmgr());
   heron::proto::stmgr::StrMgrHelloResponse response;
   response.mutable_status()->set_status(heron::proto::system::OK);
@@ -127,11 +129,11 @@ void DummyStMgr::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 }
 
 void DummyStMgr::HandleStartBackPressureMessage(Connection*,
-                                        unique_ptr<heron::proto::stmgr::StartBackPressureMessage>) {
+                                  pool_unique_ptr<heron::proto::stmgr::StartBackPressureMessage>) {
   ++num_start_bp_;
 }
 
 void DummyStMgr::HandleStopBackPressureMessage(Connection*,
-                                         unique_ptr<heron::proto::stmgr::StopBackPressureMessage>) {
+                                   pool_unique_ptr<heron::proto::stmgr::StopBackPressureMessage>) {
   ++num_stop_bp_;
 }

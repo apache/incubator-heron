@@ -55,7 +55,7 @@ void TestServer::HandleConnectionClose(Connection* _conn,
 }
 
 void TestServer::HandleTestMessage(Connection* _connection __attribute__((unused)),
-                                   unique_ptr<TestMessage> _message) {
+                                   pool_unique_ptr<TestMessage> _message) {
   nrecv_++;
 
   // find a random client to send the message to
@@ -73,6 +73,6 @@ void TestServer::Terminate() {
 }
 
 void TestServer::HandleTerminateMessage(Connection* _connection __attribute__((unused)),
-                                    unique_ptr<TerminateMessage> _message __attribute__((unused))) {
+                              pool_unique_ptr<TerminateMessage> _message __attribute__((unused))) {
   AddTimer([this]() { this->Terminate(); }, 1);
 }

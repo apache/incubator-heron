@@ -44,7 +44,7 @@ class TestClient : public Client {
 
  private:
   // Handle incoming message
-  void HandleTestMessage(unique_ptr<TestMessage> _message);
+  void HandleTestMessage(pool_unique_ptr<TestMessage> _message);
 
   void SendMessages();
   void CreateAndSendMessage();

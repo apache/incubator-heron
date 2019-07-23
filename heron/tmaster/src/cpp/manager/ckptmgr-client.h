@@ -42,17 +42,17 @@ class CkptMgrClient : public Client {
 
  protected:
   virtual void HandleCleanStatefulCheckpointResponse(
-                              void*,
-                              unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
-                              NetworkErrorCode status);
+                        void*,
+                        pool_unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
+                        NetworkErrorCode status);
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
   void HandleTMasterRegisterResponse(
-                                      void*,
-                                      unique_ptr<proto::ckptmgr::RegisterTMasterResponse>_response,
-                                      NetworkErrorCode _status);
+                                  void*,
+                                  pool_unique_ptr<proto::ckptmgr::RegisterTMasterResponse>_response,
+                                  NetworkErrorCode _status);
 
   void SendRegisterRequest();
 

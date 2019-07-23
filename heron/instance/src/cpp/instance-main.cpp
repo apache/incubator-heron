@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
   auto slave = new heron::instance::Slave(FLAGS_task_id, FLAGS_topology_binary);
 
   auto dataToSlave =
-          new heron::instance::NotifyingCommunicator<unique_ptr<google::protobuf::Message>>(
+          new heron::instance::NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>(
                                slave->eventLoop(),
                                std::bind(&heron::instance::Slave::HandleGatewayData,
                                          slave, std::placeholders::_1),

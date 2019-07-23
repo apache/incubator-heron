@@ -287,7 +287,7 @@ void InstanceServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) 
 }
 
 void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
-                                       unique_ptr<proto::stmgr::RegisterInstanceRequest> _request) {
+                                  pool_unique_ptr<proto::stmgr::RegisterInstanceRequest> _request) {
   LOG(INFO) << "Got HandleRegisterInstanceRequest from connection " << _conn << " and instance "
             << _request->instance().instance_id();
   // Do some basic checks
@@ -377,7 +377,7 @@ void InstanceServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _co
 }
 
 void InstanceServer::HandleTupleSetMessage(Connection* _conn,
-                                           unique_ptr<proto::system::HeronTupleSet> _message) {
+                                           pool_unique_ptr<proto::system::HeronTupleSet> _message) {
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping..";
@@ -398,7 +398,7 @@ void InstanceServer::HandleTupleSetMessage(Connection* _conn,
                              std::move(_message));
 }
 
-void InstanceServer::SendToInstance2(unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
+void InstanceServer::SendToInstance2(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   sp_string instance_id = task_id_to_name[_message->task_id()];
   ConnectionBufferLengthMetricMap::const_iterator it =
     connection_buffer_length_metric_map_.find(instance_id);
@@ -469,7 +469,7 @@ void InstanceServer::DrainTupleSet(sp_int32 _task_id,
 }
 
 void InstanceServer::DrainCheckpoint(sp_int32 _task_id,
-                                  unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message) {
+                             pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message) {
   TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
     LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping...";
@@ -647,7 +647,7 @@ void InstanceServer::InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag
 }
 
 void InstanceServer::HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
-                               unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message) {
+                          pool_unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message) {
   ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Hmm.. Got InstaceStateCheckpoint Message from an unknown connection";
@@ -667,7 +667,7 @@ void InstanceServer::HandleStoreInstanceStateCheckpointMessage(Connection* _conn
 }
 
 void InstanceServer::HandleRestoreInstanceStateResponse(Connection* _conn,
-                               unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message) {
+                          pool_unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message) {
   ConnectionTaskIdMap::iterator iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Hmm.. Got RestoreInstanceStateResponse Message from an unknown connection";
