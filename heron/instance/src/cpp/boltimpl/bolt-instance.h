@@ -41,7 +41,7 @@ namespace instance {
 class BoltInstance : public InstanceBase {
  public:
   BoltInstance(std::shared_ptr<EventLoop> eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
-               NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
+               NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
                NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
                void* dllHandle);
   virtual ~BoltInstance();
@@ -52,7 +52,7 @@ class BoltInstance : public InstanceBase {
   virtual void Deactivate();
   virtual bool IsRunning() { return active_; }
   virtual void DoWork();
-  virtual void HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet);
+  virtual void HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet);
 
  private:
   void executeTuple(const proto::api::StreamId& stream,
@@ -62,7 +62,7 @@ class BoltInstance : public InstanceBase {
                     const proto::system::HeronDataTuple& tup);
 
   std::shared_ptr<TaskContextImpl> taskContext_;
-  NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave_;
+  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
   std::shared_ptr<EventLoop> eventLoop_;
   api::bolt::IBolt* bolt_;

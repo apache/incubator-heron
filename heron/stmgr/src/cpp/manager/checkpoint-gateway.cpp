@@ -42,7 +42,7 @@ CheckpointGateway::CheckpointGateway(sp_uint64 _drain_threshold,
          shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
          std::function<void(sp_int32, proto::system::HeronTupleSet2*)> _tupleset_drainer,
          std::function<void(proto::stmgr::TupleStreamMessage*)> _tuplestream_drainer,
-         std::function<void(sp_int32, std::unique_ptr<InitiateStatefulCheckpoint>)> _ckpt_drainer)
+         std::function<void(sp_int32, pool_unique_ptr<InitiateStatefulCheckpoint>)> _ckpt_drainer)
   : drain_threshold_(_drain_threshold), current_size_(0),
     neighbour_calculator_(_neighbour_calculator),
     metrics_manager_client_(_metrics_manager_client), tupleset_drainer_(_tupleset_drainer),
@@ -72,7 +72,7 @@ void CheckpointGateway::SendToInstance(sp_int32 _task_id,
   size_metric_->SetValue(current_size_);
 }
 
-void CheckpointGateway::SendToInstance(unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
+void CheckpointGateway::SendToInstance(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   if (current_size_ > drain_threshold_) {
     ForceDrain();
   }
@@ -176,8 +176,8 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::system::HeronTupleSet2*
       return _tuple;
     } else {
       auto tp = std::make_tuple(_tuple,
-                                (proto::stmgr::TupleStreamMessage*)nullptr,
-                                (unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>)nullptr);
+                              (proto::stmgr::TupleStreamMessage*)nullptr,
+                              (pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>)nullptr);
       add(tp, _size);
       return nullptr;
     }
@@ -196,8 +196,8 @@ CheckpointGateway::CheckpointInfo::SendToInstance(proto::stmgr::TupleStreamMessa
       return _tuple;
     } else {
       auto tp = std::make_tuple((proto::system::HeronTupleSet2*)nullptr,
-                                _tuple,
-                                (unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>)nullptr);
+                              _tuple,
+                              (pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>)nullptr);
       add(tp, _size);
       return nullptr;
     }
@@ -235,7 +235,7 @@ CheckpointGateway::CheckpointInfo::HandleUpstreamMarker(sp_int32 _src_task_id,
               << " All checkpoint markers received for checkpoint "
                  << _checkpoint_id;
     // We need to add Initiate Checkpoint message before the current set
-    auto message = make_unique<proto::ckptmgr::InitiateStatefulCheckpoint>();
+    auto message = make_unique_from_protobuf_pool<proto::ckptmgr::InitiateStatefulCheckpoint>();
     message->set_checkpoint_id(_checkpoint_id);
     int cache_size = message->GetCachedSize();
     auto new_tuple = std::make_tuple(

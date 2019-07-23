@@ -178,7 +178,7 @@ bool SpoutInstance::canContinueWork() {
           collector_->numInFlight() < maxSpoutPending));
 }
 
-void SpoutInstance::HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
+void SpoutInstance::HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (tupleSet->has_data()) {
     LOG(FATAL) << "Spout cannot get incoming data tuples from other components";
   }

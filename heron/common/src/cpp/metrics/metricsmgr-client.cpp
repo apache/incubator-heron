@@ -84,7 +84,7 @@ void MetricsMgrClient::SendRegisterRequest() {
 }
 
 void MetricsMgrClient::HandleRegisterResponse(
-    void*, unique_ptr<proto::system::MetricPublisherRegisterResponse> _response,
+    void*, pool_unique_ptr<proto::system::MetricPublisherRegisterResponse> _response,
     NetworkErrorCode _status) {
   if (_status == OK && _response->status().status() != proto::system::OK) {
     // What the heck we explicitly got a non ok response

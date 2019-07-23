@@ -56,17 +56,18 @@ class Gateway {
   void HandleSlaveMetrics(google::protobuf::Message* msg);
 
   std::shared_ptr<EventLoop> eventLoop() { return eventLoop_; }
-  void setCommunicators(NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
+  void setCommunicators(
+          NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
+          NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+          NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
     dataToSlave_ = dataToSlave;
     dataFromSlave_ = dataFromSlave;
     metricsFromSlave_ = metricsFromSlave;
   }
 
  private:
-  void HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan);
-  void HandleStMgrTuples(unique_ptr<proto::system::HeronTupleSet2> tuples);
+  void HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan);
+  void HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tuples);
   void ResumeConsumingFromSlaveTimer();
   std::string topologyName_;
   std::string topologyId_;
@@ -76,7 +77,7 @@ class Gateway {
   std::shared_ptr<StMgrClient> stmgrClient_;
   std::shared_ptr<common::MetricsMgrClient> metricsMgrClient_;
   std::shared_ptr<GatewayMetrics> gatewayMetrics_;
-  NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave_;
+  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
   std::shared_ptr<EventLoop> eventLoop_;

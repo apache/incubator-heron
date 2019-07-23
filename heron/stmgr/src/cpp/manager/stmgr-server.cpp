@@ -125,7 +125,7 @@ void StMgrServer::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
 }
 
 void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                          unique_ptr<proto::stmgr::StrMgrHelloRequest> _request) {
+                                       pool_unique_ptr<proto::stmgr::StrMgrHelloRequest> _request) {
   LOG(INFO) << "Got a hello message from stmgr " << _request->stmgr() << " on connection " << _conn;
   proto::stmgr::StrMgrHelloResponse response;
   // Some basic checks
@@ -155,7 +155,7 @@ void StMgrServer::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
 }
 
 void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
-                                           unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
+                                       pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   auto iter = rstmgrs_.find(_conn);
   if (iter == rstmgrs_.end()) {
     LOG(INFO) << "Recieved Tuple messages from unknown streammanager connection";
@@ -204,7 +204,7 @@ void StMgrServer::StopBackPressureClientCb(const sp_string& _other_stmgr_id) {
 }
 
 void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
-                                      unique_ptr<proto::stmgr::StartBackPressureMessage> _message) {
+                               pool_unique_ptr<proto::stmgr::StartBackPressureMessage> _message) {
   // Close spouts
   LOG(INFO) << "Received start back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
@@ -222,7 +222,7 @@ void StMgrServer::HandleStartBackPressureMessage(Connection* _conn,
 }
 
 void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
-                                       unique_ptr<proto::stmgr::StopBackPressureMessage> _message) {
+                                pool_unique_ptr<proto::stmgr::StopBackPressureMessage> _message) {
   LOG(INFO) << "Received stop back pressure from str mgr " << _message->stmgr();
   if (_message->topology_name() != topology_name_ || _message->topology_id() != topology_id_) {
     LOG(ERROR) << "Received stop back pressure message from unknown stream manager "
@@ -246,7 +246,7 @@ void StMgrServer::HandleStopBackPressureMessage(Connection* _conn,
 }
 
 void StMgrServer::HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
-                               unique_ptr<proto::ckptmgr::DownstreamStatefulCheckpoint> _message) {
+                          pool_unique_ptr<proto::ckptmgr::DownstreamStatefulCheckpoint> _message) {
   stmgr_->HandleDownStreamStatefulCheckpoint(*_message);
 }
 

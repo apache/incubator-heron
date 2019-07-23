@@ -58,9 +58,9 @@ Slave::~Slave() {
 }
 
 void Slave::setCommunicators(
-                        NotifyingCommunicator<unique_ptr<google::protobuf::Message>>* dataToSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
+                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
+                    NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave) {
   dataToSlave_ = dataToSlave;
   dataFromSlave_ = dataFromSlave;
   metricsFromSlave_ = metricsFromSlave;
@@ -80,20 +80,20 @@ void Slave::InternalStart() {
   eventLoop_->loop();
 }
 
-void Slave::HandleGatewayData(unique_ptr<google::protobuf::Message> msg) {
+void Slave::HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg) {
   if (msg->GetTypeName() == pplan_typename_) {
     LOG(INFO) << "Slave Received a new pplan message from Gateway";
-    auto pplan = unique_ptr<proto::system::PhysicalPlan>(
+    auto pplan = pool_unique_ptr<proto::system::PhysicalPlan>(
             static_cast<proto::system::PhysicalPlan*>(msg.release()));
     HandleNewPhysicalPlan(std::move(pplan));
   } else {
-    auto tupleSet = unique_ptr<proto::system::HeronTupleSet2>(
+    auto tupleSet = pool_unique_ptr<proto::system::HeronTupleSet2>(
             static_cast<proto::system::HeronTupleSet2*>(msg.release()));
     HandleStMgrTuples(std::move(tupleSet));
   }
 }
 
-void Slave::HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan) {
+void Slave::HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan) {
   std::shared_ptr<proto::system::PhysicalPlan> newPplan = std::move(pplan);
   taskContext_->newPhysicalPlan(newPplan);
   if (!instance_) {
@@ -125,7 +125,7 @@ void Slave::HandleNewPhysicalPlan(unique_ptr<proto::system::PhysicalPlan> pplan)
   }
 }
 
-void Slave::HandleStMgrTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
+void Slave::HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (instance_) {
     instance_->HandleGatewayTuples(std::move(tupleSet));
   } else {

@@ -57,10 +57,10 @@ class CheckpointGateway {
         shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
         std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer,
         std::function<void(proto::stmgr::TupleStreamMessage*)> tuplestream_drainer,
-        std::function<void(sp_int32, unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer);
+        std::function<void(sp_int32, pool_unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer);
   virtual ~CheckpointGateway();
   void SendToInstance(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance(unique_ptr<proto::stmgr::TupleStreamMessage> _message);
+  void SendToInstance(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
   void HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                             const sp_string& _checkpoint_id);
 
@@ -70,7 +70,7 @@ class CheckpointGateway {
  private:
   typedef std::tuple<proto::system::HeronTupleSet2*,
                      proto::stmgr::TupleStreamMessage*,
-                     unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>>
+                     pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>>
           Tuple;
 
   // This helper class defines the current state of affairs
@@ -111,7 +111,7 @@ class CheckpointGateway {
   std::unordered_map<sp_int32, unique_ptr<CheckpointInfo>> pending_tuples_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer_;
   std::function<void(proto::stmgr::TupleStreamMessage*)> tuplestream_drainer_;
-  std::function<void(sp_int32, unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer_;
+  std::function<void(sp_int32, pool_unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer_;
 };
 
 }  // namespace stmgr
