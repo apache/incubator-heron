@@ -8,12 +8,13 @@ const docsDir = `${CWD}/build/${siteConfig.projectName}/docs`
 
 function getVersions() {
     try {
+      console.log(JSON.parse(require('fs').readFileSync(`${CWD}/versions.json`, 'utf8')))
       return JSON.parse(require('fs').readFileSync(`${CWD}/versions.json`, 'utf8'));
     } catch (error) {
       //console.error(error)
-      console.error('no versions found defaulting to 2.1.0')
+      console.error('no versions found defaulting to 0.20.0')
     }
-    return ['2.1.0']
+    return ['0.20.0']
   }
 
 function doReplace(options) {
@@ -54,3 +55,23 @@ const options = {
   };
   
 doReplace(options);
+
+// replaces versions
+for (v of versions) {
+    if (v === latestVersion) {
+      continue
+    }
+    const opts = {
+      files: [
+        `${docsDir}/${v}/*.html`,
+        `${docsDir}/${v}/**/*.html`
+      ],
+      from: from,
+      to: [
+        `${latestVersion}`,
+        `${v}`,
+      ],
+      dry: true
+    };
+    doReplace(opts);
+}  
