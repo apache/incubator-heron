@@ -52,7 +52,7 @@ $ ./bazel-bin/heron/tools/ui/src/python/heron-ui
 * `--tracker_url` - The base url for tracker. All the information about the
   topologies is fetched from tracker. Default url is `http://localhost:8888`.
 * `--address` - Address to listen; Default address is `0.0.0.0`
-* `--base_url` - The base url path if operating behind proxy; Default is [`None`](https://github.com/apache/incubator-heron/blob/5ee2490c025c7684c097962cf6d25f54ead73cf4/heron/tools/ui/src/python/main.py#L135)
+* `--base_url` - The base url path if operating behind proxy; Default is [`None`](https://github.com/apache/incubator-heron/blob/master/heron/tools/ui/src/python/main.py#L145)
 
 ```bash
 $ heron-ui
