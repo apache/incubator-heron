@@ -925,6 +925,15 @@ http_archive(
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
     sha256 = "b3de7fbdc1a23d7341b55f7f88877e106a76847bd5a07fa721c07310b625318b",
 )
+
+http_archive(
+    name = "com_github_hopscotch_hashmap",
+    build_file = "@//:third_party/hopscotch-hashmap/hopscotch.BUILD",
+    sha256 = "73e301925e1418c5ed930ef37ebdcab2c395a6d1bdaf5a012034bb75307d33f1",
+    strip_prefix = "hopscotch-map-2.2.1",
+    urls = ["https://github.com/Tessil/hopscotch-map/archive/v2.2.1.tar.gz"],
+)
+
 # end 3rdparty C++ dependencies
 
 # for helm
