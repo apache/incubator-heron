@@ -51,6 +51,8 @@ $ ./bazel-bin/heron/tools/ui/src/python/heron-ui
 * `--port` - Port to run the heron-ui on. Default port is `8889`.
 * `--tracker_url` - The base url for tracker. All the information about the
   topologies is fetched from tracker. Default url is `http://localhost:8888`.
+* `--address` - Address to listen; Default address is `0.0.0.0`
+* `--base_url` - The base url path if operating behind proxy; Default is [`None`](https://github.com/apache/incubator-heron/blob/master/heron/tools/ui/src/python/main.py#L145)
 
 ```bash
 $ heron-ui

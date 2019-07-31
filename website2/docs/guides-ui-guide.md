@@ -38,6 +38,18 @@ listed below. A complete set of features can be found in following sections.
 
 #### Topologies Page
 
+Heron UI is a user interface that uses the Heron Tracker to display detailed, colorful visual representations of topologies, including the logical and physical plan for each topology. 
+
+Start the Heron tracker using `heron-tracker &` which uses default heron_tracker.yaml configuration file. It's a centralized gateway for cluster-wide information about topologies, including which topologies are running, being launched, being killed, etc. It exposes Json Restful endpoint and relies on Zookeeper nodes.
+
+Launc the Heron UI by the command:
+
+```bash
+heron-ui &
+```
+
+By default Heron UI will be started at `http://localhost:8889`
+
 Below is the home page of Heron UI.
 
 The following information or actions can be found on this page.
@@ -181,3 +193,13 @@ agaist the PID for the instance. Follow the instructions on the page to download
 the heap dump file. This link does not download the file.
 
 ![Memory Dump](assets/dump.png)
+
+#### Kill Heron UI server
+
+To kill Heron UI server run the following command:
+
+```bash
+kill $(pgrep -f heron-ui)
+```
+
+To stop all the Heron tools, kill the Heron Tracker as well using `kill $(pgrep -f heron-tracker)`.
