@@ -34,6 +34,7 @@ build:centos --linkopt -lpthread
 build:centos --linkopt -lrt
 build:centos --spawn_strategy=standalone
 build:centos --workspace_status_command scripts/release/status.sh
+build:centos --copt=-O3
 
 # For debian
 # To use it: bazel build --config=debian
@@ -47,6 +48,7 @@ build:debian --linkopt -lpthread
 build:debian --linkopt -lrt
 build:debian --spawn_strategy=standalone
 build:debian --workspace_status_command scripts/release/status.sh
+build:debian --copt=-O3
 
 # For Mac
 # To use it: bazel build --config=darwin
@@ -57,6 +59,7 @@ build:darwin --genrule_strategy=standalone
 build:darwin --ignore_unsupported_sandboxing
 build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
+build:darwin --copt=-O3
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
@@ -70,7 +73,7 @@ build:ubuntu --linkopt -lpthread
 build:ubuntu --linkopt -lrt
 build:ubuntu --spawn_strategy=standalone
 build:ubuntu --workspace_status_command scripts/release/status.sh
-
+build:ubuntu --copt=-O3
 
 ### Disabled checkstyle
 
@@ -83,6 +86,7 @@ build:centos_nostyle --linkopt -lpthread
 build:centos_nostyle --linkopt -lrt
 build:centos_nostyle --spawn_strategy=standalone
 build:centos_nostyle --workspace_status_command scripts/release/status.sh
+build:centos_nostyle --copt=-O3
 
 # For debian
 # To use it: bazel build --config=debian_nostyle
@@ -93,6 +97,7 @@ build:debian_nostyle --linkopt -lpthread
 build:debian_nostyle --linkopt -lrt
 build:debian_nostyle --spawn_strategy=standalone
 build:debian_nostyle --workspace_status_command scripts/release/status.sh
+build:debian_nostyle --copt=-O3
 
 # For Mac
 # To use it: bazel build --config=darwin_nostyle
@@ -100,6 +105,7 @@ build:darwin_nostyle --genrule_strategy=standalone
 build:darwin_nostyle --ignore_unsupported_sandboxing
 build:darwin_nostyle --spawn_strategy=standalone
 build:darwin_nostyle --workspace_status_command scripts/release/status.sh
+build:darwin_nostyle --copt=-O3
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu_nostyle
@@ -110,3 +116,4 @@ build:ubuntu_nostyle --linkopt -lpthread
 build:ubuntu_nostyle --linkopt -lrt
 build:ubuntu_nostyle --spawn_strategy=standalone
 build:ubuntu_nostyle --workspace_status_command scripts/release/status.sh
+build:ubuntu_nostyle --copt=-O3
