@@ -17,10 +17,14 @@
  * under the License.
  */
 
+#define XXH_INLINE_ALL
+
 #include "grouping/fields-grouping.h"
 #include <iostream>
 #include <list>
 #include <vector>
+#include <string>
+#include "xhh/xxhash.h"
 #include "grouping/grouping.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
@@ -54,7 +58,8 @@ void FieldsGrouping::GetListToSend(const proto::system::HeronDataTuple& _tuple,
   for (auto iter = fields_grouping_indices_.begin();
        iter != fields_grouping_indices_.end(); ++iter) {
     CHECK(_tuple.values_size() > *iter);
-    size_t h = str_hash_fn(_tuple.values(*iter));
+    std::string const& buff = _tuple.values(*iter);
+    size_t h =  XXH64(buff.data(), buff.length(), 0);
     task_index += (h % prime_num);
   }
   task_index = task_index % task_ids_.size();
