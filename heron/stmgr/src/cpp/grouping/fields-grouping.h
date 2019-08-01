@@ -40,6 +40,7 @@ class FieldsGrouping : public Grouping {
 
  private:
   std::vector<sp_int32> fields_grouping_indices_;
+  std::hash<sp_string> str_hash_fn;
 };
 
 }  // namespace stmgr

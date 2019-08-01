@@ -32,7 +32,6 @@ cc_library(
         "//config:config-cxx",
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
-        "@com_github_xxhash//:xxhash",
     ],
     linkstatic = 1,
 )

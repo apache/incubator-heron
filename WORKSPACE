@@ -933,14 +933,6 @@ http_archive(
     strip_prefix = "hopscotch-map-2.2.1",
     urls = ["https://github.com/Tessil/hopscotch-map/archive/v2.2.1.tar.gz"],
 )
-
-http_archive(
-    name = "com_github_xxhash",
-    build_file = "@//:third_party/xxhash/xxhash.BUILD",
-    sha256 = "b34792646d5e19964bb7bba24f06cb13aecaac623ab91a54da08aa19d3686d7e",
-    strip_prefix = "xxHash-0.7.0",
-    urls = ["https://github.com/Cyan4973/xxHash/archive/v0.7.0.tar.gz"],
-)
 # end 3rdparty C++ dependencies
 
 # for helm
