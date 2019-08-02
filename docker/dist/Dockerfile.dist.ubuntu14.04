@@ -82,6 +82,7 @@ RUN mkdir -p /opt/zookeeper/scripts
 ADD dist/scripts /opt/zookeeper/scripts
 RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
     && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
-    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
+    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh \
+    && chmod +x /opt/zookeeper/scripts/wait-for-zookeeper.sh
 
 CMD ["supervisord", "-n"]
