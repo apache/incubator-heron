@@ -44,7 +44,7 @@ public final class Logging {
 
     final Level level = verbose ? Level.ALL : Level.INFO;
     // configure the root heron logger and it's handlers
-    Logger logger = Logger.getLogger("org.apache");
+    Logger logger = Logger.getLogger("");
     for (Handler handler : logger.getHandlers()) {
       handler.setLevel(level);
     }
