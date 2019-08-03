@@ -73,9 +73,9 @@ void start_http_client(sp_uint32 _port, sp_uint64 _requests, sp_uint32 _nkeys) {
   ntotal = _requests;
   nkeys = _nkeys;
 
-  EventLoopImpl ss;
-  AsyncDNS dns(&ss);
-  HTTPClient client(&ss, &dns);
+  auto ss = std::make_shared<EventLoopImpl>();
+  AsyncDNS dns(ss);
+  HTTPClient client(ss, &dns);
   SendRequest(&client);
-  ss.loop();
+  ss->loop();
 }

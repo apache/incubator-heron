@@ -4,7 +4,6 @@
 # Data/doc files
 .*\.conf
 .*\.json
-.*\.md
 .*\.txt
 .*\.BUILD
 .*\.patch
@@ -14,28 +13,40 @@ autogen\.sh
 description
 heron\.iml
 
-# UI resources
-jquery.*\.js
-bootstrap\.min\.css
-glyphicons-halflings-regular\.svg
-bootstrap\.min\.js
-d3.*\.js
-html5-trunk\.js
-list\.min.*.js
-moment\.min.*\.js
-underscore-min.*\.js
-underscore-min.*\.map
-
 # Directories
 bazel-.*
 m4
-website
 META-INF
+# website and website2 are not part of the release
+website
+
+# UI resources
+# Apache 2.0 licenses & MIT Licenses
+jquery.*\.js
+# Apache 2.0 licenses & MIT Licenses
+bootstrap\.min\.css
+bootstrap\.min\.js
+# MIT licenses
+glyphicons-halflings-regular\.svg
+# MIT licenses & BSD 3-Clause licenses
+d3.*\.js
+# MIT licenses
+html5-trunk\.js
+# MIT licenses
+list\.min.*.js
+# MIT licenses
+moment\.min.*\.js
+# MIT licenses
+underscore-min.*\.js
+underscore-min.*\.map
+
 
 # Thirdparty
+# 3-Clause BSD License
 cpplint\.py
-kashmir
-semver
-
-# Unrecognizable license
+# BSD 3-Clause licenses
 cloudpickle.py
+# Boost Software License, Version 1.0
+kashmir
+# BSD License
+semver

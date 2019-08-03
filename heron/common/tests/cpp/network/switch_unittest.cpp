@@ -38,7 +38,7 @@
 
 class Terminate : public Client {
  public:
-  Terminate(EventLoopImpl* eventLoop, const NetworkOptions& _options)
+  Terminate(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options)
       : Client(eventLoop, _options) {
     // Setup the call back function to be invoked when retrying
     retry_cb_ = [this]() { this->Retry(); };
@@ -77,13 +77,13 @@ void start_server(sp_uint32* port, CountDownLatch* latch) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  server_ = new TestServer(&ss, options);
+  auto ss = std::make_shared<EventLoopImpl>();
+  server_ = new TestServer(ss, options);
   EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
   *port = server_->get_serveroptions().get_port();
   latch->countDown();
-  ss.loop();
+  ss->loop();
 }
 
 void start_client(sp_uint32 port, sp_uint64 requests) {
@@ -93,10 +93,10 @@ void start_client(sp_uint32 port, sp_uint64 requests) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  TestClient client(&ss, options, requests);
+  auto ss = std::make_shared<EventLoopImpl>();
+  TestClient client(ss, options, requests);
   client.Start();
-  ss.loop();
+  ss->loop();
 }
 
 void terminate_server(sp_uint32 port) {
@@ -106,10 +106,10 @@ void terminate_server(sp_uint32 port) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  Terminate ts(&ss, options);
+  auto ss = std::make_shared<EventLoopImpl>();
+  Terminate ts(ss, options);
   ts.Start();
-  ss.loop();
+  ss->loop();
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {

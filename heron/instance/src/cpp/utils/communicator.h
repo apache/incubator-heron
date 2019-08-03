@@ -46,7 +46,7 @@ template<typename T>
 class Communicator {
  public:
   // Constructor/Destructor
-  Communicator(EventLoop* eventLoop, std::function<void(T)> consumer)
+  Communicator(std::shared_ptr<EventLoop> eventLoop, std::function<void(T)> consumer)
     : eventLoop_(eventLoop), consumer_(std::move(consumer)), registered_for_read_(false) {
     queue_ = new PCQueue<T>();
     if (pipe(pipers_) < 0) {
@@ -70,7 +70,7 @@ class Communicator {
   // The main interface of Piper. This will enqueue the item so that
   // the consumer function will pluck it and execute in the eventLoop
   void enqueue(T t) {
-    queue_->enqueue(t);
+    queue_->enqueue(std::move(t));
     SignalMainThread();
   }
 
@@ -120,7 +120,7 @@ class Communicator {
         bool dequeued = false;
         T t = queue_->trydequeue(dequeued);
         if (dequeued) {
-          consumer_(t);
+          consumer_(std::move(t));
         }
       } else {
         LOG(ERROR) << "In Communicator read from pipers returned "
@@ -137,7 +137,7 @@ class Communicator {
     return;
   }
 
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
   // These pipers are how they communicate it accross to our thread
   sp_int32 pipers_[2];

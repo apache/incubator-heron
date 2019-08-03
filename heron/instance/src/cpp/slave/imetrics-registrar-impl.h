@@ -42,7 +42,7 @@ namespace instance {
  */
 class IMetricsRegistrarImpl : public api::metric::IMetricsRegistrar {
  public:
-  explicit IMetricsRegistrarImpl(EventLoop* eventLoop,
+  explicit IMetricsRegistrarImpl(std::shared_ptr<EventLoop> eventLoop,
            NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave);
   virtual ~IMetricsRegistrarImpl();
   virtual void registerMetric(const std::string& metricName,
@@ -57,7 +57,7 @@ class IMetricsRegistrarImpl : public api::metric::IMetricsRegistrar {
   std::map<std::string, std::shared_ptr<api::metric::IMetric>> metrics_;
   std::map<std::string, std::shared_ptr<api::metric::IMultiMetric>> multiMetrics_;
   std::map<int, std::list<std::string>> timeBuckets_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
 };
 

@@ -856,10 +856,10 @@ http_archive(
 
 http_archive(
     name = "org_libevent_libevent",
-    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz"],
-    strip_prefix = "libevent-2.1.8-stable",
+    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.10-stable/libevent-2.1.10-stable.tar.gz"],
+    strip_prefix = "libevent-2.1.10-stable",
     build_file = "@//:third_party/libevent/libevent.BUILD",
-    sha256 = "965cc5a8bb46ce4199a47e9b2c9e1cae3b137e8356ffdad6d94d3b9069b71dc2",
+    sha256 = "e864af41a336bb11dab1a23f32993afe963c1f69618bd9292b89ecf6904845b0",
 )
 
 http_archive(
@@ -991,14 +991,14 @@ http_archive(
 )
 
 # scala integration
-rules_scala_version = "9cb85352a060248a558fedecaa46832abbb2864b"  # update this as needed
+rules_scala_version = "300b4369a0a56d9e590d9fea8a73c3913d758e12"  # May 27 - update this as needed
 
 http_archive(
     name = "io_bazel_rules_scala",
     urls = ["https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version],
     type = "zip",
     strip_prefix = "rules_scala-%s" % rules_scala_version,
-    sha256 = "9cbb637e913f0a19e1c781a7f163797bb5ab4cf39729ab7f90e9fc8453588712",
+    sha256 = "7f35ee7d96b22f6139b81da3a8ba5fb816e1803ed097f7295b85b7a56e4401c7",
 )
 
 load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")

@@ -28,7 +28,9 @@
 #include "basics/basics.h"
 
 // Constructor. We create a new event_base.
-AsyncDNS::AsyncDNS(EventLoop* eventLoop) { dns_ = evdns_base_new(eventLoop->dispatcher(), 1); }
+AsyncDNS::AsyncDNS(std::shared_ptr<EventLoop> eventLoop) {
+    dns_ = evdns_base_new(eventLoop->dispatcher(), 1);
+}
 
 // Destructor.
 AsyncDNS::~AsyncDNS() { evdns_base_free(dns_, 1); }

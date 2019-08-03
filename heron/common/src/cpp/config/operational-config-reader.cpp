@@ -32,7 +32,7 @@
 namespace heron {
 namespace config {
 
-OperationalConfigReader::OperationalConfigReader(EventLoop* eventLoop,
+OperationalConfigReader::OperationalConfigReader(std::shared_ptr<EventLoop> eventLoop,
                                                  const sp_string& _defaults_file)
     : YamlFileReader(eventLoop, _defaults_file) {
   LoadConfig();

@@ -1,0 +1,101 @@
+
+{
+  "docs": {
+    "Getting Started": [
+      "getting-started-local-single-node",
+      "getting-started-migrate-storm-topologies",
+      "getting-started-troubleshooting-guide"
+    ],
+    "Deployment": [
+      "deployment-overview",
+      "deployment-configuration",
+      "deployment-api-server"
+    ],
+    "Topology Development APIs": [
+      "topology-development-streamlet-api",
+      "topology-development-eco-api",
+      "topology-development-topology-api-java",
+      "topology-development-topology-api-python",
+      "topology-development-streamlet-scala"
+    ],
+    "Client API Docs": [
+    ],
+    "Guides": [
+      "guides-effectively-once-java-topologies",
+      "guides-python-topologies",
+      "guides-data-model",
+      "guides-tuple-serialization",
+      "guides-ui-guide",
+      "guides-topology-tuning",
+      "guides-packing-algorithms",
+      "guides-simulator-mode",
+      "guides-troubeshooting-guide"
+    ],
+    "Heron Concepts": [
+      "heron-design-goals",
+      "heron-topology-concepts",
+      "heron-streamlet-concepts",
+      "heron-architecture",
+      "heron-delivery-semantics"
+    ],
+    "State Managers": [
+      "state-managers-zookeeper",
+      "state-managers-local-fs"
+    ],
+    "Uploaders": [
+      "uploaders-local-fs",
+      "uploaders-hdfs",
+      "uploaders-http",
+      "uploaders-amazon-s3",
+      "uploaders-scp"
+    ],
+    "Schedulers": [
+      "schedulers-k8s-by-hand",
+      "schedulers-k8s-with-helm",
+      "schedulers-aurora-cluster",
+      "schedulers-aurora-local",
+      "schedulers-local",
+      "schedulers-standalone",
+      "schedulers-nomad",
+      "schedulers-mesos-local-mac",
+      "schedulers-slurm",
+      "schedulers-yarn"
+    ],
+    "Cluster Configuration": [
+      "cluster-config-overview",
+      "cluster-config-system-level",
+      "cluster-config-instance",
+      "cluster-config-metrics",
+      "cluster-config-stream",
+      "cluster-config-tmaster"
+    ],
+    "Observability": [
+      "observability-prometheus",
+      "observability-graphite",
+      "observability-scribe"
+    ],
+    "User Manuals": [
+      "user-manuals-heron-cli",
+      "user-manuals-heron-explorer",
+      "user-manuals-tracker-rest",
+      "user-manuals-heron-tracker-runbook",
+      "user-manuals-heron-ui-runbook",
+      "user-manuals-heron-shell"
+    ],
+    "Compiling": [
+      "compiling-overview",
+      "compiling-linux",
+      "compiling-osx",
+      "compiling-docker",
+      "compiling-running-tests",
+      "compiling-code-organization"
+    ],
+    "Extending Heron": [
+      "extending-heron-scheduler",
+      "extending-heron-metric-sink"
+    ],
+    "Heron Resources": [
+      "heron-resources-resources"
+    ]
+  }
+}

@@ -42,7 +42,7 @@ namespace common {
 
 class HeronLocalFileStateMgr : public HeronStateMgr {
  public:
-  HeronLocalFileStateMgr(const std::string& _topleveldir, EventLoop* eventLoop);
+  HeronLocalFileStateMgr(const std::string& _topleveldir, shared_ptr<EventLoop> eventLoop);
   virtual ~HeronLocalFileStateMgr();
 
   // Sets up the basic filesystem tree at the given location
@@ -54,12 +54,12 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
 
   // implement the functions
   void GetTMasterLocation(const std::string& _topology_name,
-                          proto::tmaster::TMasterLocation* _return,
+                          shared_ptr<proto::tmaster::TMasterLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetMetricsCacheLocation(const std::string& _topology_name,
-                          proto::tmaster::MetricsCacheLocation* _return,
+                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
@@ -137,7 +137,7 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                         VCallback<> _watcher, EventLoop::Status);
 
   // Hold the EventLoop for scheduling callbacks
-  EventLoop* eventLoop_;
+  shared_ptr<EventLoop> eventLoop_;
 };
 }  // namespace common
 }  // namespace heron

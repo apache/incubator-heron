@@ -28,7 +28,7 @@
 
 class OrderServer : public Server {
  public:
-  OrderServer(EventLoopImpl* ss, const NetworkOptions& options);
+  OrderServer(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options);
 
   ~OrderServer();
 
@@ -46,10 +46,11 @@ class OrderServer : public Server {
   virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
   // handle the test message
-  virtual void HandleOrderMessage(Connection* connection, OrderMessage* message);
+  virtual void HandleOrderMessage(Connection* connection, pool_unique_ptr<OrderMessage> message);
 
   // handle the terminate message
-  virtual void HandleTerminateMessage(Connection* connection, TerminateMessage* message);
+  virtual void HandleTerminateMessage(Connection* connection,
+          pool_unique_ptr<TerminateMessage> message);
 
  private:
   void Terminate();

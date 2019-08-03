@@ -19,7 +19,7 @@ FROM centos:centos7
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM centos
-ENV bazelVersion 0.23.2
+ENV bazelVersion 0.26.0
 
 RUN yum -y upgrade
 RUN yum -y install \

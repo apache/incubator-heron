@@ -33,9 +33,11 @@ from heron.common.src.python.utils import log
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration_test/src/python/test_runner/resources/test.json"
 
-RETRY_ATTEMPTS = 15
+RETRY_ATTEMPTS = 25
 #seconds
 RETRY_INTERVAL = 10
+
+VERBOSE = False               # Disable verbose by default
 
 successes = []
 failures = []
@@ -258,8 +260,10 @@ def submit_topology(heron_cli_path, cli_config_path, cluster, role,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit --verbose --config-path=%s %s %s %s %s" %\
-        (heron_cli_path, cli_config_path, cluster_token(cluster, role, env),
+  cmd = "%s submit %s --config-path=%s %s %s %s %s" %\
+        (heron_cli_path, 
+        "--verbose" if VERBOSE else "",
+        cli_config_path, cluster_token(cluster, role, env),
          jar_path, classpath, args)
 
   if pkg_uri is not None:

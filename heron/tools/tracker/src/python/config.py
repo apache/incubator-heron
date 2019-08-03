@@ -26,7 +26,7 @@ STATEMGRS_KEY = "statemgrs"
 EXTRA_LINKS_KEY = "extra.links"
 EXTRA_LINK_NAME_KEY = "name"
 EXTRA_LINK_FORMATTER_KEY = "formatter"
-
+EXTRA_LINK_URL_KEY = "url"
 
 class Config(object):
   """
@@ -81,24 +81,25 @@ class Config(object):
     # No error is thrown, so the format is valid.
     return url_format
 
-  def get_formatted_url(self, execution_state, formatter):
+  def get_formatted_url(self, formatter, execution_state):
     """
+    @param formatter: The template string to interpolate
     @param execution_state: The python dict representing JSON execution_state
     @return Formatted viz url
     """
 
     # Create the parameters based on execution state
-    valid_parameters = {
-        "${CLUSTER}": execution_state["cluster"],
-        "${ENVIRON}": execution_state["environ"],
-        "${TOPOLOGY}": execution_state["jobname"],
-        "${ROLE}": execution_state["role"],
-        "${USER}": execution_state["submission_user"],
+    common_parameters = {
+        "${CLUSTER}": execution_state.get("cluster", "${CLUSTER}"),
+        "${ENVIRON}": execution_state.get("environ", "${ENVIRON}"),
+        "${TOPOLOGY}": execution_state.get("jobname", "${TOPOLOGY}"),
+        "${ROLE}": execution_state.get("role", "${ROLE}"),
+        "${USER}": execution_state.get("submission_user", "${USER}"),
     }
 
     formatted_url = formatter
 
-    for key, value in valid_parameters.items():
+    for key, value in common_parameters.items():
       formatted_url = formatted_url.replace(key, value)
 
     return formatted_url

@@ -31,7 +31,7 @@ namespace heron {
 namespace instance {
 
 GatewayMetrics::GatewayMetrics(std::shared_ptr<common::MetricsMgrClient> metricsMgrClient,
-                               EventLoop* eventLoop)
+                               std::shared_ptr<EventLoop> eventLoop)
   : metricsMgrClient_(metricsMgrClient) {
   receivedPacketsCount_.reset(new api::metric::CountMetric());
   receivedPacketsSize_.reset(new api::metric::CountMetric());

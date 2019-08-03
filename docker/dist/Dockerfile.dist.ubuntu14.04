@@ -35,8 +35,7 @@ ADD artifacts /heron
 WORKDIR /heron
 
 # run heron installer
-RUN /heron/heron-install.sh \
-    && rm -f /usr/local/heron/dist/heron-core.tar.gz
+RUN /heron/heron-install.sh
 
 RUN ln -s /usr/local/heron/dist/heron-core /heron \
     && mkdir -p /heron/heron-tools \
@@ -83,6 +82,7 @@ RUN mkdir -p /opt/zookeeper/scripts
 ADD dist/scripts /opt/zookeeper/scripts
 RUN chmod +x /opt/zookeeper/scripts/generate-zookeeper-config.sh \
     && chmod +x /opt/zookeeper/scripts/zookeeper-ruok.sh \
-    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh
+    && chmod +x /opt/zookeeper/scripts/start-zookeeper.sh \
+    && chmod +x /opt/zookeeper/scripts/wait-for-zookeeper.sh
 
 CMD ["supervisord", "-n"]

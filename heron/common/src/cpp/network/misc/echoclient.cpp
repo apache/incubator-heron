@@ -81,7 +81,7 @@ void EchoClient::HandleClose(NetworkErrorCode)
   getEventLoop()->loopExit();
 }
 
-void EchoClient::HandleEchoResponse(void*, EchoServerResponse* _response,
+void EchoClient::HandleEchoResponse(void*, std::unique_ptr<EchoServerResponse> _response,
                                     NetworkErrorCode _status)
 {
   if (_status != OK) {
@@ -95,6 +95,6 @@ void EchoClient::HandleEchoResponse(void*, EchoServerResponse* _response,
       }
     }
   }
-  delete _response;
+
   CreateAndSendRequest();
 }

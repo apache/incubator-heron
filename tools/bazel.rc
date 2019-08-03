@@ -17,8 +17,8 @@
 
 
 build --genrule_strategy=standalone
+build --host_force_python=PY2
 build --ignore_unsupported_sandboxing
-build --python2_path /usr/bin/python2.7
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh
 
@@ -32,7 +32,6 @@ build:centos --ignore_unsupported_sandboxing
 build:centos --linkopt -lm
 build:centos --linkopt -lpthread
 build:centos --linkopt -lrt
-build:centos --python2_path /usr/bin/python2.7
 build:centos --spawn_strategy=standalone
 build:centos --workspace_status_command scripts/release/status.sh
 
@@ -46,7 +45,6 @@ build:debian --ignore_unsupported_sandboxing
 build:debian --linkopt -lm
 build:debian --linkopt -lpthread
 build:debian --linkopt -lrt
-build:debian --python2_path /usr/bin/python2.7
 build:debian --spawn_strategy=standalone
 build:debian --workspace_status_command scripts/release/status.sh
 
@@ -57,7 +55,6 @@ build:darwin --experimental_action_listener=tools/java:compile_java
 build:darwin --experimental_action_listener=tools/python:compile_python
 build:darwin --genrule_strategy=standalone
 build:darwin --ignore_unsupported_sandboxing
-build:darwin --python2_path /usr/bin/python2.7
 build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
 
@@ -71,7 +68,6 @@ build:ubuntu --ignore_unsupported_sandboxing
 build:ubuntu --linkopt -lm
 build:ubuntu --linkopt -lpthread
 build:ubuntu --linkopt -lrt
-build:ubuntu --python2_path /usr/bin/python2.7
 build:ubuntu --spawn_strategy=standalone
 build:ubuntu --workspace_status_command scripts/release/status.sh
 
@@ -85,7 +81,6 @@ build:centos_nostyle --ignore_unsupported_sandboxing
 build:centos_nostyle --linkopt -lm
 build:centos_nostyle --linkopt -lpthread
 build:centos_nostyle --linkopt -lrt
-build:centos_nostyle --python2_path /usr/bin/python2.7
 build:centos_nostyle --spawn_strategy=standalone
 build:centos_nostyle --workspace_status_command scripts/release/status.sh
 
@@ -96,7 +91,6 @@ build:debian_nostyle --ignore_unsupported_sandboxing
 build:debian_nostyle --linkopt -lm
 build:debian_nostyle --linkopt -lpthread
 build:debian_nostyle --linkopt -lrt
-build:debian_nostyle --python2_path /usr/bin/python2.7
 build:debian_nostyle --spawn_strategy=standalone
 build:debian_nostyle --workspace_status_command scripts/release/status.sh
 
@@ -104,7 +98,6 @@ build:debian_nostyle --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=darwin_nostyle
 build:darwin_nostyle --genrule_strategy=standalone
 build:darwin_nostyle --ignore_unsupported_sandboxing
-build:darwin_nostyle --python2_path /usr/bin/python2.7
 build:darwin_nostyle --spawn_strategy=standalone
 build:darwin_nostyle --workspace_status_command scripts/release/status.sh
 
@@ -115,7 +108,5 @@ build:ubuntu_nostyle --ignore_unsupported_sandboxing
 build:ubuntu_nostyle --linkopt -lm
 build:ubuntu_nostyle --linkopt -lpthread
 build:ubuntu_nostyle --linkopt -lrt
-build:ubuntu_nostyle --python2_path /usr/bin/python2.7
 build:ubuntu_nostyle --spawn_strategy=standalone
 build:ubuntu_nostyle --workspace_status_command scripts/release/status.sh
-

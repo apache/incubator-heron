@@ -34,7 +34,7 @@ namespace config {
 // Global initialization to facilitate singleton design pattern
 HeronInternalsConfigReader* HeronInternalsConfigReader::heron_internals_config_reader_ = 0;
 
-HeronInternalsConfigReader::HeronInternalsConfigReader(EventLoop* eventLoop,
+HeronInternalsConfigReader::HeronInternalsConfigReader(std::shared_ptr<EventLoop> eventLoop,
                                                        const sp_string& _defaults_file,
                                                        const sp_string& _override_file)
     : YamlFileReader(eventLoop, _defaults_file) {
@@ -57,7 +57,7 @@ bool HeronInternalsConfigReader::Exists() {
   return (heron_internals_config_reader_ != NULL);  // Return true/false
 }
 
-void HeronInternalsConfigReader::Create(EventLoop* eventLoop,
+void HeronInternalsConfigReader::Create(std::shared_ptr<EventLoop> eventLoop,
                                         const sp_string& _defaults_file,
                                         const sp_string& _override_file) {
   if (heron_internals_config_reader_) {

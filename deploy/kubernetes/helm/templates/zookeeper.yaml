@@ -146,6 +146,9 @@ spec:
       name: datadir
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      {{- if ne .Values.zookeeper.storageClassName "none" }}
+      storageClassName: {{ .Values.zookeeper.storageClassName }}
+      {{- end }}
       resources:
         requests:
           storage: {{ .Values.zookeeper.storage }}

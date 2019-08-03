@@ -38,7 +38,8 @@ namespace common {
 
 using std::shared_ptr;
 
-MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
+MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval,
+        shared_ptr<EventLoop> eventLoop) {
   options_.set_host("127.0.0.1");
   options_.set_port(_metricsmgr_port);
   options_.set_max_packet_size(1024 * 1024);

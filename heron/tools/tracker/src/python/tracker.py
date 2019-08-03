@@ -29,7 +29,7 @@ from functools import partial
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 from heron.statemgrs.src.python import statemanagerfactory
-from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY
+from heron.tools.tracker.src.python.config import EXTRA_LINK_FORMATTER_KEY, EXTRA_LINK_URL_KEY
 from heron.tools.tracker.src.python.topology import Topology
 from heron.tools.tracker.src.python import javaobj
 from heron.tools.tracker.src.python import pyutils
@@ -282,8 +282,8 @@ class Tracker(object):
 
     for extra_link in self.config.extra_links:
       link = extra_link.copy()
-      link["url"] = self.config.get_formatted_url(executionState,
-                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                               executionState)
       executionState["extra_links"].append(link)
     return executionState
 
@@ -308,8 +308,8 @@ class Tracker(object):
 
     for extra_link in self.config.extra_links:
       link = extra_link.copy()
-      link["url"] = self.config.get_formatted_url(metadata,
-                                                  link[EXTRA_LINK_FORMATTER_KEY])
+      link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                               metadata)
       metadata["extra_links"].append(link)
     return metadata
 
@@ -375,6 +375,7 @@ class Tracker(object):
 
     return tmasterLocation
 
+  # pylint: disable=too-many-locals
   def extract_logical_plan(self, topology):
     """
     Returns the representation of logical plan that will
@@ -392,6 +393,7 @@ class Tracker(object):
       spoutSource = "NA"
       spoutVersion = "NA"
       spoutConfigs = spout.comp.config.kvs
+      spoutExtraLinks = []
       for kvs in spoutConfigs:
         if kvs.key == "spout.type":
           spoutType = javaobj.loads(kvs.serialized_value)
@@ -399,13 +401,32 @@ class Tracker(object):
           spoutSource = javaobj.loads(kvs.serialized_value)
         elif kvs.key == "spout.version":
           spoutVersion = javaobj.loads(kvs.serialized_value)
+        elif kvs.key == "extra.links":
+          spoutExtraLinks = json.loads(javaobj.loads(kvs.serialized_value))
+
       spoutPlan = {
           "config": convert_pb_kvs(spoutConfigs, include_non_primitives=False),
           "type": spoutType,
           "source": spoutSource,
           "version": spoutVersion,
-          "outputs": []
+          "outputs": [],
+          "extra_links": spoutExtraLinks,
       }
+
+      # render component extra links with general params
+      execution_state = topology.execution_state
+      executionState = {
+          "cluster": execution_state.cluster,
+          "environ": execution_state.environ,
+          "role": execution_state.role,
+          "jobname": topology.name,
+          "submission_user": execution_state.submission_user,
+      }
+
+      for link in spoutPlan["extra_links"]:
+        link[EXTRA_LINK_URL_KEY] = self.config.get_formatted_url(link[EXTRA_LINK_FORMATTER_KEY],
+                                                                 executionState)
+
       for outputStream in list(spout.outputs):
         spoutPlan["outputs"].append({
             "stream_name": outputStream.stream.id

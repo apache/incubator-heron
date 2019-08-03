@@ -47,9 +47,9 @@ void TerminateRequestDone(HTTPClient* client, IncomingHTTPResponse* response) {
 }
 
 void TerminateServer(sp_uint32 port) {
-  EventLoopImpl ss;
-  AsyncDNS dns(&ss);
-  HTTPClient client(&ss, &dns);
+  auto ss = std::make_shared<EventLoopImpl>();
+  AsyncDNS dns(ss);
+  HTTPClient client(ss, &dns);
 
   HTTPKeyValuePairs kvs;
 
@@ -63,7 +63,7 @@ void TerminateServer(sp_uint32 port) {
     GTEST_FAIL();
   }
 
-  ss.loop();
+  ss->loop();
 }
 
 void StartTest(sp_uint32 nclients, sp_uint64 requests, sp_uint32 nkeys) {

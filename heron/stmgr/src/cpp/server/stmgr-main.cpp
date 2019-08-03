@@ -56,17 +56,17 @@ int main(int argc, char* argv[]) {
   }
   std::vector<std::string> instances = StrUtils::split(FLAGS_instance_ids, ",");
 
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss,
+  heron::config::HeronInternalsConfigReader::Create(ss,
     FLAGS_config_file, FLAGS_override_config_file);
 
   heron::common::Initialize(argv[0], FLAGS_stmgr_id.c_str());
 
   // Lets first read the top defn file
-  heron::proto::api::Topology* topology = new heron::proto::api::Topology();
+  auto topology = std::make_shared<heron::proto::api::Topology>();
   sp_string contents = FileUtils::readAll(FLAGS_topologydefn_file);
   topology->ParseFromString(contents);
   if (!topology->IsInitialized()) {
@@ -79,12 +79,12 @@ int main(int argc, char* argv[]) {
   sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
                               ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
                                 1_MB;
-  heron::stmgr::StMgr mgr(&ss, FLAGS_myhost, FLAGS_data_port, FLAGS_local_data_port,
+  heron::stmgr::StMgr mgr(ss, FLAGS_myhost, FLAGS_data_port, FLAGS_local_data_port,
                           FLAGS_topology_name, FLAGS_topology_id, topology, FLAGS_stmgr_id,
                           instances, FLAGS_zkhostportlist, FLAGS_zkroot, FLAGS_metricsmgr_port,
                           FLAGS_shell_port, FLAGS_ckptmgr_port, FLAGS_ckptmgr_id,
                           high_watermark, low_watermark, FLAGS_metricscachemgr_mode);
   mgr.Init();
-  ss.loop();
+  ss->loop();
   return 0;
 }

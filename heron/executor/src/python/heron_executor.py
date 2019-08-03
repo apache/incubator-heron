@@ -1109,10 +1109,17 @@ class HeronExecutor(object):
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
     Log.info("Start state manager watches")
+
+    with open(self.override_config_file, 'r') as stream:
+      overrides = yaml.load(stream)
+      if overrides is None:
+        overrides = dict()
+    overrides["heron.statemgr.connection.string"] = self.state_manager_connection
+
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(configloader.load_state_manager_locations(
         self.cluster, state_manager_config_file=self.state_manager_config_file,
-        overrides={"heron.statemgr.connection.string": self.state_manager_connection}))
+        **overrides))
     try:
       self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
       for state_manager in self.state_managers:

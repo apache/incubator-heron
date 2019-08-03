@@ -66,7 +66,7 @@ TMaster::TMaster(const std::string& _zk_hostport, const std::string& _topology_n
                  sp_int32 _master_port, sp_int32 _stats_port, sp_int32 metricsMgrPort,
                  sp_int32 _ckptmgr_port,
                  const std::string& _metrics_sinks_yaml, const std::string& _myhost_name,
-                 EventLoop* eventLoop) {
+                 shared_ptr<EventLoop> eventLoop) {
   start_time_ = std::chrono::high_resolution_clock::now();
   zk_hostport_ = _zk_hostport;
   topdir_ = _topdir;

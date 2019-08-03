@@ -45,7 +45,7 @@ class TaskContextImpl : public api::topology::TaskContext {
  public:
   explicit TaskContextImpl(int myTaskId);
   ~TaskContextImpl();
-  void newPhysicalPlan(proto::system::PhysicalPlan* pplan);
+  void newPhysicalPlan(std::shared_ptr<proto::system::PhysicalPlan> pplan);
 
   // TopologyContext related implementations
   virtual const std::string& getTopologyId();
@@ -103,7 +103,7 @@ class TaskContextImpl : public api::topology::TaskContext {
   void cleanUp();
 
   int myTaskId_;
-  proto::system::PhysicalPlan* pplan_;
+  std::shared_ptr<proto::system::PhysicalPlan> pplan_;
   std::string myComponentName_;
   std::string myInstanceId_;
   std::map<std::string, int> myOutputSchema_;

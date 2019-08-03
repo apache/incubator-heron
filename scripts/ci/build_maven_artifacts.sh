@@ -43,6 +43,7 @@ $HOME/bin/bazel build heron/api/src/java:all
 $HOME/bin/bazel build heron/spi/src/java:all
 $HOME/bin/bazel build heron/simulator/src/java:all
 $HOME/bin/bazel build storm-compatibility/src/java:all
+$HOME/bin/bazel build contrib/spouts/kafka/src/java:all
 
 echo "Found Version Tag $VERSION_TAG"
 mkdir -p artifacts/$VERSION_TAG
@@ -62,6 +63,7 @@ mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-api
 mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-spi
 mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-simulator
 mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-storm
+mkdir -p $OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout
 
 echo "Copy heron-api artifacts ... "
 cp ./release/heron-api-$VERSION_TAG.pom $OUTPUT_DIR/$VERSION_TAG/heron-api/
@@ -87,6 +89,11 @@ cp ./bazel-bin/storm-compatibility/src/java/heron-storm.jar ./$OUTPUT_DIR/$VERSI
 cp ./bazel-bin/storm-compatibility/src/java/heron-storm-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-javadoc.jar
 cp ./bazel-bin/storm-compatibility/src/java/libstorm-compatibility-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-storm/heron-storm-$VERSION_TAG-sources.jar
 
+echo "Copy heron-kafka-spout artifacts ... "
+cp ./release/heron-kafka-spout-$VERSION_TAG.pom ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/
+cp ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG.jar
+cp ./bazel-bin/contrib/spouts/kafka/src/java/heron-kafka-spout-javadoc.zip ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-javadoc.jar
+cp ./bazel-bin/contrib/spouts/kafka/src/java/libheron-kafka-spout-java-src.jar ./$OUTPUT_DIR/$VERSION_TAG/heron-kafka-spout/heron-kafka-spout-$VERSION_TAG-sources.jar
 
 echo "Compress all artifacts into a bundle file ..."
 tar -czf "heron-artifacts-${VERSION_TAG}.tar.gz" $OUTPUT_DIR

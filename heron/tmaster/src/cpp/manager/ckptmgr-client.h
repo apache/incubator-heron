@@ -31,7 +31,7 @@ namespace tmaster {
 
 class CkptMgrClient : public Client {
  public:
-  CkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
+  CkptMgrClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                 const sp_string& _topology_name, const sp_string& _topology_id,
                 std::function<void(proto::system::StatusCode)> _clean_response_watcher);
   virtual ~CkptMgrClient();
@@ -41,15 +41,18 @@ class CkptMgrClient : public Client {
   void SendCleanStatefulCheckpointRequest(const std::string& _oldest_ckpt, bool _clean_all);
 
  protected:
-  virtual void HandleCleanStatefulCheckpointResponse(void*,
-                              proto::ckptmgr::CleanStatefulCheckpointResponse* _response,
-                              NetworkErrorCode status);
+  virtual void HandleCleanStatefulCheckpointResponse(
+                        void*,
+                        pool_unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
+                        NetworkErrorCode status);
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleTMasterRegisterResponse(void*, proto::ckptmgr::RegisterTMasterResponse *_response,
-                                      NetworkErrorCode _status);
+  void HandleTMasterRegisterResponse(
+                                  void*,
+                                  pool_unique_ptr<proto::ckptmgr::RegisterTMasterResponse>_response,
+                                  NetworkErrorCode _status);
 
   void SendRegisterRequest();
 

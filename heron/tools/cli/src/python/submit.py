@@ -234,6 +234,14 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
       err_context = "Cannot load topology definition '%s': %s" % (defn_file, e)
       return SimpleResult(Status.HeronError, err_context)
 
+    # log topology and components configurations
+    Log.debug("Topology config: %s", topology_defn.topology_config)
+    Log.debug("Component config:")
+    for spout in topology_defn.spouts:
+      Log.debug("%s => %s", spout.comp.name, spout.comp.config)
+    for bolt in topology_defn.bolts:
+      Log.debug("%s => %s", bolt.comp.name, bolt.comp.config)
+
     # launch the topology
     Log.info("Launching topology: \'%s\'%s", topology_defn.name, launch_mode_msg(cl_args))
 
@@ -455,6 +463,10 @@ def run(command, parser, cl_args, unknown_args):
   opts.set_config('cmdline.topology.initial.state', initial_state)
   opts.set_config('cmdline.topology.role', cl_args['role'])
   opts.set_config('cmdline.topology.environment', cl_args['environ'])
+  opts.set_config('cmdline.topology.cluster', cl_args['cluster'])
+  opts.set_config('cmdline.topology.file_name', cl_args['topology-file-name'])
+  opts.set_config('cmdline.topology.class_name', cl_args['topology-class-name'])
+  opts.set_config('cmdline.topology.submit_user', cl_args['submit_user'])
 
   # Use CLI release yaml file if the release_yaml_file config is empty
   if not cl_args['release_yaml_file']:

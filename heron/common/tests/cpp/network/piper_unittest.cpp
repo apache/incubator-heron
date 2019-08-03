@@ -32,13 +32,13 @@ struct Resource {
   sp_int32 count;
 };
 
-void RunningEventLoop(EventLoopImpl* ss) {
+void RunningEventLoop(std::shared_ptr<EventLoopImpl> ss) {
   ss->registerTimer([](EventLoop::Status status) { /* do nothing */ }, true, 1 * 1000 * 1000);
   ss->loop();
 }
 
 TEST(PiperTest, test_piper) {
-  EventLoopImpl* eventLoop = new EventLoopImpl();
+  auto eventLoop = std::make_shared<EventLoopImpl>();
   std::thread* thread = new std::thread(RunningEventLoop, eventLoop);
 
   Piper* piper = new Piper(eventLoop);
@@ -62,7 +62,6 @@ TEST(PiperTest, test_piper) {
 
   delete piper;
   delete resource;
-  delete eventLoop;
   delete thread;
 }
 

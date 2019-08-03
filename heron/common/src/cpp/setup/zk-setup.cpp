@@ -111,10 +111,10 @@ int main(int argc, char* argv[]) {
     zkroot = std::string(zkroot, 0, zkroot.size() - 1);
   }
 
-  EventLoopImpl ss;
-  zkclient = new ZKClient(zkhostport, &ss);
+  auto ss = std::make_shared<EventLoopImpl>();
+  zkclient = new ZKClient(zkhostport, ss);
 
   zkclient->CreateNode(zkroot, "Heron Cluster " + clustername, false,
                        [](sp_int32 status) { ZkRootDone(status); });
-  ss.loop();
+  ss->loop();
 }

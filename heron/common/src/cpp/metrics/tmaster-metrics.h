@@ -49,7 +49,7 @@ class TMasterMetrics {
     AVG,
     LAST  // We only care about the last value
   };
-  TMasterMetrics(const sp_string& metrics_sinks, EventLoop* eventLoop);
+  TMasterMetrics(const sp_string& metrics_sinks, std::shared_ptr<EventLoop> eventLoop);
   ~TMasterMetrics();
 
   bool IsTMasterMetric(const sp_string& _name);

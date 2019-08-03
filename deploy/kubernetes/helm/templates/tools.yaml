@@ -17,7 +17,7 @@
 
 {{- $platform := .Values.platform -}}
 {{- $jobReplicas := .Values.jobReplicas -}}
-{{- $apiServerMemory := .Values.apiServerMemory -}}
+{{- $apiServerMemory := .Values.apiServerMemory }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -70,7 +70,7 @@ spec:
             - /opt/zookeeper/scripts/wait-for-zookeeper.sh {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}
         - name: init-heron-apiserver
           image: {{ .Values.bookkeeper.image }}
-          command: ['sh', '-c', '/opt/bookkeeper/bin/dlog admin bind -l /ledgers -s {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}:2181 -c distributedlog://{{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}/heron']
+          command: ['sh', '-c', '/opt/bookkeeper/bin/dlog admin bind -l /ledgers -s {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} -c distributedlog://{{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}/heron']
       containers:
         - name: heron-tracker
           image: {{ .Values.image }}
@@ -131,11 +131,11 @@ spec:
               -D heron.kubernetes.scheduler.namespace={{ .Release.Namespace }}
               -D heron.executor.docker.image={{ .Values.image }}
               -D heron.statefulstorage.classname=org.apache.heron.statefulstorage.dlog.DlogStorage
-              -D heron.statefulstorage.dlog.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}/heron
+              -D heron.statefulstorage.dlog.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}/heron
               {{- if eq .Values.uploader.class "dlog" }}
-              -D heron.class.uploader=org.apache.heron.uploader.dlog.DLUploader
+              -D heron.class.uploader=com.twitter.heron.uploader.dlog.DLUploader
               -D heron.uploader.dlog.topologies.num.replicas={{ $jobReplicas }}
-              -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }}/heron
+              -D heron.uploader.dlog.topologies.namespace.uri=distributedlog://{{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}/heron
               {{- else if eq .Values.uploader.class "s3" }}
               -D heron.class.uploader=org.apache.heron.uploader.s3.S3Uploader
               -D heron.uploader.s3.bucket={{ .Values.uploader.s3Bucket }}
@@ -145,8 +145,8 @@ spec:
               -D heron.uploader.s3.region={{ .Values.uploader.s3Region }}
               {{- end }}
               {{- if eq .Values.packing "RoundRobin" }}
-              -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
-              -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.RoundRobinPacking
+              -D heron.class.packing.algorithm=com.twitter.heron.packing.roundrobin.RoundRobinPacking
+              -D heron.class.repacking.algorithm=com.twitter.heron.packing.roundrobin.RoundRobinPacking
               {{- else if eq .Values.packing "ResourceCompliantRR" }}
               -D heron.class.packing.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
               -D heron.class.repacking.algorithm=org.apache.heron.packing.roundrobin.ResourceCompliantRRPacking
@@ -158,7 +158,7 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-tools-config
         - name: kubectl-proxy
-          image: heron/kubectl:latest
+          image: {{ .Values.kubectlImage }}
           command: ["sh", "-c"]
           args:
             - >

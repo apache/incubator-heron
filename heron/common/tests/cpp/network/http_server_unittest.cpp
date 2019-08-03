@@ -27,7 +27,7 @@
 
 static sp_uint32 nkeys = 0;
 
-TestHttpServer::TestHttpServer(EventLoopImpl* eventLoop, NetworkOptions& _options) {
+TestHttpServer::TestHttpServer(std::shared_ptr<EventLoopImpl> eventLoop, NetworkOptions& _options) {
   server_ = new HTTPServer(eventLoop, _options);
   server_->InstallCallBack(
       "/meta", [this](IncomingHTTPRequest* request) { this->HandleMetaRequest(request); });
@@ -88,7 +88,7 @@ void TestHttpServer::HandleTerminateRequest(IncomingHTTPRequest* _request) {
 void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd) {
   nkeys = _nkeys;
 
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // set host, port and packet size
   NetworkOptions options;
@@ -97,11 +97,11 @@ void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd) {
   options.set_max_packet_size(BUFSIZ << 4);
 
   // start the server
-  TestHttpServer http_server(&ss, options);
+  TestHttpServer http_server(ss, options);
 
   // use pipe to block clients before server enters event loop
   int sent;
   write(fd, &sent, sizeof(int));
 
-  ss.loop();
+  ss->loop();
 }

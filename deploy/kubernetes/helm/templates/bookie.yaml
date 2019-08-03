@@ -42,7 +42,11 @@ data:
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
-  #BK_statsProviderClass: org.apache.bookkeeper.stats.PrometheusMetricsProvider
+  {{- if eq .Values.bookkeeper.prometheus.enabled true }}
+  BK_enableStatistics: "true"
+  BK_enableTaskExecutionStats: "true"
+  BK_statsProviderClass: org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider
+  {{- end }}
 ---
 
 ## BookKeeper servers need to access the local disks and the pods
@@ -101,15 +105,15 @@ spec:
       initContainers:
         # Wait until the zookeeper pods are up and running
         - name: bookie-init-container
-          image: {{ .Values.bookkeeper.image }}
+          image: {{ .Values.image }} # use heron image until bookkeeper has nc
           command: 
             - sh
             - -c
             - >-
               while true; do
-                status=$(echo ruok | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
-                writestatus=$(echo isro | nc {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
-                if [ "$status" = "imok" ] && [ "$writestatus" == "rw" ]; then
+                status=$(echo ruok | nc -w 3 {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }});
+                writestatus=$(echo isro | nc -w 3 {{ .Release.Name }}-zookeeper {{ .Values.zookeeper.clientPort }})
+                if [ "$status" = "imok" ] && [ "$writestatus" = "rw" ]; then
                   break;
                 fi;
                 echo 'Zookeeper {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }} not ready';
@@ -138,7 +142,7 @@ spec:
           volumeMounts:
             - name: journal-disk
               mountPath: /bookkeeper/data/journal
-            - name: data-disk
+            - name: ledgers-disk
               mountPath: /bookkeeper/data/ledgers
 
 {{- if or (eq .Values.platform "aws") (eq .Values.platform "baremetal") }}
@@ -162,17 +166,23 @@ spec:
           component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
+        {{- if ne .Values.bookkeeper.storageClassName "none" }}
+        storageClassName: {{ .Values.bookkeeper.storageClassName }}
+        {{- end }}
         resources:
           requests:
             storage: {{ $bookieJournalCapacity }}
     - metadata:
-        name: data-disk
+        name: ledgers-disk
         annotations:
           volume.alpha.kubernetes.io/storage-class: default
         labels:
           component: {{ .Release.Name }}-bookkeeper
       spec:
         accessModes: [ "ReadWriteOnce" ]
+        {{- if ne .Values.bookkeeper.storageClassName "none" }}
+        storageClassName: {{ .Values.bookkeeper.storageClassName }}
+        {{- end }}
         resources:
           requests:
             storage: {{ $bookieStorageCapacity }}

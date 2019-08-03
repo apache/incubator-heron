@@ -34,7 +34,7 @@
 const sp_uint8 __SYSTEM_MIN_NUM_ENQUEUES_WITH_BUFFER_FULL__ = 3;
 
 Connection::Connection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                       EventLoop* eventLoop)
+                       std::shared_ptr<EventLoop> eventLoop)
     : BaseConnection(endpoint, options, eventLoop) {
   mIncomingPacket = new IncomingPacket(mOptions->max_packet_size_);
   mOnNewPacket = NULL;

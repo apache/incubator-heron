@@ -34,7 +34,7 @@
 sp_string heron_internals_config_filename =
     "../../../../../../../../heron/config/heron_internals.yaml";
 
-EventLoopImpl ss;
+std::shared_ptr<EventLoopImpl> ss = std::make_shared<EventLoopImpl>();
 
 void OneTimer(heron::stmgr::XorManager* _g, std::vector<sp_int64>* _task_ids,
               EventLoopImpl::Status) {
@@ -57,7 +57,7 @@ void TwoTimer(heron::stmgr::XorManager* _g, std::vector<sp_int64>* _task_ids,
   EXPECT_EQ(_g->remove(2, 1), false);
 
   delete _task_ids;
-  ss.loopExit();
+  ss->loopExit();
 }
 
 // Test the anchoring xoring logic and removes
@@ -65,7 +65,7 @@ TEST(XorManager, test_all) {
   std::vector<sp_int32> task_ids;
   task_ids.push_back(1);
   task_ids.push_back(2);
-  heron::stmgr::XorManager* g = new heron::stmgr::XorManager(&ss, 1, task_ids);
+  heron::stmgr::XorManager* g = new heron::stmgr::XorManager(ss, 1, task_ids);
 
   // Create some items
   for (sp_int32 i = 0; i < 100; ++i) {
@@ -113,7 +113,7 @@ TEST(XorManager, test_all) {
   };
 
   // register timer after 1.5 seconds to allow rotation to happen
-  ss.registerTimer(std::move(cb1), false, 1500000);
+  ss->registerTimer(std::move(cb1), false, 1500000);
 
   // Same test with too much rotation
   std::vector<sp_int64>* two_added = new std::vector<sp_int64>();
@@ -132,8 +132,8 @@ TEST(XorManager, test_all) {
 
   // register timer after 5 seconds to allow
   // multiple rotation to happen
-  ss.registerTimer(std::move(cb2), false, 4000000);
-  ss.loop();
+  ss->registerTimer(std::move(cb2), false, 4000000);
+  ss->loop();
 
   delete g;
 }

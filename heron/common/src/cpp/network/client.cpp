@@ -24,7 +24,7 @@
 #include <string>
 #include "basics/basics.h"
 
-Client::Client(EventLoop* eventLoop, const NetworkOptions& _options)
+Client::Client(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options)
     : BaseClient(eventLoop, _options) {
   Init();
 }
@@ -69,7 +69,7 @@ sp_int64 Client::AddTimer(VCallback<> cb, sp_int64 _msecs) {
 sp_int32 Client::RemoveTimer(sp_int64 timer_id) { return RemoveTimer_Base(timer_id); }
 
 BaseConnection* Client::CreateConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
-                                         EventLoop* eventLoop) {
+                                         std::shared_ptr<EventLoop> eventLoop) {
   auto conn = new Connection(_endpoint, _options, eventLoop);
 
   conn->registerForNewPacket([this](IncomingPacket* pkt) { this->OnNewPacket(pkt); });

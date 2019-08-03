@@ -49,12 +49,12 @@ class ZKClient {
   };
 
   // Constructor/Destructor
-  ZKClient(const std::string& hostportlist, EventLoop* eventLoop);
+  ZKClient(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop);
 
   // If a global_watcher is provided, the clients can watch on session events.
   // Right now only SessionExpired event is notified, but could have others
   // in the future. global_watcher_cb should be a PermanentCallback.
-  ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
+  ZKClient(const std::string& hostportlist, std::shared_ptr<EventLoop> eventLoop,
            VCallback<ZkWatchEvent> global_watcher_cb);
 
   virtual ~ZKClient();
@@ -147,7 +147,7 @@ class ZKClient {
 
   clientid_t zk_clientid_;
   zhandle_t* zk_handle_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   std::string hostportlist_;
 
   // We use libzookeeper_mt as our zk library. This means that

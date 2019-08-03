@@ -41,13 +41,14 @@ class Slave {
   // This essentially fires a thread with internalStart
   void Start();
 
-  EventLoop* eventLoop() { return eventLoop_; }
-  void setCommunicators(NotifyingCommunicator<google::protobuf::Message*>* dataToSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                        NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave);
+  std::shared_ptr<EventLoop> eventLoop() { return eventLoop_; }
+  void setCommunicators(
+                    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
+                    NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+                    NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave);
 
   // Handles data from gateway thread
-  void HandleGatewayData(google::protobuf::Message* msg);
+  void HandleGatewayData(pool_unique_ptr<google::protobuf::Message> msg);
 
   // This is the notification that gateway thread consumed something that we wrote
   void HandleGatewayDataConsumed();
@@ -59,17 +60,17 @@ class Slave {
   // This is the one thats running in the slave thread
   void InternalStart();
   // Called when a new phyiscal plan is received
-  void HandleNewPhysicalPlan(proto::system::PhysicalPlan* pplan);
+  void HandleNewPhysicalPlan(pool_unique_ptr<proto::system::PhysicalPlan> pplan);
   // Called when we receive new tuple messages from gateway
-  void HandleStMgrTuples(proto::system::HeronTupleSet2* msg);
+  void HandleStMgrTuples(pool_unique_ptr<proto::system::HeronTupleSet2> msg);
 
   int myTaskId_;
   std::shared_ptr<TaskContextImpl> taskContext_;
-  NotifyingCommunicator<google::protobuf::Message*>* dataToSlave_;
+  NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
   NotifyingCommunicator<google::protobuf::Message*>* metricsFromSlave_;
   InstanceBase* instance_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   void* dllHandle_;
   std::string pplan_typename_;
   std::unique_ptr<std::thread> slaveThread_;
