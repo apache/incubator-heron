@@ -18,6 +18,7 @@
 package org.apache.heron.bolts.kafka;
 
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
@@ -34,8 +35,11 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 
 import static org.apache.heron.api.Config.TopologyReliabilityMode.ATLEAST_ONCE;
+import static org.apache.heron.api.Config.TopologyReliabilityMode.ATMOST_ONCE;
+import static org.apache.heron.api.Config.TopologyReliabilityMode.EFFECTIVELY_ONCE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -97,5 +101,37 @@ public class KafkaBoltTest {
         });
     kafkaBolt.execute(tuple);
     verify(outputCollector).fail(tuple);
+  }
+
+  @Test(expected = KafkaException.class)
+  public void executeEFFECTIVEONCE() throws ExecutionException, InterruptedException {
+    kafkaBolt.prepare(Collections.singletonMap(Config.TOPOLOGY_RELIABILITY_MODE, EFFECTIVELY_ONCE),
+        null, outputCollector);
+    when(tupleTransformer.transformToKey(tuple)).thenReturn("key");
+    byte[] value = new byte[]{1, 2, 3};
+    when(tupleTransformer.transformToValue(tuple)).thenReturn(value);
+    when(tupleTransformer.getTopicName(tuple)).thenReturn("topic");
+
+    ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>("topic", "key", value);
+    when(producer.send(producerRecord)).thenReturn(future);
+    kafkaBolt.execute(tuple);
+    verify(future).get();
+
+    when(future.get()).thenThrow(ExecutionException.class);
+    kafkaBolt.execute(tuple);
+  }
+
+  @Test
+  public void executeATMOSTONCE() {
+    kafkaBolt.prepare(Collections.singletonMap(Config.TOPOLOGY_RELIABILITY_MODE, ATMOST_ONCE),
+        null, outputCollector);
+    when(tupleTransformer.transformToKey(tuple)).thenReturn("key");
+    byte[] value = new byte[]{1, 2, 3};
+    when(tupleTransformer.transformToValue(tuple)).thenReturn(value);
+    when(tupleTransformer.getTopicName(tuple)).thenReturn("topic");
+
+    ProducerRecord<String, byte[]> producerRecord = new ProducerRecord<>("topic", "key", value);
+    kafkaBolt.execute(tuple);
+    verify(producer).send(eq(producerRecord), any(Callback.class));
   }
 }
