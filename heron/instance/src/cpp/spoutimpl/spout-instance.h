@@ -51,7 +51,7 @@ class SpoutInstance : public InstanceBase {
   virtual void Deactivate();
   virtual bool IsRunning() { return active_; }
   virtual void DoWork();
-  virtual void HandleGatewayTuples(unique_ptr<proto::system::HeronTupleSet2> tupleSet);
+  virtual void HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet);
 
  private:
   void lookForTimeouts();

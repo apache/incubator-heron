@@ -132,7 +132,7 @@ class Client : public BaseClient {
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
   void InstallResponseHandler(unique_ptr<S> _request,
-                              void (T::*method)(void* _ctx, unique_ptr<M>,
+                              void (T::*method)(void* _ctx, pool_unique_ptr<M>,
                               NetworkErrorCode status)) {
     auto m = make_unique<M>();
     T* t = static_cast<T*>(this);
@@ -143,7 +143,7 @@ class Client : public BaseClient {
 
   // Register a handler for a particular message type
   template <typename T, typename M>
-  void InstallMessageHandler(void (T::*method)(unique_ptr<M> _message)) {
+  void InstallMessageHandler(void (T::*method)(pool_unique_ptr<M> _message)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] =
@@ -212,10 +212,10 @@ class Client : public BaseClient {
   void OnPacketTimer(REQID _id, EventLoop::Status status);
 
   template <typename T, typename M>
-  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, unique_ptr<M>, NetworkErrorCode),
+  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, pool_unique_ptr<M>, NetworkErrorCode),
                         IncomingPacket* _ipkt, NetworkErrorCode _code) {
     void* ctx = nullptr;
-    unique_ptr<M> m = nullptr;
+    pool_unique_ptr<M> m = nullptr;
     NetworkErrorCode status = _code;
     if (status == OK && _ipkt) {
       REQID rid;
@@ -223,7 +223,7 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = make_unique<M>();
+        m = make_unique_from_protobuf_pool<M>();
         context_map_.erase(rid);
         _ipkt->UnPackProtocolBuffer(m.get());
       } else {
@@ -241,8 +241,8 @@ class Client : public BaseClient {
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t, void (T::*method)(unique_ptr<M>), IncomingPacket* _ipkt) {
-    unique_ptr<M> m = make_unique<M>();
+  void dispatchMessage(T* _t, void (T::*method)(pool_unique_ptr<M>), IncomingPacket* _ipkt) {
+    pool_unique_ptr<M> m = make_unique_from_protobuf_pool<M>();
 
     if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly

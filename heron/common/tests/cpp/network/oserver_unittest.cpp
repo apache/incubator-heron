@@ -56,7 +56,7 @@ void OrderServer::HandleConnectionClose(Connection* _conn,
   delete ids;
 }
 
-void OrderServer::HandleOrderMessage(Connection* _conn, unique_ptr<OrderMessage> _message) {
+void OrderServer::HandleOrderMessage(Connection* _conn, pool_unique_ptr<OrderMessage> _message) {
   if (clients_.find(_conn) == clients_.end()) return;
 
   nrecv_++;
@@ -77,6 +77,6 @@ void OrderServer::Terminate() {
 }
 
 void OrderServer::HandleTerminateMessage(Connection* _connection __attribute__((unused)),
-                                   unique_ptr<TerminateMessage> _message __attribute__((unused))) {
+                               pool_unique_ptr<TerminateMessage> _message __attribute__((unused))) {
   AddTimer([this]() { std::cout << "OrderServer:Terminate"; this->Terminate(); }, 1);
 }

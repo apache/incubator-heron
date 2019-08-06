@@ -38,8 +38,8 @@ class StMgrClient : public Client {
               const std::string& topologyName,
               const std::string& topologyId, const proto::system::Instance& instance,
               std::shared_ptr<GatewayMetrics> gatewayMetrics,
-              std::function<void(std::unique_ptr<proto::system::PhysicalPlan>)> pplan_watcher,
-              std::function<void(std::unique_ptr<proto::system::HeronTupleSet2>)> tuple_watcher);
+              std::function<void(pool_unique_ptr<proto::system::PhysicalPlan>)> pplan_watcher,
+              std::function<void(pool_unique_ptr<proto::system::HeronTupleSet2>)> tuple_watcher);
   virtual ~StMgrClient();
 
   void SendTupleMessage(const proto::system::HeronTupleSet& msg);
@@ -51,10 +51,11 @@ class StMgrClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, unique_ptr<proto::stmgr::RegisterInstanceResponse> response,
+  void HandleRegisterResponse(void*,
+                              pool_unique_ptr<proto::stmgr::RegisterInstanceResponse> response,
                               NetworkErrorCode status);
-  void HandlePhysicalPlan(unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg);
-  void HandleTupleMessage(unique_ptr<proto::system::HeronTupleSet2> tupleMessage);
+  void HandlePhysicalPlan(pool_unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg);
+  void HandleTupleMessage(pool_unique_ptr<proto::system::HeronTupleSet2> tupleMessage);
 
   void OnReconnectTimer();
   void SendRegisterRequest();
@@ -63,8 +64,8 @@ class StMgrClient : public Client {
   std::string topologyId_;
   const proto::system::Instance& instanceProto_;
   std::shared_ptr<GatewayMetrics> gatewayMetrics_;
-  std::function<void(std::unique_ptr<proto::system::PhysicalPlan>)> pplanWatcher_;
-  std::function<void(std::unique_ptr<proto::system::HeronTupleSet2>)> tupleWatcher_;
+  std::function<void(pool_unique_ptr<proto::system::PhysicalPlan>)> pplanWatcher_;
+  std::function<void(pool_unique_ptr<proto::system::HeronTupleSet2>)> tupleWatcher_;
   int64_t ndropped_messages_;
   int reconnect_interval_;
   int max_reconnect_times_;

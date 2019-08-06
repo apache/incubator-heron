@@ -212,7 +212,7 @@ void drainer2(heron::proto::stmgr::TupleStreamMessage* _tup) {
 }
 
 void drainer3(sp_int32 _task_id,
-        std::unique_ptr<heron::proto::ckptmgr::InitiateStatefulCheckpoint> _ckpt) {
+        pool_unique_ptr<heron::proto::ckptmgr::InitiateStatefulCheckpoint> _ckpt) {
   drainer3_markers.push_back(_task_id);
 }
 

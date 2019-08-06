@@ -47,22 +47,22 @@ class TMasterServer : public Server {
  private:
   // Various handlers for different requests
   void HandleStMgrRegisterRequest(REQID _id, Connection* _conn,
-                                  unique_ptr<proto::tmaster::StMgrRegisterRequest> _request);
+                                  pool_unique_ptr<proto::tmaster::StMgrRegisterRequest> _request);
   void HandleStMgrHeartbeatRequest(REQID _id, Connection* _conn,
-                                   unique_ptr<proto::tmaster::StMgrHeartbeatRequest> _request);
-  void HandleMetricsMgrStats(Connection*, unique_ptr<proto::tmaster::PublishMetrics> _request);
+                                   pool_unique_ptr<proto::tmaster::StMgrHeartbeatRequest> _request);
+  void HandleMetricsMgrStats(Connection*, pool_unique_ptr<proto::tmaster::PublishMetrics> _request);
 
   // Message sent by stmgr to tell tmaster that a particular checkpoint message
   // was saved. This way the tmaster can keep track of which all instances have saved their
   // state for any given checkpoint id.
   void HandleInstanceStateStored(Connection*,
-                                 unique_ptr<proto::ckptmgr::InstanceStateStored> _message);
+                                 pool_unique_ptr<proto::ckptmgr::InstanceStateStored> _message);
   // Handle response from stmgr for the RestoreTopologyStateRequest
   void HandleRestoreTopologyStateResponse(Connection*,
-                                 unique_ptr<proto::ckptmgr::RestoreTopologyStateResponse> _message);
+                            pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateResponse> _message);
   // Stmgr can request tmaster to reset the state of the topology in case it finds any errors.
   void HandleResetTopologyStateMessage(Connection*,
-                                     unique_ptr<proto::ckptmgr::ResetTopologyState> _message);
+                                      pool_unique_ptr<proto::ckptmgr::ResetTopologyState> _message);
 
   // our tmaster
   shared_ptr<TMetricsCollector> collector_;

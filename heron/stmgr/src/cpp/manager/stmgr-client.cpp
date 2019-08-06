@@ -143,9 +143,9 @@ void StMgrClient::HandleClose(NetworkErrorCode _code) {
 }
 
 void StMgrClient::HandleHelloResponse(
-                                        void*,
-                                        unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
-                                        NetworkErrorCode _status) {
+                                       void*,
+                                       pool_unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
+                                       NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code " << _status << " for register response from stmgr "
                << other_stmgr_id_ << " running at " << get_clientoptions().get_host() << ":"
@@ -239,7 +239,8 @@ bool StMgrClient::SendTupleStreamMessage(proto::stmgr::TupleStreamMessage& _msg)
   return retval;
 }
 
-void StMgrClient::HandleTupleStreamMessage(unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
+void StMgrClient::HandleTupleStreamMessage(
+        pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message) {
   LOG(FATAL) << "We should not receive tuple messages in the client" << std::endl;
 }
 

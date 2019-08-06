@@ -43,7 +43,7 @@ class OrderClient : public Client {
 
  private:
   // Handle incoming message
-  void HandleOrderMessage(unique_ptr<OrderMessage> _message);
+  void HandleOrderMessage(pool_unique_ptr<OrderMessage> _message);
 
   void SendMessages();
   void CreateAndSendMessage();

@@ -99,9 +99,9 @@ void CkptMgrClient::HandleClose(NetworkErrorCode _status) {
 }
 
 void CkptMgrClient::HandleTMasterRegisterResponse(
-                                    void*,
-                                    unique_ptr<proto::ckptmgr::RegisterTMasterResponse> _response,
-                                    NetworkErrorCode _status) {
+                                void*,
+                                pool_unique_ptr<proto::ckptmgr::RegisterTMasterResponse> _response,
+                                NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK network code" << _status << " for register response from ckptmgr "
                << "running at " << get_clientoptions().get_host() << ":"
@@ -145,9 +145,9 @@ void CkptMgrClient::SendCleanStatefulCheckpointRequest(const std::string& _oldes
 }
 
 void CkptMgrClient::HandleCleanStatefulCheckpointResponse(
-                              void*,
-                              unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
-                              NetworkErrorCode status) {
+                        void*,
+                        pool_unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
+                        NetworkErrorCode status) {
   LOG(INFO) << "Got CleanStatefulCheckpoint response from ckptmgr" << std::endl;
 
   proto::system::StatusCode code = proto::system::OK;

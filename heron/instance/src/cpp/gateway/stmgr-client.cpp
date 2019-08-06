@@ -37,8 +37,8 @@ StMgrClient::StMgrClient(
                    const std::string& topologyName, const std::string& topologyId,
                    const proto::system::Instance& instanceProto,
                    std::shared_ptr<GatewayMetrics> gatewayMetrics,
-                   std::function<void(std::unique_ptr<proto::system::PhysicalPlan>)> pplanWatcher,
-                   std::function<void(std::unique_ptr<proto::system::HeronTupleSet2>)> tupleWatcher)
+                   std::function<void(pool_unique_ptr<proto::system::PhysicalPlan>)> pplanWatcher,
+                   std::function<void(pool_unique_ptr<proto::system::HeronTupleSet2>)> tupleWatcher)
     : Client(eventLoop, options),
       topologyName_(topologyName),
       topologyId_(topologyId),
@@ -100,7 +100,7 @@ void StMgrClient::HandleClose(NetworkErrorCode code) {
 
 void StMgrClient::HandleRegisterResponse(
     void*,
-    unique_ptr<proto::stmgr::RegisterInstanceResponse> response,
+    pool_unique_ptr<proto::stmgr::RegisterInstanceResponse> response,
     NetworkErrorCode status) {
   if (status != OK) {
     LOG(ERROR) << "NonOK network code " << status << " for register response from stmgr "
@@ -125,7 +125,8 @@ void StMgrClient::HandleRegisterResponse(
 
   if (response->has_pplan()) {
     LOG(INFO) << "Registration response had a pplan";
-    pplanWatcher_(std::move(unique_ptr<proto::system::PhysicalPlan>(response->release_pplan())));
+    using std::move;
+    pplanWatcher_(move(pool_unique_ptr<proto::system::PhysicalPlan>(response->release_pplan())));
   }
 }
 
@@ -140,13 +141,14 @@ void StMgrClient::SendRegisterRequest() {
   return;
 }
 
-void StMgrClient::HandlePhysicalPlan(unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg) {
+void StMgrClient::HandlePhysicalPlan(
+        pool_unique_ptr<proto::stmgr::NewInstanceAssignmentMessage> msg) {
   LOG(INFO) << "Got a Physical Plan from our stmgr " << instanceProto_.stmgr_id() << " running at "
             << get_clientoptions().get_host() << ":" << get_clientoptions().get_port();
-  pplanWatcher_(std::move(unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan())));
+  pplanWatcher_(std::move(pool_unique_ptr<proto::system::PhysicalPlan>(msg->release_pplan())));
 }
 
-void StMgrClient::HandleTupleMessage(unique_ptr<proto::system::HeronTupleSet2> msg) {
+void StMgrClient::HandleTupleMessage(pool_unique_ptr<proto::system::HeronTupleSet2> msg) {
   gatewayMetrics_->updateReceivedPacketsCount(1);
   gatewayMetrics_->updateReceivedPacketsSize(msg->ByteSize());
   tupleWatcher_(std::move(msg));

@@ -151,7 +151,7 @@ class Server : public BaseServer {
 
   // Register a handler for a particular request type
   template <typename T, typename M>
-  void InstallRequestHandler(void (T::*method)(REQID id, Connection* conn, unique_ptr<M>)) {
+  void InstallRequestHandler(void (T::*method)(REQID id, Connection* conn, pool_unique_ptr<M>)) {
     unique_ptr<google::protobuf::Message> m = make_unique<M>();
     T* t = static_cast<T*>(this);
     requestHandlers[m->GetTypeName()] = std::bind(&Server::dispatchRequest<T, M>, this, t, method,
@@ -160,7 +160,7 @@ class Server : public BaseServer {
 
   // Register a handler for a particular message type
   template <typename T, typename M>
-  void InstallMessageHandler(void (T::*method)(Connection* conn, unique_ptr<M>)) {
+  void InstallMessageHandler(void (T::*method)(Connection* conn, pool_unique_ptr<M>)) {
     unique_ptr<google::protobuf::Message> m = make_unique<M>();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] = std::bind(&Server::dispatchMessage<T, M>, this, t, method,
@@ -214,13 +214,13 @@ class Server : public BaseServer {
   void InternalSendResponse(Connection* _connection, OutgoingPacket* _packet);
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t, void (T::*method)(REQID id, Connection* conn, unique_ptr<M>),
+  void dispatchRequest(T* _t, void (T::*method)(REQID id, Connection* conn, pool_unique_ptr<M>),
                        Connection* _conn,
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
 
-    auto m = make_unique<M>();
+    auto m = make_unique_from_protobuf_pool<M>();
 
     if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly
@@ -237,13 +237,13 @@ class Server : public BaseServer {
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t, void (T::*method)(Connection* conn, unique_ptr<M>),
+  void dispatchMessage(T* _t, void (T::*method)(Connection* conn, pool_unique_ptr<M>),
                        Connection* _conn,
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
 
-    auto m = make_unique<M>();
+    auto m = make_unique_from_protobuf_pool<M>();
 
     if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly

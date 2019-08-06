@@ -32,8 +32,8 @@ namespace heron {
 namespace tmaster {
 
 StMgrRegisterProcessor::StMgrRegisterProcessor(REQID _reqid, Connection* _conn,
-                                         unique_ptr<proto::tmaster::StMgrRegisterRequest> _request,
-                                         TMaster* _tmaster, Server* _server)
+                                     pool_unique_ptr<proto::tmaster::StMgrRegisterRequest> _request,
+                                     TMaster* _tmaster, Server* _server)
     : Processor(_reqid, _conn, std::move(_request), _tmaster, _server) {}
 
 StMgrRegisterProcessor::~StMgrRegisterProcessor() {

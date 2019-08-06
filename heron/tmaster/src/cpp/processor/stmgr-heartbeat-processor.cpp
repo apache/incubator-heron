@@ -31,8 +31,8 @@ namespace heron {
 namespace tmaster {
 
 StMgrHeartbeatProcessor::StMgrHeartbeatProcessor(REQID reqid, Connection* conn,
-                                         unique_ptr<proto::tmaster::StMgrHeartbeatRequest> request,
-                                         TMaster* tmaster, Server* server)
+                                     pool_unique_ptr<proto::tmaster::StMgrHeartbeatRequest> request,
+                                     TMaster* tmaster, Server* server)
     : Processor(reqid, conn, std::move(request), tmaster, server) {}
 
 StMgrHeartbeatProcessor::~StMgrHeartbeatProcessor() {

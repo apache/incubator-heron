@@ -62,7 +62,7 @@ void TestClient::HandleConnect(NetworkErrorCode _status) {
 
 void TestClient::HandleClose(NetworkErrorCode) {}
 
-void TestClient::HandleTestMessage(unique_ptr<TestMessage> _message) {
+void TestClient::HandleTestMessage(pool_unique_ptr<TestMessage> _message) {
   ++nrecv_;
 
   if (nrecv_ >= ntotal_) {

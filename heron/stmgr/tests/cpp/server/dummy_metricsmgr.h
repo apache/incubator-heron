@@ -49,11 +49,12 @@ class DummyMtrMgr : public Server {
 
   // Handle metrics publisher request
   virtual void HandleMetricPublisherRegisterRequest(REQID _id, Connection* _conn,
-          unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> _request);
+                  pool_unique_ptr<heron::proto::system::MetricPublisherRegisterRequest> _request);
   virtual void HandleMetricPublisherPublishMessage(
-      Connection* _conn, unique_ptr<heron::proto::system::MetricPublisherPublishMessage> _message);
+      Connection* _conn,
+      pool_unique_ptr<heron::proto::system::MetricPublisherPublishMessage> _message);
   virtual void HandleTMasterLocationMessage(
-      Connection*, unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> _message);
+      Connection*, pool_unique_ptr<heron::proto::system::TMasterLocationRefreshMessage> _message);
 
  private:
   sp_string stmgr_id_expected_;

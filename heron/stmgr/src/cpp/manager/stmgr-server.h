@@ -70,19 +70,19 @@ class StMgrServer : public Server {
 
   // First from other stream managers
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                               unique_ptr<proto::stmgr::StrMgrHelloRequest> _request);
+                               pool_unique_ptr<proto::stmgr::StrMgrHelloRequest> _request);
   void HandleTupleStreamMessage(Connection* _conn,
-          unique_ptr<proto::stmgr::TupleStreamMessage> _message);
+                                pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   // Handler for DownstreamStatefulCheckpoint from a peer stmgr
   void HandleDownstreamStatefulCheckpointMessage(Connection* _conn,
-                                unique_ptr<proto::ckptmgr::DownstreamStatefulCheckpoint> _message);
+                           pool_unique_ptr<proto::ckptmgr::DownstreamStatefulCheckpoint> _message);
 
   // Backpressure message from and to other stream managers
   void HandleStartBackPressureMessage(Connection* _conn,
-                                      unique_ptr<proto::stmgr::StartBackPressureMessage> _message);
+                                 pool_unique_ptr<proto::stmgr::StartBackPressureMessage> _message);
   void HandleStopBackPressureMessage(Connection* _conn,
-                                     unique_ptr<proto::stmgr::StopBackPressureMessage> _message);
+                                 pool_unique_ptr<proto::stmgr::StopBackPressureMessage> _message);
 
   // map from stmgr_id to their connection
   typedef std::unordered_map<sp_string, Connection*> StreamManagerConnectionMap;

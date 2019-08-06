@@ -55,10 +55,10 @@ class CkptMgrClient : public Client {
   void GetInstanceState(const proto::system::Instance& _instance,
                         const std::string& _checkpoint_id, int32_t* _nattempts);
   virtual void HandleSaveInstanceStateResponse(void*,
-                             unique_ptr<proto::ckptmgr::SaveInstanceStateResponse> _response,
+                             pool_unique_ptr<proto::ckptmgr::SaveInstanceStateResponse> _response,
                              NetworkErrorCode status);
   virtual void HandleGetInstanceStateResponse(void*,
-                             unique_ptr<proto::ckptmgr::GetInstanceStateResponse> _response,
+                             pool_unique_ptr<proto::ckptmgr::GetInstanceStateResponse> _response,
                              NetworkErrorCode status);
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
@@ -66,7 +66,7 @@ class CkptMgrClient : public Client {
  private:
   void HandleRegisterStMgrResponse(
                                    void *,
-                                   unique_ptr<proto::ckptmgr::RegisterStMgrResponse >_response,
+                                   pool_unique_ptr<proto::ckptmgr::RegisterStMgrResponse >_response,
                                    NetworkErrorCode);
   void SendRegisterRequest();
 

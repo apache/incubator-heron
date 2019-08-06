@@ -29,7 +29,7 @@ namespace heron {
 namespace tmaster {
 
 Processor::Processor(REQID _reqid, Connection* _conn,
-                     unique_ptr<google::protobuf::Message> _request,
+                     pool_unique_ptr<google::protobuf::Message> _request,
                      TMaster* _tmaster, Server* _server)
     : request_(std::move(_request)), tmaster_(_tmaster), server_(_server),
       reqid_(_reqid), conn_(_conn) {}

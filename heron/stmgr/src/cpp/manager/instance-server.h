@@ -63,7 +63,7 @@ class InstanceServer : public Server {
 
   // We own the message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance2(unique_ptr<proto::stmgr::TupleStreamMessage> _message);
+  void SendToInstance2(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   // When we get a checkpoint marker from _src_task_id destined for _destination_task_id
   // this function in invoked, so that we might register it in gateway
@@ -107,7 +107,7 @@ class InstanceServer : public Server {
   void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void DrainTupleStream(proto::stmgr::TupleStreamMessage* _message);
   void DrainCheckpoint(sp_int32 _task_id,
-          unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message);
+                       pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueLengthCompIdMetricName(const sp_string& instanceid);
@@ -118,12 +118,13 @@ class InstanceServer : public Server {
 
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
-                                     unique_ptr<proto::stmgr::RegisterInstanceRequest> _request);
-  void HandleTupleSetMessage(Connection* _conn, unique_ptr<proto::system::HeronTupleSet> _message);
+                                   pool_unique_ptr<proto::stmgr::RegisterInstanceRequest> _request);
+  void HandleTupleSetMessage(Connection* _conn,
+                             pool_unique_ptr<proto::system::HeronTupleSet> _message);
   void HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
-                                 unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message);
+                           pool_unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message);
   void HandleRestoreInstanceStateResponse(Connection* _conn,
-                                 unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message);
+                            pool_unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message);
 
   // Back pressure related connection callbacks
   // Do back pressure
