@@ -20,6 +20,7 @@
 #ifndef SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 #define SRC_CPP_SVCS_STMGR_SRC_UTIL_TUPLE_CACHE_H_
 
+#include <tsl/hopscotch_map.h>
 #include <deque>
 #include <vector>
 #include <map>
@@ -114,7 +115,7 @@ class TupleCache {
   TupleList* get(sp_int32 _task_id);
 
   // map from task_id to the TupleList
-  std::unordered_map<sp_int32, TupleList*> cache_;
+  tsl::hopscotch_map<sp_int32, TupleList*> cache_;
   std::shared_ptr<EventLoop> eventLoop_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tuple_drainer_;
   std::function<void(sp_int32, proto::ckptmgr::DownstreamStatefulCheckpoint*)>
