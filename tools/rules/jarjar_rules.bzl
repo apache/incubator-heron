@@ -18,9 +18,9 @@ def jarjar_binary_impl(ctx):
   jarjar = ctx.executable._jarjar
   class_jar = ctx.outputs.class_jar
 
-  ctx.action(
+  ctx.actions.run(
       executable = jarjar,
-      inputs = [ src_file, shade_file, jarjar ],
+      inputs = [ src_file, shade_file ],
       outputs = [ class_jar ],
       arguments = ["process", shade_file.path, src_file.path, class_jar.path])
 
@@ -34,12 +34,10 @@ def jarjar_binary_impl(ctx):
 
 jarjar_attrs = {
     "src": attr.label(
-        allow_files = [".jar"],
-        single_file = True,
+        allow_single_file = [".jar"],
     ),
     "shade": attr.label(
-        allow_files = True,
-        single_file = True,
+        allow_single_file = True,
     ),
     "deps": attr.label_list(),
     "_jarjar": attr.label(
