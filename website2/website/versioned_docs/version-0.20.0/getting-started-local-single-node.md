@@ -1,7 +1,8 @@
 ---
-id: getting-started-local-single-node
+id: version-0.20.0-getting-started-local-single-node
 title: Local (Single Node)
 sidebar_label: Local (Single Node)
+original_id: getting-started-local-single-node
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +21,7 @@ sidebar_label: Local (Single Node)
     under the License.
 -->
 
-> The current version of Heron is {{heron:version}}
+> The current version of Heron is **{{heron:version}}**
 
 
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:

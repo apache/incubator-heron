@@ -9,7 +9,10 @@
     "rename-version": "docusaurus-rename-version"
   },
   "devDependencies": {
-    "docusaurus": "^1.10.0"
+    "docusaurus": "^1.10.0",
+    "remarkable-embed": "^0.4.1",
+    "replace-in-file": "^3.4.0",
+    "redoc": "^2.0.0-alpha.30"
   },
   "dependencies": {}
 }
