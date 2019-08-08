@@ -67,7 +67,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="/docs/getting-started-local-single-node">Documentation</Button>
+            <Button href="/docs/en/getting-started-local-single-node">Documentation</Button>
             {/* keep as reference for now <Button href={docUrl('doc1.html')}>Github</Button> */}
             <Button href="https://github.com/apache/incubator-heron" target="_blank">Github</Button>
           </PromoSection>
