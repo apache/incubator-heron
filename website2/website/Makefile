@@ -8,4 +8,4 @@ python-docs:
 	@scripts/python-doc-gen.sh 0.0.0
 
 buildsite:
-    @scripts/build-site.sh
+	@scripts/build-site.sh
