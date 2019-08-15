@@ -297,7 +297,7 @@ class HeronExecutor(object):
     self.init_from_parsed_args(parsed_args)
 
     self.shell_env = shell_env
-    self.max_runs = 100
+    self.max_runs = 150
     self.interval_between_runs = 10
 
     # Read the heron_internals.yaml for logging dir
