@@ -118,10 +118,10 @@ public class CuratorStateManager extends FileSystemStateManager {
     try {
       if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(newConfig),
           TimeUnit.MILLISECONDS)) {
-        throw new RuntimeException("Failed to initialize CuratorClient");
+        throw new RuntimeException("Failed to connect to " + connectionString);
       }
     } catch (InterruptedException e) {
-      throw new RuntimeException("Failed to initialize CuratorClient", e);
+      throw new RuntimeException("Interrupted from blockUntilConnected(): " + connectionString, e);
     }
 
     if (ZkContext.isInitializeTree(newConfig)) {
@@ -335,7 +335,8 @@ public class CuratorStateManager extends FileSystemStateManager {
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      safeSetException(future, new RuntimeException("Could not getNodeData", e));
+      safeSetException(future, new RuntimeException(
+          "Could not getNodeData using watcher for path: " + path, e));
     }
 
     return future;
@@ -448,7 +449,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     if (args.length < 2) {
-      throw new RuntimeException("Expects arguments: <topology_name> <zookeeper_hostname>");
+      throw new RuntimeException("Expects 2 arguments: <topology_name> <zookeeper_hostname>");
     }
 
     String zookeeperHostname = args[1];
