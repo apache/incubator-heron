@@ -55,14 +55,17 @@ StatefulController::StatefulController(const std::string& _topology_name,
                shared_ptr<heron::common::HeronStateMgr> _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
                shared_ptr<common::MetricsMgrSt> _metrics_manager_client,
-               std::function<void(std::string)> _ckpt_save_watcher)
-  : topology_name_(_topology_name), ckpt_record_(std::move(_ckpt)), state_mgr_(_state_mgr),
-    metrics_manager_client_(_metrics_manager_client) {
+               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)> _ckpt_save_watcher)
+  : topology_name_(_topology_name),
+    ckpt_record_(std::move(_ckpt)),
+    state_mgr_(_state_mgr),
+    metrics_manager_client_(_metrics_manager_client),
+    ckpt_save_watcher_(_ckpt_save_watcher) {
   checkpointer_ = make_unique<StatefulCheckpointer>(_tmaster_start_time);
   restorer_ = make_unique<StatefulRestorer>();
   count_metrics_ = make_shared<common::MultiCountMetric>();
+
   metrics_manager_client_->register_metric("__stateful_controller", count_metrics_);
-  ckpt_save_watcher_ = _ckpt_save_watcher;
 }
 
 StatefulController::~StatefulController() {
@@ -162,13 +165,13 @@ void StatefulController::HandleCheckpointSave(
         shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _new_ckpt,
         proto::system::StatusCode _status) {
   if (_status == proto::system::OK) {
-    LOG(INFO) << "Successfully saved " << _new_ckpt->consistent_checkpoints(0).checkpoint_id()
-              << " as the new globally consistent checkpoint";
     ckpt_record_ = std::move(_new_ckpt);
-    std::string oldest_ckpt =
-        ckpt_record_->consistent_checkpoints(ckpt_record_->consistent_checkpoints_size() - 1)
-          .checkpoint_id();
-    ckpt_save_watcher_(oldest_ckpt);
+
+    LOG(INFO) << "Successfully saved "
+              << ckpt_record_->consistent_checkpoints(0).checkpoint_id()
+              << " as the latest globally consistent checkpoint";
+
+    ckpt_save_watcher_(*ckpt_record_);
   } else {
     LOG(ERROR) << "Error saving " << _new_ckpt->consistent_checkpoints(0).checkpoint_id()
               << " as the new globally consistent checkpoint "
