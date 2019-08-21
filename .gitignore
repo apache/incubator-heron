@@ -90,6 +90,10 @@ tools/jdk/ijar
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 
+# Intellij bazel plugin
+.ijwb
+.clwb
+
 ## Maven generated files
 .classpath.txt
 
@@ -134,6 +138,7 @@ website2/website/static/api
 
 # Visual Studio Code
 .vscode
+vs.code-workspace
 
 # integration_test
 results/
