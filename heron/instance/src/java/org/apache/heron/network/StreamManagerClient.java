@@ -120,6 +120,7 @@ public class StreamManagerClient extends HeronClient {
     registerOnMessage(CheckpointManager.InitiateStatefulCheckpoint.newBuilder());
     registerOnMessage(CheckpointManager.RestoreInstanceStateRequest.newBuilder());
     registerOnMessage(CheckpointManager.StartInstanceStatefulProcessing.newBuilder());
+    registerOnMessage(CheckpointManager.StatefulConsistentCheckpointSaved.newBuilder());
   }
 
 
@@ -205,6 +206,8 @@ public class StreamManagerClient extends HeronClient {
       handleRestoreInstanceStateRequest((CheckpointManager.RestoreInstanceStateRequest) message);
     } else if (message instanceof CheckpointManager.StartInstanceStatefulProcessing) {
       handleStartStatefulRequest((CheckpointManager.StartInstanceStatefulProcessing) message);
+    } else if (message instanceof CheckpointManager.StatefulConsistentCheckpointSaved) {
+      handleCheckpointSaved((CheckpointManager.StatefulConsistentCheckpointSaved) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -282,6 +285,16 @@ public class StreamManagerClient extends HeronClient {
 
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
         .setStartInstanceStatefulProcessing(request)
+        .build();
+    inControlQueue.offer(instanceControlMsg);
+  }
+
+  private void handleCheckpointSaved(
+      CheckpointManager.StatefulConsistentCheckpointSaved message) {
+    LOG.info("Received a StatefulCheckpointSaved message: " + message);
+
+    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
+        .setStatefulCheckpointSaved(message)
         .build();
     inControlQueue.offer(instanceControlMsg);
   }

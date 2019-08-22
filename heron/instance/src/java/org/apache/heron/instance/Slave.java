@@ -123,6 +123,15 @@ public class Slave implements Runnable, AutoCloseable {
           if (instanceControlMsg.isNewPhysicalPlanHelper()) {
             handleNewPhysicalPlan(instanceControlMsg);
           }
+
+          if (instanceControlMsg.getStatefulCheckpointSavedMessage() != null) {
+            String checkpointId = instanceControlMsg
+                .getStatefulCheckpointSavedMessage()
+                .getConsistentCheckpoint()
+                .getCheckpointId();
+
+            LOG.log(Level.INFO, "checkpoint: {0} has become globally consistent", checkpointId);
+          }
         }
       }
     };
