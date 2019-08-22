@@ -195,7 +195,8 @@ class TMaster {
                                      const ComponentConfigMap& _config);
 
   // Function called when a new stateful ckpt record is saved
-  void HandleStatefulCheckpointSave(const proto::ckptmgr::StatefulConsistentCheckpoints &new_ckpts);
+  void HandleStatefulCheckpointSave(
+      const proto::ckptmgr::StatefulConsistentCheckpoints &new_ckpts);
 
   // Function called to kill container
   void KillContainer(const std::string& host_name,

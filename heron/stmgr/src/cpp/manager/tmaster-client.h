@@ -42,7 +42,9 @@ class TMasterClient : public Client {
                 VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
                 VCallback<sp_string> _stateful_checkpoint_watch,
                 VCallback<sp_string, sp_int64> _restore_topology_watch,
-                VCallback<sp_string> _start_stateful_watch);
+                VCallback<sp_string> _start_stateful_watch,
+                VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&>
+                    _broadcast_checkpoint_saved);
   virtual ~TMasterClient();
 
   // Told by the upper layer to disconnect and self destruct
@@ -88,6 +90,9 @@ class TMasterClient : public Client {
   void HandleStartStmgrStatefulProcessing(
           pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _msg);
 
+  void HandleStatefulCheckpointSavedMessage(
+          pool_unique_ptr<proto::ckptmgr::StatefulConsistentCheckpointSaved> _msg);
+
   void OnReConnectTimer();
   void OnHeartbeatTimer();
   void SendRegisterRequest();
@@ -116,6 +121,9 @@ class TMasterClient : public Client {
   // We invoke this callback upon receiving a StartStatefulProcessing message from tmaster
   // passing in the checkpoint id
   VCallback<sp_string> start_stateful_watch_;
+  // This callback will be invoked upon receiving a StatefulConsistentCheckpointSaved message.
+  // We will then forward this message to all the instances connected to this stmgr
+  VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&> broadcast_checkpoint_saved_;
 
   // Configs to be read
   sp_int32 reconnect_tmaster_interval_sec_;

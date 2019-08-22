@@ -58,7 +58,8 @@ class StatefulController {
                shared_ptr<heron::common::HeronStateMgr> _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
                shared_ptr<common::MetricsMgrSt> _metrics_manager_client,
-               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)> _ckpt_save_watcher);
+               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)>
+                   _ckpt_save_watcher);
   virtual ~StatefulController();
   // Start a new restore process
   void StartRestore(const StMgrMap& _stmgrs, bool _ignore_prev_checkpoints);

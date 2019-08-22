@@ -368,12 +368,18 @@ void StMgr::CreateTMasterClient(shared_ptr<proto::tmaster::TMasterLocation> tmas
     this->StartStatefulProcessing(checkpoint_id);
   };
 
+  auto broadcast_checkpoint_saved =
+       [this](const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg) {
+    this->BroadcastCheckpointSaved(_msg);
+  };
+
   tmaster_client_ = make_shared<TMasterClient>(eventLoop_, master_options, stmgr_id_, stmgr_host_,
                                       data_port_, local_data_port_, shell_port_,
                                       std::move(pplan_watch),
                                       std::move(stateful_checkpoint_watch),
                                       std::move(restore_topology_watch),
-                                      std::move(start_stateful_watch));
+                                      std::move(start_stateful_watch),
+                                      std::move(broadcast_checkpoint_saved));
 }
 
 void StMgr::CreateTupleCache() {
@@ -1078,6 +1084,12 @@ void StMgr::RestoreTopologyState(sp_string _checkpoint_id, sp_int64 _restore_txi
   std::unordered_set<sp_int32> local_taskids;
   config::PhysicalPlanHelper::GetTasks(*pplan_, stmgr_id_, local_taskids),
   stateful_restorer_->StartRestore(_checkpoint_id, _restore_txid, local_taskids, *pplan_);
+}
+
+// broadcast the news that the checkpoint has been saved to all instances connected to this stmgr
+void StMgr::BroadcastCheckpointSaved(
+        const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg) {
+  instance_server_->BroadcastStatefulCheckpointSaved(_msg);
 }
 
 // Called by TmasterClient when it receives directive from tmaster

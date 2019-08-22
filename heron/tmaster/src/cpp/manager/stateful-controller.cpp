@@ -55,7 +55,8 @@ StatefulController::StatefulController(const std::string& _topology_name,
                shared_ptr<heron::common::HeronStateMgr> _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
                shared_ptr<common::MetricsMgrSt> _metrics_manager_client,
-               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)> _ckpt_save_watcher)
+               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)>
+                   _ckpt_save_watcher)
   : topology_name_(_topology_name),
     ckpt_record_(std::move(_ckpt)),
     state_mgr_(_state_mgr),

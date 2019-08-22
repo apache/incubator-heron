@@ -616,7 +616,16 @@ void TMaster::CleanAllStatefulCheckpoint() {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest("", true);
 }
 
-void TMaster::HandleStatefulCheckpointSave(const proto::ckptmgr::StatefulConsistentCheckpoints &new_ckpts) {
+void TMaster::HandleStatefulCheckpointSave(
+    const proto::ckptmgr::StatefulConsistentCheckpoints &new_ckpts) {
+  // broadcast globally consistent checkpoint completion
+  proto::ckptmgr::StatefulConsistentCheckpointSaved msg;
+  msg.mutable_consistent_checkpoint()->CopyFrom(new_ckpts.consistent_checkpoints(0));
+
+  for (auto & stmgr : stmgrs_) {
+    stmgr.second->SendCheckpointSavedMessage(msg);
+  }
+
   // clean oldest checkpoint on save
   std::string oldest_ckpt_id =
       new_ckpts.consistent_checkpoints(new_ckpts.consistent_checkpoints_size() - 1)

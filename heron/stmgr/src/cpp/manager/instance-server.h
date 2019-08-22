@@ -72,6 +72,9 @@ class InstanceServer : public Server {
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
+  void BroadcastStatefulCheckpointSaved(
+      const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg);
+
   virtual bool HaveAllInstancesConnectedToUs() const {
     return active_instances_.size() == expected_instances_.size();
   }
