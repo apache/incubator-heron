@@ -41,7 +41,9 @@ TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptio
                              VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
                              VCallback<sp_string> _stateful_checkpoint_watch,
                              VCallback<sp_string, sp_int64> _restore_topology_watch,
-                             VCallback<sp_string> _start_stateful_watch)
+                             VCallback<sp_string> _start_stateful_watch,
+                             VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&>
+                                 _broadcast_checkpoint_saved)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_host_(_stmgr_host),
@@ -53,6 +55,7 @@ TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptio
       stateful_checkpoint_watch_(std::move(_stateful_checkpoint_watch)),
       restore_topology_watch_(std::move(_restore_topology_watch)),
       start_stateful_watch_(std::move(_start_stateful_watch)),
+      broadcast_checkpoint_saved_(_broadcast_checkpoint_saved),
       reconnect_timer_id(0),
       heartbeat_timer_id(0),
       reconnect_attempts_(0) {
@@ -74,6 +77,7 @@ TMasterClient::TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptio
   InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointMessage);
   InstallMessageHandler(&TMasterClient::HandleRestoreTopologyStateRequest);
   InstallMessageHandler(&TMasterClient::HandleStartStmgrStatefulProcessing);
+  InstallMessageHandler(&TMasterClient::HandleStatefulCheckpointSavedMessage);
 }
 
 TMasterClient::~TMasterClient() {
@@ -301,6 +305,11 @@ void TMasterClient::HandleRestoreTopologyStateRequest(
 void TMasterClient::HandleStartStmgrStatefulProcessing(
         pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _message) {
   start_stateful_watch_(_message->checkpoint_id());
+}
+
+void TMasterClient::HandleStatefulCheckpointSavedMessage(
+    pool_unique_ptr<proto::ckptmgr::StatefulConsistentCheckpointSaved> _msg) {
+  broadcast_checkpoint_saved_(*_msg);
 }
 
 void TMasterClient::SendResetTopologyState(const std::string& _dead_stmgr,
