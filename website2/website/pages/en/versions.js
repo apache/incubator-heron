@@ -45,7 +45,8 @@ function Versions(props) {
                       props.language ? props.language + '/' : ''
                     }doc1`}> */}
                    <a
-                    href={`${siteConfig.baseUrl}docs/${props.language}/getting-started-local-single-node`}>
+    href = {`${siteConfig.baseUrl}docs/getting-started-local-single-node`
+}>
                     Documentation
                   </a>
                 </td>
@@ -68,7 +69,8 @@ function Versions(props) {
                   {/* You are supposed to change this href where appropriate
                         Example: href="<baseUrl>/docs(/:language)/next/:id" */}
                   <a
-                    href={`${siteConfig.baseUrl}docs/${props.language}/next/getting-started-local-single-node`}>
+    href = {`${siteConfig.baseUrl}docs/next/getting-started-local-single-node`
+}>
                     Documentation
                   </a>
                 </td>
@@ -94,12 +96,15 @@ function Versions(props) {
                         {/* You are supposed to change this href where appropriate
                         Example: href="<baseUrl>/docs(/:language)/:version/:id" */}
                         <a
-                          href={`${siteConfig.baseUrl}docs/${props.language}/${version}/getting-started-local-single-node`}>
+                  href = {`${siteConfig.baseUrl}docs/${version}/getting-started-local-single-node`
+              } >
                           Documentation
                         </a>
                       </td>
                       <td>
-                        <a href={`${repoUrl}/releases/tag/v${version}`}>
+        < a
+    href = {`${siteConfig.baseUrl}release-notes#${version}`
+}>
                           Release Notes
                         </a>
                       </td>

@@ -1,5 +1,5 @@
 ---
-id: version-0.20.0-getting-started-local-single-node
+id: version-0.21.2-getting-started-local-single-node
 title: Local (Single Node)
 sidebar_label: Local (Single Node)
 original_id: getting-started-local-single-node
@@ -21,13 +21,14 @@ original_id: getting-started-local-single-node
     under the License.
 -->
 
-> The current version of Heron is **{{heron:version}}**
+> The current version of Heron is {{heron:version}}
 
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
 * [MacOS](#macos-homebrew)
 * [Ubuntu >= 14.04](#using-installation-scripts)
 * [CentOS](#using-installation-scripts)
+
 
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
 
