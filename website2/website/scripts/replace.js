@@ -49,7 +49,7 @@ function replaceBazel(version) {
         }
     } catch (error) {
 
-        console.error('no versions found defaulting to 0.20.0')
+        console.error('no versions found defaulting to 0.26')
     }
     return '0.26'
 }
