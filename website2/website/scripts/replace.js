@@ -37,7 +37,7 @@ const latestVersion = versions[0];
 const bazelVersions = {
     '0.20.0': '0.14.1',
     '0.20.1': '0.26',
-    '0.20.2': '0.26',
+    'latest': '0.26',
 }
 
 function replaceBazel(version) {
