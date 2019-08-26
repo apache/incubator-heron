@@ -36,6 +36,7 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.metric.GlobalMetrics;
 import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.I2PhaseCommitComponent;
 import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
@@ -211,6 +212,20 @@ public class BoltInstance implements IInstance {
   @Override
   public void start() {
     addBoltTasks();
+  }
+
+  @Override
+  public void preRestore(String checkpointId) {
+    if (bolt instanceof I2PhaseCommitComponent) {
+      ((I2PhaseCommitComponent) bolt).preRestore(checkpointId);
+    }
+  }
+
+  @Override
+  public void onCheckpointSaved(String checkpointId) {
+    if (bolt instanceof I2PhaseCommitComponent) {
+      ((I2PhaseCommitComponent) bolt).postSave(checkpointId);
+    }
   }
 
   @Override

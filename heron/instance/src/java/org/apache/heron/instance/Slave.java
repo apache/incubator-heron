@@ -124,19 +124,25 @@ public class Slave implements Runnable, AutoCloseable {
             handleNewPhysicalPlan(instanceControlMsg);
           }
 
+          // When a checkpoint becomes "globally consistent"
           if (instanceControlMsg.getStatefulCheckpointSavedMessage() != null) {
             String checkpointId = instanceControlMsg
                 .getStatefulCheckpointSavedMessage()
                 .getConsistentCheckpoint()
                 .getCheckpointId();
 
-            LOG.log(Level.INFO, "checkpoint: {0} has become globally consistent", checkpointId);
+            handleGlobalCheckpointConsistent(checkpointId);
           }
         }
       }
     };
 
     slaveLooper.addTasksOnWakeup(handleControlMessageTask);
+  }
+
+  private void handleGlobalCheckpointConsistent(String checkpointId) {
+    LOG.log(Level.INFO, "checkpoint: {0} has become globally consistent", checkpointId);
+    instance.onCheckpointSaved(checkpointId);
   }
 
   private void resetCurrentAssignment() {
@@ -271,7 +277,7 @@ public class Slave implements Runnable, AutoCloseable {
     startInstanceIfNeeded();
   }
 
-  private void cleanAndStopSlave() {
+  private void cleanAndStopSlaveBeforeRestore(String checkpointId) {
     // Clear all queues
     streamInCommunicator.clear();
     streamOutCommunicator.clear();
@@ -284,6 +290,7 @@ public class Slave implements Runnable, AutoCloseable {
     slaveLooper.clearTimers();
 
     if (instance != null) {
+      instance.preRestore(checkpointId);
       instance.clean();
     }
 
@@ -303,9 +310,13 @@ public class Slave implements Runnable, AutoCloseable {
   private void handleRestoreInstanceStateRequest(InstanceControlMsg instanceControlMsg) {
     CheckpointManager.RestoreInstanceStateRequest request =
         instanceControlMsg.getRestoreInstanceStateRequest();
+
+    // ID of the checkpoint we are restoring to
+    String checkpointId = request.getState().getCheckpointId();
+
     // Clean buffers and unregister tasks in slave looper
     if (isInstanceStarted) {
-      cleanAndStopSlave();
+      cleanAndStopSlaveBeforeRestore(checkpointId);
     }
 
     // Restore the state

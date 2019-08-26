@@ -35,6 +35,7 @@ import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.spout.ISpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
+import org.apache.heron.api.topology.I2PhaseCommitComponent;
 import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
@@ -216,6 +217,20 @@ public class SpoutInstance implements IInstance {
   public void start() {
     // Add spout tasks for execution
     addSpoutsTasks();
+  }
+
+  @Override
+  public void preRestore(String checkpointId) {
+    if (spout instanceof I2PhaseCommitComponent) {
+      ((I2PhaseCommitComponent) spout).preRestore(checkpointId);
+    }
+  }
+
+  @Override
+  public void onCheckpointSaved(String checkpointId) {
+    if (spout instanceof I2PhaseCommitComponent) {
+      ((I2PhaseCommitComponent) spout).postSave(checkpointId);
+    }
   }
 
   @Override
