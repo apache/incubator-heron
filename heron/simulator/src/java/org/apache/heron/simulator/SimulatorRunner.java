@@ -20,10 +20,7 @@
 
 package org.apache.heron.simulator;
 
-import org.apache.heron.api.exception.AlreadyAliveException;
-import org.apache.heron.api.exception.InvalidTopologyException;
 import org.apache.heron.api.topology.TopologyBuilder;
-import org.apache.heron.simulator.Simulator;
 import org.apache.heron.streamlet.Builder;
 import org.apache.heron.streamlet.Config;
 import org.apache.heron.streamlet.impl.BuilderImpl;
