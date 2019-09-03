@@ -27,7 +27,6 @@ import org.junit.Ignore;
 
 import org.apache.heron.api.Config;
 import org.apache.heron.api.generated.TopologyAPI;
-import org.apache.heron.api.topology.TopologyBuilder;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.config.SystemConfigKey;
@@ -60,89 +59,34 @@ public final class UnitTestHelper {
   public static PhysicalPlans.PhysicalPlan getPhysicalPlan(
       boolean ackEnabled,
       int messageTimeout,
-      TopologyAPI.TopologyState topologyState) {
-    PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
+      TopologyAPI.TopologyState topologyState
+  ) {
+    Config.TopologyReliabilityMode reliabilityMode = ackEnabled
+        ? Config.TopologyReliabilityMode.ATLEAST_ONCE
+        : Config.TopologyReliabilityMode.ATMOST_ONCE;
 
-    setTopology(pPlan, ackEnabled, messageTimeout, topologyState);
-
-    setInstances(pPlan);
-
-    setStMgr(pPlan);
-
-    return pPlan.build();
+    return MockPhysicalPlansBuilder
+        .newBuilder()
+        .withTopologyConfig(reliabilityMode, messageTimeout)
+        .withTopologyState(topologyState)
+        .withSpoutInstance(
+            "test-spout",
+            0,
+            "spout-id",
+            new TestSpout()
+        )
+        .withBoltInstance(
+            "test-bolt",
+            1,
+            "bolt-id",
+            "test-spout",
+            new TestBolt()
+        )
+        .build();
   }
 
   public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout) {
     return getPhysicalPlan(ackEnabled, messageTimeout, TopologyAPI.TopologyState.RUNNING);
-  }
-
-  private static void setTopology(PhysicalPlans.PhysicalPlan.Builder pPlan, boolean ackEnabled,
-                                  int messageTimeout, TopologyAPI.TopologyState topologyState) {
-    TopologyBuilder topologyBuilder = new TopologyBuilder();
-    topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
-    // Here we need case switch to corresponding grouping
-    topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).shuffleGrouping("test-spout");
-
-    Config conf = new Config();
-    conf.setTeamEmail("streaming-compute@twitter.com");
-    conf.setTeamName("stream-computing");
-    conf.setTopologyProjectName("heron-integration-test");
-    conf.setNumStmgrs(1);
-    conf.setMaxSpoutPending(100);
-    if (ackEnabled) {
-      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATLEAST_ONCE);
-    } else {
-      conf.setTopologyReliabilityMode(Config.TopologyReliabilityMode.ATMOST_ONCE);
-    }
-    if (messageTimeout != -1) {
-      conf.setMessageTimeoutSecs(messageTimeout);
-      conf.put("topology.enable.message.timeouts", "true");
-    }
-
-    TopologyAPI.Topology fTopology =
-        topologyBuilder.createTopology().
-            setName("topology-name").
-            setConfig(conf).
-            setState(topologyState).
-            getTopology();
-
-    pPlan.setTopology(fTopology);
-  }
-
-  private static void setInstances(PhysicalPlans.PhysicalPlan.Builder pPlan) {
-    // Construct the spoutInstance
-    PhysicalPlans.InstanceInfo.Builder spoutInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    spoutInstanceInfo.setComponentName("test-spout");
-    spoutInstanceInfo.setTaskId(0);
-    spoutInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder spoutInstance = PhysicalPlans.Instance.newBuilder();
-    spoutInstance.setInstanceId("spout-id");
-    spoutInstance.setStmgrId("stream-manager-id");
-    spoutInstance.setInfo(spoutInstanceInfo);
-
-    // Construct the boltInstanceInfo
-    PhysicalPlans.InstanceInfo.Builder boltInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    boltInstanceInfo.setComponentName("test-bolt");
-    boltInstanceInfo.setTaskId(1);
-    boltInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder boltInstance = PhysicalPlans.Instance.newBuilder();
-    boltInstance.setInstanceId("bolt-id");
-    boltInstance.setStmgrId("stream-manager-id");
-    boltInstance.setInfo(boltInstanceInfo);
-
-    pPlan.addInstances(spoutInstance);
-    pPlan.addInstances(boltInstance);
-  }
-
-  private static void setStMgr(PhysicalPlans.PhysicalPlan.Builder pPlan) {
-    PhysicalPlans.StMgr.Builder stmgr = PhysicalPlans.StMgr.newBuilder();
-    stmgr.setId("stream-manager-id");
-    stmgr.setHostName("127.0.0.1");
-    stmgr.setDataPort(8888);
-    stmgr.setLocalEndpoint("endpoint");
-    pPlan.addStmgrs(stmgr);
   }
 
   @SuppressWarnings("unchecked")
