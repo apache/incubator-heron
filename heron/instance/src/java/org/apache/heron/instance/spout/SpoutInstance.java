@@ -281,6 +281,9 @@ public class SpoutInstance implements IInstance {
       public void run() {
         spoutMetrics.updateTaskRunCount();
 
+        // Check if we have any message to process anyway
+        readTuplesAndExecute(streamInQueue);
+
         // Check whether we should produce more tuples
         if (isProduceTuple()) {
           spoutMetrics.updateProduceTupleCount();
@@ -295,9 +298,6 @@ public class SpoutInstance implements IInstance {
         if (!collector.isOutQueuesAvailable()) {
           spoutMetrics.updateOutQueueFullCount();
         }
-
-        // Check if we have any message to process anyway
-        readTuplesAndExecute(streamInQueue);
 
         if (ackEnabled) {
           // Update the pending-to-be-acked tuples counts

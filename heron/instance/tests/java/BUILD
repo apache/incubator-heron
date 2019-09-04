@@ -27,6 +27,7 @@ java_tests(
         "org.apache.heron.instance.bolt.BoltStatefulInstanceTest",
         "org.apache.heron.instance.spout.ActivateDeactivateTest",
         "org.apache.heron.instance.spout.SpoutInstanceTest",
+        "org.apache.heron.instance.spout.SpoutStatefulInstanceTest",
         "org.apache.heron.metrics.GlobalMetricsTest",
         "org.apache.heron.metrics.MultiAssignableMetricTest",
         "org.apache.heron.network.ConnectTest",

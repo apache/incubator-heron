@@ -39,6 +39,7 @@ public final class Constants {
   public static final String ACK_COUNT = "ack-count";
 
   public static final String EXECUTE_LATCH = "execute-latch";
+  public static final String EMIT_LATCH = "emit-latch";
   public static final String FAIL_LATCH = "fail-latch";
   public static final String ACK_LATCH = "ack-latch";
 
@@ -47,6 +48,7 @@ public final class Constants {
 
   public static final String PRESAVE_LATCH = "preSave-latch";
   public static final String POSTSAVE_LATCH = "postSave-latch";
+  public static final String SPOUT_SHOULD_START_EMIT = "spout-should-start-emit";
 
   public static final String RECEIVED_STRING_LIST = "received-string-list";
 
