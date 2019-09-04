@@ -24,6 +24,7 @@ java_tests(
         "org.apache.heron.grouping.EmitDirectBoltTest",
         "org.apache.heron.grouping.EmitDirectSpoutTest",
         "org.apache.heron.instance.bolt.BoltInstanceTest",
+        "org.apache.heron.instance.bolt.StatefulControlMessageTest",
         "org.apache.heron.instance.spout.ActivateDeactivateTest",
         "org.apache.heron.instance.spout.SpoutInstanceTest",
         "org.apache.heron.metrics.GlobalMetricsTest",
