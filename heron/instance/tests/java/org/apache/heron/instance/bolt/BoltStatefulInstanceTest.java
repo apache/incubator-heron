@@ -93,6 +93,23 @@ public class BoltStatefulInstanceTest {
     assertEquals(0, postSaveLatch.getCount());
   }
 
+  @Test
+  public void testPreRestore() throws InterruptedException {
+    CountDownLatch preRestoreLatch = new CountDownLatch(1);
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.PRERESTORE_LATCH, preRestoreLatch);
+
+    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("c0"));
+    slaveTester.getInControlQueue().offer(UnitTestHelper.buildStartInstanceProcessingMessage("c0"));
+    slaveTester.getInControlQueue().offer(buildPhysicalPlanMessageFor2PCBolt());
+
+    assertEquals(1, preRestoreLatch.getCount());
+
+    slaveTester.getInControlQueue().offer(UnitTestHelper.buildRestoreInstanceState("cx"));
+
+    assertTrue(preRestoreLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
+    assertEquals(0, preRestoreLatch.getCount());
+  }
+
   /**
    * Ensure that for I2PhaseCommitComponent bolts, after a preSave, execute will not be invoked
    * unless the corresponding postSave is called.

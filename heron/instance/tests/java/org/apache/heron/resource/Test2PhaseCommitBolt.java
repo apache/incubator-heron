@@ -74,6 +74,12 @@ public class Test2PhaseCommitBolt extends BaseRichBolt
 
   @Override
   public void preRestore(String checkpointId) {
+    CountDownLatch preRestoreLatch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.PRERESTORE_LATCH);
+
+    if (preRestoreLatch != null) {
+      preRestoreLatch.countDown();
+    }
   }
 
   @Override

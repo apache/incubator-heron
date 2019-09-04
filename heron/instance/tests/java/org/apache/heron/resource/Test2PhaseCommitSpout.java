@@ -69,6 +69,12 @@ public class Test2PhaseCommitSpout extends BaseRichSpout
 
   @Override
   public void preRestore(String checkpointId) {
+    CountDownLatch preRestoreLatch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.PRERESTORE_LATCH);
+
+    if (preRestoreLatch != null) {
+      preRestoreLatch.countDown();
+    }
   }
 
   @Override
