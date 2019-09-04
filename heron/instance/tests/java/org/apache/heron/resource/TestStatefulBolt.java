@@ -16,64 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.heron.resource;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Ignore;
-
 import org.apache.heron.api.bolt.BaseRichBolt;
 import org.apache.heron.api.bolt.OutputCollector;
 import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.I2PhaseCommitComponent;
+import org.apache.heron.api.topology.IStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
-import org.apache.heron.api.tuple.Fields;
 import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.common.basics.SingletonRegistry;
 
-@Ignore
-public class Test2PhaseCommitBolt extends BaseRichBolt
-    implements I2PhaseCommitComponent<String, String> {
-
-  private static final long serialVersionUID = -5160420613503624743L;
-
+public class TestStatefulBolt extends BaseRichBolt
+    implements IStatefulComponent<String, String> {
   @Override
   public void prepare(
-      Map<String, Object> map,
-      TopologyContext topologyContext,
+      Map<String, Object> heronConf,
+      TopologyContext context,
       OutputCollector collector) {
   }
 
   @Override
-  public void execute(Tuple tuple) {
+  public void execute(Tuple input) {
     CountDownLatch tupleExecutedLatch =
         (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.EXECUTE_LATCH);
 
     if (tupleExecutedLatch != null) {
       tupleExecutedLatch.countDown();
     }
-  }
-
-  @Override
-  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("word"));
-  }
-
-  @Override
-  public void postSave(String checkpointId) {
-    CountDownLatch postSaveLatch =
-        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.POSTSAVE_LATCH);
-
-    if (postSaveLatch != null) {
-      postSaveLatch.countDown();
-    }
-  }
-
-  @Override
-  public void preRestore(String checkpointId) {
   }
 
   @Override
@@ -88,5 +61,9 @@ public class Test2PhaseCommitBolt extends BaseRichBolt
     if (preSaveLatch != null) {
       preSaveLatch.countDown();
     }
+  }
+
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer declarer) {
   }
 }

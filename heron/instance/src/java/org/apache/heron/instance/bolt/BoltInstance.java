@@ -75,6 +75,8 @@ public class BoltInstance implements IInstance {
 
   private State<Serializable, Serializable> instanceState;
 
+  private boolean waitingForCheckpointSaved;
+
   // The reference to topology's config
   private final Map<String, Object> config;
 
@@ -110,6 +112,8 @@ public class BoltInstance implements IInstance {
     this.spillStateLocation = String.format("%s/%s/",
             String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION)),
             helper.getMyInstanceId());
+
+    this.waitingForCheckpointSaved = false;
 
     if (helper.getMyBolt() == null) {
       throw new RuntimeException("HeronBoltInstance has no bolt in physical plan.");
@@ -163,9 +167,11 @@ public class BoltInstance implements IInstance {
     // so that topology emit, ack, fail are thread safe
     collector.lock.lock();
     try {
-      // Checkpoint
       if (bolt instanceof IStatefulComponent) {
         ((IStatefulComponent) bolt).preSave(checkpointId);
+      }
+      if (bolt instanceof I2PhaseCommitComponent) {
+        waitingForCheckpointSaved = true;
       }
       collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
     } finally {
@@ -225,6 +231,7 @@ public class BoltInstance implements IInstance {
   public void onCheckpointSaved(String checkpointId) {
     if (bolt instanceof I2PhaseCommitComponent) {
       ((I2PhaseCommitComponent) bolt).postSave(checkpointId);
+      waitingForCheckpointSaved = false;
     }
   }
 
@@ -253,6 +260,7 @@ public class BoltInstance implements IInstance {
       @Override
       public void run() {
         boltMetrics.updateTaskRunCount();
+
         // Back-pressure -- only when we could send out tuples will we read & execute tuples
         if (collector.isOutQueuesAvailable()) {
           boltMetrics.updateExecutionCount();
@@ -279,6 +287,11 @@ public class BoltInstance implements IInstance {
     InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
+  // do not process data tuple when it is a I2PhaseCommitComponent and waiting for postSave
+  private boolean isWaitingForCheckpointSaved() {
+    return bolt instanceof I2PhaseCommitComponent && waitingForCheckpointSaved;
+  }
+
   @Override
   public void readTuplesAndExecute(Communicator<Message> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
@@ -286,7 +299,7 @@ public class BoltInstance implements IInstance {
 
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
-    while (!inQueue.isEmpty()) {
+    while (!inQueue.isEmpty() && !isWaitingForCheckpointSaved()) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {

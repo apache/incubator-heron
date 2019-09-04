@@ -23,6 +23,8 @@ import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import com.google.protobuf.Message;
+
 import org.junit.Ignore;
 
 import org.apache.heron.api.Config;
@@ -30,6 +32,8 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.config.SystemConfig;
 import org.apache.heron.common.config.SystemConfigKey;
+import org.apache.heron.instance.InstanceControlMsg;
+import org.apache.heron.proto.ckptmgr.CheckpointManager;
 import org.apache.heron.proto.stmgr.StreamManager;
 import org.apache.heron.proto.system.Common;
 import org.apache.heron.proto.system.PhysicalPlans;
@@ -138,6 +142,62 @@ public final class UnitTestHelper {
     registerInstanceResponse.setStatus(status);
 
     return registerInstanceResponse.build();
+  }
+
+  public static Message buildPersistStateMessage(String checkpointId) {
+    CheckpointManager.InitiateStatefulCheckpoint.Builder builder = CheckpointManager
+        .InitiateStatefulCheckpoint
+        .newBuilder();
+
+    builder.setCheckpointId(checkpointId);
+
+    return builder.build();
+  }
+
+  public static InstanceControlMsg buildRestoreInstanceState(String checkpointId) {
+    return InstanceControlMsg.newBuilder()
+        .setRestoreInstanceStateRequest(
+            CheckpointManager.RestoreInstanceStateRequest
+                .newBuilder()
+                .setState(CheckpointManager.InstanceStateCheckpoint
+                    .newBuilder()
+                    .setCheckpointId(checkpointId))
+                .build()
+        )
+        .build();
+  }
+
+  public static InstanceControlMsg buildStartInstanceProcessingMessage(String checkpointId) {
+    return InstanceControlMsg.newBuilder()
+        .setStartInstanceStatefulProcessing(
+            CheckpointManager.StartInstanceStatefulProcessing
+                .newBuilder()
+                .setCheckpointId(checkpointId)
+                .build()
+        )
+        .build();
+  }
+
+  public static InstanceControlMsg buildCheckpointSavedMessage(
+      String checkpointId,
+      String packingPlanId
+  ) {
+    CheckpointManager.StatefulConsistentCheckpointSaved.Builder builder = CheckpointManager
+        .StatefulConsistentCheckpointSaved
+        .newBuilder();
+
+    CheckpointManager.StatefulConsistentCheckpoint.Builder ckptBuilder = CheckpointManager
+        .StatefulConsistentCheckpoint
+        .newBuilder();
+
+    ckptBuilder.setCheckpointId(checkpointId);
+    ckptBuilder.setPackingPlanId(packingPlanId);
+
+    builder.setConsistentCheckpoint(ckptBuilder.build());
+
+    return InstanceControlMsg.newBuilder()
+        .setStatefulCheckpointSaved(builder.build())
+        .build();
   }
 
 }

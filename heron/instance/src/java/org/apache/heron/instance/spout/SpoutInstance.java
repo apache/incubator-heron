@@ -72,6 +72,7 @@ public class SpoutInstance implements IInstance {
   private final boolean spillState;
   private final String spillStateLocation;
 
+  private boolean waitingForCheckpointSaved;
   private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
@@ -110,6 +111,8 @@ public class SpoutInstance implements IInstance {
     this.spillStateLocation = String.format("%s/%s/",
         String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION)),
         helper.getMyInstanceId());
+
+    this.waitingForCheckpointSaved = false;
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);
 
@@ -172,10 +175,15 @@ public class SpoutInstance implements IInstance {
       if (spout instanceof IStatefulComponent) {
         ((IStatefulComponent) spout).preSave(checkpointId);
       }
+
+      if (spout instanceof I2PhaseCommitComponent) {
+        waitingForCheckpointSaved = true;
+      }
       collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
     } finally {
       collector.lock.unlock();
     }
+
     LOG.info("State persisted for checkpoint: " + checkpointId);
   }
 
@@ -230,6 +238,7 @@ public class SpoutInstance implements IInstance {
   public void onCheckpointSaved(String checkpointId) {
     if (spout instanceof I2PhaseCommitComponent) {
       ((I2PhaseCommitComponent) spout).postSave(checkpointId);
+      waitingForCheckpointSaved = false;
     }
   }
 
@@ -345,12 +354,14 @@ public class SpoutInstance implements IInstance {
    * It is allowed in:
    * 1. Outgoing Stream queue is available
    * 2. Topology State is RUNNING
+   * 3. If the Spout implements I2PhaseCommitComponent, not waiting for checkpoint saved message
    *
    * @return true to allow produceTuple() to be invoked
    */
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
-        && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING);
+        && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
+        && !(spout instanceof I2PhaseCommitComponent && waitingForCheckpointSaved);
   }
 
   protected void produceTuple() {
