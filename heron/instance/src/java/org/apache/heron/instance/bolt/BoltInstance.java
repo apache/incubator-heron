@@ -287,8 +287,7 @@ public class BoltInstance implements IInstance {
     InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
-  // do not process data tuple when it is a ITwoPhaseStatefulComponent and waiting for postSave
-  private boolean isWaitingForCheckpointSaved() {
+  private boolean isWaitingForCheckpointToBeSaved() {
     return bolt instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved;
   }
 
@@ -299,7 +298,7 @@ public class BoltInstance implements IInstance {
 
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
-    while (!inQueue.isEmpty() && !isWaitingForCheckpointSaved()) {
+    while (!inQueue.isEmpty() && !isWaitingForCheckpointToBeSaved()) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {

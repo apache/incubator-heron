@@ -349,6 +349,10 @@ public class SpoutInstance implements IInstance {
             (ackEnabled && !streamInQueue.isEmpty()));
   }
 
+  private boolean isWaitingForCheckpointToBeSaved() {
+    return spout instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved;
+  }
+
   /**
    * Check whether we could produce tuples, i.e. invoke spout.nextTuple()
    * It is allowed in:
@@ -361,7 +365,7 @@ public class SpoutInstance implements IInstance {
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
         && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
-        && !(spout instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved);
+        && !isWaitingForCheckpointToBeSaved();
   }
 
   protected void produceTuple() {
@@ -461,7 +465,7 @@ public class SpoutInstance implements IInstance {
     long startOfCycle = System.nanoTime();
     Duration spoutAckBatchTime = systemConfig.getInstanceAckBatchTime();
 
-    while (!inQueue.isEmpty()) {
+    while (!inQueue.isEmpty() && !isWaitingForCheckpointToBeSaved()) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
