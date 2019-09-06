@@ -36,8 +36,8 @@ import org.apache.heron.api.generated.TopologyAPI;
 import org.apache.heron.api.metric.GlobalMetrics;
 import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.I2PhaseCommitComponent;
 import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.ITwoPhaseStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.Communicator;
@@ -170,7 +170,7 @@ public class BoltInstance implements IInstance {
       if (bolt instanceof IStatefulComponent) {
         ((IStatefulComponent) bolt).preSave(checkpointId);
       }
-      if (bolt instanceof I2PhaseCommitComponent) {
+      if (bolt instanceof ITwoPhaseStatefulComponent) {
         waitingForCheckpointSaved = true;
       }
       collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
@@ -222,15 +222,15 @@ public class BoltInstance implements IInstance {
 
   @Override
   public void preRestore(String checkpointId) {
-    if (bolt instanceof I2PhaseCommitComponent) {
-      ((I2PhaseCommitComponent) bolt).preRestore(checkpointId);
+    if (bolt instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) bolt).preRestore(checkpointId);
     }
   }
 
   @Override
   public void onCheckpointSaved(String checkpointId) {
-    if (bolt instanceof I2PhaseCommitComponent) {
-      ((I2PhaseCommitComponent) bolt).postSave(checkpointId);
+    if (bolt instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) bolt).postSave(checkpointId);
       waitingForCheckpointSaved = false;
     }
   }
@@ -287,9 +287,9 @@ public class BoltInstance implements IInstance {
     InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
-  // do not process data tuple when it is a I2PhaseCommitComponent and waiting for postSave
+  // do not process data tuple when it is a ITwoPhaseStatefulComponent and waiting for postSave
   private boolean isWaitingForCheckpointSaved() {
-    return bolt instanceof I2PhaseCommitComponent && waitingForCheckpointSaved;
+    return bolt instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved;
   }
 
   @Override

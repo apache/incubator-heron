@@ -38,9 +38,9 @@ import org.apache.heron.instance.SlaveTester;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
 import org.apache.heron.resource.MockPhysicalPlansBuilder;
-import org.apache.heron.resource.Test2PhaseCommitSpout;
 import org.apache.heron.resource.TestBolt;
 import org.apache.heron.resource.TestStatefulSpout;
+import org.apache.heron.resource.TestTwoPhaseStatefulSpout;
 import org.apache.heron.resource.UnitTestHelper;
 
 import static org.junit.Assert.*;
@@ -107,7 +107,7 @@ public class SpoutStatefulInstanceTest {
   }
 
   /**
-   * Ensure that for I2PhaseCommitComponent bolts, after a preSave, execute will not be invoked
+   * Ensure that for ITwoPhaseStatefulComponent bolts, after a preSave, execute will not be invoked
    * unless the corresponding postSave is called.
    */
   @Test
@@ -166,7 +166,7 @@ public class SpoutStatefulInstanceTest {
 
   /**
    * Ensure that the aforementioned behaviour does not apply for spouts that don't implement
-   * I2PhaseCommitComponent
+   * ITwoPhaseStatefulComponent
    */
   @Test
   public void testExecuteNotBlocked() throws Exception {
@@ -199,14 +199,14 @@ public class SpoutStatefulInstanceTest {
     assertTrue(preSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
 
-    // no need to wait for postSave as the bolt doesn't implement I2PhaseCommitComponent
+    // no need to wait for postSave as the bolt doesn't implement ITwoPhaseStatefulComponent
     assertTrue(emitLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(0, emitLatch.getCount());
   }
 
   private InstanceControlMsg buildPhysicalPlanMessageFor2PCSpout() {
-    return buildPhysicalPlanMessage(new Test2PhaseCommitSpout());
+    return buildPhysicalPlanMessage(new TestTwoPhaseStatefulSpout());
   }
 
   private InstanceControlMsg buildPhysicalPlanMessageForStatefulSpout() {

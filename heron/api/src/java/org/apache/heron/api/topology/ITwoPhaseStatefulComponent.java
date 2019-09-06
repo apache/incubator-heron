@@ -21,7 +21,31 @@ package org.apache.heron.api.topology;
 
 import java.io.Serializable;
 
-public interface I2PhaseCommitComponent<K extends Serializable, V extends Serializable>
+/**
+ * Defines a stateful component that is aware of Heron topology's "two-phase commit".
+ *
+ * Note tasks saving a distributed checkpoint would be the "prepare" phase of the two-phase commit
+ * algorithm. When a distributed checkpoint is done, we can say that all tasks agree that they
+ * will not roll back to the time before that distributed checkpoint, and the "prepare" phase is
+ * complete.
+ *
+ * When the "prepare" phase is complete, Heron will invoke the "postSave" hook to signal the
+ * beginning of the "commit" phase. If there is a failure occurred during the "prepare" phase,
+ * Heron will invoke the hook "preRestore" to signal that two-phase commit is aborted, and the
+ * topology will be rolled back to the previous checkpoint.
+ *
+ * Note that the commit phase will finish after the postSave hook exits successfully. Then, the
+ * prepare phase of the following checkpoint will begin.
+ *
+ * In addition, for two-phase stateful components specifically, Heron will not execute (for bolts)
+ * or produce (for spouts) tuples between preSave and postSave. This will guarantee that the prepare
+ * phase of the next checkpoint will not overlap with the commit phase of the current checkpoint
+ * (eg. we block execution of tuples from the next checkpoint unless commit phase is done).
+ *
+ * See the end-to-end effectively-once designed doc (linked in the PR of this commit) for more
+ * details.
+ */
+public interface ITwoPhaseStatefulComponent<K extends Serializable, V extends Serializable>
     extends IStatefulComponent<K, V> {
 
   /**

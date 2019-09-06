@@ -16,50 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.heron.resource;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Ignore;
-
-import org.apache.heron.api.bolt.BaseRichBolt;
-import org.apache.heron.api.bolt.OutputCollector;
+import org.apache.heron.api.spout.BaseRichSpout;
+import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.I2PhaseCommitComponent;
+import org.apache.heron.api.topology.ITwoPhaseStatefulComponent;
 import org.apache.heron.api.topology.OutputFieldsDeclarer;
 import org.apache.heron.api.topology.TopologyContext;
-import org.apache.heron.api.tuple.Fields;
-import org.apache.heron.api.tuple.Tuple;
 import org.apache.heron.common.basics.SingletonRegistry;
 
-@Ignore
-public class Test2PhaseCommitBolt extends BaseRichBolt
-    implements I2PhaseCommitComponent<String, String> {
-
-  private static final long serialVersionUID = -5160420613503624743L;
-
+public class TestTwoPhaseStatefulSpout extends BaseRichSpout
+    implements ITwoPhaseStatefulComponent<String, String> {
   @Override
-  public void prepare(
-      Map<String, Object> map,
-      TopologyContext topologyContext,
-      OutputCollector collector) {
+  public void open(
+      Map<String, Object> conf,
+      TopologyContext context,
+      SpoutOutputCollector collector) {
   }
 
   @Override
-  public void execute(Tuple tuple) {
-    CountDownLatch tupleExecutedLatch =
-        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.EXECUTE_LATCH);
+  public void nextTuple() {
+    AtomicBoolean shouldStartEmit =
+        (AtomicBoolean) SingletonRegistry.INSTANCE.getSingleton(Constants.SPOUT_SHOULD_START_EMIT);
 
-    if (tupleExecutedLatch != null) {
-      tupleExecutedLatch.countDown();
+    if (shouldStartEmit != null && !shouldStartEmit.get()) {
+      return;
     }
-  }
 
-  @Override
-  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("word"));
+    // actually "emit" the tuple
+    CountDownLatch emitLatch =
+        (CountDownLatch) SingletonRegistry.INSTANCE.getSingleton(Constants.EMIT_LATCH);
+
+    if (emitLatch != null) {
+      emitLatch.countDown();
+    }
   }
 
   @Override
@@ -94,5 +89,9 @@ public class Test2PhaseCommitBolt extends BaseRichBolt
     if (preSaveLatch != null) {
       preSaveLatch.countDown();
     }
+  }
+
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer declarer) {
   }
 }

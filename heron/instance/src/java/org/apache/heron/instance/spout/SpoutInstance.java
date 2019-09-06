@@ -35,8 +35,8 @@ import org.apache.heron.api.serializer.IPluggableSerializer;
 import org.apache.heron.api.spout.ISpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
-import org.apache.heron.api.topology.I2PhaseCommitComponent;
 import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.ITwoPhaseStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
@@ -176,7 +176,7 @@ public class SpoutInstance implements IInstance {
         ((IStatefulComponent) spout).preSave(checkpointId);
       }
 
-      if (spout instanceof I2PhaseCommitComponent) {
+      if (spout instanceof ITwoPhaseStatefulComponent) {
         waitingForCheckpointSaved = true;
       }
       collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
@@ -229,15 +229,15 @@ public class SpoutInstance implements IInstance {
 
   @Override
   public void preRestore(String checkpointId) {
-    if (spout instanceof I2PhaseCommitComponent) {
-      ((I2PhaseCommitComponent) spout).preRestore(checkpointId);
+    if (spout instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) spout).preRestore(checkpointId);
     }
   }
 
   @Override
   public void onCheckpointSaved(String checkpointId) {
-    if (spout instanceof I2PhaseCommitComponent) {
-      ((I2PhaseCommitComponent) spout).postSave(checkpointId);
+    if (spout instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) spout).postSave(checkpointId);
       waitingForCheckpointSaved = false;
     }
   }
@@ -354,14 +354,14 @@ public class SpoutInstance implements IInstance {
    * It is allowed in:
    * 1. Outgoing Stream queue is available
    * 2. Topology State is RUNNING
-   * 3. If the Spout implements I2PhaseCommitComponent, not waiting for checkpoint saved message
+   * 3. If the Spout implements ITwoPhaseStatefulComponent, not waiting for checkpoint saved message
    *
    * @return true to allow produceTuple() to be invoked
    */
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
         && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
-        && !(spout instanceof I2PhaseCommitComponent && waitingForCheckpointSaved);
+        && !(spout instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved);
   }
 
   protected void produceTuple() {

@@ -40,9 +40,9 @@ import org.apache.heron.proto.system.HeronTuples;
 import org.apache.heron.proto.system.PhysicalPlans;
 import org.apache.heron.resource.Constants;
 import org.apache.heron.resource.MockPhysicalPlansBuilder;
-import org.apache.heron.resource.Test2PhaseCommitBolt;
 import org.apache.heron.resource.TestSpout;
 import org.apache.heron.resource.TestStatefulBolt;
+import org.apache.heron.resource.TestTwoPhaseStatefulBolt;
 import org.apache.heron.resource.UnitTestHelper;
 
 import static org.junit.Assert.*;
@@ -111,7 +111,7 @@ public class BoltStatefulInstanceTest {
   }
 
   /**
-   * Ensure that for I2PhaseCommitComponent bolts, after a preSave, execute will not be invoked
+   * Ensure that for ITwoPhaseStatefulComponent bolts, after a preSave, execute will not be invoked
    * unless the corresponding postSave is called.
    */
   @Test
@@ -165,7 +165,7 @@ public class BoltStatefulInstanceTest {
 
   /**
    * Ensure that the aforementioned behaviour does not apply for bolts that don't implement
-   * I2PhaseCommitComponent
+   * ITwoPhaseStatefulComponent
    */
   @Test
   public void testExecuteNotBlocked() throws Exception {
@@ -192,7 +192,7 @@ public class BoltStatefulInstanceTest {
     assertTrue(preSaveLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
 
-    // no need to wait for postSave as the bolt doesn't implement I2PhaseCommitComponent
+    // no need to wait for postSave as the bolt doesn't implement ITwoPhaseStatefulComponent
     assertTrue(executeLatch.await(Constants.TEST_WAIT_TIME.toMillis(), TimeUnit.MILLISECONDS));
     assertEquals(0, preSaveLatch.getCount());
     assertEquals(0, executeLatch.getCount());
@@ -224,7 +224,7 @@ public class BoltStatefulInstanceTest {
   }
 
   private InstanceControlMsg buildPhysicalPlanMessageFor2PCBolt() {
-    return buildPhysicalPlanMessage(new Test2PhaseCommitBolt());
+    return buildPhysicalPlanMessage(new TestTwoPhaseStatefulBolt());
   }
 
   private InstanceControlMsg buildPhysicalPlanMessageForStatefulBolt() {
