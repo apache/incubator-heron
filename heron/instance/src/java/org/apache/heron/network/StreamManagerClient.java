@@ -291,7 +291,7 @@ public class StreamManagerClient extends HeronClient {
 
   private void handleCheckpointSaved(
       CheckpointManager.StatefulConsistentCheckpointSaved message) {
-    LOG.info("Received a StatefulCheckpointSaved message:with checkpoint id: "
+    LOG.info("Received a StatefulCheckpointSaved message with checkpoint id: "
         + message.getConsistentCheckpoint().getCheckpointId());
 
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder()
