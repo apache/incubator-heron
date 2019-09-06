@@ -72,7 +72,9 @@ public class SpoutInstance implements IInstance {
   private final boolean spillState;
   private final String spillStateLocation;
 
+  // default to false, can only be toggled to true if spout implements ITwoPhaseStatefulComponent
   private boolean waitingForCheckpointSaved;
+
   private State<Serializable, Serializable> instanceState;
 
   private final SlaveLooper looper;
@@ -349,10 +351,6 @@ public class SpoutInstance implements IInstance {
             (ackEnabled && !streamInQueue.isEmpty()));
   }
 
-  private boolean isWaitingForCheckpointToBeSaved() {
-    return spout instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved;
-  }
-
   /**
    * Check whether we could produce tuples, i.e. invoke spout.nextTuple()
    * It is allowed in:
@@ -365,7 +363,7 @@ public class SpoutInstance implements IInstance {
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
         && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
-        && !isWaitingForCheckpointToBeSaved();
+        && !waitingForCheckpointSaved;
   }
 
   protected void produceTuple() {
@@ -465,7 +463,7 @@ public class SpoutInstance implements IInstance {
     long startOfCycle = System.nanoTime();
     Duration spoutAckBatchTime = systemConfig.getInstanceAckBatchTime();
 
-    while (!inQueue.isEmpty() && !isWaitingForCheckpointToBeSaved()) {
+    while (!inQueue.isEmpty() && !waitingForCheckpointSaved) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {

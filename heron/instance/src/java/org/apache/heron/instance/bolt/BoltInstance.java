@@ -75,6 +75,7 @@ public class BoltInstance implements IInstance {
 
   private State<Serializable, Serializable> instanceState;
 
+  // default to false, can only be toggled to true if bolt implements ITwoPhaseStatefulComponent
   private boolean waitingForCheckpointSaved;
 
   // The reference to topology's config
@@ -287,10 +288,6 @@ public class BoltInstance implements IInstance {
     InstanceUtils.prepareTimerEvents(looper, helper);
   }
 
-  private boolean isWaitingForCheckpointToBeSaved() {
-    return bolt instanceof ITwoPhaseStatefulComponent && waitingForCheckpointSaved;
-  }
-
   @Override
   public void readTuplesAndExecute(Communicator<Message> inQueue) {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
@@ -298,7 +295,7 @@ public class BoltInstance implements IInstance {
 
     long startOfCycle = System.nanoTime();
     // Read data from in Queues
-    while (!inQueue.isEmpty() && !isWaitingForCheckpointToBeSaved()) {
+    while (!inQueue.isEmpty() && !waitingForCheckpointSaved) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
