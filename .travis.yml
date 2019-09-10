@@ -1,4 +1,4 @@
-dist: xenial
+group: edge
 
 cache: pip
 
@@ -31,14 +31,16 @@ addons:
       # for pyenv
       - git
       - build-essential
+      - libffi-dev
       - libzip-dev
       - libssl-dev
       - libbz2-dev
+      - python-openssl
       - libsqlite3-dev
       - libreadline-dev
 
 env:
-  - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1
+  - BAZEL_VERSION=0.26.0 CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8 ENABLE_HEAPCHECK=1 PYTHON_VERSION=3.6.9
 
 before_install:
   # download and install bazel
@@ -48,8 +50,8 @@ before_install:
   # install the latest python
   - git -C /opt/pyenv checkout master
   - git -C /opt/pyenv pull origin master
-  - pyenv install 3.7.0
-  - pyenv global system 3.7.0
+  - pyenv install ${PYTHON_VERSION}
+  - pyenv global system ${PYTHON_VERSION}
 
 before_script:
   # install python module for wheel files

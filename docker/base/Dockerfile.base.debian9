@@ -30,8 +30,8 @@ ENV PATH="/root/.pyenv/bin:${PATH}"
 RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 RUN apt-get install --yes libzip-dev libssl-dev libbz2-dev libsqlite3-dev libreadline-dev \
     && pyenv update \
-    && pyenv install 3.7.0 \
-    && pyenv global system 3.7.0
+    && pyenv install 3.6.9 \
+    && pyenv global system 3.6.9
 RUN echo 'eval "$(pyenv init -)"' >> /root/.bashrc \
     && echo 'eval "$(pyenv virtualenv-init -)"' >> /root/.bashrc
 
