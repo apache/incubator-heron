@@ -429,7 +429,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_zookeeper_zookeeper",
-  artifact = "org.apache.zookeeper:zookeeper:3.4.6",
+  artifact = "org.apache.zookeeper:zookeeper:3.4.14",
 )
 
 maven_jar(
@@ -872,10 +872,10 @@ http_archive(
 
 http_archive(
     name = "org_apache_zookeeper",
-    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
-    strip_prefix = "zookeeper-3.4.10",
+    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
+    strip_prefix = "zookeeper-3.4.14",
     build_file = "@//:third_party/zookeeper/zookeeper.BUILD",
-    sha256 = "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27",
+    sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
 )
 
 http_archive(
