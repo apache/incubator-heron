@@ -23,7 +23,6 @@ original_id: getting-started-local-single-node
 
 > The current version of Heron is **{{heron:version}}**
 
-
 The easiest way to get started learning Heron is to install the Heron client tools, which are currently available for:
 
 * [MacOS](#macos-homebrew)
