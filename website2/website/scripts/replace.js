@@ -8,7 +8,6 @@ const docsDir = `${CWD}/build/${siteConfig.projectName}/docs`
 
 function getVersions() {
     try {
-      console.log(JSON.parse(require('fs').readFileSync(`${CWD}/versions.json`, 'utf8')))
       return JSON.parse(require('fs').readFileSync(`${CWD}/versions.json`, 'utf8'));
     } catch (error) {
       //console.error(error)
@@ -30,14 +29,37 @@ replace(options)
     });
 }
 
+
 const versions = getVersions();
 
 const latestVersion = versions[0];
 
+const bazelVersions = {
+    '0.20.0': '0.14.1',
+    '0.20.1': '0.26',
+    'latest': '0.26',
+}
+
+function replaceBazel(version) {
+    try {
+        if (version in bazelVersions) {
+            return bazelVersions[version]
+        } else {
+            throw new Error('Unable to find bazel Version');
+        }
+    } catch (error) {
+
+        console.error('no versions found defaulting to 0.26')
+    }
+    return '0.26'
+}
+
 console.log(latestVersion)
 const from = [
-    /{{heron:version_latest}}/g,
     /{{heron:version}}/g,
+    /{{bazel:version}}/g,
+    /{{% heronVersion %}}/g,
+    /{{% bazelVersion %}}/g
 ];
 
 const options = {
@@ -48,8 +70,10 @@ const options = {
     ignore: versions.map(v => `${docsDir}/${v}/**/*`), // TODO add next and assets
     from: from,
     to: [
-      `${latestVersion}`,
-      `${versions}`,
+        `${latestVersion}`,
+        replaceBazel(`${latestVersion}`),
+        `${latestVersion}`,
+        replaceBazel(`${latestVersion}`),
     ],
     dry: false
   };
@@ -68,10 +92,12 @@ for (v of versions) {
       ],
       from: from,
       to: [
-        `${latestVersion}`,
-        `${v}`,
+          `${v}`,
+          replaceBazel(`${v}`),
+          `${v}`,
+          replaceBazel(`${v}`),
       ],
-      dry: true
+        dry: false
     };
     doReplace(opts);
 }  

@@ -16,6 +16,11 @@
     specific language governing permissions and limitations
     under the License.
 -->
+ perl -pi -e 's/^  */\t/' Makefile
+ chmod +x scripts/*
+ npm run version 0.21.2
+
+
 # The Heron website and documentation
 
 This `README` is basically the meta-documentation for the Heron website and documentation. You will find instructions on running the site locally.
