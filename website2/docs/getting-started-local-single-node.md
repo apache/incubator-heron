@@ -28,7 +28,7 @@ The easiest way to get started learning Heron is to install the Heron client too
 * [MacOS](#macos-homebrew)
 * [Ubuntu >= 14.04](#using-installation-scripts)
 * [CentOS](#using-installation-scripts)
-aa
+
 For other platforms, you need to build from source. Please refer to the [guide to compiling Heron](compiling-overview).
 
 ## Step 1 --- Download the Heron tools
