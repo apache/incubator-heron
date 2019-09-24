@@ -16,10 +16,6 @@
     specific language governing permissions and limitations
     under the License.
 -->
- perl -pi -e 's/^  */\t/' Makefile
- chmod +x scripts/*
- npm run version 0.21.2
-
 
 # The Heron website and documentation
 
