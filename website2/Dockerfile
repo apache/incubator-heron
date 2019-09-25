@@ -22,6 +22,4 @@ EXPOSE 3000 35729
 COPY ./docs /app/docs
 COPY ./website /app/website
 RUN yarn install
-RUN git config user.name "Heron Publish"
-RUN git config user.email "publish@heron.incubator.apache.org"
 CMD ["yarn", "start"]
