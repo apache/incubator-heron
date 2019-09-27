@@ -197,6 +197,10 @@ class StMgr {
   void HandleStatefulRestoreDone(proto::system::StatusCode _status,
                                  std::string _checkpoint_id, sp_int64 _restore_txid);
 
+  // Called when stmgr received StatefulConsistentCheckpointSaved message from TMaster
+  // Then, the stmgr will forward this fact to all heron instances connected to it
+  void BroadcastCheckpointSaved(const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg);
+
   // Patch new physical plan with internal hydrated topology but keep new topology data:
   // - new topology state
   // - new topology/component config

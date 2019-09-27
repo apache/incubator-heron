@@ -108,6 +108,12 @@ message StartStatefulCheckpoint {
   required string checkpoint_id = 1;
 }
 
+// Message broadcasted to stmgr (will then be forwarded to instances) after when checkpoint becomes
+// "globally consistent"
+message StatefulConsistentCheckpointSaved {
+  required StatefulConsistentCheckpoint consistent_checkpoint = 1;
+}
+
 // Message sent by tmaster to stmgr asking them to reset their instances
 // to this checkpoint
 message RestoreTopologyStateRequest {

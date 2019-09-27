@@ -398,8 +398,8 @@ void TMaster::SetupStatefulController(
        config::TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(*topology_, 300);
   CHECK_GT(stateful_checkpoint_interval, 0);
 
-  auto cb = [this](std::string _oldest_ckptid) {
-    this->HandleStatefulCheckpointSave(_oldest_ckptid);
+  auto cb = [this](const proto::ckptmgr::StatefulConsistentCheckpoints& new_ckpts) {
+    this->HandleStatefulCheckpointSave(new_ckpts);
   };
   // Instantiate the stateful restorer/coordinator
   stateful_controller_ = make_unique<StatefulController>(topology_->name(), _ckpt, state_mgr_,
@@ -616,8 +616,22 @@ void TMaster::CleanAllStatefulCheckpoint() {
   ckptmgr_client_->SendCleanStatefulCheckpointRequest("", true);
 }
 
-void TMaster::HandleStatefulCheckpointSave(const std::string& _oldest_ckpt) {
-  ckptmgr_client_->SendCleanStatefulCheckpointRequest(_oldest_ckpt, false);
+void TMaster::HandleStatefulCheckpointSave(
+    const proto::ckptmgr::StatefulConsistentCheckpoints &new_ckpts) {
+  // broadcast globally consistent checkpoint completion
+  proto::ckptmgr::StatefulConsistentCheckpointSaved msg;
+  msg.mutable_consistent_checkpoint()->CopyFrom(new_ckpts.consistent_checkpoints(0));
+
+  for (auto & stmgr : stmgrs_) {
+    stmgr.second->SendCheckpointSavedMessage(msg);
+  }
+
+  // clean oldest checkpoint on save
+  std::string oldest_ckpt_id =
+      new_ckpts.consistent_checkpoints(new_ckpts.consistent_checkpoints_size() - 1)
+        .checkpoint_id();
+
+  ckptmgr_client_->SendCleanStatefulCheckpointRequest(oldest_ckpt_id, false);
 }
 
 // Called when ckptmgr completes the clean stateful checkpoint request

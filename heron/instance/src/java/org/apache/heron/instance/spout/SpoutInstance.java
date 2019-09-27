@@ -36,6 +36,7 @@ import org.apache.heron.api.spout.ISpout;
 import org.apache.heron.api.spout.SpoutOutputCollector;
 import org.apache.heron.api.state.State;
 import org.apache.heron.api.topology.IStatefulComponent;
+import org.apache.heron.api.topology.ITwoPhaseStatefulComponent;
 import org.apache.heron.api.topology.IUpdatable;
 import org.apache.heron.api.utils.Utils;
 import org.apache.heron.common.basics.ByteAmount;
@@ -70,6 +71,9 @@ public class SpoutInstance implements IInstance {
   private final boolean isTopologyStateful;
   private final boolean spillState;
   private final String spillStateLocation;
+
+  // default to false, can only be toggled to true if spout implements ITwoPhaseStatefulComponent
+  private boolean waitingForCheckpointSaved;
 
   private State<Serializable, Serializable> instanceState;
 
@@ -109,6 +113,8 @@ public class SpoutInstance implements IInstance {
     this.spillStateLocation = String.format("%s/%s/",
         String.valueOf(config.get(Config.TOPOLOGY_STATEFUL_SPILL_STATE_LOCATION)),
         helper.getMyInstanceId());
+
+    this.waitingForCheckpointSaved = false;
 
     LOG.info("Is this topology stateful: " + isTopologyStateful);
 
@@ -171,10 +177,15 @@ public class SpoutInstance implements IInstance {
       if (spout instanceof IStatefulComponent) {
         ((IStatefulComponent) spout).preSave(checkpointId);
       }
+
+      if (spout instanceof ITwoPhaseStatefulComponent) {
+        waitingForCheckpointSaved = true;
+      }
       collector.sendOutState(instanceState, checkpointId, spillState, spillStateLocation);
     } finally {
       collector.lock.unlock();
     }
+
     LOG.info("State persisted for checkpoint: " + checkpointId);
   }
 
@@ -219,6 +230,21 @@ public class SpoutInstance implements IInstance {
   }
 
   @Override
+  public void preRestore(String checkpointId) {
+    if (spout instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) spout).preRestore(checkpointId);
+    }
+  }
+
+  @Override
+  public void onCheckpointSaved(String checkpointId) {
+    if (spout instanceof ITwoPhaseStatefulComponent) {
+      ((ITwoPhaseStatefulComponent) spout).postSave(checkpointId);
+      waitingForCheckpointSaved = false;
+    }
+  }
+
+  @Override
   public void clean() {
     // Invoke clean up hook before clean() is called
     helper.getTopologyContext().invokeHookCleanup();
@@ -257,6 +283,9 @@ public class SpoutInstance implements IInstance {
       public void run() {
         spoutMetrics.updateTaskRunCount();
 
+        // Check if we have any message to process anyway
+        readTuplesAndExecute(streamInQueue);
+
         // Check whether we should produce more tuples
         if (isProduceTuple()) {
           spoutMetrics.updateProduceTupleCount();
@@ -271,9 +300,6 @@ public class SpoutInstance implements IInstance {
         if (!collector.isOutQueuesAvailable()) {
           spoutMetrics.updateOutQueueFullCount();
         }
-
-        // Check if we have any message to process anyway
-        readTuplesAndExecute(streamInQueue);
 
         if (ackEnabled) {
           // Update the pending-to-be-acked tuples counts
@@ -330,12 +356,14 @@ public class SpoutInstance implements IInstance {
    * It is allowed in:
    * 1. Outgoing Stream queue is available
    * 2. Topology State is RUNNING
+   * 3. If the Spout implements ITwoPhaseStatefulComponent, not waiting for checkpoint saved message
    *
    * @return true to allow produceTuple() to be invoked
    */
   private boolean isProduceTuple() {
     return collector.isOutQueuesAvailable()
-        && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING);
+        && helper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)
+        && !waitingForCheckpointSaved;
   }
 
   protected void produceTuple() {
@@ -435,7 +463,7 @@ public class SpoutInstance implements IInstance {
     long startOfCycle = System.nanoTime();
     Duration spoutAckBatchTime = systemConfig.getInstanceAckBatchTime();
 
-    while (!inQueue.isEmpty()) {
+    while (!inQueue.isEmpty() && !waitingForCheckpointSaved) {
       Message msg = inQueue.poll();
 
       if (msg instanceof CheckpointManager.InitiateStatefulCheckpoint) {
