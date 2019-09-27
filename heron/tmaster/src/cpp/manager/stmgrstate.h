@@ -70,6 +70,8 @@ class StMgrState {
   // Send stateful checkpoint message to the stmgr
   void NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request);
 
+  void SendCheckpointSavedMessage(const proto::ckptmgr::StatefulConsistentCheckpointSaved &_msg);
+
 
   bool TimedOut() const;
 
