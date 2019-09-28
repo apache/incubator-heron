@@ -429,7 +429,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_zookeeper_zookeeper",
-  artifact = "org.apache.zookeeper:zookeeper:3.4.6",
+  artifact = "org.apache.zookeeper:zookeeper:3.4.14",
 )
 
 maven_jar(
@@ -872,10 +872,10 @@ http_archive(
 
 http_archive(
     name = "org_apache_zookeeper",
-    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"],
-    strip_prefix = "zookeeper-3.4.10",
+    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
+    strip_prefix = "zookeeper-3.4.14",
     build_file = "@//:third_party/zookeeper/zookeeper.BUILD",
-    sha256 = "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27",
+    sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
 )
 
 http_archive(
@@ -924,6 +924,14 @@ http_archive(
     strip_prefix = "cppcheck-1.87",
     build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
     sha256 = "b3de7fbdc1a23d7341b55f7f88877e106a76847bd5a07fa721c07310b625318b",
+)
+
+http_archive(
+    name = "com_github_hopscotch_hashmap",
+    build_file = "@//:third_party/hopscotch-hashmap/hopscotch.BUILD",
+    sha256 = "73e301925e1418c5ed930ef37ebdcab2c395a6d1bdaf5a012034bb75307d33f1",
+    strip_prefix = "hopscotch-map-2.2.1",
+    urls = ["https://github.com/Tessil/hopscotch-map/archive/v2.2.1.tar.gz"],
 )
 # end 3rdparty C++ dependencies
 

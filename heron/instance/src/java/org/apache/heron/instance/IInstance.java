@@ -58,6 +58,21 @@ public interface IInstance {
   void clean();
 
   /**
+   * Inform the Instance that the framework will clean, stop, and delete the instance
+   * in order to restore its state to a previously-saved checkpoint.
+   *
+   * @param checkpointId the ID of the checkpoint the instance will be restoring to
+   */
+  void preRestore(String checkpointId);
+
+  /**
+   * Inform the Instance that a particular checkpoint has become globally consistent
+   *
+   * @param checkpointId the ID of the checkpoint that became globally consistent
+   */
+  void onCheckpointSaved(String checkpointId);
+
+  /**
    * Destroy the whole IInstance.
    * Notice: It should only be called when the whole program is
    * exiting. And in fact, this method should never be called.

@@ -13,11 +13,14 @@ const Container = CompLibrary.Container;
 
 const CWD = process.cwd();
 
+const siteConfig = require(`${CWD}/siteConfig.js`);
+// versions
 const versions = require(`${CWD}/versions.json`);
 
 function Versions(props) {
-  const {config: siteConfig} = props;
-  const latestVersion = versions[0];
+  // const {config: siteConfig} = props;
+  const latestStableVersion = versions[0];
+
   const repoUrl = `https://github.com/${siteConfig.organizationName}/${
     siteConfig.projectName
   }`;
@@ -33,14 +36,17 @@ function Versions(props) {
           <table className="versions">
             <tbody>
               <tr>
-                <th>{latestVersion}</th>
+                <th>{latestStableVersion}</th>
                 <td>
                   {/* You are supposed to change this href where appropriate
                         Example: href="<baseUrl>/docs(/:language)/:id" */}
-                  <a
+                  {/* <a
                     href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
                       props.language ? props.language + '/' : ''
-                    }doc1`}>
+                    }doc1`}> */}
+                   <a
+    href = {`${siteConfig.baseUrl}docs/getting-started-local-single-node`
+}>
                     Documentation
                   </a>
                 </td>
@@ -63,9 +69,8 @@ function Versions(props) {
                   {/* You are supposed to change this href where appropriate
                         Example: href="<baseUrl>/docs(/:language)/next/:id" */}
                   <a
-                    href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
-                      props.language ? props.language + '/' : ''
-                    }next/doc1`}>
+    href = {`${siteConfig.baseUrl}docs/next/getting-started-local-single-node`
+}>
                     Documentation
                   </a>
                 </td>
@@ -81,22 +86,25 @@ function Versions(props) {
           <table className="versions">
             <tbody>
               {versions.map(
+                
+                
                 version =>
-                  version !== latestVersion && (
+                  version !== latestStableVersion && (                  
                     <tr>
                       <th>{version}</th>
                       <td>
                         {/* You are supposed to change this href where appropriate
                         Example: href="<baseUrl>/docs(/:language)/:version/:id" */}
                         <a
-                          href={`${siteConfig.baseUrl}${siteConfig.docsUrl}/${
-                            props.language ? props.language + '/' : ''
-                          }${version}/doc1`}>
+                  href = {`${siteConfig.baseUrl}docs/${version}/getting-started-local-single-node`
+              } >
                           Documentation
                         </a>
                       </td>
                       <td>
-                        <a href={`${repoUrl}/releases/tag/v${version}`}>
+        < a
+    href = {`${siteConfig.baseUrl}release-notes#${version}`
+}>
                           Release Notes
                         </a>
                       </td>
@@ -114,5 +122,7 @@ function Versions(props) {
     </div>
   );
 }
+
+Versions.title = 'Versions';
 
 module.exports = Versions;

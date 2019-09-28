@@ -26,11 +26,13 @@ public final class InstanceControlMsg {
   private PhysicalPlanHelper newPhysicalPlanHelper;
   private CheckpointManager.RestoreInstanceStateRequest restoreInstanceStateRequest;
   private CheckpointManager.StartInstanceStatefulProcessing startInstanceStatefulProcessing;
+  private CheckpointManager.StatefulConsistentCheckpointSaved statefulConsistentCheckpointSaved;
 
   private InstanceControlMsg(Builder builder) {
     this.newPhysicalPlanHelper = builder.newPhysicalPlanHelper;
     this.restoreInstanceStateRequest = builder.restoreInstanceStateRequest;
     this.startInstanceStatefulProcessing = builder.startInstanceStatefulProcessing;
+    this.statefulConsistentCheckpointSaved = builder.statefulConsistentCheckpointSaved;
   }
 
   public static Builder newBuilder() {
@@ -39,6 +41,10 @@ public final class InstanceControlMsg {
 
   public PhysicalPlanHelper getNewPhysicalPlanHelper() {
     return newPhysicalPlanHelper;
+  }
+
+  public CheckpointManager.StatefulConsistentCheckpointSaved getStatefulCheckpointSavedMessage() {
+    return this.statefulConsistentCheckpointSaved;
   }
 
   public boolean isNewPhysicalPlanHelper() {
@@ -65,6 +71,7 @@ public final class InstanceControlMsg {
     private PhysicalPlanHelper newPhysicalPlanHelper;
     private CheckpointManager.RestoreInstanceStateRequest restoreInstanceStateRequest;
     private CheckpointManager.StartInstanceStatefulProcessing startInstanceStatefulProcessing;
+    private CheckpointManager.StatefulConsistentCheckpointSaved statefulConsistentCheckpointSaved;
 
     private Builder() {
 
@@ -84,6 +91,12 @@ public final class InstanceControlMsg {
     public Builder setStartInstanceStatefulProcessing(
         CheckpointManager.StartInstanceStatefulProcessing request) {
       this.startInstanceStatefulProcessing = request;
+      return this;
+    }
+
+    public Builder setStatefulCheckpointSaved(
+        CheckpointManager.StatefulConsistentCheckpointSaved message) {
+      this.statefulConsistentCheckpointSaved = message;
       return this;
     }
 

@@ -107,8 +107,15 @@ void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
 }
 
 void StMgrState::NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request) {
-  LOG(INFO) << "Sending a new stateful checkpoint request to stmgr" << stmgr_->id();
+  LOG(INFO) << "Sending a new stateful checkpoint request to stmgr: " << stmgr_->id();
   server_.SendMessage(connection_, _request);
+}
+
+void StMgrState::SendCheckpointSavedMessage(
+        const proto::ckptmgr::StatefulConsistentCheckpointSaved &_msg) {
+  LOG(INFO) << "Sending checkpoint saved message to stmgr: " << stmgr_->id() << " "
+            << "for checkpoint: " << _msg.consistent_checkpoint().checkpoint_id();
+  server_.SendMessage(connection_, _msg);
 }
 
 /*

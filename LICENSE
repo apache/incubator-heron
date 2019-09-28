@@ -233,14 +233,6 @@ See project link for details.
       -> tools/rules/jarjar_rules.bzl
     gerrit(https://gerrit.googlesource.com/gerrit/+/master/COPYING)
       -> tools/rules/javadoc.bzl
-    heronpy(Copyright - Parsely, Inc.)
-      -> heronpy/api/bolt/base_bolt.py
-      -> heronpy/api/bolt/bolt.py
-      -> heronpy/api/bolt/base_component.py
-      -> heronpy/api/bolt/base_spout.py
-      -> heronpy/api/bolt/stream.py
-      -> heronpy/api/bolt/generator.py
-      -> heronpy/api/bolt/transformoperator.py
     k8s-zookeeper-docker(https://github.com/muxinc/k8s-zookeeper-docker/blob/master/LICENSE)
       -> docker/base/scripts/generate-zookeeper-config.sh
 

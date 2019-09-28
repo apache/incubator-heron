@@ -498,6 +498,15 @@ void InstanceServer::BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan&
   }
 }
 
+void InstanceServer::BroadcastStatefulCheckpointSaved(
+    const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg) {
+  for (auto & iter : active_instances_) {
+    LOG(INFO) << "Sending checkpoint: " << _msg.consistent_checkpoint().checkpoint_id()
+              << " saved message to instance with task_id: " << iter.second;
+    SendMessage(iter.first, _msg);
+  }
+}
+
 void InstanceServer::SetRateLimit(const proto::system::PhysicalPlan& _pplan,
                                   const std::string& _component,
                                   Connection* _conn) const {
