@@ -199,7 +199,7 @@ public class MetricsManager {
               : TypeUtils.getInteger(restartAttempts));
 
       // Update the list of Communicator in Metrics Manager Server
-      metricsManagerServer.addSinkCommunicator(sinkExecutor.getCommunicator());
+      metricsManagerServer.addSinkCommunicator(sinkId, sinkExecutor.getCommunicator());
     }
   }
 
@@ -537,12 +537,11 @@ public class MetricsManager {
       // If the thread name is a key of SinkExecutors, then it is a thread running IMetricsSink
       if (sinkExecutors.containsKey(thread.getName())) {
         sinkId = thread.getName();
-        // Remove the old sink executor
-        SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
         // Remove the unneeded Communicator bind with Metrics Manager Server
-        metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
+        metricsManagerServer.removeSinkCommunicator(sinkId);
 
-        // Close the sink
+        // Remove the old sink executor and close the sink
+        SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
         SysUtils.closeIgnoringExceptions(oldSinkExecutor);
 
         thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
@@ -565,7 +564,7 @@ public class MetricsManager {
         sinksRetryAttempts.put(sinkId, thisSinkRetryAttempts);
 
         // Update the list of Communicator in Metrics Manager Server
-        metricsManagerServer.addSinkCommunicator(newSinkExecutor.getCommunicator());
+        metricsManagerServer.addSinkCommunicator(sinkId, newSinkExecutor.getCommunicator());
 
         // Restart it
         executors.execute(newSinkExecutor);
