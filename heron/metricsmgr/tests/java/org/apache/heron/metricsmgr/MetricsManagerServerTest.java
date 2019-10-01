@@ -83,9 +83,10 @@ public class MetricsManagerServerTest {
    */
   @Test
   public void testAddSinkCommunicator() {
+    String name = "test_communicator";
     Communicator<MetricsRecord> sinkCommunicator = new Communicator<>();
-    metricsManagerServer.addSinkCommunicator(sinkCommunicator);
-    Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(sinkCommunicator));
+    metricsManagerServer.addSinkCommunicator(name, sinkCommunicator);
+    Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(name));
   }
 
   /**
@@ -93,9 +94,10 @@ public class MetricsManagerServerTest {
    */
   @Test
   public void testRemoveSinkCommunicator() {
+    String name = "test_communicator";
     Communicator<MetricsRecord> sinkCommunicator = new Communicator<>();
-    metricsManagerServer.addSinkCommunicator(sinkCommunicator);
-    Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(sinkCommunicator));
+    metricsManagerServer.addSinkCommunicator(name, sinkCommunicator);
+    Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(name));
   }
 
   /**
@@ -103,10 +105,11 @@ public class MetricsManagerServerTest {
    */
   @Test
   public void testMetricsManagerServer() throws InterruptedException {
+    String name = "test_communicator";
     CountDownLatch offersLatch = new CountDownLatch(MESSAGE_SIZE);
     Communicator<MetricsRecord> sinkCommunicator =
         CommunicatorTestHelper.spyCommunicator(new Communicator<MetricsRecord>(), offersLatch);
-    metricsManagerServer.addSinkCommunicator(sinkCommunicator);
+    metricsManagerServer.addSinkCommunicator(name, sinkCommunicator);
 
     serverTester.start();
 
