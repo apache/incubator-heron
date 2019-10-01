@@ -22,10 +22,11 @@ package org.apache.heron.metricsmgr;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,8 +62,10 @@ public class MetricsManagerServer extends HeronServer {
   private static final String SERVER_EXCEPTIONS_RECEIVED = "exceptions-received";
   private static final String SERVER_NEW_TMASTER_LOCATION = "new-tmaster-location";
   private static final String SERVER_TMASTER_LOCATION_RECEIVED = "tmaster-location-received";
+  private static final String SERVER_COMMUNICATOR_OFFER = "communicator-offer";
+  private static final String SERVER_COMMUNICATOR_SIZE = "communicator-size";
 
-  private final List<Communicator<MetricsRecord>> metricsSinkCommunicators;
+  private final Map<String, Communicator<MetricsRecord>> metricsSinkCommunicators;
 
   // A map from MetricPublisher's immutable SocketAddress to the MetricPublisher
   // We would fetch SocketAddress by using SocketChannel.socket().getRemoteSocketAddress,
@@ -96,7 +99,7 @@ public class MetricsManagerServer extends HeronServer {
     // Since we might mutate the list while iterating it
     // Consider that the iteration vastly outnumbers mutation,
     // it would barely hurt any performance
-    this.metricsSinkCommunicators = new CopyOnWriteArrayList<Communicator<MetricsRecord>>();
+    this.metricsSinkCommunicators = Collections.synchronizedMap(new HashMap<>());
 
     this.publisherMap = new HashMap<SocketAddress, Metrics.MetricPublisher>();
 
@@ -119,14 +122,24 @@ public class MetricsManagerServer extends HeronServer {
     registerOnMessage(Metrics.MetricsCacheLocationRefreshMessage.newBuilder());
   }
 
-  public void addSinkCommunicator(Communicator<MetricsRecord> communicator) {
-    LOG.info("Communicator is added: " + communicator);
-    this.metricsSinkCommunicators.add(communicator);
+  public void addSinkCommunicator(String id, Communicator<MetricsRecord> communicator) {
+    LOG.info("Communicator " + id + " is added: " + communicator);
+    synchronized (metricsSinkCommunicators) {
+      this.metricsSinkCommunicators.put(id, communicator);
+    }
   }
 
-  public boolean removeSinkCommunicator(Communicator<MetricsRecord> communicator) {
-    LOG.info("Communicator is removed: " + communicator);
-    return this.metricsSinkCommunicators.remove(communicator);
+  public boolean removeSinkCommunicator(String id) {
+    LOG.info("Remove communicator: " + id);
+    boolean found = false;
+    synchronized (metricsSinkCommunicators) {
+      if (metricsSinkCommunicators.containsKey(id)) {
+        this.metricsSinkCommunicators.remove(id);
+        found = true;
+        LOG.info("Communicator " + id + " is removed");
+      }
+    }
+    return found;
   }
 
   @Override
@@ -279,8 +292,15 @@ public class MetricsManagerServer extends HeronServer {
     MetricsRecord record = new MetricsRecord(source, metricsInfos, exceptionInfos);
 
     // Push MetricsRecord to Communicator, which would wake up SlaveLooper bind with IMetricsSink
-    for (Communicator<MetricsRecord> c : metricsSinkCommunicators) {
-      c.offer(record);
+    synchronized (metricsSinkCommunicators) {
+      Iterator<String> itr = metricsSinkCommunicators.keySet().iterator();
+      while (itr.hasNext()) {
+        String key = itr.next();
+        Communicator<MetricsRecord> c = metricsSinkCommunicators.get(key);
+        c.offer(record);
+        serverMetricsCounters.scope(SERVER_COMMUNICATOR_OFFER).incr();
+        serverMetricsCounters.scope(SERVER_COMMUNICATOR_SIZE + "-" + key).incrBy(c.size());
+      }
     }
   }
 
