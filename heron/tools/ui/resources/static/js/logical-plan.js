@@ -256,7 +256,8 @@
     // create the spout array
     for (var i in topology.spouts) {
       spoutsArr.push({
-        "name": i
+        "name": i,
+        "parallelism": topology.spouts[i]["config"]["topology.component.parallelism"]
       });
     }
 
@@ -264,6 +265,7 @@
     for (var i in topology.bolts) {
       boltsArr.push({
           "name": i,
+          "parallelism": topology.bolts[i]["config"]["topology.component.parallelism"],
           "inputComponents": topology.bolts[i]["inputComponents"],
           "inputStreams": topology.bolts[i]["inputs"]
       });
@@ -346,10 +348,12 @@
 
     var connection_tip = d3.tip()
         .attr('class', 'd3-tip main text-center connection')
-        .offset([10, 0])
+        .offset(function () {
+          return [10 - this.getBBox().height / 2, 0];
+        })
         .direction('s')
-        .html(function (d) {
-          return d.streams;
+        .html(function (edge) {
+          return edge.streams;
         });
 
     var node = svg.selectAll(".topnode")
@@ -385,10 +389,15 @@
     });
 
     // Component
-    node.append("circle")
+    var g = node.append("g")
+        .attr("transform", function(d){return "translate("+d.x+","+d.y+")"})
+        .on("click", planController.logicalComponentClicked)
+        .on("dblclick", planController.logicalComponentClicked)
+        .on("mouseover", planController.logicalComponentHoverOver)
+        .on("mouseout", planController.logicalComponentHoverOut);
+
+    g.append("circle")
         .attr('class', 'background')
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; })
         .attr("r", function (d) {
           if (d.isReal) {
             return d.r = 17;
@@ -397,10 +406,8 @@
         })
         .style('fill', 'white');
 
-    node.append("circle")
+    g.append("circle")
         .attr("class", "node")
-        .attr("cx", function (d) { return d.cx = d.x; })
-        .attr("cy", function (d) { return d.cy = d.y; })
         .attr("r", function (d) {
           if (d.isReal) {
             return d.r = 15;
@@ -413,17 +420,24 @@
           d.defaultColor = color(d.name);
           d.color = d.color || d.defaultColor;
           return d.color;
-        })
-        .on("click", planController.logicalComponentClicked)
-        .on("dblclick", planController.logicalComponentClicked)
-        .on("mouseover", planController.logicalComponentHoverOver)
-        .on("mouseout", planController.logicalComponentHoverOut);
+        });
+
+    // Component parallelism, always visible
+    g.append("text")
+        .attr("id", function(d) { return "parallelism+" + d.name; })
+        .attr("y", function (d) { return 4; })
+        .attr("class", "fade fade-half")
+        .style("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("cursor", "default")
+        .text(function (d) {
+          return "x" + d.parallelism;
+        });
 
     // Component name
-    node.append("text")
+    g.append("text")
         .attr("id", function(d) { return "text+" + d.name; })
-        .attr("x", function (d) { return d.cx; })
-        .attr("y", function (d) { return d.cy - d.r - 10; })
+        .attr("y", function (d) { return - d.r - 10; })
         .attr("class", "fade")
         .style("text-anchor", "middle")
         .style("user-select", "all")

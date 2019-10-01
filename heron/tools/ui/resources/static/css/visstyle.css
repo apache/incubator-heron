@@ -142,19 +142,19 @@ a:active, a:focus {
 }
 
 path.regular, rect.regular {
-    opacity: 1;
+  opacity: 1;
 }
 
 path.fade, rect.fade {
-    opacity: 0.2;
+  opacity: 0.2;
 }
 
 circle.regular {
-    opacity: 1;
+  opacity: 1;
 }
 
 circle.fade {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
 text.regular {
@@ -163,6 +163,11 @@ text.regular {
 
 text.fade {
   display: none;
+}
+
+text.fade.fade-half {
+  display: block;
+  opacity: 0.5;
 }
 
 circle.background {
