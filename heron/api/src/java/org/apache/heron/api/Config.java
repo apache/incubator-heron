@@ -378,7 +378,11 @@ public class Config extends HashMap<String, Object> {
       "topology.droptuples.upon.backpressure";
 
   /**
-   * The per component output bytes per second in this topology.
+   * The per component output bytes per second (rate limit) in this topology. It works with
+   * the addConfiguration() function in ComponentConfigurationDeclarer class.
+   * Example:
+   *   builder.setSpout(...).addConfiguration(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, 1000);
+   *   builder.setBolt(...).addConfiguration(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, 1000);
    */
   public static final String TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps";
 
@@ -646,13 +650,21 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
-  public static void setTopologyComponentOutputBPS(Map<String, Object> conf, long bps) {
-    conf.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
-  }
-
   @SuppressWarnings("unchecked")
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
     return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
+  }
+
+  /**
+   * This function should not be used to set rate limiter in topology config.
+   * @deprecated use the TOPOLOGY_COMPONENT_OUTPUT_BPS config with ComponentConfigurationDeclarer's
+   * addConfiguration() instead.
+   * Example:
+   *   builder.setSpout(...).addConfiguration(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, 1000);
+   */
+  @Deprecated
+  public static void setTopologyComponentOutputBPS(Map<String, Object> conf, long bps) {
+    conf.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
 
   /**
@@ -1030,6 +1042,14 @@ public class Config extends HashMap<String, Object> {
     this.put(Config.TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, String.valueOf(dropTuples));
   }
 
+  /**
+   * This function should not be used to set rate limiter in topology config.
+   * @deprecated use the TOPOLOGY_COMPONENT_OUTPUT_BPS config with ComponentConfigurationDeclarer's
+   * addConfiguration() instead.
+   * Example:
+   *   builder.setSpout(...).addConfiguration(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, 1000);
+   */
+  @Deprecated
   public void setTopologyComponentOutputBPS(long bps) {
     this.put(Config.TOPOLOGY_COMPONENT_OUTPUT_BPS, String.valueOf(bps));
   }
