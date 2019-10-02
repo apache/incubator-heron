@@ -376,9 +376,8 @@ class HeronExecutor(object):
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
     if unknown_args:
-      Log.error('Unknown argument: %s' % unknown_args[0])
-      parser.print_help()
-      sys.exit(1)
+      Log.warn('Unknown arguments found!!! They are: %s' % unknown_args)
+      Log.warn(parser.format_help())
 
     return parsed_args
 
