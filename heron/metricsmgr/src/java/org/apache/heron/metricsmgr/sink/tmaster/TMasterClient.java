@@ -88,12 +88,20 @@ public class TMasterClient extends HeronClient implements Runnable {
     Runnable task = new Runnable() {
       @Override
       public void run() {
-        while (!publishMetricsCommunicator.isEmpty()) {
-          TopologyMaster.PublishMetrics publishMetrics = publishMetricsCommunicator.poll();
+        TopologyMaster.PublishMetrics publishMetrics;
+        synchronized (publishMetricsCommunicator) {
+          publishMetrics = publishMetricsCommunicator.poll();
+        }
+        while (publishMetrics != null) {
           LOG.info(String.format("%d Metrics, %d Exceptions to send to TMaster",
               publishMetrics.getMetricsCount(), publishMetrics.getExceptionsCount()));
           LOG.fine("Publish Metrics sending to TMaster: " + publishMetrics.toString());
+
           sendMessage(publishMetrics);
+
+          synchronized (publishMetricsCommunicator) {
+            publishMetrics = publishMetricsCommunicator.poll();
+          }
         }
       }
     };
