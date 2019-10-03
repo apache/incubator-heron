@@ -446,7 +446,7 @@ class HeronExecutor(object):
                       '-XX:+HeapDumpOnOutOfMemoryError',
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:+PrintCommandLineFlags',
-                      '-Xloggc:log-files/gc.metricsmgr.log',
+                      '-Xloggc:log-files/gc.' + metricsManagerId + '.log',
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metrics_manager_classpath,
@@ -845,6 +845,7 @@ class HeronExecutor(object):
     ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
     ckptmgr_ram_mb = self.checkpoint_manager_ram / (1024 * 1024)
+    ckptmgr_id = self.ckptmgr_ids[self.shard]
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
                    '-Xms%dM' % ckptmgr_ram_mb,
                    '-Xmx%dM' % ckptmgr_ram_mb,
@@ -863,14 +864,14 @@ class HeronExecutor(object):
                    '-XX:+HeapDumpOnOutOfMemoryError',
                    '-XX:+UseConcMarkSweepGC',
                    '-XX:+UseConcMarkSweepGC',
-                   '-Xloggc:log-files/gc.ckptmgr.log',
+                   '-Xloggc:log-files/gc.' + ckptmgr_id + '.log',
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
                    self.checkpoint_manager_classpath,
                    ckptmgr_main_class,
                    '-t' + self.topology_name,
                    '-i' + self.topology_id,
-                   '-c' + self.ckptmgr_ids[self.shard],
+                   '-c' + ckptmgr_id,
                    '-p' + self.checkpoint_manager_port,
                    '-f' + self.stateful_config_file,
                    '-o' + self.override_config_file,

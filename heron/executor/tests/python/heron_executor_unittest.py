@@ -109,12 +109,12 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=100M " \
            "-XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC " \
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
-           "-Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true " \
+           "-Xloggc:log-files/gc.metricsmgr-%d.log -Djava.net.preferIPv4Stack=true " \
            "-cp metricsmgr_classpath org.apache.heron.metricsmgr.MetricsManager " \
            "--id=metricsmgr-%d --port=metricsmgr_port " \
            "--topology=topname --cluster=cluster --role=role --environment=environ --topology-id=topid " \
            "--system-config-file=%s --override-config-file=%s --sink-config-file=metrics_sinks_config_file" %\
-           (container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
+           (container_id, container_id, INTERNAL_CONF_PATH, OVERRIDE_PATH)
 
   def get_expected_metricscachemgr_command():
       return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc " \
