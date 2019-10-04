@@ -83,6 +83,8 @@ import org.apache.heron.spi.metricsmgr.sink.SinkContext;
 public class MetricsCacheSink implements IMetricsSink {
   private static final Logger LOG = Logger.getLogger(MetricsCacheSink.class.getName());
 
+  private static final int MAX_COMMUNICATOR_SIZE = 128;
+
   // These configs would be read from metrics-sink-configs.yaml
   private static final String KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC =
       "metricscache-location-check-interval-sec";
@@ -232,10 +234,27 @@ public class MetricsCacheSink implements IMetricsSink {
 
     metricsCommunicator.offer(publishMetrics.build());
 
+
+
     // Update metrics
     sinkContext.exportCountMetric(RECORD_PROCESS_COUNT, 1);
     sinkContext.exportCountMetric(METRICS_COUNT, publishMetrics.getMetricsCount());
     sinkContext.exportCountMetric(EXCEPTIONS_COUNT, publishMetrics.getExceptionsCount());
+
+    checkCommunicator(metricsCommunicator, MAX_COMMUNICATOR_SIZE);
+  }
+
+  // Check if the communicator is full/overflow. Poll and drop extra elements that
+  // are over the queue limit from the head.
+  public static void checkCommunicator(Communicator<TopologyMaster.PublishMetrics> communicator,
+                                        int maxSize) {
+    synchronized (communicator) {
+      int size = communicator.size();
+
+      for (int i = 0; i < size - maxSize; ++i) {
+        communicator.poll();
+      }
+    }
   }
 
   @Override
