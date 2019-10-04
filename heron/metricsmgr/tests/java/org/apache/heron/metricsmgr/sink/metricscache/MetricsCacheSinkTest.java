@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.apache.heron.api.metric.MultiCountMetric;
+import org.apache.heron.common.basics.Communicator;
 import org.apache.heron.common.basics.SingletonRegistry;
 import org.apache.heron.common.basics.SysUtils;
 import org.apache.heron.common.config.SystemConfig;
@@ -187,5 +188,31 @@ public class MetricsCacheSinkTest {
     assertEquals(newLoc, metricsCacheSink.getCurrentMetricsCacheLocationInService());
 
     metricsCacheSink.close();
+  }
+
+  @Test
+  public void testCheckCommunicator() {
+    Communicator<TopologyMaster.PublishMetrics> communicator = new Communicator<>();
+    int initSize = 16;
+    int capSize = 10;
+
+    TopologyMaster.PublishMetrics.Builder publishMetrics =
+        TopologyMaster.PublishMetrics.newBuilder();
+    for (int i = 0; i < initSize; ++i) {
+      communicator.offer(publishMetrics.build());
+    }
+    assertEquals(communicator.size(), initSize);
+
+    MetricsCacheSink.checkCommunicator(communicator, initSize + 1);
+    assertEquals(communicator.size(), initSize);
+
+    MetricsCacheSink.checkCommunicator(communicator, initSize);
+    assertEquals(communicator.size(), initSize);
+
+    MetricsCacheSink.checkCommunicator(communicator, initSize - 1);
+    assertEquals(communicator.size(), initSize - 1);
+
+    MetricsCacheSink.checkCommunicator(communicator, capSize);
+    assertEquals(communicator.size(), capSize);
   }
 }
