@@ -94,19 +94,20 @@ public class MetricsCacheClient extends HeronClient implements Runnable {
       @Override
       public void run() {
         TopologyMaster.PublishMetrics publishMetrics;
-        synchronized (publishMetricsCommunicator) {
-          publishMetrics = publishMetricsCommunicator.poll();
-        }
-        while (publishMetrics != null) {
+        while (true) {
+          synchronized (publishMetricsCommunicator) {
+            publishMetrics = publishMetricsCommunicator.poll();
+          }
+          if (publishMetrics == null) {
+            break;  // No metrics left
+          }
+
           LOG.info(String.format("%d Metrics, %d Exceptions to send to MetricsCache",
               publishMetrics.getMetricsCount(), publishMetrics.getExceptionsCount()));
           LOG.fine("Publish Metrics sending to MetricsCache: " + publishMetrics.toString());
 
           sendMessage(publishMetrics);
 
-          synchronized (publishMetricsCommunicator) {
-            publishMetrics = publishMetricsCommunicator.poll();
-          }
         }
       }
     };
