@@ -24,6 +24,7 @@ from .topology import (
     TopologyExceptionSummaryHandler,
     ListTopologiesJsonHandler,
     TopologyLogicalPlanJsonHandler,
+    TopologyPackingPlanJsonHandler,
     TopologyPhysicalPlanJsonHandler,
     TopologySchedulerLocationJsonHandler,
     TopologyExecutionStateJsonHandler,

@@ -598,7 +598,7 @@ class Tracker(object):
 
     packingPlan["id"] = topology.packing_plan.id
     packingPlan["container_plans"] = containers
-    return json.dumps(packingPlan)
+    return packingPlan
 
   def setTopologyInfo(self, topology):
     """

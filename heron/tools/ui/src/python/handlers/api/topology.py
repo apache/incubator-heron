@@ -141,6 +141,32 @@ class TopologyLogicalPlanJsonHandler(base.BaseHandler):
     self.write(result)
 
 
+class TopologyPackingPlanJsonHandler(base.BaseHandler):
+  ''' TopologyPackingPlanJsonHandler '''
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology):
+    '''
+    :param cluster:
+    :param environ:
+    :param topology:
+    :return:
+    '''
+
+    start_time = time.time()
+    packing_plan = yield access.get_packing_plan(cluster, environ, topology)
+
+    result_map = dict(
+        status="success",
+        message="",
+        version=common.VERSION,
+        executiontime=time.time() - start_time,
+        result=packing_plan
+    )
+
+    self.write(result_map)
+
+
 class TopologyPhysicalPlanJsonHandler(base.BaseHandler):
   ''' TopologyPhysicalPlanJsonHandler '''
 

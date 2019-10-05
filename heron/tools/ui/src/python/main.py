@@ -100,6 +100,8 @@ class Application(tornado.web.Application):
          handlers.api.ListTopologiesJsonHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/logicalplan.json",
          handlers.api.TopologyLogicalPlanJsonHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/packingplan.json",
+         handlers.api.TopologyPackingPlanJsonHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/physicalplan.json",
          handlers.api.TopologyPhysicalPlanJsonHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/executionstate.json",
