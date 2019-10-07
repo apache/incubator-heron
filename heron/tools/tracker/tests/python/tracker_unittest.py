@@ -250,3 +250,22 @@ class TrackerTest(unittest.TestCase):
                      {'topology.component.parallelism': '1'})
     self.assertEqual(pplan['instances'], {})
     self.assertEqual(pplan['stmgrs'], {})
+
+  def test_extract_packing_plan(self):
+    # Create topology
+    pb_pplan = MockProto().create_mock_simple_packing_plan()
+    topology = Topology('topology_name', 'ExclamationTopology')
+    topology.set_packing_plan(pb_pplan)
+    # Extract packing plan
+    packing_plan = self.tracker.extract_packing_plan(topology)
+    self.assertEqual(packing_plan['id'], 'ExclamationTopology')
+    self.assertEqual(packing_plan['container_plans'][0]['id'], 1)
+    self.assertEqual(packing_plan['container_plans'][0]['required_resources'],
+                     {'disk': 2048L, 'ram': 1024L, 'cpu': 1.0})
+    self.assertEqual(packing_plan['container_plans'][0]['instances'][0],
+                     {
+                       'component_index': 1,
+                        'component_name': u'word',
+                        'instance_resources': {'cpu': 1.0, 'disk': 2048L, 'ram': 1024L},
+                        'task_id': 1
+                     })
