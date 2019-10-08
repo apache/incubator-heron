@@ -31,8 +31,9 @@
 
 namespace heron {
 namespace common {
-class MetricsMgrSt;
 class CountMetric;
+class MetricsMgrSt;
+class TimeSpentMetric;
 }
 }
 
@@ -107,6 +108,7 @@ class StMgrServer : public Server {
   shared_ptr<heron::common::CountMetric> ack_tuples_from_stmgrs_metrics_;
   shared_ptr<heron::common::CountMetric> fail_tuples_from_stmgrs_metrics_;
   shared_ptr<heron::common::CountMetric> bytes_from_stmgrs_metrics_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_caused_by_remote_stmgr_;
 };
 
 }  // namespace stmgr
