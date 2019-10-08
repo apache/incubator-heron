@@ -35,6 +35,7 @@ TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
 EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
 LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
+PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
 SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
 
 METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
@@ -264,6 +265,25 @@ def get_instances(cluster, environ, topology, role=None):
   pplan = yield fetch_url_as_json(request_url)
   instances = pplan['instances'].keys()
   raise tornado.gen.Return(instances)
+
+
+################################################################################
+@tornado.gen.coroutine
+def get_packing_plan(cluster, environ, topology, role=None):
+  '''
+  Get the packing plan state of a topology in a cluster from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
+  params = dict(cluster=cluster, environ=environ, topology=topology)
+  if role is not None:
+    params['role'] = role
+  request_url = tornado.httputil.url_concat(
+      create_url(PACKINGPLAN_URL_FMT), params)
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
