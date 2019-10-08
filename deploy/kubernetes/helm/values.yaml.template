@@ -41,7 +41,7 @@ jobReplicas: 1
 apiServerMemory: 512M
 heron:
   url:/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
-i Topologies uploader
+# Topologies uploader
 uploader:
   class: dlog # s3
   s3Bucket: ""
