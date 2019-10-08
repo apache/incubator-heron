@@ -61,8 +61,8 @@ bookieHeapMemory: 512M
 bookieDirectMemory: 256M
 bookieReadCacheSize: 32
 bookieWriteCacheSize: 32
-bookieJournalCapacity: 10G
-bookieStorageCapacity: 30G
+bookieJournalCapacity: 5G
+bookieStorageCapacity: 15G
 
 # Number of replicas for zookeeper
 zkReplicas: 3
