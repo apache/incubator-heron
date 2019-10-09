@@ -31,11 +31,11 @@
 
 namespace heron {
 namespace common {
+class AssignableMetric;
 class MetricsMgrSt;
 class MultiCountMetric;
-class TimeSpentMetric;
-class AssignableMetric;
 class MultiMeanMetric;
+class TimeSpentMetric;
 }
 }
 
@@ -196,6 +196,7 @@ class InstanceServer : public Server {
   shared_ptr<heron::common::MetricsMgrSt> metrics_manager_client_;
   shared_ptr<heron::common::MultiCountMetric> instance_server_metrics_;
   shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_aggr_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_caused_by_local_instances_;
 
   bool spouts_under_back_pressure_;
 
