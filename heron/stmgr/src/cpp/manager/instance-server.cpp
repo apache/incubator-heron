@@ -67,13 +67,16 @@ const sp_string METRIC_FAIL_TUPLES_TO_INSTANCES_LOST = "__fail_tuples_to_workers
 // Num bytes lost since instances is not connected
 const sp_string METRIC_BYTES_TO_INSTANCES_LOST = "__bytes_to_workers_lost";
 
+// Time spent in back pressure caused by instances managed by this stmgr.
+const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_CAUSED_BY_LOCAL_INSTANCE =
+    "__time_spent_back_pressure_by_local_instance";
 // Time spent in back pressure aggregated - back pressure initiated by us +
 // others
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_AGGR = "__server/__time_spent_back_pressure_aggr";
 // Time spent in back pressure because of a component id. The comp id will be
-// appended
-// to the string below
+// appended to the string below
 const sp_string METRIC_TIME_SPENT_BACK_PRESSURE_COMPID = "__time_spent_back_pressure_by_compid/";
+
 // Prefix for connection buffer's metrics
 const sp_string CONNECTION_BUFFER_BY_INSTANCEID = "__connection_buffer_by_instanceid/";
 // Prefix for connection buffer's length metrics. This is different
@@ -117,6 +120,9 @@ InstanceServer::InstanceServer(
   metrics_manager_client_->register_metric("__server", instance_server_metrics_);
   metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR,
                                            back_pressure_metric_aggr_);
+  back_pressure_metric_caused_by_local_instances_ = make_shared<heron::common::TimeSpentMetric>();
+  metrics_manager_client_->register_metric(METRIC_TIME_SPENT_BACK_PRESSURE_CAUSED_BY_LOCAL_INSTANCE,
+                                           back_pressure_metric_caused_by_local_instances_);
   spouts_under_back_pressure_ = false;
 
   // Update queue related metrics every 10 seconds
@@ -180,6 +186,8 @@ InstanceServer::~InstanceServer() {
 
   metrics_manager_client_->unregister_metric("__server");
   metrics_manager_client_->unregister_metric(METRIC_TIME_SPENT_BACK_PRESSURE_AGGR);
+  metrics_manager_client_->unregister_metric(
+      METRIC_TIME_SPENT_BACK_PRESSURE_CAUSED_BY_LOCAL_INSTANCE);
 
   // cleanup the instance info
   for (auto iter = instance_info_.begin(); iter != instance_info_.end(); ++iter) {
@@ -549,6 +557,8 @@ sp_string InstanceServer::GetInstanceName(Connection* _connection) {
   return "";
 }
 
+// This function is called when the buffer in the connection is full (the instance is not consuming
+// tuples fast enough).
 void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   // The connection will notify us when we can stop the back pressure
   _connection->setCausedBackPressure();
@@ -568,6 +578,8 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
 
   if (!stmgr_->DidAnnounceBackPressure()) {
     stmgr_->SendStartBackPressureToOtherStMgrs();
+    // Start backpressure from local instances metric
+    back_pressure_metric_caused_by_local_instances_->Start();
   }
 
   // Indicate which instance component had back pressure
@@ -578,6 +590,7 @@ void InstanceServer::StartBackPressureConnectionCb(Connection* _connection) {
   StartBackPressureOnSpouts();
 }
 
+// This function is called when the buffer in the connection is empty (the tuples are drained).
 void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
   _connection->unsetCausedBackPressure();
 
@@ -605,6 +618,8 @@ void InstanceServer::StopBackPressureConnectionCb(Connection* _connection) {
 
   if (!stmgr_->DidAnnounceBackPressure()) {
     stmgr_->SendStopBackPressureToOtherStMgrs();
+    // Stop backpressure from local instances metric
+    back_pressure_metric_caused_by_local_instances_->Stop();
   }
   AttemptStopBackPressureFromSpouts();
 }
