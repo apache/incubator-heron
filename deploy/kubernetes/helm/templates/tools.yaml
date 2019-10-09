@@ -111,7 +111,7 @@ spec:
             - >-
               heron-ui
               --port=8889
-              --base_url=/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
+              --base_url={{ .Values.heron.url }}
         - name: heron-apiserver
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}

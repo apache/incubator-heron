@@ -39,7 +39,8 @@ jobReplicas: 1
 
 # amount of memory to provide for API server
 apiServerMemory: 512M
-
+heron:
+  url:/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
 # Topologies uploader
 uploader:
   class: dlog # s3
@@ -53,18 +54,18 @@ uploader:
 packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
 
 # Number of replicas for storage bookies, memory and storage requirements
-bookieReplicas: 1
+bookieReplicas: 3
 bookieCpuMin: 100m
 bookieCpuMax: 250m
-bookieHeapMemory: 256M
-bookieDirectMemory: 128M
+bookieHeapMemory: 512M
+bookieDirectMemory: 256M
 bookieReadCacheSize: 32
 bookieWriteCacheSize: 32
-bookieJournalCapacity: 1G
-bookieStorageCapacity: 3G
+bookieJournalCapacity: 5G
+bookieStorageCapacity: 15G
 
 # Number of replicas for zookeeper
-zkReplicas: 1
+zkReplicas: 3
 
 bookkeeper:
   image: apache/bookkeeper:4.7.3
