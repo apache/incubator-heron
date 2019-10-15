@@ -36,13 +36,13 @@ block](https://maven.apache.org/pom.html#Dependencies).
 <dependency>
   <groupId>org.apache.heron</groupId>
   <artifactId>heron-api</artifactId>
-  <version>{{< heronVersion >}}</version>
+  <version>{{heron:version}}</version>
   <scope>compile</scope>
 </dependency>
 <dependency>
   <groupId>org.apache.heron</groupId>
   <artifactId>heron-storm</artifactId>
-  <version>{{< heronVersion >}}</version>
+  <version>{{heron:version}}</version>
   <scope>compile</scope>
 </dependency>
 ```

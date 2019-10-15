@@ -21,7 +21,7 @@ original_id: topology-development-topology-api-python
     under the License.
 -->
 
-> The current version of `heronpy` is [{{% heronpyVersion %}}](https://pypi.python.org/pypi/heronpy/{{% heronpyVersion %}}).
+> The current version of `heronpy` is [{{heron:version}}](https://pypi.python.org/pypi/heronpy/{{heron:version}}).
 
 Support for developing Heron topologies in Python is provided by a Python library called [`heronpy`](https://pypi.python.org/pypi/heronpy).
 

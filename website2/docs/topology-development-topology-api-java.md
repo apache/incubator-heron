@@ -46,7 +46,7 @@ configuration file:
 <dependency>
     <groupId>org.apache.heron</groupId>
     <artifactId>heron-api</artifactId>
-    <version>{{< heronVersion >}}</version>
+    <version>{{heron:version}}</version>
 </dependency>
 ```
 
