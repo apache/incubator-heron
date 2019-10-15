@@ -6,9 +6,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,7 +34,7 @@ mkdir -p ${ROOT_DIR}/generated-site/content
 ## copy generated site
 cp -R build/incubator-heron/* ${ROOT_DIR}/generated-site/content
 ## copy java docs
-cp -R ${ROOT_DIR}/website2/public/* ${ROOT_DIR}/generated-site/content/api/java
+cp -R ${ROOT_DIR}/website2/website/public/api/java/* ${ROOT_DIR}/generated-site/content/api/java/
 ## copy pydocs
 cp -R ${ROOT_DIR}/website2/website/static/api/python/* ${ROOT_DIR}/generated-site/content/api/python/
 
