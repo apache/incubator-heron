@@ -1,7 +1,8 @@
 ---
-id: client-api-docs-overview
-title: Client API Docs 
-sidebar_label: Client API Docs 
+id: version-0.20.1-incubating-client-api-docs-overview
+title: Client API Docs
+sidebar_label: Client API Docs
+original_id: client-api-docs-overview
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
