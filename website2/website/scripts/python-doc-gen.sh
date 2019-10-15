@@ -17,14 +17,14 @@
 # under the License.
 
 # Install Dependencies
-sudo apt-get update && sudo apt install -y automake cmake libtool-bin g++ \
- python-setuptools python-dev python-wheel python python-pip unzip tree openjdk-8-jdk virtualenv
+#sudo apt-get update && sudo apt install -y automake cmake libtool-bin g++ \
+# python-setuptools python-dev python-wheel python python-pip unzip tree openjdk-8-jdk virtualenv
 
 # Install Bazel 0.26
-wget -O ./bazel-0.26.0-installer-linux-x86_64.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh && \
-chmod +x ./bazel-0.26.0-installer-linux-x86_64.sh && \
-./bazel-0.26.0-installer-linux-x86_64.sh --user && \
-export PATH="$PATH:$HOME/bin"
+#wget -O ./bazel-0.26.0-installer-linux-x86_64.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh && \
+# chmod +x ./bazel-0.26.0-installer-linux-x86_64.sh && \
+#./bazel-0.26.0-installer-linux-x86_64.sh --user && \
+# export PATH="$PATH:$HOME/bin"
 
 set -e
 

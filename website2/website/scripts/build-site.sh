@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -31,4 +31,12 @@ node ./scripts/replace.js
 
 rm -rf ${ROOT_DIR}/generated-site/content
 mkdir -p ${ROOT_DIR}/generated-site/content
+## copy generated site
 cp -R build/incubator-heron/* ${ROOT_DIR}/generated-site/content
+## copy java docs
+cp -R ${ROOT_DIR}/website2/public/* ${ROOT_DIR}/generated-site/content
+## copy pydocs
+cp -R ${ROOT_DIR}/website2/website/static/api/python/* ${ROOT_DIR}/generated-site/content
+
+## java public/api/java
+## py static/api/python

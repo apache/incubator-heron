@@ -355,8 +355,6 @@ builder.newSource(() -> "Some string over and over");
 
 ### Join operations
 
-> For a more in-depth conceptual discussion of joins, see the [Heron Streamlet API](../../../concepts/streamlet-api#join-operations) doc.
-
 Join operations unify two streamlets *on a key* (join operations thus require KV streamlets). Each `KeyValue` object in a streamlet has, by definition, a key. When a join operation is added to a processing graph, 
 
 ```java
