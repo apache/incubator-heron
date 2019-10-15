@@ -82,9 +82,9 @@ Once you've defined spouts and bolts for a topology, you can then compose the to
         my_bolt = CountBolt.spec(par=3, inputs={spout: Grouping.fields("word")})
     ```
 
-## Defining topologies using the `TopologyBuilder class
+## Defining topologies using the `TopologyBuilder` class
 
-If you create a Python topology using a `TopologyBuilder1, you need to instantiate a `TopologyBuilder` inside of a standard Python main function, like this:
+If you create a Python topology using a `TopologyBuilder`, you need to instantiate a `TopologyBuilder` inside of a standard Python main function, like this:
 
 ```python
 from heronpy.api.topology import TopologyBuilder
