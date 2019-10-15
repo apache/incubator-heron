@@ -37,6 +37,3 @@ cp -R build/incubator-heron/* ${ROOT_DIR}/generated-site/content
 cp -R ${ROOT_DIR}/website2/website/public/api/java/* ${ROOT_DIR}/generated-site/content/api/java/
 ## copy pydocs
 cp -R ${ROOT_DIR}/website2/website/static/api/python/* ${ROOT_DIR}/generated-site/content/api/python/
-
-## java public/api/java
-## py static/api/python
