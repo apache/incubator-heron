@@ -52,7 +52,7 @@ Heron [topologies](heron-topology-concepts) are networks of [spouts](topology-de
 
 Once you've defined spouts and bolts for a topology, you can then compose the topology in one of two ways:
 
-* You can use the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class inside of a main function.
+* You can use the `TopologyBuilder` class inside of a main function.
 
     Here's an example:
 
@@ -67,7 +67,7 @@ Once you've defined spouts and bolts for a topology, you can then compose the to
         builder.build_and_submit()
     ```
 
-* You can subclass the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class.
+* You can subclass the `Topology` class.
 
     Here's an example:
 
@@ -81,9 +81,9 @@ Once you've defined spouts and bolts for a topology, you can then compose the to
         my_bolt = CountBolt.spec(par=3, inputs={spout: Grouping.fields("word")})
     ```
 
-## Defining topologies using the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class
+## Defining topologies using the `TopologyBuilder class
 
-If you create a Python topology using a [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder), you need to instantiate a `TopologyBuilder` inside of a standard Python main function, like this:
+If you create a Python topology using a `TopologyBuilder1, you need to instantiate a `TopologyBuilder` inside of a standard Python main function, like this:
 
 ```python
 from heronpy.api.topology import TopologyBuilder
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     builder = TopologyBuilder("MyTopology")
 ```
 
-Once you've created a `TopologyBuilder` object, you can add bolts using the [`add_bolt`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_bolt) method and spouts using the [`add_spout`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.add_spout) method. Here's an example:
+Once you've created a `TopologyBuilder` object, you can add bolts using the `add_bolt` method and spouts using the `add_spout` method. Here's an example:
 
 ```python
 builder = TopologyBuilder("MyTopology")
@@ -101,14 +101,14 @@ builder.add_bolt("my_bolt", CountBolt, par=3)
 builder.add_spout("my_spout", WordSpout, par=2)
 ```
 
-Both the `add_bolt` and `add_spout` methods return the corresponding [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec) object.
+Both the `add_bolt` and `add_spout` methods return the corresponding `HeronComponentSpec1 object.
 
 The `add_bolt` method takes four arguments and an optional `config` parameter:
 
 Argument | Data type | Description | Default
 :--------|:----------|:------------|:-------
 `name` | `str` | The unique identifier assigned to this bolt | |
-`bolt_cls` | class | The subclass of [`Bolt`](/api/python/bolt/bolt.m.html#heronpy.bolt.bolt.Bolt) that defines this bolt | |
+`bolt_cls` | class | The subclass of `Bolt` that defines this bolt | |
 `par` | `int` | The number of instances of this bolt in the topology | |
 `config` | `dict` | Specifies the configuration for this spout | `None`
 
@@ -117,14 +117,14 @@ The `add_spout` method takes three arguments and an optional `config` parameter:
 Argument | Data type | Description | Default
 :--------|:----------|:------------|:-------
 `name` | `str` | The unique identifier assigned to this spout | |
-`spout_cls` | class | The subclass of [`Spout`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout) that defines this spout | |
+`spout_cls` | class | The subclass of `Spout` that defines this spout | |
 `par` | `int` | The number of instances of this spout in the topology | |
-`inputs` | `dict` or `list` | Either a `dict` mapping from [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec) to [`Grouping`](/api/python/stream.m.html#heronpy.stream.Grouping) *or* a list of [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec)s, in which case the [`shuffle`](/api/python/stream.m.html#heronpy.stream.Grouping.SHUFFLE) grouping is used
+`inputs` | `dict` or `list` | Either a `dict` mapping from `HeronComponentSpec` to `Grouping` *or* a list of `HeronComponentSpec`, in which case the `shuffle` grouping is used
 `config` | `dict` | Specifies the configuration for this spout | `None`
 
 ### Example
 
-The following is an example implementation of a word count topology in Python that subclasses [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder).
+The following is an example implementation of a word count topology in Python that subclasses `TopologyBuilder`.
 
 ```python
 from your_spout import WordSpout
@@ -148,7 +148,7 @@ Note that arguments to the main method can be passed by providing them in the
 
 ### Topology-wide configuration
 
-If you're building a Python topology using a `TopologyBuilder`, you can specify configuration for the topology using the [`set_config`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.set_config) method. A topology's config is a `dict` in which the keys are a series constants from the [`api_constants`](/api/python/api_constants.m.html) module and values are configuration values for those parameters.
+If you're building a Python topology using a `TopologyBuilder`, you can specify configuration for the topology using the `set_config` method. A topology's config is a `dict` in which the keys are a series constants from the `api_constants` module and values are configuration values for those parameters.
 
 Here's an example:
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
 If you want to [submit](../../../operators/heron-cli#submitting-a-topology) Python topologies to a Heron cluster, they need to be packaged as a [PEX](https://pex.readthedocs.io/en/stable/whatispex.html) file. In order to produce PEX files, we recommend using a build tool like [Pants](http://www.pantsbuild.org/python_readme.html) or [Bazel](https://github.com/benley/bazel_rules_pex).
 
-If you defined your topology by subclassing the [`TopologyBuilder`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder) class and built a `word_count.pex` file for that topology in the `~/topology` folder. You can submit the topology to a cluster called `local` like this:
+If you defined your topology by subclassing the `TopologyBuilder` class and built a `word_count.pex` file for that topology in the `~/topology` folder. You can submit the topology to a cluster called `local` like this:
 
 ```bash
 $ heron submit local \
@@ -184,9 +184,9 @@ Note the `-` in this submission command. If you define a topology by subclassing
 > * See [this repo](https://github.com/streamlio/pants-dev-environment) for an example of a Heron topology written in Python and deployable as a Pants-packaged PEX.
 > * See [this repo](https://github.com/streamlio/bazel-dev-environment) for an example of a Heron topology written in Python and deployable as a Bazel-packaged PEX.
 
-## Defining a topology by subclassing the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class
+## Defining a topology by subclassing the `Topology` class
 
-If you create a Python topology by subclassing the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class, you need to create a new topology class, like this:
+If you create a Python topology by subclassing the `Topology` class, you need to create a new topology class, like this:
 
 ```python
 from my_spout import WordSpout
@@ -202,13 +202,13 @@ class MyTopology(Topology):
     my_bolt = CountBolt.spec(par=3, inputs=my_bolt_inputs)
 ```
 
-All you need to do is place [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec)s as the class attributes
+All you need to do is place `HeronComponentSpec`s as the class attributes
 of your topology class, which are returned by the `spec()` method of
 your spout or bolt class. You do *not* need to run a `build` method or anything like that; the `Topology` class will automatically detect which spouts and bolts are included in the topology.
 
 > If you use this method to define a new Python topology, you do *not* need to have a main function.
 
-For bolts, the [`spec`](/api/python/bolt/bolt.m.html#heronpy.bolt.bolt.Bolt.spec) method for spouts takes three optional arguments::
+For bolts, the `spec` method for spouts takes three optional arguments::
 
 Argument | Data type | Description | Default
 :--------|:----------|:------------|:-------
@@ -217,12 +217,12 @@ Argument | Data type | Description | Default
 `config` | `dict` | Specifies the configuration for this bolt | `None`
 
 
-For spouts, the [`spec`](/api/python/spout/spout.m.html#heronpy.spout.spout.Spout.spec) method takes four optional arguments:
+For spouts, the `spec` method takes four optional arguments:
 
 Argument | Data type | Description | Default
 :--------|:----------|:------------|:-------
 `name` | `str` | The unique identifier assigned to this spout or `None` if you want to use the variable name of the return `HeronComponentSpec` as the unique identifier for this spout | `None` |
-`inputs` | `dict` or `list` | Either a `dict` mapping from [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec) to [`Grouping`](/api/python/stream.m.html#heronpy.stream.Grouping) *or* a list of [`HeronComponentSpec`](/api/python/component/component_spec.m.html#heronpy.component.component_spec.HeronComponentSpec)s, in which case the [`shuffle`](/api/python/stream.m.html#heronpy.stream.Grouping.SHUFFLE) grouping is used
+`inputs` | `dict` or `list` | Either a `dict` mapping from `HeronComponentSpec`to `Grouping` *or* a list of `HeronComponentSpec`s, in which case the `shuffle` grouping is used
 `par` | `int` | The number of instances of this spout in the topology | `1` |
 `config` | `dict` | Specifies the configuration for this spout | `None`
 
@@ -245,7 +245,7 @@ class WordCount(Topology):
 
 ### Launching
 
-If you defined your topology by subclassing the [`Topology`](/api/python/topology.m.html#heronpy.topology.Topology) class,
+If you defined your topology by subclassing the `Topology` class,
 your main Python file should *not* contain a main method. You will, however, need to instruct Heron which class contains your topology definition.
 
 Let's say that you've defined a topology by subclassing `Topology` and built a PEX stored in `~/topology/dist/word_count.pex`. The class containing your topology definition is `topology.word_count.WordCount`. You can submit the topology to a cluster called `local` like this:
@@ -259,7 +259,7 @@ $ heron submit local \
 
 ### Topology-wide configuration
 
-If you're building a Python topology by subclassing `Topology`, you can specify configuration for the topology using the [`set_config`](/api/python/topology.m.html#heronpy.topology.TopologyBuilder.set_config) method. A topology's config is a `dict` in which the keys are a series constants from the [`api_constants`](/api/python/api_constants.m.html) module and values are configuration values for those parameters.
+If you're building a Python topology by subclassing `Topology`, you can specify configuration for the topology using the `set_config` method. A topology's config is a `dict` in which the keys are a series constants from the `api_constants` module and values are configuration values for those parameters.
 
 Here's an example:
 
