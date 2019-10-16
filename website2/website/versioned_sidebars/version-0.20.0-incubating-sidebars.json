@@ -1,0 +1,101 @@
+{
+  "version-0.20.0-incubating-docs": {
+    "Getting Started": [
+      "version-0.20.0-incubating-getting-started-local-single-node",
+      "version-0.20.0-incubating-getting-started-migrate-storm-topologies",
+      "version-0.20.0-incubating-getting-started-troubleshooting-guide"
+    ],
+    "Deployment": [
+      "version-0.20.0-incubating-deployment-overview",
+      "version-0.20.0-incubating-deployment-configuration",
+      "version-0.20.0-incubating-deployment-api-server"
+    ],
+    "Topology Development APIs": [
+      "version-0.20.0-incubating-topology-development-streamlet-api",
+      "version-0.20.0-incubating-topology-development-eco-api",
+      "version-0.20.0-incubating-topology-development-topology-api-java",
+      "version-0.20.0-incubating-topology-development-topology-api-python",
+      "version-0.20.0-incubating-topology-development-streamlet-scala"
+    ],
+    "Client API Docs": [
+      "version-0.20.0-incubating-client-api-docs-overview"
+    ],
+    "Guides": [
+      "version-0.20.0-incubating-guides-effectively-once-java-topologies",
+      "version-0.20.0-incubating-guides-python-topologies",
+      "version-0.20.0-incubating-guides-data-model",
+      "version-0.20.0-incubating-guides-tuple-serialization",
+      "version-0.20.0-incubating-guides-ui-guide",
+      "version-0.20.0-incubating-guides-topology-tuning",
+      "version-0.20.0-incubating-guides-packing-algorithms",
+      "version-0.20.0-incubating-guides-simulator-mode",
+      "version-0.20.0-incubating-guides-troubeshooting-guide"
+    ],
+    "Heron Concepts": [
+      "version-0.20.0-incubating-heron-design-goals",
+      "version-0.20.0-incubating-heron-topology-concepts",
+      "version-0.20.0-incubating-heron-streamlet-concepts",
+      "version-0.20.0-incubating-heron-architecture",
+      "version-0.20.0-incubating-heron-delivery-semantics"
+    ],
+    "State Managers": [
+      "version-0.20.0-incubating-state-managers-zookeeper",
+      "version-0.20.0-incubating-state-managers-local-fs"
+    ],
+    "Uploaders": [
+      "version-0.20.0-incubating-uploaders-local-fs",
+      "version-0.20.0-incubating-uploaders-hdfs",
+      "version-0.20.0-incubating-uploaders-http",
+      "version-0.20.0-incubating-uploaders-amazon-s3",
+      "version-0.20.0-incubating-uploaders-scp"
+    ],
+    "Schedulers": [
+      "version-0.20.0-incubating-schedulers-k8s-by-hand",
+      "version-0.20.0-incubating-schedulers-k8s-with-helm",
+      "version-0.20.0-incubating-schedulers-aurora-cluster",
+      "version-0.20.0-incubating-schedulers-aurora-local",
+      "version-0.20.0-incubating-schedulers-local",
+      "version-0.20.0-incubating-schedulers-standalone",
+      "version-0.20.0-incubating-schedulers-nomad",
+      "version-0.20.0-incubating-schedulers-mesos-local-mac",
+      "version-0.20.0-incubating-schedulers-slurm",
+      "version-0.20.0-incubating-schedulers-yarn"
+    ],
+    "Cluster Configuration": [
+      "version-0.20.0-incubating-cluster-config-overview",
+      "version-0.20.0-incubating-cluster-config-system-level",
+      "version-0.20.0-incubating-cluster-config-instance",
+      "version-0.20.0-incubating-cluster-config-metrics",
+      "version-0.20.0-incubating-cluster-config-stream",
+      "version-0.20.0-incubating-cluster-config-tmaster"
+    ],
+    "Observability": [
+      "version-0.20.0-incubating-observability-prometheus",
+      "version-0.20.0-incubating-observability-graphite",
+      "version-0.20.0-incubating-observability-scribe"
+    ],
+    "User Manuals": [
+      "version-0.20.0-incubating-user-manuals-heron-cli",
+      "version-0.20.0-incubating-user-manuals-heron-explorer",
+      "version-0.20.0-incubating-user-manuals-tracker-rest",
+      "version-0.20.0-incubating-user-manuals-heron-tracker-runbook",
+      "version-0.20.0-incubating-user-manuals-heron-ui-runbook",
+      "version-0.20.0-incubating-user-manuals-heron-shell"
+    ],
+    "Compiling": [
+      "version-0.20.0-incubating-compiling-overview",
+      "version-0.20.0-incubating-compiling-linux",
+      "version-0.20.0-incubating-compiling-osx",
+      "version-0.20.0-incubating-compiling-docker",
+      "version-0.20.0-incubating-compiling-running-tests",
+      "version-0.20.0-incubating-compiling-code-organization"
+    ],
+    "Extending Heron": [
+      "version-0.20.0-incubating-extending-heron-scheduler",
+      "version-0.20.0-incubating-extending-heron-metric-sink"
+    ],
+    "Heron Resources": [
+      "version-0.20.0-incubating-heron-resources-resources"
+    ]
+  }
+}

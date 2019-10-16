@@ -1,7 +1,8 @@
 ---
-id: guides-python-topologies
+id: version-0.20.0-incubating-guides-python-topologies
 title: Python Topologies
 sidebar_label: Python Topologies
+original_id: guides-python-topologies
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one

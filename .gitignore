@@ -132,9 +132,10 @@ com_crashlytics_export_strings.xml
 # generated for the website
 website/node_modules/
 website/public/
-/bin/
+
 website2/website/public
 website2/website/static/api
+website2/website/venv/
 
 # Visual Studio Code
 .vscode

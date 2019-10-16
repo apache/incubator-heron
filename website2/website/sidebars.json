@@ -19,6 +19,7 @@
       "topology-development-streamlet-scala"
     ],
     "Client API Docs": [
+      "client-api-docs-overview"
     ],
     "Guides": [
       "guides-effectively-once-java-topologies",
