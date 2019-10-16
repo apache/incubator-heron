@@ -1,7 +1,8 @@
 ---
-id: getting-started-migrate-storm-topologies
+id: version-0.20.0-incubating-getting-started-migrate-storm-topologies
 title: Migrate Storm Topologies
 sidebar_label: Migrate Storm Topologies
+original_id: getting-started-migrate-storm-topologies
 ---
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
