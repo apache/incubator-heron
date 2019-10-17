@@ -17,7 +17,7 @@
 # under the License.
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
-WORK_DIR=generated-site/content
+WORK_DIR=${ROOT_DIR}/generated-site/content
 ME=`basename $0`
 
 # push all of the results to asf-site branch
@@ -25,12 +25,12 @@ git checkout asf-site
 git clean -f -d
 git pull origin asf-site
 
-rm -rf content
-mkdir content
+rm -rf ${ROOT_DIR}/content
+mkdir ${ROOT_DIR}/content
 
-cp -a $WORK_DIR/* content
-cp -a .htaccess content
+cp -a $WORK_DIR/* ${ROOT_DIR}/content
+cp -a ${ROOT_DIR}/.htaccess ${ROOT_DIR}/content
 
-git add content
+git add ${ROOT_DIR}/content
 git commit -m "git-site-role commit from $ME"
 git push origin asf-site
