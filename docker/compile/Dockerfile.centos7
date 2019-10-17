@@ -41,9 +41,9 @@ RUN yum -y install \
       zip \
       unzip \
       wget \
-      which
-
-RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel
+      which \
+      java-1.8.0-openjdk \
+      java-1.8.0-openjdk-devel
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0
 
