@@ -23,22 +23,23 @@
 # To create a clean development environment with docker and run it,
 # execute the following scripts in the source directory of Heron:
 #   sh docker/scripts/dev-env.sh
-# After the container is started, enter the source code directory
-# and build with bazel (assuming it's a ubuntu container):
-#   cd heron
+#
+# After the container is started, build Heron with bazel
+# (ubuntu config is used in the example):
 #   ./bazel_configure.py
 #   bazel build --config=ubuntu heron/...
-# To enter an existing container after leaving it, find the container
+#
+# To enter an existing container with a new shell, find the container
 # id with this command:
 #   docker ps -a
-# Then enter the container by
-#   docker start -ai CONTAINER_ID
+# And then :
+#   docker exec -it CONTAINER_ID bash
 
 set -o nounset
 set -o errexit
 
 # Default platform is ubuntu18.04. Other available platforms
-# include centos7
+# include centos7, debian9
 TARGET_PLATFORM=${1:-"ubuntu18.04"}
 SCRATCH_DIR=${2:-"$HOME/.heron-docker"}
 REPOSITORY="heron-dev"
@@ -76,8 +77,10 @@ echo "Building docker container for Heron development environment on $TARGET_PLA
 docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Running container and mapping the current dir to /heron"
-docker run -i \
+docker run -it \
     -e TARGET_PLATFORM=$TARGET_PLATFORM \
     -e SCRATCH_DIR="/scratch" \
     -v $PROJECT_DIR:/heron \
+    -w "/heron" \
+    --network host \
     -t $REPOSITORY:$TARGET_PLATFORM bash
