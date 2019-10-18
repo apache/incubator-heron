@@ -73,14 +73,15 @@ DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
 copy_extra_files
 
-echo "Building docker container for Heron development environment on $TARGET_PLATFORM"
+echo "Building docker image for Heron development environment on $TARGET_PLATFORM"
 docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
-echo "Running container and mapping the current dir to /heron"
-docker run -it \
+echo "Creating and starting container and mapping the current dir to /heron"
+docker container run -it \
     -e TARGET_PLATFORM=$TARGET_PLATFORM \
     -e SCRATCH_DIR="/scratch" \
     -v $PROJECT_DIR:/heron \
     -w "/heron" \
-    --network host \
+    -p 8888:8888 \
+    -p 8889:8889 \
     -t $REPOSITORY:$TARGET_PLATFORM bash
