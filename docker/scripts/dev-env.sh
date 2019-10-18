@@ -20,17 +20,19 @@
 # tools needed to compire Heron. Developer should be able to
 # compile Heron in the container without any setup works.
 # usage:
-# To create a clean development environment, enter the source
-# code directory of Heron and then execute the following scripts: 
-#   sh docker/scripts/docker-dev-env.sh
-# To enter an existing container, find the container id with:
-#   docker ps -a
-# Then enter the container by
-#   docker start -ai CONTAINER_ID
+# To create a clean development environment with docker and run it,
+# execute the following scripts in the source directory of Heron:
+#   sh docker/scripts/dev-env.sh
 # After the container is started, enter the source code directory
 # and build with bazel (assuming it's a ubuntu container):
 #   cd heron
+#   ./bazel_configure.py
 #   bazel build --config=ubuntu heron/...
+# To enter an existing container after leaving it, find the container
+# id with this command:
+#   docker ps -a
+# Then enter the container by
+#   docker start -ai CONTAINER_ID
 
 set -o nounset
 set -o errexit
@@ -38,7 +40,8 @@ set -o errexit
 # Default platform is ubuntu18.04. Other available platforms
 # include centos7
 TARGET_PLATFORM=${1:-"ubuntu18.04"}
-SCRATCH_DIR="docker"
+SCRATCH_DIR=${2:-"$HOME/.heron-docker"}
+REPOSITORY="heron-dev"
 
 
 realpath() {
@@ -56,20 +59,25 @@ verify_dockerfile_exists() {
 }
 
 dockerfile_path_for_platform() {
-  echo "$SCRATCH_DIR/compile/Dockerfile.$1"
+  echo "$DOCKER_DIR/compile/Dockerfile.$1"
+}
+
+copy_extra_files() {
+  mkdir -p $SCRATCH_DIR/scripts
+  cp $PROJECT_DIR/tools/docker/bazel.rc $SCRATCH_DIR/bazelrc
+  cp $DOCKER_DIR/scripts/compile-docker.sh $SCRATCH_DIR/scripts/compile-platform.sh
 }
 
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
+copy_extra_files
 
-echo $DOCKER_FILE
-
-echo "Building docker container for development environment"
-docker build -t heron-dev:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+echo "Building docker container for Heron development environment on $TARGET_PLATFORM"
+docker build -t $REPOSITORY:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
 echo "Running container and mapping the current dir to /heron"
 docker run -i \
     -e TARGET_PLATFORM=$TARGET_PLATFORM \
     -e SCRATCH_DIR="/scratch" \
     -v $PROJECT_DIR:/heron \
-    -t heron-dev:$TARGET_PLATFORM bash
+    -t $REPOSITORY:$TARGET_PLATFORM bash
