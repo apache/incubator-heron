@@ -31,9 +31,11 @@ RUN apt-get update && apt-get -y install \
       python-dev \
       wget \
       zip \
-      unzip
-
-RUN apt-get -y install openjdk-8-jdk-headless
+      virtualenv \
+      unzip \
+      git \
+      curl \
+      openjdk-8-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
