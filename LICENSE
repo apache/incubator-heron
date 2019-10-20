@@ -235,6 +235,24 @@ See project link for details.
       -> tools/rules/javadoc.bzl
     k8s-zookeeper-docker(https://github.com/muxinc/k8s-zookeeper-docker/blob/master/LICENSE)
       -> docker/base/scripts/generate-zookeeper-config.sh
+    bazel_rules_pex(v0.3.0,https://github.com/benley/bazel_rules_pex/blob/master/LICENSE.txt)
+      -> tools/rules/pex/pex_rules.bzl
+      -> tools/rules/pex/wrapper/pex_wrapper.py
+    bazel_authors(https://github.com/bazelbuild/bazel/blob/master/LICENSE)
+      -> scripts/setup-eclipse.sh
+      -> scripts/detect_os_type.sh
+      -> scripts/get_all_heron_paths.sh
+      -> scripts/packages/template_bin.sh
+      -> scripts/packages/self_extract_binary.bzl
+      -> scripts/packages/package_info_generator.sh
+      -> scripts/packages/tests_template_bin.sh
+      -> scripts/packages/bin_common.sh
+      -> third_party/java/bazel/extra_actions_base.proto
+    Twitter
+      -> heron/shell/src/python/handlers/healthhandler.py
+    Google
+      -> third_party/java/jarjar/src/main/resources/com/tonicsystems/jarjar/help.txt
+
 
 ========================================================================
 Third party MIT licenses
@@ -264,6 +282,17 @@ The following components are provided under the MIT License. See project link fo
     normalize.css(v2.1.0, v3.0.1, https://github.com/necolas/normalize.css/blob/master/LICENSE.md)
       -> heron/tools/ui/resources/static/css/bootstrap.css
       -> heron/tools/ui/resources/static/css/bootstrap.min.css
+    Docusaurus(v1.13.0, https://github.com/facebook/docusaurus/blob/master/LICENSE)
+      -> website2/website/core/Footer.js
+      -> website2/website/siteConfig.js
+      -> website2/website/pages/en/users.js
+      -> website2/website/pages/en/index.js
+      -> website2/website/pages/en/help.js
+      -> website2/website/pages/en/versions.js
+    Sizzle(https://github.com/jquery/sizzle/blob/master/LICENSE.txt)
+      -> heron/shell/assets/jquery.js
+    Modernizr(http://www.modernizr.com)
+      -> heron/tools/ui/resources/static/js/bootstrap.js
 
 ========================================================================
 Third party BSD 3-Clause licenses
@@ -282,6 +311,8 @@ See project link for details.
       -> third_party/python/cpplint/cpplint.py
     d3(v3.4.11, https://github.com/d3/d3/blob/master/LICENSE)
       -> heron/tools/ui/resources/static/js/d3.min.3.4.11.js
+    Sizzle(https://github.com/jquery/sizzle/blob/master/LICENSE.txt)
+          -> heron/shell/assets/jquery.js
 
 ========================================================================
 Third party Boost Software License, Version 1.0 licenses
@@ -292,3 +323,13 @@ See project link for details.
 
     kashmir(https://github.com/Corvusoft/kashmir-dependency/blob/master/LICENSE_1_0.txt)
       -> third_party/kashmir/*
+
+========================================================================
+Third party GNU General Public License, Version 3.0 licenses
+========================================================================
+
+The following components are provided under the GNU General Public License, Version 3.0.
+See project link for details.
+
+    Sizzle(https://github.com/jquery/sizzle/blob/master/LICENSE.txt)
+          -> heron/shell/assets/jquery.js
