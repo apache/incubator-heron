@@ -37,17 +37,17 @@ hk2_api = "2.5.0-b32"
 
 maven_server(
   name = "default",
-  url = "http://central.maven.org/maven2/",
+  url = "https://repo1.maven.org/maven2/",
+)
+
+maven_server(
+  name = "maven_twttr_com",
+  url = "https://maven.twttr.com",
 )
 
 maven_jar(
   name = "org_apache_avro_avro",
   artifact = "org.apache.avro:avro:1.7.4"
-)
-
-maven_server(
-  name = "maven_twttr_com",
-  url = "http://maven.twttr.com",
 )
 
 maven_jar(
@@ -177,7 +177,7 @@ maven_jar(
 
 http_jar(
   name = "org_apache_httpcomponents_http_client_test",
-  url = "http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/" +
+  url = "https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/" +
   http_client_version + "/httpclient-" + http_client_version + "-tests.jar"
 )
 
@@ -769,7 +769,6 @@ maven_jar(
 maven_jar(
       name = "commons_codec_commons_codec",
       artifact = "commons-codec:commons-codec:1.9",
-      repository = "http://central.maven.org/maven2/",
       sha1 = "9ce04e34240f674bc72680f8b843b1457383161a",
   )
 
@@ -864,7 +863,7 @@ http_archive(
 
 http_archive(
     name = "org_nongnu_libunwind",
-    urls = ["http://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
+    urls = ["https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
     strip_prefix = "libunwind-1.1",
     build_file = "@//:third_party/libunwind/libunwind.BUILD",
     sha256 = "9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a",
@@ -872,7 +871,7 @@ http_archive(
 
 http_archive(
     name = "org_apache_zookeeper",
-    urls = ["http://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
+    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
     strip_prefix = "zookeeper-3.4.14",
     build_file = "@//:third_party/zookeeper/zookeeper.BUILD",
     sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
