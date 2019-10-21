@@ -250,6 +250,24 @@
     var svg = outerSvg.append("g")
                 .attr("tranform", "translate(" + padding.left + "," + padding.top + ")");
 
+    var defs = svg.append("defs")
+
+    // Arrow head
+    defs.append("marker")
+        .attr({
+          "id": "arrow",
+          "viewBox": "0 -5 10 10",
+          "refX": 5,
+          "refY": 0,
+          "markerWidth": 2,
+          "markerHeight": 2,
+          "orient": "auto"
+        })
+        .append("path")
+          .attr("d", "M0,-5L10,0L0,5")
+          .attr("class","arrowHead")
+          .style("fill", linestyle.color);
+
     spoutsArr = [];
     boltsArr = [];
 
@@ -363,6 +381,8 @@
                   .attr("class", "topnode")
                   .style("fill", "black");
 
+    var compCircleRadius = 17;
+
     // Links
     node.each(function (n) {
       d3.select(this)
@@ -371,6 +391,7 @@
         .enter()
         .append("path")
         .attr('class', 'link')
+        .attr("marker-end", "url(#arrow)")
         .attr("stroke-width", linestyle.boldwidth)
         .attr("stroke", linestyle.color)
         .attr("fill", "none")
@@ -378,7 +399,16 @@
           var p0 = edge.source;
           var p3 = edge.target;
           var m = (p0.x + p3.x) / 2;
-          var p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3];
+          var p0x = p0.x + compCircleRadius;
+          var p0y = p0.y;
+          var p3x = p3.x - compCircleRadius;
+          var p3y = p3.y;
+          var p = [
+            {x: p0x, y: p0y},
+            {x: m, y: p0y},
+            {x: m, y: p3y},
+            {x: p3x, y: p3.y}
+          ];
           return "M" + p[0].x + " " + p[0].y +
                  "C" + p[1].x + " " + p[1].y +
                  " " + p[2].x + " " + p[2].y +
@@ -400,7 +430,7 @@
         .attr('class', 'background')
         .attr("r", function (d) {
           if (d.isReal) {
-            return d.r = 17;
+            return d.r = compCircleRadius;
           }
           return d.r = 0;
         })
@@ -410,7 +440,7 @@
         .attr("class", "node")
         .attr("r", function (d) {
           if (d.isReal) {
-            return d.r = 15;
+            return d.r = compCircleRadius - 2;
           }
           return d.r = 0;
         })
