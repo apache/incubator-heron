@@ -33,11 +33,11 @@
     // Build the status table
     var rowData = [
       {
-        name: 'Capacity',
+        name: 'Capacity Utilization',
         metricName: 'capacity',
         get: getAndRenderStats,
         tooltip: 'Average tuple execute latency multiplied by number of tuples processed divided by the time period.',
-        legendDescription: 'capacity',
+        legendDescription: 'utilization of execution capacity',
         loMedHi: [0.1, 0.5, 1],
         scaleTicks: [0, 0.25, 0.5, 0.75, 1]
       },
