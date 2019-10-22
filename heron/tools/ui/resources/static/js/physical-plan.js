@@ -63,16 +63,23 @@
       container.children = _.sortBy(container.children, 'name');
       // Parse index
       container.index = parseInt(container.id.split('-')[1]);
-      // Search for resource config in packing plan
+      // Search for container resource config in packing plan
       container.required_resources = {
-        'cpu': 0,
-        'disk': 0,
-        'ram': 0
+        'cpu': 'unknown',
+        'disk': 'unknown',
+        'ram': 'unknown'
       };
       for (var i in containerPlan) {
         var packing = containerPlan[i];
         if (packing.id === container.index) {
           container.required_resources = packing.required_resources;
+          // Get instance resources
+          var instance_resources = {};
+          for (var j in packing.instances) {
+            var inst = packing.instances[j];
+            instance_resources[inst.component_name + '_' + inst.task_id] = inst.instance_resources;
+          }
+          container.instance_resources = instance_resources;
         }
       }
     });
@@ -85,6 +92,18 @@
     var maxInstances = d3.max(containerList, function (d) {
       return d.children.length;
     });
+
+    function formatByteSize(byteSize) {
+      if (byteSize > 1024 * 1024 * 1024 / 2) {
+        return (byteSize / (1024 * 1024 * 1024)).toFixed(2) + 'GB';
+      } else if (byteSize > 1024 * 1024 / 2) {
+        return (byteSize / (1024 * 1024)).toFixed(2) + 'MB';
+      } else if (byteSize > 1024 / 2) {
+        return (byteSize / 1024).toFixed(2) + 'KB';
+      } else {
+        return byteSize + 'B';
+      }
+    }
 
     /**
      * Config paramaters for container/heron instance layout
@@ -159,15 +178,25 @@
         });
 
     var container_tip = d3.tip()
-        .attr('class', 'd3-tip main text-center container')
+        .attr('class', 'd3-tip main container')
         .offset([8, 0])
         .direction('s')
         .html(function (container) {
+          var instance_cpu = '';
+          var instance_ram = '';
+          var instance_disk = '';
+          if (container.instance_resources) {
+            for (var inst in container.instance_resources) {
+              instance_cpu += '<li>   - ' + inst + ': <span>' + container.instance_resources[inst].cpu + '</span></li>';
+              instance_ram += '<li>   - ' + inst + ': <span>' + formatByteSize(container.instance_resources[inst].ram) + '</span></li>';
+              instance_disk += '<li>   - ' + inst + ': <span>' + formatByteSize(container.instance_resources[inst].disk) + '</span></li>';
+            }
+          }
           return '<ul>' +
-          '<li>cpu required: ' + container.required_resources.cpu + '</li>' +
-          '<li>ram required: ' + (container.required_resources.ram / 1048576).toFixed(2) + 'MB</li>' +
-          '<li>disk required: ' + (container.required_resources.disk / 1048576).toFixed(2) + 'MB</li>' +
-          '</ul>';
+              '<li>cpu required: <span>' + container.required_resources.cpu + '</span></li>' + instance_cpu +
+              '<li>ram required: <span>' + formatByteSize(container.required_resources.ram) + '</span></li>' + instance_ram +
+              '<li>disk required: <span>' + formatByteSize(container.required_resources.disk) + '</span></li>' + instance_disk +
+              '</ul>';
         });
 
     var containerGs = svg.selectAll('.physical-plan')
