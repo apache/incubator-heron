@@ -208,18 +208,20 @@ under the License.
       .append("p")
       .html('{{topology}}');
 
-    var logicalPlan, physicalPlan;
+    var logicalPlan, physicalPlan, packingPlan;
 
     d3.json("./{{topology}}/logicalplan.json",
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success") {
-          console.log("Loading json failed!");
+          console.log("Loading logical plan json failed!");
           return;
         }
 
         logicalPlan = data.result;
-        if (physicalPlan) { startRendering(); }
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
       }
     );
 
@@ -227,12 +229,29 @@ under the License.
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success" ) {
-          console.log("Loading json failed!");
+          console.log("Loading physical plan json failed!");
           return;
         }
 
         physicalPlan = data;
-        if (logicalPlan) { startRendering(); }
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
+      }
+    );
+
+    d3.json("./{{topology}}/packingplan.json",
+      function(data) {
+        // if there are any errors display using dialog box
+        if (data.status != "success" ) {
+          console.log("Loading packing plan json failed!");
+          return;
+        }
+
+        packingPlan = data.result;
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
       }
     );
 
@@ -240,7 +259,7 @@ under the License.
       drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400, "{{baseUrl}}",
           "{{cluster}}", "{{environ}}", "{{topology}}");
       planController.planResized();
-      drawPhysicalPlan(planController, physicalPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
+      drawPhysicalPlan(planController, physicalPlan, packingPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
           "{{environ}}", "{{topology}}");
       planController.planResized();
     }

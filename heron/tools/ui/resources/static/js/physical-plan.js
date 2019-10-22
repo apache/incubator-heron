@@ -24,7 +24,7 @@
 (function (global) {
   var topo, instances, containers;
 
-  function drawPhysicalPlan(planController, data, div_id, outerWidth, minHeight, cluster, environ, toponame) {
+  function drawPhysicalPlan(planController, data, packingData, div_id, outerWidth, minHeight, cluster, environ, toponame) {
     var margin = {
       top: 50,
       right: 0,
@@ -35,6 +35,7 @@
 
     instances = data.result.instances;
     containers = data.result.stmgrs;
+    containerPlan = packingData.container_plans;
 
     var sptblt = Object.keys(data.result.spouts)
                        .concat(Object.keys(data.result.bolts));
@@ -56,28 +57,42 @@
       }
     }
 
-    var auroraContainers = _.values(containers);
-    auroraContainers.forEach(function (container) {
+    var containerList = _.values(containers);
+    containerList.forEach(function (container) {
       // make ordering of instances the same in each container
       container.children = _.sortBy(container.children, 'name');
+      // Parse index
+      container.index = parseInt(container.id.split('-')[1]);
+      // Search for resource config in packing plan
+      container.required_resources = {
+        'cpu': 0,
+        'disk': 0,
+        'ram': 0
+      };
+      for (var i in containerPlan) {
+        var packing = containerPlan[i];
+        if (packing.id === container.index) {
+          container.required_resources = packing.required_resources;
+        }
+      }
     });
 
     // Sort the containers by their id so they are easier to find in the UI.
-    auroraContainers = _.sortBy(auroraContainers, function(container) {
-      return parseInt(container.id.split('-')[1]);
+    containerList = _.sortBy(containerList, function(container) {
+      return container.index;
     });
 
-    var maxInstances = d3.max(auroraContainers, function (d) {
+    var maxInstances = d3.max(containerList, function (d) {
       return d.children.length;
     });
 
     /**
-     * Config paramaters for aurora container/heron instance layout
+     * Config paramaters for container/heron instance layout
      */
 
-    // margin outside of each aurora container as a fraction of the container width
+    // margin outside of each container as a fraction of the container width
     var containerMarginRatio = 0.08;
-    // padding inside each aurora container as a fraction of container width
+    // padding inside each container as a fraction of container width
     var containerPaddingRatio = 0.05;
     // margin around each heron instance as a faction of the instance width
     var instanceMarginRatio = 0.15;
@@ -87,19 +102,19 @@
     var maxInstanceWith = 30;
 
     /**
-     * Compute the aurora container and instance sizes
+     * Compute the container and instance sizes
      */
 
     var innerCols = Math.ceil(Math.sqrt(maxInstances));
-    // compute the min aurora columns allowed to keep instance size below limit
-    var minAuroraCols = Math.ceil(width / (innerCols * maxInstanceWith / (1 - 2 * instanceMarginRatio)));
-    // compute the max aurora columns allowed to keep instance size above min limit
-    var maxAuroraCols = Math.ceil(width / (innerCols * minInstanceWidth / (1 - 2 * instanceMarginRatio)));
-    // compute # cols to give 50% more columns than rows, and bound it by max/min aurora columns
-    var desiredAuroraCols = Math.ceil(Math.sqrt(auroraContainers.length) * 1.5);
-    var cols = Math.min(maxAuroraCols, Math.max(minAuroraCols, desiredAuroraCols));
+    // compute the min columns allowed to keep instance size below limit
+    var minContainerCols = Math.ceil(width / (innerCols * maxInstanceWith / (1 - 2 * instanceMarginRatio)));
+    // compute the max columns allowed to keep instance size above min limit
+    var maxContainerCols = Math.ceil(width / (innerCols * minInstanceWidth / (1 - 2 * instanceMarginRatio)));
+    // compute # cols to give 50% more columns than rows, and bound it by max/min columns
+    var desiredContainerCols = Math.ceil(Math.sqrt(containerList.length) * 1.5);
+    var cols = Math.min(maxContainerCols, Math.max(minContainerCols, desiredContainerCols));
     // from there, compute the required number of rows and exact instance/container sizes...
-    var rows = Math.ceil(auroraContainers.length / cols);
+    var rows = Math.ceil(containerList.length / cols);
     var innerRows = Math.ceil(maxInstances / innerCols);
     var containerWidth = (width / cols) * (1 - 2 * containerMarginRatio);
     var containerPadding = containerWidth * containerPaddingRatio;
@@ -108,7 +123,7 @@
     var containerHeight = instanceSize * innerRows + containerPadding * 2;
     var height = (containerHeight + containerMargin * 2) * rows;
     var totalVisHeight = height + margin.top + margin.bottom;
-    var totalVisWidth = Math.min(width, auroraContainers.length * (containerWidth + containerMargin * 2));
+    var totalVisWidth = Math.min(width, containerList.length * (containerWidth + containerMargin * 2));
 
     var svg = d3.select(div_id).text("").append("svg")
         .attr("width", totalVisWidth)
@@ -122,7 +137,7 @@
       .attr('y', height + 25)
       .style('text-anchor', 'middle');
 
-    var tip = d3.tip()
+    var instance_tip = d3.tip()
         .attr('class', 'd3-tip main text-center')
         .offset([8, 0])
         .direction('s')
@@ -143,24 +158,37 @@
           return result;
         });
 
-    var auroraGs = svg.selectAll('.aurora-container')
-        .data(auroraContainers, function (d) { return d.id; })
+    var container_tip = d3.tip()
+        .attr('class', 'd3-tip main text-center container')
+        .offset([8, 0])
+        .direction('s')
+        .html(function (container) {
+          return '<ul>' +
+          '<li>cpu required: ' + container.required_resources.cpu + '</li>' +
+          '<li>ram required: ' + (container.required_resources.ram / 1048576).toFixed(2) + 'MB</li>' +
+          '<li>disk required: ' + (container.required_resources.disk / 1048576).toFixed(2) + 'MB</li>' +
+          '</ul>';
+        });
+
+    var containerGs = svg.selectAll('.physical-plan')
+        .data(containerList, function (d) { return d.id; })
         .enter()
       .append('g')
-        .attr('class', 'aurora-container')
+        .attr('class', 'physical-plan')
         .attr('transform', function (d, i) {
           var x = (i % cols) * (containerWidth + 2 * containerMargin) + containerMargin;
           var y = Math.floor(i / cols) * (containerHeight + 2 * containerMargin) + containerMargin;
           return 'translate(' + x + ',' + y + ')';
         });
 
-    auroraGs.append('rect')
+    containerGs.append('rect')
         .attr('width', containerWidth)
         .attr('height', containerHeight)
-        .attr('class', 'aurora');
+        .attr('class', 'container')
+        .on('mouseover', container_tip.show)
+        .on('mouseout', container_tip.hide);
 
-
-    auroraGs.selectAll('.instance')
+    containerGs.selectAll('.instance')
         .data(function (d) { return d.children; }, function (d) { return d.id; })
         .enter()
       .append('rect')
@@ -175,16 +203,17 @@
         .attr('x', function (d, i) { return containerPadding + (i % innerCols) * instanceSize + instanceSize * instanceMarginRatio; })
         .attr('y', function (d, i) { return containerPadding +Math.floor(i / innerCols) * instanceSize + instanceSize * instanceMarginRatio; })
         .on('mouseover', function (d) {
-          planController.physicalComponentHoverOver(d, tip);
+          planController.physicalComponentHoverOver(d, instance_tip);
         })
         .on('mouseout', function (d) {
-          planController.physicalComponentHoverOut(d, tip);
+          planController.physicalComponentHoverOut(d, instance_tip);
         })
         .on('click', function (d) {
           planController.physicalComponentClicked(d);
         });
 
-    svg.call(tip);
+    svg.call(instance_tip);
+    svg.call(container_tip);
   }
 
   // Stash the old values for transition.
