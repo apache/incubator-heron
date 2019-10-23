@@ -248,8 +248,6 @@ See project link for details.
       -> scripts/packages/tests_template_bin.sh
       -> scripts/packages/bin_common.sh
       -> third_party/java/bazel/extra_actions_base.proto
-    Twitter
-      -> heron/shell/src/python/handlers/healthhandler.py
     Google
       -> third_party/java/jarjar/src/main/resources/com/tonicsystems/jarjar/help.txt
 
