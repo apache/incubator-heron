@@ -63,7 +63,7 @@
       container.children = _.sortBy(container.children, 'name');
       // Parse index
       container.index = parseInt(container.id.split('-')[1]);
-      // Search for container resource config in packing plan
+      // Search for container and instance resource config in packing plan
       container.required_resources = {
         'cpu': 'unknown',
         'disk': 'unknown',
