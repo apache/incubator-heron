@@ -23,6 +23,8 @@ var SUM = 0,
     AVG = 1,
     LAST = 2;
 
+var countersUrlFlags = {};
+
 var AllExceptions = React.createClass({
   getInitialState: function() {
     return {}
@@ -480,50 +482,58 @@ var AllMetrics = React.createClass({
   },
 
   fetchCountersURL: function(url, timeRange) {
-    $.ajax({
-      url:       url,
-      dataType:  'json',
-      success: function(response) {
-        if (response.hasOwnProperty("metrics")) {
-          var component = response.component;
-          var metrics = this.metrics;
-          if (!metrics.hasOwnProperty(component)) {
-            metrics[response.component] = {};
-          }
-          if (!metrics[component].hasOwnProperty(timeRange)) {
-            metrics[component][timeRange] = {};
-          }
-          for (var name in response.metrics) {
-            if (response.metrics.hasOwnProperty(name)) {
-              var metricname = name;
-              // Handle __jvm-uptime-secs as a special case.
-              if (name !== "__jvm-uptime-secs") {
-                metricname = name.split("/")[0] + "/";
-              }
-              var displayName = this.supportedMetricNames[metricname].name;
-              if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
-                metrics[component][timeRange][displayName] = {};
-              }
-              var tmpMetrics = {
-                metrics: response.metrics[name],
-                scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
-                aggregationType: this.supportedMetricNames[metricname].aggregationType
-              };
-              if (name === "__jvm-uptime-secs") {
-                metrics[component][timeRange][displayName][""] = tmpMetrics;
-              } else {
-                metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+    // This function might be called multiple times with the same url. Note
+    // that the timeRange value is inlcuded in the url so it can be ignored in
+    // the check. We check if the request has been made before first and
+    // skip if this is a duplicated request.
+    if (!countersUrlFlags[url]) {
+      countersUrlFlags[url] = true;  // Set the flag
+
+      $.ajax({
+        url:       url,
+        dataType:  'json',
+        success: function(response) {
+          if (response.hasOwnProperty("metrics")) {
+            var component = response.component;
+            var metrics = this.metrics;
+            if (!metrics.hasOwnProperty(component)) {
+              metrics[response.component] = {};
+            }
+            if (!metrics[component].hasOwnProperty(timeRange)) {
+              metrics[component][timeRange] = {};
+            }
+            for (var name in response.metrics) {
+              if (response.metrics.hasOwnProperty(name)) {
+                var metricname = name;
+                // Handle __jvm-uptime-secs as a special case.
+                if (name !== "__jvm-uptime-secs") {
+                  metricname = name.split("/")[0] + "/";
+                }
+                var displayName = this.supportedMetricNames[metricname].name;
+                if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
+                  metrics[component][timeRange][displayName] = {};
+                }
+                var tmpMetrics = {
+                  metrics: response.metrics[name],
+                  scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
+                  aggregationType: this.supportedMetricNames[metricname].aggregationType
+                };
+                if (name === "__jvm-uptime-secs") {
+                  metrics[component][timeRange][displayName][""] = tmpMetrics;
+                } else {
+                  metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+                }
               }
             }
+            metrics[component][timeRange]["__interval"] = response.interval;
+            this.setMetrics(metrics);
           }
-          metrics[component][timeRange]["__interval"] = response.interval;
-          this.setMetrics(metrics);
-        }
-      }.bind(this),
+        }.bind(this),
 
-      error: function() {
-      }
-    });
+        error: function() {
+        }
+      });
+    }
   },
 
   render: function() {
