@@ -16,6 +16,7 @@ api_deps_files =  \
     heron_java_api_proto_files() + [
         ":classification",
         "//heron/common/src/java:basics-java",
+        "@javax_xml_bind_jaxb//jar",
     ]
 
 # Low Level Api
@@ -46,7 +47,7 @@ java_library(
     srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
     deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
-        "@org_apache_commons_commons_lang3//jar"
+        "@org_apache_commons_commons_lang3//jar",
     ]
 )
 
