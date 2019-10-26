@@ -41,6 +41,7 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
+  BK_useHostNameAsBookieID: "true"
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
   {{- if eq .Values.bookkeeper.prometheus.enabled true }}
   BK_enableStatistics: "true"
