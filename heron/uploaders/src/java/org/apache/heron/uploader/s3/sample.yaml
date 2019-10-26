@@ -1,0 +1,49 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:         org.apache.heron.uploader.s3.S3Uploader
+
+# S3 bucket to put the jar file into
+heron.uploader.s3.bucket:     heron-topologies-company-com
+
+# By default the path prefix will be empty and the full path would be s3://#{bucket}/#{topology_name}/topology.tar.gz
+# This allows you to prepend a prefix to the path to specify a sub-folder in which cased the full path would be:
+# s3://#{bucket}/#{prefix}/#{topology_name}/topology.tar.gz
+# heron.uploader.s3.path_prefix: path/prefix
+
+# By default, assume AWS S3. However, you can specify a custom url if you are using a
+# S3 compatible storage layer (or using a reverse proxy for accessing S3).
+# heron.uploader.s3.uri: hostname:port
+# If you want to access S3 through a http proxy, use
+# heron.upload.s3.proxy_uri: http://username:password@hostname:port
+# username and password are optional
+
+# Specifies a custom region - see http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/regions/Regions.html#US_EAST_1
+# heron.uploader.s3.region : meh
+
+# AWS Credentials
+# By default the S3 Uploader will use the Default Credential Provider Chain for accessing the S3 bucket -
+# see http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#using-the-default-credential-provider-chain
+# However you have the option to directly specify aws credentials:
+# heron.uploader.s3.access_key: access_key
+# heron.uploader.s3.secret_key: secret_access_key
+# Alternatively to directly specifying aws credentials, you can specify the aws profile
+# in case you have multiple AWS profiles in your credentials file (~/.aws/credentials):
+# heron.uploader.s3.aws_profile: profile_name
+
+

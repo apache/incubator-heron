@@ -1,107 +1,88 @@
-var gulp = require('gulp'),
-    // Pulls in any Gulp-related metadata
-    pkg = require('./package.json'),
-    hash = require('gulp-hash'),
-    // Use $ to invoke Gulp plugins
-    $ = require('gulp-load-plugins')(),
-    // All non-Gulp modules here
-    del = require('del');
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-// Define the source and distribution directories
-var srcDir = './assets';
-var distDir = './static';
+const gulp     = require("gulp"),
+      sass     = require("gulp-sass"),
+      hash     = require("gulp-hash"),
+      prefixer = require("gulp-autoprefixer"),
+      uglify   = require("gulp-uglify"),
+      del      = require("del");
 
-// Define asset sources
-var SRC = {
-  js: srcDir + '/js/**/*.js',
-  sass: srcDir + '/sass/**/*.scss'
+const SRCS = {
+  sass: 'assets/sass/style.scss',
+  sassWatch: 'assets/sass/**/*.scss',
+  js: 'assets/js/app.js'
 }
 
-// Define asset distribution destination
-var DIST = {
-  js: distDir + '/js',
-  css: distDir + '/css',
-  all: distDir
+const DIST = {
+  css: 'static/css',
+  js: 'static/js'
 }
 
-// JavaScript assets
-gulp.task('js', function(done) {
-  gulp.src(SRC.js)
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
-    .pipe($.concat('app.min.js'))
+const sassConfig = {
+  outputStyle: 'compressed'
+}
+
+const prefixerConfig = {
+  browsers: ['last 2 versions'],
+	cascade: false
+}
+
+gulp.task('sass', (done) => {
+  del([`${DIST.css}/style-*.css`]);
+
+  gulp.src(SRCS.sass)
+    .pipe(sass(sassConfig).on('error', sass.logError))
+    .pipe(hash())
+    .pipe(prefixer(prefixerConfig))
+    .pipe(gulp.dest(DIST.css))
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
+  done();
+});
+
+gulp.task('sass:watch', () => {
+  gulp.watch(SRCS.sassWatch, gulp.series('sass'));
+});
+
+gulp.task('js', (done) => {
+  gulp.src(SRCS.js)
     .pipe(gulp.dest(DIST.js));
+
   done();
 });
 
-gulp.task('js-dev', function(done) {
-  del(['static/js/app*.js']);
+gulp.task('js', (done) => {
+  del([`${DIST.js}/app-*.js`]);
 
-  gulp.src(SRC.js)
+  gulp.src(SRCS.js)
     .pipe(hash())
-    .pipe($.uglify().on('error', function(err) { console.log(err); }))
     .pipe(gulp.dest(DIST.js))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/js'));
+    .pipe(hash.manifest('assetHashes.json'))
+    .pipe(gulp.dest('data'));
   done();
 });
 
-gulp.task('js:watch', function() {
-  gulp.watch(SRC.js, gulp.series('js-dev'));
+gulp.task('js:watch', () => {
+  gulp.watch(SRCS.js, gulp.series('js'));
 });
 
-// Sass assets (dev mode)
-gulp.task('sass-dev', function(done) {
-  del(['static/css/style*.css']);
+gulp.task('build', gulp.series('sass', 'js'));
 
-  gulp.src(SRC.sass)
-    .pipe($.sass({
-      outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe(hash())
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: false
-    }))
-    .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css))
-    .pipe(hash.manifest('hash.json'))
-    .pipe(gulp.dest('data/assets/css'));
-  done();
-});
-
-// Sass assets
-gulp.task('sass', function(done) {
-  del(['static/css/style*.css']);
-
-  gulp.src(SRC.sass)
-    .pipe($.sass({
-      outputStyle: 'compressed'
-    }).on('error', function(err) { $.sass.logError; }))
-    .pipe($.autoprefixer({
-      browsers: ['last 2 versions'],
-      cascade: true
-    }))
-    .pipe($.cleanCss())
-    .pipe(gulp.dest(DIST.css))
-    .pipe(gulp.dest('data/assets/css'));
-  done();
-});
-
-gulp.task('sass:watch', function() {
-  gulp.watch(SRC.sass, gulp.series('sass-dev'));
-});
-
-// One-time build; doesn't watch for changes
-gulp.task('build', gulp.series('js', 'sass'));
-
-// Run in development (i.e. watch) mode
-gulp.task('dev', gulp.series('js-dev', 'sass-dev', gulp.parallel('js:watch', 'sass:watch')));
-
-// Help => list tasks
-gulp.task('help', function(done) {
-  $.taskListing.withFilters(null, 'help')
-  done();
-});
-
-// Default
-gulp.task('default', gulp.series('help'));
+gulp.task('dev', gulp.series('build', gulp.parallel('sass:watch', 'js:watch')));

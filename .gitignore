@@ -33,7 +33,7 @@ tools/jdk/ijar
 
 # Compiled source #
 ###################
-/release
+/release/*.pom
 *.com
 *.class
 *.dll
@@ -90,6 +90,10 @@ tools/jdk/ijar
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 
+# Intellij bazel plugin
+.ijwb
+.clwb
+
 ## Maven generated files
 .classpath.txt
 
@@ -128,7 +132,17 @@ com_crashlytics_export_strings.xml
 # generated for the website
 website/node_modules/
 website/public/
-/bin/
+
+website2/website/public
+website2/website/static/api
+website2/website/venv/
 
 # Visual Studio Code
 .vscode
+vs.code-workspace
+
+# integration_test
+results/
+
+# Vagrant
+vagrant/.vagrant/

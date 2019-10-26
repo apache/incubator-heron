@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ################################################################################
 # Default values for various configs used inside Heron.
 ################################################################################
@@ -65,14 +82,14 @@ heron.streammgr.xormgr.rotatingmap.nbuckets: 3
 # The max number of messages in the memory pool for each message type
 heron.streammgr.mempool.max.message.number: 512
 
-# The max reconnect attempts to other stream managers for stream manager client
-heron.streammgr.client.reconnect.max.attempts: 300
-
 # The reconnect interval to other stream managers in secs for stream manager client
 heron.streammgr.client.reconnect.interval.sec: 1
 
 # The reconnect interval to tamster in second for stream manager client
 heron.streammgr.client.reconnect.tmaster.interval.sec: 10
+
+# The max reconnect attempts to tmaster for stream manager client
+heron.streammgr.client.reconnect.tmaster.max.attempts: 30
 
 # The maximum packet size in MB of stream manager's network options
 heron.streammgr.network.options.maximum.packet.mb: 10
@@ -131,7 +148,7 @@ heron.tmaster.metrics.network.bindallinterfaces: False
 heron.tmaster.stmgr.state.timeout.sec: 60
 
 ################################################################################
-# Configs related to Topology Master, starts with heron.metricsmgr.*
+# Configs related to Metrics Manager, starts with heron.metricsmgr.*
 ################################################################################
 
 # The size of packets to read from socket will be determined by the minimal of:
@@ -247,7 +264,7 @@ heron.instance.reconnect.streammgr.times: 60
 heron.instance.reconnect.metricsmgr.interval.sec: 5
 heron.instance.reconnect.metricsmgr.times: 60
 
-# The interval in second for an instance to sample its system metrics, for instance, cpu load.
+# The interval in second for an instance to sample its system metrics, for instance, CPU load.
 heron.instance.metrics.system.sample.interval.sec: 10
 
 # For efficient acknowledgement

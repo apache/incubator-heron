@@ -31,7 +31,6 @@ function untar {
     exit 1
   fi
   [ -d "$2" ] || mkdir -p $2
-  echo tar xfz $1 -C $2 $TAR_X_FLAGS
   tar xfz $1 -C $2 $TAR_X_FLAGS
 }
 

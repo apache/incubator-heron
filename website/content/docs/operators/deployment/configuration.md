@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Configuring a Cluster
 ---
@@ -42,10 +60,10 @@ HDFS for uploader will have the following set of configurations.
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.aurora.AuroraScheduler
+heron.class.scheduler: org.apache.heron.scheduler.aurora.AuroraScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.aurora.AuroraLauncher
+heron.class.launcher: org.apache.heron.scheduler.aurora.AuroraLauncher
 
 # location of java
 heron.directory.sandbox.java.home: /usr/lib/jvm/java-1.8.0-openjdk-amd64/
@@ -58,7 +76,7 @@ heron.scheduler.is.service: False
 
 ```yaml
 # zookeeper state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # zookeeper state manager connection string
 heron.statemgr.connection.string:  "127.0.0.1:2181"
@@ -75,14 +93,14 @@ heron.statemgr.zookeeper.is.initialize.tree: True
 # Directory of config files for hadoop client to read from
 heron.uploader.hdfs.config.directory:              "/home/hadoop/hadoop/conf/"
 
-# The URI of the directory for uploading topologies in the hdfs
+# The URI of the directory for uploading topologies in the HDFS
 heron.uploader.hdfs.topologies.directory.uri:      "hdfs:///heron/topology/"
 ```
 
 ## packing.yaml (for Round Robin)
 ```yaml
 # packing algorithm for packing instances into containers
-heron.class.packing.algorithm:    com.twitter.heron.packing.roundrobin.RoundRobinPacking
+heron.class.packing.algorithm:    org.apache.heron.packing.roundrobin.RoundRobinPacking
 ```
 
 ## client.yaml (for heron cli)

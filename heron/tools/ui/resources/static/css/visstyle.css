@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 #page-title {
   background: #fff;
   position: absolute;
@@ -10,7 +29,7 @@
 .reset {
   position: absolute;
   top: 1em;
-  right: 1em;
+  left: 1em;
   z-index: 100;
 }
 
@@ -120,22 +139,23 @@ a:active, a:focus {
 
 .d3-tip {
   max-width: 400px;
+  transition-delay: 0.25s;
 }
 
 path.regular, rect.regular {
-    opacity: 1;
+  opacity: 1;
 }
 
 path.fade, rect.fade {
-    opacity: 0.2;
+  opacity: 0.2;
 }
 
 circle.regular {
-    opacity: 1;
+  opacity: 1;
 }
 
 circle.fade {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
 text.regular {
@@ -146,11 +166,16 @@ text.fade {
   display: none;
 }
 
+text.fade.fade-half {
+  display: block;
+  opacity: 0.5;
+}
+
 circle.background {
   opacity: 1;
 }
 
-.aurora {
+.container {
   stroke: #888;
   stroke-width: 1px;
   fill: #f0f5fa;
@@ -217,19 +242,19 @@ tr.highlighted {
 }
 
 .topotable>thead>tr>th, .topotable>tbody>tr>th, .topotable>tfoot>tr>th, .topotable>thead>tr>td, .topotable>tbody>tr>td, .topotable>tfoot>tr>td {
-font-size: 14px;
-padding: 8px;
-line-height: 1.42857143;
-vertical-align: top;
-border-top: 1px solid #dddddd;
+  font-size: 14px;
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #dddddd;
 }
 
 .break-all {
-word-break: break-all;
+  word-break: break-all;
 }
 
 .no-break {
-white-space: nowrap
+  white-space: nowrap
 }
 
 .strong {
@@ -237,16 +262,16 @@ white-space: nowrap
 }
 
 .topotable .topobutton {
-padding: 2px;
+  padding: 2px;
 }
 
 .topotable .topobutton a {
-margin-left: 8px;
-visibility: hidden;
+  margin-left: 8px;
+  visibility: hidden;
 }
 
 .topotable tr:hover .topobutton a {
-visibility: visible;
+  visibility: visible;
 }
 .vcenter {
     display: inline-block;
@@ -255,76 +280,76 @@ visibility: visible;
 }
 
 .action-button-group {
-position: absolute;
-right: 10px;
-top: 2px;
+  position: absolute;
+  right: 10px;
+  top: 2px;
 }
 
 .sort.asc {
-background-color: lightgrey;
+  background-color: lightgrey;
 }
 
 .sort.desc {
-background-color: lightgrey;
+  background-color: lightgrey;
 }
 
 /* Sort arrows */
 .sort:after {
-width: 0;
-height: 0;
-border-left: 5px solid transparent;
-border-right: 5px solid transparent;
-border-bottom: 5px solid transparent;
-border-top: 5px solid transparent;
-content:"";
-position: relative;
-top:-10px;
-right:-5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid transparent;
+  content:"";
+  position: relative;
+  top:-10px;
+  right:-5px;
 }
 
 .sort.asc:after {
-width: 0;
-height: 0;
-border-left: 5px solid transparent;
-border-right: 5px solid transparent;
-border-bottom: 5px solid transparent;
-border-top: 5px solid black;
-content:"";
-position: relative;
-top:10px;
-right:-5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid black;
+  content:"";
+  position: relative;
+  top:10px;
+  right:-5px;
 }
 
 .sort.desc:after {
-width: 0;
-height: 0;
-border-left: 5px solid transparent;
-border-right: 5px solid transparent;
-border-bottom: 5px solid black;
-border-top: 5px solid transparent;
-content:"";
-position: relative;
-top:-10px;
-right:-5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid black;
+  border-top: 5px solid transparent;
+  content:"";
+  position: relative;
+  top:-10px;
+  right:-5px;
 }
 
 .search-result {
-color: grey;
-font-size: 14px;
-line-height: 30px;
+  color: grey;
+  font-size: 14px;
+  line-height: 30px;
 }
 
 /* When the topology is dead */
 .dead {
-color: red;
+  color: red;
 }
 
 /* When the topology is weird state */
 .weird {
-color: orange;
+  color: orange;
 }
 
 /* When the topology is starting */
 .starting {
-color: green;
+  color: green;
 }

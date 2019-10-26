@@ -63,7 +63,7 @@ java_binary(
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),
     deps = localfs_deps_files,
-    main_class="com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager"
+    main_class="org.apache.heron.statemgr.localfs.LocalFileSystemStateManager"
 )
 
 genrule(
@@ -83,7 +83,7 @@ java_binary(
     name = "zookeeper-statemgr-unshaded",
     srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
     deps = zookeeper_deps_files,
-    main_class="com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager"
+    main_class="org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager"
 )
 
 genrule(

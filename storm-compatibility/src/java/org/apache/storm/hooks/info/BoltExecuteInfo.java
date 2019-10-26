@@ -31,7 +31,7 @@ public class BoltExecuteInfo {
     this.executeLatencyMs = executeLatencyMs;
   }
 
-  public BoltExecuteInfo(com.twitter.heron.api.hooks.info.BoltExecuteInfo info) {
+  public BoltExecuteInfo(org.apache.heron.api.hooks.info.BoltExecuteInfo info) {
     this.tuple = new org.apache.storm.tuple.TupleImpl(info.getTuple());
     this.executingTaskId = info.getExecutingTaskId();
     this.executeLatencyMs = info.getExecuteLatency().toMillis();

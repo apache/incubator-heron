@@ -1,0 +1,46 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+FROM ubuntu:18.04
+
+RUN apt-get update
+RUN apt-get -y install \
+    unzip software-properties-common curl supervisor openjdk-8-jdk-headless
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+RUN update-ca-certificates -f
+
+ADD artifacts /heron
+
+WORKDIR /heron
+
+# run heron installers
+RUN /heron/heron-install.sh \
+    && rm -f /heron/heron-install.sh
+
+RUN ln -s /usr/local/heron/dist/heron-core /heron \
+    && mkdir -p /heron/heron-tools \
+    && ln -s /usr/local/heron/bin /heron/heron-tools \
+    && ln -s /usr/local/heron/conf /heron/heron-tools \
+    && ln -s /usr/local/heron/dist /heron/heron-tools \
+    && ln -s /usr/local/heron/lib /heron/heron-tools \
+    && ln -s /usr/local/heron/release.yaml /heron/heron-tools \
+    && ln -s /usr/local/heron/examples /heron \
+    && ln -s /usr/local/heron/release.yaml /heron
+
+ENV HERON_HOME /heron/heron-core/
+RUN export HERON_HOME

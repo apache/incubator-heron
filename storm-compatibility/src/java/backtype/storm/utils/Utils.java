@@ -22,13 +22,13 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.common.basics.TypeUtils;
+import org.apache.heron.common.basics.TypeUtils;
 
 // import org.json.simple.JSONValue;
 
 public final class Utils {
   public static final String DEFAULT_STREAM_ID =
-      com.twitter.heron.api.utils.Utils.DEFAULT_STREAM_ID;
+      org.apache.heron.api.utils.Utils.DEFAULT_STREAM_ID;
 
   private Utils() {
   }
@@ -38,16 +38,16 @@ public final class Utils {
       Class<?> c = Class.forName(klass);
       return c.newInstance();
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to create instance for class: " + klass, e);
     }
   }
 
   public static List<Object> tuple(Object... values) {
-    return com.twitter.heron.api.utils.Utils.tuple(values);
+    return org.apache.heron.api.utils.Utils.tuple(values);
   }
 
   public static void sleep(long millis) {
-    com.twitter.heron.api.utils.Utils.sleep(millis);
+    org.apache.heron.api.utils.Utils.sleep(millis);
   }
 
     /*
@@ -58,7 +58,7 @@ public final class Utils {
     */
 
   public static Map<String, String> readCommandLineOpts() {
-    return com.twitter.heron.api.utils.Utils.readCommandLineOpts();
+    return org.apache.heron.api.utils.Utils.readCommandLineOpts();
   }
 
     /*
@@ -89,11 +89,11 @@ public final class Utils {
     */
 
   public static byte[] serialize(Object obj) {
-    return com.twitter.heron.api.utils.Utils.serialize(obj);
+    return org.apache.heron.api.utils.Utils.serialize(obj);
   }
 
   public static Object deserialize(byte[] serialized) {
-    return com.twitter.heron.api.utils.Utils.deserialize(serialized);
+    return org.apache.heron.api.utils.Utils.deserialize(serialized);
   }
 
   public static Integer getInt(Object o) {
@@ -109,10 +109,10 @@ public final class Utils {
   }
 
   public static byte[] toByteArray(ByteBuffer buffer) {
-    return com.twitter.heron.api.utils.Utils.toByteArray(buffer);
+    return org.apache.heron.api.utils.Utils.toByteArray(buffer);
   }
 
   public static <S, T> T get(Map<S, T> m, S key, T defaultValue) {
-    return com.twitter.heron.api.utils.Utils.get(m, key, defaultValue);
+    return org.apache.heron.api.utils.Utils.get(m, key, defaultValue);
   }
 }

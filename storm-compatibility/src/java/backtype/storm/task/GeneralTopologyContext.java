@@ -33,7 +33,7 @@ import backtype.storm.tuple.Fields;
 // import backtype.storm.utils.ThriftTopologyUtils;
 
 public class GeneralTopologyContext implements JSONAware {
-  private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
+  private org.apache.heron.api.topology.GeneralTopologyContext delegate;
 
   @SuppressWarnings("rawtypes")
   public GeneralTopologyContext(StormTopology topology, Map stormConf,
@@ -44,7 +44,7 @@ public class GeneralTopologyContext implements JSONAware {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
   }
 
-  public GeneralTopologyContext(com.twitter.heron.api.topology.GeneralTopologyContext delegate) {
+  public GeneralTopologyContext(org.apache.heron.api.topology.GeneralTopologyContext delegate) {
     this.delegate = delegate;
   }
 
@@ -82,6 +82,8 @@ public class GeneralTopologyContext implements JSONAware {
 
   /**
    * Gets the set of streams declared for the specified component.
+   * @param componentId component id
+   * @return the set of streams
    */
   public Set<String> getComponentStreams(String componentId) {
     return delegate.getComponentStreams(componentId);
@@ -90,6 +92,8 @@ public class GeneralTopologyContext implements JSONAware {
   /**
    * Gets the task ids allocated for the given component id. The task ids are
    * always returned in ascending order.
+   * @param componentId the component id
+   * @return  the task ids
    */
   public List<Integer> getComponentTasks(String componentId) {
     return delegate.getComponentTasks(componentId);
@@ -97,6 +101,9 @@ public class GeneralTopologyContext implements JSONAware {
 
   /**
    * Gets the declared output fields for the specified component/stream.
+   * @param  componentId the component id
+   * @param  streamId the steam id
+   * @return the declared output fields
    */
   public Fields getComponentOutputFields(String componentId, String streamId) {
     return new Fields(delegate.getComponentOutputFields(componentId, streamId));
@@ -152,6 +159,7 @@ public class GeneralTopologyContext implements JSONAware {
 
   /**
    * Gets a map from task id to component id.
+   * @return a map from task id to component id
    */
   public Map<Integer, String> getTaskToComponent() {
     return delegate.getTaskToComponent();
@@ -159,6 +167,7 @@ public class GeneralTopologyContext implements JSONAware {
 
   /**
    * Gets a list of all component ids in this topology
+   * @return the list of component ids in this topology
    */
   public Set<String> getComponentIds() {
     return delegate.getComponentIds();

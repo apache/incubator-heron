@@ -28,18 +28,14 @@ import backtype.storm.tuple.Tuple;
  * as output. An IBolt can do everything from filtering to joining to functions
  * to aggregations. It does not have to process a tuple immediately and may
  * hold onto tuples to process later.
- * <p>
  * <p>A bolt's lifecycle is as follows:</p>
- * <p>
  * <p>IBolt object created on client machine. The IBolt is serialized into the topology
  * (using Java serialization) and submitted to the master machine of the cluster (Nimbus).
  * Nimbus then launches workers which deserialize the object, call prepare on it, and then
  * start processing tuples.</p>
- * <p>
  * <p>If you want to parameterize an IBolt, you should set the parameter's through its
  * constructor and save the parameterization state as instance variables (which will
  * then get serialized and shipped to every task executing this bolt across the cluster).</p>
- * <p>
  * <p>When defining bolts in Java, you should use the IRichBolt interface which adds
  * necessary methods for using the Java TopologyBuilder API.</p>
  */
@@ -47,7 +43,6 @@ public interface IBolt extends Serializable {
   /**
    * Called when a task for this component is initialized within a worker on the cluster.
    * It provides the bolt with the environment in which the bolt executes.
-   * <p>
    * <p>This includes the:</p>
    *
    * @param stormConf The Storm configuration for this bolt. This is the configuration provided to the topology merged in with cluster configuration on this machine.
@@ -63,12 +58,10 @@ public interface IBolt extends Serializable {
    * be accessed using Tuple#getValue. The IBolt does not have to process the Tuple
    * immediately. It is perfectly fine to hang onto a tuple and process it later
    * (for instance, to do an aggregation or join).
-   * <p>
    * <p>Tuples should be emitted using the OutputCollector provided through the prepare method.
    * It is required that all input tuples are acked or failed at some point using the OutputCollector.
    * Otherwise, Storm will be unable to determine when tuples coming off the spouts
    * have been completed.</p>
-   * <p>
    * <p>For the common case of acking an input tuple at the end of the execute method,
    * see IBasicBolt which automates this.</p>
    *
@@ -79,7 +72,6 @@ public interface IBolt extends Serializable {
   /**
    * Called when an IBolt is going to be shutdown. There is no guarentee that cleanup
    * will be called, because the supervisor kill -9's worker processes on the cluster.
-   * <p>
    * <p>The one context where cleanup is guaranteed to be called is when a topology
    * is killed when running Storm in simulator.</p>
    */

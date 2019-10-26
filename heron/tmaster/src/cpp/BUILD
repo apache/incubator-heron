@@ -51,6 +51,7 @@ cc_library(
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/proto:proto-cxx",
         "@com_github_jbeder_yaml_cpp//:yaml-cxx",
+        "@com_github_cereal//:cereal-cxx",
     ],
     linkstatic = 1,
 )

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "network/http_server_unittest.h"
@@ -24,7 +27,7 @@
 
 static sp_uint32 nkeys = 0;
 
-TestHttpServer::TestHttpServer(EventLoopImpl* eventLoop, NetworkOptions& _options) {
+TestHttpServer::TestHttpServer(std::shared_ptr<EventLoopImpl> eventLoop, NetworkOptions& _options) {
   server_ = new HTTPServer(eventLoop, _options);
   server_->InstallCallBack(
       "/meta", [this](IncomingHTTPRequest* request) { this->HandleMetaRequest(request); });
@@ -62,9 +65,9 @@ void TestHttpServer::HandleMetaRequest(IncomingHTTPRequest* _request) {
     EXPECT_EQ(value.str(), keyvalues[i].second);
   }
 
-  OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
+  auto response = make_unique<OutgoingHTTPResponse>(_request);
   response->AddResponse("This is response for meta object\r\n");
-  server_->SendReply(_request, 200, response);
+  server_->SendReply(_request, 200, std::move(response));
 }
 
 void TestHttpServer::HandleGenericRequest(IncomingHTTPRequest* _request) {
@@ -85,7 +88,7 @@ void TestHttpServer::HandleTerminateRequest(IncomingHTTPRequest* _request) {
 void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd) {
   nkeys = _nkeys;
 
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // set host, port and packet size
   NetworkOptions options;
@@ -94,11 +97,11 @@ void start_http_server(sp_uint32 _port, sp_uint32 _nkeys, int fd) {
   options.set_max_packet_size(BUFSIZ << 4);
 
   // start the server
-  TestHttpServer http_server(&ss, options);
+  TestHttpServer http_server(ss, options);
 
   // use pipe to block clients before server enters event loop
   int sent;
   write(fd, &sent, sizeof(int));
 
-  ss.loop();
+  ss->loop();
 }

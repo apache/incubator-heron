@@ -1,0 +1,109 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+# Default values for heron.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# The environment where Heron will be running
+# The following values are valid:
+# "aws" - Amazon Web Services
+# "gke" - Google Kubernetes Engine
+# "minikube" - Kubernetes on a single local node
+# "baremetal" - On-premise cluster
+platform: minikube
+
+# Heron image to use
+image: heron/heron:VERSION
+kubectlImage: heron/kubectl:latest
+
+# Heron image pull policy
+imagePullPolicy: IfNotPresent
+
+# Number of replicas for the job binary in bookkeeper
+jobReplicas: 1
+
+# amount of memory to provide for API server
+apiServerMemory: 512M
+heron:
+  url:/api/v1/namespaces/{{ .Release.Namespace }}/services/{{ .Release.Name }}-ui:8889/proxy
+# Topologies uploader
+uploader:
+  class: dlog # s3
+  s3Bucket: ""
+  s3PathPrefix: ""
+  s3AccessKey: ""
+  s3SecretKey: ""
+  s3Region: ""
+
+# Packing algorithms
+packing: RoundRobin # ResourceCompliantRR, FirstFitDecreasing
+
+# Number of replicas for storage bookies, memory and storage requirements
+bookieReplicas: 3
+bookieCpuMin: 100m
+bookieCpuMax: 250m
+bookieHeapMemory: 512M
+bookieDirectMemory: 256M
+bookieReadCacheSize: 32
+bookieWriteCacheSize: 32
+bookieJournalCapacity: 5G
+bookieStorageCapacity: 15G
+
+# Number of replicas for zookeeper
+zkReplicas: 3
+
+bookkeeper:
+  image: apache/bookkeeper:4.7.3
+  imagePullPolicy: IfNotPresent
+  
+  # set storageClassName to "none" to not use storageClassName
+  storageClassName: "none"
+  prometheus:
+    enabled: false
+
+zookeeper:
+  enabled: true
+  minAvailable: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2G
+    limits:
+      cpu: 1
+      memory: 4G
+  heap: 1G
+  storage: 2G
+  serverPort: 2888
+  leaderElectionPort: 3888
+  clientPort: 2181
+  tickTimeMs: 2000
+  initTicks: 10
+  syncTicks: 5
+  clientCnxns: 60
+  snapRetain: 3
+  purgeHours: 1
+  probeInitialDelaySeconds: 15
+  probeTimeoutSeconds: 5
+  antiAffinity: "hard"
+  logLevel: "INFO"
+  security:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000
+  # set storageClassName to "none" to not use storageClassName
+  storageClassName: "none"

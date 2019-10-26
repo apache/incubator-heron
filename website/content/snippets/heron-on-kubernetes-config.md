@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ## Heron on Kubernetes configuration
 
 ### Current Limitations
@@ -26,11 +44,11 @@ config file specific for the Heron cluster. The following must be specified
 for each cluster:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for Kubernetes scheduler.
-You should set this to `com.twitter.heron.scheduler.kubernetes.KubernetesScheduler`
+You should set this to `org.apache.heron.scheduler.kubernetes.KubernetesScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching and
 submitting topologies. To configure the Kubernetes launcher, set this to
-`com.twitter.heron.scheduler.kubernetes.KubernetesLauncher`
+`org.apache.heron.scheduler.kubernetes.KubernetesLauncher`
 
 * `heron.directory.sandbox.java.home` --- Specifies the location of the Java 8 JRE. Depending on 
 the Docker container you're using for executor image, this may be different. If you're using
@@ -58,10 +76,10 @@ To use the Docker image created for the latest release, you can set this value t
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler:                       com.twitter.heron.scheduler.kubernetes.KubernetesScheduler
+heron.class.scheduler:                       org.apache.heron.scheduler.kubernetes.KubernetesScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher:                        com.twitter.heron.scheduler.kubernetes.KubernetesLauncher
+heron.class.launcher:                        org.apache.heron.scheduler.kubernetes.KubernetesLauncher
 
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:          $JAVA_HOME
@@ -87,7 +105,7 @@ configuration file for your Kubernetes cluster.
 
 * `heron.class.state.manager` --- Specifies the class of the state manager you want to use. In a 
 Kubernetes cluster, you'll want to use Zookeeper so set this to 
-`com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
+`org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager`
 
 * `heron.statemgr.connection.string` --- Specifies the connection string to the zookeeper cluster. 
 This will look something like `<zookeeper_ip>:2181`.
@@ -125,7 +143,7 @@ process
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string:  "<zk_ip>:2181"

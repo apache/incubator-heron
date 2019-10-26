@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef __DUMMY_STMGR_H
@@ -22,10 +25,10 @@
 
 class DummyTMasterClient : public Client {
  public:
-  DummyTMasterClient(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+  DummyTMasterClient(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options,
                      const sp_string& stmgr_id, const sp_string& stmgr_host, sp_int32 stmgr_port,
                      sp_int32 shell_port,
-                     const std::vector<heron::proto::system::Instance*>& instances);
+                     const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
   virtual ~DummyTMasterClient();
 
   void setStmgrPort(sp_int32 stmgrPort) {
@@ -38,8 +41,10 @@ class DummyTMasterClient : public Client {
   virtual void HandleConnect(NetworkErrorCode _status);
   // Handle connection close
   virtual void HandleClose(NetworkErrorCode _status);
-  virtual void HandleRegisterResponse(void*, heron::proto::tmaster::StMgrRegisterResponse* response,
-                                      NetworkErrorCode);
+  virtual void HandleRegisterResponse(
+                            void*,
+                            pool_unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
+                            NetworkErrorCode);
   // Send worker request
   void CreateAndSendRegisterRequest();
 
@@ -49,15 +54,16 @@ class DummyTMasterClient : public Client {
   sp_string stmgr_host_;
   sp_int32 stmgr_port_;
   sp_int32 shell_port_;
-  std::vector<heron::proto::system::Instance*> instances_;
+  std::vector<std::shared_ptr<heron::proto::system::Instance>> instances_;
 };
 
 class DummyStMgr : public Server {
  public:
-  DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const sp_string& stmgr_id,
+  DummyStMgr(std::shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
+             const sp_string& stmgr_id,
              const sp_string& stmgr_host, sp_int32 stmgr_port, const sp_string& tmaster_host,
              sp_int32 tmaster_port, sp_int32 shell_port,
-             const std::vector<heron::proto::system::Instance*>& instances);
+             const std::vector<std::shared_ptr<heron::proto::system::Instance>>& instances);
 
   virtual ~DummyStMgr();
   sp_int32 Start();
@@ -74,11 +80,11 @@ class DummyStMgr : public Server {
 
   // Handle st mgr hello message
   virtual void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                       heron::proto::stmgr::StrMgrHelloRequest* _request);
+                                 pool_unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request);
   virtual void HandleStartBackPressureMessage(Connection*,
-                                              heron::proto::stmgr::StartBackPressureMessage*);
+                                    pool_unique_ptr<heron::proto::stmgr::StartBackPressureMessage>);
   virtual void HandleStopBackPressureMessage(Connection*,
-                                             heron::proto::stmgr::StopBackPressureMessage*);
+                                     pool_unique_ptr<heron::proto::stmgr::StopBackPressureMessage>);
 
  private:
   std::vector<sp_string> other_stmgrs_ids_;

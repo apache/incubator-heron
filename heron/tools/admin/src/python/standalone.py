@@ -1,17 +1,22 @@
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' standalone.py '''
+from collections import OrderedDict
 from subprocess import call
 import subprocess
 import sys
@@ -24,6 +29,7 @@ import requests
 import time
 import netifaces
 import yaml
+import json
 
 from heron.common.src.python.utils.log import Log
 from heron.tools.cli.src.python.result   import SimpleResult, Status
@@ -178,7 +184,7 @@ def run(command, parser, cl_args, unknown_args):
     update_config_files(cl_args)
   elif action == Action.GET:
     action_type = cl_args["type"]
-    if action_type == Get.HERON_TRACKER_URL:
+    if action_type == Get.SERVICE_URL:
       print get_service_url(cl_args)
     elif action_type == Get.HERON_UI_URL:
       print get_heron_ui_url(cl_args)
@@ -341,24 +347,32 @@ def get_heron_ui_url(cl_args):
   return "http://%s:8889" % list(roles[Role.MASTERS])[0]
 
 def print_cluster_info(cl_args):
-  roles = read_and_parse_roles(cl_args)
-  masters = roles[Role.MASTERS]
-  slaves = roles[Role.SLAVES]
-  zookeepers = roles[Role.ZOOKEEPERS]
-  cluster = roles[Role.CLUSTER]
-  print "Cluster:"
-  print " - Total # of nodes: %s" % len(cluster)
-  print " - Nodes: %s" % cluster
-  print "\n"
-  print "Roles:"
-  print " - Master Servers: %s" % list(masters)
-  print " - Slave Servers: %s" % list(slaves)
-  print " - Zookeeper Servers: %s" % list(zookeepers)
-  print "\n"
-  print "URLs:"
-  print " - Service URL: %s" % get_service_url(cl_args)
-  print " - Heron UI URL: %s" % get_heron_ui_url(cl_args)
-  print " - Heron Tracker URL: %s" % get_heron_tracker_url(cl_args)
+  '''
+  get cluster info for standalone cluster
+  '''
+  parsed_roles = read_and_parse_roles(cl_args)
+  masters = list(parsed_roles[Role.MASTERS])
+  slaves = list(parsed_roles[Role.SLAVES])
+  zookeepers = list(parsed_roles[Role.ZOOKEEPERS])
+  cluster = list(parsed_roles[Role.CLUSTER])
+
+  # OrderedDicts are used here so that the key order can be
+  # specified directly
+  info = OrderedDict()
+  info['numNodes'] = len(cluster)
+  info['nodes'] = cluster
+  roles = OrderedDict()
+  roles['masters'] = masters
+  roles['slaves'] = slaves
+  roles['zookeepers'] = zookeepers
+  urls = OrderedDict()
+  urls['serviceUrl'] = get_service_url(cl_args)
+  urls['heronUi'] = get_heron_ui_url(cl_args)
+  urls['heronTracker'] = get_heron_tracker_url(cl_args)
+  info['roles'] = roles
+  info['urls'] = urls
+
+  print json.dumps(info, indent=2)
 
 def add_additional_args(parsers):
   '''
@@ -487,7 +501,7 @@ def start_api_server(masters, cl_args):
   output = pid.communicate()
   Log.debug("return code: %s output: %s" % (return_code, output))
   if return_code != 0:
-    Log.error("Failed to start apiserver on %s with error:\n%s" % (single_master, output[1]))
+    Log.error("Failed to start API server on %s with error:\n%s" % (single_master, output[1]))
     sys.exit(-1)
 
   wait_for_job_to_start(single_master, "apiserver")
@@ -570,7 +584,7 @@ def wait_for_job_to_start(single_master, job):
         raise RuntimeError()
     except:
       Log.debug(sys.exc_info()[0])
-      Log.info("Waiting for apiserver to come up... %s" % i)
+      Log.info("Waiting for %s to come up... %s" % (job, i))
       time.sleep(1)
       if i > 20:
         Log.error("Failed to start Nomad Cluster!")
@@ -782,13 +796,13 @@ def get_nomad_slave_config_file(cl_args):
 
 def get_apiserver_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/apiserver.hcl" % config.get_heron_conf_dir()
 
 def get_heron_tools_job_file(cl_args):
   '''
-  get path to api server job file
+  get path to API server job file
   '''
   return "%s/standalone/resources/heron_tools.hcl" % config.get_heron_conf_dir()
 

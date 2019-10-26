@@ -69,6 +69,7 @@ nomad_sdk_deps = [
 nomad_deps_files = \
     scheduler_deps_files + nomad_sdk_deps + [
         ":scheduler-utils-java",
+        "//heron/metricsmgr/src/java:metricsmgr-java"
     ]
 
 java_library(
@@ -176,13 +177,13 @@ genrule(
 
 java_library(
     name='mesos-scheduler-java',
-    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/mesos/**/*.java"]),
     deps = mesos_deps_files,
 )
 
 java_binary(
     name='mesos-scheduler-unshaded',
-    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/mesos/**/*.java"]),
     deps = mesos_deps_files,
 )
 
@@ -196,13 +197,13 @@ genrule(
 
 java_library(
     name='marathon-scheduler-java',
-    srcs = glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/marathon/**/*.java"]),
     deps = marathon_deps_files,
 )
 
 java_binary(
     name='marathon-scheduler-unshaded',
-    srcs=glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
+    srcs=glob(["org/apache/heron/scheduler/marathon/**/*.java"]),
     deps = marathon_deps_files,
 )
 
@@ -215,13 +216,13 @@ genrule(
 
 java_library(
     name='kubernetes-scheduler-java',
-    srcs = glob(["com/twitter/heron/scheduler/kubernetes/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/kubernetes/**/*.java"]),
     deps = kubernetes_deps_files,
 )
 
 java_binary(
     name='kubernetes-scheduler-unshaded',
-    srcs=glob(["com/twitter/heron/scheduler/kubernetes/**/*.java"]),
+    srcs=glob(["org/apache/heron/scheduler/kubernetes/**/*.java"]),
     deps = kubernetes_deps_files,
 )
 
@@ -234,13 +235,13 @@ genrule(
 
 java_library(
     name='nomad-scheduler-java',
-    srcs = glob(["com/twitter/heron/scheduler/nomad/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/nomad/**/*.java"]),
     deps = nomad_deps_files,
 )
 
 java_binary(
     name='nomad-scheduler-unshaded',
-    srcs = glob(["com/twitter/heron/scheduler/nomad/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/nomad/**/*.java"]),
     deps = nomad_deps_files,
 )
 
@@ -253,7 +254,7 @@ genrule(
 
 java_library(
     name = 'scheduler-utils-java',
-    srcs = glob(["com/twitter/heron/scheduler/utils/**/*.java"]),
+    srcs = glob(["org/apache/heron/scheduler/utils/**/*.java"]),
     deps = [
         "//third_party/java:jackson",
         "//heron/spi/src/java:network-utils-java",

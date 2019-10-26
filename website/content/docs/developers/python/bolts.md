@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Implementing Python bolts
 ---
@@ -8,15 +26,14 @@ title: Implementing Python bolts
 Bolts must implement the `Bolt` interface, which has the following methods.
 
 ```python
-class Bolt(BaseBolt):
-  def initialize(self, config, context)
-
-  def process(self, tup)
+class MyBolt(Bolt):
+    def initialize(self, config, context): pass
+    def process(self, tup): pass
 ```
 
 * The `initialize()` method is called when the bolt is first initialized and
 provides the bolt with the executing environment. It is equivalent to `prepare()`
-method of the [`IBolt`](/api/com/twitter/heron/api/bolt/IBolt.html) interface in Java.
+method of the [`IBolt`](/api/org/apache/heron/api/bolt/IBolt.html) interface in Java.
 Note that you should not override `__init__()` constructor of `Bolt` class
 for initialization of custom variables, since it is used internally by HeronInstance; instead,
 `initialize()` should be used to initialize any custom variables or connections to databases.
@@ -28,18 +45,15 @@ is equivalent to `execute()` method of `IBolt` interface in Java. You can use
 In addition, `BaseBolt` class provides you with the following methods.
 
 ```python
-class BaseBolt:
-  def emit(self, tup, stream="default", anchors=None, direct_task=None, need_task_ids=False)
-  def ack(self, tup)
-  def fail(self, tup)
-
-  @staticmethod
-  def is_tick(tup)
-
-  def log(self, message, level=None)
-
-  @classmethod
-  def spec(cls, name=None, inputs=None, par=1, config=None)
+class BaseBolt(BaseComponent):
+    def emit(self, tup, stream="default", anchors=None, direct_task=None, need_task_ids=False): ...
+    def ack(self, tup): ...
+    def fail(self, tup): ...
+    def log(self, message, level=None): ...
+    @staticmethod
+    def is_tick(tup)
+    @classmethod
+    def spec(cls, name=None, inputs=None, par=1, config=None): ...
 ```
 
 * The `emit()` method is used to emit a given `tup`, which can be a `list` or `tuple` of
@@ -74,15 +88,17 @@ The following is an example implementation of a bolt in Python.
 
 ```python
 from collections import Counter
-from heronpy import Bolt
+from heronpy.api.bolt.bolt import Bolt
+
 
 class CountBolt(Bolt):
-  outputs = ["word", "count"]
-  def initialize(self, config, context):
-    self.counter = Counter()
+    outputs = ["word", "count"]
 
-  def process(self, tup):
-    word = tup.values[0]
-    self.counter[word] += 1
-    self.emit([word, self.counter[word]])
+    def initialize(self, config, context):
+        self.counter = Counter()
+
+    def process(self, tup):
+        word = tup.values[0]
+        self.counter[word] += 1
+        self.emit([word, self.counter[word]])
 ```

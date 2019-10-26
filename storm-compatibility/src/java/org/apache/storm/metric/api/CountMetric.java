@@ -19,10 +19,10 @@
 package org.apache.storm.metric.api;
 
 public class CountMetric implements IMetric {
-  private com.twitter.heron.api.metric.CountMetric delegate;
+  private org.apache.heron.api.metric.CountMetric delegate;
 
   public CountMetric() {
-    delegate = new com.twitter.heron.api.metric.CountMetric();
+    delegate = new org.apache.heron.api.metric.CountMetric();
   }
 
   public void incr() {

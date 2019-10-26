@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 # Heron Documentation
 
 Heron's documentation was primarily built using the following components:
@@ -14,20 +32,12 @@ installed:
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
-* [pip](https://pypi.python.org/pypi/pip)
+* [pip](https://pypi.python.org/pypi/pip) - install `PyYAML>=3.12`
+* [Go](https://golang.org) (make sure that your `GOPATH` and `GOROOT` are set)
 
-### OS X Setup
+### macOS setup
 
-To install Node.js and npm on Mac OS X, make sure that you have
-[Homebrew](http://brew.sh/) installed and run:
-
-```bash
-$ brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
-$ nvm install node
-$ curl -L https://www.npmjs.com/install.sh | sh
-```
-
-Once this has completed:
+To get set up on macOS:
 
 ```bash
 $ cd website
@@ -35,8 +45,8 @@ $ make setup
 $ make build-static-assets
 ```
 
-This will install Hugo, Gulp, and all of the necessary Gulp plugins and build
-the static assets for the site.
+This will install Gulp and all of the necessary Gulp plugins and build the
+static assets for the site, as well as some necessary Python libraries.
 
 ### Other Operating Systems Setup
 
@@ -47,8 +57,7 @@ are installed:
 
 1. Navigate to the `website` folder
 2. Run `npm install`
-3. Run `make build-static-assets` (this will build all of the necessary static
-   assets, i.e. CSS, Javascript, etc.)
+3. Run `make site`
 
 ## Building the Docs Locally
 
@@ -76,8 +85,10 @@ This will run the docs locally on `localhost:1313`. Navigate to
 open the browser from the command line:
 
 ```bash
-$ open http://localhost:1313/heron
+$ open http://localhost:1313/incubator-heron/
 ```
+
+You can edit `.md` files and they will be automatically updated in your browser.
 
 ## Working on Static Assets
 
@@ -98,7 +109,7 @@ one can use `grep` command to find those parent webpages.
 
 The content on the [twitter.github.io/heron](http://twitter.github.io/heron)
 website is what is committed on the [gh-pages
-branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
+branch](https://github.com/apache/incubator-heron/tree/gh-pages) of the Heron repo. To
 simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
 submodule that points to the `gh-pages` branch of the heron repo.

@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Heron Code Organization
 ---
@@ -21,7 +39,7 @@ The primary programming languages for Heron are C++, Java, and Python.
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
 in [Building Topologies](../../developers/java/topologies), while documentation for the Java
-API can be found [here](/api/com/twitter/heron/api/topology/package-summary.html). Please note that Heron topologies do not
+API can be found [here](/api/org/apache/heron/api/topology/package-summary.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
@@ -58,7 +76,7 @@ Heron supports two cluster schedulers out of the box:
 [Aurora](../../operators/deployment/schedulers/aurora) and a [local
 scheduler](../../operators/deployment/schedulers/local). The Java code for each of those
 schedulers can be found in [`heron/schedulers`]({{% githubMaster %}}/heron/schedulers)
-, while the underlying scheduler API can be found [here](/api/com/twitter/heron/spi/scheduler/package-summary.html)
+, while the underlying scheduler API can be found [here](/api/org/apache/heron/spi/scheduler/package-summary.html)
 
 Info on custom schedulers can be found in [Implementing a Custom
 Scheduler](../custom-scheduler); info on the currently available schedulers
@@ -114,7 +132,7 @@ be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](../../developers/java/topologies), while API documentation can be found
-[here](/api/com/twitter/heron/api/topology/package-summary.html).
+[here](/api/org/apache/heron/api/topology/package-summary.html).
 
 ### Simulator
 
@@ -122,7 +140,7 @@ Heron enables you to run topologies in [`Simulator`](../../developers/simulator-
 for debugging purposes.
 
 The Java API for simulator can be found in
-[`heron/simulator`](/api/com/twitter/heron/simulator/package-summary.html).
+[`heron/simulator`](/api/org/apache/heron/simulator/package-summary.html).
 
 ### Example Topologies
 

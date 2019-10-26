@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "config/topology-config-helper.h"
@@ -29,6 +32,9 @@
 namespace heron {
 namespace config {
 
+static const char TOPOLOGY_CONFIG_KEY[] = "_topology_";
+static const char RUNTIME_CONFIG_POSTFIX[] = ":runtime";
+
 TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::string& _mode) {
   if (_mode == "ATMOST_ONCE") {
     return TopologyConfigVars::TopologyReliabilityMode::ATMOST_ONCE;
@@ -44,7 +50,7 @@ TopologyConfigVars::TopologyReliabilityMode StringToReliabilityMode(const std::s
 
 TopologyConfigVars::TopologyReliabilityMode
 TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
+  static const std::string value_true_ = "true";
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     // First search for reliabiliy mode
@@ -70,8 +76,7 @@ TopologyConfigHelper::GetReliabilityMode(const proto::api::Topology& _topology) 
 }
 
 bool TopologyConfigHelper::EnableMessageTimeouts(const proto::api::Topology& _topology) {
-  sp_string value_true_ = "true";
-  std::set<sp_string> topology_config;
+  static const std::string value_true_ = "true";
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
@@ -84,7 +89,6 @@ bool TopologyConfigHelper::EnableMessageTimeouts(const proto::api::Topology& _to
 }
 
 sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topology) {
-  std::set<sp_string> topology_config;
   if (_topology.has_topology_config()) {
     const proto::api::Config& cfg = _topology.topology_config();
     for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
@@ -100,11 +104,24 @@ sp_int32 TopologyConfigHelper::GetNumStMgrs(const proto::api::Topology& _topolog
 }
 
 sp_int32 TopologyConfigHelper::GetComponentParallelism(const proto::api::Config& _config) {
-  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
-    if (_config.kvs(i).key() == TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM) {
-      return atoi(_config.kvs(i).value().c_str());
-    }
+  std::string parallelism = GetConfigValue(_config,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
   }
+
+  CHECK(false) << "Topology config - no component parallelism hints";
+  return -1;  // keep compiler happy
+}
+
+sp_int32 TopologyConfigHelper::GetComponentParallelism(
+    const proto::api::Topology& _topology, const std::string& _component) {
+  std::string parallelism = GetComponentConfigValue(_topology, _component,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_PARALLELISM, "");
+  if (!parallelism.empty()) {
+    return atoi(parallelism.c_str());
+  }
+
   CHECK(false) << "Topology config - no component parallelism hints";
   return -1;  // keep compiler happy
 }
@@ -214,7 +231,7 @@ sp_double64 TopologyConfigHelper::GetContainerCpuRequested(const proto::api::Top
       return atof(cfg.kvs(i).value().c_str());
     }
   }
-  // Hmmm.. There was no value specified. The default is to allocate one cpu
+  // Hmmm.. There was no value specified. The default is to allocate one CPU
   // per component on a stmgr
   sp_int32 total_parallelism = TopologyConfigHelper::GetTotalParallelism(_topology);
   sp_int32 nstmgrs = TopologyConfigHelper::GetNumStMgrs(_topology);
@@ -378,17 +395,18 @@ sp_int64 TopologyConfigHelper::GetStatefulCheckpointIntervalSecsWithDefault(
                                const proto::api::Topology& _topology,
                                sp_int64 _default) {
   const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS) {
-      return atol(cfg.kvs(i).value().c_str());
-    }
+  const std::string value = GetConfigValue(cfg,
+      TopologyConfigVars::TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS, "");
+  if (!value.empty()) {
+    return atol(value.c_str());
   }
+
   // There was no value specified. Return the default
   return _default;
 }
 
 void TopologyConfigHelper::GetSpoutComponentNames(const proto::api::Topology& _topology,
-                                                  std::unordered_set<std::string> spouts) {
+                                                  std::unordered_set<std::string>& spouts) {
   for (int i = 0; i < _topology.spouts_size(); ++i) {
     spouts.insert(_topology.spouts(i).comp().name());
   }
@@ -399,17 +417,196 @@ bool TopologyConfigHelper::DropTuplesUponBackpressure(const proto::api::Topology
                                TopologyConfigVars::TOPOLOGY_DROPTUPLES_UPON_BACKPRESSURE, false);
 }
 
+std::string TopologyConfigHelper::GetRuntimeConfigKey(const std::string& _key) {
+  return _key + RUNTIME_CONFIG_POSTFIX;
+}
+
+// Convert configs in map to runtime configs (append runtime postfix)
+void TopologyConfigHelper::ConvertToRuntimeConfigs(
+    const std::map<std::string, std::string>& _origin,
+    std::map<std::string, std::string>& _retval) {
+  std::map<std::string, std::string>::const_iterator it;
+  for (it = _origin.begin(); it != _origin.end(); ++it) {
+    _retval[GetRuntimeConfigKey(it->first)] = it->second;
+  }
+}
+
+
+// Return topology level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::GetTopologyRuntimeConfig(
+    const proto::api::Topology& _topology,
+    std::map<std::string, std::string>& retval) {
+  if (_topology.has_topology_config()) {
+    const proto::api::Config& config = _topology.topology_config();
+    ConvertRuntimeConfigToKVMap(config, retval);
+  }
+}
+
+// Update topology level runtime  config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::SetTopologyRuntimeConfig(
+    proto::api::Topology* _topology,
+    const std::map<std::string, std::string>& _update) {
+  if (_topology->has_topology_config()) {
+    proto::api::Config* config = _topology->mutable_topology_config();
+    UpdateRuntimeConfigFromKVMap(config, _update);
+  }
+}
+
+// Return component level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::GetComponentRuntimeConfig(
+    const proto::api::Topology& _topology,
+    const std::string& _component_name,
+    std::map<std::string, std::string>& retval) {
+  // We are assuming component names are unique and returning the config
+  // of the first spout or bolt found with the name.
+  for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
+    if (_topology.spouts(i).comp().name() == _component_name) {
+      const proto::api::Config& config = _topology.spouts(i).comp().config();
+      ConvertRuntimeConfigToKVMap(config, retval);
+      return;
+    }
+  }
+
+  for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
+    if (_topology.bolts(i).comp().name() == _component_name) {
+      const proto::api::Config& config = _topology.bolts(i).comp().config();
+      ConvertRuntimeConfigToKVMap(config, retval);
+      return;
+    }
+  }
+}
+
+// Update component level runtime config
+// Note that all runtime configs are pure string so there is no need to worry about serialized_value
+void TopologyConfigHelper::SetComponentRuntimeConfig(
+    proto::api::Topology* _topology,
+    const std::string& _component_name,
+    const std::map<std::string, std::string>& _update) {
+  // We are assuming component names are unique and updating config for all instances
+  // with the specific component name.
+  for (sp_int32 i = 0; i < _topology->spouts_size(); ++i) {
+    proto::api::Component* comp = _topology->mutable_spouts(i)->mutable_comp();
+    if (comp->name() == _component_name) {
+      proto::api::Config* config = comp->mutable_config();
+      UpdateRuntimeConfigFromKVMap(config, _update);
+    }
+  }
+
+  for (sp_int32 i = 0; i < _topology->bolts_size(); ++i) {
+    proto::api::Component* comp = _topology->mutable_bolts(i)->mutable_comp();
+    if (comp->name() == _component_name) {
+      proto::api::Config* config = comp->mutable_config();
+      UpdateRuntimeConfigFromKVMap(config, _update);
+    }
+  }
+}
+
+// For every existing config, update the value; for every non-existing config, add it.
+void TopologyConfigHelper::UpdateRuntimeConfigFromKVMap(proto::api::Config* _config,
+    const std::map<std::string, std::string>& _kv_map) {
+  std::set<std::string> updated;
+  for (sp_int32 i = 0; i < _config->kvs_size(); ++i) {
+    // Runtime config has a postfix
+    const std::string key = _config->mutable_kvs(i)->key();
+    const std::map<std::string, std::string>::const_iterator it = _kv_map.find(key);
+    if (it != _kv_map.end()) {  // If the runtime config exists, update value
+      _config->mutable_kvs(i)->set_value(it->second);
+      updated.insert(key);
+    }
+  }
+  // After existing configs are updated, append the newly added ones
+  std::map<std::string, std::string>::const_iterator it;
+  for (it = _kv_map.begin(); it != _kv_map.end(); ++it) {
+    if (updated.find(it->first) == updated.end()) {
+      proto::api::Config::KeyValue* kv = _config->add_kvs();
+      kv->set_key(it->first);
+      kv->set_value(it->second);
+    }
+  }
+}
+
+const std::string TopologyConfigHelper::GetConfigValue(const proto::api::Config& _config,
+                                                       const std::string& _key,
+                                                       const std::string& _default) {
+  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
+    if (_config.kvs(i).key() == _key) {
+      return _config.kvs(i).value();
+    }
+  }
+  return _default;
+}
+
 bool TopologyConfigHelper::GetBooleanConfigValue(const proto::api::Topology& _topology,
                                                  const std::string& _config_name,
                                                  bool _default_value) {
-  sp_string value_true_ = "true";
-  const proto::api::Config& cfg = _topology.topology_config();
-  for (sp_int32 i = 0; i < cfg.kvs_size(); ++i) {
-    if (cfg.kvs(i).key() == _config_name) {
-      return value_true_.compare(cfg.kvs(i).value().c_str()) == 0;
+  static const std::string value_true_ = "true";
+  const std::string value = GetTopologyConfigValue(_topology, _config_name, "");
+
+  return value_true_.compare(value.c_str()) == 0;
+}
+
+// Convert topology config to a key value map
+void TopologyConfigHelper::ConvertRuntimeConfigToKVMap(
+    const proto::api::Config& _config,
+    std::map<std::string, std::string>& retval) {
+  for (sp_int32 i = 0; i < _config.kvs_size(); ++i) {
+    const std::string& key = _config.kvs(i).key();
+    // Assuming RUNTIME_CONFIG_POSTFIX is unique and doesn't happen in normal cases. When it is
+    // found in a config key, the config is considered a runtime config and extracted into the
+    // result
+    if (key.find(RUNTIME_CONFIG_POSTFIX) != std::string::npos) {
+      retval[_config.kvs(i).key()] = _config.kvs(i).value();
     }
   }
-  return _default_value;
+}
+
+const std::string TopologyConfigHelper::GetTopologyConfigValue(
+    const proto::api::Topology& _topology,
+    const std::string& _key,
+    const std::string& _default) {
+  const proto::api::Config& cfg = _topology.topology_config();
+  return GetConfigValue(cfg, _key, _default);
+}
+
+const std::string TopologyConfigHelper::GetComponentConfigValue(
+    const proto::api::Topology& _topology,
+    const std::string& _component,
+    const std::string& _key,
+    const std::string& _default) {
+  for (auto spout : _topology.spouts()) {
+    if (spout.comp().name() == _component) {  // Found the component
+      const proto::api::Config& config = spout.comp().config();
+      return GetConfigValue(config, _key, _default);
+    }
+  }
+  for (auto bolt : _topology.bolts()) {  // Found the component
+    if (bolt.comp().name() == _component) {
+      const proto::api::Config& config = bolt.comp().config();
+      return GetConfigValue(config, _key, _default);
+    }
+  }
+  return _default;
+}
+
+sp_int64 TopologyConfigHelper::GetComponentOutputBPS(const proto::api::Topology& _topology,
+                                                     const std::string& _component) {
+  const std::string init_value = GetComponentConfigValue(_topology, _component,
+      TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS, "");
+  const std::string value = GetComponentConfigValue(_topology, _component,
+      GetRuntimeConfigKey(TopologyConfigVars::TOPOLOGY_COMPONENT_OUTPUT_BPS), init_value);
+
+  if (!value.empty()) {
+    return atol(value.c_str());
+  }
+
+  return -1;  // default to -1 (no rate limit)
+}
+
+const char* TopologyConfigHelper::GetReservedTopologyConfigKey() {
+  return TOPOLOGY_CONFIG_KEY;
 }
 }  // namespace config
 }  // namespace heron

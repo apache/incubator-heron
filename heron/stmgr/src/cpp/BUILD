@@ -61,6 +61,7 @@ cc_library(
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
+        "@com_github_hopscotch_hashmap//:hopscotch-hashmap",
     ],
     linkstatic = 1,
 )

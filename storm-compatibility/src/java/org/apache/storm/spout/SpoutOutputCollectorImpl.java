@@ -31,9 +31,9 @@ import org.apache.storm.utils.Utils;
  * guarantee that each message is fully processed at least once.
  */
 public class SpoutOutputCollectorImpl extends SpoutOutputCollector {
-  private com.twitter.heron.api.spout.SpoutOutputCollector delegate;
+  private org.apache.heron.api.spout.SpoutOutputCollector delegate;
 
-  public SpoutOutputCollectorImpl(com.twitter.heron.api.spout.SpoutOutputCollector delegate) {
+  public SpoutOutputCollectorImpl(org.apache.heron.api.spout.SpoutOutputCollector delegate) {
     super(null);
     this.delegate = delegate;
   }

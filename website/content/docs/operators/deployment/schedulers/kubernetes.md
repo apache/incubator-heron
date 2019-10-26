@@ -1,7 +1,28 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
-title: Kubernetes
+title: Heron on Kubernetes by hand
+description: Run Heron on the foremost open source container orchestration platform
 new: true
 ---
+
+> This document shows you how to install Heron on Kubernetes in a step-by-step, "by hand" fashion. An easier way to install Heron on Kubernetes is to use the [Helm](https://helm.sh) package manager. For instructions on doing so, see [Heron on Kubernetes with Helm](../kubernetes-helm)).
 
 Heron supports deployment on [Kubernetes](https://kubernetes.io/) (sometimes called **k8s**). Heron deployments on Kubernetes use Docker as the containerization format for Heron topologies and use the Kubernetes API for scheduling.
 
@@ -66,7 +87,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on Minikube:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/zookeeper.yaml
 ```
 
 #### BookKeeper
@@ -74,7 +95,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 When running Heron on Kubernetes, [Apache BookKeeper](https://bookkeeper.apache.org) is used for things like topology artifact storage. You can start up BookKeeper using this command:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/bookkeeper.yaml
 ```
 
 #### Heron tools
@@ -82,7 +103,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/tools.yaml
 ```
 
 #### Heron API server
@@ -90,7 +111,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on Minikube:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/minikube/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/minikube/apiserver.yaml
 ```
 
 ### Managing topologies
@@ -101,23 +122,25 @@ Once all of the [components](#components) have been successfully started up, you
 $ kubectl proxy -p 8001
 ```
 
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
+
 Now, verify that the Heron API server running on Minikube is available using curl:
 
 ```bash
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 ```
 
 You should get a JSON response like this:
 
 ```json
 {
-  "heron.build.git.revision" : "bf9fe93f76b895825d8852e010dffd5342e1f860",
+  "heron.build.git.revision" : "ddbb98bbf173fb082c6fd575caaa35205abe34df",
   "heron.build.git.status" : "Clean",
   "heron.build.host" : "ci-server-01",
-  "heron.build.time" : "Sun Oct  1 20:42:18 UTC 2017",
-  "heron.build.timestamp" : "1506890538000",
-  "heron.build.user" : "release-agent1",
-  "heron.build.version" : "0.16.2"
+  "heron.build.time" : "Sat Mar 31 09:27:19 UTC 2018",
+  "heron.build.timestamp" : "1522488439000",
+  "heron.build.user" : "release-agent",
+  "heron.build.version" : "0.17.8"
 }
 ```
 
@@ -125,9 +148,9 @@ Success! You can now manage Heron topologies on your Minikube Kubernetes install
 
 ```bash
 $ heron submit kubernetes \
-  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.
@@ -136,7 +159,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.
@@ -145,7 +168,7 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in Minikube.
 
-You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
 
 ## Google Container Engine
 
@@ -228,7 +251,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your GKE cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/zookeeper.yaml
 ```
 
 #### BookKeeper setup
@@ -238,7 +261,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 To start up an [Apache BookKeeper](https://bookkeeper.apache.org) cluster for Heron:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper.yaml
 ```
 
 #### Heron tools <a id="heron-tools-gke"></a>
@@ -246,7 +269,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/tools.yaml
 ```
 
 #### Heron API server
@@ -256,13 +279,13 @@ The [Heron API server](../../../heron-api-server) is the endpoint that the [Hero
 If you're using Google Cloud Storage:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/gcs-apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/gcs-apiserver.yaml
 ```
 
 If you're using Apache BookKeeper:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/gcp/bookkeeper-apiserver.yaml
 ```
 
 ### Managing topologies
@@ -272,11 +295,12 @@ Once all of the [components](#components) have been successfully started up, you
 ```bash
 $ kubectl proxy -p 8001
 ```
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
 
 Now, verify that the Heron API server running on GKE is available using curl:
 
 ```bash
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 ```
 
 You should get a JSON response like this:
@@ -299,7 +323,7 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 $ heron submit kubernetes \
   --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.
@@ -308,7 +332,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.
@@ -317,7 +341,7 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 The [Heron UI](../../../heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](../../../../concepts/topologies). It should already be running in your GKE cluster.
 
-You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+You can access [Heron UI](../../../heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy/topologies.
 
 ## General Kubernetes clusters
 
@@ -340,7 +364,7 @@ $ kubectl get pods -w
 Heron uses [ZooKeeper](https://zookeeper.apache.org) for a variety of coordination- and configuration-related tasks. To start up ZooKeeper on your Kubernetes cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/zookeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/zookeeper.yaml
 ```
 
 #### BookKeeper
@@ -348,7 +372,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 When running Heron on Kubernetes, [Apache BookKeeper](https://bookkeeper.apache.org) is used for things like topology artifact storage (unless you're running on GKE). You can start up BookKeeper using this command:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/bookkeeper.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/bookkeeper.yaml
 ```
 
 #### Heron tools
@@ -356,7 +380,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The so-called "Heron tools" include the [Heron UI](../../../heron-ui) and the [Heron Tracker](../../../heron-tracker). To start up the Heron tools:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/tools.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/tools.yaml
 ```
 
 #### Heron API server
@@ -364,7 +388,7 @@ $ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deplo
 The Heron API server is the endpoint that the Heron CLI client uses to interact with the other components of Heron. To start up the Heron API server on your Kubernetes cluster:
 
 ```bash
-$ kubectl create -f https://raw.githubusercontent.com/twitter/heron/master/deploy/kubernetes/general/apiserver.yaml
+$ kubectl create -f https://raw.githubusercontent.com/apache/incubator-heron/master/deploy/kubernetes/general/apiserver.yaml
 ```
 
 ### Managing topologies
@@ -375,23 +399,25 @@ Once all of the [components](#components) have been successfully started up, you
 $ kubectl proxy -p 8001
 ```
 
+> Note: All of the following Kubernetes specific urls are valid with the Kubernetes 1.10.0 release.
+
 Now, verify that the Heron API server running on GKE is available using curl:
 
 ```bash
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 ```
 
 You should get a JSON response like this:
 
 ```json
 {
-  "heron.build.git.revision" : "bf9fe93f76b895825d8852e010dffd5342e1f860",
+  "heron.build.git.revision" : "ddbb98bbf173fb082c6fd575caaa35205abe34df",
   "heron.build.git.status" : "Clean",
   "heron.build.host" : "ci-server-01",
-  "heron.build.time" : "Sun Oct  1 20:42:18 UTC 2017",
-  "heron.build.timestamp" : "1506890538000",
-  "heron.build.user" : "release-agent1",
-  "heron.build.version" : "0.16.2"
+  "heron.build.time" : "Sat Mar 31 09:27:19 UTC 2018",
+  "heron.build.timestamp" : "1522488439000",
+  "heron.build.user" : "release-agent",
+  "heron.build.version" : "0.17.8"
 }
 ```
 
@@ -399,9 +425,9 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 
 ```bash
 $ heron submit kubernetes \
-  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
-  com.twitter.heron.examples.api.AckingTopology acking
+  org.apache.heron.examples.api.AckingTopology acking
 ```
 
 You can also track the progress of the Kubernetes pods that make up the topology. When you run `kubectl get pods` you should see pods with names like `acking-0` and `acking-1`.
@@ -410,7 +436,7 @@ Another option is to set the service URL for Heron using the `heron config` comm
 
 ```bash
 $ heron config kubernetes set service_url \
-  http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000
+  http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy
 ```
 
 That would enable you to manage topologies without setting the `--service-url` flag.

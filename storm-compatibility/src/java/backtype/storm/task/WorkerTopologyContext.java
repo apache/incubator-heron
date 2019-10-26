@@ -27,7 +27,7 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 
 public class WorkerTopologyContext extends GeneralTopologyContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate;
+  private org.apache.heron.api.topology.TopologyContext delegate;
 
   @SuppressWarnings("rawtypes")
   public WorkerTopologyContext(
@@ -49,7 +49,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
     throw new RuntimeException("WorkerTopologyContext should never be init this way");
   }
 
-  public WorkerTopologyContext(com.twitter.heron.api.topology.TopologyContext newDelegate) {
+  public WorkerTopologyContext(org.apache.heron.api.topology.TopologyContext newDelegate) {
     super(newDelegate);
     this.delegate = newDelegate;
   }
@@ -59,6 +59,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * (including the task for this task).
    * In Heron parlance, since every instance is running as a seperate process
    * this will just return the current instance's taskId
+   * @return the worker task
    */
   public List<Integer> getThisWorkerTasks() {
     List<Integer> retval = new LinkedList<>();
@@ -72,6 +73,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * on the same machine.
    * In Heron parlance, we just return the taskId since that
    * should be unique
+   * @return the worker port
    */
   public Integer getThisWorkerPort() {
     return delegate.getThisTaskId();
@@ -81,6 +83,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * Gets the location of the external resources for this worker on the
    * local filesystem. These external resources typically include bolts implemented
    * in other languages, such as Ruby or Python.
+   * @return the location of the external resources
    */
   public String getCodeDir() {
     throw new RuntimeException("Not supported");
@@ -90,6 +93,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * If this task spawns any subprocesses, those subprocesses must immediately
    * write their PID to this directory on the local filesystem to ensure that
    * Storm properly destroys that process when the worker is shutdown.
+   * @return the PID directory
    */
   public String getPIDDir() {
     throw new RuntimeException("Not supported");

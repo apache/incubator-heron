@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <map>
@@ -152,7 +155,7 @@ void DummyTimerCb(EventLoop::Status) {
 }
 
 // Function to start the threads
-void StartServer(EventLoopImpl* ss) {
+void StartServer(std::shared_ptr<EventLoopImpl> ss) {
   // In the ss register a dummy timer. This is to make sure that the
   // exit from the loop happens timely. If there are no timers registered
   // with the select server and also no activity on any of the fds registered
@@ -161,10 +164,10 @@ void StartServer(EventLoopImpl* ss) {
   ss->loop();
 }
 
-void StartDummyTMaster(EventLoopImpl*& ss, heron::testing::DummyTMaster*& mgr,
+void StartDummyTMaster(std::shared_ptr<EventLoopImpl>& ss, heron::testing::DummyTMaster*& mgr,
                        std::thread*& tmaster_thread, sp_int32 tmaster_port) {
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
 
   NetworkOptions options;
   options.set_host(LOCALHOST);
@@ -177,12 +180,12 @@ void StartDummyTMaster(EventLoopImpl*& ss, heron::testing::DummyTMaster*& mgr,
   tmaster_thread = new std::thread(StartServer, ss);
 }
 
-void StartDummyStMgr(EventLoopImpl*& ss, heron::testing::DummyStMgr*& mgr,
+void StartDummyStMgr(std::shared_ptr<EventLoopImpl>& ss, heron::testing::DummyStMgr*& mgr,
                      std::thread*& stmgr_thread, const sp_string tmaster_host,
                      sp_int32 tmaster_port, const sp_string& stmgr_id, sp_int32 stmgr_port,
                      const std::vector<heron::proto::system::Instance*>& instances) {
   // Create the select server for this stmgr to use
-  ss = new EventLoopImpl();
+  ss = std::make_shared<EventLoopImpl>();
 
   NetworkOptions options;
   options.set_host(tmaster_host);
@@ -212,7 +215,7 @@ struct CommonResources {
   heron::proto::api::Grouping grouping_;
 
   // returns - filled in by init
-  std::vector<EventLoopImpl*> ss_list_;
+  std::vector<std::shared_ptr<EventLoopImpl>> ss_list_;
   std::vector<sp_string> stmgrs_id_list_;
   heron::proto::api::Topology* topology_;
 
@@ -256,7 +259,7 @@ void StartDummyTMaster(CommonResources& common) {
   }
 
   // Start the tmaster
-  EventLoopImpl* tmaster_eventloop;
+  std::shared_ptr<EventLoopImpl> tmaster_eventloop = nullptr;
 
   StartDummyTMaster(tmaster_eventloop, common.tmaster_, common.tmaster_thread_,
                     common.tmaster_port_);
@@ -306,7 +309,7 @@ void DistributeWorkersAcrossStmgrs(CommonResources& common) {
 void StartStMgrs(CommonResources& common) {
   // Spwan and start the stmgrs
   for (int i = 0; i < common.num_stmgrs_; ++i) {
-    EventLoopImpl* stmgr_ss = nullptr;
+    std::shared_ptr<EventLoopImpl> stmgr_ss = nullptr;
     heron::testing::DummyStMgr* mgr = nullptr;
     std::thread* stmgr_thread = nullptr;
     StartDummyStMgr(stmgr_ss, mgr, stmgr_thread, LOCALHOST, common.tmaster_port_,
@@ -346,9 +349,7 @@ void TearCommonResources(CommonResources& common) {
     delete common.stmgrs_threads_list_[i];
   }
 
-  for (size_t i = 0; i < common.ss_list_.size(); ++i) {
-    delete common.ss_list_[i];
-  }
+  common.ss_list_.clear();
 
   for (auto itr : common.instanceid_instance_) {
     delete itr.second;
@@ -370,7 +371,7 @@ TEST(StatefulRestorer, test_restore_send) {
   // Start the stmgr
   StartStMgrs(common);
 
-  // Wait untill all stmgrs registered
+  // Wait until all stmgrs registered
   while (common.tmaster_->stmgrs().size() != common.num_stmgrs_) sleep(1);
 
   // Make sure that stmgrs have not gotten any restore message

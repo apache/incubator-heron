@@ -18,7 +18,7 @@
 
 package backtype.storm.generated;
 
-import com.twitter.heron.api.HeronTopology;
+import org.apache.heron.api.HeronTopology;
 
 public class StormTopology {
   private HeronTopology topology;

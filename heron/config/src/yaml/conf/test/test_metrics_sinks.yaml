@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ########### These all have default values as shown
 
 # We would specify the unique sink-id first
@@ -13,11 +30,11 @@ sinks: []
 
 ########### Other options would be constructed as an immutable map passed to IMetricsSink's init(Map conf) as argument,
 ########### We would be able to fetch value by conf.get(options), for instance:
-########### We could get "com.twitter.heron.metricsmgr.sink.FileSink" if conf.get("class") is called inside file-sink's instance
+########### We could get "org.apache.heron.metricsmgr.sink.FileSink" if conf.get("class") is called inside file-sink's instance
 
 ### Config for file-sink
 file-sink:
-  class: "com.twitter.heron.metricsmgr.sink.FileSink"
+  class: "org.apache.heron.metricsmgr.sink.FileSink"
   flush-frequency-ms: 60000 # 1 min
   sink-restart-attempts: -1 # Forever
   filename-output: "metrics.json" # File for metrics to write to
@@ -25,7 +42,7 @@ file-sink:
 
 ### Config for tmaster-sink
 tmaster-sink:
-  class: "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSink"
+  class: "org.apache.heron.metricsmgr.sink.tmaster.TMasterSink"
   flush-frequency-ms: 60000
   sink-restart-attempts: -1 # Forever
   tmaster-location-check-interval-sec: 5
@@ -56,7 +73,7 @@ tmaster-sink:
 
 ### Config for metricscache-sink
 metricscache-sink:
-  class: "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSink"
+  class: "org.apache.heron.metricsmgr.sink.metricscache.MetricsCacheSink"
   flush-frequency-ms: 60000
   sink-restart-attempts: -1 # Forever
   metricscache-location-check-interval-sec: 5
@@ -87,7 +104,7 @@ metricscache-sink:
 
 ### Config for prometheus-sink
 # prometheus-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.PrometheusSink"
+#   class: "org.apache.heron.metricsmgr.sink.PrometheusSink"
 #   port: 8080 # The port on which to run (either port or port-file are mandatory)
 #   path: /metrics # The path on which to publish the metrics (mandatory)
 #   flat-metrics: true # By default the web-sink will publish a flat "name -> value" json map
@@ -97,7 +114,7 @@ metricscache-sink:
 
 ### Config for scribe-sink
 # scribe-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
+#   class: "org.apache.heron.metricsmgr.sink.ScribeSink"
 #   flush-frequency-ms: 60000
 #   sink-restart-attempts: -1 # Forever
 #   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
@@ -112,7 +129,7 @@ metricscache-sink:
 ### Config for graphite-sink
 ### Currently the graphite-sink is disabled
 # graphite-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.GraphiteSink"
+#   class: "org.apache.heron.metricsmgr.sink.GraphiteSink"
 #   flush-frequency-ms: 60000
 #   graphite_host: "127.0.0.1" # The host of graphite to be exported metrics to
 #   graphite_port: 2004 # The port of graphite to be exported metrics to
@@ -122,7 +139,7 @@ metricscache-sink:
 ### Config for web-sink
 ### The web-sink publishes metrics as json on http://host:port/path
 # web-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.WebSink"
+#   class: "org.apache.heron.metricsmgr.sink.WebSink"
 #   port: 8080 # The port on which to run (either port or port-file are mandatory)
 #   # port-file: metrics.port # Alternatively supply a file which contains the port (text file containing single integer)
 #   path: /metrics.json # The path on which to publish the metrics (mandatory)

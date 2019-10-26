@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Originally derived from:
-# https://github.com/twitter/heron/blob/master/tools/rules/pex_rules.bzl
+# https://github.com/apache/incubator-heron/blob/master/tools/rules/pex_rules.bzl
 
 """Python pex rules for Bazel
 
@@ -44,44 +44,28 @@ Lastly, make sure that `tools/build_rules/BUILD` exists, even if it is empty,
 so that Bazel can find your `prelude_bazel` file.
 """
 
-pex_file_types = FileType([".py"])
-egg_file_types = FileType([".egg", ".whl"])
+pex_file_types = [".py"]
+egg_file_types = [".egg", ".whl"]
 
-# As much as I think this test file naming convention is a good thing, it's
-# probably a bad idea to impose it as a policy to all OSS users of these rules,
-# so I guess let's skip it.
-#
-# pex_test_file_types = FileType(["_unittest.py", "_test.py"])
-
+PexProvider = provider(fields=["transitive_sources", "transitive_eggs", "transitive_reqs"])
 
 def _collect_transitive_sources(ctx):
-  source_files = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    source_files += dep.py.transitive_sources
-  source_files += pex_file_types.filter(ctx.files.srcs)
-  return source_files
+  return depset(ctx.files.srcs,
+                transitive=[dep[PexProvider].transitive_sources for dep in ctx.attr.deps])
 
 
 def _collect_transitive_eggs(ctx):
-  transitive_eggs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_eggs"):
-      transitive_eggs += dep.py.transitive_eggs
-  transitive_eggs += egg_file_types.filter(ctx.files.eggs)
-  return transitive_eggs
+  return depset(ctx.files.eggs,
+                transitive=[dep[PexProvider].transitive_eggs for dep in ctx.attr.deps])
 
 
 def _collect_transitive_reqs(ctx):
-  transitive_reqs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_reqs"):
-      transitive_reqs += dep.py.transitive_reqs
-  transitive_reqs += ctx.attr.reqs
-  return transitive_reqs
+  return depset(ctx.attr.reqs,
+                transitive=[dep[PexProvider].transitive_reqs for dep in ctx.attr.deps])
 
 
 def _collect_transitive(ctx):
-  return struct(
+  return PexProvider(
       # These rules don't use transitive_sources internally; it's just here for
       # parity with the native py_library rule type.
       transitive_sources = _collect_transitive_sources(ctx),
@@ -92,15 +76,13 @@ def _collect_transitive(ctx):
 
 
 def _pex_library_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
+  transitive_files = depset(ctx.files.srcs,
+                            transitive = [dep.default_runfiles.files for dep in ctx.attr.deps])
   return struct(
-      files = depset(),
-      py = _collect_transitive(ctx),
+      providers = [_collect_transitive(ctx)],
       runfiles = ctx.runfiles(
           collect_default = True,
-          transitive_files = depset(transitive_files),
+          transitive_files = transitive_files,
       )
   )
 
@@ -119,7 +101,7 @@ def _gen_manifest(py, runfiles, resources):
 
   pex_files = []
 
-  for f in runfiles.files:
+  for f in runfiles.files.to_list():
     dpath = f.short_path
     if dpath.startswith("../"):
       dpath = dpath[3:]
@@ -145,15 +127,13 @@ def _gen_manifest(py, runfiles, resources):
 
   return struct(
       modules = pex_files,
-      requirements = list(py.transitive_reqs),
-      prebuiltLibraries = [f.path for f in py.transitive_eggs],
+      requirements = py.transitive_reqs.to_list(),
+      prebuiltLibraries = [f.path for f in py.transitive_eggs.to_list()],
       resources = res_files,
   )
 
 
 def _pex_binary_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
-
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
   if ctx.attr.entrypoint:
@@ -162,31 +142,32 @@ def _pex_binary_impl(ctx):
   elif ctx.file.main:
     main_file = ctx.file.main
   else:
-    main_file = pex_file_types.filter(ctx.files.srcs)[0]
+    main_file = ctx.files.srcs[0]
+
+  transitive_files = list(ctx.files.srcs)
   if main_file:
     # Translate main_file's short path into a python module name
     main_pkg = main_file.short_path.replace('/', '.')[:-3]
     transitive_files += [main_file]
 
-  deploy_pex = ctx.new_file(
-      ctx.configuration.bin_dir, ctx.outputs.executable, '.pex')
+  deploy_pex = ctx.actions.declare_file('%s.pex' % ctx.attr.name)
 
   py = _collect_transitive(ctx)
 
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
+  transitive_files = depset(transitive_files,
+                            transitive = [dep.default_runfiles.files for dep in ctx.attr.deps])
+
   runfiles = ctx.runfiles(
       collect_default = True,
-      transitive_files = transitive_files,
+      transitive_files = depset(transitive_files),
   )
 
   resources = ctx.files.resources
-  manifest_file = ctx.new_file(
-      ctx.configuration.bin_dir, deploy_pex, '_manifest')
+  manifest_file = ctx.actions.declare_file('%s.pex_manifest' % ctx.attr.name)
 
   manifest = _gen_manifest(py, runfiles, resources)
 
-  ctx.file_action(
+  ctx.actions.write(
       output = manifest_file,
       content = manifest.to_json(),
   )
@@ -200,7 +181,7 @@ def _pex_binary_impl(ctx):
     arguments += ["--python", ctx.attr.interpreter]
   for platform in ctx.attr.platforms:
     arguments += ["--platform", platform]
-  for egg in py.transitive_eggs:
+  for egg in py.transitive_eggs.to_list():
     arguments += ["--find-links", egg.dirname]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
@@ -214,12 +195,12 @@ def _pex_binary_impl(ctx):
   # form the inputs to pex builder
   _inputs = (
       [manifest_file] +
-      list(runfiles.files) +
-      list(py.transitive_eggs) +
+      runfiles.files.to_list() +
+      py.transitive_eggs.to_list() +
       list(resources)
   )
 
-  ctx.action(
+  ctx.actions.run(
       mnemonic = "PexPython",
       inputs = _inputs,
       outputs = [deploy_pex],
@@ -244,7 +225,7 @@ def _pex_binary_impl(ctx):
   # There isn't much point in having both foo.pex and foo as identical pex
   # files, but someone is probably relying on that behaviour by now so we might
   # as well keep doing it.
-  ctx.action(
+  ctx.actions.run_shell(
       mnemonic = "LinkPex",
       inputs = [deploy_pex],
       outputs = [executable],
@@ -273,14 +254,14 @@ def _pex_pytest_impl(ctx):
   output_file = ctx.outputs.executable
 
   test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
-  ctx.template_action(
+  ctx.actions.expand_template(
       template = ctx.file.launcher_template,
       output = output_file,
       substitutions = {
           "%test_runner%": _get_runfile_path(ctx, test_runner),
           "%test_files%": " \\\n    ".join(test_file_paths),
       },
-      executable = True,
+      is_executable = True,
   )
 
   transitive_files = depset(ctx.files.srcs + [test_runner])
@@ -300,12 +281,11 @@ pex_attrs = {
     "srcs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = pex_file_types),
     "deps": attr.label_list(allow_files = False,
-                            providers = ["py"]),
+                            providers = [PexProvider]),
     "eggs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = egg_file_types),
     "reqs": attr.string_list(),
-    "data": attr.label_list(allow_files = True,
-                            cfg = "data"),
+    "data": attr.label_list(allow_files = True),
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
@@ -325,8 +305,7 @@ def _dmerge(a, b):
 
 
 pex_bin_attrs = _dmerge(pex_attrs, {
-    "main": attr.label(allow_files = True,
-                       single_file = True),
+    "main": attr.label(allow_single_file = True),
     "entrypoint": attr.string(),
     "interpreter": attr.string(),
     "platforms": attr.string_list(),
@@ -411,11 +390,10 @@ _pytest_pex_test = rule(
         "runner": attr.label(
             executable = True,
             mandatory = True,
-            cfg = "data",
+            cfg = "target",
         ),
         "launcher_template": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             default = Label("//tools/rules/pex:testlauncher.sh.template"),
         ),
     }),

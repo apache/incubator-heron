@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * Render trendline for stats below the containers and instances view
  */
@@ -28,7 +47,6 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
 
     var svg = outerSvg.append('g');
     var svgTop = outerSvg.append('g');
-    d3.selectAll('.d3-tip.instance').remove();
     var tip = d3.tip()
         .attr('class', 'd3-tip instance text-center')
         .offset([-8, 0])
@@ -115,7 +133,9 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
           .attr('y2', rowHeight);
       var yScale = d3.scale.linear()
         .domain(extent)
-        .range([rowHeight, 0]);
+        // yScale starts from 1 so that value 0 is visible and users can tell
+        // if metrics are loaded or not
+        .range([rowHeight - 1, 0]);
 
       // request data and render the line chart
       (metric.queryTrendline || makeTrendlineQuery)(metric, name, instance, startTime, endTime, function (data) {
@@ -188,10 +208,8 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
     } else if (instance === '*') {
       d3.select('#trendline-title').text(name + ' Metrics');
     } else {
-      d3.select('#trendline-title').text('Instance Metrics');
-    }
+      d3.select('#trendline-title').text(instance + ' Metrics');
 
-    if (instance !== '*') {
       container = instance.split("_")[1];
       target
         .append('div')
@@ -201,7 +219,6 @@ function StatTrendlines(baseUrl, cluster, environ, toponame, physicalPlan, logic
           '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/filestats/' + cluster + '/' + environ + '/' + toponame + '/' + container + '">job</a>',
           '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
           '<br>',
-          instance
         ].join(' '));
     }
   };

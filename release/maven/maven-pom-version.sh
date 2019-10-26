@@ -1,6 +1,4 @@
 #!/bin/bash
-# Copyright 2015 The Bazel Authors. All rights reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,3 +44,23 @@ cat ./maven/heron-with-kryo.template.pom | \
     sed "s/DESCRIPTION/Heron Storm/g" \
     >> ./heron-storm-$1.pom
 
+cat ./maven/heron-with-kryo.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-simulator/g" | \
+    sed "s/NAME/heron-simulator/g" | \
+    sed "s/DESCRIPTION/Heron Simulator/g" \
+    >> ./heron-simulator-$1.pom
+
+cat ./maven/heron-kafka.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-kafka-spout/g" | \
+    sed "s/NAME/heron-kafka-spout/g" | \
+    sed "s/DESCRIPTION/Heron Kafka Spout/g" \
+    >> ./heron-kafka-spout-$1.pom
+
+cat ./maven/heron-kafka.template.pom | \
+    sed "s/VERSION/$1/g" | \
+    sed "s/ARTIFACT_ID/heron-kafka-bolt/g" | \
+    sed "s/NAME/heron-kafka-bolt/g" | \
+    sed "s/DESCRIPTION/Heron Kafka Bolt/g" \
+    >> ./heron-kafka-bolt-$1.pom

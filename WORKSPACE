@@ -1,3 +1,24 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+workspace(name = "org_apache_heron")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file", "http_jar")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.58"
 curator_version = "2.9.0"
@@ -6,27 +27,27 @@ jackson_version = "2.8.8"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
-protobuf_version = "3.4.0"
-distributedlog_version = "0.5.0"
+distributedlog_version = "4.7.3"
+http_client_version = "4.5.2"
 
-# heron api server
+# heron API server
 jetty_version = "9.4.6.v20170531"
 jersey_verion = "2.25.1"
 hk2_api = "2.5.0-b32"
 
 maven_server(
   name = "default",
-  url = "http://central.maven.org/maven2/",
+  url = "https://repo1.maven.org/maven2/",
+)
+
+maven_server(
+  name = "maven_twttr_com",
+  url = "https://maven.twttr.com",
 )
 
 maven_jar(
   name = "org_apache_avro_avro",
   artifact = "org.apache.avro:avro:1.7.4"
-)
-
-maven_server(
-  name = "maven_twttr_com",
-  url = "http://maven.twttr.com",
 )
 
 maven_jar(
@@ -151,7 +172,13 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_httpcomponents_http_client",
-  artifact = "org.apache.httpcomponents:httpclient:4.5.2",
+  artifact = "org.apache.httpcomponents:httpclient:" + http_client_version,
+)
+
+http_jar(
+  name = "org_apache_httpcomponents_http_client_test",
+  url = "https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/" +
+  http_client_version + "/httpclient-" + http_client_version + "-tests.jar"
 )
 
 maven_jar(
@@ -225,6 +252,11 @@ maven_jar(
 )
 
 maven_jar(
+   name = "org_apache_samoa_samoa_storm",
+   artifact = "org.apache.samoa:samoa-storm:0.4.0-incubating",
+)
+
+maven_jar(
    name = "javax_annotation_javax_annotation_api",
    artifact = "javax.annotation:javax.annotation-api:1.2",
 )
@@ -289,9 +321,9 @@ maven_jar(
   artifact = "com.esotericsoftware:reflectasm:1.11.3",
 )
 
-maven_jar(		
-  name = "org_objectweb_asm",		
-  artifact = "org.ow2.asm:asm:5.0.4",		
+maven_jar(
+  name = "org_objectweb_asm",
+  artifact = "org.ow2.asm:asm:5.0.4",
 )
 
 maven_jar(
@@ -306,7 +338,7 @@ maven_jar(
 
 maven_jar(
   name = "io_netty_netty_all",
-  artifact = "io.netty:netty-all:4.0.21.Final"
+  artifact = "io.netty:netty-all:4.1.22.Final"
 )
 
 maven_jar(
@@ -342,11 +374,6 @@ maven_jar(
 maven_jar(
   name = "org_powermock_powermock_reflect",
   artifact = "org.powermock:powermock-reflect:" + powermock_version,
-)
-
-maven_jar(
-  name = "com_google_protobuf_protobuf_java",
-  artifact = "com.google.protobuf:protobuf-java:" + protobuf_version,
 )
 
 maven_jar(
@@ -402,7 +429,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_zookeeper_zookeeper",
-  artifact = "org.apache.zookeeper:zookeeper:3.4.6",
+  artifact = "org.apache.zookeeper:zookeeper:3.4.14",
 )
 
 maven_jar(
@@ -427,7 +454,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_kafka_kafka_clients",
-  artifact = "org.apache.kafka:kafka-clients:0.8.2.1",
+  artifact = "org.apache.kafka:kafka-clients:2.2.0",
 )
 
 maven_jar(
@@ -452,12 +479,27 @@ maven_jar(
 
 maven_jar(
   name = "com_microsoft_dhalion",
-  artifact = "com.microsoft.dhalion:dhalion:0.0.1_2",
+  artifact = "com.microsoft.dhalion:dhalion:0.2.3",
 )
 
 maven_jar(
   name = "org_apache_commons_commons_math3",
   artifact = "org.apache.commons:commons-math3:3.6.1"
+)
+
+maven_jar(
+  name = "tech_tablesaw",
+  artifact = "tech.tablesaw:tablesaw-core:0.11.4"
+)
+
+maven_jar(
+  name = "it_unimi_dsi_fastutil",
+  artifact = "it.unimi.dsi:fastutil:8.1.1"
+)
+
+maven_jar(
+  name = "org_roaringbitmap",
+  artifact = "org.roaringbitmap:RoaringBitmap:0.6.51"
 )
 
 # Google Cloud
@@ -543,7 +585,7 @@ maven_jar(
 
 # end Kubernetes java client
 
-# heron api server
+# heron API server
 # jetty
 maven_jar(
   name = "org_eclipse_jetty_server",
@@ -696,11 +738,11 @@ maven_jar(
 # bookkeeper & distributedlog dependencies
 maven_jar(
   name = "org_apache_distributedlog_core",
-  artifact = "org.apache.distributedlog:distributedlog-core:jar:shaded:" + distributedlog_version
+  artifact = "org.apache.distributedlog:distributedlog-core-shaded:" + distributedlog_version
 )
 # end bookkeeper & distributedlog dependencies
 
-# end heron api server
+# end heron API server
 
 # Nomad dependencies
 maven_jar(
@@ -727,7 +769,6 @@ maven_jar(
 maven_jar(
       name = "commons_codec_commons_codec",
       artifact = "commons-codec:commons-codec:1.9",
-      repository = "http://central.maven.org/maven2/",
       sha1 = "9ce04e34240f674bc72680f8b843b1457383161a",
   )
 
@@ -744,38 +785,44 @@ VIRTUALENV_PREFIX = "virtualenv-15.1.0"
 WHEEL_SRC = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz"
 
 http_file(
-    name = 'pytest_whl',
-    url = PYTEST_WHEEL,
+    name = "pytest_whl",
+    downloaded_file_path = "pytest-3.1.3-py2.py3-none-any.whl",
+    urls = [PYTEST_WHEEL],
 )
 
 http_file(
-    name = 'py_whl',
-    url = PY_WHEEL,
+    name = "py_whl",
+    downloaded_file_path = "py-1.4.34-py2.py3-none-any.whl",
+    urls = [PY_WHEEL],
 )
 
 http_file(
     name = "wheel_src",
-    url = WHEEL_SRC,
+    downloaded_file_path = "wheel-0.29.0.tar.gz",
+    urls = [WHEEL_SRC],
 )
 
 http_file(
     name = "pex_src",
-    url = PEX_SRC,
+    downloaded_file_path = "pex-1.2.15.tar.gz",
+    urls = [PEX_SRC],
 )
 
 http_file(
     name = "requests_src",
-    url = REQUESTS_SRC,
+    downloaded_file_path = "requests-2.12.3.tar.gz",
+    urls = [REQUESTS_SRC],
 )
 
 http_file(
     name = "setuptools_src",
-    url = SETUPTOOLS_SRC,
+    downloaded_file_path = "setuptools-31.0.0.tar.gz",
+    urls = [SETUPTOOLS_SRC],
 )
 
-new_http_archive(
+http_archive(
     name = "virtualenv",
-    url = VIRTUALENV_SRC,
+    urls = [VIRTUALENV_SRC],
     strip_prefix = VIRTUALENV_PREFIX,
     build_file_content = "\n".join([
         "py_binary(",
@@ -784,95 +831,191 @@ new_http_archive(
         "    data = glob(['**/*']),",
         "    visibility = ['//visibility:public'],",
         ")",
-    ])
+    ]),
+    sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
 )
 # end pex repos
+
+# protobuf dependencies for C++ and Java
+http_archive(
+    name = "com_google_protobuf",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.6.1.3.tar.gz"],
+    strip_prefix = "protobuf-3.6.1.3",
+    sha256 = "73fdad358857e120fd0fa19e071a96e15c0f23bb25f85d3f7009abfd4f264a2a",
+)
+# end protobuf dependencies for C++ and Java
 
 # 3rdparty C++ dependencies
 http_archive(
     name = "com_github_gflags_gflags",
     urls = ["https://github.com/gflags/gflags/archive/v2.2.1.tar.gz"],
     strip_prefix = "gflags-2.2.1",
+    sha256 = "ae27cdbcd6a2f935baa78e4f21f675649271634c092b1be01469440495609d0e",
 )
 
 http_archive(
-    name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/v3.4.1.tar.gz"],
-    strip_prefix = "protobuf-3.4.1",
+    name = "org_libevent_libevent",
+    urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.10-stable/libevent-2.1.10-stable.tar.gz"],
+    strip_prefix = "libevent-2.1.10-stable",
+    build_file = "@//:third_party/libevent/libevent.BUILD",
+    sha256 = "e864af41a336bb11dab1a23f32993afe963c1f69618bd9292b89ecf6904845b0",
 )
 
-new_http_archive(
+http_archive(
+    name = "org_nongnu_libunwind",
+    urls = ["https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.1.tar.gz"],
+    strip_prefix = "libunwind-1.1",
+    build_file = "@//:third_party/libunwind/libunwind.BUILD",
+    sha256 = "9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a",
+)
+
+http_archive(
+    name = "org_apache_zookeeper",
+    urls = ["https://archive.apache.org/dist/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz"],
+    strip_prefix = "zookeeper-3.4.14",
+    build_file = "@//:third_party/zookeeper/zookeeper.BUILD",
+    sha256 = "b14f7a0fece8bd34c7fffa46039e563ac5367607c612517aa7bd37306afbd1cd",
+)
+
+http_archive(
+    name = "com_github_gperftools_gperftools",
+    urls = ["https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz"],
+    strip_prefix = "gperftools-2.4",
+    build_file = "@//:third_party/gperftools/gperftools.BUILD",
+    sha256 = "982a37226eb42f40714e26b8076815d5ea677a422fb52ff8bfca3704d9c30a2d",
+)
+
+http_archive(
+    name = "com_github_google_glog",
+    urls = ["https://github.com/google/glog/archive/v0.3.5.tar.gz"],
+    strip_prefix = "glog-0.3.5",
+    build_file = "@//:third_party/glog/glog.BUILD",
+    sha256 = "7580e408a2c0b5a89ca214739978ce6ff480b5e7d8d7698a2aa92fadc484d1e0",
+)
+
+http_archive(
     name = "com_google_googletest",
     urls = ["https://github.com/google/googletest/archive/release-1.8.0.tar.gz"],
     strip_prefix = "googletest-release-1.8.0",
-    build_file = "third_party/gtest/gtest.BUILD",
+    build_file = "@//:third_party/gtest/gtest.BUILD",
+    sha256 = "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_cereal",
     urls = ["https://github.com/USCiLab/cereal/archive/v1.2.2.tar.gz"],
     strip_prefix = "cereal-1.2.2",
-    build_file = "third_party/cereal/cereal.BUILD",
+    build_file = "@//:third_party/cereal/cereal.BUILD",
+    sha256 = "1921f26d2e1daf9132da3c432e2fd02093ecaedf846e65d7679ddf868c7289c4",
 )
 
-new_http_archive(
+http_archive(
     name = "com_github_jbeder_yaml_cpp",
-    urls = ["https://storage.googleapis.com/heron-packages/yaml-cpp-noboost.tar.gz"],
-    strip_prefix = "yaml-cpp-noboost",
-    build_file = "third_party/yaml-cpp/yaml.BUILD",
+    urls = ["https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz"],
+    strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
+    build_file = "@//:third_party/yaml-cpp/yaml.BUILD",
+    sha256 = "e4d8560e163c3d875fd5d9e5542b5fd5bec810febdcba61481fe5fc4e6b1fd05",
+)
+
+http_archive(
+    name = "com_github_danmar_cppcheck",
+    urls = ["https://github.com/danmar/cppcheck/archive/1.87.zip"],
+    strip_prefix = "cppcheck-1.87",
+    build_file = "@//:third_party/cppcheck/cppcheck.BUILD",
+    sha256 = "b3de7fbdc1a23d7341b55f7f88877e106a76847bd5a07fa721c07310b625318b",
+)
+
+http_archive(
+    name = "com_github_hopscotch_hashmap",
+    build_file = "@//:third_party/hopscotch-hashmap/hopscotch.BUILD",
+    sha256 = "73e301925e1418c5ed930ef37ebdcab2c395a6d1bdaf5a012034bb75307d33f1",
+    strip_prefix = "hopscotch-map-2.2.1",
+    urls = ["https://github.com/Tessil/hopscotch-map/archive/v2.2.1.tar.gz"],
 )
 # end 3rdparty C++ dependencies
 
 # for helm
-new_http_archive(
+http_archive(
     name = "helm_mac",
-    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    urls = ["https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz"],
     strip_prefix = "darwin-amd64",
-    build_file = "third_party/helm/helm.BUILD",
+    build_file = "@//:third_party/helm/helm.BUILD",
+    sha256 = "5058142bcd6e16b7e01695a8f258d27ae0b6469caf227ddf6aa2181405e6aa8e",
 )
 
-new_http_archive(
+http_archive(
     name = "helm_linux",
-    url = "https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-darwin-amd64.tar.gz",
+    urls = ["https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz"],
     strip_prefix = "linux-amd64",
-    build_file = "third_party/helm/helm.BUILD",
+    build_file = "@//:third_party/helm/helm.BUILD",
+    sha256 = "9f04c4824fc751d6c932ae5b93f7336eae06e78315352aa80241066aa1d66c49",
 )
 # end helm
 
 # for docker image building
 http_archive(
     name = "io_bazel_rules_docker",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.3.0.tar.gz"],
-    strip_prefix = "rules_docker-0.3.0",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+    strip_prefix = "rules_docker-0.7.0",
+    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
 )
+
+load(
+    "@io_bazel_rules_docker//repositories:repositories.bzl",
+    container_repositories = "repositories",
+)
+
+container_repositories()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_pull",
-    container_repositories = "repositories",
 )
-
-# This is NOT needed when going through the language lang_image
-# "repositories" function(s).
-container_repositories()
 
 container_pull(
     name = "heron-base",
     registry = "index.docker.io",
     repository = "heron/base",
     tag = "0.4.0",
+    digest = "sha256:495800e9eb001dfd2fb41d1941155203bb9be06b716b0f8b1b0133eb12ea813c"
 )
+
 # end docker image building
 
-# for nomad repo
-new_http_archive(
+# for nomad repear
+http_archive(
     name = "nomad_mac",
     urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_darwin_amd64.zip"],
-    build_file = "third_party/nomad/nomad.BUILD",
+    build_file = "@//:third_party/nomad/nomad.BUILD",
+    sha256 = "53452f5bb27131f1fe5a5f9178324511bcbc54e4fef5bec4e25b049ac38e0632",
 )
 
-new_http_archive(
+http_archive(
     name = "nomad_linux",
     urls = ["https://releases.hashicorp.com/nomad/0.7.0/nomad_0.7.0_linux_amd64.zip"],
-    build_file = "third_party/nomad/nomad.BUILD",
+    build_file = "@//:third_party/nomad/nomad.BUILD",
+    sha256 = "b3b78dccbdbd54ddc7a5ffdad29bce2d745cac93ea9e45f94e078f57b756f511",
 )
+
+# scala integration
+rules_scala_version = "300b4369a0a56d9e590d9fea8a73c3913d758e12"  # May 27 - update this as needed
+
+http_archive(
+    name = "io_bazel_rules_scala",
+    urls = ["https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version],
+    type = "zip",
+    strip_prefix = "rules_scala-%s" % rules_scala_version,
+    sha256 = "7f35ee7d96b22f6139b81da3a8ba5fb816e1803ed097f7295b85b7a56e4401c7",
+)
+
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_repositories")
+
+scala_repositories(("2.12.8", {
+    "scala_compiler": "f34e9119f45abd41e85b9e121ba19dd9288b3b4af7f7047e86dc70236708d170",
+    "scala_library": "321fb55685635c931eba4bc0d7668349da3f2c09aee2de93a70566066ff25c28",
+    "scala_reflect": "4d6405395c4599ce04cea08ba082339e3e42135de9aae2923c9f5367e957315a"
+}))
+
+load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
+
+scala_register_toolchains()

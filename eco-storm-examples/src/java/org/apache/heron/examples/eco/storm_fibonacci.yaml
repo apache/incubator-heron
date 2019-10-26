@@ -1,0 +1,77 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+---
+
+name: "storm-fibonacci-topology"
+
+config:
+  topology.workers: 1
+
+components:
+  - id: "property-holder"
+    className: "org.apache.heron.examples.eco.TestPropertyHolder"
+    constructorArgs:
+      - "some argument"
+    properties:
+      - name: "numberProperty"
+        value: 11
+      - name: "publicProperty"
+        value: "This is public property"
+
+spouts:
+  - id: "spout-1"
+    className: "org.apache.heron.examples.eco.TestFibonacciSpout"
+    constructorArgs:
+      - ref: "property-holder"
+    parallelism: 1
+
+bolts:
+  - id: "even-and-odd-bolt"
+    className: "org.apache.heron.examples.eco.EvenAndOddBolt"
+    parallelism: 1
+
+  - id: "ibasic-print-bolt"
+    className: "org.apache.heron.examples.eco.TestIBasicPrintBolt"
+    parallelism: 1
+    configMethods:
+      - name: "sampleConfigurationMethod"
+        args:
+          - "${ecoPropertyOne}"
+          - MB
+
+  - id: "sys-out-bolt"
+    className: "org.apache.heron.examples.eco.TestPrintBolt"
+    parallelism: 1
+
+streams:
+  - from: "spout-1"
+    to: "even-and-odd-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - from: "even-and-odd-bolt"
+    to: "ibasic-print-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "odds"
+
+  - from: "even-and-odd-bolt"
+    to: "sys-out-bolt"
+    grouping:
+      type: SHUFFLE
+      streamId: "evens"

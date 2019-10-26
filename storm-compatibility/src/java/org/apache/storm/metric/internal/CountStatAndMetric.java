@@ -24,10 +24,10 @@ import org.apache.storm.metric.api.IMetric;
 
 public class CountStatAndMetric implements IMetric {
 
-  private final com.twitter.heron.api.metric.CountStatAndMetric delegate;
+  private final org.apache.heron.api.metric.CountStatAndMetric delegate;
 
   public CountStatAndMetric(int numBuckets) {
-    delegate = new com.twitter.heron.api.metric.CountStatAndMetric(numBuckets);
+    delegate = new org.apache.heron.api.metric.CountStatAndMetric(numBuckets);
   }
 
   @Override

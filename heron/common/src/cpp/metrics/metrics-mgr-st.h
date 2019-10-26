@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 //////////////////////////////////////////////////////
@@ -41,15 +44,17 @@ class TMasterLocation;
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 class MetricsMgrClient;
 class IMetric;
 
 class MetricsMgrSt {
  public:
-  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop);
+  MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, shared_ptr<EventLoop> eventLoop);
   virtual ~MetricsMgrSt();
 
-  void register_metric(const sp_string& _metric_name, IMetric* _metric);
+  void register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric);
   void unregister_metric(const sp_string& _metric_name);
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
   void RefreshMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& location);
@@ -69,11 +74,11 @@ class MetricsMgrSt {
   void gather_metrics(EventLoop::Status);
 
   VCallback<EventLoop::Status> timer_cb_;
-  std::map<sp_string, IMetric*> metrics_;
+  std::map<sp_string, shared_ptr<IMetric>> metrics_;
   MetricsMgrClient* client_;
   NetworkOptions options_;
   sp_int64 timerid_;
-  EventLoop* eventLoop_;
+  shared_ptr<EventLoop> eventLoop_;
 };
 }  // namespace common
 }  // namespace heron

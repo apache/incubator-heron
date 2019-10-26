@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Quick Start Guide
 description: Run a single-node Heron cluster on your laptop
@@ -18,100 +36,74 @@ For other platforms, you need to build from source. Please refer to the [guide t
 
 ## Step 1 --- Download the Heron tools
 
-Heron tools can be installed on [MacOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
+Heron tools can be installed on [macOS](#macos-homebrew) using [Homebrew](https://brew.sh) and on Linux using [installation scripts](#using-installation-scripts).
 
-> You can install using [installation scripts](#using-installation-scripts) on MacOS as well.
+> You can install using [installation scripts](#using-installation-scripts) on macOS as well.
 
-## MacOS/Homebrew
+## macOS/Homebrew
 
-The easiest way to get started with Heron on MacOS is using [Homebrew](https://brew.sh). There are three tools currently available:
+The easiest way to get started with Heron on macOS is using [Homebrew](https://brew.sh):
 
-* The Heron command-line client tools:
+```bash
+$ brew tap streamlio/homebrew-formulae
+$ brew update
+$ brew install heron
+```
 
-    ```shell
-    $ brew install heron-client
-    ```
+This will install a variety of executables and other resources by default in `/usr/local/opt/heron`.
 
-    This will install both the [`heron`](../operators/heron-cli) and [`heron-explorer`](../operators/heron-explorer) tools.
-
-* The [Heron UI](../operators/heron-ui) dashboard:
-
-    ```shell
-    $ brew install heron-ui
-    ```
-
-* The [Heron Tracker](../operators/heron-tracker), which powers Heron UI:
-
-    ```shell
-    $ brew install heron-tracker
-    ```
-
-For this getting started tutorial we recommend installing all three tools.
+> Homebrew may use a different folder than `/usr/local/opt/heron`. To check which folder is being used, run `brew --prefix heron`.
 
 ## Using installation scripts
 
-To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/twitter/heron/releases) on GitHub
-and see a full listing of Heron releases for each available platform. The installation scripts for Mac OS X (`darwin`), for example, are named
-`heron-client-install-{{% heronVersion %}}-darwin.sh` and
-`heron-tools-install-{{% heronVersion %}}-darwin.sh`.
+To install Heron binaries directly, using installation scripts, go to Heron's [releases page](https://github.com/apache/incubator-heron/releases) on GitHub
+and see a full listing of Heron releases for each available platform. The installation script for macOS (`darwin`), for example, is named
+`heron-install-{{% heronVersion %}}-darwin.sh`.
 
-Download both the `client` and `tools` installation scripts for your platform either from the releases page or using [wget](https://www.gnu.org/software/wget/).
-
-Here's an example for Ubuntu:
+Download the for your platform either from the releases page or using [`wget`](https://www.gnu.org/software/wget/). Here's a `wget` example for Ubuntu:
 
 ```bash
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-client-install-{{% heronVersion %}}-ubuntu.sh
-$ wget https://github.com/twitter/heron/releases/download/{{% heronVersion %}}/heron-tools-install-{{% heronVersion %}}-ubuntu.sh
+$ wget https://github.com/apache/incubator-heron/releases/download/{{% heronVersion %}}/heron-install-{{% heronVersion %}}-ubuntu.sh
 ```
 
-Once you've downloaded the scripts, make the scripts executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
+Once you've downloaded the script, make it executable using [chmod](https://en.wikipedia.org/wiki/Chmod):
 
 ```bash
 $ chmod +x heron-*.sh
 ```
 
-> Both installation scripts will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
+> The script will install executables in the `~/bin` folder. You should add that folder to your `PATH` using `export PATH=~/bin:$PATH`.
 
-Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set:
+Now run the [Heron client](../operators/heron-cli) installation script with the `--user` flag set. Here's an example for Ubuntu:
 
 ```bash
-$ ./heron-client-install-{{% heronVersion %}}--PLATFORM.sh --user
-Heron client installer
-----------------------
+$ ./heron-install-{{% heronVersion %}}-ubuntu.sh --user
+Heron installer
+---------------
 
-Uncompressing......
+Uncompressing...done
+...
 Heron is now installed!
-```
-
-Now run the script for Heron tools (again setting the `--user` flag):
-
-```bash
-$ ./heron-tools-install-{{% heronVersion %}}-PLATFORM.sh --user
-Heron tools installer
----------------------
-
-Uncompressing......
-Heron Tools is now installed!
 ```
 
 To check that Heron is successfully installed, run `heron version`:
 
 ```bash
 $ heron version
-heron.build.version : {{% heronVersion %}}
-heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
-heron.build.timestamp : 1470512147000
-heron.build.host : ${HOSTNAME}
-heron.build.user : ${USERNAME}
 heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
 heron.build.git.status : Clean
+heron.build.host : ...
+heron.build.time : Sat Aug  6 12:35:47 PDT {{% currentYear %}}
+heron.build.timestamp : 1470512147000
+heron.build.user : ...
+heron.build.version : {{% heronVersion %}}
 ```
 
 ## Step 2 --- Launch an example topology
 
-> #### Note for MacOS users
+> #### Note for macOS users
 
-> If you want to run topologies locally on MacOS, you may need to add your
+> If you want to run topologies locally on macOS, you may need to add your
 > hostname to your `/etc/hosts` file under `localhost`. Here's an example line:
 > `127.0.0.1 localhost My-Mac-Laptop.local`. You can fetch your hostname by simply
 > running `hostname` in your shell.
@@ -123,20 +115,20 @@ using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
 $ heron submit local \
-  ~/.heron/examples/heron-streamlet-api-examples.jar \
-  com.twitter.heron.examples.streamlet.WordCountDslTopology \
-  WordCountDslTopology \
+  ~/.heron/examples/heron-streamlet-examples.jar \
+  org.apache.heron.examples.streamlet.WindowedWordCountTopology \
+  WindowedWordCountTopology \
   --deploy-deactivated
 ```
 
 The output should look something like this:
 
 ```bash
-INFO: Launching topology 'WordCountDslTopology'
+INFO: Launching topology 'WindowedWordCountTopology'
 
 ...
 
-INFO: Topology 'WordCountDslTopology' launched successfully
+INFO: Topology 'WindowedWordCountTopology' launched successfully
 INFO: Elapsed time: 3.409s.
 ```
 
@@ -151,8 +143,8 @@ the working directory for the topology.
 To check what's under the working directory, run:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology
--rw-r--r--   1 username  staff     6141 Oct 12 09:58 WordCountDslTopology.defn
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology
+-rw-r--r--   1 username  staff     6141 Oct 12 09:58 WindowedWordCountTopology.defn
 -rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_flatmap1_4.pid
 -rw-r--r--   1 username  staff        5 Oct 12 09:58 container_1_logger1_3.pid
 # etc.
@@ -161,7 +153,7 @@ $ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology
 All instances' log files can be found in `log-files` under the working directory:
 
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/WordCountDslTopology/log-files
+$ ls -al ~/.herondata/topologies/local/${ROLE}/WindowedWordCountTopology/log-files
 total 408
 -rw-r--r--   1 username  staff   5055 Oct 12 09:58 container_1_flatmap1_4.log.0
 -rw-r--r--   1 username  staff      0 Oct 12 09:58 container_1_flatmap1_4.log.0.lck
@@ -211,15 +203,15 @@ In step 2 you submitted a topology to your local cluster. The `heron` CLI tool
 also enables you to activate, deactivate, and kill topologies and more.
 
 ```bash
-$ heron activate local WordCountDslTopology
-$ heron deactivate local WordCountDslTopology
-$ heron kill local WordCountDslTopology
+$ heron activate local WindowedWordCountTopology
+$ heron deactivate local WindowedWordCountTopology
+$ heron kill local WindowedWordCountTopology
 ```
 
 Upon successful actions, a message similar to the following will appear:
 
 ```bash
-INFO: Successfully activated topology 'WordCountDslTopology'
+INFO: Successfully activated topology 'WindowedWordCountTopology'
 INFO: Elapsed time: 1.980s.
 ```
 
@@ -268,7 +260,7 @@ Optional arguments:
 
 The source code for the example topologies can be found
 [on
-GitHub]({{% githubMaster %}}/examples/src/java/com/twitter/heron/examples).
+GitHub]({{% githubMaster %}}/examples/src/java/org/apache/heron/examples).
 The included example topologies:
 
 * `AckingTopology.java` --- A topology with acking enabled.

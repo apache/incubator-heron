@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef HERON_INSTANCE_SPOUT_SPOUT_INSTANCE_H_
@@ -37,7 +40,7 @@ namespace instance {
 
 class SpoutInstance : public InstanceBase {
  public:
-  SpoutInstance(EventLoop* eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
+  SpoutInstance(std::shared_ptr<EventLoop> eventLoop, std::shared_ptr<TaskContextImpl> taskContext,
                 NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
                 void* dllHandle);
   virtual ~SpoutInstance();
@@ -48,7 +51,7 @@ class SpoutInstance : public InstanceBase {
   virtual void Deactivate();
   virtual bool IsRunning() { return active_; }
   virtual void DoWork();
-  virtual void HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet);
+  virtual void HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet);
 
  private:
   void lookForTimeouts();
@@ -60,7 +63,7 @@ class SpoutInstance : public InstanceBase {
 
   std::shared_ptr<TaskContextImpl> taskContext_;
   NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   api::spout::ISpout* spout_;
   std::shared_ptr<api::serializer::IPluggableSerializer> serializer_;
   std::shared_ptr<SpoutOutputCollectorImpl> collector_;
@@ -74,6 +77,8 @@ class SpoutInstance : public InstanceBase {
   int maxWriteBufferSize_;
   // This is the max time to spend in emitting tuple in one go
   int maxEmitBatchIntervalMs_;
+  // This is the max number of bytes to emit in one go
+  int maxEmitBatchSize_;
 };
 
 }  // namespace instance

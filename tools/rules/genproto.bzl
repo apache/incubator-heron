@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 load("//tools/rules/pex:pex_rules.bzl", "pex_library")
 
 def proto_package_impl(ctx):
@@ -5,8 +22,7 @@ def proto_package_impl(ctx):
 
 genproto_base_attrs = {
     "src": attr.label(
-        allow_files = FileType([".proto"]),
-        single_file = True,
+        allow_single_file = [".proto"],
     ),
     "deps": attr.label_list(
         allow_files = False,
@@ -23,7 +39,7 @@ def genproto_java_impl(ctx):
   src = ctx.file.src
   protoc = ctx.file._protoc
 
-  srcjar = ctx.new_file(ctx.configuration.genfiles_dir, ctx.label.name + ".srcjar")
+  srcjar = ctx.actions.declare_file("%s.srcjar" % ctx.attr.name)
   java_srcs = srcjar.path + ".srcs"
 
   inputs = [src, protoc]
@@ -35,7 +51,7 @@ def genproto_java_impl(ctx):
       "jar cMf " + srcjar.path + " -C " + java_srcs + " .",
       "rm -rf " + java_srcs,
   ])
-  ctx.action(
+  ctx.actions.run_shell(
       inputs = inputs,
       outputs = [srcjar],
       mnemonic = 'ProtocJava',
@@ -44,15 +60,17 @@ def genproto_java_impl(ctx):
 
   return struct(files = depset([srcjar]))
 
+genproto_java_attrs = dict(genproto_base_attrs)
+genproto_java_attrs.update({
+    "_protoc": attr.label(
+        default = Label("@com_google_protobuf//:protoc"),
+        allow_single_file = True,
+    ),
+})
+
 genproto_java = rule(
     genproto_java_impl,
-    attrs = genproto_base_attrs + {
-        "_protoc": attr.label(
-            default = Label("@com_google_protobuf//:protoc"),
-            allow_files = True,
-            single_file = True,
-        ),
-    },
+    attrs = genproto_java_attrs,
 )
 
 def proto_library(name, src=None, includes=[], deps=[], visibility=None,
@@ -71,7 +89,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         deps = deps,
         visibility = ["//visibility:private"],
     )
-    java_deps = ["@com_google_protobuf_protobuf_java//jar"]
+    java_deps = ["@com_google_protobuf//:protobuf_java"]
     for dep in deps:
       java_deps += [dep + "_java"]
 

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <stdio.h>
@@ -26,7 +29,8 @@
 #include "network/network.h"
 #include "server/dummy_ckptmgr_client.h"
 
-DummyCkptMgrClient::DummyCkptMgrClient(EventLoop* _eventLoop, const NetworkOptions& _options,
+DummyCkptMgrClient::DummyCkptMgrClient(std::shared_ptr<EventLoop> _eventLoop,
+                                       const NetworkOptions& _options,
                                        const std::string& _stmgr,
                                        heron::proto::system::PhysicalPlan* _pplan)
   : heron::stmgr::CkptMgrClient(_eventLoop, _options, _pplan->topology().name(),
@@ -90,10 +94,11 @@ void DummyCkptMgrClient::DummySaveWatcher(const heron::proto::system::Instance&,
                                           const std::string&) {
 }
 
-void DummyCkptMgrClient::DummyGetWatcher(heron::proto::system::StatusCode,
-                                         int32_t,
-                                         const std::string&,
-                                         const heron::proto::ckptmgr::InstanceStateCheckpoint&) {
+void DummyCkptMgrClient::DummyGetWatcher(
+    heron::proto::system::StatusCode,
+    int32_t,
+    const std::string&,
+    const heron::proto::ckptmgr::InstanceStateCheckpoint&) {
 }
 
 void DummyCkptMgrClient::DummyRegisterWatcher() {

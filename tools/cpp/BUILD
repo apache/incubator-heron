@@ -5,17 +5,29 @@ package(default_visibility = ["//visibility:public"])
 action_listener(
     name = "compile_cpp",
     mnemonics = ["CCompile", "CppCompile"],
-    extra_actions = [":checkstyle_cpp"],
+    extra_actions = [":checkstyle_cpp", ":cpp_cppcheck"],
 )
 
 extra_action(
     name = "checkstyle_cpp",
     tools = [
         "//third_party/python/cpplint",
-        "//tools/java/src/com/twitter/bazel/checkstyle:checkstyle_cpp",
+        "//tools/java/src/org/apache/bazel/checkstyle:checkstyle_cpp",
     ],
     requires_action_output = True,
-    cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle:checkstyle_cpp) " +
+    cmd = "$(location //tools/java/src/org/apache/bazel/checkstyle:checkstyle_cpp) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
           "--cpplint_file $$(pwd)/$(location //third_party/python/cpplint)"
+)
+
+extra_action(
+    name = "cpp_cppcheck",
+    tools = [
+        "//third_party/cppcheck:heron-cppcheck",
+        "//tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp",
+    ],
+    requires_action_output = True,
+    cmd = "$(location //tools/java/src/org/apache/bazel/cppcheck:cppcheck_cpp) " +
+              "--extra_action_file $(EXTRA_ACTION_FILE) " +
+              "--cppcheck_file $$(pwd)/$(location //third_party/cppcheck:heron-cppcheck)"
 )

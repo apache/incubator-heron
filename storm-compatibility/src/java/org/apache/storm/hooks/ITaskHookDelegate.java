@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.heron.common.basics.TypeUtils;
 import org.apache.storm.Config;
 import org.apache.storm.hooks.info.BoltAckInfo;
 import org.apache.storm.hooks.info.BoltExecuteInfo;
@@ -31,19 +32,17 @@ import org.apache.storm.hooks.info.SpoutAckInfo;
 import org.apache.storm.hooks.info.SpoutFailInfo;
 import org.apache.storm.task.TopologyContext;
 
-import com.twitter.heron.common.basics.TypeUtils;
-
 /**
  * There would be types of task hooks inside ITaskHookDelegate:
  * 1. task hook's classes specified in config statically.
  * The task hooks' objects would be instantiated by using reflection and added into
  * the list of ITaskHook when the method
- * prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context)
+ * prepare(Map conf, org.apache.heron.api.topology.TopologyContext context)
  * is invoked.
  * 2. task hook added dynamically by invoking addHook(ITaskHook)
  */
 @SuppressWarnings("rawtypes")
-public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook {
+public class ITaskHookDelegate implements org.apache.heron.api.hooks.ITaskHook {
   private List<ITaskHook> hooks;
   private Map conf;
 
@@ -66,7 +65,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
 
   @Override
   public void prepare(Map<String, Object> newConf,
-                      com.twitter.heron.api.topology.TopologyContext context) {
+                      org.apache.heron.api.topology.TopologyContext context) {
     this.conf = newConf;
     if (!newConf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
       throw new RuntimeException("StormCompat Translation not done for task hooks");
@@ -104,7 +103,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void emit(com.twitter.heron.api.hooks.info.EmitInfo info) {
+  public void emit(org.apache.heron.api.hooks.info.EmitInfo info) {
     EmitInfo emit = new EmitInfo(info);
     for (ITaskHook hook : hooks) {
       hook.emit(emit);
@@ -112,7 +111,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void spoutAck(com.twitter.heron.api.hooks.info.SpoutAckInfo info) {
+  public void spoutAck(org.apache.heron.api.hooks.info.SpoutAckInfo info) {
     SpoutAckInfo ack = new SpoutAckInfo(info);
     for (ITaskHook hook : hooks) {
       hook.spoutAck(ack);
@@ -120,7 +119,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void spoutFail(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
+  public void spoutFail(org.apache.heron.api.hooks.info.SpoutFailInfo info) {
     SpoutFailInfo fail = new SpoutFailInfo(info);
     for (ITaskHook hook : hooks) {
       hook.spoutFail(fail);
@@ -128,7 +127,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void boltAck(com.twitter.heron.api.hooks.info.BoltAckInfo info) {
+  public void boltAck(org.apache.heron.api.hooks.info.BoltAckInfo info) {
     BoltAckInfo ack = new BoltAckInfo(info);
     for (ITaskHook hook : hooks) {
       hook.boltAck(ack);
@@ -136,7 +135,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void boltFail(com.twitter.heron.api.hooks.info.BoltFailInfo info) {
+  public void boltFail(org.apache.heron.api.hooks.info.BoltFailInfo info) {
     BoltFailInfo fail = new BoltFailInfo(info);
     for (ITaskHook hook : hooks) {
       hook.boltFail(fail);
@@ -144,7 +143,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   }
 
   @Override
-  public void boltExecute(com.twitter.heron.api.hooks.info.BoltExecuteInfo info) {
+  public void boltExecute(org.apache.heron.api.hooks.info.BoltExecuteInfo info) {
     BoltExecuteInfo execute = new BoltExecuteInfo(info);
     for (ITaskHook hook : hooks) {
       hook.boltExecute(execute);

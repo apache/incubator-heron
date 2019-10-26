@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef __STMANAGERSTATE_H
@@ -37,16 +40,18 @@ class PhysicalPlan;
 namespace heron {
 namespace tmaster {
 
+using std::shared_ptr;
+
 class TMasterServer;
 
 class StMgrState {
  public:
   StMgrState(Connection* _conn, const proto::system::StMgr& _info,
-             const std::vector<proto::system::Instance*>& _instances, Server* _server);
+             const std::vector<shared_ptr<proto::system::Instance>>& _instances, Server& _server);
   virtual ~StMgrState();
 
   void UpdateWithNewStMgr(const proto::system::StMgr& _info,
-                          const std::vector<proto::system::Instance*>& _instances,
+                          const std::vector<shared_ptr<proto::system::Instance>>& _instances,
                           Connection* _conn);
 
   // Update the heartbeat. Note:- We own _stats now
@@ -65,6 +70,8 @@ class StMgrState {
   // Send stateful checkpoint message to the stmgr
   void NewStatefulCheckpoint(const proto::ckptmgr::StartStatefulCheckpoint& _request);
 
+  void SendCheckpointSavedMessage(const proto::ckptmgr::StatefulConsistentCheckpointSaved &_msg);
+
 
   bool TimedOut() const;
 
@@ -72,8 +79,8 @@ class StMgrState {
   Connection* get_connection() { return connection_; }
   const std::string& get_id() const { return stmgr_->id(); }
   sp_uint32 get_num_instances() const { return instances_.size(); }
-  const std::vector<proto::system::Instance*>& get_instances() const { return instances_; }
-  const proto::system::StMgr* get_stmgr() const { return stmgr_; }
+  const std::vector<shared_ptr<proto::system::Instance>>& get_instances() const {return instances_;}
+  const shared_ptr<proto::system::StMgr> get_stmgr() const { return stmgr_; }
   bool VerifyInstances(const std::vector<proto::system::Instance*>& _instances);
 
  private:
@@ -83,14 +90,14 @@ class StMgrState {
   proto::system::StMgrStats* last_stats_;
 
   // All the instances on this stmgr
-  std::vector<proto::system::Instance*> instances_;
+  std::vector<shared_ptr<proto::system::Instance>> instances_;
 
   // The info about this stmgr
-  proto::system::StMgr* stmgr_;
+  shared_ptr<proto::system::StMgr> stmgr_;
   // The connection used by the nodemanager to contact us
   Connection* connection_;
   // Our link to our TMaster
-  Server* server_;
+  Server& server_;
 };
 }  // namespace tmaster
 }  // namespace heron

@@ -15,7 +15,7 @@ cc_library(
         "-I$(GENDIR)/heron//common/src/cpp",
     ],
     deps = [
-        "//third_party/zookeeper:zookeeper-cxx",
+        "@org_apache_zookeeper//:zookeeper",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/errors:errors-cxx",
         "//heron/common/src/cpp/basics:basics-cxx",

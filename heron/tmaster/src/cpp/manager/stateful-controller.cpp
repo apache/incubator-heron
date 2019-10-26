@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "manager/stateful-controller.h"
@@ -31,6 +34,8 @@
 namespace heron {
 namespace tmaster {
 
+using std::make_shared;
+
 const sp_string METRIC_RESTORE_START = "__restore_start";
 const sp_string METRIC_RESTORE_STMGR_RESPONSE = "__restore_stmgr_response";
 const sp_string METRIC_RESTORE_STMGR_RESPONSE_IGNORED = "__restore_stmgr_response_ignored";
@@ -46,26 +51,26 @@ const sp_string METRIC_GLOBAL_CONSISTENT_CKPT = "__globally_consistent_ckpt";
 const int32_t MOST_CHECKPOINTS_NUMBER = 5;
 
 StatefulController::StatefulController(const std::string& _topology_name,
-               proto::ckptmgr::StatefulConsistentCheckpoints* _ckpt,
-               heron::common::HeronStateMgr* _state_mgr,
+               shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
+               shared_ptr<heron::common::HeronStateMgr> _state_mgr,
                std::chrono::high_resolution_clock::time_point _tmaster_start_time,
-               common::MetricsMgrSt* _metrics_manager_client,
-               std::function<void(std::string)> _ckpt_save_watcher)
-  : topology_name_(_topology_name), ckpt_record_(_ckpt), state_mgr_(_state_mgr),
-    metrics_manager_client_(_metrics_manager_client) {
-  checkpointer_ = new StatefulCheckpointer(_tmaster_start_time);
-  restorer_ = new StatefulRestorer();
-  count_metrics_ = new common::MultiCountMetric();
+               shared_ptr<common::MetricsMgrSt> _metrics_manager_client,
+               std::function<void(const proto::ckptmgr::StatefulConsistentCheckpoints&)>
+                   _ckpt_save_watcher)
+  : topology_name_(_topology_name),
+    ckpt_record_(std::move(_ckpt)),
+    state_mgr_(_state_mgr),
+    metrics_manager_client_(_metrics_manager_client),
+    ckpt_save_watcher_(_ckpt_save_watcher) {
+  checkpointer_ = make_unique<StatefulCheckpointer>(_tmaster_start_time);
+  restorer_ = make_unique<StatefulRestorer>();
+  count_metrics_ = make_shared<common::MultiCountMetric>();
+
   metrics_manager_client_->register_metric("__stateful_controller", count_metrics_);
-  ckpt_save_watcher_ = _ckpt_save_watcher;
 }
 
 StatefulController::~StatefulController() {
-  delete ckpt_record_;
-  delete checkpointer_;
-  delete restorer_;
   metrics_manager_client_->unregister_metric("__stateful_controller");
-  delete count_metrics_;
 }
 
 void StatefulController::StartRestore(const StMgrMap& _stmgrs, bool _ignore_prev_state) {
@@ -136,41 +141,42 @@ void StatefulController::StartCheckpoint(const StMgrMap& _stmgrs) {
 }
 
 void StatefulController::HandleInstanceStateStored(const std::string& _checkpoint_id,
-                                               const std::string& _packing_plan_id,
-                                               const proto::system::Instance& _instance) {
+                                                   const std::string& _packing_plan_id,
+                                                   const proto::system::Instance& _instance) {
   count_metrics_->scope(METRIC_INSTANCE_CKPT_SAVED)->incr();
+
   if (restorer_->IsInProgress()) {
     LOG(INFO) << "Ignoring the Instance State because we are in Restore";
     count_metrics_->scope(METRIC_INSTANCE_CKPT_SAVED_IGNORED)->incr();
     return;
   }
+
   if (checkpointer_->HandleInstanceStateStored(_checkpoint_id, _instance)) {
     // This is now a globally consistent checkpoint
     count_metrics_->scope(METRIC_GLOBAL_CONSISTENT_CKPT)->incr();
     auto new_ckpt_record = AddNewConsistentCheckpoint(_checkpoint_id, _packing_plan_id);
-    state_mgr_->SetStatefulCheckpoints(topology_name_, *new_ckpt_record,
-           std::bind(&StatefulController::HandleCheckpointSave, this,
-                    new_ckpt_record, std::placeholders::_1));
+
+    state_mgr_->SetStatefulCheckpoints(topology_name_, new_ckpt_record,
+            std::bind(&StatefulController::HandleCheckpointSave, this, new_ckpt_record,
+                    std::placeholders::_1));
   }
 }
 
 void StatefulController::HandleCheckpointSave(
-                                    proto::ckptmgr::StatefulConsistentCheckpoints* _new_ckpt,
-                                    proto::system::StatusCode _status) {
+        shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _new_ckpt,
+        proto::system::StatusCode _status) {
   if (_status == proto::system::OK) {
-    LOG(INFO) << "Successfully saved " << _new_ckpt->consistent_checkpoints(0).checkpoint_id()
-              << " as the new globally consistent checkpoint";
-    delete ckpt_record_;
-    ckpt_record_ = _new_ckpt;
-    std::string oldest_ckpt =
-        ckpt_record_->consistent_checkpoints(ckpt_record_->consistent_checkpoints_size() - 1)
-          .checkpoint_id();
-    ckpt_save_watcher_(oldest_ckpt);
+    ckpt_record_ = std::move(_new_ckpt);
+
+    LOG(INFO) << "Successfully saved "
+              << ckpt_record_->consistent_checkpoints(0).checkpoint_id()
+              << " as the latest globally consistent checkpoint";
+
+    ckpt_save_watcher_(*ckpt_record_);
   } else {
     LOG(ERROR) << "Error saving " << _new_ckpt->consistent_checkpoints(0).checkpoint_id()
               << " as the new globally consistent checkpoint "
               << _status;
-    delete _new_ckpt;
   }
 }
 
@@ -191,10 +197,10 @@ const std::string& StatefulController::GetNextInLineCheckpointId(const std::stri
   return EMPTY_STRING;
 }
 
-proto::ckptmgr::StatefulConsistentCheckpoints*
+shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints>
 StatefulController::AddNewConsistentCheckpoint(const std::string& _new_checkpoint,
                                            const std::string& _packing_plan) {
-  auto new_record = new proto::ckptmgr::StatefulConsistentCheckpoints();
+  auto new_record = make_shared<proto::ckptmgr::StatefulConsistentCheckpoints>();
   auto new_consistent_checkpoint = new_record->add_consistent_checkpoints();
   new_consistent_checkpoint->set_checkpoint_id(_new_checkpoint);
   new_consistent_checkpoint->set_packing_plan_id(_packing_plan);

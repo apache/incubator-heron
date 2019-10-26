@@ -1,19 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 """ The Heron executor is a process that runs on a container and is responsible for starting and
 monitoring the processes of the topology and it's support services."""
 import argparse
@@ -73,7 +77,8 @@ def print_usage():
       " --metricscache-manager-master-port=<metricscachemgr_masterport>"
       " --metricscache-manager-stats-port=<metricscachemgr_statsport>"
       " --is-stateful=<is_stateful> --checkpoint-manager-classpath=<ckptmgr_classpath>"
-      " --checkpoint-manager-port=<ckptmgr_port> --stateful-config-file=<stateful_config_file>"
+      " --checkpoint-manager-port=<ckptmgr_port> --checkpoint-manager-ram=<checkpoint_manager_ram>"
+      " --stateful-config-file=<stateful_config_file>"
       " --health-manager-mode=<healthmgr_mode> --health-manager-classpath=<healthmgr_classpath>"
       " --cpp-instance-binary=<cpp_instance_binary>"
       " --jvm-remote-debugger-ports=<comma_seperated_port_list>")
@@ -141,6 +146,37 @@ def stdout_log_fn(cmd):
   # Log the messages to stdout and strip off the newline because Log.info adds one automatically
   return lambda line: Log.info("%s stdout: %s", cmd, line.rstrip('\n'))
 
+class Command(object):
+  """
+  Command to run as a separate process using subprocess.POpen
+  :param cmd: command to run (as a list)
+  :param env: env variables for the process (as a map)
+  """
+  def __init__(self, cmd, env):
+    if isinstance(cmd, list):
+      self.cmd = cmd
+    else:
+      self.cmd = [cmd]
+    self.env = env
+
+  def extend(self, args):
+    self.cmd.extend(args)
+
+  def append(self, arg):
+    self.cmd.append(arg)
+
+  def copy(self):
+    return Command(list(self.cmd), self.env.copy() if self.env is not None else {})
+
+  def __repr__(self):
+    return str(self.cmd)
+
+  def __str__(self):
+    return ' '.join(self.cmd)
+
+  def __eq__(self, other):
+    return self.cmd == other.cmd
+
 class ProcessInfo(object):
   def __init__(self, process, name, command, attempts=1):
     """
@@ -154,7 +190,7 @@ class ProcessInfo(object):
     self.pid = process.pid
     self.name = name
     self.command = command
-    self.command_str = ' '.join(command) # convenience for unit tests
+    self.command_str = command.__str__() # convenience for unit tests
     self.attempts = attempts
 
   def increment_attempts(self):
@@ -166,10 +202,8 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def init_parsed_args(self, args):
+  def init_from_parsed_args(self, parsed_args):
     """ initialize from parsed arguments """
-    parsed_args = self.parse_args(args)
-
     self.shard = parsed_args.shard
     self.topology_name = parsed_args.topology_name
     self.topology_id = parsed_args.topology_id
@@ -181,9 +215,14 @@ class HeronExecutor(object):
     self.stmgr_binary = parsed_args.stmgr_binary
     self.metrics_manager_classpath = parsed_args.metrics_manager_classpath
     self.metricscache_manager_classpath = parsed_args.metricscache_manager_classpath
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     self.instance_jvm_opts =\
         base64.b64decode(parsed_args.instance_jvm_opts.lstrip('"').
-                         rstrip('"').replace('&equals;', '='))
+                         rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     self.classpath = parsed_args.classpath
     # Needed for Docker environments since the hostname of a docker container is the container's
     # id within docker, rather than the host's hostname. NOTE: this 'HOST' env variable is not
@@ -207,13 +246,18 @@ class HeronExecutor(object):
     # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
-    # First we need to decode the base64 string back to a json map string
+    # First we need to decode the base64 string back to a json map string.
+    # '=' can be parsed in a wrong way by some schedulers (aurora) hence it needs to be escaped.
+    # It is escaped in two different ways. '(61)' is the new escaping. '&equals;' was
+    # the original replacement but it is not friendly to bash and is causing issues. The original
+    # escaping is still left there for reference and backward compatibility purposes (to be
+    # removed after no topology needs it)
     component_jvm_opts_in_json =\
         base64.b64decode(parsed_args.component_jvm_opts.
-                         lstrip('"').rstrip('"').replace('&equals;', '='))
+                         lstrip('"').rstrip('"').replace('(61)', '=').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
-        # In json, the component name and jvm options are still in base64 encoding
+        # In json, the component name and JVM options are still in base64 encoding
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
     self.pkg_type = parsed_args.pkg_type
@@ -237,7 +281,10 @@ class HeronExecutor(object):
     self.is_stateful_topology = (parsed_args.is_stateful.lower() == 'true')
     self.checkpoint_manager_classpath = parsed_args.checkpoint_manager_classpath
     self.checkpoint_manager_port = parsed_args.checkpoint_manager_port
+    self.checkpoint_manager_ram = parsed_args.checkpoint_manager_ram
     self.stateful_config_file = parsed_args.stateful_config_file
+    self.metricscache_manager_mode = parsed_args.metricscache_manager_mode \
+        if parsed_args.metricscache_manager_mode else "disabled"
     self.health_manager_mode = parsed_args.health_manager_mode
     self.health_manager_classpath = '%s:%s'\
         % (self.scheduler_classpath, parsed_args.health_manager_classpath)
@@ -246,10 +293,11 @@ class HeronExecutor(object):
         if parsed_args.jvm_remote_debugger_ports else None
 
   def __init__(self, args, shell_env):
-    self.init_parsed_args(args)
+    parsed_args = self.parse_args(args)
+    self.init_from_parsed_args(parsed_args)
 
     self.shell_env = shell_env
-    self.max_runs = 100
+    self.max_runs = 150
     self.interval_between_runs = 10
 
     # Read the heron_internals.yaml for logging dir
@@ -273,6 +321,8 @@ class HeronExecutor(object):
   @staticmethod
   def parse_args(args):
     """Uses python argparse to collect positional args"""
+    Log.info("Input args: %r" % args)
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--shard", type=int, required=True)
@@ -312,9 +362,11 @@ class HeronExecutor(object):
     parser.add_argument("--metricscache-manager-classpath", required=True)
     parser.add_argument("--metricscache-manager-master-port", required=True)
     parser.add_argument("--metricscache-manager-stats-port", required=True)
+    parser.add_argument("--metricscache-manager-mode", required=False)
     parser.add_argument("--is-stateful", required=True)
     parser.add_argument("--checkpoint-manager-classpath", required=True)
     parser.add_argument("--checkpoint-manager-port", required=True)
+    parser.add_argument("--checkpoint-manager-ram", type=long, required=True)
     parser.add_argument("--stateful-config-file", required=True)
     parser.add_argument("--health-manager-mode", required=True)
     parser.add_argument("--health-manager-classpath", required=True)
@@ -324,14 +376,13 @@ class HeronExecutor(object):
     parsed_args, unknown_args = parser.parse_known_args(args[1:])
 
     if unknown_args:
-      Log.error('Unknown argument: %s' % unknown_args[0])
-      parser.print_help()
-      sys.exit(1)
+      Log.warn('Unknown arguments found!!! They are: %s' % unknown_args)
+      Log.warn(parser.format_help())
 
     return parsed_args
 
   def run_command_or_exit(self, command):
-    if self._run_blocking_process(command, True, self.shell_env) != 0:
+    if self._run_blocking_process(command, True) != 0:
       Log.error("Failed to run command: %s. Exiting" % command)
       sys.exit(1)
 
@@ -342,10 +393,10 @@ class HeronExecutor(object):
     2. We don't initialize the logger (also something unit tests don't want) until after the
     constructor
     """
-    create_folders = 'mkdir -p %s' % self.log_dir
+    create_folders = Command('mkdir -p %s' % self.log_dir, self.shell_env)
     self.run_command_or_exit(create_folders)
 
-    chmod_logs_dir = 'chmod a+rx . && chmod a+x %s' % self.log_dir
+    chmod_logs_dir = Command('chmod a+rx . && chmod a+x %s' % self.log_dir, self.shell_env)
     self.run_command_or_exit(chmod_logs_dir)
 
     chmod_x_binaries = [self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary]
@@ -353,7 +404,7 @@ class HeronExecutor(object):
     for binary in chmod_x_binaries:
       stat_result = os.stat(binary)[stat.ST_MODE]
       if not stat_result & stat.S_IXOTH:
-        chmod_binary = 'chmod +x %s' % binary
+        chmod_binary = Command('chmod +x %s' % binary, self.shell_env)
         self.run_command_or_exit(chmod_binary)
 
     # Log itself pid
@@ -374,7 +425,7 @@ class HeronExecutor(object):
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
-    metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
+    metricsmgr_main_class = 'org.apache.heron.metricsmgr.MetricsManager'
 
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
@@ -395,7 +446,7 @@ class HeronExecutor(object):
                       '-XX:+HeapDumpOnOutOfMemoryError',
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:+PrintCommandLineFlags',
-                      '-Xloggc:log-files/gc.metricsmgr.log',
+                      '-Xloggc:log-files/gc.' + metricsManagerId + '.log',
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metrics_manager_classpath,
@@ -411,11 +462,11 @@ class HeronExecutor(object):
                       '--override-config-file=' + self.override_config_file,
                       '--sink-config-file=' + sink_config_file]
 
-    return metricsmgr_cmd
+    return Command(metricsmgr_cmd, self.shell_env)
 
   def _get_metrics_cache_cmd(self):
     ''' get the command to start the metrics manager processes '''
-    metricscachemgr_main_class = 'com.twitter.heron.metricscachemgr.MetricsCacheManager'
+    metricscachemgr_main_class = 'org.apache.heron.metricscachemgr.MetricsCacheManager'
 
     metricscachemgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                            # We could not rely on the default -Xmx setting, which could be very big,
@@ -451,13 +502,13 @@ class HeronExecutor(object):
                            "--sink_config_file", self.metrics_sinks_config_file,
                            "--cluster", self.cluster,
                            "--role", self.role,
-                           "--environment", self.environment, "--verbose"]
+                           "--environment", self.environment]
 
-    return metricscachemgr_cmd
+    return Command(metricscachemgr_cmd, self.shell_env)
 
   def _get_healthmgr_cmd(self):
     ''' get the command to start the topology health manager processes '''
-    healthmgr_main_class = 'com.twitter.heron.healthmgr.HealthManager'
+    healthmgr_main_class = 'org.apache.heron.healthmgr.HealthManager'
 
     healthmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                      # We could not rely on the default -Xmx setting, which could be very big,
@@ -485,14 +536,15 @@ class HeronExecutor(object):
                      "--cluster", self.cluster,
                      "--role", self.role,
                      "--environment", self.environment,
-                     "--topology_name", self.topology_name, "--verbose"]
+                     "--topology_name", self.topology_name,
+                     "--metricsmgr_port", self.metrics_manager_port]
 
-    return healthmgr_cmd
+    return Command(healthmgr_cmd, self.shell_env)
 
   def _get_tmaster_processes(self):
     ''' get the command to start the tmaster processes '''
     retval = {}
-    tmaster_cmd = [
+    tmaster_cmd_lst = [
         self.tmaster_binary,
         '--topology_name=%s' % self.topology_name,
         '--topology_id=%s' % self.topology_id,
@@ -507,9 +559,19 @@ class HeronExecutor(object):
         '--metrics_sinks_yaml=%s' % self.metrics_sinks_config_file,
         '--metricsmgr_port=%s' % str(self.metrics_manager_port),
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port)]
+
+    tmaster_env = self.shell_env.copy() if self.shell_env is not None else {}
+    tmaster_cmd = Command(tmaster_cmd_lst, tmaster_env)
+    if os.environ.get('ENABLE_HEAPCHECK') is not None:
+      tmaster_cmd.env.update({
+          'LD_PRELOAD': "/usr/lib/libtcmalloc.so",
+          'HEAPCHECK': "normal"
+      })
+
     retval["heron-tmaster"] = tmaster_cmd
 
-    retval["heron-metricscache"] = self._get_metrics_cache_cmd()
+    if self.metricscache_manager_mode.lower() != "disabled":
+      retval["heron-metricscache"] = self._get_metrics_cache_cmd()
 
     if self.health_manager_mode.lower() != "disabled":
       retval["heron-healthmgr"] = self._get_healthmgr_cmd()
@@ -528,8 +590,46 @@ class HeronExecutor(object):
   def _get_java_instance_cmd(self, instance_info):
     retval = {}
     # TO DO (Karthik) to be moved into keys and defaults files
+    instance_class_name = 'org.apache.heron.instance.HeronInstance'
+
+    if self.jvm_remote_debugger_ports and \
+            (len(instance_info) > len(self.jvm_remote_debugger_ports)):
+      Log.warn("Not enough remote debugger ports for all instances!")
+
+    # Create id to java command map
+    for (instance_id, component_name, global_task_id, component_index) in instance_info:
+      # Append debugger ports
+      remote_debugger_port = None
+      if self.jvm_remote_debugger_ports:
+        remote_debugger_port = self.jvm_remote_debugger_ports.pop()
+
+      instance_cmd = self._get_jvm_instance_cmd().copy()            # JVM command
+      instance_cmd.extend(                                          # JVM options
+          self._get_jvm_instance_options(
+              instance_id, component_name, remote_debugger_port))
+      instance_cmd.append(instance_class_name)                      # Class name
+      instance_cmd.extend(                                          # JVM arguments
+          self._get_jvm_instance_arguments(
+              instance_id, component_name, global_task_id, component_index, remote_debugger_port))
+
+      retval[instance_id] = instance_cmd
+
+    return retval
+
+  def _get_jvm_instance_cmd(self):
+    return Command(os.path.join(self.heron_java_home, 'bin/java'), self.shell_env)
+
+  def _get_jvm_instance_options(self, instance_id, component_name, remote_debugger_port):
     code_cache_size_mb = 64
     java_metasize_mb = 128
+
+    total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
+    heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
+    Log.info("component name: %s, RAM request: %d, total JVM size: %dM, "
+             "cache size: %dM, metaspace size: %dM"
+             % (component_name, self.component_ram_map[component_name],
+                total_jvm_size, code_cache_size_mb, java_metasize_mb))
+    xmn_size = int(heap_size_mb / 2)
 
     java_version = self._get_jvm_version()
     java_metasize_param = 'MetaspaceSize'
@@ -538,80 +638,72 @@ class HeronExecutor(object):
             java_version.startswith("1.5"):
       java_metasize_param = 'PermSize'
 
-    if self.jvm_remote_debugger_ports and \
-            (len(instance_info) > len(self.jvm_remote_debugger_ports)):
-      Log.warn("Not enough remote debugger ports for all instances!")
+    instance_options = [
+        '-Xmx%dM' % heap_size_mb,
+        '-Xms%dM' % heap_size_mb,
+        '-Xmn%dM' % xmn_size,
+        '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
+        '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
+        '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
+        '-XX:+CMSScavengeBeforeRemark',
+        '-XX:TargetSurvivorRatio=90',
+        '-XX:+PrintCommandLineFlags',
+        '-verbosegc',
+        '-XX:+PrintGCDetails',
+        '-XX:+PrintGCTimeStamps',
+        '-XX:+PrintGCDateStamps',
+        '-XX:+PrintGCCause',
+        '-XX:+UseGCLogFileRotation',
+        '-XX:NumberOfGCLogFiles=5',
+        '-XX:GCLogFileSize=100M',
+        '-XX:+PrintPromotionFailure',
+        '-XX:+PrintTenuringDistribution',
+        '-XX:+PrintHeapAtGC',
+        '-XX:+HeapDumpOnOutOfMemoryError',
+        '-XX:+UseConcMarkSweepGC',
+        '-XX:ParallelGCThreads=4',
+        '-Xloggc:log-files/gc.%s.log' % instance_id,
+        '-Djava.net.preferIPv4Stack=true',
+        '-cp',
+        '%s:%s'% (self.instance_classpath, self.classpath)]
 
-    for (instance_id, component_name, global_task_id, component_index) in instance_info:
-      total_jvm_size = int(self.component_ram_map[component_name] / (1024 * 1024))
-      heap_size_mb = total_jvm_size - code_cache_size_mb - java_metasize_mb
-      Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
-               "cache size: %dM, metaspace size: %dM"
-               % (component_name, self.component_ram_map[component_name],
-                  total_jvm_size, code_cache_size_mb, java_metasize_mb))
-      xmn_size = int(heap_size_mb / 2)
-      instance_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
-                      '-Xmx%dM' % heap_size_mb,
-                      '-Xms%dM' % heap_size_mb,
-                      '-Xmn%dM' % xmn_size,
-                      '-XX:Max%s=%dM' % (java_metasize_param, java_metasize_mb),
-                      '-XX:%s=%dM' % (java_metasize_param, java_metasize_mb),
-                      '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
-                      '-XX:+CMSScavengeBeforeRemark',
-                      '-XX:TargetSurvivorRatio=90',
-                      '-XX:+PrintCommandLineFlags',
-                      '-verbosegc',
-                      '-XX:+PrintGCDetails',
-                      '-XX:+PrintGCTimeStamps',
-                      '-XX:+PrintGCDateStamps',
-                      '-XX:+PrintGCCause',
-                      '-XX:+UseGCLogFileRotation',
-                      '-XX:NumberOfGCLogFiles=5',
-                      '-XX:GCLogFileSize=100M',
-                      '-XX:+PrintPromotionFailure',
-                      '-XX:+PrintTenuringDistribution',
-                      '-XX:+PrintHeapAtGC',
-                      '-XX:+HeapDumpOnOutOfMemoryError',
-                      '-XX:+UseConcMarkSweepGC',
-                      '-XX:ParallelGCThreads=4',
-                      '-Xloggc:log-files/gc.%s.log' % instance_id]
+    # Append debugger ports when it is available
+    if remote_debugger_port:
+      instance_options.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
+                              % remote_debugger_port)
 
-      remote_debugger_port = None
-      if self.jvm_remote_debugger_ports:
-        remote_debugger_port = self.jvm_remote_debugger_ports.pop()
-        instance_cmd.append('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s'
-                            % remote_debugger_port)
+    # Append user specified jvm options
+    instance_options.extend(self.instance_jvm_opts.split())
+    if component_name in self.component_jvm_opts:
+      instance_options.extend(self.component_jvm_opts[component_name].split())
 
-      instance_args = ['-topology_name', self.topology_name,
-                       '-topology_id', self.topology_id,
-                       '-instance_id', instance_id,
-                       '-component_name', component_name,
-                       '-task_id', str(global_task_id),
-                       '-component_index', str(component_index),
-                       '-stmgr_id', self.stmgr_ids[self.shard],
-                       '-stmgr_port', self.tmaster_controller_port,
-                       '-metricsmgr_port', self.metrics_manager_port,
-                       '-system_config_file', self.heron_internals_config_file,
-                       '-override_config_file', self.override_config_file]
-      if remote_debugger_port:
-        instance_args += ['-remote_debugger_port', remote_debugger_port]
+    return instance_options
 
-      instance_cmd = instance_cmd + self.instance_jvm_opts.split()
-      if component_name in self.component_jvm_opts:
-        instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
+  def _get_jvm_instance_arguments(self, instance_id, component_name, global_task_id,
+                                  component_index, remote_debugger_port):
+    instance_args = [
+        '-topology_name', self.topology_name,
+        '-topology_id', self.topology_id,
+        '-instance_id', instance_id,
+        '-component_name', component_name,
+        '-task_id', str(global_task_id),
+        '-component_index', str(component_index),
+        '-stmgr_id', self.stmgr_ids[self.shard],
+        '-stmgr_port', self.tmaster_controller_port,
+        '-metricsmgr_port', self.metrics_manager_port,
+        '-system_config_file', self.heron_internals_config_file,
+        '-override_config_file', self.override_config_file]
 
-      instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
-                           '-cp',
-                           '%s:%s' % (self.instance_classpath, self.classpath),
-                           'com.twitter.heron.instance.HeronInstance'] + instance_args)
+    # Append debugger ports when it is available
+    if remote_debugger_port:
+      instance_args += ['-remote_debugger_port', remote_debugger_port]
 
-      retval[instance_id] = instance_cmd
-    return retval
+    return instance_args
 
   def _get_jvm_version(self):
     if not self.jvm_version:
       cmd = [os.path.join(self.heron_java_home, 'bin/java'),
-             '-cp', self.instance_classpath, 'com.twitter.heron.instance.util.JvmVersion']
+             '-cp', self.instance_classpath, 'org.apache.heron.instance.util.JvmVersion']
       process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       (process_stdout, process_stderr) = process.communicate()
       if process.returncode != 0:
@@ -645,7 +737,7 @@ class HeronExecutor(object):
                       '--topology_pex=%s' % self.topology_binary_file,
                       '--max_ram=%s' % str(self.component_ram_map[component_name])]
 
-      retval[instance_id] = instance_cmd
+      retval[instance_id] = Command(instance_cmd, self.shell_env)
 
     return retval
 
@@ -672,7 +764,7 @@ class HeronExecutor(object):
           '--topology_binary=%s' % os.path.abspath(self.topology_binary_file)
       ]
 
-      retval[instance_id] = instance_cmd
+      retval[instance_id] = Command(instance_cmd, self.shell_env)
 
     return retval
 
@@ -693,7 +785,7 @@ class HeronExecutor(object):
       instance_id = "container_%s_%s_%d" % (str(self.shard), component_name, global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
-    stmgr_cmd = [
+    stmgr_cmd_lst = [
         self.stmgr_binary,
         '--topology_name=%s' % self.topology_name,
         '--topology_id=%s' % self.topology_id,
@@ -710,7 +802,17 @@ class HeronExecutor(object):
         '--config_file=%s' % self.heron_internals_config_file,
         '--override_config_file=%s' % self.override_config_file,
         '--ckptmgr_port=%s' % str(self.checkpoint_manager_port),
-        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard]]
+        '--ckptmgr_id=%s' % self.ckptmgr_ids[self.shard],
+        '--metricscachemgr_mode=%s' % self.metricscache_manager_mode.lower()]
+
+    stmgr_env = self.shell_env.copy() if self.shell_env is not None else {}
+    stmgr_cmd = Command(stmgr_cmd_lst, stmgr_env)
+    if os.environ.get('ENABLE_HEAPCHECK') is not None:
+      stmgr_cmd.env.update({
+          'LD_PRELOAD': "/usr/lib/libtcmalloc.so",
+          'HEAPCHECK': "normal"
+      })
+
     retval[self.stmgr_ids[self.shard]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -740,10 +842,13 @@ class HeronExecutor(object):
   def _get_ckptmgr_process(self):
     ''' Get the command to start the checkpoint manager process'''
 
-    ckptmgr_main_class = 'com.twitter.heron.ckptmgr.CheckpointManager'
+    ckptmgr_main_class = 'org.apache.heron.ckptmgr.CheckpointManager'
 
+    ckptmgr_ram_mb = self.checkpoint_manager_ram / (1024 * 1024)
+    ckptmgr_id = self.ckptmgr_ids[self.shard]
     ckptmgr_cmd = [os.path.join(self.heron_java_home, "bin/java"),
-                   '-Xmx1024M',
+                   '-Xms%dM' % ckptmgr_ram_mb,
+                   '-Xmx%dM' % ckptmgr_ram_mb,
                    '-XX:+PrintCommandLineFlags',
                    '-verbosegc',
                    '-XX:+PrintGCDetails',
@@ -759,19 +864,20 @@ class HeronExecutor(object):
                    '-XX:+HeapDumpOnOutOfMemoryError',
                    '-XX:+UseConcMarkSweepGC',
                    '-XX:+UseConcMarkSweepGC',
-                   '-Xloggc:log-files/gc.ckptmgr.log',
+                   '-Xloggc:log-files/gc.' + ckptmgr_id + '.log',
                    '-Djava.net.preferIPv4Stack=true',
                    '-cp',
                    self.checkpoint_manager_classpath,
                    ckptmgr_main_class,
                    '-t' + self.topology_name,
                    '-i' + self.topology_id,
-                   '-c' + self.ckptmgr_ids[self.shard],
+                   '-c' + ckptmgr_id,
                    '-p' + self.checkpoint_manager_port,
                    '-f' + self.stateful_config_file,
+                   '-o' + self.override_config_file,
                    '-g' + self.heron_internals_config_file]
     retval = {}
-    retval[self.ckptmgr_ids[self.shard]] = ckptmgr_cmd
+    retval[self.ckptmgr_ids[self.shard]] = Command(ckptmgr_cmd, self.shell_env)
 
     return retval
 
@@ -786,8 +892,11 @@ class HeronExecutor(object):
       if container_plan.id == container_id:
         this_container_plan = container_plan
 
-    # make sure that our shard id is a valid one
-    assert this_container_plan is not None
+    # When the executor runs in newly added container by `heron update`,
+    # there is no plan for this container. In this situation,
+    # return None to bypass instance processes.
+    if this_container_plan is None:
+      return None
     return this_container_plan.instance_plans
 
   # Returns the common heron support processes that all containers get, like the heron shell
@@ -795,11 +904,11 @@ class HeronExecutor(object):
     """ Get a map from all daemon services' name to the command to start them """
     retval = {}
 
-    retval[self.heron_shell_ids[self.shard]] = [
+    retval[self.heron_shell_ids[self.shard]] = Command([
         '%s' % self.heron_shell_binary,
         '--port=%s' % self.shell_port,
         '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
-        '--secret=%s' % self.topology_id]
+        '--secret=%s' % self.topology_id], self.shell_env)
 
     return retval
 
@@ -815,33 +924,32 @@ class HeronExecutor(object):
     proc.stream_process_stdout(process, stdout_log_fn(name))
     process.wait()
 
-  def _run_process(self, name, cmd, env_to_exec=None):
-    Log.info("Running %s process as %s" % (name, ' '.join(cmd)))
+  def _run_process(self, name, cmd):
+    Log.info("Running %s process as %s" % (name, cmd))
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
-      process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 env=env_to_exec, bufsize=1)
-
+      process = subprocess.Popen(cmd.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 env=cmd.env, bufsize=1)
       proc.async_stream_process_stdout(process, stdout_log_fn(name))
     except Exception:
-      Log.info("Exception running command %:", cmd)
+      Log.info("Exception running command %s", cmd)
       traceback.print_exc()
 
     return process
 
-  def _run_blocking_process(self, cmd, is_shell=False, env_to_exec=None):
+  def _run_blocking_process(self, cmd, is_shell=False):
     Log.info("Running blocking process as %s" % cmd)
     try:
       # stderr is redirected to stdout so that it can more easily be logged. stderr has a max buffer
       # size and can cause the child process to deadlock if it fills up
-      process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT, env=env_to_exec)
+      process = subprocess.Popen(cmd.cmd, shell=is_shell, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT, env=cmd.env)
 
       # wait for termination
-      self._wait_process_std_out_err(cmd, process)
+      self._wait_process_std_out_err(cmd.cmd, process)
     except Exception:
-      Log.info("Exception running command %:", cmd)
+      Log.info("Exception running command %s", cmd)
       traceback.print_exc()
 
     # return the exit code
@@ -855,7 +963,7 @@ class HeronExecutor(object):
           if process_info.name == command_name:
             del self.processes_to_monitor[process_info.pid]
             Log.info("Killing %s process with pid %d: %s" %
-                     (process_info.name, process_info.pid, ' '.join(command)))
+                     (process_info.name, process_info.pid, command))
             try:
               process_info.process.terminate()  # sends SIGTERM to process
             except OSError as e:
@@ -867,10 +975,11 @@ class HeronExecutor(object):
 
   def _start_processes(self, commands):
     """Start all commands and add them to the dict of processes to be monitored """
+    Log.info("Start processes")
     processes_to_monitor = {}
     # First start all the processes
     for (name, command) in commands.items():
-      p = self._run_process(name, command, self.shell_env)
+      p = self._run_process(name, command)
       processes_to_monitor[p.pid] = ProcessInfo(p, name, command)
 
       # Log down the pid file
@@ -884,6 +993,7 @@ class HeronExecutor(object):
     restarting any if they fail, up to max_runs times.
     """
     # Now wait for any child to die
+    Log.info("Start process monitor")
     while True:
       if len(self.processes_to_monitor) > 0:
         (pid, status) = os.wait()
@@ -904,7 +1014,7 @@ class HeronExecutor(object):
               Log.info("%s exited too many times" % name)
               sys.exit(1)
             time.sleep(self.interval_between_runs)
-            p = self._run_process(name, command, self.shell_env)
+            p = self._run_process(name, command)
             del self.processes_to_monitor[pid]
             self.processes_to_monitor[p.pid] =\
               ProcessInfo(p, name, command, old_process_info.attempts + 1)
@@ -913,9 +1023,22 @@ class HeronExecutor(object):
             log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
+    """
+    Prepare either TMaster or Streaming commands according to shard.
+    The Shell command is attached to all containers. The empty container plan and non-exist
+    container plan are bypassed.
+    """
     # During shutdown the watch might get triggered with the empty packing plan
     if len(self.packing_plan.container_plans) == 0:
       return {}
+    if self._get_instance_plans(self.packing_plan, self.shard) is None and self.shard != 0:
+      retval = {}
+      retval['heron-shell'] = Command([
+          '%s' % self.heron_shell_binary,
+          '--port=%s' % self.shell_port,
+          '--log_file_prefix=%s/heron-shell-%s.log' % (self.log_dir, self.shard),
+          '--secret=%s' % self.topology_id], self.shell_env)
+      return retval
 
     if self.shard == 0:
       commands = self._get_tmaster_processes()
@@ -985,10 +1108,18 @@ class HeronExecutor(object):
     """
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
+    Log.info("Start state manager watches")
+
+    with open(self.override_config_file, 'r') as stream:
+      overrides = yaml.load(stream)
+      if overrides is None:
+        overrides = dict()
+    overrides["heron.statemgr.connection.string"] = self.state_manager_connection
+
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(configloader.load_state_manager_locations(
         self.cluster, state_manager_config_file=self.state_manager_config_file,
-        overrides={"heron.statemgr.connection.string": self.state_manager_connection}))
+        **overrides))
     try:
       self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
       for state_manager in self.state_managers:
@@ -1027,6 +1158,62 @@ class HeronExecutor(object):
     for state_manager in self.state_managers:
       state_manager.stop()
 
+def setup(executor):
+  """Set up log, process and signal handlers"""
+  # pylint: disable=unused-argument
+  def signal_handler(signal_to_handle, frame):
+    # We would do nothing here but just exit
+    # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
+    Log.info('signal_handler invoked with signal %s', signal_to_handle)
+    executor.stop_state_manager_watches()
+    sys.exit(signal_to_handle)
+
+  def cleanup():
+    """Handler to trigger when receiving the SIGTERM signal
+    Do cleanup inside this method, including:
+    1. Terminate all children processes
+    """
+    Log.info('Executor terminated; exiting all process in executor.')
+
+    # Kill child processes first and wait for log collection to finish
+    for pid in executor.processes_to_monitor.keys():
+      os.kill(pid, signal.SIGTERM)
+    time.sleep(5)
+
+    # We would not wait or check whether process spawned dead or not
+    os.killpg(0, signal.SIGTERM)
+
+  # Redirect stdout and stderr to files in append mode
+  # The filename format is heron-executor-<container_id>.stdxxx
+  shardid = executor.shard
+  log.configure(logfile='heron-executor-%s.stdout' % shardid)
+
+  pid = os.getpid()
+  sid = os.getsid(pid)
+
+  # POSIX prohibits the change of the process group ID of a session leader
+  if pid <> sid:
+    Log.info('Set up process group; executor becomes leader')
+    os.setpgrp() # create new process group, become its leader
+
+  Log.info('Register the SIGTERM signal handler')
+  signal.signal(signal.SIGTERM, signal_handler)
+
+  Log.info('Register the atexit clean up')
+  atexit.register(cleanup)
+
+def start(executor):
+  """Set up environment and start executor"""
+  setup(executor)
+
+  # Start state manager watches which are responsible for monitoring states and
+  # launch processes
+  executor.start_state_manager_watches()
+
+  # Start process monitor which are responsible for restarting processes when
+  # they are dead. This is the main loop of executor
+  executor.start_process_monitor()
+
 def main():
   """Register exit handlers, initialize the executor and run it."""
   # Since Heron on YARN runs as headless users, pex compiled
@@ -1038,43 +1225,9 @@ def main():
 
   # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
-
-  # pylint: disable=unused-argument
-  def signal_handler(signal_to_handle, frame):
-    # We would do nothing here but just exit
-    # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
-    Log.info('signal_handler invoked with signal %s', signal_to_handle)
-    executor.stop_state_manager_watches()
-    sys.exit(signal_to_handle)
-
-  def setup(shardid):
-    # Redirect stdout and stderr to files in append mode
-    # The filename format is heron-executor-<container_id>.stdxxx
-    log.configure(logfile='heron-executor-%s.stdout' % shardid)
-
-    Log.info('Set up process group; executor becomes leader')
-    os.setpgrp() # create new process group, become its leader
-
-    Log.info('Register the SIGTERM signal handler')
-    signal.signal(signal.SIGTERM, signal_handler)
-
-    Log.info('Register the atexit clean up')
-    atexit.register(cleanup)
-
-  def cleanup():
-    """Handler to trigger when receiving the SIGTERM signal
-    Do cleanup inside this method, including:
-    1. Terminate all children processes
-    """
-    Log.info('Executor terminated; exiting all process in executor.')
-    # We would not wait or check whether process spawned dead or not
-    os.killpg(0, signal.SIGTERM)
-
-  setup(executor.shard)
-
   executor.initialize()
-  executor.start_state_manager_watches()
-  executor.start_process_monitor()
+
+  start(executor)
 
 if __name__ == "__main__":
   main()

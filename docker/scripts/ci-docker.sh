@@ -1,4 +1,20 @@
 #!/bin/sh
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 set -o errexit
 
 realpath() {
@@ -50,18 +66,14 @@ build_exec_image() {
   setup_scratch_dir $SCRATCH_DIR
 
   # need to copy artifacts locally
-  TOOLS_FILE="$OUTPUT_DIRECTORY/heron-tools-install.sh"
-  TOOLS_OUT_FILE="$SCRATCH_DIR/artifacts/heron-tools-install.sh"
+  INSTALL_FILE="$OUTPUT_DIRECTORY/heron-install.sh"
+  INSTALL_OUT_FILE="$SCRATCH_DIR/artifacts/heron-install.sh"
 
   CORE_FILE="$OUTPUT_DIRECTORY/heron-core.tar.gz"
   CORE_OUT_FILE="$SCRATCH_DIR/artifacts/heron-core.tar.gz"
 
-  CLIENT_FILE="$OUTPUT_DIRECTORY/heron-client-install.sh"
-  CLIENT_OUT_FILE="$SCRATCH_DIR/artifacts/heron-client-install.sh"
-
-  cp $TOOLS_FILE $TOOLS_OUT_FILE
+  cp $INSTALL_FILE $INSTALL_OUT_FILE
   cp $CORE_FILE $CORE_OUT_FILE
-  cp $CLIENT_FILE $CLIENT_OUT_FILE
 
   export HERON_VERSION
 
@@ -127,7 +139,7 @@ case $# in
   *)
     echo "Usage: $0 <operation> <platform> <version_string> <tag-prefix> <input-output-directory> "
     echo "  "
-    echo "Platforms Supported: latest ubuntu14.04, ubuntu15.10, ubuntu16.04 centos7"
+    echo "Platforms Supported: latest, ubuntu14.04, ubuntu16.04, centos7, debian9"
     echo "  "
     echo "Example:"
     echo "  $0 build ubuntu14.04 0.12.0 heron ."

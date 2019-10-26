@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <stdlib.h>
@@ -49,18 +52,19 @@ int main(int argc, char* argv[]) {
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  EventLoopImpl eventLoop;
-  heron::config::HeronInternalsConfigReader::Create(&eventLoop, FLAGS_config_file,
+  auto eventLoop = std::make_shared<EventLoopImpl>();
+  heron::config::HeronInternalsConfigReader::Create(eventLoop, FLAGS_config_file,
                                                     FLAGS_override_config_file);
 
   auto gateway = new heron::instance::Gateway(FLAGS_topology_name, FLAGS_topology_id,
                                               FLAGS_instance_id, FLAGS_component_name,
                                               FLAGS_task_id, FLAGS_component_index,
                                               FLAGS_stmgr_id, FLAGS_stmgr_port,
-                                              FLAGS_metricsmgr_port, &eventLoop);
+                                              FLAGS_metricsmgr_port, eventLoop);
   auto slave = new heron::instance::Slave(FLAGS_task_id, FLAGS_topology_binary);
 
-  auto dataToSlave = new heron::instance::NotifyingCommunicator<google::protobuf::Message*>(
+  auto dataToSlave =
+          new heron::instance::NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>(
                                slave->eventLoop(),
                                std::bind(&heron::instance::Slave::HandleGatewayData,
                                          slave, std::placeholders::_1),

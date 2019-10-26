@@ -54,7 +54,7 @@ apiserver_deps_files = \
 java_binary(
     name = 'heron-apiserver-unshaded',
     srcs = glob(["**/apiserver/**/*.java"]),
-    main_class = "com.twitter.heron.apiserver.Runtime",
+    main_class = "org.apache.heron.apiserver.Runtime",
     deps = apiserver_deps_files,
 )
 

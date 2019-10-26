@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Heron Tracker REST API
 ---
@@ -355,7 +373,7 @@ Returns all exceptions for the component of the topology.
 
 ### <a name="topologies_pid">/topologies/pid</a>
 
-Returns the PID of the instance jvm process.
+Returns the PID of the instance JVM process.
 
 #### Parameters
 
@@ -368,7 +386,7 @@ Returns the PID of the instance jvm process.
 
 ### <a name="topologies_jstack">/topologies/jstack</a>
 
-Returns the thread dump of the instance jvm process.
+Returns the thread dump of the instance JVM process.
 
 #### Parameters
 
@@ -395,7 +413,7 @@ Returns the path to the file that can be downloaded externally.
 
 ### <a name="topologies_histo">/topologies/histo</a>
 
-Returns histogram for the instance jvm process.
+Returns histogram for the instance JVM process.
 
 #### Parameters
 

@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <dlfcn.h>
@@ -32,11 +35,11 @@
 namespace heron {
 namespace instance {
 
-BoltInstance::BoltInstance(EventLoop* eventLoop,
-                           std::shared_ptr<TaskContextImpl> taskContext,
-                           NotifyingCommunicator<google::protobuf::Message*>* dataToSlave,
-                           NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
-                           void* dllHandle)
+BoltInstance::BoltInstance(std::shared_ptr<EventLoop> eventLoop,
+    std::shared_ptr<TaskContextImpl> taskContext,
+    NotifyingCommunicator<pool_unique_ptr<google::protobuf::Message>>* dataToSlave,
+    NotifyingCommunicator<google::protobuf::Message*>* dataFromSlave,
+    void* dllHandle)
   : taskContext_(taskContext), dataToSlave_(dataToSlave),
     dataFromSlave_(dataFromSlave), eventLoop_(eventLoop), bolt_(NULL), active_(false),
     tickTimer_(-1) {
@@ -111,10 +114,11 @@ void BoltInstance::executeTuple(const proto::api::StreamId& stream,
   metrics_->executeTuple(stream.id(), stream.component_name(), endTime - startTime);
 }
 
-void BoltInstance::HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet) {
+void BoltInstance::HandleGatewayTuples(pool_unique_ptr<proto::system::HeronTupleSet2> tupleSet) {
   if (tupleSet->has_control()) {
     LOG(FATAL) << "Bolt cannot get incoming control tuples from other components";
   }
+
   if (tupleSet->has_data()) {
     for (int i = 0; i < tupleSet->data().tuples_size(); ++i) {
       auto t = new proto::system::HeronDataTuple();
@@ -125,7 +129,7 @@ void BoltInstance::HandleGatewayTuples(proto::system::HeronTupleSet2* tupleSet) 
       executeTuple(tupleSet->data().stream(), tup);
     }
   }
-  delete tupleSet;
+
   if (dataFromSlave_->size() > maxWriteBufferSize_) {
     dataToSlave_->stopConsumption();
   }

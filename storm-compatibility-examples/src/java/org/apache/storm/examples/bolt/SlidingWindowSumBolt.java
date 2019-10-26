@@ -44,7 +44,7 @@ public class SlidingWindowSumBolt extends BaseWindowedBolt {
 
   @Override
   @SuppressWarnings("HiddenField")
-  public void prepare(Map<String, Object> topoConf, TopologyContext context, OutputCollector
+  public void prepare(Map topoConf, TopologyContext context, OutputCollector
       collector) {
     this.collector = collector;
   }

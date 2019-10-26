@@ -1,6 +1,0 @@
-# state manager class for managing state in a persistent fashion
-heron.class.state.manager:     com.twitter.heron.state.localfile.LocalFileStateManager
-
-# zookeeper config for storing topology definition, physical plan and execution state
-# state.root.address:    /storm/heron/cluster
-# zk.connection.string:  szookeeper.local.twitter.com

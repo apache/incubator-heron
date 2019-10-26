@@ -9,7 +9,7 @@ spi_deps_files = [
 localfs_deps_files = \
     spi_deps_files + [
         "//heron/common/src/java:basics-java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ]
 
 java_library(

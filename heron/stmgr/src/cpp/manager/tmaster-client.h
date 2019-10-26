@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
@@ -28,15 +31,20 @@
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class TMasterClient : public Client {
  public:
-  TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
+  TMasterClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
+                const sp_string& _stmgr_id,
                 const sp_string& _stmgr_host, sp_int32 _data_port, sp_int32 _local_data_port,
                 sp_int32 _shell_port,
-                VCallback<proto::system::PhysicalPlan*> _pplan_watch,
+                VCallback<shared_ptr<proto::system::PhysicalPlan>> _pplan_watch,
                 VCallback<sp_string> _stateful_checkpoint_watch,
                 VCallback<sp_string, sp_int64> _restore_topology_watch,
-                VCallback<sp_string> _start_stateful_watch);
+                VCallback<sp_string> _start_stateful_watch,
+                VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&>
+                    _broadcast_checkpoint_saved);
   virtual ~TMasterClient();
 
   // Told by the upper layer to disconnect and self destruct
@@ -67,15 +75,23 @@ class TMasterClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* _response,
+  void HandleRegisterResponse(void*,
+                              pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> _response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*, proto::tmaster::StMgrHeartbeatResponse* response,
+  void HandleHeartbeatResponse(void*,
+                               pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
 
-  void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message);
-  void HandleStatefulCheckpointMessage(proto::ckptmgr::StartStatefulCheckpoint* _message);
-  void HandleRestoreTopologyStateRequest(proto::ckptmgr::RestoreTopologyStateRequest* _message);
-  void HandleStartStmgrStatefulProcessing(proto::ckptmgr::StartStmgrStatefulProcessing* _msg);
+  void HandleNewAssignmentMessage(pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> _message);
+  void HandleStatefulCheckpointMessage(
+          pool_unique_ptr<proto::ckptmgr::StartStatefulCheckpoint> _message);
+  void HandleRestoreTopologyStateRequest(
+          pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> _message);
+  void HandleStartStmgrStatefulProcessing(
+          pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> _msg);
+
+  void HandleStatefulCheckpointSavedMessage(
+          pool_unique_ptr<proto::ckptmgr::StatefulConsistentCheckpointSaved> _msg);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();
@@ -91,11 +107,11 @@ class TMasterClient : public Client {
   sp_int32 shell_port_;
 
   // Set of instances to be reported to tmaster
-  std::set<proto::system::Instance*> instances_;
+  std::set<unique_ptr<proto::system::Instance>> instances_;
 
   bool to_die_;
   // We invoke this callback upon a new physical plan from tmaster
-  VCallback<proto::system::PhysicalPlan*> pplan_watch_;
+  VCallback<shared_ptr<proto::system::PhysicalPlan>> pplan_watch_;
   // We invoke this callback upon receiving a checkpoint message from tmaster
   // passing in the checkpoint id
   VCallback<sp_string> stateful_checkpoint_watch_;
@@ -105,6 +121,9 @@ class TMasterClient : public Client {
   // We invoke this callback upon receiving a StartStatefulProcessing message from tmaster
   // passing in the checkpoint id
   VCallback<sp_string> start_stateful_watch_;
+  // This callback will be invoked upon receiving a StatefulConsistentCheckpointSaved message.
+  // We will then forward this message to all the instances connected to this stmgr
+  VCallback<const proto::ckptmgr::StatefulConsistentCheckpointSaved&> broadcast_checkpoint_saved_;
 
   // Configs to be read
   sp_int32 reconnect_tmaster_interval_sec_;
@@ -112,6 +131,10 @@ class TMasterClient : public Client {
 
   sp_int64 reconnect_timer_id;
   sp_int64 heartbeat_timer_id;
+
+  // Counter for reconnect attempts
+  sp_int32 reconnect_attempts_;
+  sp_int32 reconnect_max_attempt_;
 
   // Permanent timer callbacks
   VCallback<> reconnect_timer_cb;

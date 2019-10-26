@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STATEFUL_RESTORER_H_
@@ -44,6 +47,8 @@ class TimeSpentMetric;
 namespace heron {
 namespace stmgr {
 
+using std::shared_ptr;
+
 class InstanceServer;
 class TupleCache;
 class StMgrClientMgr;
@@ -72,10 +77,11 @@ class CkptMgrClient;
 // and in particular the recovery section.
 class StatefulRestorer {
  public:
-  explicit StatefulRestorer(CkptMgrClient* _ckptmgr,
-                            StMgrClientMgr* _clientmgr, TupleCache* _tuple_cache,
-                            InstanceServer* _server,
-                            common::MetricsMgrSt* _metrics_manager_client,
+  explicit StatefulRestorer(shared_ptr<CkptMgrClient> _ckptmgr,
+                            shared_ptr<StMgrClientMgr> _clientmgr,
+                            shared_ptr<TupleCache> _tuple_cache,
+                            shared_ptr<InstanceServer> _server,
+                            shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
                             std::function<void(proto::system::StatusCode,
                                                std::string, sp_int64)> _restore_done_watcher);
   virtual ~StatefulRestorer();
@@ -89,7 +95,7 @@ class StatefulRestorer {
   // and the _restore_txid
   void StartRestore(const std::string& _checkpoint_id, sp_int64 _restore_txid,
                     const std::unordered_set<sp_int32>& _local_taskids,
-                    proto::system::PhysicalPlan* _pplan);
+                    proto::system::PhysicalPlan const& _pplan);
   // Called when ckptmgr client restarts
   void HandleCkptMgrRestart();
   // Called when local instance _task_id is done restoring its state at
@@ -139,11 +145,11 @@ class StatefulRestorer {
   // What are all our local taskids that we need to restore
   std::unordered_set<sp_int32> local_taskids_;
 
-  CkptMgrClient* ckptmgr_;
-  StMgrClientMgr* clientmgr_;
-  TupleCache* tuple_cache_;
-  InstanceServer* server_;
-  common::MetricsMgrSt* metrics_manager_client_;
+  shared_ptr<CkptMgrClient> ckptmgr_;
+  shared_ptr<StMgrClientMgr> clientmgr_;
+  shared_ptr<TupleCache> tuple_cache_;
+  shared_ptr<InstanceServer> server_;
+  shared_ptr<common::MetricsMgrSt> metrics_manager_client_;
 
   // Are we in the middle of a restore
   bool in_progress_;
@@ -153,8 +159,8 @@ class StatefulRestorer {
   std::function<void(proto::system::StatusCode, std::string, sp_int64)> restore_done_watcher_;
 
   // Different metrics
-  common::MultiCountMetric* multi_count_metric_;
-  common::TimeSpentMetric* time_spent_metric_;
+  shared_ptr<common::MultiCountMetric> multi_count_metric_;
+  shared_ptr<common::TimeSpentMetric>  time_spent_metric_;
 };
 }  // namespace stmgr
 }  // namespace heron

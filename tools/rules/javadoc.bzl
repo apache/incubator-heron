@@ -15,11 +15,11 @@
 
 def _impl(ctx):
   zip_output = ctx.outputs.zip
-  transitive_jar_set = depset()
-  source_jars = depset()
+  transitive_jar_set = []
+  source_jars = []
   for l in ctx.attr.libs:
-    source_jars += l.java.source_jars
-    transitive_jar_set += l.java.transitive_deps
+    source_jars += l.java.source_jars.to_list()
+    transitive_jar_set += l.java.transitive_deps.to_list()
   transitive_jar_paths = [j.path for j in transitive_jar_set]
   dir = ctx.outputs.zip.path + ".dir"
   source = ctx.outputs.zip.path + ".source"
@@ -49,7 +49,7 @@ def _impl(ctx):
     "find %s -exec touch -t 198001010000 '{}' ';'" % dir,
     "(cd %s && zip -qr ../%s *)" % (dir, ctx.outputs.zip.basename),
   ]
-  ctx.action(
+  ctx.actions.run_shell(
       inputs = list(transitive_jar_set) + list(source_jars) + ctx.files._jdk,
       outputs = [zip_output],
       command = " && ".join(cmd))
@@ -61,11 +61,10 @@ java_doc = rule(
         "external_docs": attr.string_list(),
         "_javadoc": attr.label(
             default = Label("@local_jdk//:bin/javadoc"),
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
         ),
         "_jdk": attr.label(
-            default = Label("@local_jdk//:jdk-default"),
+            default = Label("@local_jdk//:bin/javadoc"),
             allow_files = True,
         ),
     },

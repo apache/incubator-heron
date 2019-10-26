@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +62,7 @@ class BaseServer {
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
-  BaseServer(EventLoop* eventLoop, const NetworkOptions& options);
+  BaseServer(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Destructor.
   virtual ~BaseServer();
@@ -98,7 +101,7 @@ class BaseServer {
  protected:
   // Instantiate a new Connection
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                           EventLoop* eventLoop) = 0;
+                                           std::shared_ptr<EventLoop> eventLoop) = 0;
 
   // Called when a new connection is accepted.
   virtual void HandleNewConnection_Base(BaseConnection* newConnection) = 0;
@@ -108,14 +111,14 @@ class BaseServer {
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status) = 0;
 
   // The underlying EventLoop
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
   // The set of active connections
   std::unordered_set<BaseConnection*> active_connections_;
 
  private:
   // Internal helper function to initialize things
-  void Init(EventLoop* eventLoop, const NetworkOptions& options);
+  void Init(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
 
   // Internal method to be called when a write event happens on listen_fd_
   void OnNewConnection(EventLoop::Status status);
@@ -126,7 +129,7 @@ class BaseServer {
   // When EventLoop invokes upon a timer
   void OnTimer(VCallback<> cb, EventLoop::Status status);
 
-  // Internal functions which do most of the api related activities in the
+  // Internal functions which do most of the API related activities in the
   // main thread
   void InternalCloseConnection(BaseConnection* _connection);
   void InternalAddTimer(VCallback<> cb, sp_int64 msecs);

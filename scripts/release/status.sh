@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 # This script will be run when the bazel build process starts to
 # generate key-value information that represents the status of the
 # workspace. The output should be like
@@ -28,26 +45,40 @@ function disable_e_and_execute {
 # get the release tag version or the branch name
 if [ -z ${HERON_BUILD_VERSION+x} ];
 then
-  cmd="git rev-parse --abbrev-ref HEAD"
-  build_version=$($cmd) || die "Failed to run command to check head: $cmd"
-
-  if [ "${build_version}" = "HEAD" ];
+  # variable HERON_BUILD_VERSION is not available, use git branch as build version
+  if [ -d .git ];
   then
-    cmd="git describe --tags --always"
-    build_version=$($cmd) || die "Failed to run command to get git release: $cmd"
+    cmd="git rev-parse --abbrev-ref HEAD"
+    build_version=$($cmd) || die "Failed to run command to check head: $cmd"
+
+    if [ "${build_version}" = "HEAD" ];
+    then
+      cmd="git describe --tags --always"
+      build_version=$($cmd) || die "Failed to run command to get git release: $cmd"
+    fi
+  else
+    # not git managed, use current dir as build version
+    current_dir=$(pwd)
+    build_version=$(basename "$current_dir")
   fi
 else
+  # variable HERON_BUILD_VERSION is available, use it.
   build_version=${HERON_BUILD_VERSION}
 fi
 echo "HERON_BUILD_VERSION ${build_version}"
 
 # The code below presents an implementation that works for git repository
-if [ -z ${HERON_GIT_REV+x} ];
+if [ -d .git ];
 then
-  cmd="git rev-parse HEAD"
-  git_rev=$($cmd) || die "Failed to get git revision: $cmd"
+  if [ -z ${HERON_GIT_REV+x} ];
+  then
+    cmd="git rev-parse HEAD"
+    git_rev=$($cmd) || die "Failed to get git revision: $cmd"
+  else
+    git_rev=${HERON_GIT_REV}
+  fi
 else
-  git_rev=${HERON_GIT_REV}
+  git_rev=$build_version
 fi
 
 echo "HERON_BUILD_SCM_REVISION ${git_rev}"
@@ -78,23 +109,28 @@ echo "HERON_BUILD_TIMESTAMP ${build_timestamp}"
 
 if [ -z ${HERON_BUILD_USER+x} ];
 then
-  build_user=${USER}
+  build_user=${USER:-root}
 else
   build_user=${HERON_BUILD_USER}
 fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -z ${HERON_TREE_STATUS+x} ];
+if [ -d .git ];
 then
-  status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
-  if [[ $status == 0 ]];
+  if [ -z ${HERON_TREE_STATUS+x} ];
   then
-    tree_status="Clean"
+    status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
+    if [[ $status == 0 ]];
+    then
+      tree_status="Clean"
+    else
+      tree_status="Modified"
+    fi
   else
-    tree_status="Modified"
+    tree_status=${HERON_TREE_STATUS}
   fi
 else
-  tree_status=${HERON_TREE_STATUS}
+  tree_status="Clean"
 fi
 echo "HERON_BUILD_RELEASE_STATUS ${tree_status}"

@@ -1,8 +1,29 @@
 /** @jsx React.DOM */
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 var SUM = 0,
     AVG = 1,
     LAST = 2;
+
+var countersUrlFlags = {};
 
 var AllExceptions = React.createClass({
   getInitialState: function() {
@@ -244,7 +265,7 @@ var AllMetrics = React.createClass({
 
   fetchLplan: function () {
     if (this.state.lplan === undefined) {
-      var fetch_url = this.props.baseUrl + 
+      var fetch_url = this.props.baseUrl +
        "/topologies/" +
         this.props.cluster + "/" +
         this.props.environ + "/" +
@@ -375,7 +396,7 @@ var AllMetrics = React.createClass({
         "component=" + this.props.comp_name;
       var metricnames = [];
 
-      // Explicitly add jvm uptime metric since it
+      // Explicitly add JVM uptime metric since it
       // is unique, in the sense that no stream is
       // associated with it.
       metricnames.push("__jvm-uptime-secs");
@@ -461,50 +482,58 @@ var AllMetrics = React.createClass({
   },
 
   fetchCountersURL: function(url, timeRange) {
-    $.ajax({
-      url:       url,
-      dataType:  'json',
-      success: function(response) {
-        if (response.hasOwnProperty("metrics")) {
-          var component = response.component;
-          var metrics = this.metrics;
-          if (!metrics.hasOwnProperty(component)) {
-            metrics[response.component] = {};
-          }
-          if (!metrics[component].hasOwnProperty(timeRange)) {
-            metrics[component][timeRange] = {};
-          }
-          for (var name in response.metrics) {
-            if (response.metrics.hasOwnProperty(name)) {
-              var metricname = name;
-              // Handle __jvm-uptime-secs as a special case.
-              if (name !== "__jvm-uptime-secs") {
-                metricname = name.split("/")[0] + "/";
-              }
-              var displayName = this.supportedMetricNames[metricname].name;
-              if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
-                metrics[component][timeRange][displayName] = {};
-              }
-              var tmpMetrics = {
-                metrics: response.metrics[name],
-                scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
-                aggregationType: this.supportedMetricNames[metricname].aggregationType
-              };
-              if (name === "__jvm-uptime-secs") {
-                metrics[component][timeRange][displayName][""] = tmpMetrics;
-              } else {
-                metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+    // This function might be called multiple times with the same url. Note
+    // that the timeRange value is inlcuded in the url so it can be ignored in
+    // the check. We check if the request has been made before first and
+    // skip if this is a duplicated request.
+    if (!countersUrlFlags[url]) {
+      countersUrlFlags[url] = true;  // Set the flag
+
+      $.ajax({
+        url:       url,
+        dataType:  'json',
+        success: function(response) {
+          if (response.hasOwnProperty("metrics")) {
+            var component = response.component;
+            var metrics = this.metrics;
+            if (!metrics.hasOwnProperty(component)) {
+              metrics[response.component] = {};
+            }
+            if (!metrics[component].hasOwnProperty(timeRange)) {
+              metrics[component][timeRange] = {};
+            }
+            for (var name in response.metrics) {
+              if (response.metrics.hasOwnProperty(name)) {
+                var metricname = name;
+                // Handle __jvm-uptime-secs as a special case.
+                if (name !== "__jvm-uptime-secs") {
+                  metricname = name.split("/")[0] + "/";
+                }
+                var displayName = this.supportedMetricNames[metricname].name;
+                if (!metrics[component][timeRange].hasOwnProperty(displayName)) {
+                  metrics[component][timeRange][displayName] = {};
+                }
+                var tmpMetrics = {
+                  metrics: response.metrics[name],
+                  scaleDevisor: this.supportedMetricNames[metricname].scaleDevisor,
+                  aggregationType: this.supportedMetricNames[metricname].aggregationType
+                };
+                if (name === "__jvm-uptime-secs") {
+                  metrics[component][timeRange][displayName][""] = tmpMetrics;
+                } else {
+                  metrics[component][timeRange][displayName][name.split("/")[1]] = tmpMetrics;
+                }
               }
             }
+            metrics[component][timeRange]["__interval"] = response.interval;
+            this.setMetrics(metrics);
           }
-          metrics[component][timeRange]["__interval"] = response.interval;
-          this.setMetrics(metrics);
-        }
-      }.bind(this),
+        }.bind(this),
 
-      error: function() {
-      }
-    });
+        error: function() {
+        }
+      });
+    }
   },
 
   render: function() {
@@ -526,6 +555,7 @@ var AllMetrics = React.createClass({
       cluster: this.props.cluster,
       environ: this.props.environ,
       metrics: this.state.metrics,
+      lplan: this.state.lplan,
       pplan: this.state.pplan,
       instance: this.props.instance,
     };
@@ -691,8 +721,13 @@ var ComponentCounters = React.createClass({
     headings.push.apply(headings, timeRanges);
 
     var rows = [];
+    var extraLinks = [];
     if (this.props.info.comp_name) {
       rows = this.getComponentMetricsRows();
+      var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
+      if (spoutDetail) {
+        extraLinks = spoutDetail.extra_links;
+      }
     } else {
       rows = this.getTopologyMetricsRows();
     }
@@ -701,7 +736,24 @@ var ComponentCounters = React.createClass({
       <div>
         <div className="widget-header">
           <div className="title">
-            <h4>{title}</h4>
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            {extraLinks.map(function (extraLink) {
+              return <a id={extraLink['name']}
+                        className="btn btn-primary btn-xs"
+                        href={extraLink['url']}
+                        target="_blank"
+                        style={{"margin-right": "5px"}}>{extraLink['name']}
+                     </a>
+            })}
+            </div>
           </div>
         </div>
         <table className="table table-striped table-hover no-margin">
@@ -1018,4 +1070,3 @@ var InstanceCounters = React.createClass({
     );
   }
 });
-

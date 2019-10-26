@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -39,7 +42,7 @@ namespace common {
 
 class HeronLocalFileStateMgr : public HeronStateMgr {
  public:
-  HeronLocalFileStateMgr(const std::string& _topleveldir, EventLoop* eventLoop);
+  HeronLocalFileStateMgr(const std::string& _topleveldir, shared_ptr<EventLoop> eventLoop);
   virtual ~HeronLocalFileStateMgr();
 
   // Sets up the basic filesystem tree at the given location
@@ -51,12 +54,12 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
 
   // implement the functions
   void GetTMasterLocation(const std::string& _topology_name,
-                          proto::tmaster::TMasterLocation* _return,
+                          shared_ptr<proto::tmaster::TMasterLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetMetricsCacheLocation(const std::string& _topology_name,
-                          proto::tmaster::MetricsCacheLocation* _return,
+                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
@@ -64,7 +67,7 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
   void CreateTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
   void DeleteTopology(const std::string& _topology_name, VCallback<proto::system::StatusCode> _cb);
   void SetTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
-  void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+  void GetTopology(const std::string& _topology_name, proto::api::Topology& _return,
                    VCallback<proto::system::StatusCode> _cb);
 
   void CreatePhysicalPlan(const proto::system::PhysicalPlan& _pplan,
@@ -73,13 +76,15 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                           VCallback<proto::system::StatusCode> _cb);
   void SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
                        VCallback<proto::system::StatusCode> _cb);
-  void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlan(const std::string& _topology_name,
+                       shared_ptr<proto::system::PhysicalPlan> _return,
                        VCallback<proto::system::StatusCode> _cb);
 
   void CreatePackingPlan(const std::string& _topology_name,
                          const proto::system::PackingPlan& _packingPlan,
                          VCallback<proto::system::StatusCode> _cb);
-  void GetPackingPlan(const std::string& _topology_name, proto::system::PackingPlan* _return,
+  void GetPackingPlan(const std::string& _topology_name,
+                      shared_ptr<proto::system::PackingPlan> _return,
                       VCallback<proto::system::StatusCode> _cb);
 
   void CreateExecutionState(const proto::system::ExecutionState& _pplan,
@@ -92,15 +97,15 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                          VCallback<proto::system::StatusCode> _cb);
 
   void CreateStatefulCheckpoints(const std::string& _topology_name,
-                      const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
-                      VCallback<proto::system::StatusCode> _cb);
+                                 shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
+                                 VCallback<proto::system::StatusCode> _cb);
   void DeleteStatefulCheckpoints(const std::string& _topology_name,
                             VCallback<proto::system::StatusCode> _cb);
   void GetStatefulCheckpoints(const std::string& _topology_name,
-                      proto::ckptmgr::StatefulConsistentCheckpoints* _return,
-                      VCallback<proto::system::StatusCode> _cb);
+                              shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
+                              VCallback<proto::system::StatusCode> _cb);
   void SetStatefulCheckpoints(const std::string& _topology_name,
-                      const proto::ckptmgr::StatefulConsistentCheckpoints& _state,
+                      shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _state,
                       VCallback<proto::system::StatusCode> _cb);
 
   void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
@@ -132,7 +137,7 @@ class HeronLocalFileStateMgr : public HeronStateMgr {
                         VCallback<> _watcher, EventLoop::Status);
 
   // Hold the EventLoop for scheduling callbacks
-  EventLoop* eventLoop_;
+  shared_ptr<EventLoop> eventLoop_;
 };
 }  // namespace common
 }  // namespace heron

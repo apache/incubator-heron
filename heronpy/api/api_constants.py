@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-''' api_constants.py: defines api constants for topology config'''
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+''' API_constants.py: defines API constants for topology config'''
 
 ####################################################################################################
 ###########################  Constants for topology configuration ##################################
@@ -27,7 +31,7 @@ class TopologyReliabilityMode(object):
 
 # Topology-specific options for the worker child process.
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
-# Per component jvm options.
+# Per component JVM options.
 TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts"
 # How often a tick tuple from the "__system" component and "__tick" stream should be sent to tasks.
 TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
@@ -56,23 +60,27 @@ TOPOLOGY_STATEFUL_CHECKPOINT_INTERVAL_SECONDS = "topology.stateful.checkpoint.in
 # clean state, i.e. ignore any checkpoint state
 TOPOLOGY_STATEFUL_START_CLEAN = "topology.stateful.start.clean"
 
-# Number of cpu cores per container to be reserved for this topology.
+# Number of CPU cores per container to be reserved for this topology.
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
-# Amount of ram per container to be reserved for this topology, in bytes.
+# Amount of RAM per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram"
 # Amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk"
-# Hint for max amount of ram per container to be reserved for this topology, in bytes.
+# Hint for max amount of RAM per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_CPU_HINT = "topology.container.max.cpu.hint"
 # Hint for max amount of disk per container to be reserved for this topology, in bytes.
 TOPOLOGY_CONTAINER_MAX_DISK_HINT = "topology.container.max.disk.hint"
 # Padding percentage for this container.
 TOPOLOGY_CONTAINER_PADDING_PERCENTAGE = "topology.container.padding.percentage"
-# Amount of ram padding per container.
+# Amount of RAM padding per container.
 TOPOLOGY_CONTAINER_RAM_PADDING = "topology.container.ram.padding"
 
-# Per component ram requirement.
+# Per component CPU requirement.
+TOPOLOGY_COMPONENT_CPUMAP = "topology.component.cpumap"
+# Per component RAM requirement.
 TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
+# Per component disk requirement.
+TOPOLOGY_COMPONENT_DISKMAP = "topology.component.diskmap"
 # Name of the topology, automatically set by Heron when the topology is submitted.
 TOPOLOGY_NAME = "topology.name"
 # Name of the team which owns this topology.
@@ -87,3 +95,5 @@ TOPOLOGY_PROJECT_NAME = "topology.project.name"
 # Any user defined classpath that needs to be passed to instances should be set in to config
 # through this key.
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
+# The per component output bytes per second in this topology.
+TOPOLOGY_COMPONENT_OUTPUT_BPS = "topology.component.output.bps"

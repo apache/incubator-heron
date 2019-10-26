@@ -34,7 +34,7 @@ public class EmitInfo {
     this.outTasks = outTasks;
   }
 
-  public EmitInfo(com.twitter.heron.api.hooks.info.EmitInfo info) {
+  public EmitInfo(org.apache.heron.api.hooks.info.EmitInfo info) {
     this.values = info.getValues();
     this.stream = info.getStream();
     this.taskId = info.getTaskId();

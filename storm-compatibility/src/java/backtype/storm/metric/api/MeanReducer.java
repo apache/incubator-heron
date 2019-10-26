@@ -18,7 +18,7 @@
 
 package backtype.storm.metric.api;
 
-import com.twitter.heron.api.metric.MeanReducerState;
+import org.apache.heron.api.metric.MeanReducerState;
 
 public class MeanReducer implements IReducer<MeanReducerState> {
   public MeanReducerState init() {

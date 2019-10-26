@@ -51,7 +51,7 @@ import backtype.storm.tuple.Fields;
  * synchronize state with StateSpouts this object is subscribed to.
  */
 public class TopologyContext extends WorkerTopologyContext implements IMetricsContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate;
+  private org.apache.heron.api.topology.TopologyContext delegate;
 
   // Constructor to match the signature of the storm's TopologyContext
   // Note that here, we fake the clojure.lang.Atom by creating our own class
@@ -67,10 +67,10 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
                          Map<String, Object> userResources,
                          Map<String, Object> executorData, Map<String, Object> registeredMetrics,
                          clojure.lang.Atom openOrPrepareWasCalled) {
-    super((com.twitter.heron.api.topology.TopologyContext) null);
+    super((org.apache.heron.api.topology.TopologyContext) null);
   }
 
-  public TopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
+  public TopologyContext(org.apache.heron.api.topology.TopologyContext delegate) {
     super(delegate);
     this.delegate = delegate;
   }
@@ -149,6 +149,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /**
    * Gets the component id for this task. The component id maps
    * to a component id specified for a Spout or Bolt in the topology definition.
+   * @return the compoenent id
    */
   public String getThisComponentId() {
     return delegate.getThisComponentId();
@@ -157,6 +158,8 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /**
    * Gets the declared output fields for the specified stream id for the component
    * this task is a part of.
+   * @param streamId The id of the output field.
+   * @return the declared output fields for the specified stream id
    */
   public Fields getThisOutputFields(String streamId) {
     return new Fields(delegate.getThisOutputFields(streamId));
@@ -164,6 +167,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
 
   /**
    * Gets the set of streams declared for the component of this task.
+   * @return the set of streams
    */
   public Set<String> getThisStreams() {
     return delegate.getThisStreams();
@@ -173,6 +177,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    * Gets the index of this task id in getComponentTasks(getThisComponentId()).
    * An example use case for this method is determining which task
    * accesses which resource in a distributed resource to ensure an even distribution.
+   * @return the task index
    */
   public int getThisTaskIndex() {
     return delegate.getThisTaskIndex();
@@ -218,14 +223,14 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   */
 
   public void addTaskHook(ITaskHook newHook) {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+    Collection<org.apache.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
     if (hooks == null) {
       ITaskHookDelegate delegateHook = new ITaskHookDelegate();
       delegateHook.addHook(newHook);
 
       delegate.addTaskHook(delegateHook);
     } else {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+      for (org.apache.heron.api.hooks.ITaskHook hook : hooks) {
         if (hook instanceof ITaskHookDelegate) {
           ITaskHookDelegate delegateHook = (ITaskHookDelegate) hook;
           delegateHook.addHook(newHook);
@@ -237,9 +242,9 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   }
 
   public Collection<ITaskHook> getHooks() {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+    Collection<org.apache.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
     if (hooks != null) {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+      for (org.apache.heron.api.hooks.ITaskHook hook : hooks) {
         if (hook instanceof ITaskHookDelegate) {
           return ((ITaskHookDelegate) hook).getHooks();
         }

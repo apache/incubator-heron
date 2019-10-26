@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_CHECKPOINT_GATEWAY_H_
@@ -38,6 +41,10 @@ namespace stmgr {
 
 class NeighbourCalculator;
 
+using std::unique_ptr;
+using std::shared_ptr;
+using proto::ckptmgr::InitiateStatefulCheckpoint;
+
 // The CheckpointGateway class defines the buffer inside the stmgr
 // that exists to buffer tuples to all the local instances until
 // all upstream checkpoint markers are received. The gateway
@@ -46,14 +53,14 @@ class NeighbourCalculator;
 class CheckpointGateway {
  public:
   explicit CheckpointGateway(sp_uint64 _drain_threshold,
-        NeighbourCalculator* _neighbour_calculator,
-        common::MetricsMgrSt* _metrics_manager_client,
+        shared_ptr<NeighbourCalculator> _neighbour_calculator,
+        shared_ptr<common::MetricsMgrSt> const& _metrics_manager_client,
         std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer,
         std::function<void(proto::stmgr::TupleStreamMessage*)> tuplestream_drainer,
-        std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> ckpt_drainer);
+        std::function<void(sp_int32, pool_unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer);
   virtual ~CheckpointGateway();
   void SendToInstance(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance(proto::stmgr::TupleStreamMessage* _message);
+  void SendToInstance(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
   void HandleUpstreamMarker(sp_int32 _src_task_id, sp_int32 _destination_task_id,
                             const sp_string& _checkpoint_id);
 
@@ -63,7 +70,7 @@ class CheckpointGateway {
  private:
   typedef std::tuple<proto::system::HeronTupleSet2*,
                      proto::stmgr::TupleStreamMessage*,
-                     proto::ckptmgr::InitiateStatefulCheckpoint*>
+                     pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint>>
           Tuple;
 
   // This helper class defines the current state of affairs
@@ -82,8 +89,8 @@ class CheckpointGateway {
     std::deque<Tuple> ForceDrain();
     void Clear();
    private:
-    void add(Tuple _tuple, sp_uint64 _size);
-    void add_front(Tuple _tuple, sp_uint64 _size);
+    void add(Tuple& _tuple, sp_uint64 _size);
+    void add_front(Tuple& _tuple, sp_uint64 _size);
     sp_string checkpoint_id_;
     std::unordered_set<sp_int32> all_upstream_dependencies_;
     std::unordered_set<sp_int32> pending_upstream_dependencies_;
@@ -93,17 +100,18 @@ class CheckpointGateway {
   };
   void ForceDrain();
   void DrainTuple(sp_int32 _dest, Tuple& _tuple);
-  CheckpointInfo* get_info(sp_int32 _task_id);
+  CheckpointGateway::CheckpointInfo& get_info(sp_int32 _task_id);
+
   // The maximum buffering that we can do before we discard the marker
   sp_uint64 drain_threshold_;
   sp_uint64 current_size_;
-  NeighbourCalculator* neighbour_calculator_;
-  common::MetricsMgrSt* metrics_manager_client_;
-  common::AssignableMetric* size_metric_;
-  std::unordered_map<sp_int32, CheckpointInfo*> pending_tuples_;
+  shared_ptr<NeighbourCalculator> neighbour_calculator_;
+  shared_ptr<common::MetricsMgrSt> metrics_manager_client_;
+  std::shared_ptr<common::AssignableMetric> size_metric_;
+  std::unordered_map<sp_int32, unique_ptr<CheckpointInfo>> pending_tuples_;
   std::function<void(sp_int32, proto::system::HeronTupleSet2*)> tupleset_drainer_;
   std::function<void(proto::stmgr::TupleStreamMessage*)> tuplestream_drainer_;
-  std::function<void(sp_int32, proto::ckptmgr::InitiateStatefulCheckpoint*)> ckpt_drainer_;
+  std::function<void(sp_int32, pool_unique_ptr<InitiateStatefulCheckpoint>)> ckpt_drainer_;
 };
 
 }  // namespace stmgr

@@ -51,7 +51,7 @@ function validate_env() {
     echo "ZK_REPLICAS is a mandatory environment variable"
     exit 1
   fi
-   
+
   if [[ $HOST =~ (.*)-([0-9]+)$ ]]; then
     NAME=${BASH_REMATCH[1]}
     ORD=${BASH_REMATCH[2]}
@@ -98,8 +98,8 @@ function create_config() {
   echo "maxSessionTimeout=$ZK_MAX_SESSION_TIMEOUT" >> $ZK_CONFIG_FILE
   echo "autopurge.snapRetainCount=$ZK_SNAP_RETAIN_COUNT" >> $ZK_CONFIG_FILE
   echo "autopurge.purgeInteval=$ZK_PURGE_INTERVAL" >> $ZK_CONFIG_FILE
-    
-  if [ $ZK_REPLICAS -gt 1 ]; then 
+
+  if [ $ZK_REPLICAS -gt 1 ]; then
     print_servers >> $ZK_CONFIG_FILE
   fi
   echo "Wrote ZooKeeper configuration file to $ZK_CONFIG_FILE"
@@ -108,17 +108,17 @@ function create_config() {
 function create_data_dirs() {
   echo "Creating ZooKeeper data directories and setting permissions"
   if [ ! -d $ZK_DATA_DIR  ]; then
-    mkdir -p $ZK_DATA_DIR 
+    mkdir -p $ZK_DATA_DIR
     chown -R $ZK_USER:$ZK_USER $ZK_DATA_DIR
   fi
-    
+
   if [ ! -d $ZK_DATA_LOG_DIR  ]; then
     mkdir -p $ZK_DATA_LOG_DIR 
     chown -R $ZK_USER:$ZK_USER $ZK_DATA_LOG_DIR
   fi
-   
+
   if [ ! -d $ZK_LOG_DIR  ]; then
-    mkdir -p $ZK_LOG_DIR 
+    mkdir -p $ZK_LOG_DIR
     chown -R $ZK_USER:$ZK_USER $ZK_LOG_DIR
   fi
   if [ ! -f $ID_FILE ]; then

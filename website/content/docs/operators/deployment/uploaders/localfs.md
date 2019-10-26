@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Setting Up Local File System Uploader
 ---
@@ -22,7 +40,7 @@ You can make Heron aware of the local file system uploader by modifying the
 the following for each cluster:
 
 * `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this
-to `com.twitter.heron.uploader.localfs.LocalFileSystemUploader`
+to `org.apache.heron.uploader.localfs.LocalFileSystemUploader`
 
 * `heron.uploader.localfs.file.system.directory` --- Provides the name of the directory where
 the topology jar should be uploaded. The name of the directory should be unique per cluster
@@ -35,7 +53,7 @@ Below is an example configuration (in `uploader.yaml`) for a local file system u
 
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader: com.twitter.heron.uploader.localfs.LocalFileSystemUploader
+heron.class.uploader: org.apache.heron.uploader.localfs.LocalFileSystemUploader
 
 # name of the directory to upload topologies for local file system uploader
 heron.uploader.localfs.file.system.directory: ${HOME}/.herondata/topologies/${CLUSTER}

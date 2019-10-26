@@ -24,9 +24,9 @@ import java.util.Map;
 import org.apache.storm.utils.ConfigUtils;
 
 public class SpoutDeclarerImpl implements SpoutDeclarer {
-  private com.twitter.heron.api.topology.SpoutDeclarer delegate;
+  private org.apache.heron.api.topology.SpoutDeclarer delegate;
 
-  public SpoutDeclarerImpl(com.twitter.heron.api.topology.SpoutDeclarer delegate) {
+  public SpoutDeclarerImpl(org.apache.heron.api.topology.SpoutDeclarer delegate) {
     this.delegate = delegate;
   }
 

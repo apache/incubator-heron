@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +50,8 @@
 #include "network/network_error.h"
 #include "network/packet.h"
 
+using std::unique_ptr;
+
 /*
  * Client class definition
  * Given a host/port, the client tries to connect to the host port.
@@ -70,7 +75,7 @@ class Client : public BaseClient {
   // Note that constructor doesn't do much beyond initializing some members.
   // Users must explicitly invoke the Start method to be able to send requests
   // and receive responses.
-  Client(EventLoop* eventLoop, const NetworkOptions& options);
+  Client(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
   virtual ~Client();
 
   // This starts the connect opereation.
@@ -101,10 +106,10 @@ class Client : public BaseClient {
   // a user owned piece of context that is not interpreted by the
   // client which is passed on to the HandleResponse
   // A negative value of the msecs means no timeout.
-  void SendRequest(google::protobuf::Message* _request, void* ctx, sp_int64 msecs);
+  void SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* ctx, sp_int64 msecs);
 
   // Convinience method of the above function with no timeout
-  void SendRequest(google::protobuf::Message* _request, void* ctx);
+  void SendRequest(std::unique_ptr<google::protobuf::Message> _request, void* ctx);
 
   // This interface is used if you want to communicate with the other end
   // on a non-request-response based communication.
@@ -126,20 +131,19 @@ class Client : public BaseClient {
 
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
-  void InstallResponseHandler(S* _request,
-                              void (T::*method)(void* _ctx, M*, NetworkErrorCode status)) {
-    google::protobuf::Message* m = new M();
+  void InstallResponseHandler(unique_ptr<S> _request,
+                              void (T::*method)(void* _ctx, pool_unique_ptr<M>,
+                              NetworkErrorCode status)) {
+    auto m = make_unique<M>();
     T* t = static_cast<T*>(this);
     responseHandlers[m->GetTypeName()] = std::bind(&Client::dispatchResponse<T, M>, this, t, method,
                                                    std::placeholders::_1, std::placeholders::_2);
     requestResponseMap_[_request->GetTypeName()] = m->GetTypeName();
-    delete m;
-    delete _request;
   }
 
   // Register a handler for a particular message type
   template <typename T, typename M>
-  void InstallMessageHandler(void (T::*method)(M* _message)) {
+  void InstallMessageHandler(void (T::*method)(pool_unique_ptr<M> _message)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] =
@@ -156,7 +160,7 @@ class Client : public BaseClient {
   }
 
   // Return the underlying EventLoop.
-  EventLoop* getEventLoop() { return eventLoop_; }
+  std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
  protected:
   // Derived class should implement this method to handle Connection
@@ -187,14 +191,15 @@ class Client : public BaseClient {
  private:
   //! Imlement methods of BaseClient
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                           EventLoop* eventLoop);
+                                           std::shared_ptr<EventLoop> eventLoop);
   virtual void HandleConnect_Base(NetworkErrorCode status);
   virtual void HandleClose_Base(NetworkErrorCode status);
 
   //! Handle most of the init stuff
   void Init();
 
-  void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
+  void InternalSendRequest(std::unique_ptr<google::protobuf::Message> _request, void* _ctx,
+          sp_int64 _msecs);
   void InternalSendMessage(const google::protobuf::Message& _message);
   void InternalSendResponse(OutgoingPacket* _packet);
 
@@ -207,10 +212,10 @@ class Client : public BaseClient {
   void OnPacketTimer(REQID _id, EventLoop::Status status);
 
   template <typename T, typename M>
-  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, M*, NetworkErrorCode),
+  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, pool_unique_ptr<M>, NetworkErrorCode),
                         IncomingPacket* _ipkt, NetworkErrorCode _code) {
     void* ctx = nullptr;
-    M* m = nullptr;
+    pool_unique_ptr<M> m = nullptr;
     NetworkErrorCode status = _code;
     if (status == OK && _ipkt) {
       REQID rid;
@@ -218,9 +223,9 @@ class Client : public BaseClient {
       if (context_map_.find(rid) != context_map_.end()) {
         // indeed
         ctx = context_map_[rid].second;
-        m = __global_protobuf_pool_acquire__(m);
+        m = make_unique_from_protobuf_pool<M>();
         context_map_.erase(rid);
-        _ipkt->UnPackProtocolBuffer(m);
+        _ipkt->UnPackProtocolBuffer(m.get());
       } else {
         // This is either some unknown message type or the response of an
         // already timed out request
@@ -230,26 +235,26 @@ class Client : public BaseClient {
       }
     }
 
-    std::function<void()> cb = std::bind(method, _t, ctx, m, status);
+    auto cb = std::bind(method, _t, ctx, std::placeholders::_1, status);
 
-    cb();
+    cb(std::move(m));
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
-    M* m = nullptr;
-    m = __global_protobuf_pool_acquire__(m);
-    if (_ipkt->UnPackProtocolBuffer(m) != 0) {
+  void dispatchMessage(T* _t, void (T::*method)(pool_unique_ptr<M>), IncomingPacket* _ipkt) {
+    pool_unique_ptr<M> m = make_unique_from_protobuf_pool<M>();
+
+    if (_ipkt->UnPackProtocolBuffer(m.get()) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      __global_protobuf_pool_release__(m);
       return;
     }
+
     CHECK(m->IsInitialized());
 
-    std::function<void()> cb = std::bind(method, _t, m);
+    auto cb = std::bind(method, _t, std::placeholders::_1);
 
-    cb();
+    cb(std::move(m));
   }
 
   //! Map from reqid to the response/context pair of the request

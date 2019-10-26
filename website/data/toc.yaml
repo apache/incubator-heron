@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 sections:
   - name: Getting Started
     sublinks:
@@ -7,14 +24,34 @@ sections:
         url: /docs/migrate-storm-to-heron
       - name: Troubleshooting Guide
         url: /docs/getting-started-troubleshooting
-  - name: The Heron Streamlet API
+  - name: Deployment
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment
+      - name: Configuration
+        url: /docs/operators/deployment/configuration
+      - name: The Heron API server
+        url: /docs/operators/heron-api-server
+  - name: Topology Development APIs
     sublinks:
     - name: The Heron Streamlet API for Java
       url: /docs/developers/java/streamlet-api
-  - name: The Heron Topology API
+    - name: The Heron Streamlet API for Scala
+      url: /docs/developers/scala/streamlet-api
+    - name: The Heron ECO API for Java
+      url: /docs/developers/java/eco-api
+    - name: The Heron Topology API for Java
+      url: /docs/developers/java/topologies
+    - name: The Heron Topology API for Python
+      url: /docs/developers/python/topologies
+  - name: Client API docs
     sublinks:
-      - name: The Heron Topology API for Java
-        url: /docs/developers/java/topologies
+      - name: Java
+        url: /api/java
+      - name: Python
+        url: /api/python
+  - name: Guides
+    sublinks:
       - name: Effectively-once Java topologies
         url: /docs/developers/java/effectively-once
       - name: Python Topologies
@@ -33,12 +70,6 @@ sections:
         url: /docs/developers/simulator-mode
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
-  - name: Client API docs
-    sublinks:
-      - name: Java
-        url: /api/java
-      - name: Python
-        url: /api/python
   - name: Heron Concepts
     sublinks:
       - name: Heron Design Goals
@@ -51,14 +82,6 @@ sections:
         url: /docs/concepts/architecture
       - name: Heron Delivery Semantics
         url: /docs/concepts/delivery-semantics
-  - name: Deployment
-    sublinks:
-      - name: Overview
-        url: /docs/operators/deployment
-      - name: Configuration
-        url: /docs/operators/deployment/configuration
-      - name: The Heron API server
-        url: /docs/operators/heron-api-server
   - name: State Managers
     sublinks:
       - name: Zookeeper
@@ -71,16 +94,24 @@ sections:
         url: /docs/operators/deployment/uploaders/localfs
       - name: HDFS
         url: /docs/operators/deployment/uploaders/hdfs
+      - name: HTTP
+        url: /docs/operators/deployment/uploaders/http
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
       - name: Secure Copy (SCP)
         url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
-      - name: Kubernetes
+      - name: Kubernetes by Hand
         url: /docs/operators/deployment/schedulers/kubernetes
+      - name: Kubernetes with Helm
+        url: /docs/operators/deployment/schedulers/kubernetes-helm
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
+      - name: Multi-node standalone cluster
+        url: /docs/operators/deployment/schedulers/standalone
+      - name: Nomad
+        url: /docs/operators/deployment/schedulers/nomad
       - name: Local Cluster
         url: /docs/operators/deployment/schedulers/local
 #      - name: Mesos Cluster

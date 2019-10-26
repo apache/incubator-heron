@@ -20,7 +20,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.statefulstorage.localfs.LocalFileSystemStorageTest",
+    "org.apache.heron.statefulstorage.localfs.LocalFileSystemStorageTest",
   ],
   runtime_deps = [":localfs-tests"],
   size = "small",
@@ -40,7 +40,7 @@ java_library(
 
 java_tests(
   test_classes = [
-    "com.twitter.heron.statefulstorage.hdfs.HDFSStorageTest",
+    "org.apache.heron.statefulstorage.hdfs.HDFSStorageTest",
   ],
   runtime_deps = [ ":hdfs-tests" ],
   size = "small",
@@ -48,8 +48,10 @@ java_tests(
 
 dlog_deps_files = [
   "//heron/statefulstorages/src/java:dlog-statefulstorage-java",
+  "//heron/io/dlog/src/java:dlog-lib",
   "@com_google_guava_guava//jar",
   "@org_apache_distributedlog_core//jar",
+  "@io_netty_netty_all//jar",
 ]
 
 java_library(

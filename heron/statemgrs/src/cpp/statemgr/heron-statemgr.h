@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -52,15 +55,19 @@
 namespace heron {
 namespace common {
 
+using std::shared_ptr;
+
 class HeronStateMgr {
  public:
   explicit HeronStateMgr(const std::string& _topleveldir);
   virtual ~HeronStateMgr();
 
   // Factory method to create
-  static HeronStateMgr* MakeStateMgr(const std::string& _zk_hostport,
-                                     const std::string& _topleveldir, EventLoop* eventLoop,
-                                     bool exitOnSessionExpiry = true);
+  static shared_ptr<HeronStateMgr> MakeStateMgr(
+    const std::string& _zk_hostport,
+    const std::string& _topleveldir,
+    shared_ptr<EventLoop> eventLoop,
+    bool exitOnSessionExpiry = true);
 
   //
   // Interface methods
@@ -80,12 +87,12 @@ class HeronStateMgr {
 
   // Sets/Gets the Tmaster
   virtual void GetTMasterLocation(const std::string& _topology_name,
-                                  proto::tmaster::TMasterLocation* _return,
+                                  shared_ptr<proto::tmaster::TMasterLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetMetricsCacheLocation(const std::string& _topology_name,
-                                  proto::tmaster::MetricsCacheLocation* _return,
+                                  shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
@@ -97,7 +104,7 @@ class HeronStateMgr {
                               VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTopology(const proto::api::Topology& _top,
                            VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+  virtual void GetTopology(const std::string& _topology_name, proto::api::Topology& _return,
                            VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets PhysicalPlan
@@ -108,12 +115,12 @@ class HeronStateMgr {
   virtual void SetPhysicalPlan(const proto::system::PhysicalPlan& _plan,
                                VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetPhysicalPlan(const std::string& _topology_name,
-                               proto::system::PhysicalPlan* _return,
+                               shared_ptr<proto::system::PhysicalPlan> _return,
                                VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets PackingPlan
   virtual void GetPackingPlan(const std::string& _topology_name,
-                              proto::system::PackingPlan* _return,
+                              shared_ptr<proto::system::PackingPlan> _return,
                               VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets ExecutionState
@@ -132,15 +139,15 @@ class HeronStateMgr {
 
   // Gets/Sets Stateful Checkpoint
   virtual void CreateStatefulCheckpoints(const std::string& _topology_name,
-                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                           shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                            VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void DeleteStatefulCheckpoints(const std::string& _topology_name,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetStatefulCheckpoints(const std::string& _topology_name,
-                           const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+                            shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                             VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetStatefulCheckpoints(const std::string& _topology_name,
-                               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                               shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
                                VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Calls to list the topologies and physical plans

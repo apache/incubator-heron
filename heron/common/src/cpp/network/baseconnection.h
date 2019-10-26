@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +72,6 @@ class ConnectionEndPoint {
 
 /**
  * Options that the server passes to the Connection.
- * Currently we just have the maximum packet size allowed.
  */
 struct ConnectionOptions {
   sp_uint32 max_packet_size_;
@@ -95,7 +97,8 @@ class BaseConnection {
     TO_BE_DISCONNECTED,
   };
 
-  BaseConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options, EventLoop* eventLoop);
+  BaseConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
+          std::shared_ptr<EventLoop> eventLoop);
   virtual ~BaseConnection();
 
   /**
@@ -128,6 +131,18 @@ class BaseConnection {
    * Gets the total outstanding bytes pending to be sent
    */
   sp_int32 getOutstandingBytes() const;
+
+  /**
+   * Set rate limiting (bytes per second). Both arguments should be positive.
+   * The function can be called multiple times. Return false when it fails to
+   * apply the new rate limit.
+   */
+  bool setRateLimit(const sp_int64 _read_bps, const sp_int64 _burst_read_bps);
+
+  /**
+   * Disable rate limiting.
+   */
+  void disableRateLimit();
 
  protected:
   /**
@@ -198,9 +213,14 @@ class BaseConnection {
   ConnectionEndPoint* mEndpoint;
 
   // The underlying event loop
-  EventLoop* mEventLoop;
+  std::shared_ptr<EventLoop> mEventLoop;
   // The underlying bufferevent
   struct bufferevent* buffer_;
+
+  // The config for rate limit (bytes per second) on read
+  sp_int64 read_bps_;
+  sp_int64 burst_read_bps_;
+  struct ev_token_bucket_cfg* rate_limit_cfg_;
 };
 
 #endif  // HERON_COMMON_SRC_CPP_NETWORK_BASECONNECTION_H_

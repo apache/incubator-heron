@@ -1,3 +1,22 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
 {% extends "application.html" %}
 
 {% block content %}
@@ -48,7 +67,7 @@
               Click on a circle to color instances by their value for that metric."></span>
         </div>
         <p class="text-muted text-center">
-          <em>Click to color instances by metric over a time period</em>
+          <em>Click the circles below to color instances by metric over a time period</em>
         </p>
         <table class="stat-rollup-table">
           <tbody class="stats">
@@ -108,11 +127,12 @@
       <thead>
         <th>Topology name</th>
         <th>Status</th>
-        <th>DC</th>
+        <th>Cluster</th>
         <th>Role</th>
         <th>Environment</th>
+        <th>Version</th>
         <th>Launched at</th>
-        <th>Launched by</th>
+        <th>Submitted by</th>
         <th>Links</th>
       </thead>
 
@@ -123,12 +143,15 @@
           <td>{{cluster}}</td>
           <td>{{execution_state['role']}}</td>
           <td>{{environ}}</td>
+          <td>{{execution_state['release_version']}}</td>
           <td>{{launched}}</td>
           <td>{{execution_state['submission_user']}}</td>
           <td>
             <a class="btn btn-primary btn-xs" href="./{{topology}}/config" target="_blank">Config</a>
             <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
-            <a id="vizLink" class="btn btn-primary btn-xs" href="{{execution_state['viz']}}" target="_blank">Viz</a>
+            {% for extra_link in execution_state['extra_links'] %}
+              <a id="{{extra_link['name']}}" class="btn btn-primary btn-xs" href="{{extra_link['url']}}" target="_blank">{{extra_link['name']}}</a>
+            {% end %}
           </td>
         </tr>
       </tbody>
@@ -171,7 +194,7 @@
     return hsl.toString();
   });
 
-  var linestyle = {color:'#888', width:'4px'};
+  var linestyle = {color:'#888', width:'3px', boldwidth: '6px'};
 
   window.onload = function() {
 
@@ -180,28 +203,25 @@
       document.getElementById("jobPageLink").style.display = "none";
     }
 
-    // hide viz link if it is not there
-    if ("{{execution_state['viz']}}" === "") {
-      document.getElementById("vizLink").style.display = "none";
-    }
-
     // display the topology name as the title
     d3.select("#page-title")
       .append("p")
       .html('{{topology}}');
 
-    var logicalPlan, physicalPlan;
+    var logicalPlan, physicalPlan, packingPlan;
 
     d3.json("./{{topology}}/logicalplan.json",
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success") {
-          console.log("Loading json failed!");
+          console.log("Loading logical plan json failed!");
           return;
         }
 
         logicalPlan = data.result;
-        if (physicalPlan) { startRendering(); }
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
       }
     );
 
@@ -209,12 +229,29 @@
       function(data) {
         // if there are any errors display using dialog box
         if (data.status != "success" ) {
-          console.log("Loading json failed!");
+          console.log("Loading physical plan json failed!");
           return;
         }
 
         physicalPlan = data;
-        if (logicalPlan) { startRendering(); }
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
+      }
+    );
+
+    d3.json("./{{topology}}/packingplan.json",
+      function(data) {
+        // if there are any errors display using dialog box
+        if (data.status != "success" ) {
+          console.log("Loading packing plan json failed!");
+          return;
+        }
+
+        packingPlan = data.result;
+        if (physicalPlan && logicalPlan && packingPlan) {
+          startRendering();
+        }
       }
     );
 
@@ -222,7 +259,7 @@
       drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400, "{{baseUrl}}",
           "{{cluster}}", "{{environ}}", "{{topology}}");
       planController.planResized();
-      drawPhysicalPlan(planController, physicalPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
+      drawPhysicalPlan(planController, physicalPlan, packingPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
           "{{environ}}", "{{topology}}");
       planController.planResized();
     }

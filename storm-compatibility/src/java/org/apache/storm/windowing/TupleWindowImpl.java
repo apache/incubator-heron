@@ -26,9 +26,9 @@ import org.apache.storm.tuple.TupleImpl;
 
 public class TupleWindowImpl implements TupleWindow {
 
-  private final com.twitter.heron.api.windowing.TupleWindow delegate;
+  private final org.apache.heron.api.windowing.TupleWindow delegate;
 
-  public TupleWindowImpl(com.twitter.heron.api.windowing.TupleWindow tupleWindow) {
+  public TupleWindowImpl(org.apache.heron.api.windowing.TupleWindow tupleWindow) {
     this.delegate = tupleWindow;
   }
 
@@ -57,9 +57,9 @@ public class TupleWindowImpl implements TupleWindow {
     return this.delegate.getStartTimestamp();
   }
 
-  private static List<Tuple> convert(List<com.twitter.heron.api.tuple.Tuple> tuples) {
+  private static List<Tuple> convert(List<org.apache.heron.api.tuple.Tuple> tuples) {
     List<Tuple> ret = new LinkedList<>();
-    for (com.twitter.heron.api.tuple.Tuple tuple : tuples) {
+    for (org.apache.heron.api.tuple.Tuple tuple : tuples) {
       ret.add(new TupleImpl(tuple));
     }
     return ret;

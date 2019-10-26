@@ -14,7 +14,7 @@ pex_library(
         "//heron/proto:proto-py",
     ],
     reqs = [
-        "protobuf==3.4.0",
+        "protobuf==3.6.1",
         "tornado==4.0.2",
     ],
 )

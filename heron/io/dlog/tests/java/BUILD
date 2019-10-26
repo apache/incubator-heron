@@ -7,6 +7,7 @@ dlog_test_deps_files = \
   common_deps_files + [
     "@com_google_guava_guava//jar",
     "@org_apache_distributedlog_core//jar",
+    "@io_netty_netty_all//jar",
     "//heron/io/dlog/src/java:dlog-lib",
   ]
   

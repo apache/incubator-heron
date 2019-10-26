@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Observability with Prometheus
 ---
@@ -17,7 +35,7 @@ To set up your Heron cluster to export to Prometheus, you need to make two chang
 
 Parameter | Description | Default
 :---------|:------------|:-------
-`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.PrometheusSink`](/api/com/twitter/heron/metricsmgr/sink/PrometheusSink.html)
+`class` | The Java class used to control Prometheus sink behavior | [`org.apache.heron.metricsmgr.sink.PrometheusSink`](/api/org/apache/heron/metricsmgr/sink/PrometheusSink.html)
 `port` | The port on which Prometheus will scrape for metrics. **Note**: You must supply a `port` *or* `port-file` config. | 8080
 `port-file` | The path to a text file that contains the port number to be used by Prometheus for metrics scraping. **Note**: You must supply a `port` *or* `port-file` config. | `metrics.port`
 `path` | The Prometheus path on which to publish metrics | `/metrics`

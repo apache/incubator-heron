@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <iostream>
@@ -43,6 +46,7 @@ DEFINE_string(config_file, "", "The heron internals config file");
 DEFINE_string(override_config_file, "", "The override heron internals config file");
 DEFINE_string(ckptmgr_id, "", "The id of the local ckptmgr");
 DEFINE_int32(ckptmgr_port, 0, "The port of the local ckptmgr");
+DEFINE_string(metricscachemgr_mode, "disabled", "MetricsCacheMgr mode, default `disabled`");
 
 int main(int argc, char* argv[]) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -52,17 +56,17 @@ int main(int argc, char* argv[]) {
   }
   std::vector<std::string> instances = StrUtils::split(FLAGS_instance_ids, ",");
 
-  EventLoopImpl ss;
+  auto ss = std::make_shared<EventLoopImpl>();
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(&ss,
+  heron::config::HeronInternalsConfigReader::Create(ss,
     FLAGS_config_file, FLAGS_override_config_file);
 
   heron::common::Initialize(argv[0], FLAGS_stmgr_id.c_str());
 
   // Lets first read the top defn file
-  heron::proto::api::Topology* topology = new heron::proto::api::Topology();
+  auto topology = std::make_shared<heron::proto::api::Topology>();
   sp_string contents = FileUtils::readAll(FLAGS_topologydefn_file);
   topology->ParseFromString(contents);
   if (!topology->IsInitialized()) {
@@ -75,12 +79,12 @@ int main(int argc, char* argv[]) {
   sp_int64 low_watermark = heron::config::HeronInternalsConfigReader::Instance()
                               ->GetHeronStreammgrNetworkBackpressureLowwatermarkMb() *
                                 1_MB;
-  heron::stmgr::StMgr mgr(&ss, FLAGS_myhost, FLAGS_data_port, FLAGS_local_data_port,
+  heron::stmgr::StMgr mgr(ss, FLAGS_myhost, FLAGS_data_port, FLAGS_local_data_port,
                           FLAGS_topology_name, FLAGS_topology_id, topology, FLAGS_stmgr_id,
                           instances, FLAGS_zkhostportlist, FLAGS_zkroot, FLAGS_metricsmgr_port,
                           FLAGS_shell_port, FLAGS_ckptmgr_port, FLAGS_ckptmgr_id,
-                          high_watermark, low_watermark);
+                          high_watermark, low_watermark, FLAGS_metricscachemgr_mode);
   mgr.Init();
-  ss.loop();
+  ss->loop();
   return 0;
 }

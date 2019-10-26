@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 //////////////////////////////////////////////////////
@@ -33,7 +36,10 @@
 namespace heron {
 namespace common {
 
-MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventLoop* eventLoop) {
+using std::shared_ptr;
+
+MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval,
+        shared_ptr<EventLoop> eventLoop) {
   options_.set_host("127.0.0.1");
   options_.set_port(_metricsmgr_port);
   options_.set_max_packet_size(1024 * 1024);
@@ -49,9 +55,6 @@ MetricsMgrSt::MetricsMgrSt(sp_int32 _metricsmgr_port, sp_int32 _interval, EventL
 MetricsMgrSt::~MetricsMgrSt() {
   CHECK_EQ(client_->getEventLoop()->unRegisterTimer(timerid_), 0);
   delete client_;
-  for (auto iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
-    delete iter->second;
-  }
 }
 
 void MetricsMgrSt::Start(const sp_string& _my_hostname, sp_int32 _my_port,
@@ -71,7 +74,7 @@ void MetricsMgrSt::RefreshMetricsCacheLocation(
   client_->SendMetricsCacheLocation(location);
 }
 
-void MetricsMgrSt::register_metric(const sp_string& _metric_name, IMetric* _metric) {
+void MetricsMgrSt::register_metric(const sp_string& _metric_name, shared_ptr<IMetric> _metric) {
   metrics_[_metric_name] = _metric;
 }
 

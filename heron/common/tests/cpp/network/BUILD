@@ -119,3 +119,29 @@ cc_test(
     size = "small",
     linkstatic = 1,
 )
+
+cc_test(
+    name = "rate_limit_unittest",
+    srcs = [
+        "rate_limit_unittest.cpp",
+        "client_unittest.cpp",
+        "server_unittest.cpp",
+
+        "client_unittest.h",
+        "server_unittest.h",
+        "host_unittest.h",
+    ],
+    deps = [
+        ":proto_unittests_cc",
+        "//heron/common/src/cpp/network:network-cxx",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = [
+        "-Iheron/common/src/cpp",
+        "-Iheron/common/tests/cpp",
+        "-I$(GENDIR)/heron/common/src/cpp",
+        "-I$(GENDIR)/heron/common/tests/cpp",
+    ],
+    size = "small",
+    linkstatic = 1,
+)

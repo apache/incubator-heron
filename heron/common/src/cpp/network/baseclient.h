@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +54,7 @@ class BaseClient {
   // Note that constructor doesn't do much beyond initializing some members.
   // Users must explicitly invoke the Start method to be able to send requests
   // and receive responses.
-  BaseClient(EventLoop* eventLoop, const NetworkOptions& options);
+  BaseClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options);
   virtual ~BaseClient();
 
   // This starts the connect opereation.
@@ -81,7 +84,7 @@ class BaseClient {
  protected:
   // Instantiate a new connection
   virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
-                                           EventLoop* eventLoop) = 0;
+                                           std::shared_ptr<EventLoop> eventLoop) = 0;
 
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -109,11 +112,11 @@ class BaseClient {
   State state_;
 
   // The underlying EventLoop
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
 
  private:
   // Helper function that inits various objects
-  void Init(EventLoop* eventLoop, const NetworkOptions& _options);
+  void Init(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options);
 
   // Internal method to be called by the Connection class when a
   // connect happens.

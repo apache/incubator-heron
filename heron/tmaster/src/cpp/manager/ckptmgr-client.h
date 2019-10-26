@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_TMASTER_SRC_CKPTMGR_CLIENT_H
@@ -28,7 +31,7 @@ namespace tmaster {
 
 class CkptMgrClient : public Client {
  public:
-  CkptMgrClient(EventLoop* eventLoop, const NetworkOptions& _options,
+  CkptMgrClient(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
                 const sp_string& _topology_name, const sp_string& _topology_id,
                 std::function<void(proto::system::StatusCode)> _clean_response_watcher);
   virtual ~CkptMgrClient();
@@ -38,15 +41,18 @@ class CkptMgrClient : public Client {
   void SendCleanStatefulCheckpointRequest(const std::string& _oldest_ckpt, bool _clean_all);
 
  protected:
-  virtual void HandleCleanStatefulCheckpointResponse(void*,
-                              proto::ckptmgr::CleanStatefulCheckpointResponse* _response,
-                              NetworkErrorCode status);
+  virtual void HandleCleanStatefulCheckpointResponse(
+                        void*,
+                        pool_unique_ptr<proto::ckptmgr::CleanStatefulCheckpointResponse> _response,
+                        NetworkErrorCode status);
   virtual void HandleConnect(NetworkErrorCode status);
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleTMasterRegisterResponse(void*, proto::ckptmgr::RegisterTMasterResponse *_response,
-                                      NetworkErrorCode _status);
+  void HandleTMasterRegisterResponse(
+                                  void*,
+                                  pool_unique_ptr<proto::ckptmgr::RegisterTMasterResponse>_response,
+                                  NetworkErrorCode _status);
 
   void SendRegisterRequest();
 

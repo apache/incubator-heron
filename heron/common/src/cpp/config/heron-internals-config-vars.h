@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ////////////////////////////////////////////////////////////////
@@ -146,14 +149,14 @@ class HeronInternalsConfigVars {
   // For efficient acknowledgement
   static const sp_string HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS;
 
-  // The max reconnect attempts to other stream managers for stream manager client
-  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS;
-
   // The reconnect interval to other stream managers in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_INTERVAL_SEC;
 
   // The reconnect interval to tamster in second for stream manager client
   static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_INTERVAL_SEC;
+
+  // The max reconnect attempts to tmaster for stream manager client
+  static const sp_string HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS;
 
   // The maximum packet size in MB of stream manager's network options
   static const sp_string HERON_STREAMMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
@@ -205,6 +208,9 @@ class HeronInternalsConfigVars {
 
   // The maximum time in ms for an spout instance to emit tuples per attempt
   static const sp_string HERON_INSTANCE_EMIT_BATCH_TIME_MS;
+
+  // The maximum number of bytes for n spout instance to emit tuples per attempt
+  static const sp_string HERON_INSTANCE_EMIT_BATCH_SIZE;
 
   // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
   static const sp_string HERON_INSTANCE_SET_DATA_TUPLE_CAPACITY;

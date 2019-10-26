@@ -1,0 +1,131 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+##
+## Heron API server deployment
+##
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: heron-apiserver
+  name: heron-apiserver
+  namespace: default
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: heron-apiserver
+  labels:
+    app: heron-apiserver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: heron-apiserver
+  namespace: default
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: heron-apiserver
+  labels:
+    app: heron-apiserver
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: heron-apiserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: heron-apiserver
+    spec:
+      serviceAccountName: heron-apiserver
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/notReady"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+        - key: "node.alpha.kubernetes.io/unreachable"
+          operator: "Equal"
+          effect: "NoExecute"
+          tolerationSeconds: 10
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: heron-gcs-key
+      containers:
+        - name: heron-apiserver
+          image: heron/heron:latest
+          command: ["sh", "-c"]
+          args:
+            - >-
+              heron-apiserver
+              --base-template kubernetes
+              --cluster kubernetes
+              -D heron.statemgr.connection.string=zookeeper:2181
+              -D heron.kubernetes.scheduler.uri=http://localhost:8001
+              -D heron.executor.docker.image=heron/heron:latest
+              -D heron.class.uploader=org.apache.heron.uploader.gcs.GcsUploader
+              -D heron.uploader.gcs.bucket=$GCS_BUCKET
+          volumeMounts:
+            - name: google-cloud-key
+              mountPath: /heron/secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /heron/secret/key.json
+            - name: GCS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: heron-apiserver-config
+                  key: gcs.bucket
+        - name: kubectl-proxy
+          image: heron/kubectl:latest
+          command: ["sh", "-c"]
+          args:
+            - >
+              kubectl proxy -p 8001
+
+---
+
+##
+## Service to expose the heron API server
+##
+apiVersion: v1
+kind: Service
+metadata:
+  name: heron-apiserver
+spec:
+  selector:
+    app: heron-apiserver
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000

@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 '''module for single-thread Heron Instance in python'''
 import argparse
 import collections
@@ -337,7 +341,7 @@ def main():
   parser.add_argument('--sys_config', required=True, help='System Config File')
   parser.add_argument('--override_config', required=True, help='Override Config File')
   parser.add_argument('--topology_pex', required=True, help='Topology Pex File')
-  parser.add_argument('--max_ram', required=True, help='Maximum Ram to limit', type=int)
+  parser.add_argument('--max_ram', required=True, help='Maximum RAM to limit', type=int)
 
   args = parser.parse_args()
 
@@ -380,7 +384,7 @@ def main():
            "\n **Topology Pex file located at: " + args.topology_pex)
   Log.debug("System config: " + str(sys_config))
   Log.debug("Override config: " + str(override_config))
-  Log.debug("Maximum Ram: " + str(args.max_ram))
+  Log.debug("Maximum RAM: " + str(args.max_ram))
 
   heron_instance = SingleThreadHeronInstance(args.topology_name, args.topology_id, instance,
                                              args.stmgr_port, args.metricsmgr_port,

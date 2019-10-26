@@ -27,7 +27,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.tuple.Fields;
 
 public class WorkerTopologyContext extends GeneralTopologyContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate;
+  private org.apache.heron.api.topology.TopologyContext delegate;
 
   @SuppressWarnings("rawtypes")
   public WorkerTopologyContext(
@@ -49,7 +49,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
     throw new RuntimeException("WorkerTopologyContext should never be init this way");
   }
 
-  public WorkerTopologyContext(com.twitter.heron.api.topology.TopologyContext newDelegate) {
+  public WorkerTopologyContext(org.apache.heron.api.topology.TopologyContext newDelegate) {
     super(newDelegate);
     this.delegate = newDelegate;
   }

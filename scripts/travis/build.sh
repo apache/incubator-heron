@@ -1,4 +1,20 @@
 #!/bin/bash
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # Script to kick off the travis CI build. We want the build to fail-fast if any
 # of the below commands fail so we need to chain them in this script.
@@ -65,7 +81,8 @@ T="heron build"
 start_timer "$T"
 python ${UTILS}/save-logs.py "heron_build.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build --config=$PLATFORM heron/... \
-  heronpy/... examples/... storm-compatibility-examples/...
+  heronpy/... examples/... storm-compatibility-examples/... \
+  eco-storm-examples/... eco-heron-examples/... contrib/...
 end_timer "$T"
 
 # run heron unit tests
@@ -75,7 +92,8 @@ python ${UTILS}/save-logs.py "heron_test_non_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
   --config=$PLATFORM --test_tag_filters=-flaky heron/... \
-  heronpy/... examples/... storm-compatibility-examples/...
+  heronpy/... examples/... storm-compatibility-examples/... \
+  eco-storm-examples/... eco-heron-examples/... contrib/... 
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions,
@@ -85,8 +103,9 @@ start_timer "$T"
 python ${UTILS}/save-logs.py "heron_test_flaky.txt" bazel\
   --bazelrc=tools/travis/bazel.rc test\
   --test_summary=detailed --test_output=errors\
-  --config=$PLATFORM --test_tag_filters=flaky --jobs=0 heron/... \
-  heronpy/... examples/... storm-compatibility-examples/...
+  --config=$PLATFORM --test_tag_filters=flaky --jobs=1 heron/... \
+  heronpy/... examples/... storm-compatibility-examples/... \
+  eco-storm-examples/... eco-heron-examples/...
 end_timer "$T"
 
 # build packages
@@ -103,5 +122,13 @@ python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
   --bazelrc=tools/travis/bazel.rc build\
   --config=$PLATFORM scripts/packages:binpkgs
 end_timer "$T"
+
+T="heron build docker images"
+start_timer "$T"
+python ${UTILS}/save-logs.py "heron_build_binpkgs.txt" bazel\
+  --bazelrc=tools/travis/bazel.rc build\
+  --config=$PLATFORM scripts/images:heron.tar
+end_timer "$T"
+
 
 print_timer_summary

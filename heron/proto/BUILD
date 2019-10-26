@@ -167,7 +167,7 @@ java_library(
         ":proto_stmgr_java",
         ":proto_ckptmgr_java",
         ":proto_networktests_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
     srcs = [
         "Empty.java",
@@ -191,7 +191,7 @@ pex_library(
         ":proto_ckptmgr_py",
     ],
     reqs = [
-        "protobuf==3.4.0",
+        "protobuf==3.6.1",
         "setuptools==18.0.1",
     ],
 )

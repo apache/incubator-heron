@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Topology Troubleshooting Guide
 ---
@@ -128,7 +146,7 @@ getting launched.
    `heron-executor.stderr` files. All commands to instantiate the instances and
    stream managers are redirected to these files.
 
-2. Check jvm configs for anything amiss.
+2. Check JVM configs for anything amiss.
 
 3. If `Xmx` is too low, increase `containerRAM` or `componentRAM`. Note that
    because heron sets aside some RAM for its internal components, like stream

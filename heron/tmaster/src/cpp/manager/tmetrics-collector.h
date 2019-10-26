@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef __TMETRICS_COLLECTOR_H_
@@ -29,13 +32,17 @@
 
 namespace heron {
 namespace tmaster {
+
+using std::unique_ptr;
+using std::shared_ptr;
+
 // Helper class to manage aggregation and and serving of metrics. Metrics are logically stored as a
 // component_name -> {instance_id ->value}n .
 // TODO(kramasamy): Store metrics persistently to prevent against crashes.
 class TMetricsCollector {
  public:
   // _max_interval is how far along we keep individual metric blobs.
-  TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop,
+  TMetricsCollector(sp_int32 _max_interval, std::shared_ptr<EventLoop> eventLoop,
                     const std::string& metrics_sinks_yaml);
 
   // Deletes all stored ComponentMetrics.
@@ -47,15 +54,16 @@ class TMetricsCollector {
 
   // Returns a new response to fetch metrics. The request gets propagated to Component's and
   // Instance's get metrics. Doesn't own Response.
-  proto::tmaster::MetricResponse* GetMetrics(const proto::tmaster::MetricRequest& _request,
-                                             const proto::api::Topology* _topology);
+  unique_ptr<proto::tmaster::MetricResponse> GetMetrics(
+                                                const proto::tmaster::MetricRequest& _request,
+                                                const proto::api::Topology& _topology);
 
   // Returns response for fetching exceptions. Doesn't own response.
-  proto::tmaster::ExceptionLogResponse* GetExceptions(
+  unique_ptr<proto::tmaster::ExceptionLogResponse> GetExceptions(
       const proto::tmaster::ExceptionLogRequest& request);
 
   // Returns exception summary response. Doesn't own response.
-  proto::tmaster::ExceptionLogResponse* GetExceptionsSummary(
+  unique_ptr<proto::tmaster::ExceptionLogResponse> GetExceptionsSummary(
       const proto::tmaster::ExceptionLogRequest& request);
 
  private:
@@ -63,12 +71,12 @@ class TMetricsCollector {
   // 'all_exceptions'.
   //  Doesn't own 'all_exceptions' pointer
   void GetExceptionsHelper(const proto::tmaster::ExceptionLogRequest& request,
-                           proto::tmaster::ExceptionLogResponse* all_excepions);
+                           proto::tmaster::ExceptionLogResponse& all_excepions);
 
   // Aggregate exceptions from 'all_exceptions' to 'aggregate_exceptions'.
   // Doesn't own 'aggregate_exceptions'.
   void AggregateExceptions(const proto::tmaster::ExceptionLogResponse& all_exceptions,
-                           proto::tmaster::ExceptionLogResponse* aggregate_exceptions);
+                           proto::tmaster::ExceptionLogResponse& aggregate_exceptions);
 
   // Add metrics for 'component_name'
   void AddMetricsForComponent(const sp_string& component_name,
@@ -136,7 +144,7 @@ class TMetricsCollector {
    private:
     sp_string name_;
     // Time series. data_ will be ordered by their time of arrival.
-    std::list<TimeBucket*> data_;
+    std::list<unique_ptr<TimeBucket>> data_;
     // Type of metric. This can be SUM or AVG. It specify how to aggregate these metrics for
     // display.
     common::TMasterMetrics::MetricAggregationType metric_type_;
@@ -171,23 +179,23 @@ class TMetricsCollector {
 
     // Returns the metric metrics. Doesn't own _response.
     void GetMetrics(const proto::tmaster::MetricRequest& request, sp_int64 start_time,
-                    sp_int64 end_time, proto::tmaster::MetricResponse* response);
+                    sp_int64 end_time, proto::tmaster::MetricResponse& response);
 
     // Fills response for fetching exceptions. Doesn't own response.
-    void GetExceptionLog(proto::tmaster::ExceptionLogResponse* response);
+    void GetExceptionLog(proto::tmaster::ExceptionLogResponse& response);
 
    private:
     // Create or return existing Metric. Retains ownership of Metric object returned.
-    Metric* GetOrCreateMetric(const sp_string& name,
+    shared_ptr<Metric> GetOrCreateMetric(const sp_string& name,
                               common::TMasterMetrics::MetricAggregationType type);
 
     sp_string instance_id_;
     sp_int32 nbuckets_;
     sp_int32 bucket_interval_;
     // map between metric name and its values
-    std::map<sp_string, Metric*> metrics_;
+    std::map<sp_string, shared_ptr<Metric>> metrics_;
     // list of exceptions
-    std::list<proto::tmaster::TmasterExceptionLog*> exceptions_;
+    std::list<unique_ptr<proto::tmaster::TmasterExceptionLog>> exceptions_;
   };
 
   // Component level metrics. A component metrics is a map storing metrics for each of its
@@ -214,39 +222,39 @@ class TMetricsCollector {
     // Request aggregated metrics for this component for the '_nbucket' interval.
     // Doesn't own '_response' object.
     void GetMetrics(const proto::tmaster::MetricRequest& request, sp_int64 start_time,
-                    sp_int64 end_time, proto::tmaster::MetricResponse* response);
+                    sp_int64 end_time, proto::tmaster::MetricResponse& response);
 
     // Returns response for fetching exceptions. Doesn't own response.
     void GetExceptionsForInstance(const sp_string& instance_id,
-                                  proto::tmaster::ExceptionLogResponse* response);
+                                  proto::tmaster::ExceptionLogResponse& response);
 
-    void GetAllExceptions(proto::tmaster::ExceptionLogResponse* response);
+    void GetAllExceptions(proto::tmaster::ExceptionLogResponse& response);
 
    private:
     // Create or return existing mutable InstanceMetrics associated with 'instance_id'. This
     // method doesn't verify if the instance_id is valid fof the component.
     // Doesn't transfer ownership of returned InstanceMetrics.
-    InstanceMetrics* GetOrCreateInstanceMetrics(const sp_string& instance_id);
+    shared_ptr<InstanceMetrics> GetOrCreateInstanceMetrics(const sp_string& instance_id);
 
     sp_string component_name_;
     sp_int32 nbuckets_;
     sp_int32 bucket_interval_;
     // map between instance id and its set of metrics
-    std::map<sp_string, InstanceMetrics*> metrics_;
+    std::map<sp_string, shared_ptr<InstanceMetrics>> metrics_;
   };
 
   // Create or return existing mutable ComponentMetrics associated with 'component_name'.
   // Doesn't transfer ownership of returned ComponentMetrics
-  ComponentMetrics* GetOrCreateComponentMetrics(const sp_string& component_name);
+  shared_ptr<ComponentMetrics> GetOrCreateComponentMetrics(const sp_string& component_name);
 
   // map of component name to its metrics
-  std::map<sp_string, ComponentMetrics*> metrics_;
+  std::map<sp_string, shared_ptr<ComponentMetrics>> metrics_;
   sp_int32 max_interval_;
   sp_int32 nintervals_;
   sp_int32 interval_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   std::string metrics_sinks_yaml_;
-  common::TMasterMetrics* tmetrics_info_;
+  std::unique_ptr<common::TMasterMetrics> tmetrics_info_;
   time_t start_time_;
 };
 }  // namespace tmaster

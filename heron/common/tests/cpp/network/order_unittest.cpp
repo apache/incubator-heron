@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <iostream>
@@ -38,7 +41,7 @@ const sp_int64 timeout_sec_ = 5;
 
 class Terminate : public Client {
  public:
-  Terminate(EventLoopImpl* eventLoop, const NetworkOptions& _options)
+  Terminate(std::shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options)
       : Client(eventLoop, _options) {
     // Setup the call back function to be invoked when retrying
     retry_cb_ = [this]() { this->Retry(); };
@@ -77,14 +80,14 @@ void start_server(sp_uint32* port, CountDownLatch* latch) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  server_ = new OrderServer(&ss, options);
+  auto ss = std::make_shared<EventLoopImpl>();
+  server_ = new OrderServer(ss, options);
   EXPECT_EQ(0, server_->get_serveroptions().get_port());
   if (server_->Start() != 0) GTEST_FAIL();
   *port = server_->get_serveroptions().get_port();
   EXPECT_GT(*port, 0);
   latch->countDown();
-  ss.loop();
+  ss->loop();
 }
 
 void start_client(sp_uint32 port, sp_uint64 requests) {
@@ -94,10 +97,10 @@ void start_client(sp_uint32 port, sp_uint64 requests) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  OrderClient client(&ss, options, requests);
+  auto ss = std::make_shared<EventLoopImpl>();
+  OrderClient client(ss, options, requests);
   client.Start();
-  ss.loop();
+  ss->loop();
 }
 
 void terminate_server(sp_uint32 port) {
@@ -107,10 +110,10 @@ void terminate_server(sp_uint32 port) {
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
 
-  EventLoopImpl ss;
-  Terminate ts(&ss, options);
+  auto ss = std::make_shared<EventLoopImpl>();
+  Terminate ts(ss, options);
   ts.Start();
-  ss.loop();
+  ss->loop();
 }
 
 void start_test(sp_int32 nclients, sp_uint64 requests) {

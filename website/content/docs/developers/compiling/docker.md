@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Compiling With Docker
 ---
@@ -64,7 +82,7 @@ The following arguments are required:
 Here's an example usage:
 
 ```bash
-$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+$ docker/scripts/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
 ```
 
 This will build a Docker container specific to Ubuntu 14.04, create a source
@@ -87,13 +105,12 @@ of the generated artifacts:
 
 ```bash
 $ ls ~/heron-release
-heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz
+heron-0.12.0-ubuntu14.04.tar
+heron-0.12.0-ubuntu14.04.tar.gz
+heron-core-0.12.0-ubuntu14.04.tar.gz
+heron-install-0.12.0-ubuntu14.04.sh
+heron-layer-0.12.0-ubuntu14.04.tar
 heron-tools-0.12.0-ubuntu14.04.tar.gz
-heron-client-install-0.12.0-ubuntu.sh  
-heron-tools-install-0.12.0-ubuntu.sh
-heron-api-install-0.12.0-ubuntu.sh     
-heron-core-0.12.0-ubuntu.tar.gz
 ```
 
 ## Contributing New Environments
@@ -172,7 +189,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 Here's an example:
 
 ```dockerfile
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.26.0/bazel-0.26.0-installer-linux-x86_64.sh \
          && chmod +x /tmp/bazel.sh \
          && /tmp/bazel.sh
 ```

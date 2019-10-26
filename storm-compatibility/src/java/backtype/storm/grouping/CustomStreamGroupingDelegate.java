@@ -24,7 +24,7 @@ import backtype.storm.generated.GlobalStreamId;
 import backtype.storm.task.TopologyContext;
 
 public class CustomStreamGroupingDelegate implements
-    com.twitter.heron.api.grouping.CustomStreamGrouping {
+    org.apache.heron.api.grouping.CustomStreamGrouping {
   private static final long serialVersionUID = 2286979042095596191L;
   private CustomStreamGrouping delegate;
 
@@ -33,7 +33,7 @@ public class CustomStreamGroupingDelegate implements
   }
 
   @Override
-  public void prepare(com.twitter.heron.api.topology.TopologyContext context,
+  public void prepare(org.apache.heron.api.topology.TopologyContext context,
                       String component, String streamId,
                       List<Integer> targetTasks) {
     TopologyContext c = new TopologyContext(context);

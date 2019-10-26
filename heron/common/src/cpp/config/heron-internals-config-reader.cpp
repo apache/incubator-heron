@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "config/heron-internals-config-reader.h"
@@ -31,7 +34,7 @@ namespace config {
 // Global initialization to facilitate singleton design pattern
 HeronInternalsConfigReader* HeronInternalsConfigReader::heron_internals_config_reader_ = 0;
 
-HeronInternalsConfigReader::HeronInternalsConfigReader(EventLoop* eventLoop,
+HeronInternalsConfigReader::HeronInternalsConfigReader(std::shared_ptr<EventLoop> eventLoop,
                                                        const sp_string& _defaults_file,
                                                        const sp_string& _override_file)
     : YamlFileReader(eventLoop, _defaults_file) {
@@ -54,7 +57,7 @@ bool HeronInternalsConfigReader::Exists() {
   return (heron_internals_config_reader_ != NULL);  // Return true/false
 }
 
-void HeronInternalsConfigReader::Create(EventLoop* eventLoop,
+void HeronInternalsConfigReader::Create(std::shared_ptr<EventLoop> eventLoop,
                                         const sp_string& _defaults_file,
                                         const sp_string& _override_file) {
   if (heron_internals_config_reader_) {
@@ -234,8 +237,9 @@ sp_int32 HeronInternalsConfigReader::GetHeronStreammgrXormgrRotatingmapNbuckets(
   return config_[HeronInternalsConfigVars::HERON_STREAMMGR_XORMGR_ROTATINGMAP_NBUCKETS].as<int>();
 }
 
-sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectMaxAttempts() {
-  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_MAX_ATTEMPTS].as<int>();
+sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectTmasterMaxAttempts() {
+  return config_[HeronInternalsConfigVars::HERON_STREAMMGR_CLIENT_RECONNECT_TMASTER_MAX_ATTEMPTS]
+      .as<int>();
 }
 
 sp_int32 HeronInternalsConfigReader::GetHeronStreammgrClientReconnectIntervalSec() {
@@ -313,6 +317,11 @@ int HeronInternalsConfigReader::GetHeronInstanceInternalSpoutWriteQueueCapacity(
 
 int HeronInternalsConfigReader::GetHeronInstanceEmitBatchTimeMs() {
   return config_[HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_TIME_MS]
+      .as<int>();
+}
+
+int HeronInternalsConfigReader::GetHeronInstanceEmitBatchSize() {
+  return config_[HeronInternalsConfigVars::HERON_INSTANCE_EMIT_BATCH_SIZE]
       .as<int>();
 }
 

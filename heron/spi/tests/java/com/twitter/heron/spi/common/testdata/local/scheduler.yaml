@@ -1,5 +1,0 @@
-# scheduler class for distributing the topology for execution
-heron.class.scheduler:          com.twitter.heron.scheduler.local.LocalScheduler
-
-# launcher class for submitting the topology to the scheduler
-heron.class.launcher:          com.twitter.heron.scheduler.local.LocalLauncher

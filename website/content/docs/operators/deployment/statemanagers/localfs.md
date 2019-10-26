@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Setting Up Local File System State Manager
 ---
@@ -15,7 +33,7 @@ You can make Heron aware of the ZooKeeper cluster by modifying the
 need to specify the following for each cluster:
 
 * `heron.class.state.manager` --- Indicates the class to be loaded for local file system
-state manager. You should set this to `com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager`
+state manager. You should set this to `org.apache.heron.statemgr.localfs.LocalFileSystemStateManager`
 
 * `heron.statemgr.connection.string` --- This should be `LOCALMODE` since it always localhost.
 
@@ -35,7 +53,7 @@ Below is an example configuration (in `statemgr.yaml`) for a local file system r
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager
+heron.class.state.manager: org.apache.heron.statemgr.localfs.LocalFileSystemStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string: LOCALMODE

@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Heron observability with Scribe
 ---
@@ -17,7 +35,7 @@ To set up your Heron cluster to export to Scribe, you need to make two changes t
 
 Parameter | Description | Default
 :---------|:------------|:-------
-`class` | The Java class used to control Prometheus sink behavior | [`com.twitter.heron.metricsmgr.sink.ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
+`class` | The Java class used to control Prometheus sink behavior | [`org.apache.heron.metricsmgr.sink.ScribeSink`](/api/org/apache/heron/metricsmgr/sink/ScribeSink.html)
 `flush-frequency-ms` | How frequently, in milliseconds, the `flush()` method is called | 60000 (one minute)
 `sink-restart-attempts` | How many times Heron should attempt to publish metrics to Scribe before no longer attempting | -1 (forever)
 `scribe-host` | The Scribe host to export metrics to | 127.0.0.1

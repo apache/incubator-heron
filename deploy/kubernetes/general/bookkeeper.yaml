@@ -30,8 +30,6 @@ data:
   BK_ledgerDirectories: "/bookkeeper/data/ledgers"
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: zookeeper
-  # the default manager is flat, which is not good for supporting large number of ledgers
-  BK_ledgerManagerType: "hierarchical"
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
   #BK_statsProviderClass: org.apache.bookkeeper.stats.PrometheusMetricsProvider
 ---
@@ -63,7 +61,7 @@ spec:
     spec:
       containers:
         - name: bookie
-          image: apachedistributedlog/distributedlog:0.5.0
+          image: apache/bookkeeper:4.7.3
           resources:
             requests:
               memory: "3Gi"
@@ -71,8 +69,7 @@ spec:
             limits:
               memory: "5Gi"
               cpu: "2000m"
-          # use the patched entrypoint.sh - it will automatically created the desired distributedlog namespace
-          command: [ "/bin/bash", "/opt/distributedlog/bin/entrypoint.sh" ]
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           args: ["/opt/bookkeeper/bin/bookkeeper", "bookie"]
           ports:
             - name: client
@@ -147,8 +144,8 @@ spec:
     spec:
       containers:
         - name: replication-worker
-          image: apachedistributedlog/distributedlog:0.5.0
-          command: [ "/bin/bash", "/opt/bookkeeper/entrypoint.sh" ]
+          image: apache/bookkeeper:4.7.3
+          command: [ "/bin/bash", "/opt/bookkeeper/scripts/entrypoint.sh" ]
           args: ["/opt/bookkeeper/bin/bookkeeper", "autorecovery"]
           envFrom:
             - configMapRef:

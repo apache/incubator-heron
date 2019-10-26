@@ -12,10 +12,10 @@ extra_action(
     name = "checkstyle_python",
     tools = [
         "//third_party/python/pylint",
-        "//tools/java/src/com/twitter/bazel/checkstyle:checkstyle_python",
+        "//tools/java/src/org/apache/bazel/checkstyle:checkstyle_python",
     ],
     requires_action_output = True,
-    cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle:checkstyle_python) " +
+    cmd = "$(location //tools/java/src/org/apache/bazel/checkstyle:checkstyle_python) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
           "--pylint_file $$(pwd)/$(location //third_party/python/pylint)"
 )

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <iostream>
@@ -23,18 +26,20 @@
 #include "network/network.h"
 #include "server/dummy_stmgr.h"
 
+using std::shared_ptr;
+
 ///////////////////////////// DummyTMasterClient ///////////////////////////////////////////
 DummyTMasterClient::DummyTMasterClient(
-    EventLoopImpl* eventLoop, const NetworkOptions& _options, const sp_string& stmgr_id,
+    shared_ptr<EventLoopImpl> eventLoop, const NetworkOptions& _options, const sp_string& stmgr_id,
     const sp_string& stmgr_host, sp_int32 stmgr_port, sp_int32 shell_port,
-    const std::vector<heron::proto::system::Instance*>& _instances)
+    const std::vector<shared_ptr<heron::proto::system::Instance>>& _instances)
     : Client(eventLoop, _options),
       stmgr_id_(stmgr_id),
       stmgr_host_(stmgr_host),
       stmgr_port_(stmgr_port),
       shell_port_(shell_port),
       instances_(_instances) {
-  InstallResponseHandler(new heron::proto::tmaster::StMgrRegisterRequest(),
+  InstallResponseHandler(make_unique<heron::proto::tmaster::StMgrRegisterRequest>(),
                          &DummyTMasterClient::HandleRegisterResponse);
   // Setup the call back function to be invoked when retrying
   retry_cb_ = [this]() { this->Retry(); };
@@ -43,8 +48,9 @@ DummyTMasterClient::DummyTMasterClient(
 DummyTMasterClient::~DummyTMasterClient() {}
 
 void DummyTMasterClient::HandleRegisterResponse(
-    void*, heron::proto::tmaster::StMgrRegisterResponse* response, NetworkErrorCode) {
-  delete response;
+    void*,
+    pool_unique_ptr<heron::proto::tmaster::StMgrRegisterResponse> response,
+    NetworkErrorCode) {
 }
 
 void DummyTMasterClient::HandleConnect(NetworkErrorCode _status) {
@@ -59,8 +65,7 @@ void DummyTMasterClient::HandleConnect(NetworkErrorCode _status) {
 void DummyTMasterClient::HandleClose(NetworkErrorCode) {}
 
 void DummyTMasterClient::CreateAndSendRegisterRequest() {
-  heron::proto::tmaster::StMgrRegisterRequest* request =
-      new heron::proto::tmaster::StMgrRegisterRequest();
+  auto request = make_unique<heron::proto::tmaster::StMgrRegisterRequest>();
   heron::proto::system::StMgr* stmgr = request->mutable_stmgr();
   sp_string cwd;
   stmgr->set_id(stmgr_id_);
@@ -73,14 +78,15 @@ void DummyTMasterClient::CreateAndSendRegisterRequest() {
   for (auto iter = instances_.begin(); iter != instances_.end(); ++iter) {
     request->add_instances()->CopyFrom(**iter);
   }
-  SendRequest(request, NULL);
+  SendRequest(std::move(request), nullptr);
 }
 
 ///////////////////////////// DummyStMgr /////////////////////////////////////////////////
-DummyStMgr::DummyStMgr(EventLoopImpl* ss, const NetworkOptions& options, const sp_string& stmgr_id,
+DummyStMgr::DummyStMgr(shared_ptr<EventLoopImpl> ss, const NetworkOptions& options,
+                       const sp_string& stmgr_id,
                        const sp_string& stmgr_host, sp_int32 stmgr_port,
                        const sp_string& tmaster_host, sp_int32 tmaster_port, sp_int32 shell_port,
-                       const std::vector<heron::proto::system::Instance*>& _instances)
+                       const std::vector<shared_ptr<heron::proto::system::Instance>>& _instances)
     : Server(ss, options), num_start_bp_(0), num_stop_bp_(0) {
   NetworkOptions tmaster_options;
   tmaster_options.set_host(tmaster_host);
@@ -115,20 +121,19 @@ void DummyStMgr::HandleNewConnection(Connection* conn) {}
 void DummyStMgr::HandleConnectionClose(Connection*, NetworkErrorCode) {}
 
 void DummyStMgr::HandleStMgrHelloRequest(REQID _id, Connection* _conn,
-                                         heron::proto::stmgr::StrMgrHelloRequest* _request) {
+                               pool_unique_ptr<heron::proto::stmgr::StrMgrHelloRequest> _request) {
   other_stmgrs_ids_.push_back(_request->stmgr());
   heron::proto::stmgr::StrMgrHelloResponse response;
   response.mutable_status()->set_status(heron::proto::system::OK);
   SendResponse(_id, _conn, response);
-  delete _request;
 }
 
 void DummyStMgr::HandleStartBackPressureMessage(Connection*,
-                                                heron::proto::stmgr::StartBackPressureMessage*) {
+                                  pool_unique_ptr<heron::proto::stmgr::StartBackPressureMessage>) {
   ++num_start_bp_;
 }
 
 void DummyStMgr::HandleStopBackPressureMessage(Connection*,
-                                               heron::proto::stmgr::StopBackPressureMessage*) {
+                                   pool_unique_ptr<heron::proto::stmgr::StopBackPressureMessage>) {
   ++num_stop_bp_;
 }

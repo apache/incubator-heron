@@ -2,18 +2,13 @@
   "private": true,
   "dependencies": {
     "del": "^2.2.2",
-    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp": "^4.0.0",
     "gulp-autoprefixer": "^4.0.0",
-    "gulp-clean-css": "^3.0.0",
-    "gulp-concat": "^2.6.1",
     "gulp-hash": "^4.1.1",
-    "gulp-load-plugins": "^1.5.0",
     "gulp-sass": "^3.1.0",
-    "gulp-task-listing": "^1.0.1",
-    "gulp-uglify": "^2.0.1"
+    "gulp-uglify": "^3.0.0"
   },
-  "scripts": {
-    "build": "node_modules/.bin/gulp build",
-    "develop": "node_modules/.bin/gulp dev"
+  "devDependencies": {
+    "concurrently": "^3.5.1"
   }
 }

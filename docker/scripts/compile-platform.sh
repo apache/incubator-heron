@@ -1,4 +1,20 @@
 #!/bin/bash
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 set -o nounset
 set -o errexit
 
@@ -28,18 +44,27 @@ elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
   CONFIG_PLATFORM=darwin
 elif [[ "$TARGET_PLATFORM" =~ "debian" ]]; then
   CONFIG_PLATFORM=debian
-else 
+elif [[ "$TARGET_PLATFORM" =~ "ubuntu_nostyle" ]]; then
+  CONFIG_PLATFORM=ubuntu
+elif [[ "$TARGET_PLATFORM" =~ "centos_nostyle" ]]; then
+  CONFIG_PLATFORM=centos
+elif [[ "$TARGET_PLATFORM" =~ "darwin_nostyle" ]]; then
+  CONFIG_PLATFORM=darwin
+elif [[ "$TARGET_PLATFORM" =~ "debian_nostyle" ]]; then
+  CONFIG_PLATFORM=debian
+else
   echo "Unknown platform: $TARGET_PLATFORM"
   exit 1
 fi
 
+bazel version
 ./bazel_configure.py
 bazel clean
 
 echo "Creating packages"
 bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:tarpkgs
 bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/packages:binpkgs
-bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/docker:heron.tar
+bazel build -c opt --jobs 25 --config=$CONFIG_PLATFORM scripts/images:heron.tar
 
 echo "Moving packages to /$OUTPUT_DIRECTORY"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do
@@ -58,7 +83,7 @@ for file in ./bazel-bin/scripts/packages/*.sh; do
 done
 
 echo "Moving docker image to /$OUTPUT_DIRECTORY"
-for file in ./bazel-bin/scripts/docker/*.tar; do
+for file in ./bazel-bin/scripts/images/*.tar; do
   filename=$(basename $file)
   dest=$OUTPUT_DIRECTORY/${filename/.tar/-$HERON_VERSION-$TARGET_PLATFORM.tar}
 

@@ -57,7 +57,7 @@ public interface ISpout extends Serializable {
    * @param collector The collector is used to emit tuples from this spout. Tuples can be emitted at any time, including the open and close methods. The collector is thread-safe and should be saved as an instance variable of this spout object.
    */
   @SuppressWarnings("rawtypes")
-  void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
+  void open(Map conf, TopologyContext context, SpoutOutputCollector collector);
 
   /**
    * Called when an ISpout is going to be shutdown. There is no guarentee that close

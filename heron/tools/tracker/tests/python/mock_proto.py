@@ -1,7 +1,24 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 ''' mock_proto.py '''
 from heronpy.api import api_constants
 import heron.proto.execution_state_pb2 as protoEState
 import heron.proto.physical_plan_pb2 as protoPPlan
+import heron.proto.packing_plan_pb2 as protoPackingPlan
 import heron.proto.tmaster_pb2 as protoTmaster
 import heron.proto.topology_pb2 as protoTopology
 
@@ -26,6 +43,37 @@ class MockProto(object):
     for stream in output_streams:
       spout.outputs.add().stream.CopyFrom(stream)
     return spout
+
+  def create_mock_resource(self):
+    resource = protoPackingPlan.Resource()
+    resource.cpu = 1.0
+    resource.ram = 1024
+    resource.disk = 1024 * 2
+    return resource
+
+  def create_mock_instance_plan(self):
+    instancePlan = protoPackingPlan.InstancePlan()
+    instancePlan.component_name  = "word"
+    instancePlan.task_id = 1
+    instancePlan.component_index = 1
+    instancePlan.resource.CopyFrom(self.create_mock_resource())
+    return instancePlan
+
+  def create_mock_simple_container_plan(self):
+    containerPlan = protoPackingPlan.ContainerPlan()
+    containerPlan.id = 1
+    containerPlan.instance_plans.extend([self.create_mock_instance_plan()])
+    containerPlan.requiredResource.CopyFrom(self.create_mock_resource())
+
+    return containerPlan
+
+  def create_mock_simple_container_plan2(self):
+    containerPlan = protoPackingPlan.ContainerPlan()
+    containerPlan.id = 1
+    containerPlan.instance_plans.extend([self.create_mock_instance_plan()])
+    containerPlan.requiredResource.CopyFrom(self.create_mock_resource())
+    containerPlan.scheduledResource.CopyFrom(self.create_mock_resource())
+    return containerPlan
 
   def create_mock_bolt(self,
                        bolt_name,
@@ -137,6 +185,21 @@ class MockProto(object):
         spout_parallelism,
         bolt_parallelism))
     return pplan
+
+  def create_mock_simple_packing_plan(
+    self):
+    packingPlan = protoPackingPlan.PackingPlan()
+    packingPlan.id = "ExclamationTopology"
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan()])
+    return packingPlan
+
+  def create_mock_simple_packing_plan2(
+    self):
+    packingPlan = protoPackingPlan.PackingPlan()
+    packingPlan.id = "ExclamationTopology"
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan2()])
+    packingPlan.container_plans.extend([self.create_mock_simple_container_plan()])
+    return packingPlan
 
   def create_mock_medium_physical_plan(
       self,

@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -54,7 +57,7 @@ namespace common {
 class HeronZKStateMgr : public HeronStateMgr {
  public:
   HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
-                  EventLoop* eventLoop, bool exitOnSessionExpiry);
+                  std::shared_ptr<EventLoop> eventLoop, bool exitOnSessionExpiry);
   virtual ~HeronZKStateMgr();
 
   //
@@ -72,19 +75,19 @@ class HeronZKStateMgr : public HeronStateMgr {
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetTMasterLocation(const std::string& _topology_name,
-                          proto::tmaster::TMasterLocation* _return,
+                          shared_ptr<proto::tmaster::TMasterLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
   void SetMetricsCacheLocation(const proto::tmaster::MetricsCacheLocation& _location,
                           VCallback<proto::system::StatusCode> _cb);
   void GetMetricsCacheLocation(const std::string& _topology_name,
-                          proto::tmaster::MetricsCacheLocation* _return,
+                          shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                           VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets the Topology
   void CreateTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
   void DeleteTopology(const std::string& _topology_name, VCallback<proto::system::StatusCode> _cb);
   void SetTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
-  void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+  void GetTopology(const std::string& _topology_name, proto::api::Topology& _return,
                    VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets physical plan
@@ -94,10 +97,12 @@ class HeronZKStateMgr : public HeronStateMgr {
                           VCallback<proto::system::StatusCode> _cb);
   void SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
                        VCallback<proto::system::StatusCode> _cb);
-  void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlan(const std::string& _topology_name,
+                       shared_ptr<proto::system::PhysicalPlan> _return,
                        VCallback<proto::system::StatusCode> _cb);
 
-  void GetPackingPlan(const std::string& _topology_name, proto::system::PackingPlan* _return,
+  void GetPackingPlan(const std::string& _topology_name,
+                      shared_ptr<proto::system::PackingPlan> _return,
                       VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets execution state
@@ -112,16 +117,16 @@ class HeronZKStateMgr : public HeronStateMgr {
 
   // Gets/Sets the Stateful Checkpoints
   void CreateStatefulCheckpoints(const std::string& _topology_name,
-               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
-               VCallback<proto::system::StatusCode> _cb);
+          shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
+          VCallback<proto::system::StatusCode> _cb);
   void DeleteStatefulCheckpoints(const std::string& _topology_name,
                VCallback<proto::system::StatusCode> _cb);
   void SetStatefulCheckpoints(const std::string& _topology_name,
-               const proto::ckptmgr::StatefulConsistentCheckpoints& _ckpt,
+               shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _ckpt,
                VCallback<proto::system::StatusCode> _cb);
   void GetStatefulCheckpoints(const std::string& _topology_name,
-               proto::ckptmgr::StatefulConsistentCheckpoints* _return,
-               VCallback<proto::system::StatusCode> _cb);
+                              shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
+                              VCallback<proto::system::StatusCode> _cb);
 
   void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
   void ListExecutionStateTopologies(std::vector<sp_string>* _return,
@@ -133,32 +138,33 @@ class HeronZKStateMgr : public HeronStateMgr {
   // A test ONLY constructor used to pass a ZKClientFactory which could
   // return a MockZKClient
   HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
-                  EventLoop* eventLoop, ZKClientFactory* zkclient_factory,
+                  std::shared_ptr<EventLoop> eventLoop, ZKClientFactory* zkclient_factory,
                   bool exitOnSessionExpiry = false);
 
  private:
   // Done methods
   void SetTMasterLocationDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetMetricsCacheLocationDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetTMasterLocationDone(std::string* _contents, proto::tmaster::TMasterLocation* _return,
+  void GetTMasterLocationDone(std::string* _contents,
+                              shared_ptr<proto::tmaster::TMasterLocation> _return,
                               VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetMetricsCacheLocationDone(std::string* _contents,
-                                   proto::tmaster::MetricsCacheLocation* _return,
+                                   shared_ptr<proto::tmaster::MetricsCacheLocation> _return,
                                    VCallback<proto::system::StatusCode> _cb,
                                    sp_int32 _rc);
 
   void CreateTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeleteTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetTopologyDone(std::string* _contents, proto::api::Topology* _return,
+  void GetTopologyDone(std::string* _contents, proto::api::Topology& _return,
                        VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreatePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeletePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetPhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetPhysicalPlanDone(std::string* _contents, proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlanDone(std::string* _contents, shared_ptr<proto::system::PhysicalPlan> _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetPackingPlanDone(std::string* _contents, proto::system::PackingPlan* _return,
+  void GetPackingPlanDone(std::string* _contents, shared_ptr<proto::system::PackingPlan> _return,
                           VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreateExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
@@ -171,7 +177,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   void DeleteStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetStatefulCheckpointsDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void GetStatefulCheckpointsDone(std::string* _contents,
-                           proto::ckptmgr::StatefulConsistentCheckpoints* _return,
+                           shared_ptr<proto::ckptmgr::StatefulConsistentCheckpoints> _return,
                            VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void ListTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
@@ -222,7 +228,7 @@ class HeronZKStateMgr : public HeronStateMgr {
   // For tests it could be overriden to a factor that returns a MockZkClient
   // This class owns the factory, and is responsible for deleting it.
   ZKClientFactory* const zkclient_factory_;
-  EventLoop* eventLoop_;
+  std::shared_ptr<EventLoop> eventLoop_;
   // A permanent callback initialized to wrap the WatchEventHandler
   VCallback<ZKClient::ZkWatchEvent> watch_event_cb_;
 

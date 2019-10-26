@@ -1,7 +1,24 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
+
 build --genrule_strategy=standalone
+build --host_force_python=PY2
 build --ignore_unsupported_sandboxing
-build --java_toolchain=//tools/java:heron_java_toolchain
-build --python2_path /usr/bin/python2.7
 build --spawn_strategy=standalone
 build --workspace_status_command scripts/release/status.sh
 
@@ -12,13 +29,12 @@ build:centos --experimental_action_listener=tools/java:compile_java
 build:centos --experimental_action_listener=tools/python:compile_python
 build:centos --genrule_strategy=standalone
 build:centos --ignore_unsupported_sandboxing
-build:centos --java_toolchain=//tools/java:heron_java_toolchain
 build:centos --linkopt -lm
 build:centos --linkopt -lpthread
 build:centos --linkopt -lrt
-build:centos --python2_path /usr/bin/python2.7
 build:centos --spawn_strategy=standalone
 build:centos --workspace_status_command scripts/release/status.sh
+build:centos --copt=-O3
 
 # For debian
 # To use it: bazel build --config=debian
@@ -27,13 +43,12 @@ build:debian --experimental_action_listener=tools/java:compile_java
 build:debian --experimental_action_listener=tools/python:compile_python
 build:debian --genrule_strategy=standalone
 build:debian --ignore_unsupported_sandboxing
-build:debian --java_toolchain=//tools/java:heron_java_toolchain
 build:debian --linkopt -lm
 build:debian --linkopt -lpthread
 build:debian --linkopt -lrt
-build:debian --python2_path /usr/bin/python2.7
 build:debian --spawn_strategy=standalone
 build:debian --workspace_status_command scripts/release/status.sh
+build:debian --copt=-O3
 
 # For Mac
 # To use it: bazel build --config=darwin
@@ -42,10 +57,9 @@ build:darwin --experimental_action_listener=tools/java:compile_java
 build:darwin --experimental_action_listener=tools/python:compile_python
 build:darwin --genrule_strategy=standalone
 build:darwin --ignore_unsupported_sandboxing
-build:darwin --java_toolchain=//tools/java:heron_java_toolchain
-build:darwin --python2_path /usr/bin/python2.7
 build:darwin --spawn_strategy=standalone
 build:darwin --workspace_status_command scripts/release/status.sh
+build:darwin --copt=-O3
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
@@ -54,10 +68,52 @@ build:ubuntu --experimental_action_listener=tools/cpp:compile_cpp
 build:ubuntu --experimental_action_listener=tools/python:compile_python
 build:ubuntu --genrule_strategy=standalone
 build:ubuntu --ignore_unsupported_sandboxing
-build:ubuntu --java_toolchain=//tools/java:heron_java_toolchain
 build:ubuntu --linkopt -lm
 build:ubuntu --linkopt -lpthread
 build:ubuntu --linkopt -lrt
-build:ubuntu --python2_path /usr/bin/python2.7
 build:ubuntu --spawn_strategy=standalone
 build:ubuntu --workspace_status_command scripts/release/status.sh
+build:ubuntu --copt=-O3
+
+### Disabled checkstyle
+
+# For centos
+# To use it: bazel build --config=centos_nostyle
+build:centos_nostyle --genrule_strategy=standalone
+build:centos_nostyle --ignore_unsupported_sandboxing
+build:centos_nostyle --linkopt -lm
+build:centos_nostyle --linkopt -lpthread
+build:centos_nostyle --linkopt -lrt
+build:centos_nostyle --spawn_strategy=standalone
+build:centos_nostyle --workspace_status_command scripts/release/status.sh
+build:centos_nostyle --copt=-O3
+
+# For debian
+# To use it: bazel build --config=debian_nostyle
+build:debian_nostyle --genrule_strategy=standalone
+build:debian_nostyle --ignore_unsupported_sandboxing
+build:debian_nostyle --linkopt -lm
+build:debian_nostyle --linkopt -lpthread
+build:debian_nostyle --linkopt -lrt
+build:debian_nostyle --spawn_strategy=standalone
+build:debian_nostyle --workspace_status_command scripts/release/status.sh
+build:debian_nostyle --copt=-O3
+
+# For Mac
+# To use it: bazel build --config=darwin_nostyle
+build:darwin_nostyle --genrule_strategy=standalone
+build:darwin_nostyle --ignore_unsupported_sandboxing
+build:darwin_nostyle --spawn_strategy=standalone
+build:darwin_nostyle --workspace_status_command scripts/release/status.sh
+build:darwin_nostyle --copt=-O3
+
+# For Ubuntu
+# To use it: bazel build --config=ubuntu_nostyle
+build:ubuntu_nostyle --genrule_strategy=standalone
+build:ubuntu_nostyle --ignore_unsupported_sandboxing
+build:ubuntu_nostyle --linkopt -lm
+build:ubuntu_nostyle --linkopt -lpthread
+build:ubuntu_nostyle --linkopt -lrt
+build:ubuntu_nostyle --spawn_strategy=standalone
+build:ubuntu_nostyle --workspace_status_command scripts/release/status.sh
+build:ubuntu_nostyle --copt=-O3

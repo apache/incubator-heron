@@ -1,3 +1,20 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 FROM centos:centos7
 
 RUN yum -y upgrade
@@ -5,7 +22,9 @@ RUN yum -y install python; yum clean all
 RUN yum -y install unzip; yum clean all
 RUN yum -y install which; yum clean all
 RUN yum -y install curl; yum clean all
-RUN apt-get -y install supervisor; apt-get clean all
+RUN yum -y install python-setuptools; yum clean all
+RUN easy_install supervisor
+RUN echo_supervisord_conf > /etc/supervisord.conf
 
 RUN yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel; yum clean all
 
@@ -15,16 +34,19 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-# run heron installers
-RUN /heron/heron-client-install.sh
-RUN /heron/heron-tools-install.sh
+# run heron installer
+RUN /heron/heron-install.sh \
+    && rm -f /heron/heron-install.sh
 
-RUN mkdir -p /opt/heron && \
-    tar --strip-components=1 -m -zxvf /heron/heron-core.tar.gz -C /heron
-
-RUN rm -f /heron/heron-tools-install.sh
-RUN rm -f /heron/heron-client-install.sh
-RUN rm -f /heron/heron-core.tar.gz
+RUN ln -s /usr/local/heron/dist/heron-core /heron \
+    && mkdir -p /heron/heron-tools \
+    && ln -s /usr/local/heron/bin /heron/heron-tools \
+    && ln -s /usr/local/heron/conf /heron/heron-tools \
+    && ln -s /usr/local/heron/dist /heron/heron-tools \
+    && ln -s /usr/local/heron/lib /heron/heron-tools \
+    && ln -s /usr/local/heron/release.yaml /heron/heron-tools \
+    && ln -s /usr/local/heron/examples /heron \
+    && ln -s /usr/local/heron/release.yaml /heron
 
 ENV HERON_HOME /heron/heron-core/
 RUN export HERON_HOME

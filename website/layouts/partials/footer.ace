@@ -1,13 +1,23 @@
-footer.footer.hn-footer role=contentinfo
-  .container
-    .row
-      .col-lg-12
-        ul.hn-footer-links
-          li
-            a href=/docs/contributors/governance/ Governance
-          li
-            a href=/docs/contributors/roadmap/ Roadmap
-          li
-            a href=/docs/contributors/support/ Support
+footer.footer.hn-footer role=contentinfo id="apache"
+  .container-fluid
+    .row-fluid
+      .col-md-4
+        img.img-responsive src={{.Site.Params.assets.incubator}}
+        p &copy; 2018-{{ now.Year }} The Apache Software Foundation, Licensed under the
+          a href="https://www.apache.org/licenses/LICENSE-2.0"  Apache License, Version 2.0 |
+          a href="https://www.apache.org/foundation/policies/privacy" Privacy Policy
 
-        p &copy; {{ now.Year }} Twitter
+      .col-md-6
+        p Apache Heron is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the name of Apache Incubator PMC. Incubation is required of all newly accepted projects until a further review indicates that the infrastructure, communications, and decision making process have stabilized in a manner consistent with other successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability of the code, it does indicate that the project has yet to be fully endorsed by the ASF.
+      .col-md-2
+        h4 The ASF
+        .row
+        a href="https://www.apache.org" About
+        .row
+        a href="https://www.apache.org/licenses/" License
+        .row
+        a href="https://www.apache.org/foundation/sponsorship.html" Sponsorship
+        .row
+        a href="https://www.apache.org/security/" Security
+        .row
+        a href="https://www.apache.org/foundation/thanks.html" Thanks

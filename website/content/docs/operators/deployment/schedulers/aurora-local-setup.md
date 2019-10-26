@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Setting up Heron with Aurora Cluster Locally on Linux
 ---
@@ -75,12 +93,11 @@ $ vagrant ssh
 ### Step 1.a : Download installation script files
 
 You can download the script files that match your Linux distribution from
-https://github.com/twitter/heron/releases/tag/{{% heronVersion %}}
+https://github.com/apache/incubator-heron/releases/tag/{{% heronVersion %}}
 
 For example for the {{% heronVersion %}} release the files you need to download For Ubuntu will be the following.
 
-* `heron-client-install-{{% heronVersion %}}-ubuntu.sh`
-* `heron-tools-install-{{% heronVersion %}}-ubuntu.sh`
+* `heron-install-{{% heronVersion %}}-ubuntu.sh`
 
 Optionally - You want need the following for the steps in the blog post
 
@@ -91,8 +108,8 @@ Optionally - You want need the following for the steps in the blog post
 
 
 ```bash
-$ chmod +x heron-client-install-VERSION-PLATFORM.sh
-$ ./heron-client-install-VERSION-PLATFORM.sh --user
+$ chmod +x heron-install-VERSION-PLATFORM.sh
+$ ./heron-install-VERSION-PLATFORM.sh --user
 Heron client installer
 ----------------------
 
@@ -132,7 +149,7 @@ and add/edit the file to include the following.
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string:  "127.0.0.1:2181"
@@ -192,10 +209,10 @@ following. More information regarding parameters can be found in [Aurora Cluster
 
 ```yaml
 # scheduler class for distributing the topology for execution
-heron.class.scheduler: com.twitter.heron.scheduler.aurora.AuroraScheduler
+heron.class.scheduler: org.apache.heron.scheduler.aurora.AuroraScheduler
 
 # launcher class for submitting and launching the topology
-heron.class.launcher: com.twitter.heron.scheduler.aurora.AuroraLauncher
+heron.class.launcher: org.apache.heron.scheduler.aurora.AuroraLauncher
 
 # location of the core package
 heron.package.core.uri: file:///home/vagrant/.heron/dist/heron-core.tar.gz
@@ -231,7 +248,7 @@ $ mv aurora devcluster
 Now you can submit a topology to the aurora cluster. this can be done with the following command.
 
 ```bash
-$ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+$ heron submit devcluster/heronuser/devel --config-path ~/.heron/conf/ ~/.heron/examples/heron-api-examples.jar org.apache.heron.examples.api.ExclamationTopology ExclamationTopology
 ```
 
 Now you should be able to see the topology in the Aurora UI ( http://192.168.33.7:8081/scheduler/heronuser ) .

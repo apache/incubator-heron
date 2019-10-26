@@ -22,4 +22,4 @@ html lang={{.Site.LanguageCode}}
         li
           a href=/docs/contributors/community Community page
         li
-          a href=https://github.com/twitter/heron GitHub repo
+          a href=https://github.com/apache/incubator-heron GitHub repo

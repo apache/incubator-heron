@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ////////////////////////////////////////////////////////////////
@@ -42,7 +45,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
   static bool Exists();
   // Create a singleton reader from a config file,
   // which will check and reload the config change
-  static void Create(EventLoop* eventLoop,
+  static void Create(std::shared_ptr<EventLoop> eventLoop,
                      const sp_string& _defaults_file, const sp_string& _override_file);
   // Create a singleton reader from a config file,
   // which will not check or reload the config change
@@ -160,14 +163,14 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // Get the Nbucket value, for efficient acknowledgement
   sp_int32 GetHeronStreammgrXormgrRotatingmapNbuckets();
 
-  // The max reconnect attempts to other stream managers for stream manager client
-  sp_int32 GetHeronStreammgrClientReconnectMaxAttempts();
-
   // The reconnect interval to other stream managers in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectIntervalSec();
 
   // The reconnect interval to tamster in second for stream manager client
   sp_int32 GetHeronStreammgrClientReconnectTmasterIntervalSec();
+
+  // The max reconnect attempts to tmaster for stream manager client
+  sp_int32 GetHeronStreammgrClientReconnectTmasterMaxAttempts();
 
   // The maximum packet size in MB of stream manager's network options
   sp_int32 GetHeronStreammgrNetworkOptionsMaximumPacketMb();
@@ -216,6 +219,9 @@ class HeronInternalsConfigReader : public YamlFileReader {
   // The maximum time in ms for an spout instance to emit tuples per attempt
   int GetHeronInstanceEmitBatchTimeMs();
 
+  // The maximum number of bytes for an spout instance to emit tuples per attempt
+  int GetHeronInstanceEmitBatchSize();
+
   // The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
   int GetHeronInstanceSetDataTupleCapacity();
 
@@ -229,7 +235,7 @@ class HeronInternalsConfigReader : public YamlFileReader {
   int GetHeronInstanceAcknowledgementNbuckets();
 
  protected:
-  HeronInternalsConfigReader(EventLoop* eventLoop,
+  HeronInternalsConfigReader(std::shared_ptr<EventLoop> eventLoop,
                              const sp_string& _defaults_file,
                              const sp_string& _override_file);
   virtual ~HeronInternalsConfigReader();

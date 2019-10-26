@@ -63,7 +63,7 @@ public interface Tuple {
   /**
    * Gets the field at position i in the tuple. Returns object since tuples are dynamically typed.
    *
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Object getValue(int i);
 
@@ -71,7 +71,7 @@ public interface Tuple {
    * Returns the String at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a String
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   String getString(int i);
 
@@ -79,7 +79,7 @@ public interface Tuple {
    * Returns the Integer at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Integer
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Integer getInteger(int i);
 
@@ -87,7 +87,7 @@ public interface Tuple {
    * Returns the Long at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Long
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Long getLong(int i);
 
@@ -95,7 +95,7 @@ public interface Tuple {
    * Returns the Boolean at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Boolean
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Boolean getBoolean(int i);
 
@@ -103,7 +103,7 @@ public interface Tuple {
    * Returns the Short at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Short
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Short getShort(int i);
 
@@ -111,7 +111,7 @@ public interface Tuple {
    * Returns the Byte at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Byte
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Byte getByte(int i);
 
@@ -119,7 +119,7 @@ public interface Tuple {
    * Returns the Double at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Double
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Double getDouble(int i);
 
@@ -127,7 +127,7 @@ public interface Tuple {
    * Returns the Float at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a Float
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   Float getFloat(int i);
 
@@ -135,7 +135,7 @@ public interface Tuple {
    * Returns the byte array at position i in the tuple.
    *
    * @throws ClassCastException If that field is not a byte array
-   * @throws IndexOutOfBoundsException - if the index is out of range `(index < 0 || index >= size())`
+   * @throws IndexOutOfBoundsException - if the index is out of range `(index &lt; 0 || index &gt;= size())`
    */
   byte[] getBinary(int i);
 

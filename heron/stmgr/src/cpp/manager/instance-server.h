@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_INSTANCE_SERVER_H_
@@ -28,16 +31,19 @@
 
 namespace heron {
 namespace common {
+class AssignableMetric;
 class MetricsMgrSt;
 class MultiCountMetric;
-class TimeSpentMetric;
-class AssignableMetric;
 class MultiMeanMetric;
+class TimeSpentMetric;
 }
 }
 
 namespace heron {
 namespace stmgr {
+
+using std::shared_ptr;
+using std::unordered_map;
 
 class StMgr;
 class NeighbourCalculator;
@@ -45,17 +51,19 @@ class CheckpointGateway;
 
 class InstanceServer : public Server {
  public:
-  InstanceServer(EventLoop* eventLoop, const NetworkOptions& options,
-                 const sp_string& _topology_name, const sp_string& _topology_id,
-                 const sp_string& _stmgr_id, const std::vector<sp_string>& _expected_instances,
-                 StMgr* _stmgr, heron::common::MetricsMgrSt* _metrics_manager_client,
-                 NeighbourCalculator* _neighbour_calculator,
-                 bool _droptuples_upon_backpressure);
+  InstanceServer(shared_ptr<EventLoop> eventLoop, const NetworkOptions& options,
+             const sp_string& _topology_name, const sp_string& _topology_id,
+             const sp_string& _stmgr_id,
+             const std::vector<sp_string>& _expected_instances,
+             StMgr* _stmgr,
+             shared_ptr<heron::common::MetricsMgrSt> const& _metrics_manager_client,
+             shared_ptr<NeighbourCalculator> _neighbour_calculator,
+             bool _droptuples_upon_backpressure);
   virtual ~InstanceServer();
 
   // We own the message
   void SendToInstance2(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
-  void SendToInstance2(proto::stmgr::TupleStreamMessage* _message);
+  void SendToInstance2(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   // When we get a checkpoint marker from _src_task_id destined for _destination_task_id
   // this function in invoked, so that we might register it in gateway
@@ -63,6 +71,9 @@ class InstanceServer : public Server {
                               const sp_string& _checkpoint_id);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
+
+  void BroadcastStatefulCheckpointSaved(
+      const proto::ckptmgr::StatefulConsistentCheckpointSaved& _msg);
 
   virtual bool HaveAllInstancesConnectedToUs() const {
     return active_instances_.size() == expected_instances_.size();
@@ -79,7 +90,7 @@ class InstanceServer : public Server {
   void InitiateStatefulCheckpoint(const sp_string& _checkpoint_tag);
   // Send a RestoreInstanceStateRequest to _task_id asking it to restore itself from _state
   virtual bool SendRestoreInstanceStateRequest(sp_int32 _task_id,
-                                           const proto::ckptmgr::InstanceStateCheckpoint& _state);
+      const proto::ckptmgr::InstanceStateCheckpoint& _state);
   // Send StartInstanceStatefulProcessing message to all instances so that they can start
   // processing
   void SendStartInstanceStatefulProcessing(const std::string& _ckpt_id);
@@ -98,9 +109,11 @@ class InstanceServer : public Server {
  private:
   void DrainTupleSet(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void DrainTupleStream(proto::stmgr::TupleStreamMessage* _message);
-  void DrainCheckpoint(sp_int32 _task_id, proto::ckptmgr::InitiateStatefulCheckpoint* _message);
+  void DrainCheckpoint(sp_int32 _task_id,
+                       pool_unique_ptr<proto::ckptmgr::InitiateStatefulCheckpoint> _message);
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
   sp_string MakeQueueSizeCompIdMetricName(const sp_string& instanceid);
+  sp_string MakeQueueLengthCompIdMetricName(const sp_string& instanceid);
   sp_string GetInstanceName(Connection* _connection);
   void UpdateQueueMetrics(EventLoop::Status);
 
@@ -108,12 +121,13 @@ class InstanceServer : public Server {
 
   // Next from local instances
   void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
-                                     proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn, proto::system::HeronTupleSet* _message);
+                                   pool_unique_ptr<proto::stmgr::RegisterInstanceRequest> _request);
+  void HandleTupleSetMessage(Connection* _conn,
+                             pool_unique_ptr<proto::system::HeronTupleSet> _message);
   void HandleStoreInstanceStateCheckpointMessage(Connection* _conn,
-                                         proto::ckptmgr::StoreInstanceStateCheckpoint* _message);
+                           pool_unique_ptr<proto::ckptmgr::StoreInstanceStateCheckpoint> _message);
   void HandleRestoreInstanceStateResponse(Connection* _conn,
-                                          proto::ckptmgr::RestoreInstanceStateResponse* _message);
+                            pool_unique_ptr<proto::ckptmgr::RestoreInstanceStateResponse> _message);
 
   // Back pressure related connection callbacks
   // Do back pressure
@@ -123,6 +137,11 @@ class InstanceServer : public Server {
 
   // Compute the LocalSpouts from Physical Plan
   void ComputeLocalSpouts(const proto::system::PhysicalPlan& _pplan);
+
+  // Read config from Physical Plan and apply rate limit to connection
+  void SetRateLimit(const proto::system::PhysicalPlan& _pplan,
+                    const std::string& component,
+                    Connection* conn) const;
 
   class InstanceData {
    public:
@@ -148,12 +167,21 @@ class InstanceServer : public Server {
 
   // map of Instance_id to metric
   // Used for back pressure metrics
-  typedef std::unordered_map<sp_string, heron::common::TimeSpentMetric*> InstanceMetricMap;
+  typedef unordered_map<sp_string, shared_ptr<heron::common::TimeSpentMetric>> InstanceMetricMap;
   InstanceMetricMap instance_metric_map_;
 
   // map of Instance_id to queue metric
-  typedef std::unordered_map<sp_string, heron::common::MultiMeanMetric*> ConnectionBufferMetricMap;
+  typedef unordered_map<sp_string,
+                        shared_ptr<heron::common::MultiMeanMetric>> ConnectionBufferMetricMap;
   ConnectionBufferMetricMap connection_buffer_metric_map_;
+
+  // map of Instance_id to queue length metric
+  typedef std::unordered_map<sp_string, shared_ptr<heron::common::MultiCountMetric>>
+    ConnectionBufferLengthMetricMap;
+  ConnectionBufferLengthMetricMap connection_buffer_length_metric_map_;
+
+  // map of task id to task name
+  std::unordered_map<sp_int32, sp_string> task_id_to_name;
 
   // instances/ causing back pressure
   std::unordered_set<sp_string> remote_ends_who_caused_back_pressure_;
@@ -165,15 +193,16 @@ class InstanceServer : public Server {
   StMgr* stmgr_;
 
   // Metrics
-  heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::MultiCountMetric* instance_server_metrics_;
-  heron::common::TimeSpentMetric* back_pressure_metric_aggr_;
+  shared_ptr<heron::common::MetricsMgrSt> metrics_manager_client_;
+  shared_ptr<heron::common::MultiCountMetric> instance_server_metrics_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_aggr_;
+  shared_ptr<heron::common::TimeSpentMetric> back_pressure_metric_caused_by_local_instances_;
 
   bool spouts_under_back_pressure_;
 
   // Stateful processing related member variables
-  NeighbourCalculator* neighbour_calculator_;
-  CheckpointGateway* stateful_gateway_;
+  shared_ptr<NeighbourCalculator> neighbour_calculator_;
+  shared_ptr<CheckpointGateway> stateful_gateway_;
 
   bool droptuples_upon_backpressure_;
 

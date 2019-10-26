@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "grouping/grouping.h"
@@ -42,43 +45,44 @@ Grouping::Grouping(const std::vector<sp_int32>& _task_ids)
 
 Grouping::~Grouping() {}
 
-Grouping* Grouping::Create(proto::api::Grouping grouping_, const proto::api::InputStream& _is,
+unique_ptr<Grouping> Grouping::Create(proto::api::Grouping grouping_,
+                           const proto::api::InputStream& _is,
                            const proto::api::StreamSchema& _schema,
                            const std::vector<sp_int32>& _task_ids) {
   switch (grouping_) {
     case proto::api::SHUFFLE: {
-      return new ShuffleGrouping(_task_ids);
+      return make_unique<ShuffleGrouping>(_task_ids);
       break;
     }
 
     case proto::api::FIELDS: {
-      return new FieldsGrouping(_is, _schema, _task_ids);
+      return make_unique<FieldsGrouping>(_is, _schema, _task_ids);
       break;
     }
 
     case proto::api::ALL: {
-      return new AllGrouping(_task_ids);
+      return make_unique<AllGrouping>(_task_ids);
       break;
     }
 
     case proto::api::LOWEST: {
-      return new LowestGrouping(_task_ids);
+      return make_unique<LowestGrouping>(_task_ids);
       break;
     }
 
     case proto::api::NONE: {
       // This is what storm does right now
-      return new ShuffleGrouping(_task_ids);
+      return make_unique<ShuffleGrouping>(_task_ids);
       break;
     }
 
     case proto::api::DIRECT: {
-      return new DirectGrouping(_task_ids);
+      return make_unique<DirectGrouping>(_task_ids);
       break;
     }
 
     case proto::api::CUSTOM: {
-      return new CustomGrouping(_task_ids);
+      return make_unique<CustomGrouping>(_task_ids);
       break;
     }
 

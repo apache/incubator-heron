@@ -1,0 +1,84 @@
+{
+  "topology": {
+    "id": "IntegrationTopologyTest_FieldsGrouping",
+    "name": "IntegrationTopologyTest_FieldsGrouping",
+    "spouts": {
+      "comp": {
+        "name": "ab-spout",
+        "config": {
+          "kvs": {
+            "key": "topology.component.parallelism",
+            "value": "1"
+          }
+        }
+      }
+    },
+    "bolts": [
+      {
+        "comp": {
+          "name": "count-bolt",
+          "config": {
+            "kvs": {
+              "key": "topology.component.parallelism",
+              "value": "2"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "stream": {
+              "id": "default",
+              "component_name": "ab-spout"
+            }
+          }
+        ]
+      },
+      {
+        "comp": {
+          "name": "sum-bolt",
+          "config": {
+            "kvs": {
+              "key": "topology.component.parallelism",
+              "value": "1"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "stream": {
+              "id": "default",
+              "component_name": "count-bolt"
+            }
+          }
+        ]
+      }
+    ],
+    "state": "RUNNING"
+  },
+  "instances": [
+    {
+      "instance_id": "container_1_ab-spout_1",
+      "info": {
+        "component_name": "ab-spout"
+      }
+    },
+    {
+      "instance_id": "container_1_count-bolt_3",
+      "info": {
+        "component_name": "count-bolt"
+      }
+    },
+    {
+      "instance_id": "container_1_count-bolt_4",
+      "info": {
+        "component_name": "count-bolt"
+      }
+    },
+    {
+      "instance_id": "container_2_sum-bolt_6",
+      "info": {
+        "component_name": "sum-bolt"
+      }
+    }
+  ]
+}

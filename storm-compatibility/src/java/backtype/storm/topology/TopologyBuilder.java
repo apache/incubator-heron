@@ -21,13 +21,13 @@ package backtype.storm.topology;
 // TODO:- Add this
 // import backtype.storm.grouping.CustomStreamGrouping;
 
-import com.twitter.heron.api.HeronTopology;
+import org.apache.heron.api.HeronTopology;
 
 import backtype.storm.generated.StormTopology;
 
 public class TopologyBuilder {
-  private com.twitter.heron.api.topology.TopologyBuilder delegate =
-      new com.twitter.heron.api.topology.TopologyBuilder();
+  private org.apache.heron.api.topology.TopologyBuilder delegate =
+      new org.apache.heron.api.topology.TopologyBuilder();
 
   public StormTopology createTopology() {
     HeronTopology topology = delegate.createTopology();
@@ -40,7 +40,7 @@ public class TopologyBuilder {
 
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
     IRichBoltDelegate boltImpl = new IRichBoltDelegate(bolt);
-    com.twitter.heron.api.topology.BoltDeclarer declarer =
+    org.apache.heron.api.topology.BoltDeclarer declarer =
         delegate.setBolt(id, boltImpl, parallelismHint);
     return new BoltDeclarerImpl(declarer);
   }
@@ -59,7 +59,7 @@ public class TopologyBuilder {
 
   public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
     IRichSpoutDelegate spoutImpl = new IRichSpoutDelegate(spout);
-    com.twitter.heron.api.topology.SpoutDeclarer declarer =
+    org.apache.heron.api.topology.SpoutDeclarer declarer =
         delegate.setSpout(id, spoutImpl, parallelismHint);
     return new SpoutDeclarerImpl(declarer);
   }

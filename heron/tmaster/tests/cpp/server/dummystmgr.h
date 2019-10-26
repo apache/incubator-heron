@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef __DUMMYSTMGR_H_
@@ -31,7 +34,8 @@ namespace testing {
 
 class DummyStMgr : public Client {
  public:
-  DummyStMgr(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& stmgr_id,
+  DummyStMgr(std::shared_ptr<EventLoop> eventLoop, const NetworkOptions& options,
+             const sp_string& stmgr_id,
              const sp_string& myhost, sp_int32 myport,
              const std::vector<proto::system::Instance*>& instances);
   ~DummyStMgr();
@@ -48,14 +52,18 @@ class DummyStMgr : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* response,
+  void HandleRegisterResponse(void*,
+                              pool_unique_ptr<proto::tmaster::StMgrRegisterResponse> response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*, proto::tmaster::StMgrHeartbeatResponse* response,
+  void HandleHeartbeatResponse(void*,
+                               pool_unique_ptr<proto::tmaster::StMgrHeartbeatResponse> response,
                                NetworkErrorCode);
-  void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* message);
+  void HandleNewAssignmentMessage(pool_unique_ptr<proto::stmgr::NewPhysicalPlanMessage> message);
   void HandleNewPhysicalPlan(const proto::system::PhysicalPlan& pplan);
-  void HandleRestoreTopologyStateRequest(proto::ckptmgr::RestoreTopologyStateRequest* message);
-  void HandleStartProcessingMessage(proto::ckptmgr::StartStmgrStatefulProcessing* message);
+  void HandleRestoreTopologyStateRequest(
+          pool_unique_ptr<proto::ckptmgr::RestoreTopologyStateRequest> message);
+  void HandleStartProcessingMessage(
+          pool_unique_ptr<proto::ckptmgr::StartStmgrStatefulProcessing> message);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();

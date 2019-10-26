@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Setting Up ZooKeeper State Manager
 ---
@@ -25,7 +43,7 @@ need to specify the following for each cluster:
 
 * `heron.class.state.manager` --- Indicates the class to be loaded for managing
 the state in ZooKeeper and this class is loaded using reflection. You should set this
-to `com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
+to `org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager`
 
 * `heron.statemgr.connection.string` --- The host IP address and port to connect to ZooKeeper
 cluster (e.g) "127.0.0.1:2181".
@@ -56,7 +74,7 @@ Below is an example configuration (in `statemgr.yaml`) for a ZooKeeper running i
 
 ```yaml
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: org.apache.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
 heron.statemgr.connection.string:  "127.0.0.1:2181"

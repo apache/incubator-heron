@@ -58,7 +58,7 @@ pex_pytest(
 
 pex_pytest(
     name = "tracker_unittest",
-    srcs = ["tracker_unittest.py"],
+    srcs = ["tracker_unittest.py", "mock_proto.py"],
     deps = [
         "//heron/tools/tracker/src/python:tracker-py",
         "//heron/proto:proto-py",

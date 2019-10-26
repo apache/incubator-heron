@@ -1,3 +1,0 @@
----
-title: Heron metrics overview
----

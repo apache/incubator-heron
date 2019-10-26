@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Setting up the HDFS uploader
 ---
@@ -18,7 +36,7 @@ You can make Heron use HDFS uploader by modifying the `uploader.yaml` config fil
 for the Heron cluster. You'll need to specify the following for each cluster:
 
 * `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this
-to `com.twitter.heron.uploader.hdfs.HdfsUploader`
+to `org.apache.heron.uploader.hdfs.HdfsUploader`
 
 * `heron.uploader.hdfs.config.directory` --- Specifies the directory of the config files
 for hadoop. This is used by hadoop client to upload the topology jar
@@ -34,7 +52,7 @@ Below is an example configuration (in `uploader.yaml`) for a HDFS uploader:
 
 ```yaml
 # uploader class for transferring the topology jar/tar files to storage
-heron.class.uploader: com.twitter.heron.uploader.hdfs.HdfsUploader
+heron.class.uploader: org.apache.heron.uploader.hdfs.HdfsUploader
 
 # Directory of config files for hadoop client to read from
 heron.uploader.hdfs.config.directory: /home/hadoop/hadoop

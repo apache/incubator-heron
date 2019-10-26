@@ -15,9 +15,9 @@ java_library(
     srcs = [ "Empty.java" ],
     deps = [
         ":extra_actions_proto_java",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
     exports = [
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )

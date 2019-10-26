@@ -1,17 +1,20 @@
-/*
- * Copyright 2017 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,9 +49,9 @@ template<typename T>
 class NotifyingCommunicator {
  public:
   // Constructor/Destructor
-  NotifyingCommunicator(EventLoop* consumer_loop,
+  NotifyingCommunicator(std::shared_ptr<EventLoop> consumer_loop,
                         std::function<void(T)> consumer_function,
-                        EventLoop* notification_loop,
+                        std::shared_ptr<EventLoop> notification_loop,
                         std::function<void()> notification_function) {
     consumption_function_ = std::move(consumer_function);
     notification_function_ = std::move(notification_function);
@@ -66,7 +69,7 @@ class NotifyingCommunicator {
   }
 
   void enqueue(T t) {
-    forward_channel_->enqueue(t);
+    forward_channel_->enqueue(std::move(t));
   }
 
   int size() {
@@ -85,7 +88,7 @@ class NotifyingCommunicator {
     notification_function_();
   }
   void consumption_function(T t) {
-    consumption_function_(t);
+    consumption_function_(std::move(t));
     notification_channel_->enqueue(&unused_);
   }
 

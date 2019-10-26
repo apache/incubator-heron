@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include <stdio.h>
@@ -25,7 +28,8 @@
 #include "network/network.h"
 #include "server/dummy_instance.h"
 
-DummyInstance::DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummyInstance::DummyInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                             const NetworkOptions& _options,
                              const sp_string& _topology_name, const sp_string& _topology_id,
                              const sp_string& _instance_id, const sp_string& _component_name,
                              sp_int32 _task_id, sp_int32 _component_index,
@@ -40,7 +44,7 @@ DummyInstance::DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _op
       stmgr_id_(_stmgr_id),
       recvd_stmgr_pplan_(NULL),
       register_response_status(heron::proto::system::STMGR_DIDNT_REGISTER) {
-  InstallResponseHandler(new heron::proto::stmgr::RegisterInstanceRequest(),
+  InstallResponseHandler(make_unique<heron::proto::stmgr::RegisterInstanceRequest>(),
                          &DummyInstance::HandleInstanceResponse);
   InstallMessageHandler(&DummyInstance::HandleTupleMessage);
   InstallMessageHandler(&DummyInstance::HandleNewInstanceAssignmentMsg);
@@ -71,28 +75,30 @@ heron::proto::system::StatusCode DummyInstance::GetRegisterResponseStatus() {
   return register_response_status;
 }
 
-void DummyInstance::HandleInstanceResponse(void*,
-    heron::proto::stmgr::RegisterInstanceResponse* _message,
-    NetworkErrorCode status) {
+void DummyInstance::HandleInstanceResponse(
+                            void*,
+                            pool_unique_ptr<heron::proto::stmgr::RegisterInstanceResponse> _message,
+                            NetworkErrorCode status) {
   CHECK_EQ(status, OK);
   if (_message->has_pplan()) {
     if (recvd_stmgr_pplan_) {
       delete recvd_stmgr_pplan_;
     }
+
     recvd_stmgr_pplan_ = new heron::proto::system::PhysicalPlan();
     recvd_stmgr_pplan_->CopyFrom(_message->pplan());
   }
+
   register_response_status = _message->status().status();
-  delete _message;
 }
 
-void DummyInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2*) {}
+void DummyInstance::HandleTupleMessage(pool_unique_ptr<heron::proto::system::HeronTupleSet2>) {}
 
 void DummyInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage*) {}
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage>) {}
 
 void DummyInstance::CreateAndSendInstanceRequest() {
-  auto request = new heron::proto::stmgr::RegisterInstanceRequest();
+  auto request = make_unique<heron::proto::stmgr::RegisterInstanceRequest>();
   heron::proto::system::Instance* instance = request->mutable_instance();
   instance->set_instance_id(instance_id_);
   instance->set_stmgr_id(stmgr_id_);
@@ -101,12 +107,13 @@ void DummyInstance::CreateAndSendInstanceRequest() {
   instance->mutable_info()->set_component_name(component_name_);
   request->set_topology_name(topology_name_);
   request->set_topology_id(topology_id_);
-  SendRequest(request, nullptr);
+  SendRequest(std::move(request), nullptr);
   return;
 }
 
 //////////////////////////////////////// DummySpoutInstance ////////////////////////////////////
-DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummySpoutInstance::DummySpoutInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                                       const NetworkOptions& _options,
                                        const sp_string& _topology_name,
                                        const sp_string& _topology_id, const sp_string& _instance_id,
                                        const sp_string& _component_name, sp_int32 _task_id,
@@ -123,11 +130,13 @@ DummySpoutInstance::DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOp
       under_backpressure_(false) {}
 
 void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage* _msg) {
-  DummyInstance::HandleNewInstanceAssignmentMsg(_msg);
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
+  const heron::proto::system::PhysicalPlan pplan = _msg->pplan();
+
+  DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
+
   custom_grouping_dest_task_ = std::numeric_limits<sp_int32>::max() - 1;
   if (do_custom_grouping_) {
-    const heron::proto::system::PhysicalPlan& pplan = _msg->pplan();
     for (sp_int32 i = 0; i < pplan.instances_size(); ++i) {
       if (pplan.instances(i).info().component_name() != component_name_ &&
           pplan.instances(i).info().task_id() < custom_grouping_dest_task_) {
@@ -135,6 +144,7 @@ void DummySpoutInstance::HandleNewInstanceAssignmentMsg(
       }
     }
   }
+
   CreateAndSendTupleMessages();
 }
 
@@ -165,7 +175,8 @@ void DummySpoutInstance::CreateAndSendTupleMessages() {
 }
 
 //////////////////////////////////////// DummyBoltInstance ////////////////////////////////////
-DummyBoltInstance::DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
+DummyBoltInstance::DummyBoltInstance(std::shared_ptr<EventLoopImpl> eventLoop,
+                                     const NetworkOptions& _options,
                                      const sp_string& _topology_name, const sp_string& _topology_id,
                                      const sp_string& _instance_id,
                                      const sp_string& _component_name, sp_int32 _task_id,
@@ -176,14 +187,15 @@ DummyBoltInstance::DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOpti
       expected_msgs_to_recv_(_expected_msgs_to_recv),
       msgs_recvd_(0) {}
 
-void DummyBoltInstance::HandleTupleMessage(heron::proto::system::HeronTupleSet2* msg) {
+void DummyBoltInstance::HandleTupleMessage(
+        pool_unique_ptr<heron::proto::system::HeronTupleSet2> msg) {
   if (msg->has_data()) msgs_recvd_ += msg->mutable_data()->tuples_size();
   if (msgs_recvd_ >= expected_msgs_to_recv_) getEventLoop()->loopExit();
 }
 
 void DummyBoltInstance::HandleNewInstanceAssignmentMsg(
-    heron::proto::stmgr::NewInstanceAssignmentMessage* _msg) {
-  DummyInstance::HandleNewInstanceAssignmentMsg(_msg);
+        pool_unique_ptr<heron::proto::stmgr::NewInstanceAssignmentMessage> _msg) {
+  DummyInstance::HandleNewInstanceAssignmentMsg(std::move(_msg));
   if (expected_msgs_to_recv_ == 0) {
     getEventLoop()->loopExit();
   }

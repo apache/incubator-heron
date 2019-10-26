@@ -1,22 +1,25 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 ////////////////////////////////////////////////////////////////////
 //
-// This file consists of ciass definition of a producer consumer queue
+// This file consists of class definition of a producer consumer queue
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -57,7 +60,7 @@ class PCQueue {
 template <typename T>
 void PCQueue<T>::enqueue(T _item) {
   std::unique_lock<std::mutex> m(mutex_);
-  queue_.push(_item);
+  queue_.push(std::move(_item));
 
   cond_.notify_one();
 }
@@ -67,7 +70,7 @@ void PCQueue<T>::enqueue_all(T _item, sp_int32 _ntimes) {
   std::unique_lock<std::mutex> m(mutex_);
 
   for (sp_int32 i = 0; i < _ntimes; i++) {
-    queue_.push(_item);
+    queue_.push(std::move(_item));
   }
 
   cond_.notify_one();
@@ -79,7 +82,7 @@ T PCQueue<T>::dequeue() {
 
   while (queue_.empty()) cond_.wait(m);
 
-  T item = queue_.front();
+  T item = std::move(queue_.front());
   queue_.pop();
   return item;
 }
@@ -87,13 +90,17 @@ T PCQueue<T>::dequeue() {
 template <typename T>
 T PCQueue<T>::trydequeue(bool& _dequeued) {
   std::unique_lock<std::mutex> m(mutex_);
+
   if (queue_.empty()) {
     _dequeued = false;
-    return NULL;
+    return nullptr;
   }
-  T item = queue_.front();
+
+  T item = std::move(queue_.front());
+
   queue_.pop();
   _dequeued = true;
+
   return item;
 }
 
@@ -102,12 +109,14 @@ sp_uint32 PCQueue<T>::trydequeuen(sp_uint32 _ntodequeue, std::vector<T>& _retval
   std::unique_lock<std::mutex> m(mutex_);
 
   sp_uint32 dequeued = 0;
+
   while (!queue_.empty() && dequeued < _ntodequeue) {
-    T item = queue_.front();
+    T item = std::move(queue_.front());
     queue_.pop();
-    _retval.push_back(item);
+    _retval.push_back(std::move(item));
     dequeued++;
   }
+
   return dequeued;
 }
 

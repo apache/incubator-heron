@@ -24,10 +24,10 @@ import org.apache.storm.metric.api.IMetric;
 
 public class LatencyStatAndMetric implements IMetric {
 
-  private final com.twitter.heron.api.metric.LatencyStatAndMetric delegate;
+  private final org.apache.heron.api.metric.LatencyStatAndMetric delegate;
 
   public LatencyStatAndMetric(int numBuckets) {
-    delegate = new com.twitter.heron.api.metric.LatencyStatAndMetric(numBuckets);
+    delegate = new org.apache.heron.api.metric.LatencyStatAndMetric(numBuckets);
   }
 
   @Override

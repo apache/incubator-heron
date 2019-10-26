@@ -13,7 +13,7 @@ java_library(
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
         "@com_google_guava_guava//jar",
-        "@com_google_protobuf_protobuf_java//jar",
+        "@com_google_protobuf//:protobuf_java",
         "//third_party/java:mockito",
         "//third_party/java:junit4",
     ],
@@ -21,15 +21,15 @@ java_library(
 
 java_tests(
     test_classes = [
-        "com.twitter.heron.metricsmgr.MetricsUtilTests",
-        "com.twitter.heron.metricsmgr.HandleTMasterLocationTest",
-        "com.twitter.heron.metricsmgr.MetricsManagerServerTest",
-        "com.twitter.heron.metricsmgr.executor.SinkExecutorTest",
-        "com.twitter.heron.metricsmgr.sink.tmaster.TMasterSinkTest",
-        "com.twitter.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
-        "com.twitter.heron.metricsmgr.sink.FileSinkTest",
-        "com.twitter.heron.metricsmgr.sink.WebSinkTest",
-        "com.twitter.heron.metricsmgr.sink.PrometheusSinkTests",
+        "org.apache.heron.metricsmgr.MetricsUtilTests",
+        "org.apache.heron.metricsmgr.HandleTMasterLocationTest",
+        "org.apache.heron.metricsmgr.MetricsManagerServerTest",
+        "org.apache.heron.metricsmgr.executor.SinkExecutorTest",
+        "org.apache.heron.metricsmgr.sink.tmaster.TMasterSinkTest",
+        "org.apache.heron.metricsmgr.sink.metricscache.MetricsCacheSinkTest",
+        "org.apache.heron.metricsmgr.sink.FileSinkTest",
+        "org.apache.heron.metricsmgr.sink.WebSinkTest",
+        "org.apache.heron.metricsmgr.sink.PrometheusSinkTests",
     ],
     runtime_deps = [
         ":metricsmgr-tests",

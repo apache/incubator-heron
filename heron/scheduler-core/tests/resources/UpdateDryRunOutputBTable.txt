@@ -1,5 +1,5 @@
 Total number of containers: 1
-Using repacking class: com.twitter.heron.packing.binpacking.FirstFitDecreasingPacking
+Using repacking class: org.apache.heron.packing.binpacking.FirstFitDecreasingPacking
 [1mContainer 1[0m MODIFIED
 CPU: 4.5 ([31m-25.00%[0m), RAM: 5120 MB ([31m-28.57%[0m), Disk: 5120 MB ([31m-28.57%[0m)
 ====================================================

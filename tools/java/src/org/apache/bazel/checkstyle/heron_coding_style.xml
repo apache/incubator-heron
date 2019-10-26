@@ -1,0 +1,344 @@
+<?xml version="1.0"?>
+<!--
+=================================================================================================
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+=================================================================================================
+-->
+
+<!DOCTYPE module PUBLIC
+          "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+          "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!--
+
+  Checkstyle configuration that checks the sun coding conventions from:
+
+    - the Java Language Specification at
+      http://java.sun.com/docs/books/jls/second_edition/html/index.html
+
+    - the Sun Code Conventions at http://java.sun.com/docs/codeconv/
+
+    - the Javadoc guidelines at
+      http://java.sun.com/j2se/javadoc/writingdoccomments/index.html
+
+    - the JDK Api documentation http://java.sun.com/j2se/docs/api/index.html
+
+    - some best practices
+
+  Checkstyle is very configurable. Be sure to read the documentation at
+  http://checkstyle.sf.net (or in your downloaded distribution).
+
+  Most Checks are configurable, be sure to consult the documentation.
+
+  To completely disable a check, just comment it out or delete it from the file.
+
+  Finally, it is worth reading the documentation.
+-->
+
+<module name="Checker">
+    <!--
+        If you set the basedir property below, then all reported file
+        names will be relative to the specified directory. See
+        http://checkstyle.sourceforge.net/config.html#Checker
+        <property name="basedir" value="${basedir}"/>
+    -->
+
+    <!-- We use this to turn off specific checks for specific file types.
+    -->
+    <module name="SuppressionFilter">
+        <property name="file" value="tools/java/src/org/apache/bazel/checkstyle/suppressions.xml"/>
+    </module>
+
+    <!-- Verify that all Java classes have a header -->
+    <module name="RegexpHeader">
+      <property name="headerFile" value="tools/java/src/org/apache/bazel/checkstyle/heron_header.txt"/>
+      <property name="fileExtensions" value="java"/>
+      <message key="header.mismatch"
+               value="Invalid header. See header template in tools/java/src/org/apache/bazel/checkstyle/heron_header.txt"/>
+    </module>
+
+    <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method
+    shows in SuppressWithNearbyCommentFilter if you can.
+         // CHECKSTYLE:OFF CheckNameHere
+         // CHECKSTYLE:ON CheckNameHere
+    -->
+    <module name="SuppressionCommentFilter">
+      <property name="offCommentFormat" value="CHECKSTYLE\:OFF ([\w\|]+)"/>
+      <property name="onCommentFormat" value="CHECKSTYLE\:ON ([\w\|]+)"/>
+      <property name="checkFormat" value="$1"/>
+    </module>
+
+    <!-- allow suppression (via comments) of a specified check +/- 1 line from
+      a in-code comment "// SUPPRESS CHECKSTYLE CheckNameHere"
+      C style comments are allowed as well
+    -->
+    <module name="SuppressWithNearbyCommentFilter">
+      <property name="influenceFormat" value="1"/>
+    </module>
+    <!-- now again for one line before the comment -->
+    <module name="SuppressWithNearbyCommentFilter">
+      <property name="influenceFormat" value="-1"/>
+    </module>
+
+    <!-- Checks whether files end with a new line.                        -->
+    <!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
+    <module name="NewlineAtEndOfFile"/>
+
+    <!-- Checks that property files contain the same keys.         -->
+    <!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
+    <module name="Translation"/>
+
+    <!-- Checks for whitespace                               -->
+    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <module name="FileTabCharacter"/>
+
+    <!-- Miscellaneous other checks.                   -->
+    <!-- See http://checkstyle.sf.net/config_misc.html -->
+    <module name="RegexpSingleline">
+      <property name="format" value="\s+$"/>
+      <property name="minimum" value="0"/>
+      <property name="maximum" value="0"/>
+      <property name="message" value="Line has trailing spaces."/>
+    </module>
+
+    <!-- allows us to use annotations to supress, like this: @SuppressWarnings("checkstyle:methodlength") -->
+    <module name="SuppressWarningsFilter" />
+
+    <module name="TreeWalker">
+      <property name="tabWidth" value="2"/>
+      <module name="Indentation">
+        <property name="basicOffset" value="2"/>
+        <property name="caseIndent" value="2"/>
+      </module>
+
+      <!-- needed for SuppressWithNearbyCommentFilter -->
+      <module name="FileContentsHolder"/>
+
+      <!-- allows the use of SuppressWarningsFilter from above -->
+      <module name="SuppressWarningsHolder" />
+
+      <!-- Annotations -->
+      <module name="AnnotationUseStyle"/>
+      <module name="MissingDeprecated"/>
+      <module name="MissingOverride"/>
+      <module name="PackageAnnotation"/>
+
+      <!-- Checks for Javadoc comments.                     -->
+      <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+      <module name="JavadocMethod">
+        <!-- don't require javadoc for methods shorter than or equal to
+        this many lines (including opening & closing brace lines)
+        -->
+        <property name="minLineCount" value="40"/>
+        <!-- javadoc doesn't need one @param, @return, @throws tags -->
+        <property name="scope" value="public"/>
+        <property name="allowMissingParamTags" value="true"/>
+        <property name="allowMissingThrowsTags" value="true"/>
+        <property name="allowMissingReturnTag" value="true"/>
+        <!-- simple set/get methods don't need javadoc comments -->
+        <property name="allowMissingPropertyJavadoc" value="true" />
+        <!-- Allow tags for runtime exceptions that are not explicitly declared -->
+        <property name="allowUndeclaredRTE" value="true" />
+        <property name="ignoreMethodNamesRegex" value="^main$" />
+      </module>
+      <module name="JavadocType">
+        <property name="excludeScope" value="private"/>
+      </module>
+      <module name="JavadocStyle">
+        <property name="checkFirstSentence" value="false"/>
+        <property name="checkEmptyJavadoc" value="true"/>
+      </module>
+
+      <!-- Checks for Naming Conventions.                  -->
+      <module name="ClassTypeParameterName">
+        <property name="format" value="^[A-Z][A-Z0-9]?$"/>
+      </module>
+      <module name="MethodTypeParameterName">
+        <property name="format" value="^[A-Z][A-Z0-9]?$"/>
+      </module>
+      <module name="ConstantName"/>
+      <module name="LocalFinalVariableName">
+        <!-- allow VAR_NAME and varName in local final variables,
+        leave it up to user to use them appropriately depending on whether
+        or not the variable is A_CONSTANT_VARIABLE, or aMutableVariable.
+        -->
+        <property name="format" value="^(([a-z][a-zA-Z0-9]*)|([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
+
+      </module>
+      <module name="LocalVariableName"/>
+      <module name="MemberName"/>
+      <!--<module name="org.apache.common.checkstyle.NonOverriddenMethodName">-->
+        <!--<property name="format" value="^(([a-z][a-zA-Z0-9]*)|(\$tag))$" />-->
+      <!--</module>-->
+      <module name="PackageName"/>
+      <module name="ParameterName"/>
+      <module name="StaticVariableName"/>
+      <module name="TypeName"/>
+
+      <!-- Checks for imports                              -->
+      <!-- See http://checkstyle.sf.net/config_import.html -->
+      <module name="AvoidStarImport">
+        <property name="excludes" value="org.junit.Assert"/>
+        <property name="excludes" value="java.util.*"/>
+      </module>
+      <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
+      <module name="RedundantImport"/>
+      <module name="UnusedImports"/>
+      <module name="ImportOrder">
+        <property name="groups"
+                  value="/^javax?\./,scala,com,net,org,org.apache"/>
+        <property name="ordered" value="true"/>
+        <property name="separated" value="true"/>
+        <property name="option" value="bottom"/>
+        <property name="sortStaticImportsAlphabetically" value="true"/>
+        <message key="import.ordering"
+                 value="Wrong order for ''{0}'' import. Order should be: java, javax, scala, com, net, org,
+org.apache. Each group should be separated by a single blank line. Static imports at the bottom." />
+      </module>
+
+      <!-- Checks for Size Violations.                    -->
+      <!-- See http://checkstyle.sf.net/config_sizes.html -->
+      <module name="LineLength">
+        <property name="max" value="100"/>
+        <property name="ignorePattern" value="^import.*$|^ *\*( |[^/]) *.*$"/>
+      </module>
+      <module name="OuterTypeNumber"/>
+
+      <!-- Checks for whitespace                               -->
+      <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+      <module name="EmptyForInitializerPad"/>
+      <module name="EmptyForIteratorPad"/>
+      <module name="GenericWhitespace"/>
+      <module name="MethodParamPad"/>
+      <module name="NoWhitespaceAfter"/>
+      <module name="NoWhitespaceBefore"/>
+      <module name="OperatorWrap"/>
+      <module name="ParenPad"/>
+      <module name="TypecastParenPad"/>
+      <module name="WhitespaceAfter"/>
+      <module name="WhitespaceAround">
+        <!-- Intentionally excludes RCURLY (default) since it trips on anonymous
+             inner class declarations when chained with a method call.
+        -->
+        <property name="tokens" value="ASSIGN,BAND,BAND_ASSIGN,BOR,BOR_ASSIGN,BSR,BSR_ASSIGN,
+                                       BXOR,BXOR_ASSIGN,COLON,DIV,DIV_ASSIGN,EQUAL,GE,GT,LAND,
+                                       LCURLY,LE,LITERAL_ASSERT,LITERAL_CATCH,LITERAL_DO,
+                                       LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,
+                                       LITERAL_RETURN,LITERAL_SYNCHRONIZED,LITERAL_TRY,
+                                       LITERAL_WHILE,LOR,LT,MINUS,MINUS_ASSIGN,MOD,MOD_ASSIGN,
+                                       NOT_EQUAL,PLUS,PLUS_ASSIGN,QUESTION,SL,SLIST,SL_ASSIGN,
+                                       SR,SR_ASSIGN,STAR,STAR_ASSIGN,TYPE_EXTENSION_AND"/>
+      </module>
+
+      <!-- Modifier Checks                                    -->
+      <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+      <module name="ModifierOrder"/>
+      <module name="RedundantModifier"/>
+
+      <!-- Checks for blocks. You know, those {}'s         -->
+      <!-- See http://checkstyle.sf.net/config_blocks.html -->
+      <module name="AvoidNestedBlocks"/>
+      <module name="EmptyBlock">
+        <!-- Allow comments to satisfy the EmptyBlock check -->
+        <property name="option" value="text"/>
+      </module>
+      <module name="LeftCurly"/>
+      <module name="NeedBraces"/>
+      <module name="RightCurly"/>
+
+      <!-- Checks for common coding problems               -->
+      <!-- See http://checkstyle.sf.net/config_coding.html -->
+      <module name="CovariantEquals"/>
+      <module name="EmptyStatement"/>
+      <module name="EqualsAvoidNull"/>
+      <module name="EqualsHashCode"/>
+      <module name="HiddenField">
+        <property name="ignoreConstructorParameter" value="true"/>
+        <property name="ignoreSetter" value="true"/>
+      </module>
+      <!-- Checks for catch of overly general exception classes like
+           RuntimeException, Exception, Throwable, etc. -->
+      <module name="IllegalCatch"/>
+      <!-- disallow calling constructors on these classes
+           calling factories is the only way to create these objects
+      -->
+      <module name="IllegalInstantiation">
+        <property name="classes" value="java.lang.Boolean"/>
+      </module>
+      <module name="IllegalToken">
+        <property name="tokens" value="LITERAL_NATIVE"/>
+      </module>
+      <!-- Disallow SimpleDateFormat as a reaction to issues.
+           It's wrapped in a util that prevents misuse
+           of week-year.
+      -->
+      <module name="IllegalType">
+        <property name="illegalClassNames" value="java.text.SimpleDateFormat"/>
+        <property name="format" value="^_DISABLE$"/>
+      </module>
+      <module name="MissingSwitchDefault"/>
+      <module name="ModifiedControlVariable"/>
+      <module name="SimplifyBooleanExpression"/>
+      <module name="SimplifyBooleanReturn"/>
+      <module name="StringLiteralEquality"/>
+      <module name="NestedForDepth">
+        <property name="max" value="2"/>
+      </module>
+      <module name="NestedTryDepth">
+        <property name="max" value="1"/>
+      </module>
+      <module name="NoClone"/>
+      <module name="NoFinalizer"/>
+      <module name="SuperClone"/>
+      <module name="SuperFinalize"/>
+      <!-- disallow throws Throwable unless a superclass or interface requires this -->
+      <!--<module name="org.apache.common.checkstyle.IllegalThrowsCheck"/>-->
+      <module name="PackageDeclaration"/>
+      <module name="ParameterAssignment"/>
+      <module name="DefaultComesLast"/>
+      <module name="FallThrough"/>
+      <module name="MultipleVariableDeclarations"/>
+      <module name="UnnecessaryParentheses"/>
+      <module name="OneStatementPerLine"/>
+
+      <module name="FinalClass"/>
+      <module name="HideUtilityClassConstructor"/>
+      <module name="InterfaceIsType"/>
+      <module name="VisibilityModifier">
+        <property name="protectedAllowed" value="true"/>
+        <!-- Allow public members at the coder's discretion, for struct-like things. -->
+        <property name="publicMemberPattern" value="^.*$" />
+      </module>
+      <module name="MutableException"/>
+
+      <!-- Miscellaneous other checks.                   -->
+      <!-- See http://checkstyle.sf.net/config_misc.html -->
+      <module name="ArrayTypeStyle"/>
+      <module name="UpperEll"/>
+      <module name="ArrayTypeStyle"/>
+      <module name="OuterTypeFilename"/>
+
+      <!-- Regexp checks -->
+      <module name="RegexpSinglelineJava">
+        <property name="format" value="System\.exit"/>
+        <property name="ignoreComments" value="true"/>
+        <property name="message"
+                  value="Don''t System.exit(), throw a RuntimeException()" />
+      </module>
+    </module>
+</module>

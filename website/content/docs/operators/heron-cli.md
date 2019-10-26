@@ -1,3 +1,21 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 ---
 title: Managing Topologies with Heron CLI
 ---
@@ -7,14 +25,14 @@ The **Heron CLI** us used to to manage every aspect of the
 
 ## Deploying the `heron` CLI Executable
 
-To use `heron` CLI, download the `heron-client-install` for your platfrom from
-[release binaries](https://github.com/twitter/heron/releases) and  run the
-installation script. For example, if you have downloaded the version `0.13.5`,
-you invoke the installation script as follows:
+To use `heron` CLI, download the `heron-install` for your platfrom from
+[release binaries](https://github.com/apache/incubator-heron/releases) and  run the
+installation script. For example, if you have downloaded the version `0.17.6`,
+you invoke the installation script as follows
 
 ```bash
-$ chmod +x heron-client-install-0.13.5-darwin.sh
-$ ./heron-client-install-0.13.5-darwin.sh --user
+$ chmod +x heron-install-0.17.6-darwin.sh
+$ ./heron-install-0.17.6-darwin.sh --user
 Heron client installer
 ----------------------
 
@@ -359,10 +377,11 @@ using:
 
 ```bash
 $ heron version
-heron.build.version : 0.13.5
-heron.build.time : Wed May 11 23:49:00 PDT 2016
-heron.build.timestamp : 1463035740000
-heron.build.host : mbp-machine
-heron.build.user : userwhobuilt
-INFO: Elapsed time: 0.000s.
+heron.build.version : '0.17.6'
+heron.build.time : Wed Feb 28 12:08:52 PST 2018
+heron.build.timestamp : 1519848532000
+heron.build.host : ci-server-01
+heron.build.user : release-agent1
+heron.build.git.revision : ada6052f6f841e27416b9f9bb4be73183d5a8cd8
+heron.build.git.status : Clean
 ```

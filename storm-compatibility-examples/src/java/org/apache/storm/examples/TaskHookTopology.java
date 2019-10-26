@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.twitter.heron.common.basics.ByteAmount;
+import org.apache.heron.common.basics.ByteAmount;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
@@ -73,17 +73,17 @@ public final class TaskHookTopology {
 
     // Set the task hook
     List<String> taskHooks = new LinkedList<>();
-    taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
-    com.twitter.heron.api.Config.setAutoTaskHooks(conf, taskHooks);
+    taskHooks.add("org.apache.heron.examples.TaskHookTopology$TestTaskHook");
+    org.apache.heron.api.Config.setAutoTaskHooks(conf, taskHooks);
 
     // component resource configuration
-    com.twitter.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
-    com.twitter.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
+    org.apache.heron.api.Config.setComponentRam(conf, "word", ByteAmount.fromMegabytes(512));
+    org.apache.heron.api.Config.setComponentRam(conf, "count", ByteAmount.fromMegabytes(512));
 
     // container resource configuration
-    com.twitter.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
-    com.twitter.heron.api.Config.setContainerCpuRequested(conf, 2);
+    org.apache.heron.api.Config.setContainerDiskRequested(conf, ByteAmount.fromGigabytes(2));
+    org.apache.heron.api.Config.setContainerRamRequested(conf, ByteAmount.fromGigabytes(2));
+    org.apache.heron.api.Config.setContainerCpuRequested(conf, 2);
 
 
     conf.setNumWorkers(2);

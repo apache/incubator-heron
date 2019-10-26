@@ -31,9 +31,9 @@ import backtype.storm.tuple.TupleImpl;
  * form of stream processing, see IBasicBolt and BasicOutputCollector.
  */
 public class OutputCollectorImpl extends OutputCollector {
-  private com.twitter.heron.api.bolt.OutputCollector delegate;
+  private org.apache.heron.api.bolt.OutputCollector delegate;
 
-  public OutputCollectorImpl(com.twitter.heron.api.bolt.OutputCollector delegate) {
+  public OutputCollectorImpl(org.apache.heron.api.bolt.OutputCollector delegate) {
     super(null);
     this.delegate = delegate;
   }
@@ -41,15 +41,15 @@ public class OutputCollectorImpl extends OutputCollector {
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     if (anchors != null) {
-      ArrayList<com.twitter.heron.api.tuple.Tuple> l =
-          new ArrayList<com.twitter.heron.api.tuple.Tuple>();
+      ArrayList<org.apache.heron.api.tuple.Tuple> l =
+          new ArrayList<org.apache.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
         TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
       }
       return delegate.emit(streamId, l, tuple);
     } else {
-      return delegate.emit(streamId, (Collection<com.twitter.heron.api.tuple.Tuple>) null, tuple);
+      return delegate.emit(streamId, (Collection<org.apache.heron.api.tuple.Tuple>) null, tuple);
     }
   }
 
@@ -57,8 +57,8 @@ public class OutputCollectorImpl extends OutputCollector {
   public void emitDirect(
       int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     if (anchors != null) {
-      ArrayList<com.twitter.heron.api.tuple.Tuple> l =
-          new ArrayList<com.twitter.heron.api.tuple.Tuple>();
+      ArrayList<org.apache.heron.api.tuple.Tuple> l =
+          new ArrayList<org.apache.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
         TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
@@ -66,7 +66,7 @@ public class OutputCollectorImpl extends OutputCollector {
       delegate.emitDirect(taskId, streamId, l, tuple);
     } else {
       delegate.emitDirect(
-          taskId, streamId, (Collection<com.twitter.heron.api.tuple.Tuple>) null, tuple);
+          taskId, streamId, (Collection<org.apache.heron.api.tuple.Tuple>) null, tuple);
     }
   }
 

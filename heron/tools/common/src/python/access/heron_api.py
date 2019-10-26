@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 ''' heron.py '''
 
 import logging
@@ -27,9 +31,11 @@ from query import QueryHandler
 # pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
 TOPOLOGIES_URL_FMT          = "%s/topologies"
+TOPOLOGIES_STATS_URL_FMT    = "%s/states"             % TOPOLOGIES_URL_FMT
 EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
 LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
+PACKINGPLAN_URL_FMT         = "%s/packingplan"        % TOPOLOGIES_URL_FMT
 SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
 
 METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
@@ -134,7 +140,7 @@ def get_topologies_states():
   Get the list of topologies and their states
   :return:
   '''
-  request_url = create_url(TOPOLOGIES_URL_FMT) + "/states"
+  request_url = create_url(TOPOLOGIES_STATS_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
@@ -259,6 +265,25 @@ def get_instances(cluster, environ, topology, role=None):
   pplan = yield fetch_url_as_json(request_url)
   instances = pplan['instances'].keys()
   raise tornado.gen.Return(instances)
+
+
+################################################################################
+@tornado.gen.coroutine
+def get_packing_plan(cluster, environ, topology, role=None):
+  '''
+  Get the packing plan state of a topology in a cluster from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
+  params = dict(cluster=cluster, environ=environ, topology=topology)
+  if role is not None:
+    params['role'] = role
+  request_url = tornado.httputil.url_concat(
+      create_url(PACKINGPLAN_URL_FMT), params)
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################

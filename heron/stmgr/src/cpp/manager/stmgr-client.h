@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_CLIENT_H_
@@ -31,14 +34,18 @@ class MultiCountMetric;
 
 namespace heron {
 namespace stmgr {
+
+using std::shared_ptr;
+
 class StMgrClientMgr;
 
 class StMgrClient : public Client {
  public:
-  StMgrClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _topology_name,
+  StMgrClient(shared_ptr<EventLoop> eventLoop, const NetworkOptions& _options,
+              const sp_string& _topology_name,
               const sp_string& _topology_id, const sp_string& _our_id, const sp_string& _other_id,
               StMgrClientMgr* _client_manager,
-              heron::common::MetricsMgrSt* _metrics_manager_client,
+              shared_ptr<heron::common::MetricsMgrSt> const& _metrics_manager_client,
               bool _droptuples_upon_backpressure);
   virtual ~StMgrClient();
 
@@ -56,8 +63,11 @@ class StMgrClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleHelloResponse(void*, proto::stmgr::StrMgrHelloResponse* _response, NetworkErrorCode);
-  void HandleTupleStreamMessage(proto::stmgr::TupleStreamMessage* _message);
+  void HandleHelloResponse(
+          void*,
+          pool_unique_ptr<proto::stmgr::StrMgrHelloResponse> _response,
+          NetworkErrorCode);
+  void HandleTupleStreamMessage(pool_unique_ptr<proto::stmgr::TupleStreamMessage> _message);
 
   void OnReConnectTimer();
   void SendHelloRequest();
@@ -74,8 +84,8 @@ class StMgrClient : public Client {
 
   StMgrClientMgr* client_manager_;
   // Metrics
-  heron::common::MetricsMgrSt* metrics_manager_client_;
-  heron::common::MultiCountMetric* stmgr_client_metrics_;
+  shared_ptr<heron::common::MetricsMgrSt> metrics_manager_client_;
+  shared_ptr<heron::common::MultiCountMetric> stmgr_client_metrics_;
 
   // Configs to be read
   sp_int32 reconnect_other_streammgrs_interval_sec_;

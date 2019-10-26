@@ -1,0 +1,65 @@
+{
+  "topology": {
+    "id": "IntegrationTopologyTest_StatefulBasicTopologyOneTask",
+    "name": "IntegrationTopologyTest_StatefulBasicTopologyOneTask",
+    "spouts": {
+      "comp": {
+        "name": "stateful-ab-spout",
+        "config": {
+          "kvs": {
+            "key": "topology.component.parallelism",
+            "value": "1"
+          }
+        }
+      }
+    },
+    "bolts": [
+      {
+        "comp": {
+          "name": "stateful-identity-bolt",
+          "config": {
+            "kvs": {
+              "key": "topology.component.parallelism",
+              "value": "3"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "stream": {
+              "id": "default",
+              "component_name": "stateful-ab-spout"
+            }
+          }
+        ]
+      }
+    ],
+    "state": "RUNNING"
+  },
+  "instances": [
+    {
+      "instance_id": "container_1_stateful-ab-spout_1",
+      "info": {
+        "component_name": "stateful-ab-spout"
+      }
+    },
+    {
+      "instance_id": "container_1_stateful-identity-bolt_2",
+      "info": {
+        "component_name": "stateful-identity-bolt"
+      }
+    },
+    {
+      "instance_id": "container_2_stateful-identity-bolt_3",
+      "info": {
+        "component_name": "stateful-identity-bolt"
+      }
+    },
+    {
+      "instance_id": "container_2_stateful-identity-bolt_4",
+      "info": {
+        "component_name": "stateful-identity-bolt"
+      }
+    }
+  ]
+}

@@ -40,7 +40,7 @@ packing_utils_deps_files = \
 java_library(
     name = "packing-utils",
     srcs = glob(
-        ["com/twitter/heron/packing/*.java"]
+        ["org/apache/heron/packing/*.java"]
     ),
     deps = [
         "//heron/common/src/java:basics-java",

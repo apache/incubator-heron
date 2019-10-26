@@ -1,6 +1,25 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
 # Docker
 
-## To compile source using a docker container:
+## To compile source, into Heron release artifacts, using a docker container:
+Make sure enough resources are configured in Docker settings: 2 CPU, 4G RAM and 128G disk.
 ```
 ./docker/scripts/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
 # e.g.  ./docker/scripts/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
@@ -11,25 +30,3 @@
 ./docker/scripts/build-docker.sh <platform> <version_string> <output-directory>
 # e.g. ./docker/scripts/build-docker.sh ubuntu14.04 testbuild ~/heron-release
 ```
-
-### To run docker containers for local dev work:
-```
-./docker/start-docker.sh heron:<version_string>-<platform>
-# e.g. ./docker/start-docker.sh heron:testbuild-ubuntu14.04
-```
-### To stop docker containers for local dev work:
-```
-./docker/stop-docker.sh
-```
-### To submit/activate/kill a topology:
-```
-#To submit a topology:
-        docker exec heron_executor_1 heron submit local /usr/local/heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology --deploy-deactivated
-#To activate a topology:
-        docker exec -it heron_executor_1 heron activate local ExclamationTopology
-#To kill a topology:
-        docker exec -it heron_executor_1 heron kill local ExclamationTopology
-```
-## To access heron ui:
-* determine the IP of your docker host
-* navigate to http://<your docker host>:8889 in your web browser

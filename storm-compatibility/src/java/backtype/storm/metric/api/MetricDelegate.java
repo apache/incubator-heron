@@ -19,7 +19,7 @@
 package backtype.storm.metric.api;
 
 @SuppressWarnings("rawtypes")
-public class MetricDelegate implements com.twitter.heron.api.metric.IMetric {
+public class MetricDelegate implements org.apache.heron.api.metric.IMetric {
   private IMetric delegate;
 
   public MetricDelegate(IMetric delegate) {

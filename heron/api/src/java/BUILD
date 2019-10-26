@@ -7,8 +7,8 @@ load("//tools/rules:javadoc.bzl", "java_doc")
 
 java_doc(
     name = "heron-api-javadoc",
-    libs = [":api-java"],
-    pkgs = ["com/twitter/heron"],
+    libs = [":api-java-low-level-functional"],
+    pkgs = ["org/apache/heron"],
     title = "Heron Api Documentation",
 )
 
@@ -21,26 +21,42 @@ api_deps_files =  \
 # Low Level Api
 java_library(
     name = "api-java-low-level",
-    srcs = glob(["com/twitter/heron/api/**/*.java"]),
+    srcs = glob(["org/apache/heron/api/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
-    deps = api_deps_files,
+    deps = api_deps_files + [
+        "//third_party/java:kryo-neverlink"
+    ]
 )
 
 # Functional Api
 java_library(
     name = "api-java",
-    srcs = glob(["com/twitter/heron/streamlet/**/*.java"]),
+    srcs = glob(["org/apache/heron/streamlet/**/*.java"]),
     javacopts = DOCLINT_HTML_AND_SYNTAX,
     deps = api_deps_files + [
         ":api-java-low-level",
+        "@org_apache_commons_commons_lang3//jar"
+    ]
+)
+
+# Low level and functional Api
+java_library(
+    name = "api-java-low-level-functional",
+    javacopts = DOCLINT_HTML_AND_SYNTAX,
+    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
+    deps = api_deps_files + [
         "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
     ]
 )
 
 java_binary(
     name = "api-unshaded",
-    srcs = glob(["com/twitter/heron/api/**/*.java", "com/twitter/heron/streamlet/**/*.java"]),
-    deps = api_deps_files + ["//third_party/java:kryo-neverlink"],
+    srcs = glob(["org/apache/heron/api/**/*.java", "org/apache/heron/streamlet/**/*.java"]),
+    deps = api_deps_files + [
+        "//third_party/java:kryo-neverlink",
+        "@org_apache_commons_commons_lang3//jar"
+    ]
 )
 
 jarjar_binary(
@@ -59,6 +75,6 @@ genrule(
 
 java_library(
     name = "classification",
-    srcs = glob(["com/twitter/heron/classification/**/*.java"]),
+    srcs = glob(["org/apache/heron/classification/**/*.java"]),
     resources = ["//heron/api/src:processor-service-conf"],
 )

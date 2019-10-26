@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# Copyright 2016 Twitter. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Unless required by applicable law or agreed to in writing,
+#  software distributed under the License is distributed on an
+#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#  KIND, either express or implied.  See the License for the
+#  specific language governing permissions and limitations
+#  under the License.
+
 """Provides functions for reading and writing (writing is WIP currently) Java objects
 serialized or will be deserialized by ObjectOutputStream. This form of object
 representation is a standard data interchange format in Java world.
@@ -67,6 +71,11 @@ def dumps(obj):
   marshaller = JavaObjectMarshaller()
   return marshaller.dump(obj)
 
+_java_primitives = set([
+    "java.lang.Double",
+    "java.lang.Float",
+    "java.lang.Integer",
+    "java.lang.Long"])
 
 class JavaClass(object):
   """Java class representation"""
@@ -105,6 +114,15 @@ class JavaObject(object):
     if self.classdesc:
       name = self.classdesc.name
     return "<javaobj:%s>" % name
+
+  def classname(self):
+    name = "UNKNOWN"
+    if self.classdesc:
+      name = self.classdesc.name
+    return name
+
+  def is_primitive(self):
+    return self.classname() in _java_primitives
 
   def copy(self, new_object):
     """copy an object"""
