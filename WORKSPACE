@@ -258,7 +258,7 @@ maven_jar(
 
 maven_jar(
    name = "javax_annotation_javax_annotation_api",
-   artifact = "javax.annotation:javax.annotation-api:1.2",
+   artifact = "javax.annotation:javax.annotation-api:1.3.2",
 )
 
 maven_jar(
@@ -734,6 +734,17 @@ maven_jar(
   name = "org_apache_commons_compress",
   artifact = "org.apache.commons:commons-compress:1.14",
 )
+
+maven_jar(
+  name = "javax_xml_bind_jaxb",
+  artifact = "javax.xml.bind:jaxb-api:2.3.0",
+)
+
+maven_jar(
+  name = "javax_activation_activation",
+  artifact = "javax.activation:activation:1.1.1",
+)
+
 
 # bookkeeper & distributedlog dependencies
 maven_jar(

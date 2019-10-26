@@ -19,6 +19,7 @@ simulator_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/common/src/java:utils-java",
         "//heron/instance/src/java:instance-java",
+        "@javax_xml_bind_jaxb//jar",
         "@org_yaml_snakeyaml//jar",
     ]
 
