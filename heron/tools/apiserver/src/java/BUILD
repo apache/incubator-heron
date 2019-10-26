@@ -44,11 +44,14 @@ apiserver_deps_files = \
   packing_deps_files + \
   uploader_deps_files + [
     "//third_party/java:cli",
-    "@org_yaml_snakeyaml//jar",
     "//third_party/java:jetty-jersey-java",
     "//third_party/java:commons-compress",
     "//third_party/java:jackson",
     "//third_party/java:logging",
+    "@javax_activation_activation//jar",
+    "@javax_annotation_javax_annotation_api//jar",
+    "@javax_xml_bind_jaxb//jar",
+    "@org_yaml_snakeyaml//jar",
   ]
 
 java_binary(

@@ -7,6 +7,7 @@ common_deps_files = [
     "//heron/api/src/java:classification",
     "@commons_cli_commons_cli//jar",
     "@com_google_guava_guava//jar",
+    "@javax_xml_bind_jaxb//jar",
     "@org_apache_commons_commons_lang3//jar",
     "//third_party/java:jackson",
 ]
