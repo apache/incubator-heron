@@ -867,9 +867,12 @@ class HeronQueryHandler(QueryHandler):
     :param multi_ts:
     :return:
     '''
-    if len(multi_ts) > 0 and len(multi_ts[0]["timeline"]) > 0:
-      keys = multi_ts[0]["timeline"][0]["data"].keys()
-      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in multi_ts)
+    # Some components don't have specific metrics such as capacity hence the
+    # key set is empty. These components are filtered out first.
+    filtered_ts = [ts for ts in multi_ts if len(ts["timeline"][0]["data"]) > 0]
+    if len(filtered_ts) > 0 and len(filtered_ts[0]["timeline"]) > 0:
+      keys = filtered_ts[0]["timeline"][0]["data"].keys()
+      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in filtered_ts)
       values = (max(v) for v in zip(*timelines))
       return dict(zip(keys, values))
     return {}
