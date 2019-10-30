@@ -24,6 +24,10 @@ var SUM = 0,
     LAST = 2;
 
 var countersUrlFlags = {};
+setInterval(function() {
+  // Reset fetch flags every minute so that new fetches can go through
+  countersUrlFlags = {};
+}, 60000);
 
 var AllExceptions = React.createClass({
   getInitialState: function() {
@@ -387,9 +391,8 @@ var AllMetrics = React.createClass({
   },
 
   fetchCounters: function() {
-    var fetch_url = "";
     if (this.props.hasOwnProperty("comp_name")) {
-      fetch_url = this.props.baseUrl + "/topologies/metrics?" +
+      var fetch_url = this.props.baseUrl + "/topologies/metrics?" +
         "cluster=" + this.props.cluster + "&" +
         "environ=" + this.props.environ + "&" +
         "topology=" + this.props.topology + "&" +
@@ -432,14 +435,15 @@ var AllMetrics = React.createClass({
           }
         }
       }
-      for (var i = 0; i < metricnames.length; i++) {
-        for (var timeRange in this.timeRanges) {
-          if (this.timeRanges.hasOwnProperty(timeRange)) {
-            var url = fetch_url +
-              "&metricname=" + metricnames[i] +
-              "&interval=" + this.timeRanges[timeRange];
-            this.fetchCountersURL(url, timeRange);
-          }
+      for (var timeRange in this.timeRanges) {
+        metricnameargs = "";
+        for (var i = 0; i < metricnames.length; i++) {
+          metricnameargs += "&metricname=" + metricnames[i];
+        }
+        if (this.timeRanges.hasOwnProperty(timeRange) && metricnameargs != "") {
+          var url = fetch_url + metricnameargs +
+            "&interval=" + this.timeRanges[timeRange];
+          this.fetchCountersURL(url, timeRange);
         }
       }
     } else if (!this.props.hasOwnProperty("comp_name")) {
@@ -452,27 +456,27 @@ var AllMetrics = React.createClass({
             spoutNames.push(name);
           }
         }
-        fetch_url = this.props.baseUrl + "/topologies/metrics?" +
+        var fetch_url = this.props.baseUrl + "/topologies/metrics?" +
           "cluster=" + this.props.cluster + "&" +
           "environ=" + this.props.environ + "&" +
           "topology=" + this.props.topology;
         for (var i = 0; i < spoutNames.length; i++) {
           var spout = spoutNames[i];
-          var url = fetch_url + "&component=" + spout;
           for (var j = 0; j < this.state.lplan.spouts[spout].outputs.length; j++) {
             var streamName = this.state.lplan.spouts[spout].outputs[j].stream_name;
-            for (var spoutMetric in this.spoutMetrics) {
-              if (this.spoutMetrics.hasOwnProperty(spoutMetric)) {
-                var metricname = spoutMetric + streamName;
-                for (var timeRange in this.timeRanges) {
-                  if (this.timeRanges.hasOwnProperty(timeRange)) {
-                    var url = fetch_url +
-                      "&component=" + spout +
-                      "&metricname=" + metricname +
-                      "&interval=" + this.timeRanges[timeRange];
-                    this.fetchCountersURL(url, timeRange);
-                  }
+            for (var timeRange in this.timeRanges) {
+              metricnameargs = "";
+              for (var spoutMetric in this.spoutMetrics) {
+                if (this.spoutMetrics.hasOwnProperty(spoutMetric)) {
+                  metricnameargs += "&metricname=" + spoutMetric + streamName;
                 }
+              }
+              if (this.timeRanges.hasOwnProperty(timeRange) && metricnameargs != "") {
+                var url = fetch_url + metricnameargs +
+                  "&component=" + spout +
+                  "&interval=" + this.timeRanges[timeRange];
+
+                this.fetchCountersURL(url, timeRange);
               }
             }
           }
