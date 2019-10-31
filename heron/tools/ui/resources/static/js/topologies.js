@@ -565,6 +565,7 @@ var AllMetrics = React.createClass({
     };
     return (
       <div>
+        <TopologyCounters info={info} />
         <ComponentCounters info={info} />
         <InstanceCounters info={info} />
       </div>
@@ -572,7 +573,7 @@ var AllMetrics = React.createClass({
   }
 });
 
-var ComponentCounters = React.createClass({
+var TopologyCounters = React.createClass({
   capitalize: function(astr) {
     if (astr) {
         return astr.charAt(0).toUpperCase() + astr.slice(1);
@@ -581,73 +582,7 @@ var ComponentCounters = React.createClass({
   },
 
   getTitle: function () {
-    if (this.props.info.comp_name) {
-      var comp_type = this.capitalize(this.props.info.comp_type);
-      var title = " " + comp_type + " Counters - " + this.props.info.comp_name;
-      if (this.props.info.comp_spout_type !== undefined
-          && this.props.info.comp_spout_type !== "default") {
-        title += " - " + this.props.info.comp_spout_type + "/" + this.props.info.comp_spout_source;
-      }
-      return title;
-    }
-    return " Topology Counters";
-  },
-
-  getComponentMetricsRows: function () {
-    var metrics = {};
-    if (this.props.info.metrics.hasOwnProperty(this.props.info.comp_name)) {
-      metrics = this.props.info.metrics[this.props.info.comp_name];
-    }
-    var aggregatedMetrics = {};
-    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
-
-    for (var time in metrics) {
-      if (metrics.hasOwnProperty(time)) {
-        for (var metricname in metrics[time]) {
-          if (metrics[time].hasOwnProperty(metricname) &&
-              metricname !== "__interval" &&
-              metricname !== "Uptime (ddd:hh:mm:ss)") {
-            for (var stream in metrics[time][metricname]) {
-              if (metrics[time][metricname].hasOwnProperty(stream)) {
-                displayName = metricname + " (" + stream + ")";
-                var value = 0;
-                var allMetrics = metrics[time][metricname][stream].metrics;
-                var aggregationType = metrics[time][metricname][stream].aggregationType;
-                var count = 0;
-                for (var m in allMetrics) {
-                  if (allMetrics.hasOwnProperty(m)) {
-                    value += Number(allMetrics[m]);
-                    count++;
-                  }
-                }
-                if (aggregationType === AVG && count > 0) {
-                  value /= count;
-                }
-                if (!aggregatedMetrics.hasOwnProperty(displayName)) {
-                  aggregatedMetrics[displayName] = {};
-                }
-                value /= (metrics[time][metricname][stream].scaleDevisor || 1);
-                aggregatedMetrics[displayName][time] = value;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    var rows = [];
-    for (var name in aggregatedMetrics) {
-      if (aggregatedMetrics.hasOwnProperty(name)) {
-        var row = [];
-        row.push(name);
-        for (var i = 0; i < timeRanges.length; i++) {
-          var time = timeRanges[i];
-          row.push(Number(Number(aggregatedMetrics[name][time] || 0).toFixed(2)));
-        }
-        rows.push(row);
-      }
-    }
-    return rows;
+    return "Topology Counters";
   },
 
   getTopologyMetricsRows: function () {
@@ -718,26 +653,154 @@ var ComponentCounters = React.createClass({
   },
 
   render: function () {
+    if (this.props.info.comp_name) {
+      // A component is selected, return empty div.
+      return (<div id="topologycounters"></div>)
+    }
     var title = this.getTitle();
+    var rows = this.getTopologyMetricsRows();
 
     var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
     var headings = ["Metrics"];
     headings.push.apply(headings, timeRanges);
 
-    var rows = [];
-    var extraLinks = [];
+    return (
+      <div id="topologycounters">
+        <div className="widget-header">
+          <div className="title">
+            <h4 style={{
+              "display": "inline-block",
+              "float": "left",
+              "margin-right": "10px"
+            }}>{title}</h4>
+            <div style={{
+              "padding-top": "10px",
+              "padding-bottom": "10px",
+            }}>
+            </div>
+          </div>
+        </div>
+        <table className="table table-striped table-hover no-margin">
+          <thead>
+            <tr>
+              {headings.map(function (heading, i) {
+                  return <th key={i}>{heading}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(function (row) {
+              return <tr key={row[0]}>{
+                row.map(function (value, i) {
+                  return <td className="col-md-2" key={i}>{value}</td>;
+                })}</tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+});
+
+var ComponentCounters = React.createClass({
+  capitalize: function(astr) {
+    if (astr) {
+        return astr.charAt(0).toUpperCase() + astr.slice(1);
+    }
+    return undefined;
+  },
+
+  getTitle: function () {
     if (this.props.info.comp_name) {
-      rows = this.getComponentMetricsRows();
-      var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
-      if (spoutDetail) {
-        extraLinks = spoutDetail.extra_links;
+      var comp_type = this.capitalize(this.props.info.comp_type);
+      var title = " " + comp_type + " Counters - " + this.props.info.comp_name;
+      if (this.props.info.comp_spout_type !== undefined
+          && this.props.info.comp_spout_type !== "default") {
+        title += " - " + this.props.info.comp_spout_type + "/" + this.props.info.comp_spout_source;
       }
-    } else {
-      rows = this.getTopologyMetricsRows();
+      return title;
+    }
+    return "";
+  },
+
+  getComponentMetricsRows: function () {
+    var metrics = {};
+    if (this.props.info.metrics.hasOwnProperty(this.props.info.comp_name)) {
+      metrics = this.props.info.metrics[this.props.info.comp_name];
+    }
+    var aggregatedMetrics = {};
+    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
+
+    for (var time in metrics) {
+      if (metrics.hasOwnProperty(time)) {
+        for (var metricname in metrics[time]) {
+          if (metrics[time].hasOwnProperty(metricname) &&
+              metricname !== "__interval" &&
+              metricname !== "Uptime (ddd:hh:mm:ss)") {
+            for (var stream in metrics[time][metricname]) {
+              if (metrics[time][metricname].hasOwnProperty(stream)) {
+                displayName = metricname + " (" + stream + ")";
+                var value = 0;
+                var allMetrics = metrics[time][metricname][stream].metrics;
+                var aggregationType = metrics[time][metricname][stream].aggregationType;
+                var count = 0;
+                for (var m in allMetrics) {
+                  if (allMetrics.hasOwnProperty(m)) {
+                    value += Number(allMetrics[m]);
+                    count++;
+                  }
+                }
+                if (aggregationType === AVG && count > 0) {
+                  value /= count;
+                }
+                if (!aggregatedMetrics.hasOwnProperty(displayName)) {
+                  aggregatedMetrics[displayName] = {};
+                }
+                value /= (metrics[time][metricname][stream].scaleDevisor || 1);
+                aggregatedMetrics[displayName][time] = value;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    var rows = [];
+    for (var name in aggregatedMetrics) {
+      if (aggregatedMetrics.hasOwnProperty(name)) {
+        var row = [];
+        row.push(name);
+        for (var i = 0; i < timeRanges.length; i++) {
+          var time = timeRanges[i];
+          row.push(Number(Number(aggregatedMetrics[name][time] || 0).toFixed(2)));
+        }
+        rows.push(row);
+      }
+    }
+    return rows;
+  },
+
+  render: function () {
+    if (!this.props.info.comp_name) {
+      // No component is selected, return empty div.
+      return (<div id="componentcounters"></div>)
+    }
+
+    var title = this.getTitle();
+    var rows = this.getComponentMetricsRows();
+
+    var timeRanges = ["10 mins", "1 hr", "3 hrs", "All Time"];
+    var headings = ["Metrics"];
+    headings.push.apply(headings, timeRanges);
+
+    var extraLinks = [];
+    var spoutDetail = this.props.info.lplan.spouts[this.props.info.comp_name];
+    if (spoutDetail) {
+      extraLinks = spoutDetail.extra_links;
     }
 
     return (
-      <div>
+      <div id="componentcounters">
         <div className="widget-header">
           <div className="title">
             <h4 style={{
@@ -800,7 +863,8 @@ var InstanceCounters = React.createClass({
 
   render: function () {
     if (!this.props.info.comp_name) {
-      return <div></div>;
+      // No component is selected, return empty div.
+      return <div id="instancecounters"></div>;
     }
     var self = this;
     var metrics = {};
