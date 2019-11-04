@@ -16,11 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Install Dependencies
-#sudo apt-get update && sudo apt install -y automake cmake libtool-bin g++ \
-# python-setuptools python-dev python-wheel python python-pip unzip tree openjdk-8-jdk virtualenv
-
-
 set -e
 
 HERONPY_VERSION=$1
@@ -40,10 +35,8 @@ VENV=./venv/
 echo $VENV
 PIP_LOCATION=${HERON_ROOT_DIR}/bazel-genfiles/scripts/packages
 
-echo "setting up virtual environment"
 virtualenv "$VENV"
 source "$VENV/bin/activate"
-
 pip install pdoc==0.3.2
 pip install --ignore-installed six
 # Install the heronpy
