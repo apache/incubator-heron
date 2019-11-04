@@ -60,7 +60,7 @@ echo "before docker"
 docker run \
   --rm \
   -v $PROJECT_DIR/..:/dist \
-  -t heron-compiler:$TARGET_PLATFORM  make -C /dist/website2/website/ python-docs
+  -t heron-compiler:$TARGET_PLATFORM  make -C /dist/website2/website/ buildsite
 echo "after docker"
 
 # make -C /dist/website2/website/Makefile buildsite
