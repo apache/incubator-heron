@@ -23,29 +23,34 @@ realpath() {
 }
 
 DOCKER_DIR=$(dirname $(dirname $(realpath $0)))
+echo "docker dir: $DOCKER_DIR"
 PROJECT_DIR=$(dirname $DOCKER_DIR)
+echo "project dir: $PROJECT_DIR"
 
 verify_dockerfile_exists() {
   if [ ! -f $1 ]; then
-    echo "The Dockerfiler $1 does not exist"
+    echo "The Dockerfile $1 does not exist"
     exit 1
   fi
 }
 
 dockerfile_path_for_platform() {
-  echo "$SCRATCH_DIR/compile/Dockerfile.$1"
+  echo "$PROJECT_DIR/website/scripts/Dockerfile.$1"
 }
 
 copy_bazel_rc_to() {
-  cp $PROJECT_DIR/tools/docker/bazel.rc $1
+  cp $PROJECT_DIR/../tools/docker/bazel.rc $1
 }
 
+TARGET_PLATFORM="ubuntu18.04"
 DOCKER_FILE=$(dockerfile_path_for_platform $TARGET_PLATFORM)
 verify_dockerfile_exists $DOCKER_FILE
-copy_bazel_rc_to  $SCRATCH_DIR/bazelrc
+copy_bazel_rc_to  $PROJECT_DIR/bazelrc
+rm -rf ~/heron-static-site
+mkdir ~/heron-static-site
 
 echo "Building heron-compiler container"
-#docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE ~/heron-static-site
 
 echo "Running build in container"
 #docker run \
