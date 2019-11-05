@@ -52,16 +52,16 @@ rm -rf ~/heron-static-site
 mkdir ~/heron-static-site
 echo "docker file"
 echo $DOCKER_FILE
-ls
+
 echo "Building heron-compiler container"
 docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
 
-echo "before docker"
+
 docker run \
   --rm \
   -v $PROJECT_DIR/..:/dist \
   -t heron-compiler:$TARGET_PLATFORM  make -C /dist/website2/website/ buildsite
-echo "after docker"
+
 
 # make -C /dist/website2/website/Makefile buildsite
 #docker run \
