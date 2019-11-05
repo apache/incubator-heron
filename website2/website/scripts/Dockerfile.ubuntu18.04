@@ -41,10 +41,13 @@ RUN apt-get update && apt-get -y install \
       python-dev \
       python-wheel \
       python \
-      python-pip
+      python-pip \
+      curl \
+      sudo
 
+RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
 
-
+RUN apt-get update && apt-get install -y nodejs
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 

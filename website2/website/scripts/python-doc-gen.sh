@@ -30,6 +30,7 @@ bazel build  --config=ubuntu scripts/packages:pypkgs
 cd website2/website/
 mkdir -p ./tmp/
 TMP_DIR=./tmp
+rm -rf ./venv/
 mkdir -p ./venv/
 VENV=./venv/
 echo $VENV
