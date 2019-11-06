@@ -1009,7 +1009,7 @@ var BoltRunningInfo = React.createClass({
           var max = -1;
           for (var i in instanceUtilization) {
             if (instanceUtilization.hasOwnProperty(i)) {
-              var utilization = instanceUtilization[i] / (10 * 60 * 1000);   // Divide by the time window and get percentage.
+              var utilization = instanceUtilization[i] * 100 / (10 * 60 * 1000);   // Divide by the time window and get percentage.
               if (min === -1 || min > utilization) {
                 min = utilization;
               }
@@ -1020,8 +1020,8 @@ var BoltRunningInfo = React.createClass({
           }
 
           if (min !== -1) {
-            aggregatedMetrics[boltName][minUtilizationName] = min.toFixed(3);
-            aggregatedMetrics[boltName][maxUtilizationName] = max.toFixed(3);
+            aggregatedMetrics[boltName][minUtilizationName] = min.toFixed(2) + "%";
+            aggregatedMetrics[boltName][maxUtilizationName] = max.toFixed(2) + "%";
           }
         }
       }
@@ -1429,8 +1429,8 @@ var InstanceCounters = React.createClass({
       if (this.props.info.comp_type === "bolt") {
         var capacity = (Number(tenMinAggregatedMetrics["Execute Count"][instance]));
         capacity *= (Number(tenMinAggregatedMetrics["Execute Latency (ms)"][instance]));
-        capacity /= (10 * 60 * 1000);
-        row.push(Number(capacity.toFixed(3)) || 0);
+        capacity = capacity * 100 / (10 * 60 * 1000);
+        row.push(Number((capacity.toFixed(2)) || 0) + "%");
       }
       if (pplan) {
         // Get Job url from pplan.
