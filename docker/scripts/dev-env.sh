@@ -30,10 +30,15 @@
 #   bazel build --config=ubuntu heron/...
 #
 # To enter an existing container with a new shell, find the container
-# id with this command:
+# ID with this command first:
 #   docker ps -a
-# And then :
+# The image name looks like: "heron-dev:ubuntu18.04".=
+# After the container is found, execute the following commands to start
+# the container in case it is not started yet, and then start a new
+# terminal in the container:
+#   docker container start CONTAINER_ID
 #   docker exec -it CONTAINER_ID bash
+#
 
 set -o nounset
 set -o errexit
