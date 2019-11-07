@@ -598,7 +598,7 @@ var AllMetrics = React.createClass({
       instance: this.props.instance,
     };
     return (
-      <div>
+      <div className="display-info display-counters">
         <TopologyCounters info={info} />
         <SpoutRunningInfo info={info} />
         <BoltRunningInfo info={info} />
