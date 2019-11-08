@@ -103,7 +103,7 @@ under the License.
   <!-- Topology details, including stats, counter, and config. -->
   <div class="display-stats" id="topologydetails">
     <!-- Stats -->
-    <div class="row">
+    <div class="col-md-12">
       <div class="display-info space-above display-stats" id="topologystats">
         <div class="col-md-6">
           <div class="container">
@@ -281,12 +281,23 @@ under the License.
       }
     );
 
+    function resizeDetailsSection() {
+      const minSectionHeight = 350;  // Minimal height in pixel.
+      var windowH = $(window).height();
+      var planH = $(".plans").height();
+      var detailsH = Math.max(minSectionHeight, windowH - planH - 222);  // Leave 222 pixels for topology info.
+
+      d3.selectAll("div#topologydetails").style('height', detailsH + 'px');
+    }
+
     function render(planController) {
       drawLogicalPlan(planController, logicalPlan, "#logical-plan", $("#logical-plan").width(), 400, "{{baseUrl}}",
           "{{cluster}}", "{{environ}}", "{{topology}}");
-      planController.planResized();
       drawPhysicalPlan(planController, physicalPlan, packingPlan, "#physical-plan", $("#physical-plan").width(), 400, "{{baseUrl}}", "{{cluster}}",
           "{{environ}}", "{{topology}}");
+
+      resizeDetailsSection();
+
       planController.planResized();
     }
 
@@ -297,6 +308,7 @@ under the License.
       }, 100));
       render(planController);
       drawStatsTable(planController, "{{baseUrl}}", "{{cluster}}", "{{environ}}", "{{topology}}", physicalPlan, logicalPlan);
+
       planController.planDrawn();
     }
   };

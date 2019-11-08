@@ -583,8 +583,7 @@ header {
           left: 0; }
 
 .dashboard-wrapper {
-  /*padding: 30px;*/
-  padding: 0px 30px 30px 10px;
+  padding: 0px 10px 20px 10px;
   position: relative;
   margin: 0px 0px 10px 10px;
   background: white;
@@ -2269,6 +2268,7 @@ div#display-navigator {
   padding-bottom: 5px;
   background-color: transparent;
   border-width: 0px;
+  outline: none;  /* disable outline after clicked on */
 }
 
 #display-navigator .navbar-default button.active {
@@ -2280,6 +2280,7 @@ div#topologydetails {
   border-style: solid;
   border-width: 1px;
   border-color: #dddddd;
+  overflow-y: scroll;
 }
 
 div#topologydetails div.display-info {
