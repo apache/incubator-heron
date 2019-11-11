@@ -432,6 +432,10 @@ class HeronExecutor(object):
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
                       '-XX:+PrintCommandLineFlags',
+<<<<<<< HEAD
+=======
+                      self._get_java_gc_instance_cmd(metricsManagerId),
+>>>>>>> Java 11 support (#3399)
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metrics_manager_classpath,
@@ -460,6 +464,10 @@ class HeronExecutor(object):
                            # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                            '-Xmx1024M',
                            '-XX:+PrintCommandLineFlags',
+<<<<<<< HEAD
+=======
+                           self._get_java_gc_instance_cmd('metricscache'),
+>>>>>>> Java 11 support (#3399)
                            '-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            self.metricscache_manager_classpath,
@@ -489,6 +497,10 @@ class HeronExecutor(object):
                      # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                      '-Xmx1024M',
                      '-XX:+PrintCommandLineFlags',
+<<<<<<< HEAD
+=======
+                     self._get_java_gc_instance_cmd('healthmgr'),
+>>>>>>> Java 11 support (#3399)
                      '-Djava.net.preferIPv4Stack=true',
                      '-cp', self.health_manager_classpath,
                      healthmgr_main_class,
