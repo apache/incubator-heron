@@ -1067,8 +1067,34 @@ var BoltRunningInfo = React.createClass({
     });
     var setState = this.setState.bind(this);
 
-    const headings = ["Bolt", "Parallelism", "Execute Count", "Failure Count",
-                      "Capacity Utilization(min)", "Capacity Utilization(max)"];
+    const headings = [
+      { name: "Bolt", sortable: true },
+      { name: "Parallelism", sortable: true },
+      { name: "Execute Count", sortable: true },
+      { name: "Failure Count", sortable: true },
+      { name: "Capacity Utilization(min)", sortable: true },
+      { name: "Capacity Utilization(max)", sortable: true },
+      { name: "Parallelism Calculator", sortable: false }
+    ];
+
+    var openParallelismCalculator = function (e, index) {
+      var row = rows[index];
+
+      var calculator = $("#parallelism-calculator-modal");
+      calculator.find('#modal-component').text(row[0]);
+      calculator.attr('data-execute-count', row[2]);
+      calculator.find('#modal-execute-count').text(row[2]);
+      calculator.find('#target-execute-count').val(row[2]);
+      calculator.attr('data-max-utilization', row[5].replace("%", ""));
+      calculator.find('#modal-max-utilization').text(row[5]);
+      calculator.find('#target-max-utilization').val(row[5].replace("%", ""));
+      calculator.attr('data-parallelism', row[1]);
+      calculator.find('#modal-parallelism').text(row[1]);
+      calculator.find('#target-parallelism').val(row[1]);
+
+      calculator.modal({keyboard: true});
+    };
+
     return (
       <div id="componentrunninginfo">
         <div className="widget-header">
@@ -1100,16 +1126,27 @@ var BoltRunningInfo = React.createClass({
                     reverse: i === sortKey ? (!reverse) : true
                   });
                 }
-                return <th key={i} className={classNameVals} onClick={clicked}>{heading}</th>;
+
+                if (heading.sortable) {
+                  return <th key={i} className={classNameVals} onClick={clicked}>{heading.name}</th>;
+                } else {
+                  return <th key={i}>{heading.name}</th>;
+                }
               })}
             </tr>
           </thead>
           <tbody>
-            {rows.map(function (row) {
+            {rows.map(function (row, index) {
               return <tr key={row[0]}>{
-                row.map(function (value, i) {
-                  return <td className="col-md-2" key={i}>{value}</td>;
-                })}</tr>;
+                  row.map(function (value, i) {
+                    return <td className="col-md-2" key={i}>{value}</td>;
+                  })}
+                  <td className="col-md-1">
+                    <button type="button" className="btn btn-primary btn-xs" data-toggle="modal"
+                            onClick={(e) => openParallelismCalculator(e, index)}>
+                      Calculator
+                    </button>
+                  </td></tr>;
             })}
           </tbody>
         </table>
