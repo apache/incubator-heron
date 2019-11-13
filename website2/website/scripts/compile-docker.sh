@@ -53,7 +53,9 @@ echo "docker file"
 echo $DOCKER_FILE
 
 echo "Building heron-compiler container"
-docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
+docker build \
+  --build-arg UNAME=$USER \
+  -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
 
 
 docker run \
