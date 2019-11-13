@@ -58,6 +58,8 @@ docker build -t heron-compiler:$TARGET_PLATFORM -f $DOCKER_FILE .
 
 docker run \
   --rm \
+  -u `id -u`:`id -g` \
   -v $PROJECT_DIR/..:/dist \
+  -v /etc/passwd:/etc/passwd \
   -t heron-compiler:$TARGET_PLATFORM  make -C /dist/website2/website/ buildsite
 
