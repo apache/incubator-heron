@@ -2292,3 +2292,9 @@ div#topologydetails.display-counters div.display-info.display-counters,
 div#topologydetails.display-config div.display-info.display-config {
   display: block;
 }
+
+/* Backdrop in bootstrap 3 seems to have solid color and we would like it to be half transparent */
+div.modal-backdrop.fade.in {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
