@@ -182,7 +182,49 @@ under the License.
       <div class="col-md-12">
         <div id="display-counters"></div>
       </div>
+      <!-- Popup dialog for parallelism calculator -->
+      <div class="modal fade" id="parallelism-calculator-modal" tabindex="-1" role="dialog" aria-labelledby="parallelismCalculatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Parallelism Calculator: <span id="modal-component"></span></h5>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <h3 id="modal-component"></h3>
+                <div class="form-group">
+                  <label class="col-sm-8 control-label" for="target-execute-count">
+                    Target execute count (current: <b id="modal-execute-count"></b>)</label>
+                  <div class="col-sm-4">
+                    <input id="target-execute-count" class="form-control form-control-sm" value="100"></input>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-8 control-label" for="target-max-utilization">
+                    Target max capacity utilization (current: <b id="modal-max-utilization"></b>)</label>
+                  <div class="col-sm-3">
+                    <input id="target-max-utilization" class="form-control form-control-sm" value=50 max=100 min=1></input>
+                  </div>
+                  <span class="col-sm-1 control-label">%</span>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-8 control-label" for="target-parallelism">
+                    Target parallelism (current: <b id="modal-parallelism"></b>)</label>
+                  <div class="col-sm-4">
+                    <input id="target-parallelism" class="form-control form-control-sm" readonly=true value="3"></input>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" onclick="calculateParallelism()">Calculate</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <!-- Config -->
     <div class="col-md-12">
       <div class="col-md-12">
@@ -203,6 +245,23 @@ under the License.
 <script src="{{ static_url('js/topology-details.js') }}"></script>
 <script type="text/jsx" src="{{ static_url('js/topologies.js') }}" ></script>
 <script type="text/jsx" src="{{ static_url('js/config.js') }}"></script>
+
+<script type="application/javascript">
+  function calculateParallelism() {
+    var calculator = $("#parallelism-calculator-modal");
+
+    var execute_count = calculator.attr("data-execute-count");
+    var max_utilization = calculator.attr("data-max-utilization");
+    var parallelism = calculator.attr("data-parallelism");
+    var target_execute_count = calculator.find('#target-execute-count').val();
+    var target_max_utilization = calculator.find('#target-max-utilization').val();
+
+    // Estimate the target parallelism based on the current information.
+    var newParallelism = max_utilization * target_execute_count * parallelism /
+                         (execute_count * target_max_utilization);
+    calculator.find('#target-parallelism').val(Math.ceil(newParallelism));
+  }
+</script>
 
 <script type="application/javascript">
 
