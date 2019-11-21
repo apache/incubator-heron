@@ -537,7 +537,7 @@ maven_jar(
 # end Pulsar Client
 
 # Kubernetes java client
-kubernetes_client_version = "1.0.0-beta1"
+kubernetes_client_version = "6.0.1"
 squareup_okhttp_version = "2.7.5"
 
 maven_jar(
