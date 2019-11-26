@@ -319,7 +319,7 @@ Success! You can now manage Heron topologies on your GKE Kubernetes installation
 
 ```bash
 $ heron submit kubernetes \
-  --service-url=http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+  --service-url=http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
   ~/.heron/examples/heron-api-examples.jar \
   org.apache.heron.examples.api.AckingTopology acking
 ```
@@ -443,7 +443,7 @@ That would enable you to manage topologies without setting the `--service-url` f
 
 The [Heron UI](user-manuals-heron-ui) is an in-browser dashboard that you can use to monitor your Heron [topologies](heron-topology-concepts). It should already be running in your GKE cluster.
 
-You can access [Heron UI](user-manuals-heron-ui) in your browser by navigating to http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889.
+You can access [Heron UI](user-manuals-heron-ui) in your browser by navigating to http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy.
 
 ## Heron on Kubernetes configuration
 
