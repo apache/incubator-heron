@@ -61,7 +61,7 @@ USER $UNAME
 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
-      && /tmp/bazel.sh --user
+      && /tmp/bazel.sh 
 
 ADD bazelrc /$UNAME/.bazelrc
 
