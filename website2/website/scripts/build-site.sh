@@ -23,8 +23,8 @@ VERSION=0.20
 set -x -e
 
 cd ${ROOT_DIR}/website2/website
-#npm install yarn
-npm build
+npm install yarn
+npm npm run-script build
 
 node ./scripts/replace.js
 

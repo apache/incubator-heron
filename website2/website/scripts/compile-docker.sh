@@ -63,7 +63,7 @@ docker build \
 docker run \
   --rm \
   -u `id -u`:`id -g` \
-  -v $PROJECT_DIR/..:/dist \
+  -v $PROJECT_DIR/..:/home/$USER/heron \
   -v /etc/passwd:/etc/passwd \
-  -t heron-compiler:$TARGET_PLATFORM  make -C /dist/website2/website/ buildsite
+  -t heron-compiler:$TARGET_PLATFORM  make -C /home/$USER/heron/website2/website/ buildsite
 
