@@ -71,7 +71,7 @@ metadata:
     component: {{ .Release.Name }}-bookie
 spec:
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
-  serviceName: {{ .Release.Name }}-bookkeeper
+  serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}
 {{- end }}
 
@@ -200,6 +200,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- end }}
   name: {{ .Release.Name }}-bookie
   labels:
     app: {{ .Release.Name }}-bookkeeper
