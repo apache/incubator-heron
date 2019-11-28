@@ -47,25 +47,27 @@ import org.apache.heron.spi.common.Config;
 import org.apache.heron.spi.packing.PackingPlan;
 import org.apache.heron.spi.packing.Resource;
 
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.api.AppsV1Api;
-import io.kubernetes.client.openapi.models.V1Container;
-import io.kubernetes.client.openapi.models.V1ContainerPort;
-import io.kubernetes.client.openapi.models.V1DeleteOptions;
-import io.kubernetes.client.openapi.models.V1EnvVar;
-import io.kubernetes.client.openapi.models.V1EnvVarSource;
-import io.kubernetes.client.openapi.models.V1LabelSelector;
-import io.kubernetes.client.openapi.models.V1ObjectFieldSelector;
-import io.kubernetes.client.openapi.models.V1ObjectMeta;
-import io.kubernetes.client.openapi.models.V1PodSpec;
-import io.kubernetes.client.openapi.models.V1PodTemplateSpec;
-import io.kubernetes.client.openapi.models.V1ResourceRequirements;
-import io.kubernetes.client.openapi.models.V1Toleration;
-import io.kubernetes.client.openapi.models.V1Volume;
-import io.kubernetes.client.openapi.models.V1VolumeMount;
-import io.kubernetes.client.openapi.models.V1StatefulSet;
-import io.kubernetes.client.openapi.models.V1StatefulSetSpec;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.apis.AppsV1Api;
+import io.kubernetes.client.custom.Quantity;
+import io.kubernetes.client.custom.Quantity.Format;
+import io.kubernetes.client.models.V1Container;
+import io.kubernetes.client.models.V1ContainerPort;
+import io.kubernetes.client.models.V1DeleteOptions;
+import io.kubernetes.client.models.V1EnvVar;
+import io.kubernetes.client.models.V1EnvVarSource;
+import io.kubernetes.client.models.V1LabelSelector;
+import io.kubernetes.client.models.V1ObjectFieldSelector;
+import io.kubernetes.client.models.V1ObjectMeta;
+import io.kubernetes.client.models.V1PodSpec;
+import io.kubernetes.client.models.V1PodTemplateSpec;
+import io.kubernetes.client.models.V1ResourceRequirements;
+import io.kubernetes.client.models.V1Toleration;
+import io.kubernetes.client.models.V1Volume;
+import io.kubernetes.client.models.V1VolumeMount;
+import io.kubernetes.client.models.V1StatefulSet;
+import io.kubernetes.client.models.V1StatefulSetSpec;
 
 public class AppsV1Controller extends KubernetesController {
 
@@ -414,10 +416,10 @@ public class AppsV1Controller extends KubernetesController {
 
     // set container resources
     final V1ResourceRequirements resourceRequirements = new V1ResourceRequirements();
-    final Map<String, String> requests = new HashMap<>();
+    final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
-        KubernetesUtils.Megabytes(resource.getRam()));
-    requests.put(KubernetesConstants.CPU, Double.toString(resource.getCpu()));
+        Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
+    requests.put(KubernetesConstants.CPU, Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
 
@@ -467,5 +469,10 @@ public class AppsV1Controller extends KubernetesController {
               .mountPath(KubernetesContext.getContainerVolumeMountPath(config));
       container.volumeMounts(Collections.singletonList(mount));
     }
+  }
+
+  public static double roundDecimal(double value, int places) {
+    double scale = Math.pow(10, places);
+    return Math.round(value * scale) / scale;
   }
 }

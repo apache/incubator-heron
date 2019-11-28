@@ -27,9 +27,9 @@ import com.squareup.okhttp.Response;
 
 import org.apache.heron.scheduler.TopologyRuntimeManagementException;
 
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.api.CoreV1Api;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.apis.CoreV1Api;
 
 public class KubernetesCompat {
 
