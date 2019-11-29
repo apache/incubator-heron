@@ -24,7 +24,7 @@ set -x -e
 
 cd ${ROOT_DIR}/website2/website
 npm install yarn
-npm npm run-script build
+npm run-script build
 
 node ./scripts/replace.js
 
