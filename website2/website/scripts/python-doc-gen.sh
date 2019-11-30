@@ -41,7 +41,10 @@ source "$VENV/bin/activate"
 pip install pdoc==0.3.2
 pip install --ignore-installed six
 # Install the heronpy
+echo "list heronpy location"
+ls $PIP_LOCATION
 pip install $PIP_LOCATION/heronpy-${HERONPY_VERSION}-py2.py3-none-any.whl
+
 
 mkdir -p static/api && rm -rf static/api/python
 
