@@ -30,10 +30,10 @@ node ./scripts/replace.js
 
 rm -rf ${ROOT_DIR}/generated-site/content
 mkdir -p ${ROOT_DIR}/generated-site/content
-## copy generated site
+## copy generated site 
 cp -R build/incubator-heron/* ${ROOT_DIR}/generated-site/content
-## copy java docs website2/website/static/api
-cp -R ${ROOT_DIR}/website2/website/static/api/* ${ROOT_DIR}/generated-site/content/api/java/
+## copy java docs
+cp -R ${ROOT_DIR}/website2/website/public/api/java/* ${ROOT_DIR}/generated-site/content/api/java/
 ## copy pydocs
 cp -R ${ROOT_DIR}/website2/website/static/api/python/* ${ROOT_DIR}/generated-site/content/api/python/
 ## remove bazelrc for dockerfile
