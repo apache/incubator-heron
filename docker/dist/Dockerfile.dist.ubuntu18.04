@@ -46,9 +46,9 @@ ENV HERON_HOME /heron/heron-core/
 RUN export HERON_HOME
 
 # install zookeeper
-ADD compile/scripts /opt/heron-docker/scripts
+ADD dist/scripts /opt/heron-docker/scripts
 
 RUN sh /opt/heron-docker/scripts/install-zookeeper.sh
 
-ADD compile/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
-ADD compile/conf/sandbox.conf /etc/supervisor/conf.d/
+ADD dist/conf/zookeeper.conf /opt/zookeeper/conf/zookeeper.conf
+ADD dist/conf/sandbox.conf /etc/supervisor/conf.d/
