@@ -41,7 +41,9 @@ data:
   BK_indexDirectories: "/bookkeeper/data/ledgers" 
   BK_zkServers: {{ .Release.Name }}-zookeeper:{{ .Values.zookeeper.clientPort }}
   BK_autoRecoveryDaemonEnabled: "true"
+  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   BK_useHostNameAsBookieID: "true"
+  {{- end }}
   # TODO: Issue 458: https://github.com/apache/bookkeeper/issues/458
   {{- if eq .Values.bookkeeper.prometheus.enabled true }}
   BK_enableStatistics: "true"
@@ -74,7 +76,7 @@ spec:
       component: {{ .Release.Name }}-bookie
       cluster: {{ .Release.Name }}-bookkeeper
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
-  serviceName: {{ .Release.Name }}-bookkeeper
+  serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}
 {{- end }}
 
@@ -203,6 +205,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- end }}
   name: {{ .Release.Name }}-bookie
   labels:
     app: {{ .Release.Name }}-bookkeeper

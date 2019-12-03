@@ -75,7 +75,7 @@ $ kubectl proxy -p 8001
 2. Verify we can access the API server:
 
 ```shell
-$ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000/api/v1/version
+$ curl http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy/api/v1/version
 {
    "heron.build.git.revision" : "bf9fe93f76b895825d8852e010dffd5342e1f860",
    "heron.build.git.status" : "Clean",
@@ -90,7 +90,7 @@ $ curl http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apis
 3. Set service_url:
 ```shell
 $ heron config kubernetes \
-set service_url http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-apiserver:9000 \
+set service_url http://localhost:8001/api/v1/namespaces/default/services/heron-apiserver:9000/proxy \
 org.apache.heron.examples.api.AckingTopology acking
 ```
 
@@ -102,5 +102,5 @@ org.apache.heron.examples.api.AckingTopology acking
 
 5. View heron ui:
 ```
-http://localhost:8001/api/v1/proxy/namespaces/default/services/heron-ui:8889
+http://localhost:8001/api/v1/namespaces/default/services/heron-ui:8889/proxy
 ```

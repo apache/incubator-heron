@@ -110,6 +110,7 @@ function PlanController(baseUrl, cluster, environ, toponame, physicalPlan, logic
   function clearFocus() {
     React.renderComponent(
       AllMetrics({
+        baseUrl: baseUrl,
         cluster: cluster,
         environ: environ,
         topology: toponame
