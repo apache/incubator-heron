@@ -23,7 +23,7 @@ import json
 import logging
 import os
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import signal
 import subprocess
 from collections import namedtuple
@@ -252,7 +252,7 @@ class TestTemplate(object):
     url = 'http://localhost:%s/topologies/physicalplan?' % self.params['trackerPort']\
           + 'cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology'
     logging.debug("Fetching physical plan from %s", url)
-    response = urllib.urlopen(url)
+    response = urllib.request.urlopen(url)
     physical_plan_json = json.loads(response.read())
 
     if 'result' not in physical_plan_json:

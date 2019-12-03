@@ -57,7 +57,7 @@ class LogicalPlanHandler(BaseHandler):
       # format the logical plan as required by the web (because of Ambrose)
       # first, spouts followed by bolts
       spouts_map = dict()
-      for name, value in lplan['spouts'].items():
+      for name, value in list(lplan['spouts'].items()):
         spouts_map[name] = dict(
             config=value.get("config", dict()),
             outputs=value["outputs"],
@@ -67,7 +67,7 @@ class LogicalPlanHandler(BaseHandler):
         )
 
       bolts_map = dict()
-      for name, value in lplan['bolts'].items():
+      for name, value in list(lplan['bolts'].items()):
         bolts_map[name] = dict(
             config=value.get("config", dict()),
             inputComponents=[i['component_name'] for i in value['inputs']],

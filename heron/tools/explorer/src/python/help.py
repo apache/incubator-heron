@@ -58,7 +58,7 @@ def run(command, parser, args, unknown_args):
   # get the subparser for the specific command
   subparser = config.get_subparser(parser, command_help)
   if subparser:
-    print(subparser.format_help())
+    print((subparser.format_help()))
     return True
   else:
     Log.error("Unknown subcommand \'%s\'" % command_help)

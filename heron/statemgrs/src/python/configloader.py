@@ -98,4 +98,4 @@ if __name__ == "__main__":
     locations = load_state_manager_locations('local', sys.argv[1])
   else:
     locations = load_state_manager_locations('local')
-  print("locations: %s" % locations)
+  print(("locations: %s" % locations))

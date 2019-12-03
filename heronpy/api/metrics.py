@@ -63,7 +63,7 @@ class MultiCountMetric(IMetric):
 
   def get_value_and_reset(self):
     ret = {}
-    for key, value in self.value.items():
+    for key, value in list(self.value.items()):
       ret[key] = value.get_value_and_reset()
     return ret
 
@@ -144,7 +144,7 @@ class MultiReducedMetric(IMetric):
 
   def get_value_and_reset(self):
     ret = {}
-    for key, value in self.value.items():
+    for key, value in list(self.value.items()):
       ret[key] = value.get_value_and_reset()
       self.value[key] = value
     return ret

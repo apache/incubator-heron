@@ -206,12 +206,12 @@ class TrackerTest(unittest.TestCase):
     self.tracker.addNewTopology(mock_state_manager_1, 'top_name1')
     self.assertItemsEqual(
         ['top_name1'],
-        map(lambda t: t.name, self.tracker.topologies))
+        [t.name for t in self.tracker.topologies])
 
     self.tracker.addNewTopology(mock_state_manager_1, 'top_name2')
     self.assertItemsEqual(
         ['top_name1', 'top_name2'],
-        map(lambda t: t.name, self.tracker.topologies))
+        [t.name for t in self.tracker.topologies])
 
     self.assertEqual(2, mock_state_manager_1.get_pplan.call_count)
     self.assertEqual(2, mock_state_manager_1.get_execution_state.call_count)
@@ -261,11 +261,11 @@ class TrackerTest(unittest.TestCase):
     self.assertEqual(packing_plan['id'], 'ExclamationTopology')
     self.assertEqual(packing_plan['container_plans'][0]['id'], 1)
     self.assertEqual(packing_plan['container_plans'][0]['required_resources'],
-                     {'disk': 2048L, 'ram': 1024L, 'cpu': 1.0})
+                     {'disk': 2048, 'ram': 1024, 'cpu': 1.0})
     self.assertEqual(packing_plan['container_plans'][0]['instances'][0],
                      {
                        'component_index': 1,
-                        'component_name': u'word',
-                        'instance_resources': {'cpu': 1.0, 'disk': 2048L, 'ram': 1024L},
+                        'component_name': 'word',
+                        'instance_resources': {'cpu': 1.0, 'disk': 2048, 'ram': 1024},
                         'task_id': 1
                      })

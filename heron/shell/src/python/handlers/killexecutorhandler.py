@@ -23,7 +23,7 @@
 import logging
 import os
 import signal
-import urlparse
+import urllib.parse
 import tornado.web
 
 from tornado.options import options
@@ -46,7 +46,7 @@ class KillExecutorHandler(tornado.web.RequestHandler):
 
     logger = logging.getLogger(__file__)
     logger.info("Received 'Killing process' request")
-    data = dict(urlparse.parse_qsl(self.request.body))
+    data = dict(urllib.parse.parse_qsl(self.request.body))
 
     # check shared secret
     sharedSecret = data.get('secret')

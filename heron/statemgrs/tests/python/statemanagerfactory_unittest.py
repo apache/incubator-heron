@@ -34,7 +34,7 @@ class StateManagerFacotryTest(unittest.TestCase):
                               'rootpath':'/heron', 'tunnelhost':'127.0.0.1'}])
     statemanagers = statemanagerfactory.get_all_zk_state_managers(conf)
     # 1 state_location should result in 1 state manager
-    self.assertEquals(1, len(statemanagers))
+    self.assertEqual(1, len(statemanagers))
 
     statemanager = statemanagers[0]
     # statemanager.hostportlist should contain both host port pairs

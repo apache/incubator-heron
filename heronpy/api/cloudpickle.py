@@ -34,7 +34,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-from __future__ import print_function
+
 
 import operator
 import opcode
@@ -55,12 +55,12 @@ import weakref
 if sys.version < '3':
   from pickle import Pickler # pylint: disable=ungrouped-imports
   try:
-    from cStringIO import StringIO
+    from io import StringIO
   except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
   PY3 = False
 else:
-  types.ClassType = type
+  type = type
   from pickle import _Pickler as Pickler # pylint: disable=ungrouped-imports
   from io import BytesIO as StringIO # pylint: disable=ungrouped-imports
   PY3 = True
@@ -79,7 +79,7 @@ def islambda(func):
 
 
 _BUILTIN_TYPE_NAMES = {}
-for k1, v1 in types.__dict__.items():
+for k1, v1 in list(types.__dict__.items()):
   if type(v1) is type: # pylint: disable=unidiomatic-typecheck
     _BUILTIN_TYPE_NAMES[v1] = k1
 
@@ -96,7 +96,7 @@ if sys.version_info < (3, 4):
     """
     code = getattr(code, 'co_code', b'')
     if not PY3:
-      code = map(ord, code)
+      code = list(map(ord, code))
 
     n = len(code)
     i = 0
@@ -169,7 +169,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
   dispatch[types.GeneratorType] = save_unsupported
 
   # itertools objects do not pickle!
-  for v in itertools.__dict__.values():
+  for v in list(itertools.__dict__.values()):
     if type(v) is type: # pylint: disable=unidiomatic-typecheck
       dispatch[v] = save_unsupported
 
@@ -386,7 +386,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
       return Pickler.save_global(self, obj, name)
 
     typ = type(obj)
-    if typ is not obj and isinstance(obj, (type, types.ClassType)):
+    if typ is not obj and isinstance(obj, type):
       d = dict(obj.__dict__)  # copy dict proxy to a dict
       if not isinstance(d.get('__dict__', None), property):
         # don't extract dict that are properties
@@ -408,7 +408,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
       d.pop('__doc__', None)
       # handle property and staticmethod
       dd = {}
-      for k, v in d.items():
+      for k, v in list(d.items()):
         if isinstance(v, property):
           k = ('property', k)
           v = (v.fget, v.fset, v.fdel, v.__doc__)
@@ -427,7 +427,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
       raise pickle.PicklingError("Can't pickle %r" % obj)
 
   dispatch[type] = save_global
-  dispatch[types.ClassType] = save_global
+  dispatch[type] = save_global
 
   def save_instancemethod(self, obj):
     # Memoization rarely is ever useful due to python bounding
@@ -604,7 +604,7 @@ class CloudPickler(Pickler): # pylint: disable=too-many-public-methods
   def save_file(self, obj): # pylint: disable=too-many-branches
     """Save a file"""
     try:
-      import StringIO as pystringIO #we can't use cStringIO as it lacks the name attribute
+      import io as pystringIO #we can't use cStringIO as it lacks the name attribute
     except ImportError:
       import io as pystringIO # pylint: disable=reimported
 
@@ -708,7 +708,7 @@ def subimport(name):
 
 # restores function attributes
 def _restore_attr(obj, attr):
-  for key, val in attr.items():
+  for key, val in list(attr.items()):
     setattr(obj, key, val)
   return obj
 
@@ -789,7 +789,7 @@ def _load_class(cls, d):
   """
   Loads additional properties into class `cls`.
   """
-  for k, v in d.items():
+  for k, v in list(d.items()):
     if isinstance(k, tuple):
       typ, k = k
       if typ == 'property':

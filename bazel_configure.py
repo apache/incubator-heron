@@ -144,7 +144,7 @@ def real_program_path(program_name):
   return None
 
 def fail(message):
-  print("\nFAILED:  %s" % message)
+  print(("\nFAILED:  %s" % message))
   sys.exit(1)
 
 # Assumes the version is at the end of the first line consisting of digits and dots
@@ -277,7 +277,7 @@ variable to specify the full path to yours.'""" % (program, program, program, en
     version = assert_min_version(VALUE, min_version)
     print_value = "%s (%s)" % (VALUE, version)
 
-  print('Using %s:\t%s' % (msg.ljust(20), print_value))
+  print(('Using %s:\t%s' % (msg.ljust(20), print_value)))
   return VALUE
 
 def discover_jdk():
@@ -290,7 +290,7 @@ def discover_jdk():
              "You can set the JAVA_HOME environment variavle to specify the full path to yours.")
     jdk_bin_path = os.path.dirname(javac_path)
     jdk_path = os.path.dirname(jdk_bin_path)
-  print('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path))
+  print(('Using %s:\t%s' % ('JDK'.ljust(20), jdk_path)))
   return jdk_path
 
 ######################################################################
@@ -307,9 +307,9 @@ def discover_tool_default(program, msg, envvar, defvalue):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     VALUE = defvalue
-    print('%s:\tnot found, but ok' % (program.ljust(26)))
+    print(('%s:\tnot found, but ok' % (program.ljust(26))))
   else:
-    print('Using %s:\t%s' % (msg.ljust(20), VALUE))
+    print(('Using %s:\t%s' % (msg.ljust(20), VALUE)))
   return VALUE
 
 def export_env_to_file(out_file, env):
@@ -343,7 +343,7 @@ def write_env_exec_file(platform, environ):
   out_file.write('$*')
 
   make_executable(env_exec_file)
-  print('Wrote the environment exec file %s' % (env_exec_file))
+  print(('Wrote the environment exec file %s' % (env_exec_file)))
 
 
 ######################################################################
@@ -380,7 +380,7 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('GIT_BRANCH', discover_git_branch()))
   out_file.write(generate_system_defines())
   out_file.close()
-  print('Wrote the heron config header file: \t"%s"' % (config_file))
+  print(('Wrote the heron config header file: \t"%s"' % (config_file)))
 
 ######################################################################
 # MAIN program that sets up your workspace for bazel
@@ -390,7 +390,7 @@ def main():
 
   # Discover the platform
   platform = discover_platform()
-  print("Platform %s" % platform)
+  print(("Platform %s" % platform))
 
   # do differently on mac
   if platform == "Darwin":

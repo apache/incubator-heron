@@ -25,7 +25,7 @@ import os
 import tempfile
 import requests
 import subprocess
-import urlparse
+import urllib.parse
 
 from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
@@ -200,7 +200,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
     elif ok:
       # this case happens when we request a dry_run
-      print(r.json().get("response"))
+      print((r.json().get("response")))
   except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
     Log.error(err)
     return SimpleResult(Status.HeronError, err_ctxt, succ_ctxt)
@@ -418,7 +418,7 @@ def run(command, parser, cl_args, unknown_args):
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 
-  if urlparse.urlparse(topology_file).scheme:
+  if urllib.parse.urlparse(topology_file).scheme:
     cl_args['topology-file-name'] = download(topology_file, cl_args['cluster'])
     topology_file = cl_args['topology-file-name']
     Log.debug("download uri to local file: %s", topology_file)

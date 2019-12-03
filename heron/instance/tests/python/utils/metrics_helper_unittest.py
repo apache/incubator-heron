@@ -45,7 +45,7 @@ class BaseMetricsHelperTest(unittest.TestCase):
 
   def test_register_metrics(self):
     self.metrics_helper.register_metrics(self.metrics_collector, 60)
-    for name, metric in self.metrics.items():
+    for name, metric in list(self.metrics.items()):
       self.assertEqual(self.metrics_collector.metrics_map[name], metric)
     self.assertEqual(len(self.metrics_collector.time_bucket_in_sec_to_metrics_name[60]), 4)
     self.assertIn(60, self.metrics_collector.registered_timers)

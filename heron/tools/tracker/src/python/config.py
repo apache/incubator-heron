@@ -71,7 +71,7 @@ class Config(object):
         "${USER}": "user",
     }
     dummy_formatted_url = url_format
-    for key, value in valid_parameters.items():
+    for key, value in list(valid_parameters.items()):
       dummy_formatted_url = dummy_formatted_url.replace(key, value)
 
     # All $ signs must have been replaced
@@ -99,7 +99,7 @@ class Config(object):
 
     formatted_url = formatter
 
-    for key, value in common_parameters.items():
+    for key, value in list(common_parameters.items()):
       formatted_url = formatted_url.replace(key, value)
 
     return formatted_url

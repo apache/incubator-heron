@@ -108,13 +108,13 @@ class StateResultHandler(tornado.web.RequestHandler):
       if key in self.result_map:
         # fix the duplicate record issue
         for comp in self.result_map[key]:
-          if comp.keys()[0] == data.keys()[0]:
+          if list(comp.keys())[0] == list(data.keys())[0]:
             break
         else:
           self.result_map[key].append(data)
       else:
         self.result_map[key] = [data]
-      self.write("Results written successfully: topology " + key + ' instance ' + data.keys()[0])
+      self.write("Results written successfully: topology " + key + ' instance ' + list(data.keys())[0])
     else:
       raise tornado.web.HTTPError(status_code=404, log_message="Invalid key %s" % key)
 

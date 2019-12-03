@@ -22,7 +22,7 @@
 from abc import abstractmethod
 
 try:
-  import cPickle as pickle
+  import pickle as pickle
 except:
   import pickle
 

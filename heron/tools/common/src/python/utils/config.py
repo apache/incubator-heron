@@ -101,7 +101,7 @@ def get_subparser(parser, command):
   # but better save than sorry
   for subparsers_action in subparsers_actions:
     # get all subparsers
-    for choice, subparser in subparsers_action.choices.items():
+    for choice, subparser in list(subparsers_action.choices.items()):
       if choice == command:
         return subparser
   return None
@@ -282,7 +282,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if tmp_confs is not None:
           cli_confs = tmp_confs
         else:
-          print("Failed to read: %s due to it is empty" % (CLIENT_YAML))
+          print(("Failed to read: %s due to it is empty" % (CLIENT_YAML)))
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
@@ -467,9 +467,9 @@ def print_build_info(zipped_pex=False):
 
   with open(release_file) as release_info:
     release_map = yaml.load(release_info)
-    release_items = sorted(release_map.items(), key=lambda tup: tup[0])
+    release_items = sorted(list(release_map.items()), key=lambda tup: tup[0])
     for key, value in release_items:
-      print("%s : %s" % (key, value))
+      print(("%s : %s" % (key, value)))
 
 def get_version_number(zipped_pex=False):
   """Print version from release.yaml

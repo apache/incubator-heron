@@ -21,7 +21,7 @@
 '''bolt_instance.py: module for base bolt for python topology'''
 
 import time
-import Queue
+import queue
 
 import heronpy.api.api_constants as api_constants
 from heronpy.api.state.stateful_component import StatefulComponent
@@ -181,7 +181,7 @@ class BoltInstance(BaseInstance):
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
-      except Queue.Empty:
+      except queue.Empty:
         break
 
       if isinstance(tuples, tuple_pb2.HeronTupleSet):

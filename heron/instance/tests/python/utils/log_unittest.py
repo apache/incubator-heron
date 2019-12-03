@@ -32,20 +32,20 @@ class LogTest(unittest.TestCase):
     pass
 
   def test_stream_process_stdout(self):
-    ret = StringIO(u'hello\nworld\n')
+    ret = StringIO('hello\nworld\n')
     log_fn = Mock()
     with patch("subprocess.Popen") as mock_process:
       mock_process.stdout = ret
       proc.stream_process_stdout(mock_process, log_fn)
 
-    log_fn.assert_has_calls([call(u'hello\n'), call(u'world\n')])
+    log_fn.assert_has_calls([call('hello\n'), call('world\n')])
 
   def test_async_stream_process_stdout(self):
-    ret = StringIO(u'hello\nworld\n')
+    ret = StringIO('hello\nworld\n')
     log_fn = Mock()
     with patch("subprocess.Popen") as mock_process:
       mock_process.stdout = ret
       thread = proc.async_stream_process_stdout(mock_process, log_fn)
       thread.join()
 
-    log_fn.assert_has_calls([call(u'hello\n'), call(u'world\n')])
+    log_fn.assert_has_calls([call('hello\n'), call('world\n')])

@@ -138,7 +138,7 @@ def extract_common_args(command, parser, cl_args):
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
-    print(subparser.format_help())
+    print((subparser.format_help()))
     return dict()
   cluster = config.get_heron_cluster(cluster_role_env)
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)

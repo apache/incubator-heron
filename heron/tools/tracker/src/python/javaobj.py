@@ -28,7 +28,7 @@ library marshal, pickle and json modules.
 See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protocol.html
 """
 
-import StringIO
+import io
 import struct
 from heron.common.src.python.utils.log import Log
 
@@ -58,7 +58,7 @@ def loads(string):
   Deserializes Java objects and primitive data serialized by ObjectOutputStream
   from a string.
   """
-  f = StringIO.StringIO(string)
+  f = io.StringIO(string)
   marshaller = JavaObjectUnmarshaller(f)
   marshaller.add_transformer(DefaultObjectTransformer())
   return marshaller.readObject()
@@ -492,7 +492,7 @@ classDescFlags: 0x%X" % (serialVersionUID, newHandle, classDescFlags), ident)
   def _create_hexdump(self, src, length=16):
     FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
       s = src[i:i+length]
       hexa = ' '.join(["%02X"%ord(x) for x in s])
       printable = s.translate(FILTER)
@@ -558,7 +558,7 @@ class JavaObjectMarshaller(JavaObjectConstants):
   # pylint: disable=attribute-defined-outside-init
   def dump(self, obj):
     self.object_obj = obj
-    self.object_stream = StringIO.StringIO()
+    self.object_stream = io.StringIO()
     self._writeStreamHeader()
     self.writeObject(obj)
     return self.object_stream.getvalue()

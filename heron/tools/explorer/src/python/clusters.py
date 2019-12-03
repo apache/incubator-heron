@@ -46,5 +46,5 @@ def run(command, parser, cl_args, unknown_args):
     return False
   print('Available clusters:')
   for cluster in clusters:
-    print('  %s' % cluster)
+    print(('  %s' % cluster))
   return True

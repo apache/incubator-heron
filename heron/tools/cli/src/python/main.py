@@ -69,9 +69,9 @@ class _HelpAction(argparse._HelpAction):
     # but better save than sorry
     for subparsers_action in subparsers_actions:
       # get all subparsers and print help
-      for choice, subparser in subparsers_action.choices.items():
-        print("Subparser '{}'".format(choice))
-        print(subparser.format_help())
+      for choice, subparser in list(subparsers_action.choices.items()):
+        print(("Subparser '{}'".format(choice)))
+        print((subparser.format_help()))
         return
 
 ################################################################################
@@ -226,7 +226,7 @@ def direct_deployment_mode(command, parser, cluster, cl_args):
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = config.get_subparser(parser, command)
-    print(subparser.format_help())
+    print((subparser.format_help()))
     return dict()
 
   # check if the cluster config directory exists
@@ -292,7 +292,7 @@ def extract_common_args(command, parser, cl_args):
     except KeyError:
       # if some of the arguments are not found, print error and exit
       subparser = config.get_subparser(parser, command)
-      print(subparser.format_help())
+      print((subparser.format_help()))
       return dict()
 
   new_cl_args = dict()
