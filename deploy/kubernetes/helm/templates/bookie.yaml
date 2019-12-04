@@ -57,10 +57,10 @@ data:
 ## For this reason, we run BK as a daemon set, one for each node in the
 ## cluster, unless restricted by label selectors
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 {{- else }}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 {{- end }}
 
@@ -70,6 +70,11 @@ metadata:
     app: {{ .Release.Name }}-bookkeeper
     component: {{ .Release.Name }}-bookie
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-bookkeeper
+      component: {{ .Release.Name }}-bookie
+      cluster: {{ .Release.Name }}-bookkeeper
 {{- if or (eq .Values.platform "gke") (eq .Values.platform "minikube") }}
   serviceName: {{ .Release.Name }}-bookie
   replicas: {{ $bookieReplicas }}

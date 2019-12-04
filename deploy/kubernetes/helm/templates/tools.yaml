@@ -28,7 +28,7 @@ data:
   HERON_APISERVER_MEM_MAX: {{ $apiServerMemory | quote }}
 ---
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-tools
@@ -38,6 +38,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-tools
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:

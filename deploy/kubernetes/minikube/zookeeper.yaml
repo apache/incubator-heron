@@ -20,7 +20,7 @@
 ##
 
 ## Define a StatefulSet for ZK servers
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -30,6 +30,10 @@ metadata:
 spec:
   serviceName: zookeeper
   replicas: 1
+  selector:
+    matchLabels:
+      app: heron
+      component: zookeeper
   template:
     metadata:
       labels:
@@ -37,6 +41,20 @@ spec:
         component: zookeeper
 
     spec:
+      # Make sure multiple pods of ZK don't get scheduled on the
+      # same node, unless there are no other available nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                        - zookeeper
+                topologyKey: "kubernetes.io/hostname"
       containers:
         - name: zookeeper
           image: heron/heron:latest
