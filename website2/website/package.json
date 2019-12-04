@@ -14,5 +14,7 @@
     "replace-in-file": "^3.4.0",
     "redoc": "^2.0.0-alpha.30"
   },
-  "dependencies": {}
+  "dependencies": {
+    "yarn": "^1.19.1"
+  }
 }

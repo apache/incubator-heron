@@ -84,7 +84,7 @@ public final class KubernetesConstants {
   }
 
   public static final String JOB_LINK =
-      "/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/pod";
+      "/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#/pod";
 
 
   public static final Pattern VALID_POD_NAME_REGEX =

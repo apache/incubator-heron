@@ -166,7 +166,7 @@ var ConfigTable = React.createClass({
       tableLayout: 'inherit'
     };
     return (
-      <div>
+      <div className="display-info display-config">
         <div className="widget-header">
           <div className="title">
             <h4>{title}</h4>
