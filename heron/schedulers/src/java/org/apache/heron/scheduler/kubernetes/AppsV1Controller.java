@@ -62,9 +62,9 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1ResourceRequirements;
-import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1StatefulSet;
 import io.kubernetes.client.models.V1StatefulSetSpec;
+import io.kubernetes.client.models.V1Toleration;
 import io.kubernetes.client.models.V1Volume;
 import io.kubernetes.client.models.V1VolumeMount;
 
@@ -418,7 +418,7 @@ public class AppsV1Controller extends KubernetesController {
     final Map<String, Quantity> requests = new HashMap<>();
     requests.put(KubernetesConstants.MEMORY,
         Quantity.fromString(KubernetesUtils.Megabytes(resource.getRam())));
-    requests.put(KubernetesConstants.CPU, 
+    requests.put(KubernetesConstants.CPU,
          Quantity.fromString(Double.toString(roundDecimal(resource.getCpu(), 3))));
     resourceRequirements.setRequests(requests);
     container.setResources(resourceRequirements);
