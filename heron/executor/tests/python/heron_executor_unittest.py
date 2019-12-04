@@ -319,12 +319,12 @@ class HeronExecutorTest(unittest.TestCase):
     found_monitored = list([(pinfo[0], pinfo[1].name, pinfo[1].command_str) for pinfo in list(monitored_processes.items())])
     found_processes.sort(key=lambda tuple: tuple[0])
     found_monitored.sort(key=lambda tuple: tuple[0])
-    print(("do_test_commands - found_processes: %s found_monitored: %s" \
-          % (found_processes, found_monitored)))
+    print("do_test_commands - found_processes: %s found_monitored: %s" \
+          % (found_processes, found_monitored))
     self.assertEqual(found_processes, found_monitored)
 
-    print(("do_test_commands - expected_processes: %s monitored_processes: %s" \
-          % (expected_processes, monitored_processes)))
+    print("do_test_commands - expected_processes: %s monitored_processes: %s" \
+          % (expected_processes, monitored_processes))
     self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):
@@ -339,8 +339,8 @@ class HeronExecutorTest(unittest.TestCase):
     current_json = json.dumps(current_commands, sort_keys=True, cls=CommandEncoder).split(' ')
     temp_json = json.dumps(temp_dict, sort_keys=True).split(' ')
 
-    print(("current_json: %s" % current_json))
-    print(("temp_json: %s" % temp_json))
+    print("current_json: %s" % current_json)
+    print("temp_json: %s" % temp_json)
 
     # better test error report
     for (s1, s2) in zip(current_json, temp_json):

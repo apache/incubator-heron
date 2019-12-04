@@ -200,7 +200,7 @@ def launch_topology_server(cl_args, topology_file, topology_defn_file, topology_
       Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
     elif ok:
       # this case happens when we request a dry_run
-      print((r.json().get("response")))
+      print(r.json().get("response"))
   except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
     Log.error(err)
     return SimpleResult(Status.HeronError, err_ctxt, succ_ctxt)

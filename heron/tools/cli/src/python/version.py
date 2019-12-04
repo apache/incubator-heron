@@ -102,7 +102,7 @@ def run(command, parser, cl_args, unknown_args):
         Log.error(r.json().get('message', "Unknown error from API server %d" % r.status_code))
       sorted_items = sorted(list(r.json().items()), key=lambda tup: tup[0])
       for key, value in sorted_items:
-        print(("%s : %s" % (key, value)))
+        print("%s : %s" % (key, value))
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
       Log.error(err)
       return SimpleResult(Status.HeronError)

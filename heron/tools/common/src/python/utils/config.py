@@ -282,7 +282,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if tmp_confs is not None:
           cli_confs = tmp_confs
         else:
-          print(("Failed to read: %s due to it is empty" % (CLIENT_YAML)))
+          print("Failed to read: %s due to it is empty" % (CLIENT_YAML))
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
@@ -469,7 +469,7 @@ def print_build_info(zipped_pex=False):
     release_map = yaml.load(release_info)
     release_items = sorted(list(release_map.items()), key=lambda tup: tup[0])
     for key, value in release_items:
-      print(("%s : %s" % (key, value)))
+      print("%s : %s" % (key, value))
 
 def get_version_number(zipped_pex=False):
   """Print version from release.yaml

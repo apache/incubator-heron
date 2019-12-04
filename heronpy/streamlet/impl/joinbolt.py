@@ -172,8 +172,8 @@ class JoinStreamlet(Streamlet):
 
   # pylint: disable=superfluous-parens
   def _build_this(self, builder, stage_names):
-    print(("join_build_this left: %s right: %s" % (self._left._built, self._right._built)))
-    print(("left: %s right: %s" % (self._left.get_name(), self._right.get_name())))
+    print("join_build_this left: %s right: %s" % (self._left._built, self._right._built))
+    print("left: %s right: %s" % (self._left.get_name(), self._right.get_name()))
     if not self._left._built or not self._right._built:
       return False
     if not self.get_name():
