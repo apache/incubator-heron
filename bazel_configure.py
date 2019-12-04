@@ -413,7 +413,7 @@ def main():
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
-  env_map['PYTHON'] = discover_tool('python', 'Python', 'PYTHON', '2.7')
+  env_map['PYTHON'] = discover_tool('python3', 'Python', 'PYTHON', '3.0.1')
 
   if platform == 'Darwin':
     env_map['LIBTOOL'] = discover_tool('glibtool', 'Libtool', 'LIBTOOL', '2.4.2')
